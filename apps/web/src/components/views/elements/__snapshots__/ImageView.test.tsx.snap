@@ -9,7 +9,7 @@ exports[`<ImageView /> > renders correctly 1`] = `
   />
   <div
     aria-label="Image view"
-    class="mx_ImageView"
+    class="cpd-theme-dark mx_ImageView"
     data-focus-lock-disabled="false"
     role="dialog"
   >
@@ -134,7 +134,7 @@ exports[`<ImageView /> > renders correctly 1`] = `
         </div>
         <div
           aria-label="Close"
-          class="mx_AccessibleButton mx_ImageView_button mx_ImageView_button_close"
+          class="mx_AccessibleButton mx_ImageView_button"
           role="button"
           tabindex="0"
         >

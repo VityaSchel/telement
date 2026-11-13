@@ -10,7 +10,8 @@ Please see LICENSE files in the repository root for full details.
 
     .mx_MemberListHeaderView_container {
         margin-top: var(--cpd-space-6x);
-        padding: 0 var(--cpd-space-4x);
+        /* The card's content edge, the card header's 12px inset */
+        padding: 0 var(--cpd-space-3x);
         align-self: stretch;
     }
 
@@ -20,7 +21,8 @@ Please see LICENSE files in the repository root for full details.
     }
 
     .mx_MemberListHeaderView_label {
-        padding: var(--cpd-space-6x) 0 var(--cpd-space-2x) var(--cpd-space-4x);
+        /* On the content edge at both ends, so that the count starts 12px from the edge right to left too */
+        padding: var(--cpd-space-6x) var(--cpd-space-3x) var(--cpd-space-2x);
         box-sizing: border-box;
         width: 100%;
         color: var(--cpd-color-text-secondary);

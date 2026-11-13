@@ -9,7 +9,7 @@ Please see LICENSE files in the repository root for full details.
 .mx_BaseCard {
     --BaseCard_EventTile_line-padding-block: 2px;
     --BaseCard_EventTile-spacing-inline: 36px;
-    --BaseCard_header-button-size: 28px;
+    --BaseCard_header-button-size: var(--tl-control-size);
 
     overflow: hidden;
     display: flex;
@@ -19,7 +19,8 @@ Please see LICENSE files in the repository root for full details.
 
     .mx_BaseCard_header {
         height: 64px;
-        padding: var(--cpd-space-4x);
+        /* The room header's inset, so that the two headers side by side end their buttons alike */
+        padding: 0 var(--cpd-space-3x);
         box-sizing: border-box;
         /* changing the color from $separator to transparent as it is
            the best visual output during the transition period. This will be
@@ -34,6 +35,13 @@ Please see LICENSE files in the repository root for full details.
 
         .mx_BaseCard_header_spacer {
             flex: 1;
+        }
+
+        /* BaseCard sizes its icon buttons with --BaseCard_header-button-size, and Compound would draw their icons 3/4
+           of that: 24px icons, as in the room header. Compound puts its class first; Headers.test.browser.ts fails
+           when an upgrade renames it. */
+        [class^="_icon-button_"] {
+            padding: calc((var(--BaseCard_header-button-size) - var(--cpd-space-6x)) / 2);
         }
 
         > h2 {
@@ -62,9 +70,15 @@ Please see LICENSE files in the repository root for full details.
 
             .mx_BaseCard_header_title_button--option {
                 position: relative;
-                width: calc(var(--BaseCard_header-button-size) - 4px);
-                height: calc(var(--BaseCard_header-button-size) - 4px);
-                padding: 2px;
+                width: var(--cpd-space-6x);
+                height: var(--cpd-space-6x);
+                padding: calc((var(--BaseCard_header-button-size) - var(--cpd-space-6x)) / 2);
+                /* Round like the header's other icon buttons, with their disc while hovered or pressed. */
+                border-radius: var(--tl-radius-control);
+
+                &:is(:hover, :active) {
+                    background: var(--cpd-color-bg-subtle-primary);
+                }
 
                 svg {
                     width: inherit;
@@ -117,8 +131,8 @@ Please see LICENSE files in the repository root for full details.
 
         font: var(--cpd-font-body-sm-regular);
         color: $primary-content;
-        padding-top: 10px;
-        padding-bottom: 10px;
+        /* The item highlights are inset 4px inside the border, as in the other menus (_IconizedContextMenu.pcss) */
+        padding: calc(var(--tl-inset-menu) - var(--cpd-border-width-1));
 
         border: var(--cpd-border-width-1) solid var(--cpd-color-border-interactive-secondary);
         box-shadow: 0px 4px 24px rgb(0, 0, 0, 0.1);

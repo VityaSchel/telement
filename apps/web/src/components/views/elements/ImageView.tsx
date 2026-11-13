@@ -39,6 +39,7 @@ import { getKeyBindingsManager } from "../../../KeyBindingsManager";
 import { presentableTextForFile } from "../../../utils/FileUtils";
 import AccessibleButton from "./AccessibleButton";
 import { useSaveMediaAs } from "../../../telement/media/useSaveMediaAs";
+import { isHighContrast } from "../../../telement/media/isHighContrast";
 import {
     MessageTimestampViewModel,
     type MessageTimestampViewModelProps,
@@ -536,7 +537,9 @@ export default class ImageView extends React.Component<IProps, IState> {
                     "role": "dialog",
                     "aria-label": _t("lightbox|title"),
                 }}
-                className="mx_ImageView"
+                // Telement: over the black backdrop in every theme, with the dark theme's tokens like the video viewer.
+                // The theme's class comes first, which the app's font stack and emoji font need (_common.pcss).
+                className={`${isHighContrast() ? "cpd-theme-dark-hc" : "cpd-theme-dark"} mx_ImageView`}
                 ref={this.focusLock}
             >
                 <div className="mx_ImageView_panel">
@@ -579,7 +582,7 @@ export default class ImageView extends React.Component<IProps, IState> {
                         />
                         {contextMenuButton}
                         <AccessibleButton
-                            className="mx_ImageView_button mx_ImageView_button_close"
+                            className="mx_ImageView_button"
                             title={_t("action|close")}
                             onClick={this.props.onFinished}
                         >

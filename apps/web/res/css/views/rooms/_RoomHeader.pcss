@@ -9,7 +9,8 @@ Please see LICENSE files in the repository root for full details.
 .mx_RoomHeader {
     height: 64px;
     box-sizing: border-box;
-    padding: 0 var(--cpd-space-3x) 0 calc(var(--cpd-space-3x) + var(--cpd-space-1-5x));
+    /* The avatar 12px from the start, as from the top and bottom; the last button 12px from the end */
+    padding: 0 var(--cpd-space-3x);
     border-bottom: 1px solid $separator;
     background-color: $background;
     transition: all 0.2s ease;
@@ -17,6 +18,15 @@ Please see LICENSE files in the repository root for full details.
     button:has(svg.mx_RoomHeader_toggled) {
         /* For enhanced visibility under contrast control */
         outline: 1px solid transparent;
+    }
+
+    /* 36px buttons around 24px icons, as in Telegram's chat header. Compound sets an icon button's size inline and
+       draws the icon 3/4 of it, so the box and the icon's inset are set here; Headers.test.browser.ts fails when an
+       upgrade renames Compound's class, which Compound puts first. */
+    [class^="_icon-button_"] {
+        inline-size: var(--tl-control-size);
+        block-size: var(--tl-control-size);
+        padding: calc((var(--tl-control-size) - var(--cpd-space-6x)) / 2);
     }
 }
 
@@ -85,7 +95,8 @@ Please see LICENSE files in the repository root for full details.
     align-items: center;
     gap: var(--cpd-space-2x);
     border-radius: 9999px;
-    padding: var(--cpd-space-1-5x);
+    /* As tall as the buttons beside it, its 20px avatars as far from the top and bottom as from the start */
+    padding: var(--cpd-space-2x);
     cursor: pointer;
     user-select: none;
     font: var(--cpd-font-body-sm-medium);

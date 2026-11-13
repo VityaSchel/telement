@@ -29,7 +29,8 @@ Please see LICENSE files in the repository root for full details.
 
 .pageInput {
     width: 4ch;
-    padding: var(--cpd-space-1x) var(--cpd-space-2x);
+    /* A 36px field, like the zoom buttons beside it */
+    padding: calc((var(--tl-control-size) - 2 * var(--cpd-border-width-1) - 1lh) / 2) var(--cpd-space-2x);
     text-align: center;
     color: var(--cpd-color-text-primary);
     background: var(--cpd-color-bg-canvas-default);
@@ -47,6 +48,12 @@ Please see LICENSE files in the repository root for full details.
 .pageTotal {
     color: var(--cpd-color-text-secondary);
     font: var(--cpd-font-body-sm-medium);
+}
+
+/* 36px controls with 24px icons, like the right panel card header's. Two classes outweigh Compound's padding also in
+   the unit tests, which load its stylesheet later and outside the app's cascade layers. */
+.zoomControls .zoomButton {
+    padding: calc((var(--tl-control-size) - var(--cpd-space-6x)) / 2);
 }
 
 .zoomLevel {

@@ -14,13 +14,21 @@ Please see LICENSE files in the repository root for full details.
         height: 64px;
         display: flex;
         box-sizing: border-box;
-        padding: 16px;
+        /* The card header's inset (_BaseCard.pcss) */
+        padding: 0 var(--cpd-space-3x);
         align-items: center;
         border-bottom: 1px solid var(--cpd-color-gray-400);
 
         .mx_AccessibleButton {
             font-size: 12px;
             color: $secondary-content;
+        }
+
+        /* As big as the card header's buttons, with a 20px icon: mark all as read draws to the edges of its box, so at
+           20px it looks as big as the header's 24px icons. Compound puts its class first; Headers.test.browser.ts fails
+           when an upgrade renames it. */
+        [class^="_icon-button_"] {
+            padding: calc((var(--BaseCard_header-button-size) - var(--cpd-space-5x)) / 2);
         }
 
         .mx_ThreadPanel_vertical_separator {
@@ -30,11 +38,15 @@ Please see LICENSE files in the repository root for full details.
             border-left: 1px solid var(--cpd-color-gray-400);
         }
 
+        /* A 36px pill like the button before it, with the chevron as far from its end as from its top and bottom. The
+           label's line is as tall as the pill, which centers the label to the half pixel. */
         .mx_ThreadPanel_dropdown {
+            display: flex;
+            align-items: center;
             font: var(--cpd-font-body-sm-regular);
-            padding: 3px var(--cpd-space-1x) 3px var(--cpd-space-2x);
-            border-radius: 4px;
-            line-height: 1.5;
+            padding-inline: var(--cpd-space-3x) var(--cpd-space-2x);
+            border-radius: var(--tl-radius-control);
+            line-height: var(--tl-control-size);
             user-select: none;
 
             &:hover,
@@ -43,11 +55,9 @@ Please see LICENSE files in the repository root for full details.
             }
 
             svg {
-                margin-left: 2px;
+                margin-inline-start: 2px;
                 height: 20px;
                 width: 20px;
-                display: inline-block;
-                vertical-align: bottom;
             }
         }
     }
@@ -108,6 +118,21 @@ Please see LICENSE files in the repository root for full details.
         content-visibility: visible;
     }
 
+    /* The lists of threads and of notifications put a row's highlight 4px from the card's edges and its content 8px
+       inside the highlight, as the other cards' rows do. The list doesn't stretch 6px under the scrollbar, which made
+       up for the always shown 8px scrollbar of 2022: its end is 4px from the scrollbar where one takes room, and from
+       the card's edge where the scrollbar overlays the list. The timelines of the thread view and the timeline card
+       keep their spacing. */
+    &:not(.mx_ThreadView, .mx_TimelineCard) {
+        .mx_RoomView_messagePanel .mx_RoomView_messageListWrapper {
+            width: auto;
+        }
+
+        .mx_RoomView_MessageList {
+            padding-inline: var(--tl-inset-menu);
+        }
+    }
+
     .mx_GenericEventListSummary {
         /* Account for scrollbar when hovering */
         padding-top: 0;
@@ -147,11 +172,22 @@ Please see LICENSE files in the repository root for full details.
         flex-grow: 1;
         justify-content: space-between;
         flex-direction: column;
-        padding: 10px 20px 10px 30px;
+        /* As in the other menus: what the item holds 16px from the menu's edge, the text 12px after the check's 16px */
+        padding: var(--cpd-space-2x) var(--cpd-space-3x) var(--cpd-space-2x)
+            calc(var(--cpd-space-3x) + 16px + var(--cpd-space-3x));
         position: relative;
+        border-radius: var(--tl-radius-row);
 
-        &:hover {
-            background-color: $event-selected-color;
+        /* Highlighted as in the other menus, also when focused with the keyboard */
+        &:hover,
+        &:focus-visible {
+            background-color: var(--cpd-color-bg-action-secondary-hovered);
+        }
+
+        /* Inside the highlight, so that the ring keeps clear of the menu's border, as far as the highlight does */
+        &:focus-visible {
+            outline: var(--cpd-border-width-2) solid var(--cpd-color-border-focused);
+            outline-offset: calc(-1 * var(--cpd-border-width-2));
         }
 
         &[aria-checked="true"] {
@@ -159,16 +195,17 @@ Please see LICENSE files in the repository root for full details.
                 margin-left: -20px;
             }
 
+            /* Where the other menus' icons are, centered on the first line */
             svg {
-                width: 12px;
-                height: 12px;
+                width: 16px;
+                height: 16px;
                 margin-right: 8px;
                 color: $primary-content;
                 display: inline-block;
                 vertical-align: middle;
                 position: absolute;
-                top: 14px;
-                left: 10px;
+                top: calc(var(--cpd-space-2x) + (1lh - 16px) / 2);
+                left: var(--cpd-space-3x);
             }
         }
 

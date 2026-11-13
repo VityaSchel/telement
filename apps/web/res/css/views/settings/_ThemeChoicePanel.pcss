@@ -15,8 +15,13 @@ Please see LICENSE files in the repository root for full details.
 
     .mx_ThemeChoicePanel_themeSelector {
         border: 1px solid var(--cpd-color-border-interactive-secondary);
-        border-radius: var(--cpd-space-1-5x);
-        padding: var(--cpd-space-3x) var(--cpd-space-5x) var(--cpd-space-3x) var(--cpd-space-3x);
+        border-radius: var(--tl-radius-row);
+        /* 44px tall, with the radio 12px from the chip's top, bottom and start, the 1px border included, and the label
+           as far from its end */
+        box-sizing: border-box;
+        min-block-size: var(--cpd-space-11x);
+        align-items: center;
+        padding: 0 calc(var(--cpd-space-3x) - 1px);
         gap: var(--cpd-space-2x);
         background-color: var(--cpd-color-bg-canvas-default);
 

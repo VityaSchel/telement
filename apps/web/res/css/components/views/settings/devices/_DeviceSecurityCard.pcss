@@ -16,7 +16,7 @@ Please see LICENSE files in the repository root for full details.
     padding: var(--cpd-space-4x);
 
     border: 1px solid $quinary-content;
-    border-radius: 8px;
+    border-radius: var(--tl-radius-bubble);
 }
 
 .mx_DeviceSecurityCard_icon {
@@ -25,7 +25,8 @@ Please see LICENSE files in the repository root for full details.
     align-items: center;
     justify-content: center;
     margin-right: var(--cpd-space-4x);
-    border-radius: 8px;
+    /* A card pushes its radius inward: 12 less the 17px from its corner is below the floor of 4 */
+    border-radius: var(--tl-radius-inline);
 
     height: 40px;
     width: 40px;

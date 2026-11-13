@@ -20,7 +20,7 @@ exports[`<RoomSummaryCard /> > has button to edit topic 1`] = `
         data-kind="secondary"
         data-testid="base-card-close-button"
         role="button"
-        style="--cpd-icon-button-size: 28px;"
+        style="--cpd-icon-button-size: var(--BaseCard_header-button-size);"
         tabindex="0"
       >
         <div
@@ -761,7 +761,7 @@ exports[`<RoomSummaryCard /> > renders the room summary 1`] = `
         data-kind="secondary"
         data-testid="base-card-close-button"
         role="button"
-        style="--cpd-icon-button-size: 28px;"
+        style="--cpd-icon-button-size: var(--BaseCard_header-button-size);"
         tabindex="0"
       >
         <div
@@ -1460,7 +1460,7 @@ exports[`<RoomSummaryCard /> > renders the room topic in the summary 1`] = `
         data-kind="secondary"
         data-testid="base-card-close-button"
         role="button"
-        style="--cpd-icon-button-size: 28px;"
+        style="--cpd-icon-button-size: var(--BaseCard_header-button-size);"
         tabindex="0"
       >
         <div

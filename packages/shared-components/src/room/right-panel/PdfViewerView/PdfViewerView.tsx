@@ -114,7 +114,8 @@ export function PdfViewerView({
                 </form>
                 <fieldset className={styles.zoomControls} aria-label={_t("pdf_viewer|zoom")}>
                     <IconButton
-                        size="28px"
+                        className={styles.zoomButton}
+                        size="var(--tl-control-size)"
                         aria-label={_t("pdf_viewer|zoom_out")}
                         tooltip={_t("pdf_viewer|zoom_out")}
                         data-testid="pdf-zoom-out"
@@ -128,7 +129,8 @@ export function PdfViewerView({
                         </span>
                     ) : null}
                     <IconButton
-                        size="28px"
+                        className={styles.zoomButton}
+                        size="var(--tl-control-size)"
                         aria-label={_t("pdf_viewer|zoom_in")}
                         tooltip={_t("pdf_viewer|zoom_in")}
                         data-testid="pdf-zoom-in"

@@ -34,6 +34,7 @@ import { getForwardableEvent } from "../../../events/forward/getForwardableEvent
 import { PlaybackManager } from "../../../audio/PlaybackManager";
 import { formatVideoTime } from "../../../telement/media/formatVideoTime";
 import { checkMediaSavingAllowed, saveMediaAs } from "../../../telement/media/saveMediaAs";
+import { isHighContrast } from "../../../telement/media/isHighContrast";
 import { VideoNoteBodyViewModel } from "../message-body/VideoNoteBodyViewModel";
 
 /** How far the arrow keys move the playback position, in seconds. */
@@ -65,12 +66,6 @@ export interface VideoLightboxViewModelProps {
      * Closes the viewer.
      */
     onFinished: () => void;
-}
-
-function isHighContrast(): boolean {
-    return (
-        document.body.classList.contains("cpd-theme-light-hc") || document.body.classList.contains("cpd-theme-dark-hc")
-    );
 }
 
 /**

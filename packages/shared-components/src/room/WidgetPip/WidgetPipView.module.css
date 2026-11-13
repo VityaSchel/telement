@@ -14,7 +14,8 @@ Please see LICENSE files in the repository root for full details.
     padding: var(--cpd-space-3x);
     background: var(--cpd-color-bg-canvas-default);
     border: 1px solid var(--cpd-color-border-interactive-secondary);
-    border-radius: var(--cpd-space-6x);
+    /* Concentric with the widget's corners: their radius plus the padding and the border */
+    border-radius: calc(var(--tl-radius-bubble) + var(--cpd-space-3x) + 1px);
     gap: var(--cpd-space-2x);
     box-shadow: 0 0 var(--cpd-space-2x) rgba(0, 0, 0, 0.1);
 }
@@ -25,6 +26,12 @@ Please see LICENSE files in the repository root for full details.
     display: flex;
     font: var(--cpd-font-body-md-semibold);
     align-items: center;
+}
+
+/* A 36px control with a 24px icon, like the right panel card's back button. Two classes outweigh Compound's padding
+   also in the unit tests, which load its stylesheet later and outside the app's cascade layers. */
+.header .backButton {
+    padding: calc((var(--tl-control-size) - var(--cpd-space-6x)) / 2);
 }
 
 .avatar {
@@ -38,7 +45,7 @@ Please see LICENSE files in the repository root for full details.
 }
 
 .roundedCornerContainer {
-    border-radius: var(--cpd-space-4x);
+    border-radius: var(--tl-radius-bubble);
     overflow: hidden;
     display: flex;
     flex-grow: 1;

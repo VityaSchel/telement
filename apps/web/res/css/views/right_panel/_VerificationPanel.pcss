@@ -22,9 +22,13 @@ Please see LICENSE files in the repository root for full details.
             margin-bottom: 0;
         }
 
+        /* 16px under the text, as the third-party invite's button is. On a line of its own, so the gap is the same
+           after a paragraph with margins as after one without */
         .mx_VerificationPanel_verifyByEmojiButton,
         .mx_UserInfo_wideButton {
+            display: flex;
             width: fit-content;
+            margin-top: var(--cpd-space-4x);
         }
 
         .mx_EncryptionInfo_spinner,
@@ -60,7 +64,6 @@ Please see LICENSE files in the repository root for full details.
         .mx_AccessibleButton {
             width: 100%;
             box-sizing: border-box;
-            padding: 10px;
             display: block;
             margin: 10px 0;
         }
@@ -88,7 +91,7 @@ Please see LICENSE files in the repository root for full details.
 
         .mx_VerificationPanel_QRPhase_startOption {
             background-color: $header-panel-bg-color;
-            border-radius: 10px;
+            border-radius: var(--tl-radius-bubble);
             flex: 1;
             display: flex;
             padding: 20px;
@@ -97,6 +100,16 @@ Please see LICENSE files in the repository root for full details.
             position: relative;
             max-width: 310px;
             justify-content: space-between;
+
+            /* While the code loads, its spinner sits in the middle of the card, level with "or" and the other card's
+               text: two equal rows around it, the title in the first */
+            &:has(> .mx_QRCode > .mx_Spinner) {
+                display: grid;
+                grid-template-rows: 1fr auto 1fr;
+                justify-content: stretch;
+                justify-items: center;
+                align-items: start;
+            }
 
             canvas,
             .mx_VerificationPanel_QRPhase_noQR {
@@ -133,7 +146,6 @@ Please see LICENSE files in the repository root for full details.
     .mx_VerificationPanel_reciprocate_section {
         .mx_AccessibleButton {
             margin-left: 10px;
-            padding: 7px 40px;
         }
 
         .mx_VerificationPanel_reciprocateButtons {

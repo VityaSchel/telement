@@ -50,14 +50,8 @@ Please see LICENSE files in the repository root for full details.
             min-height: 32px;
 
             .mx_AccessibleButton {
-                padding: 4px 12px;
                 font-weight: normal;
             }
-        }
-
-        .mx_AccessibleButton_kind_danger_outline,
-        .mx_AccessibleButton_kind_primary_outline {
-            padding: 3px 12px; /* to account for the 1px border */
         }
     }
 
@@ -102,8 +96,10 @@ Please see LICENSE files in the repository root for full details.
 
     .mx_SpaceHierarchy_subspace_toggle {
         position: absolute;
-        left: -1px;
-        top: 10px;
+        /* In the tile's 16px start padding, inside its rounded edge, and centered on the 20px avatar 16px below the
+           tile's top */
+        left: 0;
+        top: calc(var(--cpd-space-4x) + (20px - 16px) / 2);
         height: 16px;
         width: 16px;
         border-radius: 4px;
@@ -136,7 +132,8 @@ Please see LICENSE files in the repository root for full details.
 
             .mx_SpaceHierarchy_roomTile {
                 position: relative;
-                padding: 8px 16px;
+                /* The avatar as far from the top as from the start, where the subspace toggle needs 16px */
+                padding: var(--cpd-space-4x);
                 border-radius: 8px;
                 box-sizing: border-box;
 
@@ -157,6 +154,8 @@ Please see LICENSE files in the repository root for full details.
                     .mx_SpaceHierarchy_roomTile_avatar {
                         grid-row: 1;
                         grid-column: 1;
+                        /* As tall as the avatar rather than a line of text, so that it's centered on the name */
+                        display: flex;
                     }
 
                     .mx_SpaceHierarchy_roomTile_name {
@@ -209,15 +208,14 @@ Please see LICENSE files in the repository root for full details.
                     margin-left: auto;
 
                     .mx_AccessibleButton {
-                        line-height: $font-24px;
-                        padding: 4px 16px;
                         display: inline-block;
                         visibility: hidden;
                     }
 
-                    .mx_AccessibleButton_kind_danger_outline,
-                    .mx_AccessibleButton_kind_primary_outline {
-                        padding: 3px 16px; /* to account for the 1px border */
+                    /* The checkbox has no label, which leaves Compound's field an empty body after a 12px gap. Without
+                       it, the checkbox ends on the tile's 16px edge, as the avatar starts on it. */
+                    [class*="_inline-field-body_"]:empty {
+                        display: none;
                     }
                 }
 
@@ -228,12 +226,16 @@ Please see LICENSE files in the repository root for full details.
                     .mx_AccessibleButton {
                         visibility: visible;
                     }
+
+                    /* On the tile's background, rather than a box of the page's background cut into its edge */
+                    .mx_SpaceHierarchy_subspace_toggle {
+                        background-color: transparent;
+                    }
                 }
 
                 &.mx_SpaceHierarchy_joining {
                     .mx_AccessibleButton {
                         visibility: visible;
-                        padding: 4px 18px;
                     }
                 }
             }
@@ -248,7 +250,8 @@ Please see LICENSE files in the repository root for full details.
             background-color: $spacePanel-bg-color;
             width: 1px;
             height: 100%;
-            left: 6px;
+            /* Under the middle of the subspace toggle */
+            left: 7px;
             top: 0;
         }
     }

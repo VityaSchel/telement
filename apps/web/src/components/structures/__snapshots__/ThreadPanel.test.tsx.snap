@@ -10,7 +10,7 @@ exports[`ThreadPanel > Header > expect that All filter for ThreadPanelHeader pro
       class="_icon-button"
       data-kind="primary"
       role="button"
-      style="--cpd-icon-button-size: 28px;"
+      style="--cpd-icon-button-size: var(--BaseCard_header-button-size);"
       tabindex="0"
     >
       <div
@@ -28,25 +28,25 @@ exports[`ThreadPanel > Header > expect that All filter for ThreadPanelHeader pro
         >
           <path
             d="M1.75 2H14.25"
-            stroke="#656D77"
+            stroke="currentColor"
             stroke-linecap="round"
             stroke-width="1.5"
           />
           <path
             d="M1.75 6H14.25"
-            stroke="#656D77"
+            stroke="currentColor"
             stroke-linecap="round"
             stroke-width="1.5"
           />
           <path
             d="M1.75 10H8.25"
-            stroke="#656D77"
+            stroke="currentColor"
             stroke-linecap="round"
             stroke-width="1.5"
           />
           <path
             d="M6.17188 13L8.2932 15.1213L13.95 9.46447"
-            stroke="#656D77"
+            stroke="currentColor"
             stroke-linecap="round"
             stroke-linejoin="round"
             stroke-width="1.5"
@@ -91,7 +91,7 @@ exports[`ThreadPanel > Header > expect that My filter for ThreadPanelHeader prop
       class="_icon-button"
       data-kind="primary"
       role="button"
-      style="--cpd-icon-button-size: 28px;"
+      style="--cpd-icon-button-size: var(--BaseCard_header-button-size);"
       tabindex="0"
     >
       <div
@@ -109,25 +109,25 @@ exports[`ThreadPanel > Header > expect that My filter for ThreadPanelHeader prop
         >
           <path
             d="M1.75 2H14.25"
-            stroke="#656D77"
+            stroke="currentColor"
             stroke-linecap="round"
             stroke-width="1.5"
           />
           <path
             d="M1.75 6H14.25"
-            stroke="#656D77"
+            stroke="currentColor"
             stroke-linecap="round"
             stroke-width="1.5"
           />
           <path
             d="M1.75 10H8.25"
-            stroke="#656D77"
+            stroke="currentColor"
             stroke-linecap="round"
             stroke-width="1.5"
           />
           <path
             d="M6.17188 13L8.2932 15.1213L13.95 9.46447"
-            stroke="#656D77"
+            stroke="currentColor"
             stroke-linecap="round"
             stroke-linejoin="round"
             stroke-width="1.5"

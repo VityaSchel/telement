@@ -147,6 +147,12 @@ describe("VideoLightboxView", () => {
         expect(screen.getByRole("button", { name: "Play" })).toHaveAttribute("data-autofocus");
     });
 
+    it("gives the date's link a kind, as Compound's links have, which keeps the app's link color off it", () => {
+        renderView();
+
+        expect(screen.getByRole("link", { name: "Thu, Nov 12, 2026, 10:42 AM" })).toHaveAttribute("data-kind");
+    });
+
     it("uses the dark high contrast theme in high contrast mode", () => {
         renderView({ highContrast: true });
 
@@ -188,6 +194,47 @@ describe("VideoLightboxView", () => {
         renderView({ saving: true });
 
         expect(screen.getByRole("button", { name: "Save as…" })).toBeDisabled();
+    });
+
+    it.each([
+        ["wide", 960],
+        ["narrow", 400],
+    ])(
+        "keeps the top bar's sender and 36px buttons 16px from the edges on a %s screen, like the image viewer's",
+        (_name, width) => {
+            renderInWindow(width, 560);
+
+            const dialog = screen.getByRole("dialog").getBoundingClientRect();
+            const close = screen.getByRole("button", { name: "Close" });
+            const topBar = close.parentElement!.parentElement!.getBoundingClientRect();
+            const avatar = screen.getByRole("button", { name: "View profile" }).getBoundingClientRect();
+            expect(topBar.height).toBe(68);
+            expect(avatar.left - dialog.left).toBe(16);
+            expect(dialog.right - close.getBoundingClientRect().right).toBe(16);
+            expect(close.getBoundingClientRect().top - dialog.top).toBe(16);
+            for (const name of ["Save as…", "Forward", "Close"]) {
+                const button = screen.getByRole("button", { name });
+                const box = button.getBoundingClientRect();
+                const icon = button.querySelector("svg")!.getBoundingClientRect();
+                expect([box.width, box.height, icon.width, icon.height]).toEqual([36, 36, 24, 24]);
+                expect([icon.left - box.left, icon.top - box.top]).toEqual([6, 6]);
+            }
+        },
+    );
+
+    it("mirrors the top bar's insets in a right-to-left layout", () => {
+        const vm = Object.assign(new MockViewModel<VideoLightboxViewSnapshot>(snapshot), createActions());
+        render(
+            <div dir="rtl" style={{ width: "960px", height: "560px" }}>
+                <VideoLightboxView vm={vm} />
+            </div>,
+        );
+
+        const dialog = screen.getByRole("dialog").getBoundingClientRect();
+        expect(screen.getByRole("button", { name: "Close" }).getBoundingClientRect().left - dialog.left).toBe(16);
+        expect(dialog.right - screen.getByRole("button", { name: "View profile" }).getBoundingClientRect().right).toBe(
+            16,
+        );
     });
 
     it("wires the playback controls", () => {

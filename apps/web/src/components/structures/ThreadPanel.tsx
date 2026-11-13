@@ -130,7 +130,7 @@ export const ThreadPanelHeader: React.FC<{
     return (
         <div className="mx_ThreadPanelHeader">
             <Tooltip label={_t("threads|mark_all_read")}>
-                <IconButton onClick={onMarkAllThreadsReadClick} size="28px">
+                <IconButton onClick={onMarkAllThreadsReadClick} size="var(--BaseCard_header-button-size)">
                     <MarkAllThreadsReadIcon height={20} width={20} />
                 </IconButton>
             </Tooltip>

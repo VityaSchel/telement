@@ -472,7 +472,8 @@ export function VideoLightboxView({ vm, videoRef, className }: Readonly<VideoLig
                     )}
                     <div className={styles.senderText}>
                         <span className={styles.senderName}>{senderName}</span>
-                        <a className={styles.date} href={dateHref} onClick={vm.onDateClick}>
+                        {/* A kind, as Compound's links carry, keeps the app's link color off the date's own */}
+                        <a className={styles.date} data-kind="primary" href={dateHref} onClick={vm.onDateClick}>
                             {dateLabel}
                         </a>
                     </div>
@@ -481,7 +482,7 @@ export function VideoLightboxView({ vm, videoRef, className }: Readonly<VideoLig
                     {canSave && (
                         <IconButton
                             className={styles.iconButton}
-                            size="32px"
+                            size="36px"
                             aria-label={_t("telement|video_lightbox|save_as")}
                             tooltip={_t("telement|video_lightbox|save_as")}
                             tooltipPlacement="bottom"
@@ -494,7 +495,7 @@ export function VideoLightboxView({ vm, videoRef, className }: Readonly<VideoLig
                     {canForward && (
                         <IconButton
                             className={styles.iconButton}
-                            size="32px"
+                            size="36px"
                             aria-label={_t("telement|video_lightbox|forward")}
                             tooltip={_t("telement|video_lightbox|forward")}
                             tooltipPlacement="bottom"
@@ -505,7 +506,7 @@ export function VideoLightboxView({ vm, videoRef, className }: Readonly<VideoLig
                     )}
                     <IconButton
                         className={styles.iconButton}
-                        size="32px"
+                        size="36px"
                         aria-label={_t("action|close")}
                         tooltip={_t("action|close")}
                         tooltipPlacement="bottom"

@@ -6,7 +6,7 @@ SPDX-License-Identifier: AGPL-3.0-only OR GPL-3.0-only OR LicenseRef-Element-Com
 Please see LICENSE files in the repository root for full details.
 */
 
-$button-size: 32px;
+$button-size: var(--tl-control-size);
 $button-gap: var(--cpd-space-3x);
 
 :root {
@@ -44,6 +44,8 @@ $button-gap: var(--cpd-space-3x);
 .mx_ImageView_panel {
     width: 100%;
     height: var(--image-view-panel-height);
+    /* The image's wrapper below is as tall as the viewer, which would shrink the panel off the 16px around its buttons */
+    flex-shrink: 0;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -53,7 +55,8 @@ $button-gap: var(--cpd-space-3x);
 
 .mx_ImageView_info_wrapper {
     pointer-events: initial;
-    padding-left: 32px;
+    /* The video viewer's top bar: the sender as far from the start as the buttons from the end and the top */
+    padding-inline-start: var(--cpd-space-4x);
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -63,13 +66,19 @@ $button-gap: var(--cpd-space-3x);
 }
 
 .mx_ImageView_info {
-    padding-left: 12px;
+    padding-inline-start: var(--cpd-space-3x);
     display: flex;
     flex-direction: column;
 }
 
+/* The sender as the video viewer shows it (VideoLightboxView), in the dark theme both viewers use */
 .mx_ImageView_info_sender {
-    font-weight: bold;
+    font: var(--cpd-font-body-md-semibold);
+    color: var(--cpd-color-text-primary);
+}
+
+.mx_ImageView_info .mx_MessageTimestamp {
+    font: var(--cpd-font-body-sm-regular);
 }
 
 .mx_ImageView_title {
@@ -83,7 +92,7 @@ $button-gap: var(--cpd-space-3x);
 .mx_ImageView_toolbar {
     --icon-size: 24px;
 
-    padding-right: 16px;
+    padding-inline-end: var(--cpd-space-4x);
     pointer-events: initial;
     display: flex;
     align-items: center;
@@ -98,22 +107,23 @@ $button-gap: var(--cpd-space-3x);
     width: var(--icon-size);
     height: var(--icon-size);
     display: block;
+    /* The video viewer's icon buttons (Compound's IconButton), in the dark theme the viewer uses (ImageView.tsx) */
+    border-radius: var(--tl-radius-control);
 
     svg {
         height: inherit;
         width: inherit;
         display: block;
-        color: $icon-button-color;
+        color: var(--cpd-color-icon-primary);
+    }
+
+    &:not([aria-disabled="true"]):is(:hover, :active) {
+        background: var(--cpd-color-bg-subtle-primary);
     }
 }
 
 .mx_ImageView_button_more {
     --icon-size: 28px;
-}
-
-.mx_ImageView_button_close {
-    border-radius: 100%;
-    background: #21262c; /* same on all themes */
 }
 
 @media (prefers-reduced-motion) {

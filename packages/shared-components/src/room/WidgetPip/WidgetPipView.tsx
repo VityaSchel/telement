@@ -89,7 +89,8 @@ export const WidgetPipView: FC<WidgetPipViewProps> = ({ vm, RoomAvatar }) => {
         <div data-testid="widget-pip-container" className={styles.container} onMouseDown={vm.onStartMoving}>
             <div className={styles.header}>
                 <IconButton
-                    size="28px"
+                    className={styles.backButton}
+                    size="var(--tl-control-size)"
                     data-testid="base-card-back-button"
                     onClick={(ev) => vm.onBackClick(ev)}
                     tooltip={_t("action|back")}

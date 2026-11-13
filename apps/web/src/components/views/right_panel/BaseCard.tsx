@@ -67,7 +67,7 @@ const BaseCard: React.FC<IProps> = ({
         const label = backLabelForPhase(prevCard.phase) ?? _t("action|back");
         backButton = (
             <IconButton
-                size="28px"
+                size="var(--BaseCard_header-button-size)"
                 data-testid="base-card-back-button"
                 onClick={onBackClick}
                 tooltip={label}
@@ -89,7 +89,7 @@ const BaseCard: React.FC<IProps> = ({
 
         closeButton = (
             <IconButton
-                size="28px"
+                size="var(--BaseCard_header-button-size)"
                 data-testid="base-card-close-button"
                 onClick={onClose ?? closeRightPanel}
                 ref={closeButtonRef}

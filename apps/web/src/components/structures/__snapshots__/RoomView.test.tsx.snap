@@ -3520,7 +3520,7 @@ exports[`RoomView > video rooms > should render joined video room view 1`] = `
                 data-kind="secondary"
                 data-testid="base-card-close-button"
                 role="button"
-                style="--cpd-icon-button-size: 28px;"
+                style="--cpd-icon-button-size: var(--BaseCard_header-button-size);"
                 tabindex="0"
               >
                 <div

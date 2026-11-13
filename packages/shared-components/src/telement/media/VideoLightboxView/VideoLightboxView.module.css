@@ -5,8 +5,9 @@ SPDX-License-Identifier: AGPL-3.0-only OR GPL-3.0-only
 Please see LICENSE files in the repository root for full details.
 */
 
-/* The viewer sits over a black backdrop in every theme, so it uses the dark theme's tokens. Its top bar lines up with
-   the image viewer's: 32px from the start edge and 16px from the end edge. */
+/* The viewer sits over a black backdrop in every theme, so it uses the dark theme's tokens. Its top bar matches the
+   image viewer's (_ImageView.pcss): 68px tall, its buttons 16px from the top and the end, the sender 16px from the
+   start. */
 .root {
     /* The size of the playback controls, which the view also gives the icon buttons. */
     --control-size: var(--tl-control-size);
@@ -32,8 +33,8 @@ Please see LICENSE files in the repository root for full details.
     align-items: center;
     justify-content: space-between;
     gap: var(--cpd-space-4x);
-    padding-block: var(--cpd-space-4x);
-    padding-inline: var(--cpd-space-8x) var(--cpd-space-4x);
+    min-block-size: calc(var(--control-size) + 2 * var(--cpd-space-4x));
+    padding-inline: var(--cpd-space-4x);
 }
 
 /* While the video plays and the user is idle, the bars fade out and the pointer hides. The bars stay in place and
@@ -117,6 +118,11 @@ Please see LICENSE files in the repository root for full details.
 /* Compound draws icon buttons in the secondary icon color; the viewer draws every control in one bright color. */
 .iconButton {
     --cpd-color-icon-secondary: var(--cpd-color-icon-primary);
+}
+
+/* Compound draws the icon 3/4 of the button; the top bar keeps 24px icons, like the image viewer's. */
+.actions .iconButton {
+    padding: calc((var(--control-size) - var(--cpd-space-6x)) / 2);
 }
 
 /* The video reaches down under the floating controls, which hide while it plays. A video limited by the window's
@@ -373,10 +379,6 @@ Please see LICENSE files in the repository root for full details.
 /* On narrow screens the seek bar takes a row of its own above the buttons, which keep play at the start and the
    rest at the end. The row keeps its times clear of the bar's rounded corners. */
 @container video-lightbox (width < 560px) {
-    .topBar {
-        padding-inline: var(--cpd-space-4x);
-    }
-
     .timeline {
         flex-basis: 100%;
         order: -1;

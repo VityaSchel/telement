@@ -7,7 +7,9 @@ Please see LICENSE files in the repository root for full details.
 
 .mx_MemberTileView {
     display: flex;
-    padding: var(--cpd-space-3x) var(--cpd-space-3x) var(--cpd-space-3x) var(--cpd-space-4x);
+    /* The avatar 12px from the top, the bottom (the border included) and the start: what the tile holds sits on the
+       card's 12px content edge at both ends */
+    padding: var(--cpd-space-3x) var(--cpd-space-3x) calc(var(--cpd-space-3x) - var(--cpd-border-width-1));
     box-sizing: border-box;
     height: 56px;
     border-bottom: var(--cpd-border-width-1) solid var(--cpd-color-gray-300);

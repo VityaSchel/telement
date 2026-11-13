@@ -35,22 +35,26 @@ Please see LICENSE files in the repository root for full details.
     }
 }
 
+/* The buttons' 36px boxes space their icons */
 .mx_LegacyCallViewHeader_controls {
     margin-left: auto;
     display: flex;
-    gap: 5px;
 }
 
+/* A 36px icon button, as in the other headers, with the 20px icon centered */
 .mx_LegacyCallViewHeader_button {
-    display: inline-block;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    inline-size: var(--tl-control-size);
+    block-size: var(--tl-control-size);
+    border-radius: var(--tl-radius-control);
     vertical-align: middle;
     cursor: pointer;
 
     svg {
-        display: inline-block;
         height: 20px;
         width: 20px;
-        vertical-align: middle;
         color: $secondary-content;
     }
 }

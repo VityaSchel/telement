@@ -22,4 +22,10 @@ Please see LICENSE files in the repository root for full details.
         width: 100%;
         gap: var(--cpd-space-6x);
     }
+
+    /* The card's content edge, the card header's 12px inset, rather than the 18px of the right panel's timelines, which
+       _RightPanel.pcss sets later in the cascade */
+    .mx_RoomView_messageListWrapper > .mx_RoomView_MessageList {
+        padding-inline: var(--cpd-space-3x);
+    }
 }

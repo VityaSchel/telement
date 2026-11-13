@@ -32,6 +32,23 @@ describe("<ImageView />", () => {
         expect(container).toMatchSnapshot();
     });
 
+    it.each([
+        ["cpd-theme-light", "cpd-theme-dark"],
+        ["cpd-theme-light-hc", "cpd-theme-dark-hc"],
+        ["cpd-theme-dark-hc", "cpd-theme-dark-hc"],
+    ])("uses the dark theme like the video viewer when the app uses %s", (appTheme, viewerTheme) => {
+        document.body.classList.add(appTheme);
+        const { getByRole } = render(<ImageView src="https://example.com/image.png" onFinished={vi.fn()} />);
+        document.body.classList.remove(appTheme);
+
+        const themes = getByRole("dialog")
+            .className.split(" ")
+            .filter((name) => name.startsWith("cpd-theme-"));
+        expect(themes).toEqual([viewerTheme]);
+        // The app sets its font stack on elements whose class starts with a theme, as the video viewer's does
+        expect(getByRole("dialog").className.startsWith(viewerTheme)).toBe(true);
+    });
+
     it("should save as on click, downloading where the browser has no save dialog", async () => {
         fetchMock.get("https://example.com/image.png", "TESTFILE");
         const { getByRole } = render(

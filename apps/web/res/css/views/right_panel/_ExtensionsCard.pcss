@@ -10,7 +10,8 @@ Please see LICENSE files in the repository root for full details.
     --cpd-separator-spacing: var(--cpd-space-6x);
     --AddExtension-overlap: -76px;
     .mx_AutoHideScrollbar {
-        padding: 0 var(--cpd-space-4x);
+        /* The card's content edge, the card header's 12px inset */
+        padding: 0 var(--cpd-space-3x);
         margin-top: var(--cpd-space-6x);
         box-sizing: border-box;
 
@@ -38,7 +39,9 @@ Please see LICENSE files in the repository root for full details.
         }
 
         .mx_ExtensionsCard_icon_app {
-            padding: var(--cpd-space-2x) var(--cpd-space-12x) var(--cpd-space-2x) var(--cpd-space-3x);
+            /* The avatar on the card's content edge, with the title, the Add button and the separator */
+            padding-block: var(--cpd-space-2x);
+            padding-inline: 0 var(--cpd-space-12x);
             text-overflow: ellipsis;
             overflow: hidden;
             display: flex;
@@ -80,12 +83,13 @@ Please see LICENSE files in the repository root for full details.
             }
         }
 
+        /* Ending on the same edge */
         .mx_ExtensionsCard_app_pinToggle {
-            right: 8px;
+            inset-inline-end: 0;
         }
 
         .mx_ExtensionsCard_app_options {
-            right: 32px; /* 24 + 8 */
+            inset-inline-end: var(--cpd-space-6x); /* the pin toggle's width */
         }
 
         &.mx_ExtensionsCard_Button_pinned {
@@ -111,6 +115,8 @@ Please see LICENSE files in the repository root for full details.
     /* Set layout for everyone button */
     a[data-kind="primary"] {
         margin-top: var(--cpd-space-10x);
+        /* Compound pads a link by 0.25rem for its pressed pill; this puts the text on the content edge */
+        margin-inline-start: -0.25rem;
     }
 
     .mx_EmptyState::before {

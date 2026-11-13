@@ -11,11 +11,11 @@ exports[`WidgetPipView > detects back click action 1`] = `
     >
       <button
         aria-labelledby="react-use-id-1"
-        class="_icon-button_1215g_8"
+        class="_icon-button_1215g_8 WidgetPipView-module_backButton"
         data-kind="secondary"
         data-testid="base-card-back-button"
         role="button"
-        style="--cpd-icon-button-size: 28px;"
+        style="--cpd-icon-button-size: var(--tl-control-size);"
         tabindex="0"
       >
         <div
@@ -67,11 +67,11 @@ exports[`WidgetPipView > detects double click triggers back 1`] = `
     >
       <button
         aria-labelledby="react-use-id-1"
-        class="_icon-button_1215g_8"
+        class="_icon-button_1215g_8 WidgetPipView-module_backButton"
         data-kind="secondary"
         data-testid="base-card-back-button"
         role="button"
-        style="--cpd-icon-button-size: 28px;"
+        style="--cpd-icon-button-size: var(--tl-control-size);"
         tabindex="0"
       >
         <div
@@ -123,11 +123,11 @@ exports[`WidgetPipView > detects on mouse down for drag 1`] = `
     >
       <button
         aria-labelledby="react-use-id-1"
-        class="_icon-button_1215g_8"
+        class="_icon-button_1215g_8 WidgetPipView-module_backButton"
         data-kind="secondary"
         data-testid="base-card-back-button"
         role="button"
-        style="--cpd-icon-button-size: 28px;"
+        style="--cpd-icon-button-size: var(--tl-control-size);"
         tabindex="0"
       >
         <div
@@ -179,11 +179,11 @@ exports[`WidgetPipView > renders 1`] = `
     >
       <button
         aria-labelledby="react-use-id-1"
-        class="_icon-button_1215g_8"
+        class="_icon-button_1215g_8 WidgetPipView-module_backButton"
         data-kind="secondary"
         data-testid="base-card-back-button"
         role="button"
-        style="--cpd-icon-button-size: 28px;"
+        style="--cpd-icon-button-size: var(--tl-control-size);"
         tabindex="0"
       >
         <div
