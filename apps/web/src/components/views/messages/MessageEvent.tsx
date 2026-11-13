@@ -45,6 +45,8 @@ import {
     renderMBody,
 } from "./MBodyFactory";
 import { TextualBodyFactory } from "./TextualBodyFactory";
+import { isVideoNote } from "../../../telement/video-notes/isVideoNote";
+import { VideoNoteBodyFactory } from "../../../telement/video-notes/VideoNoteBodyFactory";
 
 // onMessageAllowed is handled internally
 interface IProps extends Omit<IBodyProps, "onMessageAllowed" | "mediaEventHelper"> {
@@ -291,6 +293,15 @@ export default class MessageEvent extends React.Component<IProps> implements IMe
                 (BodyType === MStickerBody && !this.validateStickerMimetype(content))
             ) {
                 BodyType = this.bodyTypes.get(MsgType.File)!;
+            }
+
+            // Telement: round video notes, unless the caller chose how videos render (as reply quotes do)
+            if (
+                BodyType === VideoBodyFactory &&
+                !this.props.overrideBodyTypes?.[MsgType.Video] &&
+                isVideoNote(content)
+            ) {
+                BodyType = VideoNoteBodyFactory;
             }
 
             // TODO: move to eventTypes when location sharing spec stabilises

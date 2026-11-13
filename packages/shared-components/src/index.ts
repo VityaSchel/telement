@@ -113,3 +113,6 @@ export * from "./status/UserStatusIconView";
 export * from "./devtools/CustomThemesView";
 // MVVM
 export * from "./core/viewmodel";
+
+// Telement
+export * from "./telement";

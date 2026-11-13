@@ -1,0 +1,112 @@
+/*
+Copyright 2026 Viktor Shchelochkov
+
+SPDX-License-Identifier: AGPL-3.0-only OR GPL-3.0-only
+Please see LICENSE files in the repository root for full details.
+*/
+
+.circle {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    max-width: 100%;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    overflow: hidden;
+    background-color: var(--cpd-color-bg-subtle-secondary);
+}
+
+.video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.toggle {
+    position: absolute;
+    inset: 0;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background: none;
+    cursor: pointer;
+}
+
+.toggle:focus-visible {
+    outline: 2px solid var(--cpd-color-border-focused);
+    outline-offset: -2px;
+}
+
+.progress {
+    position: absolute;
+    inset: 0;
+    transform: rotate(-90deg);
+    pointer-events: none;
+}
+
+.progressTrack,
+.progressValue {
+    fill: none;
+    stroke-width: 2.5;
+}
+
+.progressTrack {
+    stroke: rgb(255 255 255 / 30%);
+}
+
+.progressValue {
+    stroke: var(--cpd-color-icon-on-solid-primary);
+    stroke-linecap: round;
+    transition: stroke-dashoffset 0.25s linear;
+}
+
+.pausedIcon {
+    position: absolute;
+    color: var(--cpd-color-icon-on-solid-primary);
+    filter: drop-shadow(0 0 4px rgb(0 0 0 / 40%));
+    pointer-events: none;
+}
+
+.badge {
+    position: absolute;
+    bottom: 12%;
+    left: 50%;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--cpd-space-1x);
+    padding: var(--cpd-space-0-5x) var(--cpd-space-2x);
+    border-radius: 999px;
+    background-color: rgb(0 0 0 / 45%);
+    color: var(--cpd-color-text-on-solid-primary);
+    font: var(--cpd-font-body-xs-medium);
+    transform: translateX(-50%);
+    pointer-events: none;
+}
+
+.hiddenButton {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--cpd-space-1x);
+    width: 100%;
+    height: 100%;
+    padding: var(--cpd-space-4x);
+    border: none;
+    background: none;
+    color: var(--cpd-color-text-primary);
+    font: var(--cpd-font-body-sm-medium);
+    text-align: center;
+    cursor: pointer;
+}
+
+.loading {
+    color: var(--cpd-color-icon-secondary);
+}
+
+.error {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--cpd-space-1x);
+}

@@ -3272,6 +3272,12 @@
         "empty": "You don't currently have any stickerpacks enabled",
         "empty_add_prompt": "Add some now"
     },
+    "telement": {
+        "video_note": {
+            "pause": "Pause video message",
+            "play": "Play video message"
+        }
+    },
     "terms": {
         "column_document": "Document",
         "column_service": "Service",

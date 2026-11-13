@@ -1,0 +1,159 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`VideoNoteBodyView > matches snapshot for error story 1`] = `
+<div>
+  <span
+    class="VideoNoteBodyView-module_error"
+  >
+    <svg
+      fill="currentColor"
+      height="16"
+      viewBox="0 0 24 24"
+      width="16"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M6 22q-.824 0-1.412-.587A1.93 1.93 0 0 1 4 20V4q0-.824.588-1.412A1.93 1.93 0 0 1 6 2h7.175a1.98 1.98 0 0 1 1.4.575l4.85 4.85q.275.275.425.638.15.361.15.762v3.516A6 6 0 0 0 18 12V9h-4a.97.97 0 0 1-.713-.287A.97.97 0 0 1 13 8V4H6v16h6.341c.264.745.67 1.423 1.187 2z"
+      />
+      <path
+        d="M18 14a1 1 0 0 1 1 1v3a1 1 0 1 1-2 0v-3a1 1 0 0 1 1-1m-1 7a1 1 0 1 1 2 0 1 1 0 0 1-2 0"
+      />
+    </svg>
+    Error decrypting video
+  </span>
+</div>
+`;
+
+exports[`VideoNoteBodyView > matches snapshot for hidden story 1`] = `
+<div>
+  <div
+    class="VideoNoteBodyView-module_circle"
+    style="width: 240px; height: 240px;"
+  >
+    <button
+      class="VideoNoteBodyView-module_hiddenButton"
+      type="button"
+    >
+      <svg
+        fill="currentColor"
+        height="24"
+        viewBox="0 0 24 24"
+        width="24"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M12 16q1.875 0 3.188-1.312Q16.5 13.375 16.5 11.5t-1.312-3.187T12 7 8.813 8.313 7.5 11.5t1.313 3.188T12 16m0-1.8q-1.125 0-1.912-.787A2.6 2.6 0 0 1 9.3 11.5q0-1.125.787-1.912A2.6 2.6 0 0 1 12 8.8q1.125 0 1.912.787.788.788.788 1.913t-.787 1.912A2.6 2.6 0 0 1 12 14.2m0 4.8q-3.475 0-6.35-1.837Q2.775 15.324 1.3 12.2a.8.8 0 0 1-.1-.312 3 3 0 0 1 0-.775.8.8 0 0 1 .1-.313q1.475-3.125 4.35-4.962Q8.525 4 12 4t6.35 1.838T22.7 10.8a.8.8 0 0 1 .1.313 3 3 0 0 1 0 .774.8.8 0 0 1-.1.313q-1.475 3.125-4.35 4.963Q15.475 19 12 19m0-2a9.54 9.54 0 0 0 5.188-1.488A9.77 9.77 0 0 0 20.8 11.5a9.77 9.77 0 0 0-3.613-4.012A9.54 9.54 0 0 0 12 6a9.55 9.55 0 0 0-5.187 1.487A9.77 9.77 0 0 0 3.2 11.5a9.77 9.77 0 0 0 3.613 4.012A9.54 9.54 0 0 0 12 17"
+        />
+      </svg>
+      <span>
+        Show video
+      </span>
+    </button>
+  </div>
+</div>
+`;
+
+exports[`VideoNoteBodyView > matches snapshot for paused story 1`] = `
+<div>
+  <div
+    class="VideoNoteBodyView-module_circle"
+    style="width: 240px; height: 240px;"
+  >
+    <video
+      class="VideoNoteBodyView-module_video"
+      crossorigin="anonymous"
+      playsinline=""
+      poster="/static/element.png"
+      preload="metadata"
+      src="/static/videoBodyDemo.webm"
+    />
+    <svg
+      aria-hidden="true"
+      class="VideoNoteBodyView-module_progress"
+      viewBox="0 0 100 100"
+    >
+      <circle
+        class="VideoNoteBodyView-module_progressTrack"
+        cx="50"
+        cy="50"
+        r="48"
+      />
+      <circle
+        class="VideoNoteBodyView-module_progressValue"
+        cx="50"
+        cy="50"
+        pathLength="1"
+        r="48"
+        stroke-dasharray="1"
+        stroke-dashoffset="0.6"
+      />
+    </svg>
+    <svg
+      aria-hidden="true"
+      class="VideoNoteBodyView-module_pausedIcon"
+      fill="currentColor"
+      height="48"
+      viewBox="0 0 24 24"
+      width="48"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="m8.98 4.677 9.921 5.58c1.36.764 1.36 2.722 0 3.486l-9.92 5.58C7.647 20.073 6 19.11 6 17.58V6.42c0-1.53 1.647-2.493 2.98-1.743"
+      />
+    </svg>
+    <button
+      aria-label="Play video message"
+      aria-pressed="false"
+      class="VideoNoteBodyView-module_toggle"
+      type="button"
+    />
+    <span
+      class="VideoNoteBodyView-module_badge"
+    >
+      0:02
+    </span>
+  </div>
+</div>
+`;
+
+exports[`VideoNoteBodyView > matches snapshot for preview story 1`] = `
+<div>
+  <div
+    class="VideoNoteBodyView-module_circle"
+    style="width: 240px; height: 240px;"
+  >
+    <video
+      class="VideoNoteBodyView-module_video"
+      crossorigin="anonymous"
+      loop=""
+      playsinline=""
+      poster="/static/element.png"
+      preload="metadata"
+      src="/static/videoBodyDemo.webm"
+    />
+    <button
+      aria-label="Play video message"
+      aria-pressed="false"
+      class="VideoNoteBodyView-module_toggle"
+      type="button"
+    />
+    <span
+      class="VideoNoteBodyView-module_badge"
+    >
+      0:05
+      <svg
+        aria-hidden="true"
+        fill="currentColor"
+        height="12"
+        viewBox="0 0 24 24"
+        width="12"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M3.5 3.5a1 1 0 1 0-1.414 1.414L5.172 8H5a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h2l3.293 3.293c.63.63 1.707.184 1.707-.707v-3.758l7.086 7.086A1 1 0 0 0 20.5 20.5l-2.136-2.136.003-.003-1.414-1.414-.003.003-1.414-1.414.003-.003-1.415-1.415-.002.003L12 12v-.006L7.503 7.497 7.5 7.5zm11.496 8.662 1.661 1.66c.222-.564.343-1.18.343-1.822 0-1.38-.56-2.632-1.464-3.536a1 1 0 1 0-1.414 1.414 3 3 0 0 1 .874 2.284m3.164 3.165 1.462 1.46A8.96 8.96 0 0 0 21 12a8.98 8.98 0 0 0-2.636-6.364A1 1 0 0 0 16.95 7.05 6.98 6.98 0 0 1 19 12a7 7 0 0 1-.84 3.326M8.917 6.083 12 9.166V5.414c0-.89-1.077-1.337-1.707-.707z"
+        />
+      </svg>
+    </span>
+  </div>
+</div>
+`;
