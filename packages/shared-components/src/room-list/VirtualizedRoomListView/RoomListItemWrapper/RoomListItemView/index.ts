@@ -13,8 +13,6 @@ export type {
     RoomListItemViewActions,
     RoomListItemViewProps,
 } from "./RoomListItemView";
-export { RoomListItemContent } from "./RoomListItemContent";
-export type { RoomListItemContentProps } from "./RoomListItemContent";
 export { RoomListItemNotificationMenu } from "./RoomListItemNotificationMenu";
 export type { RoomListItemNotificationMenuProps } from "./RoomListItemNotificationMenu";
 export { RoomListItemMoreOptionsMenu, MoreOptionContent } from "./RoomListItemMoreOptionsMenu";

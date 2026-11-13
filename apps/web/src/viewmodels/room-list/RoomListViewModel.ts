@@ -33,6 +33,9 @@ import { type RoomViewStore } from "../../stores/RoomViewStore.tsx";
 import { UPDATE_EVENT } from "../../stores/AsyncStore";
 import { EffectiveMembership, getEffectiveMembership } from "../../utils/membership";
 import { isPinnedRoom } from "../../telement/room-list/isPinnedRoom";
+import { getNextMidnight } from "../../telement/room-list/formatChatListTimestamp";
+import SettingsStore from "../../settings/SettingsStore";
+import { USER_TIMEZONE_KEY } from "../../TimezoneHandler";
 
 interface RoomListViewModelProps {
     client: MatrixClient;
@@ -102,6 +105,15 @@ export class RoomListViewModel
      */
     private previewRoom?: Room;
 
+    /**
+     * The one timer that formats the times of the rooms in view again when one of them changes: at midnight, or
+     * earlier for a time from yesterday that turns into a weekday. See {@link scheduleTimestampRefresh}.
+     */
+    private timestampTimer?: number;
+
+    /** When {@link timestampTimer} fires. */
+    private timestampRefreshAt = Infinity;
+
     public constructor(props: RoomListViewModelProps) {
         const activeSpace = props.spaceStore.activeSpaceRoom;
 
@@ -165,6 +177,39 @@ export class RoomListViewModel
 
         // A room may already be open when the list is created
         this.onRoomViewStoreUpdate();
+
+        this.scheduleTimestampRefresh();
+        this.disposables.track(() => window.clearTimeout(this.timestampTimer));
+        // The times follow the user's 12-hour and time zone settings
+        const settingWatchers = [
+            SettingsStore.watchSetting("showTwelveHourTimestamps", null, this.refreshTimestamps),
+            SettingsStore.watchSetting(USER_TIMEZONE_KEY, null, this.refreshTimestamps),
+        ];
+        this.disposables.track(() => settingWatchers.forEach((watcher) => SettingsStore.unwatchSetting(watcher)));
+    }
+
+    /**
+     * Format the times of the rooms in view again, and wait for the next time one of them changes.
+     */
+    private readonly refreshTimestamps = (): void => {
+        for (const viewModel of this.roomItemViewModels.values()) viewModel.refreshTimestamp();
+        this.scheduleTimestampRefresh();
+    };
+
+    /**
+     * Set {@link timestampTimer} for `at`, by default the next midnight or the earlier change of a room in view.
+     */
+    private scheduleTimestampRefresh(at?: number): void {
+        if (at === undefined) {
+            at = getNextMidnight(Date.now());
+            for (const viewModel of this.roomItemViewModels.values()) {
+                const expiry = viewModel.timestampExpiry;
+                if (expiry !== undefined && expiry < at) at = expiry;
+            }
+        }
+        window.clearTimeout(this.timestampTimer);
+        this.timestampRefreshAt = at;
+        this.timestampTimer = window.setTimeout(this.refreshTimestamps, at - Date.now());
     }
 
     private readonly onRoomViewStoreUpdate = (): void => {
@@ -332,6 +377,11 @@ export class RoomListViewModel
             });
 
             this.roomItemViewModels.set(roomId, viewModel);
+
+            const timestampExpiry = viewModel.timestampExpiry;
+            if (timestampExpiry !== undefined && timestampExpiry < this.timestampRefreshAt) {
+                this.scheduleTimestampRefresh(timestampExpiry);
+            }
         }
 
         // Return the view model - the view will call useViewModel() on it

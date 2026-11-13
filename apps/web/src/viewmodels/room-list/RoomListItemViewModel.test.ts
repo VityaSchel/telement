@@ -19,10 +19,11 @@ import {
     Room,
     RoomEvent,
     PendingEventOrdering,
-    type RoomMember,
+    RoomMember,
+    RoomMemberEvent,
 } from "matrix-js-sdk/src/matrix";
 import { CallType } from "matrix-js-sdk/src/webrtc/call";
-import { createTestClient, flushPromises } from "test-utils";
+import { createTestClient, flushPromises, mkMessage } from "test-utils";
 
 import { RoomNotificationState } from "../../stores/notifications/RoomNotificationState";
 import { RoomNotificationStateStore } from "../../stores/notifications/RoomNotificationStateStore";
@@ -43,11 +44,21 @@ import { RoomNotifState } from "../../RoomNotifs";
 import { NotificationLevel } from "../../stores/notifications/NotificationLevel";
 import { countUnreadMessages } from "../../telement/room-list/countUnreadMessages";
 import { MARKED_UNREAD_TYPE_STABLE } from "../../utils/notifications";
+import { MatrixClientPeg } from "../../MatrixClientPeg";
+import { usersTypingApartFromMeAndIgnored } from "../../WhoIsTyping";
 
 vi.mock("./utils", () => ({
     hasAccessToOptionsMenu: vi.fn().mockReturnValue(true),
     hasAccessToNotificationMenu: vi.fn().mockReturnValue(true),
 }));
+
+vi.mock("../../WhoIsTyping", async (importOriginal) => {
+    const whoIsTyping = await importOriginal<typeof import("../../WhoIsTyping")>();
+    return {
+        ...whoIsTyping,
+        usersTypingApartFromMeAndIgnored: vi.fn(whoIsTyping.usersTypingApartFromMeAndIgnored),
+    };
+});
 
 vi.mock("../../telement/room-list/countUnreadMessages", () => ({
     countUnreadMessages: vi.fn().mockReturnValue({ count: 0, mentionsMe: false }),
@@ -74,8 +85,16 @@ describe("RoomListItemViewModel", () => {
     let notificationState: RoomNotificationState;
     let viewModel: RoomListItemViewModel;
 
+    /** A preview of the user's own message, which the room list shows as it is. */
+    const previewOf = (text: string): MessagePreview => ({
+        event: mkMessage({ event: true, room: room.roomId, user: matrixClient.getSafeUserId(), msg: text }),
+        text,
+        isThreadReply: false,
+    });
+
     beforeEach(() => {
         matrixClient = createTestClient();
+        vi.spyOn(MatrixClientPeg, "safeGet").mockReturnValue(matrixClient);
         room = new Room("!room:server", matrixClient, matrixClient.getSafeUserId(), {
             pendingEventOrdering: PendingEventOrdering.Detached,
         });
@@ -117,9 +136,7 @@ describe("RoomListItemViewModel", () => {
         });
 
         it("should load message preview", async () => {
-            vi.spyOn(MessagePreviewStore.instance, "getPreviewForRoom").mockResolvedValue({
-                text: "Hello world!",
-            } as MessagePreview);
+            vi.spyOn(MessagePreviewStore.instance, "getPreviewForRoom").mockResolvedValue(previewOf("Hello world!"));
 
             viewModel = new RoomListItemViewModel({ room, client: matrixClient });
 
@@ -155,16 +172,6 @@ describe("RoomListItemViewModel", () => {
 
             await flushPromises();
             expect(viewModel.getSnapshot().notification.count).toBe(3);
-        });
-
-        it("should show bold text when has notifications", async () => {
-            vi.spyOn(notificationState, "hasAnyNotificationOrActivity", "get").mockReturnValue(true);
-
-            viewModel = new RoomListItemViewModel({ room, client: matrixClient });
-
-            await flushPromises();
-
-            expect(viewModel.getSnapshot().isBold).toBe(true);
         });
 
         it("should show mention badge", async () => {
@@ -222,8 +229,6 @@ describe("RoomListItemViewModel", () => {
                     isMention: false,
                 }),
             );
-            // Like Telegram, a muted room isn't emphasised
-            expect(snapshot.isBold).toBe(false);
             expect(snapshot.canMarkAsRead).toBe(true);
             expect(snapshot.canMarkAsUnread).toBe(false);
         });
@@ -245,7 +250,6 @@ describe("RoomListItemViewModel", () => {
                     count: 3,
                 }),
             );
-            expect(snapshot.isBold).toBe(false);
             expect(snapshot.canMarkAsRead).toBe(true);
         });
 
@@ -379,9 +383,7 @@ describe("RoomListItemViewModel", () => {
 
     describe("Message preview", () => {
         it("should update message preview when store emits update", async () => {
-            vi.spyOn(MessagePreviewStore.instance, "getPreviewForRoom").mockResolvedValue({
-                text: "Initial message",
-            } as MessagePreview);
+            vi.spyOn(MessagePreviewStore.instance, "getPreviewForRoom").mockResolvedValue(previewOf("Initial message"));
 
             viewModel = new RoomListItemViewModel({ room, client: matrixClient });
 
@@ -389,14 +391,202 @@ describe("RoomListItemViewModel", () => {
             expect(viewModel.getSnapshot().messagePreview).toBe("Initial message");
 
             // Update preview
-            vi.spyOn(MessagePreviewStore.instance, "getPreviewForRoom").mockResolvedValue({
-                text: "Updated message",
-            } as MessagePreview);
+            vi.spyOn(MessagePreviewStore.instance, "getPreviewForRoom").mockResolvedValue(previewOf("Updated message"));
 
             MessagePreviewStore.instance.emit(MessagePreviewStore.getPreviewChangedEventName(room));
 
             await flushPromises();
             expect(viewModel.getSnapshot().messagePreview).toBe("Updated message");
+        });
+
+        it("should show the sender of a message in a group room apart from its text", async () => {
+            const event = mkMessage({
+                event: true,
+                room: room.roomId,
+                user: "@bob:server",
+                msg: "Has anyone tried it?",
+            });
+            Object.defineProperty(event, "sender", { value: { name: "Bob" } });
+            vi.spyOn(MessagePreviewStore.instance, "getPreviewForRoom").mockResolvedValue({
+                event,
+                text: "Bob: Has anyone tried it?",
+                isThreadReply: false,
+            });
+
+            viewModel = new RoomListItemViewModel({ room, client: matrixClient });
+            await flushPromises();
+
+            expect(viewModel.getSnapshot()).toEqual(
+                expect.objectContaining({ messagePreview: "Has anyone tried it?", messagePreviewSender: "Bob" }),
+            );
+        });
+
+        it("should keep the sender when the room's notifications change", async () => {
+            const event = mkMessage({ event: true, room: room.roomId, user: matrixClient.getSafeUserId(), msg: "Hi" });
+            vi.spyOn(MessagePreviewStore.instance, "getPreviewForRoom").mockResolvedValue({
+                event,
+                text: "Hi",
+                isThreadReply: false,
+            });
+            viewModel = new RoomListItemViewModel({ room, client: matrixClient });
+            await flushPromises();
+            expect(viewModel.getSnapshot().messagePreviewSender).toBe("You");
+
+            notificationState.emit(NotificationStateEvents.Update);
+
+            expect(viewModel.getSnapshot().messagePreviewSender).toBe("You");
+        });
+    });
+
+    describe("Typing", () => {
+        const setTyping = (userId: string, typing: boolean, roomId = room.roomId): void => {
+            const member = new RoomMember(roomId, userId);
+            member.name = "Alice";
+            member.typing = typing;
+            if (roomId === room.roomId) room.currentState.members[userId] = member;
+            matrixClient.emit(RoomMemberEvent.Typing, new MatrixEvent({ type: "m.typing" }), member);
+        };
+
+        it("should show who is typing in place of the message preview, until they stop", () => {
+            viewModel = new RoomListItemViewModel({ room, client: matrixClient });
+            expect(viewModel.getSnapshot().typing).toBeUndefined();
+
+            setTyping("@alice:server", true);
+            expect(viewModel.getSnapshot().typing).toBe("Alice is typing …");
+
+            setTyping("@alice:server", false);
+            expect(viewModel.getSnapshot().typing).toBeUndefined();
+        });
+
+        it("should not show the user's own typing nor typing in other rooms", () => {
+            viewModel = new RoomListItemViewModel({ room, client: matrixClient });
+
+            setTyping(matrixClient.getSafeUserId(), true);
+            setTyping("@alice:server", true, "!other:server");
+
+            expect(viewModel.getSnapshot().typing).toBeUndefined();
+        });
+
+        it("should keep who is typing without going through the members again when the room's notifications change", () => {
+            viewModel = new RoomListItemViewModel({ room, client: matrixClient });
+            setTyping("@alice:server", true);
+            vi.mocked(usersTypingApartFromMeAndIgnored).mockClear();
+
+            vi.spyOn(notificationState, "count", "get").mockReturnValue(3);
+            notificationState.emit(NotificationStateEvents.Update);
+
+            expect(viewModel.getSnapshot().notification.count).toBe(3);
+            expect(viewModel.getSnapshot().typing).toBe("Alice is typing …");
+            expect(usersTypingApartFromMeAndIgnored).not.toHaveBeenCalled();
+        });
+
+        it("should stop listening for typing once disposed", () => {
+            viewModel = new RoomListItemViewModel({ room, client: matrixClient });
+            viewModel.dispose();
+
+            setTyping("@alice:server", true);
+
+            expect(viewModel.getSnapshot().typing).toBeUndefined();
+        });
+    });
+
+    describe("Time", () => {
+        // Friday 2026-11-13, 12:00 UTC, the test setup's time zone
+        const NOW = Date.UTC(2026, 10, 13, 12);
+
+        beforeEach(() => {
+            vi.useFakeTimers({ now: NOW });
+        });
+
+        afterEach(() => {
+            vi.useRealTimers();
+        });
+
+        it("should show when the room was last active, as the recency sort sees it", () => {
+            vi.spyOn(room, "getBumpStamp").mockReturnValue(Date.UTC(2026, 10, 13, 8, 5));
+
+            viewModel = new RoomListItemViewModel({ room, client: matrixClient });
+
+            expect(viewModel.getSnapshot()).toEqual(
+                expect.objectContaining({
+                    timestamp: "08:05",
+                    timestampFull: expect.stringContaining("2026"),
+                    timestampIso: "2026-11-13T08:05:00.000Z",
+                }),
+            );
+        });
+
+        it("should show no time for a room without activity", () => {
+            viewModel = new RoomListItemViewModel({ room, client: matrixClient });
+            expect(viewModel.getSnapshot().timestamp).toBeUndefined();
+        });
+
+        it("should show the time in 12 hours when the user chose it", () => {
+            vi.spyOn(room, "getBumpStamp").mockReturnValue(Date.UTC(2026, 10, 13, 15, 5));
+            vi.spyOn(SettingsStore, "getValue").mockImplementation(
+                (setting: string) => setting === "showTwelveHourTimestamps",
+            );
+
+            viewModel = new RoomListItemViewModel({ room, client: matrixClient });
+
+            expect(viewModel.getSnapshot().timestamp).toMatch(/^3:05\s?pm$/i);
+        });
+
+        it("should show the new time when a message arrives", async () => {
+            const bumpStamp = vi.spyOn(room, "getBumpStamp").mockReturnValue(Date.UTC(2026, 10, 9, 10));
+            viewModel = new RoomListItemViewModel({ room, client: matrixClient });
+            expect(viewModel.getSnapshot().timestamp).toBe("Mon");
+
+            bumpStamp.mockReturnValue(Date.UTC(2026, 10, 13, 11, 59));
+            await room.addLiveEvents(
+                [
+                    new MatrixEvent({
+                        type: "m.room.message",
+                        room_id: room.roomId,
+                        sender: "@alice:server",
+                        event_id: "$new",
+                        content: { body: "Hello" },
+                    }),
+                ],
+                { addToState: false },
+            );
+
+            expect(viewModel.getSnapshot().timestamp).toBe("11:59");
+        });
+
+        it("should not move the time for older events loaded by scrolling back, like the room list's sort", () => {
+            const bumpStamp = vi.spyOn(room, "getBumpStamp").mockReturnValue(Date.UTC(2026, 10, 9, 10));
+            viewModel = new RoomListItemViewModel({ room, client: matrixClient });
+
+            bumpStamp.mockReturnValue(Date.UTC(2026, 10, 13, 11, 59));
+            const event = new MatrixEvent({ type: "m.room.message", room_id: room.roomId, event_id: "$old" });
+            room.emit(RoomEvent.Timeline, event, room, true, false, {
+                timeline: room.getLiveTimeline(),
+                liveEvent: false,
+            });
+
+            expect(viewModel.getSnapshot().timestamp).toBe("Mon");
+        });
+
+        it("should format the time again when asked, as days pass", () => {
+            vi.spyOn(room, "getBumpStamp").mockReturnValue(Date.UTC(2026, 10, 13, 8, 5));
+            viewModel = new RoomListItemViewModel({ room, client: matrixClient });
+
+            vi.setSystemTime(Date.UTC(2026, 10, 14, 6));
+            viewModel.refreshTimestamp();
+            expect(viewModel.getSnapshot().timestamp).toBe("Fri");
+        });
+
+        it("should tell when a time from yesterday turns into a weekday", () => {
+            const yesterdayEvening = Date.UTC(2026, 10, 12, 23, 30);
+            const bumpStamp = vi.spyOn(room, "getBumpStamp").mockReturnValue(yesterdayEvening);
+            viewModel = new RoomListItemViewModel({ room, client: matrixClient });
+
+            expect(viewModel.getSnapshot().timestamp).toBe("23:30");
+            expect(viewModel.timestampExpiry).toBe(yesterdayEvening + 20 * 60 * 60 * 1000);
+
+            bumpStamp.mockReturnValue(Date.UTC(2026, 10, 13, 8, 5));
+            expect(viewModel.timestampExpiry).toBeUndefined();
         });
     });
 

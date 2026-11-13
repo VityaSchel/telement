@@ -20,6 +20,9 @@ import { Action } from "../../dispatcher/actions";
 import { SDKContextClass } from "../../contexts/SDKContextClass";
 import DMRoomMap from "../../utils/DMRoomMap";
 import { RoomListViewModel } from "./RoomListViewModel";
+import { type RoomListItemViewModel } from "./RoomListItemViewModel";
+import SettingsStore from "../../settings/SettingsStore";
+import { SettingLevel } from "../../settings/SettingLevel";
 import { PreviewRoomListItemViewModel } from "./PreviewRoomListItemViewModel";
 import { type RoomViewStore } from "../../stores/RoomViewStore";
 import { UPDATE_EVENT } from "../../stores/AsyncStore";
@@ -1106,6 +1109,91 @@ describe("RoomListViewModel", () => {
                     }),
                 ),
             );
+        });
+    });
+
+    describe("Times", () => {
+        // Friday 2026-11-13, 12:00 UTC, the test setup's time zone
+        const NOW = Date.UTC(2026, 10, 13, 12);
+        const HOUR = 60 * 60 * 1000;
+
+        beforeEach(() => {
+            vi.useFakeTimers({ now: NOW });
+        });
+
+        afterEach(() => {
+            vi.useRealTimers();
+        });
+
+        const createViewModel = (): RoomListViewModel =>
+            new RoomListViewModel({
+                client: matrixClient,
+                spaceStore: SDKContextClass.instance.spaceStore,
+                roomViewStore: SDKContextClass.instance.roomViewStore,
+            });
+
+        it("should format the times of the rooms in view again at every midnight", () => {
+            viewModel = createViewModel();
+            const refresh = vi.spyOn(
+                viewModel.getRoomItemViewModel("!room1:server") as RoomListItemViewModel,
+                "refreshTimestamp",
+            );
+
+            vi.advanceTimersByTime(12 * HOUR - 1);
+            expect(refresh).not.toHaveBeenCalled();
+            vi.advanceTimersByTime(1);
+            expect(refresh).toHaveBeenCalledTimes(1);
+            vi.advanceTimersByTime(24 * HOUR);
+            expect(refresh).toHaveBeenCalledTimes(2);
+        });
+
+        it("should format them again before midnight when a time from yesterday turns into a weekday", () => {
+            // Shown as a time until 20 hours later, 19:30 today
+            vi.mocked(room2.getBumpStamp).mockReturnValue(Date.UTC(2026, 10, 12, 23, 30));
+            viewModel = createViewModel();
+            const refresh = vi.spyOn(
+                viewModel.getRoomItemViewModel("!room1:server") as RoomListItemViewModel,
+                "refreshTimestamp",
+            );
+            viewModel.getRoomItemViewModel("!room2:server");
+
+            vi.advanceTimersByTime(7.5 * HOUR - 1);
+            expect(refresh).not.toHaveBeenCalled();
+            vi.advanceTimersByTime(1);
+            expect(refresh).toHaveBeenCalledTimes(1);
+            // The time has turned into a weekday, so the next change is at midnight
+            vi.advanceTimersByTime(4.5 * HOUR - 1);
+            expect(refresh).toHaveBeenCalledTimes(1);
+            vi.advanceTimersByTime(1);
+            expect(refresh).toHaveBeenCalledTimes(2);
+        });
+
+        it.each(["showTwelveHourTimestamps", "userTimezone"] as const)(
+            "should format them again when the %s setting changes",
+            (setting) => {
+                const watchSetting = vi.spyOn(SettingsStore, "watchSetting");
+                viewModel = createViewModel();
+                const refresh = vi.spyOn(
+                    viewModel.getRoomItemViewModel("!room1:server") as RoomListItemViewModel,
+                    "refreshTimestamp",
+                );
+
+                const [, , onChange] = watchSetting.mock.calls.find(([name]) => name === setting)!;
+                onChange(setting, null, SettingLevel.DEVICE, true, true);
+
+                expect(refresh).toHaveBeenCalledTimes(1);
+            },
+        );
+
+        it("should stop the timer and the setting watchers when disposed", () => {
+            const unwatchSetting = vi.spyOn(SettingsStore, "unwatchSetting");
+            viewModel = createViewModel();
+            const timers = vi.getTimerCount();
+
+            viewModel.dispose();
+
+            expect(vi.getTimerCount()).toBe(timers - 1);
+            expect(unwatchSetting).toHaveBeenCalledTimes(2);
         });
     });
 

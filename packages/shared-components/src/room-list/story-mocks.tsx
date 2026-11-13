@@ -23,8 +23,8 @@ export const mockAvatar = (name: string): React.ReactElement => (
         role="img"
         aria-label={`${name} avatar`}
         style={{
-            width: "32px",
-            height: "32px",
+            width: "48px",
+            height: "48px",
             borderRadius: "50%",
             backgroundColor: "#0B7F67",
             display: "flex",
@@ -32,7 +32,7 @@ export const mockAvatar = (name: string): React.ReactElement => (
             justifyContent: "center",
             color: "white",
             fontWeight: "bold",
-            fontSize: "12px",
+            fontSize: "18px",
         }}
     >
         {name.substring(0, 2).toUpperCase()}
@@ -80,8 +80,9 @@ export const createMockRoomSnapshot = (id: string, name: string, index: number):
     id,
     room: { name },
     name,
-    isBold: index % 3 === 0,
     messagePreview: index % 2 === 0 ? `Last message in ${name}` : undefined,
+    messagePreviewSender: index % 4 === 0 ? "Alice" : undefined,
+    timestamp: `${12 - (index % 12)}:${String((index * 7) % 60).padStart(2, "0")}`,
     notification: {
         hasAnyNotificationOrActivity: index % 5 === 0,
         isUnsentMessage: false,

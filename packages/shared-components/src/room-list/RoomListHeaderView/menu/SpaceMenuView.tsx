@@ -50,9 +50,9 @@ export function SpaceMenuView({ vm }: SpaceMenuViewProps): JSX.Element {
                 <IconButton
                     className={styles.button}
                     aria-label={_t("room_list|open_space_menu")}
-                    // 24px icon with a 20px icon
-                    size="24px"
-                    style={{ padding: "2px" }}
+                    // A 36px control with a 24px icon, like the room header's
+                    size="var(--tl-control-size)"
+                    style={{ padding: "var(--cpd-space-1-5x)" }}
                 >
                     <ChevronDownIcon />
                 </IconButton>

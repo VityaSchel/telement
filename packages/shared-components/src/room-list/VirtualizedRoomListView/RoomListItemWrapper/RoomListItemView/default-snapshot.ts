@@ -14,8 +14,11 @@ export const defaultSnapshot: RoomListItemViewSnapshot = {
     id: "!room:server",
     room: mockRoom,
     name: "General",
-    isBold: false,
-    messagePreview: "Alice: Hey everyone!",
+    messagePreview: "Hey everyone!",
+    messagePreviewSender: "Alice",
+    timestamp: "12:41",
+    timestampFull: "Fri, Nov 13, 2026, 12:41:08 PM",
+    timestampIso: "2026-11-13T12:41:08.000Z",
     notification: {
         hasAnyNotificationOrActivity: false,
         isUnsentMessage: false,

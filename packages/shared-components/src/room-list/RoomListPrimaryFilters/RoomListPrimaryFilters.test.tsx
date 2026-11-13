@@ -5,6 +5,9 @@
  * Please see LICENSE files in the repository root for full details.
  */
 
+import "@vector-im/compound-design-tokens/assets/web/css/compound-design-tokens.css";
+import "@vector-im/compound-web/dist/style.css";
+import "../../telement/tokens.css";
 import React from "react";
 import { act, render, screen } from "@test-utils";
 import userEvent from "@testing-library/user-event";

@@ -6,7 +6,8 @@
  */
 
 .roomListPrimaryFilters {
-    padding: 0 var(--cpd-space-4x) var(--cpd-space-5x) var(--cpd-space-3x);
+    /* On the content edge of the header, the search field and the room list items' avatars */
+    padding: 0 var(--cpd-space-3x) var(--cpd-space-5x);
 }
 
 /* Hide filters that are wrapping when collapsed */
@@ -21,6 +22,26 @@
     height: 100%;
     flex: 1;
     user-select: none; /* currently supported by Chrome, Edge, Opera and Firefox */
+}
+
+/*
+ * The filters are 28px chips, smaller than the 36px search field and header buttons above them, with Compound's 8px
+ * inset, so four fit at the room list's default width
+ */
+.list > * {
+    box-sizing: border-box;
+    block-size: var(--cpd-space-7x);
+}
+
+/*
+ * The label is trimmed to its cap height and the button centers that line, so the capitals sit in the middle of the
+ * chip; Compound's flex layout puts them 0.75px high. Filters hidden for wrapping keep their display: none.
+ */
+.list > :not(:global(.wrapping)) {
+    display: block;
+    padding-block: 0;
+    line-height: 1cap;
+    text-box: trim-both cap alphabetic;
 }
 
 /* IconButton styles for chevron */

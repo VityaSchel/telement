@@ -37,9 +37,13 @@ export function ComposeMenuView({ vm }: ComposeMenuViewProps): JSX.Element {
     const [open, setOpen] = useState(false);
     const { canCreateRoom, canCreateVideoRoom } = useViewModel(vm);
 
-    // 28px button with a 20px icon
+    // A 36px control with a 24px icon, like the room header's
     const button = (
-        <IconButton size="28px" style={{ padding: "4px" }} tooltip={_t("action|new_conversation")}>
+        <IconButton
+            size="var(--tl-control-size)"
+            style={{ padding: "var(--cpd-space-1-5x)" }}
+            tooltip={_t("action|new_conversation")}
+        >
             <PlusIcon color="var(--cpd-color-icon-secondary)" aria-hidden />
         </IconButton>
     );

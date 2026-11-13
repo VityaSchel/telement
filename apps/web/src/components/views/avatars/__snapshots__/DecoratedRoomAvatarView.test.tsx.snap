@@ -9,17 +9,17 @@ exports[`<DecoratedRoomAvatarView /> > should not render a decoration 1`] = `
     data-testid="avatar-img"
     data-type="round"
     role="img"
-    style="--cpd-avatar-size: 32px;"
+    style="--cpd-avatar-size: 48px;"
   >
     <img
       alt=""
       class="_image"
       data-type="round"
-      height="32px"
+      height="48px"
       loading="lazy"
       referrerpolicy="no-referrer"
       src="http://this.is.a.url/avatar.url/room.png"
-      width="32px"
+      width="48px"
     />
   </span>
 </DocumentFragment>
@@ -38,17 +38,17 @@ exports[`<DecoratedRoomAvatarView /> > should render a low priority room decorat
       data-testid="avatar-img"
       data-type="round"
       role="img"
-      style="--cpd-avatar-size: 32px;"
+      style="--cpd-avatar-size: 48px;"
     >
       <img
         alt=""
         class="_image"
         data-type="round"
-        height="32px"
+        height="48px"
         loading="lazy"
         referrerpolicy="no-referrer"
         src="http://this.is.a.url/avatar.url/room.png"
-        width="32px"
+        width="48px"
       />
     </span>
     <svg
@@ -83,17 +83,17 @@ exports[`<DecoratedRoomAvatarView /> > should render a public room decoration 1`
       data-testid="avatar-img"
       data-type="round"
       role="img"
-      style="--cpd-avatar-size: 32px;"
+      style="--cpd-avatar-size: 48px;"
     >
       <img
         alt=""
         class="_image"
         data-type="round"
-        height="32px"
+        height="48px"
         loading="lazy"
         referrerpolicy="no-referrer"
         src="http://this.is.a.url/avatar.url/room.png"
-        width="32px"
+        width="48px"
       />
     </span>
     <svg
@@ -128,17 +128,17 @@ exports[`<DecoratedRoomAvatarView /> > should render a video room decoration 1`]
       data-testid="avatar-img"
       data-type="round"
       role="img"
-      style="--cpd-avatar-size: 32px;"
+      style="--cpd-avatar-size: 48px;"
     >
       <img
         alt=""
         class="_image"
         data-type="round"
-        height="32px"
+        height="48px"
         loading="lazy"
         referrerpolicy="no-referrer"
         src="http://this.is.a.url/avatar.url/room.png"
-        width="32px"
+        width="48px"
       />
     </span>
     <svg
@@ -173,17 +173,17 @@ exports[`<DecoratedRoomAvatarView /> > should render the busy presence 1`] = `
       data-testid="avatar-img"
       data-type="round"
       role="img"
-      style="--cpd-avatar-size: 32px;"
+      style="--cpd-avatar-size: 48px;"
     >
       <img
         alt=""
         class="_image"
         data-type="round"
-        height="32px"
+        height="48px"
         loading="lazy"
         referrerpolicy="no-referrer"
         src="http://this.is.a.url/avatar.url/room.png"
-        width="32px"
+        width="48px"
       />
     </span>
     <svg
@@ -233,17 +233,17 @@ exports[`<DecoratedRoomAvatarView /> > should render the offline presence 1`] = 
       data-testid="avatar-img"
       data-type="round"
       role="img"
-      style="--cpd-avatar-size: 32px;"
+      style="--cpd-avatar-size: 48px;"
     >
       <img
         alt=""
         class="_image"
         data-type="round"
-        height="32px"
+        height="48px"
         loading="lazy"
         referrerpolicy="no-referrer"
         src="http://this.is.a.url/avatar.url/room.png"
-        width="32px"
+        width="48px"
       />
     </span>
     <svg
@@ -293,17 +293,17 @@ exports[`<DecoratedRoomAvatarView /> > should render the online presence 1`] = `
       data-testid="avatar-img"
       data-type="round"
       role="img"
-      style="--cpd-avatar-size: 32px;"
+      style="--cpd-avatar-size: 48px;"
     >
       <img
         alt=""
         class="_image"
         data-type="round"
-        height="32px"
+        height="48px"
         loading="lazy"
         referrerpolicy="no-referrer"
         src="http://this.is.a.url/avatar.url/room.png"
-        width="32px"
+        width="48px"
       />
     </span>
     <svg
@@ -351,17 +351,17 @@ exports[`<DecoratedRoomAvatarView /> > should render the unavailable presence 1`
       data-testid="avatar-img"
       data-type="round"
       role="img"
-      style="--cpd-avatar-size: 32px;"
+      style="--cpd-avatar-size: 48px;"
     >
       <img
         alt=""
         class="_image"
         data-type="round"
-        height="32px"
+        height="48px"
         loading="lazy"
         referrerpolicy="no-referrer"
         src="http://this.is.a.url/avatar.url/room.png"
-        width="32px"
+        width="48px"
       />
     </span>
     <svg

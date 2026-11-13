@@ -59,8 +59,8 @@ export interface VirtualizedRoomListViewProps {
     onKeyDown?: (e: React.KeyboardEvent<HTMLDivElement>) => void;
 }
 
-/** Height of a single room list item in pixels (44px item + 8px padding bottom) */
-const ROOM_LIST_ITEM_HEIGHT = 52;
+/** Height of a single room list item in pixels (a 64px plate inset 4px on every side) */
+const ROOM_LIST_ITEM_HEIGHT = 72;
 
 /**
  * Type for context used in ListView
@@ -260,8 +260,6 @@ export function VirtualizedRoomListView({ vm, renderAvatar, onKeyDown }: Virtual
                     onFocus={onFocus}
                     roomIndex={index}
                     roomCount={roomCount}
-                    isFirstItem={index === 0}
-                    isLastItem={index === roomCount - 1}
                 />
             );
         },

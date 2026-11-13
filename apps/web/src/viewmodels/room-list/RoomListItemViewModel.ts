@@ -12,7 +12,14 @@ import {
     type RoomListItemViewActions,
     type UserStatus,
 } from "@element-hq/web-shared-components";
-import { ClientEvent, EventType, KnownMembership, MatrixEventEvent, RoomEvent } from "matrix-js-sdk/src/matrix";
+import {
+    ClientEvent,
+    EventType,
+    KnownMembership,
+    MatrixEventEvent,
+    RoomEvent,
+    RoomMemberEvent,
+} from "matrix-js-sdk/src/matrix";
 import { CallType } from "matrix-js-sdk/src/webrtc/call";
 import { logger } from "matrix-js-sdk/src/logger";
 
@@ -40,6 +47,10 @@ import type { ViewRoomPayload } from "../../dispatcher/payloads/ViewRoomPayload"
 import { type Call, CallEvent } from "../../models/Call";
 import { fetchUserStatus } from "../../utils/userStatus";
 import { countUnreadMessages } from "../../telement/room-list/countUnreadMessages";
+import { type MessagePreviewParts, splitMessagePreview } from "../../telement/room-list/splitMessagePreview";
+import { formatChatListTimestamp, getChatListTimestampExpiry } from "../../telement/room-list/formatChatListTimestamp";
+import { getLastTimestamp } from "../../stores/room-list-v3/skip-list/sorters/utils/getLastTimestamp";
+import { usersTypingApartFromMeAndIgnored, whoIsTypingString } from "../../WhoIsTyping";
 
 interface RoomItemProps {
     room: Room;
@@ -70,7 +81,7 @@ export class RoomListItemViewModel
         // Get notification state first so we can generate a complete initial snapshot
         const notifState = RoomNotificationStateStore.instance.getRoomState(props.room);
         const initialItem = RoomListItemViewModel.generateItemSync(props.room, props.client, notifState);
-        super(props, initialItem);
+        super(props, { ...initialItem, typing: RoomListItemViewModel.getTyping(props.room) });
 
         this.notifState = notifState;
 
@@ -99,11 +110,15 @@ export class RoomListItemViewModel
         this.disposables.trackListener(props.room, RoomEvent.Redaction, this.onMutedRoomChanged);
         this.disposables.trackListener(props.room, RoomEvent.Receipt, this.onMutedRoomChanged);
         this.disposables.trackListener(props.room, RoomEvent.AccountData, this.onMutedRoomChanged);
+        // An event can move the room's last activity without changing its preview or notifications
+        this.disposables.trackListener(props.room, RoomEvent.Timeline, this.onTimeline as (...args: unknown[]) => void);
         props.client.on(MatrixEventEvent.Decrypted, this.onEventDecrypted);
         props.client.on(ClientEvent.AccountData, this.onClientAccountData);
+        props.client.on(RoomMemberEvent.Typing, this.onTyping);
         this.disposables.track(() => {
             props.client.off(MatrixEventEvent.Decrypted, this.onEventDecrypted);
             props.client.off(ClientEvent.AccountData, this.onClientAccountData);
+            props.client.off(RoomMemberEvent.Typing, this.onTyping);
         });
 
         // Load message preview asynchronously (sync data is already complete)
@@ -202,8 +217,40 @@ export class RoomListItemViewModel
     };
 
     /**
+     * Like the room list store, which sorts by the same time, only a new event in the room's main timeline moves it:
+     * not older events loaded by scrolling back, nor thread replies.
+     */
+    private onTimeline: ClientEventHandlerMap[RoomEvent.Timeline] = (event, room, toStartOfTimeline, removed, data) => {
+        if (data.liveEvent && data.timeline.getTimelineSet() === this.props.room.getUnfilteredTimelineSet()) {
+            this.refreshTimestamp();
+        }
+    };
+
+    private onTyping = (event: MatrixEvent, member: RoomMember): void => {
+        if (member.roomId === this.props.room.roomId) {
+            this.snapshot.merge({ typing: RoomListItemViewModel.getTyping(this.props.room) });
+        }
+    };
+
+    /**
+     * When the time shown for this room changes before the next midnight, if it does. See
+     * {@link getChatListTimestampExpiry}.
+     */
+    public get timestampExpiry(): number | undefined {
+        const timestamp = getLastTimestamp(this.props.room, this.props.client.getSafeUserId());
+        return timestamp ? getChatListTimestampExpiry(timestamp, Date.now()) : undefined;
+    }
+
+    /**
+     * Format the time shown for this room again, which changes as days pass without the room changing.
+     */
+    public refreshTimestamp = (): void => {
+        this.snapshot.merge(RoomListItemViewModel.getTimestamp(this.props.room, this.props.client));
+    };
+
+    /**
      * Update the item snapshot with current sync data.
-     * Preserves the message preview which is managed separately.
+     * Preserves the message preview and who is typing, which are managed separately.
      */
     private updateItem(): void {
         const newItem = RoomListItemViewModel.generateItemSync(this.props.room, this.props.client, this.notifState);
@@ -212,6 +259,9 @@ export class RoomListItemViewModel
             notification: keepIfSame(this.snapshot.current.notification, newItem.notification),
             // Preserve message preview - it's managed separately by loadAndSetMessagePreview
             messagePreview: this.snapshot.current.messagePreview,
+            messagePreviewSender: this.snapshot.current.messagePreviewSender,
+            // Only a typing event changes it, and finding it goes through every member of the room
+            typing: this.snapshot.current.typing,
         });
     }
 
@@ -221,20 +271,51 @@ export class RoomListItemViewModel
     }
 
     /**
-     * Load the message preview for this room. Returns undefined if it couldn't be loaded.
+     * Load the message preview for this room, with its sender apart. Returns undefined if it couldn't be loaded.
      */
-    private async loadMessagePreview(): Promise<string | undefined> {
+    private async loadMessagePreview(): Promise<MessagePreviewParts | undefined> {
         const messagePreviewTag = this.getMessagePreviewTag();
         const preview = await MessagePreviewStore.instance.getPreviewForRoom(this.props.room, messagePreviewTag);
-        return preview?.text;
+        return preview ? splitMessagePreview(preview, messagePreviewTag) : undefined;
     }
 
     /**
-     * Load and set the message preview if it differs from current.
+     * Load and set the message preview if it differs from current, with the time of the room's last activity, which
+     * a new message changes.
      */
     private async loadAndSetMessagePreview(): Promise<void> {
-        const messagePreview = await this.loadMessagePreview();
-        this.snapshot.merge({ messagePreview });
+        const preview = await this.loadMessagePreview();
+        if (this.disposables.isDisposed) return;
+        this.snapshot.merge({
+            messagePreview: preview?.text,
+            messagePreviewSender: preview?.sender,
+            ...RoomListItemViewModel.getTimestamp(this.props.room, this.props.client),
+        });
+    }
+
+    /**
+     * Who is typing in the room, apart from the user and ignored users, or undefined if nobody is.
+     */
+    private static getTyping(room: Room): string | undefined {
+        return whoIsTypingString(usersTypingApartFromMeAndIgnored(room), 2) || undefined;
+    }
+
+    /**
+     * The time of the room's last activity, as the recency sort sees it, formatted for the room list.
+     */
+    private static getTimestamp(
+        room: Room,
+        client: MatrixClient,
+    ): Pick<RoomListItemViewSnapshot, "timestamp" | "timestampFull" | "timestampIso"> {
+        const lastTimestamp = getLastTimestamp(room, client.getSafeUserId());
+        if (!lastTimestamp) return { timestamp: undefined, timestampFull: undefined, timestampIso: undefined };
+
+        const { label, title, dateTime } = formatChatListTimestamp(
+            lastTimestamp,
+            Date.now(),
+            SettingsStore.getValue("showTwelveHourTimestamps"),
+        );
+        return { timestamp: label, timestampFull: title, timestampIso: dateTime };
     }
 
     /**
@@ -344,8 +425,8 @@ export class RoomListItemViewModel
             id: room.roomId,
             room,
             name: room.name,
-            isBold: notifState.hasAnyNotificationOrActivity,
             messagePreview,
+            ...RoomListItemViewModel.getTimestamp(room, client),
             notification: {
                 hasAnyNotificationOrActivity:
                     notifState.hasAnyNotificationOrActivity || hasParticipantsInCall || isMutedUnread,

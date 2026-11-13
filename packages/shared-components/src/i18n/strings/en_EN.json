@@ -246,6 +246,7 @@
             "a11y": {
                 "pinned": "Pinned"
             },
+            "message_preview": "<sender>%(senderName)s:</sender> %(message)s",
             "more_options": {
                 "notifications": "Notifications",
                 "pin": "Pin",

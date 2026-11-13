@@ -19,8 +19,10 @@ import styles from "./RoomListItemView.module.css";
 
 const {
     Default,
+    DirectMessage,
+    OwnMessage,
+    Typing,
     Selected,
-    Bold,
     WithNotification,
     WithMention,
     WithVoiceCall,
@@ -49,26 +51,77 @@ describe("<RoomListItemView />", () => {
         expect(container).toMatchSnapshot();
     });
 
-    it("should round the selected room's marker at both ends and the row's highlight as a row", () => {
+    it("should mark the selected room with its plate alone, without a marker at the panel's edge", () => {
         render(<Selected />);
         const container = screen.getByRole("option").querySelector(`.${styles.container}`)!;
-        const marker = getComputedStyle(container, "::before");
 
-        expect(marker.width).toBe("4px");
-        for (const radius of [
-            marker.borderTopLeftRadius,
-            marker.borderTopRightRadius,
-            marker.borderBottomRightRadius,
-            marker.borderBottomLeftRadius,
-        ]) {
-            expect(parseFloat(radius)).toBeGreaterThanOrEqual(parseFloat(marker.width) / 2);
-        }
+        expect(getComputedStyle(container, "::before").content).toBe("none");
         expect(getComputedStyle(container).borderRadius).toBe("8px");
     });
 
-    it("renders Bold story", () => {
-        const { container } = render(<Bold />);
+    it("should show the name in one weight whether the room is unread or not, like Telegram", () => {
+        const { unmount } = render(<Default />);
+        const readWeight = getComputedStyle(screen.getByTestId("room-name")).fontWeight;
+        unmount();
+
+        render(<WithNotification />);
+        expect(getComputedStyle(screen.getByTestId("room-name")).fontWeight).toBe(readWeight);
+        expect(readWeight).toBe("500");
+    });
+
+    it("renders DirectMessage story", () => {
+        const { container } = render(<DirectMessage />);
         expect(container).toMatchSnapshot();
+    });
+
+    it("renders Typing story", () => {
+        const { container } = render(<Typing />);
+        expect(container).toMatchSnapshot();
+    });
+
+    it("should show the sender before the message preview, in its own color", () => {
+        render(<Default />);
+        const sender = screen.getByText("Alice:");
+        expect(sender).toHaveClass(styles.sender);
+        expect(sender.closest(`.${styles.preview}`)).toHaveTextContent("Alice: Hey everyone!");
+    });
+
+    it("should show You before the user's own message", () => {
+        render(<OwnMessage />);
+        expect(screen.getByText("You:")).toHaveClass(styles.sender);
+    });
+
+    it("should show only the message in a direct chat", () => {
+        render(<DirectMessage />);
+        expect(screen.getByText("Hey everyone!")).toHaveClass(styles.preview);
+        expect(screen.queryByText("Alice:")).toBeNull();
+    });
+
+    it("should show who is typing instead of the message preview", () => {
+        render(<Typing />);
+        const typing = screen.getByText("Alice is typing …");
+        expect(typing).toHaveClass(styles.typing);
+        expect(typing.parentElement).toHaveClass(styles.preview);
+        expect(screen.queryByText(/Hey everyone!/)).toBeNull();
+    });
+
+    it("should show when the room was last active at the end of its name, with the full date on hover", () => {
+        render(<Default />);
+        const time = screen.getByText("12:41");
+        expect(time.tagName).toBe("TIME");
+        expect(time).toHaveAttribute("datetime", "2026-11-13T12:41:08.000Z");
+        expect(time).toHaveAttribute("title", "Fri, Nov 13, 2026, 12:41:08 PM");
+        expect(time.closest(`.${styles.titleRow}`)).toContainElement(screen.getByTestId("room-name"));
+    });
+
+    it("should give the time a class that doesn't change between builds, for the app's screenshot tests", () => {
+        render(<Default />);
+        expect(screen.getByText("12:41")).toHaveClass("mx_RoomListItemView_time");
+    });
+
+    it("should show no time for a room without one", () => {
+        render(<Default timestamp={undefined} />);
+        expect(document.querySelector("time")).toBeNull();
     });
 
     it("renders WithNotification story", () => {
@@ -243,18 +296,22 @@ describe("<RoomListItemView />", () => {
         expect(screen.queryByTestId("notification-decoration")).toBeNull();
     });
 
-    it("should show the notification decoration and the pin on the message preview line", () => {
+    it("should show the notification decoration and the pin after the message preview", () => {
         const { unmount } = render(<WithNotification />);
-        expect(screen.getByTestId("notification-decoration").parentElement).toHaveClass(styles.onMessagePreviewLine);
+        const decoration = screen.getByTestId("notification-decoration").parentElement!;
+        expect(decoration).toHaveClass(styles.notificationDecoration);
+        expect(decoration.previousElementSibling).toHaveClass(styles.preview);
         unmount();
 
         render(<Pinned />);
-        expect(screen.getByTestId("pinned-icon").parentElement).toHaveClass(styles.onMessagePreviewLine);
+        expect(screen.getByTestId("pinned-icon").parentElement!.previousElementSibling).toHaveClass(styles.preview);
     });
 
-    it("should centre the pin of a pinned room without a message preview", () => {
+    it("should show the pin of a pinned room without a message preview under its name", () => {
         render(<NoMessagePreview isFavourite={true} />);
-        expect(screen.getByTestId("pinned-icon").parentElement).not.toHaveClass(styles.onMessagePreviewLine);
+        const decoration = screen.getByTestId("pinned-icon").parentElement!;
+        expect(decoration.parentElement).toHaveClass(styles.previewRow);
+        expect(decoration.previousElementSibling).toBeNull();
     });
 
     it("should describe a pinned room as pinned to assistive technologies", () => {
@@ -340,5 +397,21 @@ describe("<RoomListItemView />", () => {
         option.blur();
         await waitFor(() => expect(option.className).not.toMatch(/keyboardActive/));
         expect(moreButton).not.toBeVisible();
+    });
+
+    it("should show the more options button in place of the time, and keep the badges", () => {
+        render(<WithNotification isFocused={true} />);
+        const time = screen.getByText("12:41");
+        const moreButton = screen.getByRole("button", { name: "More Options" });
+
+        expect(moreButton).toBeVisible();
+        expect(time).not.toBeVisible();
+        expect(time.parentElement).toBe(moreButton.closest(`.${styles.timeSlot}`));
+        expect(screen.getByTestId("notification-decoration")).toBeVisible();
+    });
+
+    it("should keep the time of a room without the more options button visible", () => {
+        render(<WithoutHoverMenu isFocused={true} />);
+        expect(screen.getByText("12:41")).toBeVisible();
     });
 });

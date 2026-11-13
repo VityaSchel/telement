@@ -27,8 +27,6 @@ type RoomListItemProps = RoomListItemViewSnapshot &
         isSelected: boolean;
         isFocused: boolean;
         onFocus: (room: Room, e: React.FocusEvent) => void;
-        isFirstItem: boolean;
-        isLastItem: boolean;
         renderAvatar: (room: Room) => React.ReactElement;
     };
 
@@ -46,8 +44,6 @@ const RoomListItemWrapperImpl = ({
     isSelected,
     isFocused,
     onFocus,
-    isFirstItem,
-    isLastItem,
     renderAvatar: renderAvatarProp,
     ...rest
 }: RoomListItemProps): JSX.Element => {
@@ -68,8 +64,6 @@ const RoomListItemWrapperImpl = ({
             isSelected={isSelected}
             isFocused={isFocused}
             onFocus={onFocus}
-            isFirstItem={isFirstItem}
-            isLastItem={isLastItem}
             renderAvatar={renderAvatarProp}
             role="option"
         />
@@ -93,8 +87,6 @@ const meta = {
         ...mockedActions,
         isSelected: false,
         isFocused: false,
-        isFirstItem: false,
-        isLastItem: false,
         onFocus: fn(),
         renderAvatar,
     },
@@ -114,7 +106,28 @@ export const Default: Story = {};
 export const LongContent: Story = {
     args: {
         name: "Loooooooooooooooooooooooooooooooooooooong name",
-        messagePreview: "Loooooooooooooooooooooooooooooooooooooong preview",
+        messagePreview:
+            "Has anyone tried the new release? The room list looks very different now, with two lines of preview",
+    },
+};
+
+export const DirectMessage: Story = {
+    args: {
+        name: "Alice",
+        messagePreviewSender: undefined,
+    },
+};
+
+export const OwnMessage: Story = {
+    args: {
+        messagePreview: "Pushed the room list spec",
+        messagePreviewSender: "You",
+    },
+};
+
+export const Typing: Story = {
+    args: {
+        typing: "Alice is typing …",
     },
 };
 
@@ -124,16 +137,26 @@ export const Selected: Story = {
     },
 };
 
-export const Bold: Story = {
+export const SelectedWithNotification: Story = {
     args: {
-        isBold: true,
-        name: "Team Updates",
+        isSelected: true,
+        notification: {
+            hasAnyNotificationOrActivity: true,
+            isUnsentMessage: false,
+            invited: false,
+            isMention: true,
+            isActivityNotification: false,
+            isNotification: false,
+            hasUnreadCount: true,
+            count: 2,
+            muted: true,
+        },
+        roomNotifState: RoomNotifState.Mute,
     },
 };
 
 export const WithNotification: Story = {
     args: {
-        isBold: true,
         notification: {
             hasAnyNotificationOrActivity: true,
             isUnsentMessage: false,
@@ -150,7 +173,6 @@ export const WithNotification: Story = {
 
 export const WithMention: Story = {
     args: {
-        isBold: true,
         notification: {
             hasAnyNotificationOrActivity: true,
             isUnsentMessage: false,
@@ -167,7 +189,6 @@ export const WithMention: Story = {
 
 export const WithVoiceCall: Story = {
     args: {
-        isBold: true,
         notification: {
             hasAnyNotificationOrActivity: true,
             isUnsentMessage: false,
@@ -185,7 +206,6 @@ export const WithVoiceCall: Story = {
 
 export const WithVideoCall: Story = {
     args: {
-        isBold: true,
         notification: {
             hasAnyNotificationOrActivity: true,
             isUnsentMessage: false,
@@ -294,20 +314,6 @@ export const WithZoom: Story = {
     ],
 };
 
-export const FirstItem: Story = {
-    args: {
-        isFirstItem: true,
-        isSelected: true,
-    },
-};
-
-export const LastItem: Story = {
-    args: {
-        isLastItem: true,
-        isSelected: true,
-    },
-};
-
 export const Muted: Story = {
     args: {
         notification: { ...defaultSnapshot.notification, muted: true },
@@ -349,7 +355,6 @@ export const Pinned: Story = {
 export const PinnedWithNotification: Story = {
     args: {
         isFavourite: true,
-        isBold: true,
         notification: {
             hasAnyNotificationOrActivity: true,
             isUnsentMessage: false,

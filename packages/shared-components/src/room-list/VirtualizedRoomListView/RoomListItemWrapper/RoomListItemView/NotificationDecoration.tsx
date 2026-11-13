@@ -17,6 +17,7 @@ import {
 import { UnreadCounter, Unread } from "@vector-im/compound-web";
 
 import { Flex } from "../../../../core/utils/Flex";
+import styles from "./NotificationDecoration.module.css";
 
 /**
  * Data representing the notification state for a room or item.
@@ -72,8 +73,15 @@ export const NotificationDecoration: React.FC<NotificationDecorationProps> = ({
         return null;
     }
 
+    // data-badge and data-unread-dot let the selected room list item recolor them
     return (
-        <Flex align="center" justify="center" gap="var(--cpd-space-1x)" data-testid="notification-decoration">
+        <Flex
+            className={styles.decoration}
+            align="center"
+            justify="center"
+            gap="var(--cpd-space-1x)"
+            data-testid="notification-decoration"
+        >
             {isUnsentMessage && (
                 <ErrorSolidIcon width="20px" height="20px" fill="var(--cpd-color-icon-critical-primary)" />
             )}
@@ -84,14 +92,17 @@ export const NotificationDecoration: React.FC<NotificationDecorationProps> = ({
                 <VoiceCallSolidIcon width="20px" height="20px" fill="var(--cpd-color-icon-accent-primary)" />
             )}
             {invited && <EmailSolidIcon width="20px" height="20px" fill="var(--cpd-color-icon-accent-primary)" />}
-            {isMention && <MentionIcon width="20px" height="20px" fill="var(--cpd-color-icon-accent-primary)" />}
-            {(isMention || isNotification) && (
-                <UnreadCounter
-                    count={count || null}
-                    style={muted ? { backgroundColor: "var(--cpd-color-icon-secondary)" } : undefined}
-                />
+            {/* Like Telegram's, the @ is a badge of the counter's shape and color */}
+            {isMention && (
+                <span className={styles.mention} data-badge={true}>
+                    <MentionIcon width="14px" height="14px" />
+                </span>
             )}
-            {isActivityNotification && <Unread />}
+            {/* Without a count, the counter would be a second circle like the @ */}
+            {(isNotification || (isMention && count > 0)) && (
+                <UnreadCounter count={count || null} data-badge={true} data-muted={muted || undefined} />
+            )}
+            {isActivityNotification && <Unread data-unread-dot={true} />}
             {muted && isActivityNotification && (
                 <NotificationsOffSolidIcon
                     width="20px"

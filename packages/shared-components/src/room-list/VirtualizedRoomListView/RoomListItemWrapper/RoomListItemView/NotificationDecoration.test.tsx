@@ -7,6 +7,7 @@
 
 import "@vector-im/compound-design-tokens/assets/web/css/compound-design-tokens.css";
 import "@vector-im/compound-web/dist/style.css";
+import "../../../../telement/tokens.css";
 import React from "react";
 import { render, screen } from "@test-utils";
 import { composeStories } from "@storybook/react-vite";
@@ -102,12 +103,36 @@ describe("<NotificationDecoration />", () => {
         expect(getComputedStyle(counter).backgroundColor).toBe(colourOf("--cpd-color-icon-accent-primary"));
     });
 
-    it("should keep the mention icon in the accent colour and the counter grey in a muted room", () => {
+    it("should keep the @ in the accent color and the counter gray in a muted room", () => {
         render(<Muted isMention={true} isNotification={false} />);
         const counter = screen.getByText("3");
-        const mentionIcon = counter.previousElementSibling!;
-        expect(mentionIcon).toHaveAttribute("fill", "var(--cpd-color-icon-accent-primary)");
+        const mention = counter.previousElementSibling!;
+        expect(getComputedStyle(mention).backgroundColor).toBe(colourOf("--cpd-color-icon-accent-primary"));
         expect(getComputedStyle(counter).backgroundColor).toBe(colourOf("--cpd-color-icon-secondary"));
+    });
+
+    it("should show the @ as a badge of the counter's size and shape, like Telegram", () => {
+        render(<MentionWithCount />);
+        const counter = screen.getByText("5");
+        const mention = counter.previousElementSibling as HTMLElement;
+        const icon = mention.querySelector("svg")!;
+
+        // About 20px and 14px: the counter is its digits' cap height padded by 6px
+        expect(mention.getBoundingClientRect().height).toBeCloseTo(counter.getBoundingClientRect().height, 5);
+        expect(mention.getBoundingClientRect().width).toBeCloseTo(20, 0);
+        expect(getComputedStyle(mention).borderRadius).toBe("9999px");
+        expect(icon.getBoundingClientRect().width).toBeCloseTo(14, 0);
+        expect(getComputedStyle(icon).fill).toBe(colourOf("--cpd-color-icon-on-solid-primary"));
+        expect(icon.getBoundingClientRect().left - mention.getBoundingClientRect().left).toBe(3);
+        expect(icon.getBoundingClientRect().top - mention.getBoundingClientRect().top).toBe(3);
+    });
+
+    it("should show only the @ badge for a mention without a count, not an empty counter after it", () => {
+        render(<Mention />);
+        const decoration = screen.getByTestId("notification-decoration");
+
+        expect(decoration.childElementCount).toBe(1);
+        expect(decoration.firstElementChild!.querySelector("svg")).not.toBeNull();
     });
 
     it("should show nothing for a muted room without unread messages, as its bell is next to the room name", () => {

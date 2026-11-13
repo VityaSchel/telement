@@ -260,8 +260,8 @@ describe("<RoomListItemMoreOptionsMenu />", () => {
             expect(getComputedStyle(item).borderRadius).toBe("8px");
             expect(rect.left - menuRect.left).toBe(4);
             expect(menuRect.right - rect.right).toBe(4);
-            // The message menu's items: 15px regular text on a 22.5px line with 8px above and below
-            expect(rect.height).toBe(38.5);
+            // The message menu's items: 15px regular text on a 22.5px line, in 40px rows
+            expect(rect.height).toBe(40);
         }
 
         const markAsRead = screen.getByRole("menuitem", { name: "Mark as read" });
@@ -269,7 +269,9 @@ describe("<RoomListItemMoreOptionsMenu />", () => {
         const label = screen.getByText("Mark as read");
         expect(icon.getBoundingClientRect().width).toBe(16);
         expect(icon.getBoundingClientRect().height).toBe(16);
-        expect(icon.getBoundingClientRect().left - markAsRead.getBoundingClientRect().left).toBe(8);
+        // As far from the item's start as from its top and bottom
+        expect(icon.getBoundingClientRect().top - markAsRead.getBoundingClientRect().top).toBe(12);
+        expect(icon.getBoundingClientRect().left - markAsRead.getBoundingClientRect().left).toBe(12);
         expect(label.getBoundingClientRect().left - icon.getBoundingClientRect().right).toBe(12);
         expect(getComputedStyle(label).fontSize).toBe("15px");
         expect(getComputedStyle(label).fontWeight).toBe("400");

@@ -6,7 +6,10 @@
  */
 
 .mx_RoomAvatarView {
-    --room-avatar-size: 32px;
+    --room-avatar-size: 48px;
+    /* The decorations are centered on the avatar's circle at its bottom right, at 45°, like Telegram's online dot,
+       and the masks cut them out with a 2px gap */
+    --room-avatar-decoration-center: 41px;
 
     position: relative;
 
@@ -32,18 +35,16 @@
     .mx_RoomAvatarView_icon {
         position: absolute;
 
-        /* Place half the icon inside the avatar */
-        /* Avatar size - (icon size (16px) / 2) */
-        left: calc((var(--room-avatar-size) - 8px));
-        bottom: var(--cpd-space-0-5x);
+        /* Decoration center - (icon size (16px) / 2) */
+        left: calc(var(--room-avatar-decoration-center) - 8px);
+        top: calc(var(--room-avatar-decoration-center) - 8px);
     }
 
     .mx_RoomAvatarView_PresenceDecoration {
         position: absolute;
 
-        /* Place half the icon inside the avatar */
-        /* Avatar size - (icon size (8px) / 2) */
-        left: calc((var(--room-avatar-size) - 4px));
-        bottom: var(--cpd-space-0-5x);
+        /* Decoration center - (icon size (8px) / 2) */
+        left: calc(var(--room-avatar-decoration-center) - 4px);
+        top: calc(var(--room-avatar-decoration-center) - 4px);
     }
 }

@@ -20,8 +20,6 @@ const meta = {
         roomIndex: 0,
         roomCount: 10,
         onFocus: fn(),
-        isFirstItem: false,
-        isLastItem: false,
         renderAvatar,
         isSelected: false,
         isFocused: false,

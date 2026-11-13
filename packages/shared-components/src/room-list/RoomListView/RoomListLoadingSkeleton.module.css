@@ -7,7 +7,6 @@
 
 .skeleton {
     position: relative;
-    margin-left: 4px;
     height: 100%;
     flex: 1;
 }
@@ -19,6 +18,12 @@
     content: "";
     position: absolute;
     mask-repeat: repeat-y;
-    mask-size: auto 96px;
+    /* One 72px room list item per repetition: its 48px avatar, name and two preview lines where the item has them */
+    mask-size: auto 72px;
     mask-image: url("./assets/skeleton.svg");
+}
+
+/* The items are mirrored in right-to-left languages */
+.skeleton:dir(rtl)::before {
+    transform: scaleX(-1);
 }

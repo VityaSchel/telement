@@ -42,7 +42,7 @@ export function RoomListView(): JSX.Element {
     const renderAvatar = useCallback((room: SharedRoom): ReactNode => {
         if (room instanceof Room) return <DecoratedRoomAvatarView room={room} />;
         // A preview item has no `Room`, only the data needed for its avatar
-        if (room instanceof PreviewRoomAvatarData) return <RoomAvatar size="32px" oobData={room} />;
+        if (room instanceof PreviewRoomAvatarData) return <RoomAvatar size="48px" oobData={room} />;
         return null;
     }, []);
 

@@ -151,6 +151,11 @@ export const expect = baseExpect.extend<Expectations>({
             .mx_MessageTimestamp {
                 font-family: "Fira Code" !important;
             }
+            /* The room list shows when each room was last active, which changes from run to run */
+            .mx_RoomListItemView_time {
+                font-family: "Fira Code" !important;
+                visibility: hidden !important;
+            }
         `;
 
         if (!options?.showTooltips) {

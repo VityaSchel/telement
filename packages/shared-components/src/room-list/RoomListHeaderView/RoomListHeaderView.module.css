@@ -7,7 +7,8 @@
 
 .header {
     min-height: 60px;
-    padding: 0 var(--cpd-space-4x) 0 var(--cpd-space-3x);
+    /* On the content edge of the search field, the filters and the room list items' avatars */
+    padding: 0 var(--cpd-space-3x);
 }
 
 .container {

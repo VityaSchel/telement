@@ -6,12 +6,13 @@ exports[`<NotificationDecoration /> > snapshots > renders ActivityIndicator stor
     style="padding: 16px; background-color: var(--cpd-color-bg-canvas-default);"
   >
     <div
-      class="Flex-module_flex"
+      class="Flex-module_flex NotificationDecoration-module_decoration"
       data-testid="notification-decoration"
       style="--mx-flex-display: flex; --mx-flex-direction: row; --mx-flex-align: center; --mx-flex-justify: center; --mx-flex-gap: var(--cpd-space-1x); --mx-flex-wrap: nowrap;"
     >
       <div
         class="_unread_cti0f_8"
+        data-unread-dot="true"
       >
         <div />
       </div>
@@ -26,7 +27,7 @@ exports[`<NotificationDecoration /> > snapshots > renders Invited story 1`] = `
     style="padding: 16px; background-color: var(--cpd-color-bg-canvas-default);"
   >
     <div
-      class="Flex-module_flex"
+      class="Flex-module_flex NotificationDecoration-module_decoration"
       data-testid="notification-decoration"
       style="--mx-flex-display: flex; --mx-flex-direction: row; --mx-flex-align: center; --mx-flex-justify: center; --mx-flex-gap: var(--cpd-space-1x); --mx-flex-wrap: nowrap;"
     >
@@ -52,24 +53,26 @@ exports[`<NotificationDecoration /> > snapshots > renders Mention story 1`] = `
     style="padding: 16px; background-color: var(--cpd-color-bg-canvas-default);"
   >
     <div
-      class="Flex-module_flex"
+      class="Flex-module_flex NotificationDecoration-module_decoration"
       data-testid="notification-decoration"
       style="--mx-flex-display: flex; --mx-flex-direction: row; --mx-flex-align: center; --mx-flex-justify: center; --mx-flex-gap: var(--cpd-space-1x); --mx-flex-wrap: nowrap;"
     >
-      <svg
-        fill="var(--cpd-color-icon-accent-primary)"
-        height="20px"
-        viewBox="0 0 24 24"
-        width="20px"
-        xmlns="http://www.w3.org/2000/svg"
+      <span
+        class="NotificationDecoration-module_mention"
+        data-badge="true"
       >
-        <path
-          d="M12 4a8 8 0 1 0 0 16 1 1 0 1 1 0 2C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10v1.5a3.5 3.5 0 0 1-6.396 1.966A5 5 0 1 1 17 12v1.5a1.5 1.5 0 0 0 3 0V12a8 8 0 0 0-8-8m3 8a3 3 0 1 0-6 0 3 3 0 0 0 6 0"
-        />
-      </svg>
-      <div
-        class="_unread-counter_19zi2_8"
-      />
+        <svg
+          fill="currentColor"
+          height="14px"
+          viewBox="0 0 24 24"
+          width="14px"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M12 4a8 8 0 1 0 0 16 1 1 0 1 1 0 2C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10v1.5a3.5 3.5 0 0 1-6.396 1.966A5 5 0 1 1 17 12v1.5a1.5 1.5 0 0 0 3 0V12a8 8 0 0 0-8-8m3 8a3 3 0 1 0-6 0 3 3 0 0 0 6 0"
+          />
+        </svg>
+      </span>
     </div>
   </div>
 </div>
@@ -81,23 +84,29 @@ exports[`<NotificationDecoration /> > snapshots > renders MentionWithCount story
     style="padding: 16px; background-color: var(--cpd-color-bg-canvas-default);"
   >
     <div
-      class="Flex-module_flex"
+      class="Flex-module_flex NotificationDecoration-module_decoration"
       data-testid="notification-decoration"
       style="--mx-flex-display: flex; --mx-flex-direction: row; --mx-flex-align: center; --mx-flex-justify: center; --mx-flex-gap: var(--cpd-space-1x); --mx-flex-wrap: nowrap;"
     >
-      <svg
-        fill="var(--cpd-color-icon-accent-primary)"
-        height="20px"
-        viewBox="0 0 24 24"
-        width="20px"
-        xmlns="http://www.w3.org/2000/svg"
+      <span
+        class="NotificationDecoration-module_mention"
+        data-badge="true"
       >
-        <path
-          d="M12 4a8 8 0 1 0 0 16 1 1 0 1 1 0 2C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10v1.5a3.5 3.5 0 0 1-6.396 1.966A5 5 0 1 1 17 12v1.5a1.5 1.5 0 0 0 3 0V12a8 8 0 0 0-8-8m3 8a3 3 0 1 0-6 0 3 3 0 0 0 6 0"
-        />
-      </svg>
+        <svg
+          fill="currentColor"
+          height="14px"
+          viewBox="0 0 24 24"
+          width="14px"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M12 4a8 8 0 1 0 0 16 1 1 0 1 1 0 2C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10v1.5a3.5 3.5 0 0 1-6.396 1.966A5 5 0 1 1 17 12v1.5a1.5 1.5 0 0 0 3 0V12a8 8 0 0 0-8-8m3 8a3 3 0 1 0-6 0 3 3 0 0 0 6 0"
+          />
+        </svg>
+      </span>
       <span
         class="_unread-counter_19zi2_8"
+        data-badge="true"
       >
         5
       </span>
@@ -112,13 +121,14 @@ exports[`<NotificationDecoration /> > snapshots > renders Muted story 1`] = `
     style="padding: 16px; background-color: var(--cpd-color-bg-canvas-default);"
   >
     <div
-      class="Flex-module_flex"
+      class="Flex-module_flex NotificationDecoration-module_decoration"
       data-testid="notification-decoration"
       style="--mx-flex-display: flex; --mx-flex-direction: row; --mx-flex-align: center; --mx-flex-justify: center; --mx-flex-gap: var(--cpd-space-1x); --mx-flex-wrap: nowrap;"
     >
       <span
         class="_unread-counter_19zi2_8"
-        style="background-color: var(--cpd-color-icon-secondary);"
+        data-badge="true"
+        data-muted="true"
       >
         3
       </span>
@@ -141,12 +151,13 @@ exports[`<NotificationDecoration /> > snapshots > renders NotificationWithCount 
     style="padding: 16px; background-color: var(--cpd-color-bg-canvas-default);"
   >
     <div
-      class="Flex-module_flex"
+      class="Flex-module_flex NotificationDecoration-module_decoration"
       data-testid="notification-decoration"
       style="--mx-flex-display: flex; --mx-flex-direction: row; --mx-flex-align: center; --mx-flex-justify: center; --mx-flex-gap: var(--cpd-space-1x); --mx-flex-wrap: nowrap;"
     >
       <span
         class="_unread-counter_19zi2_8"
+        data-badge="true"
       >
         3
       </span>
@@ -161,7 +172,7 @@ exports[`<NotificationDecoration /> > snapshots > renders UnsentMessage story 1`
     style="padding: 16px; background-color: var(--cpd-color-bg-canvas-default);"
   >
     <div
-      class="Flex-module_flex"
+      class="Flex-module_flex NotificationDecoration-module_decoration"
       data-testid="notification-decoration"
       style="--mx-flex-display: flex; --mx-flex-direction: row; --mx-flex-align: center; --mx-flex-justify: center; --mx-flex-gap: var(--cpd-space-1x); --mx-flex-wrap: nowrap;"
     >
@@ -187,7 +198,7 @@ exports[`<NotificationDecoration /> > snapshots > renders VideoCall story 1`] = 
     style="padding: 16px; background-color: var(--cpd-color-bg-canvas-default);"
   >
     <div
-      class="Flex-module_flex"
+      class="Flex-module_flex NotificationDecoration-module_decoration"
       data-testid="notification-decoration"
       style="--mx-flex-display: flex; --mx-flex-direction: row; --mx-flex-align: center; --mx-flex-justify: center; --mx-flex-gap: var(--cpd-space-1x); --mx-flex-wrap: nowrap;"
     >
@@ -213,7 +224,7 @@ exports[`<NotificationDecoration /> > snapshots > renders VoiceCall story 1`] = 
     style="padding: 16px; background-color: var(--cpd-color-bg-canvas-default);"
   >
     <div
-      class="Flex-module_flex"
+      class="Flex-module_flex NotificationDecoration-module_decoration"
       data-testid="notification-decoration"
       style="--mx-flex-display: flex; --mx-flex-direction: row; --mx-flex-align: center; --mx-flex-justify: center; --mx-flex-gap: var(--cpd-space-1x); --mx-flex-wrap: nowrap;"
     >

@@ -32,7 +32,7 @@ exports[`RoomListHeaderView > renders the default state 1`] = `
           data-state="closed"
           id="radix-react-use-id-1"
           role="button"
-          style="--cpd-icon-button-size: 24px; padding: 2px;"
+          style="--cpd-icon-button-size: var(--tl-control-size); padding: var(--cpd-space-1-5x);"
           tabindex="0"
           type="button"
         >
@@ -69,7 +69,7 @@ exports[`RoomListHeaderView > renders the default state 1`] = `
           data-state="closed"
           id="radix-react-use-id-3"
           role="button"
-          style="--cpd-icon-button-size: 28px; padding: 4px;"
+          style="--cpd-icon-button-size: var(--tl-control-size); padding: var(--cpd-space-1-5x);"
           tabindex="0"
           type="button"
         >
@@ -100,7 +100,7 @@ exports[`RoomListHeaderView > renders the default state 1`] = `
           data-state="closed"
           id="radix-react-use-id-5"
           role="button"
-          style="--cpd-icon-button-size: 28px; padding: 4px;"
+          style="--cpd-icon-button-size: var(--tl-control-size); padding: var(--cpd-space-1-5x);"
           tabindex="0"
           type="button"
         >
@@ -167,7 +167,7 @@ exports[`RoomListHeaderView > renders without space menu 1`] = `
           data-state="closed"
           id="radix-react-use-id-2"
           role="button"
-          style="--cpd-icon-button-size: 28px; padding: 4px;"
+          style="--cpd-icon-button-size: var(--tl-control-size); padding: var(--cpd-space-1-5x);"
           tabindex="0"
           type="button"
         >
@@ -198,7 +198,7 @@ exports[`RoomListHeaderView > renders without space menu 1`] = `
           data-state="closed"
           id="radix-react-use-id-4"
           role="button"
-          style="--cpd-icon-button-size: 28px; padding: 4px;"
+          style="--cpd-icon-button-size: var(--tl-control-size); padding: var(--cpd-space-1-5x);"
           tabindex="0"
           type="button"
         >

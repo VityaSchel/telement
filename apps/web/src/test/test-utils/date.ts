@@ -27,7 +27,6 @@ export const mockIntlDateTimeFormat = (): void => {
     });
 };
 
-/** @knipignore */
 export const unmockIntlDateTimeFormat = (): void => {
     vi.spyOn(globalThis.Intl, "DateTimeFormat").mockRestore();
 };

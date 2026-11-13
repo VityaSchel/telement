@@ -5,84 +5,169 @@
  * Please see LICENSE files in the repository root for full details.
  */
 
+/*
+ * A room is a 72px row holding a 64px plate inset 4px on every side, like Telegram for macOS: neighboring plates are
+ * 8px apart, and the plate's 8px padding puts the 48px avatar 12px from the panel's edge, on the content edge of the
+ * room list's header, search field and filters. ROOM_LIST_ITEM_HEIGHT is the row's height.
+ */
 .roomListItem {
     /* Remove button default style */
     background: unset;
     border: none;
     text-align: unset;
 
-    /* Needed to position the selected marker */
-    position: relative;
     cursor: pointer;
     width: 100%;
-
-    /* Gap between items, accounted for in ROOM_LIST_ITEM_HEIGHT */
-    --padding-top: var(--cpd-space-1x);
-    --padding-bottom: var(--cpd-space-1x);
-    padding: var(--padding-top) 0 var(--padding-bottom) 0;
-
-    /* 44px height + padding */
-    min-height: calc(44px + var(--padding-top) + var(--padding-bottom));
+    box-sizing: border-box;
+    padding: var(--cpd-space-1x);
 
     font: var(--cpd-font-body-md-regular);
     letter-spacing: var(--cpd-font-letter-spacing-body-md);
     color: var(--cpd-color-text-secondary);
 
-    /* Hide the menu by default */
-    .hoverMenu {
-        display: none;
-    }
+    /* The plate's color when shown, which the inverted badges of the selected plate take too */
+    --plate-color: var(--cpd-color-bg-action-tertiary-hovered);
 }
 
-/* Show hover menu and background on hover/focus/menu-open states */
-.roomListItem:hover,
-/* keyboardActive is toggled in JS for keyboard focus only (see RoomListItemView), and kept while
-   focus is on the hover-menu buttons so they stay reachable by Tab — without revealing the menu on
-   mouse-focused or selected rows the way :focus-within would */
-.roomListItem.keyboardActive,
-/* When the context menu is opened */
-.roomListItem[data-state="open"],
-/* When the options and notifications menu are opened */
-.roomListItem:has(.hoverMenu > button[data-state="open"]) {
-    color: var(--cpd-color-text-primary);
-
-    .container {
-        background-color: var(--cpd-color-bg-action-tertiary-hovered);
-    }
-
-    /* Preserve selected background on hover/focus/menu-open states */
-    &.selected .container {
-        background-color: var(--cpd-color-bg-action-tertiary-selected);
-    }
-
-    .hoverMenu {
-        display: flex;
-    }
-
-    /* When the menu is visible, hide the notification decoration to avoid clutter */
-    .notificationDecoration {
-        display: none;
-    }
-}
-
+/*
+ * The avatar is 8px from the plate's start, top and bottom. The name and two preview lines are 3.25px taller than the
+ * avatar, so the block padding is 6px and both are centered; with a larger font the plate grows with the text.
+ */
 .container {
     flex: 1;
-    margin: 0 var(--cpd-space-3x);
-    padding: 0 var(--cpd-space-2x);
-    border-radius: 8px;
-    min-width: 0;
+    min-inline-size: 0;
+    display: flex;
+    align-items: center;
+    gap: var(--cpd-space-3x);
+    box-sizing: border-box;
+    min-block-size: var(--cpd-space-16x);
+    padding: var(--cpd-space-1-5x) var(--cpd-space-2x);
+    border-radius: var(--tl-radius-row);
 }
 
-.notificationDecoration {
+/* The name line and two preview lines are always reserved, so names line up from row to row */
+.text {
+    flex: 1;
+    min-inline-size: 0;
+    display: flex;
+    flex-direction: column;
+    min-block-size: calc(
+        (var(--cpd-font-size-body-md) + 2 * var(--cpd-font-size-body-sm)) * var(--cpd-font-line-height-tight)
+    );
+}
+
+.titleRow {
     display: flex;
     align-items: center;
     gap: var(--cpd-space-1x);
+    min-inline-size: 0;
 }
 
-/* Like in Telegram, the notification decoration and the pin sit at the end of the message preview line */
-.notificationDecoration.onMessagePreviewLine {
-    align-self: flex-end;
-    height: calc(var(--cpd-font-size-body-sm) * var(--cpd-font-line-height-regular));
+/* Like every Telegram client, the name keeps one weight and color; the badges show what is unread */
+.roomName {
+    font: var(--cpd-font-body-md-medium);
+    line-height: var(--cpd-font-line-height-tight);
+    color: var(--cpd-color-text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    /* Allow the room name to shrink and truncate when displayed next to the user status emoji */
+    min-inline-size: 0;
+}
+
+/* The bell of a muted room stays visible when the room name is truncated */
+.mutedIcon {
+    flex-shrink: 0;
+}
+
+.userStatusEmoji {
+    padding-inline-start: var(--cpd-space-1-5x);
+}
+
+/* Compound's Text brings body text's taller line, which would make the name's line and the row taller */
+.roomName .userStatusEmoji {
+    line-height: inherit;
+}
+
+/*
+ * The time and the "…" button share one cell at the end of the name line: the cell is as wide as the wider of them, so
+ * the name doesn't move when the button takes the time's place.
+ */
+.timeSlot {
+    flex-shrink: 0;
+    margin-inline-start: auto;
+    /* With the line's gap, at least 8px from the name or its bell */
+    padding-inline-start: var(--cpd-space-1x);
+    display: grid;
+    /* The 24px button overflows the line evenly, centered on it like the time */
+    align-content: center;
+    align-items: center;
+    justify-items: end;
+    block-size: calc(var(--cpd-font-size-body-md) * var(--cpd-font-line-height-tight));
+
+    > * {
+        grid-area: 1 / 1;
+    }
+}
+
+.time {
+    font: var(--cpd-font-body-sm-regular);
+    line-height: var(--cpd-font-line-height-tight);
+    letter-spacing: var(--cpd-font-letter-spacing-body-sm);
+    white-space: nowrap;
+}
+
+.hoverMenu {
+    visibility: hidden;
+}
+
+/* Set icon color for hover menu buttons */
+.hoverMenu svg {
+    fill: var(--cpd-color-icon-primary);
+}
+
+/*
+ * The preview row fills the two reserved preview lines, and the decorations sit on the second of them, however long the
+ * preview is, so they are never right under the time
+ */
+.previewRow {
+    flex: 1;
+    display: flex;
+    align-items: flex-end;
+    gap: var(--cpd-space-2x);
+}
+
+.preview {
+    align-self: flex-start;
+    flex: 1;
+    min-inline-size: 0;
+    font: var(--cpd-font-body-sm-regular);
+    line-height: var(--cpd-font-line-height-tight);
+    letter-spacing: var(--cpd-font-letter-spacing-body-sm);
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+    /* A long link or user ID wraps instead of overflowing the two lines */
+    overflow-wrap: anywhere;
+}
+
+.sender {
+    color: var(--cpd-color-text-primary);
+}
+
+.typing {
+    color: var(--cpd-color-text-action-accent);
+}
+
+/* One preview line tall, so the badges, the pin and the icons are centered on that line */
+.notificationDecoration {
+    flex-shrink: 0;
+    margin-inline-start: auto;
+    display: flex;
+    align-items: center;
+    gap: var(--cpd-space-1x);
+    block-size: calc(var(--cpd-font-size-body-sm) * var(--cpd-font-line-height-tight));
 }
 
 /* Like Telegram's, the pin is tilted and smaller than the other decorations, padded to keep their 20px size */
@@ -92,89 +177,101 @@
     transform: rotate(45deg);
 }
 
-.dragging {
-    outline: 1px solid var(--cpd-color-border-interactive-hovered);
-    background-color: color-mix(in srgb, var(--cpd-color-bg-action-tertiary-hovered) 95%, transparent);
-    color: var(--cpd-color-text-primary);
+.pinnedIcon:dir(rtl) {
+    transform: rotate(-45deg);
 }
 
-.content {
-    flex: 1;
-    min-width: 0;
-}
-
-.text {
-    min-width: 0;
-}
-
-.ellipsis,
-.roomName {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.roomName {
-    /* Allow the room name to shrink and truncate when displayed next to the user status emoji */
-    min-width: 0;
-}
-
-/* The bell of a muted room stays visible when the room name is truncated */
-.mutedIcon {
-    flex-shrink: 0;
-}
-
-.userStatusEmoji {
-    padding-left: var(--cpd-space-1-5x);
-}
-
-.selected {
+/* Show the hover menu and the plate on hover, keyboard focus and while a menu is open */
+.roomListItem:hover,
+/* keyboardActive is toggled in JS for keyboard focus only (see RoomListItemView), and kept while
+   focus is on the hover-menu buttons so they stay reachable by Tab — without revealing the menu on
+   mouse-focused or selected rows the way :focus-within would */
+.roomListItem.keyboardActive,
+/* When the context menu is opened */
+.roomListItem[data-state="open"],
+/* When the options and notifications menu are opened */
+.roomListItem:has(.hoverMenu > button[data-state="open"]) {
     .container {
-        background-color: var(--cpd-color-bg-action-tertiary-selected);
-        color: var(--cpd-color-text-primary);
+        background-color: var(--plate-color);
     }
 
-    /* Visual marker at the left on the container when the room is selected */
-    .container::before {
-        content: "";
-        position: absolute;
-        /* Marker height is 34px, room list item height is 44px. So position is at 5px at and bottom + padding */
-        top: calc(5px + var(--padding-top));
-        bottom: calc(5px + var(--padding-bottom));
-        left: 0;
-        width: 4px;
-        background-color: var(--cpd-color-bg-accent-rest);
-        border-radius: var(--tl-radius-control);
+    .hoverMenu {
+        visibility: visible;
+    }
+
+    /* The time gives way to the "…" button; the badges stay */
+    .timeSlot:has(.hoverMenu) .time {
+        visibility: hidden;
+    }
+
+    &.selected {
+        --plate-color: var(--cpd-color-bg-accent-hovered);
     }
 }
 
-.bold .roomName {
-    font: var(--cpd-font-body-md-semibold);
-    color: var(--cpd-color-text-primary);
+.roomListItem:focus-visible {
+    outline: none;
+
+    /* Around the plate, inside the row's inset */
+    .container {
+        outline: var(--cpd-border-width-2) solid var(--cpd-color-border-focused);
+        outline-offset: var(--cpd-border-width-2);
+    }
 }
 
-/* Set icon color for hover menu buttons */
-.hoverMenu svg {
-    fill: var(--cpd-color-icon-primary);
+/* Like Telegram's desktop apps, the selected room is an accent plate with everything on it in the on-solid color */
+.selected {
+    --plate-color: var(--cpd-color-bg-accent-rest);
+
+    .container {
+        background-color: var(--plate-color);
+        color: var(--cpd-color-text-on-solid-primary);
+    }
+
+    :is(.roomName, .sender, .typing) {
+        color: inherit;
+    }
+
+    :is(.mutedIcon, .pinnedIcon, .notificationDecoration svg, .hoverMenu svg) {
+        fill: var(--cpd-color-icon-on-solid-primary);
+    }
+
+    .notificationDecoration {
+        color: var(--cpd-color-icon-on-solid-primary);
+    }
+
+    /* The counter and the @ are inverted, a muted room's counter too, as in Telegram for macOS */
+    .notificationDecoration [data-badge] {
+        background-color: var(--cpd-color-icon-on-solid-primary);
+        color: var(--plate-color);
+
+        svg {
+            fill: currentColor;
+        }
+    }
+
+    .notificationDecoration [data-unread-dot] > div {
+        background-color: currentColor;
+    }
+
+    /* Compound's hover color for the "…" button would hide its on-solid dots */
+    .hoverMenu button:hover {
+        background-color: color-mix(in srgb, var(--cpd-color-icon-on-solid-primary) 20%, transparent);
+    }
 }
 
-/*
- * Remove top padding for the first item and bottom padding for the last item to align them with the container border.
- * And adjust the selected marker position accordingly.
- */
-.firstItem {
-    --padding-top: 0px;
-}
-
-.lastItem {
-    --padding-bottom: 0px;
+@media (forced-colors: active) {
+    /* The plate's background is dropped, so an outline in the system color marks the selected room */
+    .selected .container {
+        outline: 1px solid transparent;
+    }
 }
 
 /*
  * The room menus (more options, right-click and the notifications submenu) have the size of the message menu
- * (_IconizedContextMenu.pcss): 16px icons and regular body text in items with 8px block padding. The items are inset
- * by the menu padding, and the menu's corner radius is an item highlight's radius plus that padding, so the corners
- * are concentric.
+ * (_IconizedContextMenu.pcss): 16px icons and regular body text in 40px items, with what they hold 12px from their
+ * sides. The items are inset by the menu padding, and the menu's corner radius is an item highlight's radius plus that
+ * padding, so the corners are concentric.
  */
 [role="menu"]:has(> [role="none"] > .menuContent) {
     border-radius: var(--tl-radius-menu);
@@ -211,17 +308,19 @@
 
     > [role^="menuitem"] {
         padding-block: var(--cpd-space-2x);
-        padding-inline: var(--cpd-space-2x) var(--cpd-space-3x);
+        /* As far from the item's sides as a 16px icon is from its top and bottom: 16px from the menu's edge, as the
+           content of the message menu and of Compound's menus */
+        padding-inline: var(--cpd-space-3x);
+        min-block-size: var(--cpd-space-10x);
         border-radius: var(--tl-radius-row);
         /* The message menu's minimum width (146px inside its padding), instead of Compound's 200px */
         min-inline-size: 146px;
 
         /* Compound puts the icon and what ends the item (chevron, toggle or check) in the first of the two rows that
-           the label spans. Shorter than the label, they would sit above its centre there, so they span both rows and
-           are centred on the label, like the message menu's */
-        > :not(span) {
-            grid-row: 1 / -1;
-        }
+           the label spans. Made as tall as the label's first line, that row centers them on it, also when the label
+           wraps; the rows stay together in the middle of the item */
+        grid-template-rows: minmax(calc(var(--cpd-font-size-body-md) * var(--cpd-font-line-height-regular)), auto) auto;
+        align-content: center;
 
         > svg:first-child {
             inline-size: 16px;
@@ -230,8 +329,11 @@
         }
 
         > span {
+            /* Items without an icon put their label in the first row only */
+            grid-row: 1 / -1;
             font: var(--cpd-font-body-md-regular);
-            /* Compound keeps items without an icon as tall as its 24px icons */
+            /* Compound makes the label of an item without an icon 24px tall, which would put its line above the
+               item's center */
             min-block-size: 0;
         }
 
@@ -243,11 +345,25 @@
         &[data-kind="critical"]:focus-visible {
             background: var(--cpd-color-bg-critical-subtle);
         }
+
+        /* Inside the highlight, so that the ring keeps clear of the menu's edge, as far as the highlight does */
+        &:focus-visible {
+            outline: var(--cpd-border-width-2) solid var(--cpd-color-border-focused);
+            outline-offset: calc(-1 * var(--cpd-border-width-2));
+        }
     }
 
-    /* The chevron of an item that opens a submenu, cropped to its width like Compound's */
+    /* The chevron of an item that opens a submenu, cropped to its width like Compound's. The crop leaves one of the
+       icon's 24 units after the stroke: pulled out by it, the chevron ends where the Low priority toggle does */
     > [aria-haspopup="menu"] > svg:last-child {
         inline-size: auto;
         block-size: 16px;
+        margin-inline-end: calc(-16px / 24);
+    }
+
+    /* The check of the current notification setting is drawn 4.275 of its 24 units inside its box: pulled out by
+       them, it ends where the toggle and the chevron of the menu that opened it do */
+    > [role="menuitemradio"] > svg:last-child {
+        margin-inline-end: calc(-16px * 4.275 / 24);
     }
 }

@@ -1,0 +1,64 @@
+/*
+Copyright 2026 Viktor Shchelochkov
+
+SPDX-License-Identifier: AGPL-3.0-only OR GPL-3.0-only
+Please see LICENSE files in the repository root for full details.
+*/
+
+/*
+ * The unread counter and the @ are 20px tall at the default font size and grow with the font, as their digits do. The
+ * digits' cap height is padded by a whole number of pixels on every side (6px by default), so one digit makes a circle
+ * and more make a pill with even sides.
+ */
+.decoration > [data-badge] {
+    --badge-inset: round(calc((1.25rem - 1cap) / 2), 1px);
+
+    flex-shrink: 0;
+    box-sizing: content-box;
+    border-radius: var(--tl-radius-control);
+    font: var(--cpd-font-body-xs-semibold);
+}
+
+/*
+ * The digits are trimmed to their cap height, so they sit in the middle of the padding wherever the counter falls on
+ * the pixel grid; Compound's flex layout puts them up to 1px high. Where text-box isn't supported, a line as tall as
+ * the cap height comes close.
+ */
+.decoration > [data-badge]:not(.mention) {
+    display: block;
+    min-inline-size: 1cap;
+    block-size: 1cap;
+    padding: var(--badge-inset);
+    text-align: center;
+    line-height: 1cap;
+    text-box: trim-both cap alphabetic;
+}
+
+/* Like Telegram's, the @ is a badge of the counter's shape and color, around a 14px icon at the default font size */
+.mention {
+    /* Whole pixels around the icon, so that it isn't drawn across pixels */
+    --mention-inset: round(0.1875rem, 1px);
+
+    display: flex;
+    padding: var(--mention-inset);
+    background-color: var(--cpd-color-icon-accent-primary);
+    color: var(--cpd-color-icon-on-solid-primary);
+
+    svg {
+        inline-size: calc(1cap + 2 * (var(--badge-inset) - var(--mention-inset)));
+        block-size: calc(1cap + 2 * (var(--badge-inset) - var(--mention-inset)));
+        fill: currentColor;
+    }
+}
+
+/* Like Telegram, a muted room's unread counter is gray */
+.decoration > [data-muted] {
+    background-color: var(--cpd-color-icon-secondary);
+}
+
+@media (forced-colors: active) {
+    /* Outlined in the system color like Compound's counter, as forced colors drop the background */
+    .mention {
+        outline: 1px solid transparent;
+    }
+}

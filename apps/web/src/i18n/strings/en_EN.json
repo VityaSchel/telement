@@ -3207,7 +3207,8 @@
         },
         "room_list": {
             "failed_pin": "Failed to pin room",
-            "failed_unpin": "Failed to unpin room"
+            "failed_unpin": "Failed to unpin room",
+            "you": "You"
         },
         "timeline": {
             "context_menu": {

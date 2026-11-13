@@ -56,10 +56,20 @@ export interface RoomListItemViewSnapshot {
     room: Room;
     /** The name of the room */
     name: string;
-    /** Whether the room name should be bolded (has unread/activity) */
-    isBold: boolean;
-    /** Optional message preview text */
+    /** Optional message preview text, without its sender */
     messagePreview?: string;
+    /** Who sent the previewed message, shown before it in group rooms: their name, or "You" for the user's own */
+    messagePreviewSender?: string;
+    /** Who is typing in the room, shown instead of the message preview */
+    typing?: string;
+    /**
+     * When the room was last active, at the end of its name: a time today, a weekday within a week, a date before
+     */
+    timestamp?: string;
+    /** The full date and time of {@link timestamp} */
+    timestampFull?: string;
+    /** {@link timestamp} as an ISO 8601 date and time */
+    timestampIso?: string;
     /** The MSC4426 user status of the other user in a DM room, if any */
     userStatus?: UserStatus;
     /** Notification decoration data */
@@ -131,10 +141,6 @@ export interface RoomListItemViewProps extends Omit<React.HTMLAttributes<HTMLBut
     isFocused: boolean;
     /** Callback when item receives focus */
     onFocus: (roomId: string, e: React.FocusEvent) => void;
-    /** Whether this is the first item in the list */
-    isFirstItem: boolean;
-    /** Whether this is the last item in the list */
-    isLastItem: boolean;
     /** Function to render the room avatar */
     renderAvatar: (room: Room) => ReactNode;
     ref?: Ref<Element>;
@@ -149,8 +155,6 @@ export const RoomListItemView = memo(function RoomListItemView({
     isSelected,
     isFocused,
     onFocus,
-    isFirstItem,
-    isLastItem,
     renderAvatar,
     ref,
     ...props
@@ -204,9 +208,6 @@ export const RoomListItemView = memo(function RoomListItemView({
                 className={classNames(styles.roomListItem, "mx_RoomListItemView", {
                     [styles.keyboardActive]: keyboardActive,
                     [styles.selected]: isSelected,
-                    [styles.bold]: item.isBold,
-                    [styles.firstItem]: isFirstItem,
-                    [styles.lastItem]: isLastItem,
                     mx_RoomListItemView_selected: isSelected,
                 })}
                 gap="var(--cpd-space-3x)"

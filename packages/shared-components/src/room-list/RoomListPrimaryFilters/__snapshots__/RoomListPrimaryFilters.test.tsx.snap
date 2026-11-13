@@ -81,7 +81,7 @@ exports[`<RoomListPrimaryFilters /> stories > snapshots > renders NarrowContaine
         class="_icon-button_1215g_8 RoomListPrimaryFilters-module_iconButton"
         data-kind="secondary"
         role="button"
-        style="--cpd-icon-button-size: 28px;"
+        style="--cpd-icon-button-size: 28px; padding: var(--cpd-space-1x);"
         tabindex="0"
       >
         <div
@@ -158,7 +158,7 @@ exports[`<RoomListPrimaryFilters /> stories > snapshots > renders NarrowWithActi
         class="_icon-button_1215g_8 RoomListPrimaryFilters-module_iconButton"
         data-kind="secondary"
         role="button"
-        style="--cpd-icon-button-size: 28px;"
+        style="--cpd-icon-button-size: 28px; padding: var(--cpd-space-1x);"
         tabindex="0"
       >
         <div

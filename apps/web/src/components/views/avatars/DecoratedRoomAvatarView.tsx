@@ -30,15 +30,14 @@ interface DecoratedRoomAvatarViewProps {
 }
 
 /**
- * Component to display the avatar of a room.
- * Currently only 32px size is supported.
+ * Component to display the avatar of a room in the room list, at 48px.
  */
 export const DecoratedRoomAvatarView = memo(function DecoratedRoomAvatarView({
     room,
 }: DecoratedRoomAvatarViewProps): JSX.Element {
     const vm = useRoomAvatarViewModel(room);
     // No decoration, we just show the avatar
-    if (!vm.badgeDecoration) return <RoomAvatar size="32px" room={room} />;
+    if (!vm.badgeDecoration) return <RoomAvatar size="48px" room={room} />;
 
     const icon = getAvatarDecoration(vm.badgeDecoration, vm.presence);
     const label = getDecorationLabel(vm.badgeDecoration, vm.presence);
@@ -52,7 +51,7 @@ export const DecoratedRoomAvatarView = memo(function DecoratedRoomAvatarView({
 
     return (
         <Flex className="mx_RoomAvatarView">
-            <RoomAvatar className={classNames("mx_RoomAvatarView_RoomAvatar", maskClass)} size="32px" room={room} />
+            <RoomAvatar className={classNames("mx_RoomAvatarView_RoomAvatar", maskClass)} size="48px" room={room} />
             {label ? <Tooltip label={label}>{icon}</Tooltip> : icon}
         </Flex>
     );
