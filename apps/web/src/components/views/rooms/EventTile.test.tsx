@@ -51,8 +51,16 @@ import { Layout } from "../../../settings/enums/Layout";
 import { ScopedRoomContextProvider } from "../../../contexts/ScopedRoomContext.tsx";
 import SettingsStore from "../../../settings/SettingsStore";
 import { RoomPermalinkCreator } from "../../../utils/permalinks/Permalinks";
-import PlatformPeg from "../../../PlatformPeg";
+import {
+    canCopyImageToClipboard,
+    copyImageToClipboard,
+} from "../../../telement/message-context-menu/copyImageToClipboard";
 import { EventPresentationContextProvider } from "../../../utils/EventPresentationContextProvider.tsx";
+
+vi.mock("../../../telement/message-context-menu/copyImageToClipboard", () => ({
+    canCopyImageToClipboard: vi.fn().mockReturnValue(false),
+    copyImageToClipboard: vi.fn().mockResolvedValue(true),
+}));
 
 function getTile(container: HTMLElement): HTMLElement {
     const tile = container.querySelector(".mx_EventTile");
@@ -141,6 +149,7 @@ function makeRelations(
             ),
         on: vi.fn(),
         off: vi.fn(),
+        removeListener: vi.fn(),
     } as unknown as Relations;
 }
 
@@ -312,64 +321,41 @@ describe("EventTile", () => {
             mxEvent = makeTimestampedMessage();
         });
 
-        it("hides the timestamp by default in room timelines", () => {
-            const { container } = getComponent();
+        it.each([Layout.Group, Layout.Bubble, Layout.IRC])(
+            "always shows the timestamp in the %s layout, without hovering",
+            (layout) => {
+                const { container } = getComponent({ layout });
 
-            expect(container.querySelector(".mx_MessageTimestamp")).toBeNull();
-        });
-
-        it("shows the timestamp when the tile is hovered", async () => {
-            const { container } = getComponent();
-            const tile = getTile(container);
-            stubHoverMatches(tile);
-
-            expect(container.querySelector(".mx_MessageTimestamp")).toBeNull();
-
-            await userEvent.hover(tile);
-
-            expect(container.querySelector(".mx_MessageTimestamp")).not.toBeNull();
-        });
-
-        it("shows the timestamp when focus is within the tile", () => {
-            const { container } = getComponent();
-
-            expect(container.querySelector(".mx_MessageTimestamp")).toBeNull();
-
-            act(() => {
-                getTile(container).focus();
-            });
-
-            expect(container.querySelector(".mx_MessageTimestamp")).not.toBeNull();
-        });
-
-        it("shows the timestamp for the last event", () => {
-            const { container } = getComponent({ last: true });
-
-            expect(container.querySelector(".mx_MessageTimestamp")).not.toBeNull();
-        });
-
-        it("shows the timestamp when timestamps are always shown", () => {
-            const { container } = getComponent({ alwaysShowTimestamps: true });
-
-            expect(container.querySelector(".mx_MessageTimestamp")).not.toBeNull();
-        });
+                expect(container.querySelector(".mx_MessageTimestamp")).not.toBeNull();
+            },
+        );
 
         it("hides the timestamp when timestamps are disabled for the tile", () => {
-            const { container } = getComponent({ alwaysShowTimestamps: true, hideTimestamp: true });
+            const { container } = getComponent({ hideTimestamp: true });
 
             expect(container.querySelector(".mx_MessageTimestamp")).toBeNull();
         });
 
-        it("does not render a placeholder timestamp in IRC layout", () => {
-            const { container } = getComponent({ layout: Layout.IRC });
+        it("draws the timestamp over the picture of an image message", () => {
+            mxEvent = mkEvent({
+                event: true,
+                type: EventType.RoomMessage,
+                room: room.roomId,
+                user: "@alice:example.org",
+                ts: 1234,
+                content: { msgtype: "m.image", body: "cat.png", url: "mxc://example.org/cat" },
+            });
+            const { container } = getComponent();
+            const timestampSlot = getByTestId(container, "event-tile-slot-timestamp");
 
-            expect(container.querySelector(".mx_MessageTimestamp")).toBeNull();
+            expect(timestampSlot.parentElement).toBe(getByTestId(container, "event-tile-slot-body"));
+            expect(timestampSlot.querySelector(".mx_MessageTimestamp")).not.toBeNull();
         });
 
         it("dispatches a room view when the linked timestamp is clicked", () => {
             vi.spyOn(dis, "dispatch").mockImplementation(() => {});
             const permalinkCreator = new RoomPermalinkCreator(room);
-            const { container } = getComponent({ alwaysShowTimestamps: true, permalinkCreator });
+            const { container } = getComponent({ permalinkCreator });
             const timestamp = container.querySelector<HTMLAnchorElement>("a.mx_MessageTimestamp");
 
             expect(timestamp).not.toBeNull();
@@ -712,16 +698,26 @@ describe("EventTile", () => {
             expect(await screen.findByTestId("mx_MessageContextMenu")).toBeInTheDocument();
         });
 
-        it("shows the timestamp while the context menu is open", async () => {
-            mxEvent = makeTimestampedMessage();
+        it("renders the message context menu when the row outside the event line is right-clicked", async () => {
             const { container } = getComponent();
 
-            expect(container.querySelector(".mx_MessageTimestamp")).toBeNull();
-
-            fireEvent.contextMenu(getLine(container), { clientX: 1, clientY: 2 });
+            fireEvent.contextMenu(getTile(container), { clientX: 1, clientY: 2 });
 
             expect(await screen.findByTestId("mx_MessageContextMenu")).toBeInTheDocument();
-            expect(container.querySelector(".mx_MessageTimestamp")).not.toBeNull();
+        });
+
+        it("renders the message context menu when the timestamp is right-clicked", async () => {
+            mxEvent = makeTimestampedMessage();
+            const permalinkCreator = new RoomPermalinkCreator(room);
+            const { container } = getComponent({ permalinkCreator });
+
+            fireEvent.contextMenu(container.querySelector(".mx_MessageTimestamp")!, { clientX: 1, clientY: 2 });
+
+            expect(await screen.findByTestId("mx_MessageContextMenu")).toBeInTheDocument();
+            expect(screen.getByRole("menuitem", { name: "Copy link" })).toHaveAttribute(
+                "href",
+                permalinkCreator.forEvent(mxEvent.getId()!),
+            );
         });
 
         it("does not render the message context menu while editing", () => {
@@ -731,20 +727,103 @@ describe("EventTile", () => {
             expect(screen.queryByTestId("mx_MessageContextMenu")).toBeNull();
         });
 
-        it("does not override the native browser context menu for links", () => {
+        it("offers to copy a link that is right-clicked", async () => {
             const { container } = getComponent();
-            vi.spyOn(PlatformPeg, "get").mockReturnValue({
-                allowOverridingNativeContextMenus: () => false,
-            } as ReturnType<typeof PlatformPeg.get>);
             const link = document.createElement("a");
             link.href = "https://example.org/";
             getLine(container).appendChild(link);
 
             const event = new MouseEvent("contextmenu", { bubbles: true, cancelable: true, clientX: 1, clientY: 2 });
-            link.dispatchEvent(event);
+            act(() => {
+                link.dispatchEvent(event);
+            });
+
+            expect(event.defaultPrevented).toBe(true);
+            expect(await screen.findByTestId("mx_MessageContextMenu")).toBeInTheDocument();
+            expect(screen.getByRole("menuitem", { name: "Copy link" })).toHaveAttribute("href", "https://example.org/");
+        });
+
+        it("keeps the browser's own menu inside text fields", () => {
+            const { container } = getComponent();
+            const input = document.createElement("input");
+            getLine(container).appendChild(input);
+
+            const event = new MouseEvent("contextmenu", { bubbles: true, cancelable: true, clientX: 1, clientY: 2 });
+            act(() => {
+                input.dispatchEvent(event);
+            });
 
             expect(event.defaultPrevented).toBe(false);
             expect(screen.queryByTestId("mx_MessageContextMenu")).toBeNull();
+        });
+
+        it("offers to copy a picture that is right-clicked", async () => {
+            vi.mocked(canCopyImageToClipboard).mockReturnValue(true);
+            const picture = new Blob(["picture"], { type: "image/png" });
+            const fetchSpy = vi.spyOn(globalThis, "fetch").mockResolvedValue(new Response(picture));
+            const { container } = getComponent();
+            const image = document.createElement("img");
+            image.src = "https://example.org/picture.png";
+            getLine(container).appendChild(image);
+
+            fireEvent.contextMenu(image, { clientX: 1, clientY: 2 });
+            fireEvent.click(await screen.findByRole("menuitem", { name: "Copy image" }));
+
+            expect(fetchSpy).toHaveBeenCalledWith("https://example.org/picture.png");
+            expect(copyImageToClipboard).toHaveBeenCalledWith(expect.any(Promise));
+            await expect(vi.mocked(copyImageToClipboard).mock.calls[0][0]).resolves.toBeInstanceOf(Blob);
+            expect(screen.queryByTestId("mx_MessageContextMenu")).toBeNull();
+        });
+
+        it("copies the full picture of an image message rather than the picture shown", async () => {
+            vi.mocked(canCopyImageToClipboard).mockReturnValue(true);
+            const fetchSpy = vi
+                .spyOn(globalThis, "fetch")
+                .mockImplementation(async () => new Response(new Blob(["picture"], { type: "image/png" })));
+            mxEvent = mkEvent({
+                event: true,
+                type: EventType.RoomMessage,
+                room: room.roomId,
+                user: "@alice:example.org",
+                content: { msgtype: "m.image", body: "cat.png", url: "mxc://example.org/cat" },
+            });
+            const { container } = getComponent();
+            const image = document.createElement("img");
+            image.src = "https://example.org/thumbnail.png";
+            getByTestId(container, "event-tile-slot-body").appendChild(image);
+
+            fireEvent.contextMenu(image, { clientX: 1, clientY: 2 });
+            fireEvent.click(await screen.findByRole("menuitem", { name: "Copy image" }));
+
+            await expect(vi.mocked(copyImageToClipboard).mock.calls[0][0]).resolves.toBeInstanceOf(Blob);
+            expect(fetchSpy).toHaveBeenCalledWith("http://this.is.a.url/example.org/cat");
+            expect(fetchSpy).not.toHaveBeenCalledWith("https://example.org/thumbnail.png");
+        });
+
+        it("opens only the reaction picker when the add-reaction button is right-clicked", async () => {
+            const reaction = makeReactionEvent(room.roomId, mxEvent.getId()!, "@bob:example.org", "👍");
+            const getRelationsForEvent = vi.fn().mockReturnValue(makeRelations(new Map([["👍", [reaction]]])));
+            getComponent({ showReactions: true, getRelationsForEvent }, TimelineRenderingType.Room, {
+                canReact: true,
+            });
+
+            fireEvent.contextMenu(screen.getByRole("button", { name: "Add reaction" }), { clientX: 1, clientY: 2 });
+
+            await waitFor(() => expect(document.querySelector(".mx_ContextualMenu")).not.toBeNull());
+            expect(screen.queryByTestId("mx_MessageContextMenu")).toBeNull();
+        });
+
+        it("hides the copy picture option when the browser cannot copy pictures", async () => {
+            vi.mocked(canCopyImageToClipboard).mockReturnValue(false);
+            const { container } = getComponent();
+            const image = document.createElement("img");
+            image.src = "https://example.org/picture.png";
+            getLine(container).appendChild(image);
+
+            fireEvent.contextMenu(image, { clientX: 1, clientY: 2 });
+
+            expect(await screen.findByTestId("mx_MessageContextMenu")).toBeInTheDocument();
+            expect(screen.queryByRole("menuitem", { name: "Copy image" })).toBeNull();
         });
     });
 

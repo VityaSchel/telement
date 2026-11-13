@@ -56,23 +56,6 @@
     width: 100%;
 }
 
-.banner {
-    position: absolute;
-    bottom: 4px;
-    left: 4px;
-    padding: 4px;
-    border-radius: var(--MBody-border-radius);
-    font-size: 0.9375rem;
-    user-select: none;
-    pointer-events: none;
-    max-width: min(100%, 350px);
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    overflow: hidden;
-    background-color: rgb(0, 0, 0, 0.6);
-    color: #ffffff;
-}
-
 .gifLabel {
     position: absolute;
     display: block;

@@ -54,8 +54,6 @@ interface IProps {
     // the latest event in this chain of replies
     parentEv: MatrixEvent;
     permalinkCreator?: RoomPermalinkCreator;
-    // Whether to always show a timestamp
-    alwaysShowTimestamps?: boolean;
     forExport?: boolean;
     isQuoteExpanded?: boolean;
     setQuoteExpanded: (isExpanded: boolean) => void;

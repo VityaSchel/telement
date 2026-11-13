@@ -193,9 +193,8 @@ describe("EventTileViewModel", () => {
         });
         expect(renderState.line).toEqual({
             media: false,
-            sticker: false,
             emote: false,
-            image: false,
+            timestampOverMedia: false,
         });
         expect(renderState.timestamp).toMatchObject(renderState.snapshot.timestamp);
     });
@@ -334,10 +333,97 @@ describe("EventTileViewModel", () => {
 
         expect(snapshot.line).toEqual({
             media: true,
-            sticker: false,
             emote: false,
-            image: true,
+            timestampOverMedia: true,
         });
+    });
+
+    it.each([
+        { name: "a picture", eventType: "m.room.message", msgtype: "m.image", over: true },
+        { name: "a video", eventType: "m.room.message", msgtype: "m.video", over: true },
+        { name: "a sticker", eventType: "m.sticker", msgtype: undefined, over: true },
+        { name: "a file", eventType: "m.room.message", msgtype: "m.file", over: false },
+        { name: "a text message", eventType: "m.room.message", msgtype: "m.text", over: false },
+    ])("draws the timestamp over the media for $name: $over", ({ eventType, msgtype, over }) => {
+        const snapshot = EventTileViewModel.createSnapshot(makeProps({ event: { eventType, msgtype } }));
+
+        expect(snapshot.line.timestampOverMedia).toBe(over);
+    });
+
+    it("keeps the timestamp beside captioned media", () => {
+        const snapshot = EventTileViewModel.createSnapshot(
+            makeProps({ event: { msgtype: "m.image", hasMediaCaption: true } }),
+        );
+
+        expect(snapshot.line.timestampOverMedia).toBe(false);
+    });
+
+    it.each([
+        { name: "a caption", content: { body: "Look at this", filename: "cat.png" }, over: false },
+        { name: "no caption", content: { body: "cat.png", filename: "cat.png" }, over: true },
+        { name: "no file name", content: { body: "cat.png" }, over: true },
+    ])("reads whether a picture event has $name", ({ content, over }) => {
+        const event = mkEvent({
+            event: true,
+            id: "$picture",
+            room: "!room:example.org",
+            ts: 123,
+            type: "m.room.message",
+            user: "@alice:example.org",
+            content: { msgtype: "m.image", url: "mxc://example.org/cat", ...content },
+        });
+        const vm = new EventTileViewModel(makeDependencies(event), makeProps());
+
+        expect(vm.getSnapshot().line.timestampOverMedia).toBe(over);
+
+        vm.dispose();
+    });
+
+    it.each([
+        {
+            name: "a picture without a file extension",
+            type: "m.room.message",
+            content: { msgtype: "m.image", body: "cat" },
+        },
+        {
+            name: "a picture whose mimetype is not a picture's",
+            type: "m.room.message",
+            content: { msgtype: "m.image", body: "cat.png", info: { mimetype: "application/pdf" } },
+        },
+        {
+            name: "a sticker whose mimetype is not a picture's",
+            type: "m.sticker",
+            content: { body: "cat", info: { mimetype: "text/html" } },
+        },
+    ])("keeps the timestamp beside $name, which shows as a file", ({ type, content }) => {
+        const event = mkEvent({
+            event: true,
+            room: "!room:example.org",
+            type,
+            user: "@alice:example.org",
+            content: { url: "mxc://example.org/cat", ...content },
+        });
+        const vm = new EventTileViewModel(makeDependencies(event), makeProps());
+
+        expect(vm.getSnapshot().line.timestampOverMedia).toBe(false);
+
+        vm.dispose();
+    });
+
+    it("keeps the timestamp beside a deleted sticker", () => {
+        const event = mkEvent({
+            event: true,
+            room: "!room:example.org",
+            type: "m.sticker",
+            user: "@alice:example.org",
+            content: { body: "cat", url: "mxc://example.org/cat" },
+        });
+        vi.spyOn(event, "isRedacted").mockReturnValue(true);
+        const vm = new EventTileViewModel(makeDependencies(event), makeProps());
+
+        expect(vm.getSnapshot().line.timestampOverMedia).toBe(false);
+
+        vm.dispose();
     });
 
     it("derives shared EventTileView root states from application inputs", () => {
@@ -397,10 +483,17 @@ describe("EventTileViewModel", () => {
         });
         expect(snapshot.line).toEqual({
             media: false,
-            sticker: true,
             emote: true,
-            image: false,
+            timestampOverMedia: true,
         });
+    });
+
+    it("marks twelve-hour timestamps on the root", () => {
+        const twelveHour = EventTileViewModel.createSnapshot(makeProps({ timestamp: { isTwelveHour: true } }));
+        const twentyFourHour = EventTileViewModel.createSnapshot(makeProps());
+
+        expect(twelveHour.root.state.twelveHourTimestamp).toBe(true);
+        expect(twentyFourHour.root.state.twelveHourTimestamp).toBeFalsy();
     });
 
     it("derives aligned-between-bubbles root state", () => {
@@ -472,6 +565,13 @@ describe("EventTileViewModel", () => {
 
         expect(hoverSnapshot.actionBar.show).toBe(true);
         expect(contextMenuSnapshot.actionBar.show).toBe(false);
+    });
+
+    it("always shows the timestamp, not only while the tile is hovered or focused", () => {
+        const snapshot = EventTileViewModel.createSnapshot(makeProps());
+
+        expect(snapshot.timestamp.show).toBe(true);
+        expect(snapshot.timestamp.displayState.showLinkedTimestamp).toBe(true);
     });
 
     it("derives timestamp state for thread list events", () => {
@@ -591,13 +691,13 @@ describe("EventTileViewModel", () => {
     });
 
     it("updates an instance snapshot when inputs change", () => {
-        const vm = new EventTileViewModel(makeDependencies(), makeProps());
+        const vm = new EventTileViewModel(makeDependencies(), makeProps({ timestamp: { hideTimestamp: true } }));
         const listener = vi.fn();
         const unsubscribe = vm.subscribe(listener);
 
         expect(vm.getSnapshot().snapshot.timestamp.show).toBe(false);
 
-        vm.setInputs(makeDependencies(), makeProps({ interaction: { hover: true } }));
+        vm.setInputs(makeDependencies(), makeProps());
 
         expect(vm.getSnapshot().snapshot.timestamp.show).toBe(true);
         expect(listener).toHaveBeenCalled();

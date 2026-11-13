@@ -57,7 +57,6 @@ interface RenderItemContext {
     showUrlPreview?: boolean;
     showReactions?: boolean;
     isTwelveHour: boolean;
-    alwaysShowTimestamps: boolean;
     editState?: EditorStateTransfer;
     getRelationsForEvent: GetRelationsForEvent;
 }
@@ -114,7 +113,6 @@ function renderTimelineItem(item: TimelineItem, ctx: RenderItemContext): ReactNo
                     showUrlPreview={ctx.showUrlPreview}
                     showReactions={ctx.showReactions}
                     isTwelveHour={ctx.isTwelveHour}
-                    alwaysShowTimestamps={ctx.alwaysShowTimestamps}
                 />
             );
         }
@@ -139,9 +137,8 @@ export function NewTimelinePanel({
 }: Readonly<NewTimelinePanelProps>): JSX.Element {
     const client: MatrixClient = useMatrixClientContext();
 
-    // Read here rather than passed in, so changing either setting redraws the tiles.
+    // Read here rather than passed in, so changing the setting redraws the tiles.
     const isTwelveHour = useSettingValue("showTwelveHourTimestamps");
-    const alwaysShowTimestamps = useSettingValue("alwaysShowTimestamps");
 
     // Modern and Message Bubbles are fully supported. IRC layout is not yet: it
     // needs the draggable name column the old timeline provides, so fall back to
@@ -194,7 +191,6 @@ export function NewTimelinePanel({
                 showUrlPreview,
                 showReactions,
                 isTwelveHour,
-                alwaysShowTimestamps,
                 editState,
                 getRelationsForEvent,
             }),
@@ -206,7 +202,6 @@ export function NewTimelinePanel({
             showUrlPreview,
             showReactions,
             isTwelveHour,
-            alwaysShowTimestamps,
             editState,
             getRelationsForEvent,
         ],

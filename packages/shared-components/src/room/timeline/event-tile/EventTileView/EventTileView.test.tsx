@@ -8,6 +8,7 @@
 import React, { createRef } from "react";
 import { describe, expect, it, vi } from "vitest";
 import { userEvent } from "vitest/browser";
+import "@vector-im/compound-design-tokens/assets/web/css/compound-design-tokens.css";
 
 import { fireEvent, render, screen } from "@test-utils";
 import type { EventLayout } from "../../EventPresentation";
@@ -22,6 +23,8 @@ import styles from "./EventTileView.module.css";
 import { MockViewModel } from "../../../../core/viewmodel";
 import { ReactionsRowView, type ReactionsRowViewSnapshot } from "../reactions/ReactionsRow";
 import reactionStyles from "../reactions/ReactionsRow/ReactionsRow.module.css";
+import { ImageBodyView, ImageBodyViewState, type ImageBodyViewSnapshot } from "../body/MImageBodyView";
+import imageBodyStyles from "../body/MImageBodyView/ImageBodyView.module.css";
 
 const renderState: EventTileViewProps["root"] = {
     id: "event-line-1",
@@ -122,6 +125,7 @@ const rootStateMatrix = [
     { name: "contextual", state: { contextual: true }, hook: "stateContextual" },
     { name: "action bar focused", state: { actionBarFocused: true }, hook: "stateActionBarFocused" },
     { name: "preview clamped", state: { previewClamped: true }, hook: "statePreviewClamped" },
+    { name: "twelve-hour timestamp", state: { twelveHourTimestamp: true }, hook: "stateTwelveHourTimestamp" },
 ] satisfies ReadonlyArray<{
     name: string;
     state: Partial<EventTileViewRootState>;
@@ -130,9 +134,8 @@ const rootStateMatrix = [
 
 const lineStateMatrix = [
     { name: "media", state: { media: true }, hook: "lineMedia" },
-    { name: "image", state: { image: true }, hook: "lineImage" },
-    { name: "sticker", state: { sticker: true }, hook: "lineSticker" },
     { name: "emote", state: { emote: true }, hook: "lineEmote" },
+    { name: "timestamp over media", state: { timestampOverMedia: true }, hook: "lineTimestampOverMedia" },
 ] satisfies ReadonlyArray<{
     name: string;
     state: EventTileViewLine;
@@ -197,7 +200,6 @@ const shellPlacementMatrix = [
     },
     { name: "editing continuation", rootState: { editing: true, continuation: true }, lineState: {}, layout: "bubble" },
     { name: "media line", rootState: {}, lineState: { media: true }, layout: "group" },
-    { name: "sticker line", rootState: {}, lineState: { sticker: true }, layout: "bubble" },
     { name: "emote line", rootState: {}, lineState: { emote: true }, layout: "bubble" },
     { name: "other-event bubble alignment", rootState: {}, lineState: {}, layout: "bubble", isOwnEvent: false },
 ] satisfies ReadonlyArray<{
@@ -708,6 +710,86 @@ describe("EventTileView", () => {
         expect(onClick).toHaveBeenCalledOnce();
     });
 
+    it.each(["group", "bubble", "irc"] as const)(
+        "opens the context menu from anywhere on the %s layout row",
+        (layout) => {
+            const onContextMenu = vi.fn();
+            render(<EventTileView {...createProps({ onContextMenu, slots: createStylingContractSlots() })} />, {
+                presentation: { layout },
+            });
+
+            for (const slotName of ["avatar", "sender", "timestamp", "replyChain", "body", "footer", "receipt"]) {
+                fireEvent.contextMenu(screen.getByTestId(`styling-contract-${slotName}`));
+            }
+
+            expect(onContextMenu).toHaveBeenCalledTimes(7);
+        },
+    );
+
+    it("opens the context menu from anywhere on a thread row", () => {
+        const onContextMenu = vi.fn();
+        render(
+            <EventTileView
+                {...createProps({
+                    root: { ...renderState, shape: "Thread" },
+                    onContextMenu,
+                    slots: createStylingContractSlots(),
+                })}
+            />,
+        );
+
+        for (const slotName of ["avatar", "sender", "body", "footer"]) {
+            fireEvent.contextMenu(screen.getByTestId(`styling-contract-${slotName}`));
+        }
+
+        expect(onContextMenu).toHaveBeenCalledTimes(4);
+    });
+
+    it.each(["group", "bubble"] as const)(
+        "draws the %s layout timestamp inside the body slot when it goes over the media",
+        (layout) => {
+            const { getByTestId } = render(
+                <EventTileView
+                    {...createProps({
+                        line: { media: true, timestampOverMedia: true },
+                        slots: createStylingContractSlots(),
+                    })}
+                />,
+                { presentation: { layout } },
+            );
+            const bodySlot = getByTestId("event-tile-slot-body");
+            const line = bodySlot.parentElement!;
+
+            expect(line).toHaveClass(styles.lineTimestampOverMedia);
+            expect(getByTestId("event-tile-slot-timestamp").parentElement).toBe(bodySlot);
+            expect(Array.from(bodySlot.children).map((child) => child.getAttribute("data-testid"))).toEqual([
+                "styling-contract-body",
+                "event-tile-slot-timestamp",
+            ]);
+            expect(Array.from(line.children).map((child) => child.getAttribute("data-testid"))).toEqual([
+                "styling-contract-contextMenu",
+                "event-tile-slot-padlock",
+                "event-tile-slot-replyChain",
+                "event-tile-slot-body",
+                "event-tile-slot-actionBar",
+            ]);
+        },
+    );
+
+    it("draws a thread timestamp inside the body slot when it goes over the media", () => {
+        const { getByTestId } = render(
+            <EventTileView
+                {...createProps({
+                    root: { ...renderState, shape: "Thread" },
+                    line: { media: true, timestampOverMedia: true },
+                    slots: createStylingContractSlots(),
+                })}
+            />,
+        );
+
+        expect(getByTestId("event-tile-slot-timestamp").parentElement).toBe(getByTestId("event-tile-slot-body"));
+    });
+
     it("does not attach a context menu handler to preview lines", () => {
         const onContextMenu = vi.fn();
         const { getByTestId } = render(
@@ -818,5 +900,147 @@ describe("EventTileView bubble layout reactions", () => {
 
     it("keeps the add-reaction control after the reactions in another user's bubble", () => {
         expect(getComputedStyle(renderAddReactionButton(false)).order).toBe("0");
+    });
+});
+
+describe("EventTileView placement", () => {
+    const timestamp = <span>23:59</span>;
+    const textBody = (text: string): React.ReactElement => (
+        <div className="mx_EventTile_content">
+            <div className="mx_EventTile_body" dir="auto">
+                {text}
+            </div>
+        </div>
+    );
+
+    interface PlacementTile {
+        shape?: EventTileViewProps["root"]["shape"];
+        state?: Partial<EventTileViewRootState>;
+        line?: EventTileViewLine;
+        slots: EventTileViewProps["slots"];
+    }
+
+    function renderTiles(layout: EventLayout, ...tiles: PlacementTile[]): void {
+        render(
+            <ol style={{ width: 400, margin: 0, padding: 0, listStyle: "none" }}>
+                {tiles.map(({ shape = "Room", state, line, slots }, index) => (
+                    <EventTileView
+                        key={index}
+                        root={{
+                            ...renderState,
+                            eventId: `$event-${index}`,
+                            shape,
+                            state: { isOwnEvent: false, hasReply: false, ...state },
+                        }}
+                        slots={{ timestamp, ...slots }}
+                        line={line}
+                    />
+                ))}
+            </ol>,
+            { presentation: { layout } },
+        );
+    }
+
+    function lastLineOf(element: Element): DOMRect {
+        const range = document.createRange();
+        range.selectNodeContents(element);
+        return Array.from(range.getClientRects()).at(-1)!;
+    }
+
+    const timestampRect = (): DOMRect => screen.getByTestId("event-tile-slot-timestamp").getBoundingClientRect();
+
+    it("lets the pointer in a bubble row's side margins reach the row", () => {
+        renderTiles("bubble", { slots: { body: textBody("Hello") } });
+        const tile = screen.getByTestId("event-tile");
+        const { left, right, top, height } = tile.getBoundingClientRect();
+
+        expect(document.elementFromPoint(left - 20, top + height / 2)).toBe(tile);
+        expect(document.elementFromPoint(right + 20, top + height / 2)).toBe(tile);
+    });
+
+    it.each(["bubble", "group"] as const)(
+        "keeps the %s layout media timestamp on the picture when a wider reply is quoted above it",
+        (layout) => {
+            renderTiles(layout, {
+                state: { hasReply: true },
+                line: { media: true, timestampOverMedia: true },
+                slots: {
+                    replyChain: <div style={{ width: 180, height: 40 }} />,
+                    body: <div data-testid="picture" style={{ width: 100, height: 75 }} />,
+                },
+            });
+            const picture = screen.getByTestId("picture").getBoundingClientRect();
+            const badge = timestampRect();
+
+            expect(badge.left).toBeGreaterThanOrEqual(picture.left);
+            expect(badge.right).toBeLessThanOrEqual(picture.right);
+            expect(badge.bottom).toBeLessThanOrEqual(picture.bottom);
+        },
+    );
+
+    it.each(["bubble", "group"] as const)(
+        "grows a tiny %s layout picture so that its timestamp badge fits",
+        (layout) => {
+            const tinyPicture = "data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACwAAAAAAQABAAACAkQBADs=";
+            const vm = new MockViewModel<ImageBodyViewSnapshot>({
+                state: ImageBodyViewState.READY,
+                alt: "Tiny picture",
+                src: tinyPicture,
+                thumbnailSrc: tinyPicture,
+                maxWidth: 1,
+                maxHeight: 1,
+                aspectRatio: "1 / 1",
+            });
+            renderTiles(layout, {
+                line: { media: true, timestampOverMedia: true },
+                slots: { body: <ImageBodyView vm={vm} /> },
+            });
+            const picture = document.querySelector(`.${imageBodyStyles.thumbnailContainer}`)!.getBoundingClientRect();
+            const badge = timestampRect();
+
+            expect(badge.left).toBeGreaterThanOrEqual(picture.left);
+            expect(badge.right).toBeLessThanOrEqual(picture.right);
+        },
+    );
+
+    it("puts a bubble's timestamp at the end of its last line when it fits", () => {
+        renderTiles("bubble", { slots: { body: textBody("Hello") } });
+        const lastLine = lastLineOf(document.querySelector(".mx_EventTile_body")!);
+        const time = timestampRect();
+
+        expect(time.left).toBeGreaterThanOrEqual(lastLine.right);
+        expect(time.top).toBeLessThan(lastLine.bottom);
+    });
+
+    it.each([
+        ["short", "مرحبا بكم في الغرفة"],
+        ["wrapped", "هذه رسالة طويلة باللغة العربية تحتوي على نص كاف لكي تلتف على عدة أسطر داخل الفقاعة الضيقة"],
+    ])("keeps %s right-to-left text in a bubble clear of the timestamp", (_name, text) => {
+        renderTiles("bubble", { slots: { body: textBody(text) } });
+        const range = document.createRange();
+        range.selectNodeContents(document.querySelector(".mx_EventTile_body")!);
+        const time = timestampRect();
+
+        for (const line of Array.from(range.getClientRects())) {
+            const overlaps =
+                line.left < time.right && time.left < line.right && line.top < time.bottom && time.top < line.bottom;
+            expect(overlaps).toBe(false);
+        }
+    });
+
+    it.each(["Thread", "Card"] as const)("keeps %s read receipts clear of the message and its timestamp", (shape) => {
+        renderTiles("group", {
+            shape,
+            state: { hasReply: false },
+            slots: {
+                body: textBody("A message long enough to fill the whole width of the line it sits on and wrap."),
+                receipt: <span data-testid="receipt" style={{ display: "inline-block", width: 32, height: 16 }} />,
+            },
+        });
+        const message = document.querySelector(".mx_EventTile_content")!.getBoundingClientRect();
+        const receipt = screen.getByTestId("receipt").getBoundingClientRect();
+
+        expect(receipt.left).toBeGreaterThanOrEqual(message.right);
+        expect(receipt.right).toBeLessThanOrEqual(timestampRect().left);
     });
 });

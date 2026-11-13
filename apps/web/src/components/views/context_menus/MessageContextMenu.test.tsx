@@ -41,6 +41,10 @@ import SettingsStore from "../../../settings/SettingsStore";
 import { ReadPinsEventId } from "../right_panel/types";
 import { Action } from "../../../dispatcher/actions";
 import { ScopedRoomContextProvider } from "../../../contexts/ScopedRoomContext.tsx";
+import {
+    canCopyImageToClipboard,
+    copyImageToClipboard,
+} from "../../../telement/message-context-menu/copyImageToClipboard";
 
 vi.mock("../../../utils/strings", () => ({
     getSelectedText: vi.fn(),
@@ -54,6 +58,10 @@ vi.mock("../../../utils/EventUtils", async () => ({
     canEditContent: vi.fn(),
 }));
 vi.mock("../../../dispatcher/dispatcher");
+vi.mock("../../../telement/message-context-menu/copyImageToClipboard", () => ({
+    canCopyImageToClipboard: vi.fn(),
+    copyImageToClipboard: vi.fn(),
+}));
 
 const roomId = "roomid";
 
@@ -594,6 +602,36 @@ describe("MessageContextMenu", () => {
             const copyButton = document.querySelector('li[aria-label="Copy"]')!;
             fireEvent.mouseDown(copyButton);
             expect(copyPlainTextToClipboard).toHaveBeenCalledWith(text);
+        });
+
+        it("copies the picture that was right-clicked", async () => {
+            vi.mocked(canCopyImageToClipboard).mockReturnValue(true);
+            const picture = Promise.resolve(new Blob(["picture"], { type: "image/png" }));
+            const loadImage = vi.fn().mockReturnValue(picture);
+            const onFinished = vi.fn();
+
+            createMenuWithContent(createMessageEventContent("hello"), { rightClick: true, loadImage, onFinished });
+            fireEvent.click(screen.getByRole("menuitem", { name: "Copy image" }));
+
+            expect(loadImage).toHaveBeenCalledTimes(1);
+            expect(copyImageToClipboard).toHaveBeenCalledWith(picture);
+            expect(onFinished).toHaveBeenCalled();
+        });
+
+        it("does not offer to copy a picture when the browser cannot copy pictures", () => {
+            vi.mocked(canCopyImageToClipboard).mockReturnValue(false);
+
+            createMenuWithContent(createMessageEventContent("hello"), { rightClick: true, loadImage: vi.fn() });
+
+            expect(screen.queryByRole("menuitem", { name: "Copy image" })).toBeNull();
+        });
+
+        it("does not offer to copy a picture when no picture was right-clicked", () => {
+            vi.mocked(canCopyImageToClipboard).mockReturnValue(true);
+
+            createRightClickMenuWithContent(createMessageEventContent("hello"));
+
+            expect(screen.queryByRole("menuitem", { name: "Copy image" })).toBeNull();
         });
 
         it("copy button is not shown when there is nothing to copy", () => {

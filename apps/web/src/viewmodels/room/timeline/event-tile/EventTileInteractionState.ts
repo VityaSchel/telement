@@ -11,6 +11,8 @@ export interface EventTileContextMenuState {
     position: Pick<DOMRect, "top" | "left" | "bottom">;
     /** Optional link target captured from the context-menu target. */
     link?: string;
+    /** Address of the picture the context menu was opened on, if any. */
+    imageSrc?: string;
 }
 
 /** Interaction state owned by EventTile. */

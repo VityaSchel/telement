@@ -27,8 +27,6 @@ import MatrixClientContext from "../../contexts/MatrixClientContext";
 import { MatrixClientPeg } from "../../MatrixClientPeg";
 import { searchPagination, SearchScope } from "../../Searching";
 import { SDKContextClass } from "../../contexts/SDKContextClass";
-import SettingsStore from "../../settings/SettingsStore.ts";
-import { SettingLevel } from "../../settings/SettingLevel.ts";
 import type * as Searching from "../../Searching";
 
 vi.mock("../../Searching", async () => ({
@@ -472,7 +470,6 @@ describe("<RoomSearchView/>", () => {
     });
 
     it("should pass appropriate permalink creator for all rooms search", async () => {
-        await SettingsStore.setValue("alwaysShowTimestamps", null, SettingLevel.DEVICE, true);
         const room2 = new Room("!room2:server", client, client.getSafeUserId());
         const room3 = new Room("!room3:server", client, client.getSafeUserId());
         vi.mocked(client.getRoom).mockImplementation(

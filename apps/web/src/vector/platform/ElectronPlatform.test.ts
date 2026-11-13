@@ -224,11 +224,6 @@ describe("ElectronPlatform", () => {
         expect(platform.overrideBrowserShortcuts()).toBe(true);
     });
 
-    it("allows overriding native context menus", () => {
-        const platform = new ElectronPlatform();
-        expect(platform.allowOverridingNativeContextMenus()).toBe(true);
-    });
-
     it("indicates support for desktop capturer", () => {
         const platform = new ElectronPlatform();
         expect(platform.supportsDesktopCapturer()).toBe(true);

@@ -56,18 +56,21 @@ export interface EventTileViewRootState {
     actionBarFocused?: boolean;
     /** Whether the body should be clamped to a preview. */
     previewClamped?: boolean;
+    /** Whether the timestamp uses the twelve-hour clock, which needs a wider space beside the message. */
+    twelveHourTimestamp?: boolean;
 }
 
 /** Semantic state consumed by EventTileView for the event line. */
 export interface EventTileViewLine {
     /** Whether the event body is likely to render media content. */
     media?: boolean;
-    /** Whether the event is a sticker. */
-    sticker?: boolean;
     /** Whether the event body is an emote. */
     emote?: boolean;
-    /** Whether the event body is an image. */
-    image?: boolean;
+    /**
+     * Whether the body is a picture, sticker or video without a caption. Its timestamp is then drawn as a badge
+     * over the bottom corner of the media rather than beside the message.
+     */
+    timestampOverMedia?: boolean;
 }
 
 /** Complete root state consumed by EventTileView. */

@@ -77,10 +77,6 @@ export interface ImageReplyBodyViewProps {
      */
     gifLabel?: string;
     /**
-     * Optional overlay banner shown while hovered.
-     */
-    bannerLabel?: string;
-    /**
      * Invoked when the rendered image loads.
      */
     onImageLoad?: ReactEventHandler<HTMLImageElement>;
@@ -144,7 +140,6 @@ export function ImageReplyBodyView({
     showAnimatedContentOnHover,
     showImage = true,
     gifLabel,
-    bannerLabel,
     onImageLoad,
     onImageError,
 }: Readonly<ImageReplyBodyViewProps>): JSX.Element {
@@ -221,7 +216,6 @@ export function ImageReplyBodyView({
                         />
                     ) : null}
                     {gifLabel && !hover ? <p className={styles.gifLabel}>{gifLabel}</p> : null}
-                    {bannerLabel && hover ? <span className={styles.banner}>{bannerLabel}</span> : null}
                 </div>
             </div>
         </div>

@@ -91,7 +91,6 @@ const meta = {
         aspectRatio: "1 / 1",
         isSvg: false,
         gifLabel: undefined,
-        bannerLabel: "install-spinner.png",
         tooltipLabel: undefined,
         linkUrl: imageSrc,
         linkTarget: undefined,

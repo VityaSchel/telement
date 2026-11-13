@@ -251,7 +251,6 @@ export interface IRoomState {
     resizing: boolean;
     layout: Layout;
     lowBandwidth: boolean;
-    alwaysShowTimestamps: boolean;
     showTwelveHourTimestamps: boolean;
     userTimezone: string | undefined;
     readMarkerInViewThresholdMs: number;
@@ -481,7 +480,6 @@ export class RoomView extends React.Component<IRoomProps, IRoomState> {
             resizing: false,
             layout: SettingsStore.getValue("layout"),
             lowBandwidth: SettingsStore.getValue("lowBandwidth"),
-            alwaysShowTimestamps: SettingsStore.getValue("alwaysShowTimestamps"),
             showTwelveHourTimestamps: SettingsStore.getValue("showTwelveHourTimestamps"),
             userTimezone: TimezoneHandler.getUserTimezone(),
             readMarkerInViewThresholdMs: SettingsStore.getValue("readMarkerInViewThresholdMs"),
@@ -994,9 +992,6 @@ export class RoomView extends React.Component<IRoomProps, IRoomState> {
             SettingsStore.watchSetting("layout", null, (...[, , , value]) => this.setState({ layout: value! })),
             SettingsStore.watchSetting("lowBandwidth", null, (...[, , , value]) =>
                 this.setState({ lowBandwidth: value! }),
-            ),
-            SettingsStore.watchSetting("alwaysShowTimestamps", null, (...[, , , value]) =>
-                this.setState({ alwaysShowTimestamps: value! }),
             ),
             SettingsStore.watchSetting("showTwelveHourTimestamps", null, (...[, , , value]) =>
                 this.setState({ showTwelveHourTimestamps: value! }),

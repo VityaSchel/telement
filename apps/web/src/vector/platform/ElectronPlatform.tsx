@@ -273,10 +273,6 @@ export default class ElectronPlatform extends BasePlatform {
         return true;
     }
 
-    public allowOverridingNativeContextMenus(): boolean {
-        return true;
-    }
-
     public setNotificationCount(count: number): void {
         if (this.notificationCount === count) return;
         super.setNotificationCount(count);

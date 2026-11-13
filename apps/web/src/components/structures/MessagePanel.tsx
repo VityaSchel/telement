@@ -171,9 +171,6 @@ interface IProps {
     // show twelve hour timestamps
     isTwelveHour?: boolean;
 
-    // show timestamps always
-    alwaysShowTimestamps?: boolean;
-
     // whether to show reactions for an event
     showReactions?: boolean;
 
@@ -613,10 +610,7 @@ export default class MessagePanel extends React.Component<IProps, IState> {
 
     private getEventTiles(): ReactNode[] {
         // first figure out which is the last event in the list which we're
-        // actually going to show; this allows us to behave slightly
-        // differently for the last event in the list. (eg show timestamp)
-        //
-        // we also need to figure out which is the last event we show which isn't
+        // actually going to show, and the last event we show which isn't
         // a local echo, to manage the read-marker.
         let lastShownEvent: MatrixEvent | undefined;
         const events: WrappedEvent[] = this.props.events.map((event) => {
@@ -679,7 +673,6 @@ export default class MessagePanel extends React.Component<IProps, IState> {
             const wrappedEvent = events[i];
             const { event, shouldShow } = wrappedEvent;
             const eventId = event.getId()!;
-            const last = event === lastShownEvent;
             const { nextEventAndShouldShow, nextTile } = this.getNextEventInfo(events, i);
 
             if (grouper) {
@@ -715,14 +708,7 @@ export default class MessagePanel extends React.Component<IProps, IState> {
                     // otherwise React will auto-generate keys, and we will end up
                     // replacing all the DOM elements every time we paginate.
                     ret.push(
-                        ...this.getTilesForEvent(
-                            prevEvent,
-                            wrappedEvent,
-                            last,
-                            false,
-                            nextEventAndShouldShow,
-                            nextTile,
-                        ),
+                        ...this.getTilesForEvent(prevEvent, wrappedEvent, false, nextEventAndShouldShow, nextTile),
                     );
                     prevEvent = event;
                 }
@@ -742,7 +728,6 @@ export default class MessagePanel extends React.Component<IProps, IState> {
     public getTilesForEvent(
         prevEvent: MatrixEvent | null,
         wrappedEvent: WrappedEvent,
-        last = false,
         isGrouped = false,
         nextEvent: WrappedEvent | null = null,
         nextEventWithTile: MatrixEvent | null = null,
@@ -813,7 +798,6 @@ export default class MessagePanel extends React.Component<IProps, IState> {
                 key={mxEv.getTxnId() || eventId}
                 as="li"
                 ref={this.collectEventTile.bind(this, eventId)}
-                alwaysShowTimestamps={this.props.alwaysShowTimestamps}
                 mxEvent={mxEv}
                 shape={this.props.shape}
                 continuation={continuation}
@@ -828,7 +812,6 @@ export default class MessagePanel extends React.Component<IProps, IState> {
                 eventSendStatus={mxEv.getAssociatedStatus() ?? undefined}
                 isTwelveHour={this.props.isTwelveHour}
                 permalinkCreator={this.props.permalinkCreator}
-                last={last}
                 lastInSection={lastInSection}
                 lastSuccessful={wrappedEvent.lastSuccessfulWeSent}
                 isSelectedEvent={highlight}

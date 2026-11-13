@@ -102,10 +102,6 @@ export interface ImageBodyViewSnapshot {
      */
     gifLabel?: string;
     /**
-     * Optional overlay banner shown while hovered/focused.
-     */
-    bannerLabel?: string;
-    /**
      * Optional tooltip shown on the media frame.
      */
     tooltipLabel?: string;
@@ -204,7 +200,7 @@ function renderPlaceholder({
  * Renders the body of an image message with ready, hidden, and error states.
  *
  * The media frame supports thumbnail fallbacks, optional loading placeholders,
- * animated-content preview on hover/focus, and optional tooltip/banner labels.
+ * animated-content preview on hover/focus, and an optional tooltip label.
  * Supplemental content such as a file body row can be rendered after the image
  * through `children`.
  *
@@ -239,7 +235,6 @@ export function ImageBodyView({
         aspectRatio,
         isSvg,
         gifLabel,
-        bannerLabel,
         tooltipLabel,
         linkUrl,
         linkTarget,
@@ -327,11 +322,6 @@ export function ImageBodyView({
             />
         ) : null;
 
-    const banner =
-        state === ImageBodyViewState.READY && bannerLabel && hoverOrFocus ? (
-            <span className={styles.banner}>{bannerLabel}</span>
-        ) : null;
-
     const gifBadge =
         state === ImageBodyViewState.READY && gifLabel && !hoverOrFocus ? (
             <p className={styles.gifLabel}>{gifLabel}</p>
@@ -352,7 +342,6 @@ export function ImageBodyView({
             <div className={styles.mediaContent} style={mediaStyle}>
                 {media}
                 {gifBadge}
-                {banner}
             </div>
         </div>
     );

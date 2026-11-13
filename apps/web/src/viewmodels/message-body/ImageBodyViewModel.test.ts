@@ -15,7 +15,6 @@ import { vi, describe, it, expect, beforeEach, afterEach } from "vitest";
 import SettingsStore from "../../settings/SettingsStore";
 import { ImageSize } from "../../settings/enums/ImageSize";
 import { type Media, mediaFromContent } from "../../customisations/Media";
-import { TimelineRenderingType } from "../../contexts/RoomContext";
 import { DecryptError, DownloadError } from "../../utils/DecryptFile";
 import { type MediaEventHelper } from "../../utils/MediaEventHelper";
 import { ImageBodyViewModel } from "./ImageBodyViewModel";
@@ -130,7 +129,6 @@ describe("ImageBodyViewModel", () => {
         new ImageBodyViewModel({
             mxEvent: createEvent(),
             mediaVisible: false,
-            timelineRenderingType: TimelineRenderingType.Room,
             imageRef,
             ...overrides,
         });
@@ -333,6 +331,8 @@ describe("ImageBodyViewModel", () => {
             thumbnailSrc: "https://server/thumb.png",
             linkUrl: "https://server/full.png",
         });
+        // Telement shows no file name and size over the picture.
+        expect(vm.getSnapshot()).not.toHaveProperty("bannerLabel");
     });
 
     it("renders an unencrypted image this client uploaded from memory", async () => {
@@ -944,7 +944,6 @@ describe("ImageBodyViewModel", () => {
         vm.setMaxImageHeight(100);
         vm.setMediaVisible(true);
         vm.setPermalinkCreator(undefined);
-        vm.setTimelineRenderingType(TimelineRenderingType.Room);
         vm.setSetMediaVisible(undefined);
         imageSizeWatcher?.(undefined, undefined, undefined, undefined, ImageSize.Normal);
 
@@ -952,7 +951,6 @@ describe("ImageBodyViewModel", () => {
 
         vm.setForExport(true);
         vm.setMaxImageHeight(200);
-        vm.setTimelineRenderingType(TimelineRenderingType.File);
         vm.setPermalinkCreator({} as any);
         vm.setSetMediaVisible(setMediaVisible);
         vm.onHiddenButtonClick();
@@ -961,7 +959,6 @@ describe("ImageBodyViewModel", () => {
         expect(setMediaVisible).toHaveBeenCalledWith(true);
         expect(vm.getSnapshot()).toMatchObject({
             linkTarget: "_blank",
-            bannerLabel: undefined,
         });
     });
 

@@ -21,10 +21,8 @@ import Modal from "../../Modal";
 import { MatrixClientPeg } from "../../MatrixClientPeg";
 import { _t } from "../../languageHandler";
 import { mediaFromContent } from "../../customisations/Media";
-import { TimelineRenderingType } from "../../contexts/RoomContext";
 import SettingsStore from "../../settings/SettingsStore";
 import { type ImageSize, suggestedSize as suggestedImageSize } from "../../settings/enums/ImageSize";
-import { presentableTextForFile } from "../../utils/FileUtils";
 import { type MediaEventHelper } from "../../utils/MediaEventHelper";
 import { blobIsAnimated, mayBeAnimated } from "../../utils/Image";
 import { type RoomPermalinkCreator } from "../../utils/permalinks/Permalinks";
@@ -59,10 +57,6 @@ export interface ImageBodyViewModelProps {
      * Permalink helper passed to the image lightbox.
      */
     permalinkCreator?: RoomPermalinkCreator;
-    /**
-     * Timeline context used to decide which labels and supplemental content should be shown.
-     */
-    timelineRenderingType: TimelineRenderingType;
     /**
      * Ref to the underlying image element used for load dimensions and lightbox animation.
      */
@@ -184,10 +178,6 @@ export class ImageBodyViewModel
         return _t("timeline|m.image|error");
     }
 
-    private static shouldShowBanner(timelineRenderingType: TimelineRenderingType): boolean {
-        return ![TimelineRenderingType.ThreadsList, TimelineRenderingType.File].includes(timelineRenderingType);
-    }
-
     private static computeSnapshot(props: ImageBodyViewModelProps, state: InternalState): ImageBodyViewSnapshot {
         const content = props.mxEvent.getContent<ImageContent>();
         const dimensions = ImageBodyViewModel.getImageDimensions(props, state);
@@ -224,9 +214,6 @@ export class ImageBodyViewModel
             placeholder: !props.forExport && !state.imgLoaded ? state.placeholder : ImageBodyViewPlaceholder.NONE,
             blurhash: content.info?.[BLURHASH_FIELD],
             gifLabel: state.isAnimated && !autoplayGifs ? "GIF" : undefined,
-            bannerLabel: ImageBodyViewModel.shouldShowBanner(props.timelineRenderingType)
-                ? presentableTextForFile(content, _t("common|image"), true, true)
-                : undefined,
             linkUrl: contentUrl ?? undefined,
             linkTarget: props.forExport ? "_blank" : undefined,
             ...dimensions,
@@ -623,18 +610,6 @@ export class ImageBodyViewModel
             ...this.props,
             permalinkCreator,
         };
-    }
-
-    public setTimelineRenderingType(timelineRenderingType: TimelineRenderingType): void {
-        if (this.props.timelineRenderingType === timelineRenderingType) {
-            return;
-        }
-
-        this.props = {
-            ...this.props,
-            timelineRenderingType,
-        };
-        this.snapshot.merge(ImageBodyViewModel.computeSnapshot(this.props, this.state));
     }
 
     public setSetMediaVisible(setMediaVisible?: (visible: boolean) => void): void {

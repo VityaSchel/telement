@@ -29,7 +29,6 @@ import { suggestedSize as suggestedImageSize } from "../../../settings/enums/Ima
 import { MatrixClientPeg } from "../../../MatrixClientPeg";
 import RoomContext, { TimelineRenderingType } from "../../../contexts/RoomContext";
 import { blobIsAnimated, mayBeAnimated } from "../../../utils/Image";
-import { presentableTextForFile } from "../../../utils/FileUtils";
 import { createReconnectedListener } from "../../../utils/connection";
 import MediaProcessingError from "./shared/MediaProcessingError";
 import { DecryptError, DownloadError } from "../../../utils/DecryptFile";
@@ -351,20 +350,6 @@ export class ImageBodyBaseInner extends React.Component<ImageBodyBaseProps, ISta
         }
     }
 
-    protected getBanner(content: ImageContent): ReactNode {
-        if (
-            [TimelineRenderingType.ThreadsList, TimelineRenderingType.File].includes(this.context.timelineRenderingType)
-        ) {
-            return null;
-        }
-
-        return (
-            <span className="mx_MImageBody_banner">
-                {presentableTextForFile(content, _t("common|image"), true, true)}
-            </span>
-        );
-    }
-
     protected messageContent(
         contentUrl: string | null,
         thumbUrl: string | null,
@@ -468,11 +453,6 @@ export class ImageBodyBaseInner extends React.Component<ImageBodyBaseProps, ISta
             gifLabel = <p className="mx_MImageBody_gifLabel">GIF</p>;
         }
 
-        let banner: ReactNode | undefined;
-        if (this.props.mediaVisible && hoverOrFocus) {
-            banner = this.getBanner(content);
-        }
-
         const sizing = infoSvg ? { maxHeight, maxWidth, width: maxWidth } : { maxHeight, maxWidth };
 
         if (!this.props.forExport) {
@@ -503,7 +483,6 @@ export class ImageBodyBaseInner extends React.Component<ImageBodyBaseProps, ISta
                 <div style={sizing}>
                     {img}
                     {gifLabel}
-                    {banner}
                 </div>
 
                 {!this.props.forExport && !this.state.imgLoaded && !placeholder && (

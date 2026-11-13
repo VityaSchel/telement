@@ -96,7 +96,6 @@ export class CreationGrouper extends BaseGrouper {
         const ret: ReactNode[] = [];
         const isGrouped = true;
         const createEvent = this.firstEventAndShouldShow;
-        const lastShownEvent = this.lastShownEvent;
 
         if (panel.wantsSeparator(this.prevEvent, createEvent.event) === SeparatorKind.Date) {
             const separatorRoomId = createEvent.event.getRoomId()!;
@@ -115,9 +114,7 @@ export class CreationGrouper extends BaseGrouper {
         }
 
         for (const ejected of this.ejectedEvents) {
-            ret.push(
-                ...panel.getTilesForEvent(createEvent.event, ejected, createEvent.event === lastShownEvent, isGrouped),
-            );
+            ret.push(...panel.getTilesForEvent(createEvent.event, ejected, isGrouped));
         }
 
         const eventTiles = this.events
@@ -126,7 +123,7 @@ export class CreationGrouper extends BaseGrouper {
                 // of GenericEventListSummary, render each member event as if the previous
                 // one was itself. This way, the timestamp of the previous event === the
                 // timestamp of the current event, and no DateSeparator is inserted.
-                return panel.getTilesForEvent(e.event, e, e.event === lastShownEvent, isGrouped);
+                return panel.getTilesForEvent(e.event, e, isGrouped);
             })
             .reduce((a, b) => a.concat(b), []);
         // Get sender profile from the latest event in the summary as the m.room.create doesn't contain one

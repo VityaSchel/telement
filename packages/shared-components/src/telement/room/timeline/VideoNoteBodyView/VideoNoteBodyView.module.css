@@ -77,8 +77,9 @@ Please see LICENSE files in the repository root for full details.
     gap: var(--cpd-space-1x);
     padding: var(--cpd-space-0-5x) var(--cpd-space-2x);
     border-radius: 999px;
-    background-color: rgb(0 0 0 / 45%);
-    color: var(--cpd-color-text-on-solid-primary);
+    background-color: rgb(0 0 0 / 55%);
+    /* White in both themes, like the timestamp badge over pictures: the theme's on-solid colour is dark in dark mode. */
+    color: #fff;
     font: var(--cpd-font-body-xs-medium);
     transform: translateX(-50%);
     pointer-events: none;

@@ -6,7 +6,6 @@
  */
 
 import React, { type ReactNode } from "react";
-import { expect, userEvent, within } from "storybook/test";
 
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { withViewDocs } from "../../../../../../.storybook/withViewDocs";
@@ -53,17 +52,6 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
-
-export const WithBanner: Story = {
-    args: {
-        bannerLabel: "image.png",
-    },
-    play: async ({ canvasElement }) => {
-        const canvas = within(canvasElement);
-        await userEvent.hover(canvas.getByRole("img", { name: "Reply preview" }));
-        await expect(canvas.findByText("image.png")).resolves.toBeInTheDocument();
-    },
-};
 
 export const LoadingWithSpinner: Story = {
     args: {

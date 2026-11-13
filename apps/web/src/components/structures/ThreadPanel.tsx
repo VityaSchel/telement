@@ -223,7 +223,6 @@ const ThreadPanel: React.FC<IProps> = ({ roomId, onClose, permalinkCreator }) =>
                                     })}
                                 />
                             }
-                            alwaysShowTimestamps={true}
                             layout={Layout.Group}
                             hideThreadedMessages={false}
                             hidden={false}

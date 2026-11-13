@@ -18,8 +18,10 @@ import React, {
 } from "react";
 import {
     EventStatus,
+    EventType,
     type MatrixEvent,
     MatrixEventEvent,
+    MsgType,
     type Relations,
     type Room,
     RoomEvent,
@@ -53,7 +55,6 @@ import { type RoomPermalinkCreator } from "../../../utils/permalinks/Permalinks"
 import type LegacyCallEventGrouper from "../../structures/LegacyCallEventGrouper";
 import { type ComposerInsertPayload } from "../../../dispatcher/payloads/ComposerInsertPayload";
 import { Action } from "../../../dispatcher/actions";
-import PlatformPeg from "../../../PlatformPeg";
 import { type IReadReceiptPosition } from "./ReadReceiptMarker";
 import RoomContext, { TimelineRenderingType } from "../../../contexts/RoomContext";
 import { MediaEventHelper } from "../../../utils/MediaEventHelper";
@@ -112,6 +113,7 @@ import { EventTileE2eViewModel } from "../../../viewmodels/room/timeline/event-t
 import { shouldHighlightEventTile } from "../../../viewmodels/room/timeline/event-tile/EventTileHighlightState";
 import { shouldHideEventTile } from "../../../viewmodels/room/timeline/event-tile/EventTileVisibilityState";
 import { UnreadNotificationBadgeViewModel } from "../../../viewmodels/room/notification-badge/UnreadNotificationBadgeViewModel";
+import { getMessageContextMenuTarget } from "../../../telement/message-context-menu/getMessageContextMenuTarget";
 
 /** Relation lookup type retained for EventTile consumers. */
 export type { GetRelationsForEvent } from "../../../viewmodels/room/timeline/event-tile/reactions/EventTileReactionState";
@@ -166,9 +168,6 @@ export interface EventTileProps {
 
     /** Whether this event continues the previous sender block. */
     continuation?: boolean;
-
-    /** Whether this is the last event in the timeline. */
-    last?: boolean;
 
     /** Whether this is the last event in a timeline section. */
     lastInSection?: boolean;
@@ -241,9 +240,6 @@ export interface EventTileProps {
 
     /** Element type used for the root node. */
     as?: React.ElementType;
-
-    /** Whether timestamps should always be visible. */
-    alwaysShowTimestamps?: boolean;
 
     /** Whether sender identity should be hidden. */
     hideSender?: boolean;
@@ -763,18 +759,13 @@ export class UnwrappedEventTile extends React.Component<EventTileProps, IState> 
     };
 
     private showContextMenu(ev: React.MouseEvent, permalink?: string): void {
-        const clickTarget = ev.target as HTMLElement;
+        // A control inside the message, such as the add-reaction button, has already opened its own menu.
+        if (ev.defaultPrevented) return;
 
-        // Try to find an anchor element
-        const anchorElement = clickTarget instanceof HTMLAnchorElement ? clickTarget : clickTarget.closest("a");
-
-        // There is no way to copy non-PNG images into clipboard, so we can't
-        // have our own handling for copying images, so we leave it to the
-        // Electron layer (webcontents-handler.ts)
-        if (clickTarget instanceof HTMLImageElement) return;
-
-        // Return if we're in a browser and click either an a tag, as in those cases we want to use the native browser menu
-        if (!PlatformPeg.get()?.allowOverridingNativeContextMenus() && anchorElement) return;
+        // Right clicks anywhere on the message open its menu, which offers to copy the picture or link under the
+        // pointer. Text fields keep the browser's own menu.
+        const target = getMessageContextMenuTarget(ev.target);
+        if (!target) return;
 
         // We don't want to show the menu when editing a message
         if (this.props.editState) return;
@@ -788,9 +779,22 @@ export class UnwrappedEventTile extends React.Component<EventTileProps, IState> 
                     top: ev.clientY,
                     bottom: ev.clientY,
                 },
-                link: anchorElement?.href || permalink,
+                link: target.link ?? permalink,
+                imageSrc: target.imageSrc,
             }),
         }));
+    }
+
+    /** Loads a picture the context menu offers to copy. */
+    private loadContextMenuImage(imageSrc: string): Promise<Blob> {
+        const { mxEvent } = this.props;
+        const isPicture =
+            mxEvent.getType() === EventType.Sticker ||
+            (mxEvent.getType() === EventType.RoomMessage && mxEvent.getContent().msgtype === MsgType.Image);
+        const mediaHelper = isPicture ? this.getTile()?.getMediaHelper?.() : undefined;
+        // The message's own picture is copied in full, not as the thumbnail the timeline shows.
+        if (mediaHelper) return mediaHelper.sourceBlob.value;
+        return fetch(imageSrc).then((response) => response.blob());
     }
 
     private readonly onCloseMenu = (): void => {
@@ -909,7 +913,6 @@ export class UnwrappedEventTile extends React.Component<EventTileProps, IState> 
                     isRedacted: this.props.isRedacted,
                 }),
                 isSelected: this.props.isSelectedEvent || !!this.state.interaction.contextMenu,
-                isLast: this.props.last,
                 isLastInSection: this.props.lastInSection,
                 isContextual: this.props.contextual,
             },
@@ -936,8 +939,8 @@ export class UnwrappedEventTile extends React.Component<EventTileProps, IState> 
                 hideSender: this.props.hideSender,
             },
             timestamp: {
-                alwaysShowTimestamps: this.props.alwaysShowTimestamps,
                 hideTimestamp: this.props.hideTimestamp,
+                isTwelveHour: this.props.isTwelveHour,
                 threadReplyEventTs: threadState.threadReplyEventTs,
             },
             footer: {
@@ -956,6 +959,7 @@ export class UnwrappedEventTile extends React.Component<EventTileProps, IState> 
         const replyChain = this.getReplyChain();
         const eventTileOps = tile?.getEventTileOps ? tile.getEventTileOps() : undefined;
         const collapseReplyChain = replyChain?.canCollapse() ? replyChain.collapse : undefined;
+        const { imageSrc } = this.state.interaction.contextMenu;
 
         return (
             <MessageContextMenu
@@ -968,6 +972,7 @@ export class UnwrappedEventTile extends React.Component<EventTileProps, IState> 
                 rightClick={true}
                 reactions={this.state.reactions}
                 link={this.state.interaction.contextMenu.link}
+                loadImage={imageSrc ? (): Promise<Blob> => this.loadContextMenuImage(imageSrc) : undefined}
                 getRelationsForEvent={this.props.getRelationsForEvent}
             />
         );
@@ -1091,7 +1096,6 @@ export class UnwrappedEventTile extends React.Component<EventTileProps, IState> 
                 ref={this.replyChain}
                 forExport={this.props.forExport}
                 permalinkCreator={this.props.permalinkCreator}
-                alwaysShowTimestamps={eventTileSnapshot.replyChain.alwaysShowTimestamps}
                 isQuoteExpanded={isQuoteExpanded}
                 setQuoteExpanded={this.setQuoteExpanded}
                 getRelationsForEvent={this.props.getRelationsForEvent}

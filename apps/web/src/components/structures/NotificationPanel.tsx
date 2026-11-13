@@ -72,7 +72,6 @@ export default class NotificationPanel extends React.PureComponent<IProps, IStat
                         timelineSet={timelineSet}
                         showUrlPreview={false}
                         empty={emptyState}
-                        alwaysShowTimestamps={true}
                         layout={Layout.Group}
                     />
                 </EventPresentationContextProvider>

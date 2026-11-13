@@ -22,7 +22,6 @@ import {
     getEventTileTimestamp,
     getFooterDisplayState,
     getIsContinuation,
-    getReplyChainAlwaysShowTimestamps,
     getScrollToken,
     getSenderProfileMode,
     getShouldShowMessageActionBar,
@@ -50,11 +49,30 @@ import { EventPreviewViewModel, type EventPreviewViewModelProps } from "./EventP
 import { getEventTileReplyChainState } from "./EventTileReplyChainState";
 import { getEventDisplayInfo } from "../../../../utils/EventRenderingUtils";
 import {
+    validateImageOrVideoMimetype,
+    validateStickerMimetype,
+} from "../../../../telement/media/validateMediaMimetype";
+import {
     ThreadListActionBarViewModel,
     type ThreadListActionBarViewModelProps,
 } from "../../ThreadListActionBarViewModel";
 import { EventTileActionBarViewModel, type EventTileActionBarViewModelProps } from "../../EventTileActionBarViewModel";
 import { ReactionsRowViewModel, type ReactionsRowViewModelProps } from "./reactions/ReactionsRowViewModel";
+
+/** Whether the event shows a picture, a sticker or a video. */
+function isPictureOrVideo({ eventType, msgtype }: { eventType: string; msgtype?: string }): boolean {
+    if (eventType === EventType.Sticker) return true;
+    return eventType === EventType.RoomMessage && (msgtype === MsgType.Image || msgtype === MsgType.Video);
+}
+
+/** Whether a picture, sticker or video event's body shows its media, following MessageEvent's checks. */
+function showsMedia(mxEvent: MatrixEvent): boolean {
+    if (mxEvent.isRedacted()) return false;
+    const content = mxEvent.getContent();
+    return mxEvent.getType() === EventType.Sticker
+        ? validateStickerMimetype(content)
+        : validateImageOrVideoMimetype(content);
+}
 
 /** Event-level inputs for deriving the EventTile snapshot. */
 export interface EventTileEventInput {
@@ -98,6 +116,13 @@ export interface EventTileDerivedEventInput extends EventTileEventInput {
     isSeeingThroughMessageHiddenForModeration: boolean;
     /** Whether EventTile should render the reply chain. */
     hasReplyChain: boolean;
+    /** Whether a media event carries a caption next to its file name. */
+    hasMediaCaption?: boolean;
+    /**
+     * Whether a picture, sticker or video event shows something other than its media: it was deleted, or its file
+     * name or mimetype is not a picture's or video's, so the body falls back to a file.
+     */
+    mediaNotShown?: boolean;
 }
 
 /** Display inputs for deriving the EventTile snapshot. */
@@ -124,8 +149,6 @@ export interface EventTileDisplayInput {
     isHighlighted: boolean;
     /** Whether the tile is selected or has an open context menu. */
     isSelected: boolean;
-    /** Whether the tile is the last event in the timeline. */
-    isLast?: boolean;
     /** Whether the tile is the last event in its section. */
     isLastInSection?: boolean;
     /** Whether the tile is being rendered in contextual mode. */
@@ -171,10 +194,10 @@ export interface EventTileSenderInput {
 
 /** Timestamp inputs for deriving the EventTile snapshot. */
 export interface EventTileTimestampInput {
-    /** Whether timestamps should always show. */
-    alwaysShowTimestamps?: boolean;
     /** Whether timestamp rendering is disabled. */
     hideTimestamp?: boolean;
+    /** Whether timestamps use the twelve-hour clock. */
+    isTwelveHour?: boolean;
     /** The latest thread reply timestamp, when available. */
     threadReplyEventTs?: number;
 }
@@ -308,12 +331,6 @@ export interface EventTileTimestampSnapshot {
     displayState: TimestampDisplayState;
 }
 
-/** Reply chain state derived for the EventTile snapshot. */
-export interface EventTileReplyChainSnapshot {
-    /** Whether ReplyChain should always show timestamps. */
-    alwaysShowTimestamps: boolean;
-}
-
 /** Footer state derived for the EventTile snapshot. */
 export type EventTileFooterSnapshot = FooterDisplayState;
 
@@ -331,8 +348,6 @@ export interface EventTileViewModelSnapshot {
     actionBar: EventTileActionBarSnapshot;
     /** Timestamp derived state. */
     timestamp: EventTileTimestampSnapshot;
-    /** Reply chain derived state. */
-    replyChain: EventTileReplyChainSnapshot;
     /** Footer derived state. */
     footer: EventTileFooterSnapshot;
 }
@@ -537,6 +552,7 @@ export class EventTileViewModel extends BaseViewModel<EventTileViewModelRenderSt
     ): NormalizedEventTileViewModelProps {
         const { mxEvent } = dependencies;
         const eventType = mxEvent.getType();
+        const content = mxEvent.getContent();
         const displayInfo = getEventDisplayInfo(
             dependencies.matrixClient,
             mxEvent,
@@ -554,7 +570,9 @@ export class EventTileViewModel extends BaseViewModel<EventTileViewModelRenderSt
             event: {
                 ...props.event,
                 eventType,
-                msgtype: mxEvent.getContent().msgtype,
+                msgtype: content.msgtype,
+                hasMediaCaption: !!content.filename && content.filename !== content.body,
+                mediaNotShown: isPictureOrVideo({ eventType, msgtype: content.msgtype }) && !showsMedia(mxEvent),
                 eventTs: mxEvent.getTs(),
                 eventId: mxEvent.getId() ?? undefined,
                 replacingEventId: mxEvent.replacingEventId() ?? undefined,
@@ -618,12 +636,6 @@ export class EventTileViewModel extends BaseViewModel<EventTileViewModelRenderSt
             eventTs: event.eventTs,
             isRtcNotification: event.isRtcNotification,
             hideTimestamp: timestamp.hideTimestamp,
-            alwaysShowTimestamps: timestamp.alwaysShowTimestamps,
-            last: display.isLast,
-            hover: interaction.hover,
-            focusWithin: interaction.focusWithin,
-            actionBarFocused: interaction.isActionBarFocused,
-            hasContextMenu: interaction.hasContextMenu,
         });
         const timestampValue = getEventTileTimestamp({
             timelineRenderingType: display.timelineRenderingType,
@@ -654,12 +666,12 @@ export class EventTileViewModel extends BaseViewModel<EventTileViewModelRenderSt
             actionBarFocused: interaction.isActionBarFocused,
             previewClamped:
                 display.timelineRenderingType === TimelineRenderingType.ThreadsList || isRenderingNotification,
+            twelveHourTimestamp: timestamp.isTwelveHour,
         };
         const lineState: EventTileViewLine = {
             media: display.isProbablyMedia,
-            sticker: event.eventType === "m.sticker",
             emote: sender.isEmote,
-            image: event.eventType === EventType.RoomMessage && event.msgtype === MsgType.Image,
+            timestampOverMedia: isPictureOrVideo(event) && !event.hasMediaCaption && !event.mediaNotShown,
         };
         return {
             event: eventSnapshot,
@@ -705,13 +717,6 @@ export class EventTileViewModel extends BaseViewModel<EventTileViewModelRenderSt
                     showTimestamp,
                     timestamp: timestampValue,
                     hideTimestamp: timestamp.hideTimestamp,
-                }),
-            },
-            replyChain: {
-                alwaysShowTimestamps: getReplyChainAlwaysShowTimestamps({
-                    alwaysShowTimestamps: timestamp.alwaysShowTimestamps,
-                    hover: interaction.hover,
-                    focusWithin: interaction.focusWithin,
                 }),
             },
             footer: getFooterDisplayState({

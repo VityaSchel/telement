@@ -30,6 +30,7 @@ const {
     StoryOngoingCallBody,
     StoryPreviewBody,
     StoryShortBody,
+    StoryRightToLeftBody,
     StoryReplyChain,
     StoryStickerBody,
     StoryThreadListActionBar,
@@ -321,9 +322,38 @@ export const Media: Story = {
     args: {
         shape: "Room",
         roomMessages: "media",
-        line: { media: true, image: true },
+        line: { media: true, timestampOverMedia: true },
         state: { hasReply: false },
         slots: { ...minimalRoomSlots, body: <StoryMediaBody /> },
+    },
+};
+
+export const MediaReply: Story = {
+    tags: interactiveTags,
+    ...shapeDescriptionParameters(
+        "Room",
+        "State variant: an image event replies to a message whose quote is wider than the image. The timestamp stays on the image.",
+    ),
+    args: {
+        shape: "Room",
+        roomMessages: "bob",
+        line: { media: true, timestampOverMedia: true },
+        state: { hasReply: true },
+        slots: { ...minimalRoomSlots, replyChain: <StoryReplyChain />, body: <StoryMediaBody size="narrow" /> },
+    },
+};
+
+export const RightToLeftText: Story = {
+    tags: interactiveTags,
+    ...shapeDescriptionParameters(
+        "Room",
+        "State variant: right-to-left text in a left-to-right timeline. In bubbles the text makes room for the timestamp.",
+    ),
+    args: {
+        shape: "Room",
+        roomMessages: "threeEach",
+        state: { hasReply: false },
+        slots: { ...minimalRoomSlots, body: <StoryRightToLeftBody /> },
     },
 };
 
@@ -333,7 +363,7 @@ export const Sticker: Story = {
     args: {
         shape: "Room",
         roomMessages: "alice",
-        line: { sticker: true },
+        line: { media: true, timestampOverMedia: true },
         state: { hasReply: false },
         slots: { ...minimalRoomSlots, body: <StoryStickerBody /> },
     },
@@ -575,4 +605,28 @@ export const StickerBubble: Story = {
     globals: bubbleGlobals,
     parameters: Sticker.parameters,
     args: Sticker.args,
+};
+
+export const MediaReplyBubble: Story = {
+    name: "Media reply - Bubble - Default",
+    tags: visualTags,
+    globals: bubbleGlobals,
+    parameters: MediaReply.parameters,
+    args: MediaReply.args,
+};
+
+export const MediaReplyGroup: Story = {
+    name: "Media reply - Group - Default",
+    tags: visualTags,
+    globals: groupGlobals,
+    parameters: MediaReply.parameters,
+    args: MediaReply.args,
+};
+
+export const RightToLeftTextBubble: Story = {
+    name: "Right-to-left text - Bubble - Default",
+    tags: visualTags,
+    globals: bubbleGlobals,
+    parameters: RightToLeftText.parameters,
+    args: RightToLeftText.args,
 };

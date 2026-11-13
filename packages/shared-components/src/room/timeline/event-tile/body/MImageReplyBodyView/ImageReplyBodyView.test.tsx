@@ -13,12 +13,11 @@ import { describe, expect, it, vi } from "vitest";
 import { ImageReplyBodyView, ImageReplyBodyViewPlaceholder } from "./ImageReplyBodyView";
 import * as stories from "./ImageReplyBodyView.stories";
 
-const { Default, WithBanner, LoadingWithSpinner, LoadingWithBlurhash, AnimatedPreview } = composeStories(stories);
+const { Default, LoadingWithSpinner, LoadingWithBlurhash, AnimatedPreview } = composeStories(stories);
 
 describe("ImageReplyBodyView", () => {
     it.each([
         ["default", Default],
-        ["with-banner", WithBanner],
         ["loading-with-spinner", LoadingWithSpinner],
         ["loading-with-blurhash", LoadingWithBlurhash],
         ["animated-preview", AnimatedPreview],
@@ -73,7 +72,7 @@ describe("ImageReplyBodyView", () => {
         expect(container.querySelector("img")).toBeNull();
     });
 
-    it("swaps animated preview content and overlays on hover", () => {
+    it("swaps animated preview content and the GIF label on hover", () => {
         render(
             <ImageReplyBodyView
                 src="https://example.org/full.gif"
@@ -84,24 +83,20 @@ describe("ImageReplyBodyView", () => {
                 aspectRatio="4 / 3"
                 showAnimatedContentOnHover
                 gifLabel="GIF"
-                bannerLabel="animated.gif"
             />,
         );
 
         const image = screen.getByRole("img", { name: "Animated reply preview" });
         expect(image).toHaveAttribute("src", "https://example.org/thumb.png");
         expect(screen.getByText("GIF")).toBeInTheDocument();
-        expect(screen.queryByText("animated.gif")).not.toBeInTheDocument();
 
         fireEvent.mouseEnter(image);
         expect(image).toHaveAttribute("src", "https://example.org/full.gif");
         expect(screen.queryByText("GIF")).not.toBeInTheDocument();
-        expect(screen.getByText("animated.gif")).toBeInTheDocument();
 
         fireEvent.mouseLeave(image);
         expect(image).toHaveAttribute("src", "https://example.org/thumb.png");
         expect(screen.getByText("GIF")).toBeInTheDocument();
-        expect(screen.queryByText("animated.gif")).not.toBeInTheDocument();
     });
 
     it("invokes visible image load and error handlers", () => {

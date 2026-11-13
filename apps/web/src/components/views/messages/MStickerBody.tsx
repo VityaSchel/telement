@@ -7,7 +7,6 @@ Please see LICENSE files in the repository root for full details.
 
 import React, { type JSX, type ComponentProps, type ReactNode } from "react";
 import { type Tooltip } from "@vector-im/compound-web";
-import { type MediaEventContent } from "matrix-js-sdk/src/types";
 
 import { ImageBodyBaseInner } from "./MImageReplyBody";
 import { BLURHASH_FIELD } from "../../../utils/image-media";
@@ -71,10 +70,6 @@ class MStickerBodyInner extends ImageBodyBaseInner {
     // Don't show "Download this_file.png ..."
     protected getFileBody(): ReactNode {
         return null;
-    }
-
-    protected getBanner(content: MediaEventContent): ReactNode {
-        return null; // we don't need a banner, we have a tooltip
     }
 }
 

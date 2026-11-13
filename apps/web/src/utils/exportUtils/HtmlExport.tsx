@@ -304,11 +304,9 @@ export default class HTMLExporter extends Exporter {
                                         isRedacted={mxEv.isRedacted()}
                                         replacingEventId={mxEv.replacingEventId()}
                                         forExport={true}
-                                        alwaysShowTimestamps={true}
                                         showUrlPreview={false}
                                         checkUnmounting={() => false}
                                         isTwelveHour={false}
-                                        last={false}
                                         lastInSection={false}
                                         permalinkCreator={this.permalinkCreator}
                                         lastSuccessful={false}

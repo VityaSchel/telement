@@ -60,6 +60,12 @@
     --event-tile-state-marker-width: 4px;
     --event-tile-state-marker-color: var(--cpd-color-bg-action-primary-rest);
 
+    /* Timestamp geometry. The text width fits "00:00" in the timestamp font, or "12:00 PM" on the
+       twelve-hour clock. The gutter is the room a message keeps free for it. */
+    --event-tile-timestamp-text-width: 1.875rem;
+    --event-tile-timestamp-gap: var(--cpd-space-2x);
+    --event-tile-timestamp-gutter: calc(var(--event-tile-timestamp-text-width) + 2 * var(--event-tile-timestamp-gap));
+
     position: relative;
     flex-shrink: 0;
     max-width: 100%;
@@ -179,6 +185,53 @@
     visibility: hidden;
 }
 
+.root.stateTwelveHourTimestamp {
+    --event-tile-timestamp-text-width: 3.125rem;
+}
+
+/* Pictures, stickers and videos carry their timestamp as a badge over the media's bottom corner. The
+   badge matches the time badge of round video notes and stays legible over any picture in either theme,
+   and over the page behind a sticker. Small pictures grow to fit it. */
+.root .line.lineTimestampOverMedia {
+    --image-body-min-width: calc(var(--event-tile-timestamp-text-width) + 4 * var(--cpd-space-2x));
+}
+
+.lineTimestampOverMedia .slotBody {
+    position: relative;
+    width: fit-content;
+    max-width: 100%;
+}
+
+.lineTimestampOverMedia .slotBody > * {
+    margin-block-end: 0;
+}
+
+.root .line.lineTimestampOverMedia .slotBody > .slotTimestamp {
+    position: absolute;
+    z-index: 3;
+    inset-block: auto var(--cpd-space-2x);
+    inset-inline: auto var(--cpd-space-2x);
+    display: flex;
+    align-items: center;
+    width: auto;
+    height: auto;
+    margin: 0;
+    overflow: visible;
+    padding: var(--cpd-space-0-5x) var(--cpd-space-2x);
+    border-radius: 999px;
+    background-color: rgb(0 0 0 / 55%);
+}
+
+.root .line.lineTimestampOverMedia .slotBody > .slotTimestamp > * {
+    color: #fff;
+    font: var(--cpd-font-body-xs-medium);
+}
+
+/* Native video controls run along the bottom edge, so the badge moves to the top corner. */
+.root .line.lineTimestampOverMedia .slotBody:has(video[controls]) > .slotTimestamp {
+    inset-block: var(--cpd-space-2x) auto;
+}
+
 .root.stateInfo {
     padding-top: 0;
     font-size: var(--cpd-font-size-body-sm);
@@ -219,6 +272,13 @@
         line-height: var(--event-tile-group-line-height);
     }
 
+    /* The timestamp gutter replaces the body's own end margin. */
+    .line:has(> .slotTimestamp) {
+        --event-tile-content-inline-end: 0;
+
+        padding-inline-end: var(--event-tile-timestamp-gutter);
+    }
+
     &:not(.shapeCard) .line:not(.lineMedia) .slotBody > *:not(fieldset) {
         margin-right: var(--event-tile-content-inline-end);
     }
@@ -247,18 +307,22 @@
         inset-inline-start: var(--cpd-space-2x);
     }
 
+    /* The timestamp sits at the end of the message's last line, in the gutter the line keeps free. */
     .slotTimestamp {
         position: absolute;
-        inset-block-start: var(--event-tile-group-line-spacing-block-start);
-        inset-inline-start: 0;
-        width: var(--event-tile-group-timestamp-width);
+        inset-block-end: var(--event-tile-group-line-spacing-block-end);
+        inset-inline-end: var(--event-tile-timestamp-gap);
         height: var(--event-tile-group-line-height);
         margin-block: 0;
         margin-inline: 0;
         display: flex;
         align-items: center;
-        justify-content: center;
-        text-align: center;
+        justify-content: flex-end;
+        text-align: end;
+    }
+
+    .line > .slotTimestamp > * {
+        font: var(--cpd-font-body-xs-regular);
     }
 
     .slotPadlock {
@@ -359,7 +423,10 @@
             padding-block: 3px 2px;
         }
 
-        .slotTimestamp,
+        .slotTimestamp {
+            inset-block-end: 2px;
+        }
+
         .slotPadlock {
             inset-block-start: 0;
         }
@@ -380,6 +447,10 @@
             grid-column: 1 / 3;
             margin-inline-end: 0;
             padding: 0;
+        }
+
+        .line:has(> .slotTimestamp) {
+            padding-inline-end: var(--event-tile-timestamp-gutter);
         }
 
         &.hasReceiptSlot .line {
@@ -408,6 +479,10 @@
 
         .line > .slotReplyChain > * {
             padding-block: 0;
+        }
+
+        .slotTimestamp {
+            inset-block-end: 0;
         }
 
         .slotAvatar {
@@ -716,17 +791,20 @@
     --image-body-min-width: calc(1.8rem + 2 * var(--event-tile-bubble-gutter));
     --image-body-min-height: calc(1.8rem + 2 * var(--event-tile-bubble-gutter));
 
-    /* Root. */
+    /* Root. Each row stacks its own band and content, so the band below the content still takes the pointer in
+       the row's side margins rather than the timeline behind it. */
     max-width: unset;
     margin-inline: var(--event-tile-bubble-margin-inline-start) var(--event-tile-bubble-margin-inline-end);
     margin-block-start: calc(var(--event-tile-bubble-gutter) / 2);
     padding-top: 0;
+    isolation: isolate;
 
     /* Nested reply tiles must not reintroduce the default timeline spacing. */
     .root {
         padding-top: 0;
     }
 
+    /* The band is part of the row: hovering or right-clicking the row's side margins reaches the row. */
     &::before {
         content: "";
         position: absolute;
@@ -734,7 +812,6 @@
         inset: -1px calc(-1 * var(--event-tile-bubble-margin-inline-end)) -1px
             calc(-1 * var(--event-tile-bubble-margin-inline-start));
         border-radius: 4px;
-        pointer-events: none;
     }
 
     /* Bubble geometry and slot placement. */
@@ -749,9 +826,46 @@
         line-height: var(--event-tile-bubble-line-height);
         position: relative;
         padding: calc(var(--event-tile-bubble-gutter) - 1px);
-        padding-inline-end: 60px;
+        padding-inline-end: calc(
+            var(--event-tile-bubble-gutter) - 1px + var(--event-tile-timestamp-text-width) +
+                var(--event-tile-timestamp-gap)
+        );
         background: var(--event-tile-bubble-other-background);
         border-end-end-radius: var(--event-tile-bubble-corner-radius);
+    }
+
+    /* Text bubbles keep room for the timestamp only at the end of their last line, as Telegram does: the
+       time sits there when it fits and moves to a line of its own when it doesn't. Other bubbles keep a
+       column free for it instead. The room is a float on the timestamp's side, which is always the right in
+       Element's left-to-right layout, so right-to-left text makes room for it too. */
+    .line:not(.lineEmote):has(
+            > .slotBody
+                > :global(.mx_EventTile_content)
+                > :is(:global(.mx_EventTile_body), [data-textual-body-annotation-wrapper]):last-child
+        ) {
+        padding-inline-end: calc(var(--event-tile-bubble-gutter) - 1px);
+    }
+
+    .line:not(.lineEmote)
+        > .slotBody
+        > :global(.mx_EventTile_content)
+        > :is(:global(.mx_EventTile_body), [data-textual-body-annotation-wrapper]):last-child::after {
+        content: "";
+        float: right;
+        width: calc(var(--event-tile-timestamp-text-width) + var(--event-tile-timestamp-gap));
+        height: var(--event-tile-bubble-line-height);
+    }
+
+    /* A media caption has no bubble padding of its own, so its spacer also covers the timestamp's inset. */
+    .line
+        > .slotBody
+        > :global(.mx_EventTile_content)
+        > :global(.mx_EventTile_caption)
+        > :is(:global(.mx_EventTile_body), [data-textual-body-annotation-wrapper]):last-child::after {
+        content: "";
+        float: right;
+        width: var(--event-tile-timestamp-gutter);
+        height: var(--event-tile-bubble-line-height);
     }
 
     /* Media bodies provide their own appearance and dimensions. The shell
@@ -764,25 +878,11 @@
         /* Media surfaces own their background and dimensions. Keep room for
            the timestamp which is positioned over the lower-right corner. */
         :global(.mx_MediaBody) {
-            padding-inline-end: 48px !important;
+            padding-inline-end: var(--event-tile-timestamp-gutter) !important;
             border-radius: 0;
             border-start-start-radius: var(--event-tile-bubble-corner-radius);
             border-start-end-radius: var(--event-tile-bubble-corner-radius);
         }
-    }
-
-    .lineMedia.lineImage .slotTimestamp {
-        border-radius: 8px;
-        background-color: rgb(0 0 0 / 60%);
-        color: #fff;
-        padding: 0 4px;
-    }
-
-    /* Stickers are un-bubbled content, so their timestamp sits immediately
-       after the line instead of over its lower-right corner. */
-    .lineSticker .slotTimestamp {
-        inset-inline-start: 100%;
-        inset-inline-end: auto;
     }
 
     /* Text-bubble body spacing belongs to the line. Media lines, structured
@@ -814,18 +914,25 @@
         display: contents;
     }
 
-    .slotTimestamp {
-        display: contents;
+    /* A badge over the media sits in a box of the media's size. The line is wider when a reply is quoted above. */
+    .lineTimestampOverMedia > .slotBody {
+        display: block;
     }
 
-    .slotTimestamp > * {
+    /* The timestamp sits in the bubble's bottom corner, level with the last line. */
+    .slotTimestamp {
         position: absolute;
         z-index: 3;
-        inset-block-end: 0;
-        inset-inline-end: 0;
-        max-width: 80px;
-        padding: 4px 8px;
-        width: unset;
+        inset-block-end: calc(var(--event-tile-bubble-gutter) - 1px);
+        inset-inline-end: calc(var(--event-tile-bubble-gutter) - 1px);
+        display: flex;
+        align-items: flex-end;
+        height: var(--event-tile-bubble-line-height);
+    }
+
+    .line > .slotTimestamp > * {
+        font: var(--cpd-font-body-xs-regular);
+        line-height: var(--cpd-font-line-height-minimum);
     }
 
     .slotAvatar {
@@ -931,10 +1038,6 @@
         }
     }
 
-    &.stateOwnEvent .lineSticker {
-        margin-inline-end: 32px;
-    }
-
     &.stateOwnEvent .slotAvatar {
         inset-block-start: -19px;
         inset-inline-start: auto;
@@ -1027,7 +1130,7 @@
     }
 
     &.stateNoBubble .lineEmote {
-        padding-inline-end: 60px;
+        padding-inline-end: var(--event-tile-timestamp-gutter);
         font-style: italic;
 
         .slotBody {
@@ -1035,8 +1138,6 @@
         }
 
         .slotTimestamp {
-            inset-block: auto;
-            align-self: center;
             font-style: normal;
         }
     }
@@ -1073,12 +1174,6 @@
 
         .slotPadlock {
             margin-inline-start: 0;
-            align-self: center;
-        }
-
-        .slotTimestamp {
-            inset-block: auto;
-            inset-inline: -77px auto;
             align-self: center;
         }
     }
@@ -1153,12 +1248,6 @@
         }
 
         .slotTimestamp {
-            inset-block: auto;
-            inset-inline: -77px auto;
-            align-self: center;
-        }
-
-        .slotTimestamp > * {
             inset-block: auto;
             inset-inline: -77px auto;
             align-self: center;
@@ -1352,9 +1441,18 @@
         }
 
         .slotTimestamp {
-            /* ThreadView aligns this with the event content, not the bottom of
-               the line's flex/content flow. */
-            inset-block-start: 2px;
+            /* ThreadView lines have a smaller block padding. */
+            inset-block-end: 2px;
+        }
+
+        /* The read receipts float at the end of the message's last line, next to the timestamp gutter, so the
+           body keeps its end margin free for them. */
+        .line:has(> .slotTimestamp):has(> .slotReceipt) {
+            --event-tile-content-inline-end: inherit;
+
+            > .slotReceipt {
+                margin-inline-end: 0;
+            }
         }
 
         .slotFooter {
@@ -1412,7 +1510,7 @@
                 z-index: 9;
             }
 
-            .slotTimestamp {
+            &.layoutIrc .slotTimestamp {
                 inset-block-start: 2px;
             }
 
@@ -1609,11 +1707,9 @@
     --event-tile-card-read-receipt-spacing-end: 78px;
     --event-tile-card-spacing-inline: 36px;
     --event-tile-card-line-padding-block: 2px;
-    --event-tile-card-timestamp-width: 46px;
     --event-tile-group-gutter: var(--event-tile-card-spacing-inline);
     --event-tile-group-line-spacing-block-start: var(--event-tile-card-line-padding-block);
     --event-tile-group-line-spacing-block-end: var(--event-tile-card-line-padding-block);
-    --event-tile-group-timestamp-width: var(--event-tile-card-timestamp-width);
     --event-tile-card-thread-summary-separator-color: var(--cpd-color-icon-tertiary);
     --event-tile-card-action-bar-inset-inline-end: calc(var(--event-tile-card-edge-gap) + 1px);
     --event-tile-card-receipt-inset-block-start: -6px;
@@ -1628,7 +1724,6 @@
         /* Line. */
         .line {
             margin-inline-end: 0;
-            padding-inline-end: var(--event-tile-group-timestamp-width);
         }
 
         /* Sender. */
@@ -1654,19 +1749,6 @@
             inset-inline-start: var(--cpd-space-2x);
         }
 
-        .slotTimestamp {
-            inset-inline-start: auto;
-            inset-inline-end: 0;
-            height: auto;
-            margin: 0;
-            text-align: end;
-            font-size: 0.75rem;
-        }
-
-        .slotTimestamp > * {
-            font-size: 0.75rem;
-        }
-
         .slotThreadInfo {
             margin-inline-end: 0;
             max-width: min(calc(100% - var(--event-tile-group-gutter)), 600px);
@@ -1689,6 +1771,19 @@
             inset-block-start: -2rem;
         }
 
+        /* Read receipts that directly follow the message sit at the end of its last line, next to the timestamp
+           gutter, which the line widens to keep them clear of the message. Below reactions or a thread summary
+           they stay at the end of the tile. */
+        &:not(.stateBubbleContainer) .line:has(> .slotTimestamp):has(+ .slotReceipt) {
+            --event-tile-content-inline-end: inherit;
+
+            padding-inline-end: calc(var(--event-tile-timestamp-gutter) + var(--event-tile-content-inline-end));
+        }
+
+        &:not(.stateBubbleContainer) .line:has(> .slotTimestamp) + .slotReceipt {
+            margin-inline-end: var(--event-tile-timestamp-gutter);
+        }
+
         .slotFooter {
             margin-inline-end: var(--cpd-space-2x);
             position: relative;
@@ -1697,7 +1792,7 @@
         /* States. */
         &.stateBubbleContainer .line {
             padding-block: 0;
-            padding-inline: var(--event-tile-card-spacing-inline) var(--event-tile-group-timestamp-width);
+            padding-inline: var(--event-tile-card-spacing-inline) var(--event-tile-timestamp-gutter);
         }
 
         /* The receipt has its own grid column; it must not reserve a second
@@ -1745,7 +1840,8 @@
         inset-inline-end: var(--event-tile-card-action-bar-inset-inline-end);
     }
 
-    &.layoutBubble .slotFooter {
+    &.layoutBubble .slotFooter,
+    &.layoutBubble .slotThreadInfo {
         position: relative;
     }
 

@@ -80,18 +80,32 @@ export function EventTileView({
         slotNames.map((slotName) => renderSlot(slotName));
 
     const hasReceiptSlot = isRenderableSlot(slots.receipt);
+    const timestampOverMedia = !!lineState?.timestampOverMedia;
 
     const lineClassName = classNames(styles.line, classNameOverrides?.line, {
         [styles.lineMedia]: lineState?.media,
-        [styles.lineSticker]: lineState?.sticker,
         [styles.lineEmote]: lineState?.emote,
-        [styles.lineImage]: lineState?.image,
+        [styles.lineTimestampOverMedia]: timestampOverMedia,
     });
+
+    // A timestamp drawn over the media sits inside the body slot, so that it follows the media's own size.
+    const renderBody = (): React.ReactNode =>
+        timestampOverMedia
+            ? renderSlot(
+                  "body",
+                  <>
+                      {slots.body}
+                      {renderSlot("timestamp")}
+                  </>,
+              )
+            : renderSlot("body");
+    const renderLineTimestamp = (): React.ReactNode => (timestampOverMedia ? null : renderSlot("timestamp"));
 
     const renderRoot = (
         children: React.ReactNode,
         rootClickHandler: React.MouseEventHandler<HTMLElement> | undefined,
         rootTabIndex?: number,
+        rootContextMenuHandler?: React.MouseEventHandler<HTMLElement>,
     ): JSX.Element => (
         <Root
             ref={refs?.root}
@@ -115,6 +129,7 @@ export function EventTileView({
                 [styles.stateContextual]: root.state?.contextual,
                 [styles.stateActionBarFocused]: root.state?.actionBarFocused,
                 [styles.statePreviewClamped]: root.state?.previewClamped,
+                [styles.stateTwelveHourTimestamp]: root.state?.twelveHourTimestamp,
                 [styles.densityCompact]: density === "compact",
                 [styles.layoutGroup]: layout === "group",
                 [styles.layoutBubble]: layout === "bubble",
@@ -137,24 +152,31 @@ export function EventTileView({
             onFocus={onFocus}
             onBlur={onBlur}
             onClick={rootClickHandler}
+            onContextMenu={rootContextMenuHandler}
         >
             {children}
         </Root>
     );
 
-    // Thread view: sender details, line content, then footer.
+    // Thread view: sender details, line content, then footer. The whole row opens the context menu.
     if (root.shape === "Thread") {
         return renderRoot(
             <>
                 <div className={classNames(styles.senderDetails, classNameOverrides?.senderDetails)}>
                     {renderSlots("avatar", "sender")}
                 </div>
-                <div id={root.id} data-testid="event-tile-line" className={lineClassName} onContextMenu={onContextMenu}>
-                    {renderSlots("contextMenu", "replyChain", "body", "actionBar", "timestamp", "receipt")}
+                <div id={root.id} data-testid="event-tile-line" className={lineClassName}>
+                    {renderSlots("contextMenu", "replyChain")}
+                    {renderBody()}
+                    {renderSlot("actionBar")}
+                    {renderLineTimestamp()}
+                    {renderSlot("receipt")}
                 </div>
                 {renderSlot("footer")}
             </>,
             undefined,
+            undefined,
+            onContextMenu,
         );
     }
 
@@ -221,31 +243,37 @@ export function EventTileView({
 
     // Default shape: Card, Pinned, Room, Search
 
-    // IRC layout: the leading metadata slots precede the line content.
+    // IRC layout: the leading metadata slots precede the line content. The whole row opens the context menu.
     if (layout === "irc") {
         return renderRoot(
             <>
                 {renderSlots("timestamp", "padlock", "avatar", "sender")}
-                <div id={root.id} data-testid="event-tile-line" className={lineClassName} onContextMenu={onContextMenu}>
+                <div id={root.id} data-testid="event-tile-line" className={lineClassName}>
                     {renderSlots("contextMenu", "replyChain", "body", "actionBar", "footer", "threadInfo")}
                 </div>
                 {renderSlot("receipt")}
             </>,
             undefined,
             -1,
+            onContextMenu,
         );
     }
 
-    // Group and bubble layouts: sender details precede the line content.
+    // Group and bubble layouts: sender details precede the line content. The whole row opens the context menu.
     return renderRoot(
         <>
             {renderSlots("sender", "avatar")}
-            <div id={root.id} data-testid="event-tile-line" className={lineClassName} onContextMenu={onContextMenu}>
-                {renderSlots("contextMenu", "timestamp", "padlock", "replyChain", "body", "actionBar")}
+            <div id={root.id} data-testid="event-tile-line" className={lineClassName}>
+                {renderSlot("contextMenu")}
+                {renderLineTimestamp()}
+                {renderSlots("padlock", "replyChain")}
+                {renderBody()}
+                {renderSlot("actionBar")}
             </div>
             {renderSlots("footer", "threadInfo", "receipt")}
         </>,
         undefined,
         -1,
+        onContextMenu,
     );
 }

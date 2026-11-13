@@ -25,7 +25,6 @@ export interface LegacyEventTileAdapterProps {
 
     // Position / continuation
     continuation?: boolean;
-    last?: boolean;
     lastInSection?: boolean;
     lastSuccessful?: boolean;
     isSelectedEvent?: boolean;
@@ -45,7 +44,6 @@ export interface LegacyEventTileAdapterProps {
     showReactions?: boolean;
     showUrlPreview?: boolean;
     isTwelveHour?: boolean;
-    alwaysShowTimestamps?: boolean;
 
     // Relations and groupers
     getRelationsForEvent?: GetRelationsForEvent;
@@ -82,7 +80,6 @@ export function LegacyEventTileAdapter(props: Readonly<LegacyEventTileAdapterPro
             as="div"
             mxEvent={props.mxEvent}
             continuation={props.continuation}
-            last={props.last}
             lastInSection={props.lastInSection}
             lastSuccessful={props.lastSuccessful}
             isSelectedEvent={props.isSelectedEvent}
@@ -96,7 +93,6 @@ export function LegacyEventTileAdapter(props: Readonly<LegacyEventTileAdapterPro
             showReactions={props.showReactions}
             showUrlPreview={props.showUrlPreview}
             isTwelveHour={props.isTwelveHour}
-            alwaysShowTimestamps={props.alwaysShowTimestamps}
             getRelationsForEvent={props.getRelationsForEvent}
             permalinkCreator={props.permalinkCreator}
             callEventGrouper={props.callEventGrouper}

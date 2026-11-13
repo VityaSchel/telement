@@ -130,7 +130,6 @@ export class MainGrouper extends BaseGrouper {
 
         const isGrouped = true;
         const panel = this.panel;
-        const lastShownEvent = this.lastShownEvent;
         const ret: ReactNode[] = [];
 
         if (panel.wantsSeparator(this.prevEvent, this.events[0].event) === SeparatorKind.Date) {
@@ -168,7 +167,6 @@ export class MainGrouper extends BaseGrouper {
                 return panel.getTilesForEvent(
                     i === 0 ? this.prevEvent : this.events[i - 1].event,
                     e,
-                    e.event === lastShownEvent,
                     isGrouped,
                     this.nextEvent,
                     this.nextEventTile,

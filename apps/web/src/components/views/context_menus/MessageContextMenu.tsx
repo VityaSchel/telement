@@ -41,6 +41,7 @@ import {
     ShareIcon,
     CopyIcon,
     TreeIcon,
+    ImageIcon,
 } from "@vector-im/compound-design-tokens/assets/web/icons";
 import { copyPlainTextToClipboard } from "@element-hq/element-web-shared-utils";
 
@@ -75,6 +76,10 @@ import { getShareableLocationEvent } from "../../../events/location/getShareable
 import { type ShowThreadPayload } from "../../../dispatcher/payloads/ShowThreadPayload";
 import { CardContext } from "../right_panel/context";
 import PinningUtils from "../../../utils/PinningUtils";
+import {
+    canCopyImageToClipboard,
+    copyImageToClipboard,
+} from "../../../telement/message-context-menu/copyImageToClipboard";
 
 interface IReplyInThreadButton {
     mxEvent: MatrixEvent;
@@ -130,6 +135,8 @@ interface IProps extends MenuProps {
     reactions?: Relations | null;
     // A permalink to this event or an href of an anchor element the user has clicked
     link?: string;
+    // Loads the picture the user has clicked, which the menu then offers to copy
+    loadImage?(): Promise<Blob>;
 
     getRelationsForEvent?: GetRelationsForEvent;
 }
@@ -308,6 +315,11 @@ export default class MessageContextMenu extends React.Component<IProps, IState> 
         this.closeMenu();
     };
 
+    private onCopyImageClick = (): void => {
+        if (this.props.loadImage) void copyImageToClipboard(this.props.loadImage());
+        this.closeMenu();
+    };
+
     private onCollapseReplyChainClick = (): void => {
         this.props.collapseReplyChain?.();
         this.closeMenu();
@@ -409,6 +421,7 @@ export default class MessageContextMenu extends React.Component<IProps, IState> 
         const { mxEvent, rightClick, link, eventTileOps, reactions, collapseReplyChain, ...other } = this.props;
         delete other.getRelationsForEvent;
         delete other.permalinkCreator;
+        delete other.loadImage;
 
         const eventStatus = mxEvent.status;
         const unsentReactionsCount = this.getUnsentReactions().length;
@@ -604,6 +617,17 @@ export default class MessageContextMenu extends React.Component<IProps, IState> 
             );
         }
 
+        let copyImageButton: JSX.Element | undefined;
+        if (this.props.loadImage && canCopyImageToClipboard()) {
+            copyImageButton = (
+                <IconizedContextMenuOption
+                    icon={<ImageIcon />}
+                    label={_t("telement|timeline|context_menu|copy_image")}
+                    onClick={this.onCopyImageClick}
+                />
+            );
+        }
+
         const selectedText = getSelectedText();
 
         let copyButton: JSX.Element | undefined;
@@ -695,11 +719,12 @@ export default class MessageContextMenu extends React.Component<IProps, IState> 
         }
 
         let nativeItemsList: JSX.Element | undefined;
-        if (copyButton || quoteButton || copyLinkButton) {
+        if (copyButton || quoteButton || copyImageButton || copyLinkButton) {
             nativeItemsList = (
                 <IconizedContextMenuOptionList>
                     {copyButton}
                     {quoteButton}
+                    {copyImageButton}
                     {copyLinkButton}
                 </IconizedContextMenuOptionList>
             );

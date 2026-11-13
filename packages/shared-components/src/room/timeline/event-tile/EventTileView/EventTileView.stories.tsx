@@ -262,13 +262,11 @@ const createStoryAvatar = (
 
 const StoryTimestamp = ({
     className,
-    visible = true,
     linked = false,
 }: {
     className?: string;
-    visible?: boolean;
     linked?: boolean;
-}): React.ReactElement | null => {
+}): React.ReactElement => {
     const vm = useMockedViewModel(
         {
             ts: "12:34",
@@ -278,24 +276,61 @@ const StoryTimestamp = ({
         },
         linked ? { onClick: fn(), onContextMenu: fn() } : {},
     );
-    return visible ? <MessageTimestampView vm={vm} className={className} /> : null;
+    return <MessageTimestampView vm={vm} className={className} />;
 };
 const StoryLinkedTimestamp = (): React.ReactElement => <StoryTimestamp linked />;
+/* Text bodies carry the application's classes, which the bubble layout uses to fit the timestamp into the last line. */
+const storyTextContentClassName = "mx_EventTile_content";
+const storyTextBodySnapshot = { className: "mx_EventTile_body", dir: "auto" } as const;
 const StoryBody = (): React.ReactElement => {
     const contentSnapshot: EventContentBodyViewSnapshot = {
+        ...storyTextBodySnapshot,
         body: "Here is a realistic event tile body with enough text to show the available width.\nThis second line makes wrapping and vertical rhythm visible in Storybook.",
     };
     const contentVm = useMockedViewModel(contentSnapshot, {});
     const bodySnapshot: TextualBodyViewSnapshot = { kind: TextualBodyViewKind.TEXT };
     const bodyVm = useMockedViewModel(bodySnapshot, {});
 
-    return <TextualBodyView vm={bodyVm} body={<EventContentBodyView vm={contentVm} as="div" />} />;
+    return (
+        <TextualBodyView
+            vm={bodyVm}
+            className={storyTextContentClassName}
+            body={<EventContentBodyView vm={contentVm} as="div" />}
+        />
+    );
 };
 const StoryShortBody = (): React.ReactElement => {
-    const contentVm = useMockedViewModel({ body: "Short text message." } satisfies EventContentBodyViewSnapshot, {});
+    const contentVm = useMockedViewModel(
+        { ...storyTextBodySnapshot, body: "Short text message." } satisfies EventContentBodyViewSnapshot,
+        {},
+    );
     const bodyVm = useMockedViewModel({ kind: TextualBodyViewKind.TEXT } satisfies TextualBodyViewSnapshot, {});
 
-    return <TextualBodyView vm={bodyVm} body={<EventContentBodyView vm={contentVm} as="div" />} />;
+    return (
+        <TextualBodyView
+            vm={bodyVm}
+            className={storyTextContentClassName}
+            body={<EventContentBodyView vm={contentVm} as="div" />}
+        />
+    );
+};
+const StoryRightToLeftBody = (): React.ReactElement => {
+    const contentVm = useMockedViewModel(
+        {
+            ...storyTextBodySnapshot,
+            body: "هذه رسالة طويلة باللغة العربية تحتوي على نص كاف لكي تلتف على سطرين داخل الفقاعة في الجدول الزمني.",
+        } satisfies EventContentBodyViewSnapshot,
+        {},
+    );
+    const bodyVm = useMockedViewModel({ kind: TextualBodyViewKind.TEXT } satisfies TextualBodyViewSnapshot, {});
+
+    return (
+        <TextualBodyView
+            vm={bodyVm}
+            className={storyTextContentClassName}
+            body={<EventContentBodyView vm={contentVm} as="div" />}
+        />
+    );
 };
 const StoryPreviewBody = (): React.ReactElement => {
     const snapshot: EventPreviewViewSnapshot = {
@@ -382,6 +417,7 @@ const StoryMessageComposer = (): React.ReactElement => (
 );
 const StoryEditedMessageBody = (): React.ReactElement => {
     const contentSnapshot: EventContentBodyViewSnapshot = {
+        ...storyTextBodySnapshot,
         body: "This message was edited.",
     };
     const contentVm = useMockedViewModel(contentSnapshot, {});
@@ -396,7 +432,13 @@ const StoryEditedMessageBody = (): React.ReactElement => {
         { onEditedMarkerClick: fn() },
     );
 
-    return <TextualBodyView vm={bodyVm} body={<EventContentBodyView vm={contentVm} as="div" />} />;
+    return (
+        <TextualBodyView
+            vm={bodyVm}
+            className={storyTextContentClassName}
+            body={<EventContentBodyView vm={contentVm} as="div" />}
+        />
+    );
 };
 const StoryEmoteBody = (): React.ReactElement => {
     const contentSnapshot: EventContentBodyViewSnapshot = {
@@ -419,6 +461,7 @@ const StoryReplyChain = (): React.ReactElement => (
 );
 const storyMediaSizes = {
     small: { label: "Small", maxWidth: 1, maxHeight: 1, aspectRatio: "1 / 1" },
+    narrow: { label: "Narrow", maxWidth: 120, maxHeight: 90, aspectRatio: "4 / 3" },
     medium: { label: "Medium", maxWidth: 320, maxHeight: 180, aspectRatio: "16 / 9" },
     large: { label: "Large", maxWidth: 800, maxHeight: 600, aspectRatio: "4 / 3" },
 } as const;
@@ -1005,15 +1048,6 @@ const resolveStoryPresentation = (
     };
 };
 
-const createStoryTimestamp = (
-    layout: EventLayout,
-    isLast: boolean,
-    showActionBar: boolean,
-): React.ReactElement | undefined => {
-    const showTimestamp = layout === "irc" || isLast || showActionBar;
-    return showTimestamp ? <StoryTimestamp visible={showTimestamp} linked /> : undefined;
-};
-
 const createRoomStorySlots = ({
     isOwnEvent,
     slots,
@@ -1105,7 +1139,6 @@ function EventTileViewStoryContent({
         isOwnEvent: boolean,
         suffix: string,
         boundaryState: Partial<EventTileViewProps["root"]["state"]> = {},
-        isLast = false,
         bodyOverride?: React.ReactNode,
         showSenderAndAvatarOverride?: boolean,
         slotsOverride?: EventTileViewProps["slots"],
@@ -1118,7 +1151,7 @@ function EventTileViewStoryContent({
         const interaction = tileInteractions[suffix] ?? { hovered: false, focused: false };
         const showActionBar =
             shape === "ThreadsList" || tileState.actionBarFocused || interaction.hovered || interaction.focused;
-        const timestamp = hideTimestampStoryOverride ? undefined : createStoryTimestamp(layout, isLast, showActionBar);
+        const timestamp = hideTimestampStoryOverride ? undefined : <StoryTimestamp linked />;
         const showSenderAndAvatar =
             showSenderAndAvatarOverride ??
             showSenderAndAvatarStoryOverride ??
@@ -1206,21 +1239,18 @@ function EventTileViewStoryContent({
                         false,
                         "media-small",
                         { continuation: false, lastInSection: false },
-                        false,
                         <StoryMediaBody size="small" />,
                     )}
                     {renderTile(
                         false,
                         "media-medium",
                         { continuation: true, lastInSection: false },
-                        false,
                         <StoryMediaBody size="medium" />,
                     )}
                     {renderTile(
                         false,
                         "media-large",
                         { continuation: true, lastInSection: true },
-                        true,
                         <StoryMediaBody size="large" />,
                     )}
                 </>
@@ -1234,7 +1264,6 @@ function EventTileViewStoryContent({
                         false,
                         "rich-bob-first",
                         { continuation: false, lastInSection: false, hasReply: true },
-                        false,
                         undefined,
                         undefined,
                         richRoomSlots,
@@ -1243,7 +1272,6 @@ function EventTileViewStoryContent({
                         false,
                         "rich-bob-continuation",
                         { continuation: true, lastInSection: false },
-                        false,
                         <StoryShortBody />,
                         undefined,
                         { body: <StoryShortBody />, receipt: <StoryReceipt empty /> },
@@ -1252,7 +1280,6 @@ function EventTileViewStoryContent({
                         true,
                         "rich-alice-last",
                         { continuation: false, lastInSection: true },
-                        true,
                         <StoryEditedMessageBody />,
                         undefined,
                         richOwnRoomSlots,
@@ -1262,11 +1289,11 @@ function EventTileViewStoryContent({
         }
 
         if (roomMessages === "alice") {
-            return renderTile(true, "alice-single", { continuation: false, lastInSection: true }, true);
+            return renderTile(true, "alice-single", { continuation: false, lastInSection: true });
         }
 
         if (roomMessages === "bob") {
-            return renderTile(false, "bob-single", { continuation: false, lastInSection: true }, true);
+            return renderTile(false, "bob-single", { continuation: false, lastInSection: true });
         }
 
         if (roomMessages === "threeEach") {
@@ -1274,10 +1301,10 @@ function EventTileViewStoryContent({
                 <>
                     {renderTile(false, "bob-first", { continuation: false, lastInSection: false })}
                     {renderTile(false, "bob-middle", { continuation: true, lastInSection: false })}
-                    {renderTile(false, "bob-last", { continuation: true, lastInSection: true }, true)}
+                    {renderTile(false, "bob-last", { continuation: true, lastInSection: true })}
                     {renderTile(true, "alice-first", { continuation: false, lastInSection: false })}
                     {renderTile(true, "alice-middle", { continuation: true, lastInSection: false })}
-                    {renderTile(true, "alice-last", { continuation: true, lastInSection: true }, true)}
+                    {renderTile(true, "alice-last", { continuation: true, lastInSection: true })}
                 </>
             );
         }
@@ -1289,21 +1316,18 @@ function EventTileViewStoryContent({
                         false,
                         "informational-first",
                         { info: true, continuation: false, lastInSection: false },
-                        false,
                         <StoryInformationalBody>Alex changed the room name.</StoryInformationalBody>,
                     )}
                     {renderTile(
                         false,
                         "informational-second",
                         { info: true, continuation: false, lastInSection: false },
-                        false,
                         <StoryInformationalBody>Notifications are enabled.</StoryInformationalBody>,
                     )}
                     {renderTile(
                         false,
                         "informational-last",
                         { info: true, continuation: false, lastInSection: true },
-                        true,
                         <StoryInformationalBody>
                             This longer informational event demonstrates how shared textual event styling handles a
                             detailed message that wraps across two rows in the timeline.
@@ -1321,14 +1345,12 @@ function EventTileViewStoryContent({
                         false,
                         "aligned-before",
                         { continuation: false, lastInSection: true },
-                        false,
                         <StoryShortBody />,
                     )}
                     {renderTile(
                         false,
                         "aligned-event",
                         { alignedBetweenBubbles: true, continuation: false, lastInSection: true },
-                        false,
                         <StoryCallStartedBody />,
                         false,
                     )}
@@ -1336,7 +1358,6 @@ function EventTileViewStoryContent({
                         true,
                         "aligned-after",
                         { continuation: false, lastInSection: true },
-                        true,
                         <StoryShortBody />,
                     )}
                 </>
@@ -1352,7 +1373,6 @@ function EventTileViewStoryContent({
                     true,
                     "alice-single",
                     { continuation: false, lastInSection: true },
-                    true,
                     <StoryEditedMessageBody />,
                 )}
             </>
@@ -1365,21 +1385,18 @@ function EventTileViewStoryContent({
                 false,
                 "search-context-before",
                 { contextual: showSearchContextOpacity, continuation: false, lastInSection: false },
-                false,
                 <StorySearchContextBody body="Earlier context message in the room." />,
             )}
             {renderTile(
                 false,
                 "search-result",
                 { contextual: false, continuation: true, lastInSection: false },
-                false,
                 <StorySearchBody />,
             )}
             {renderTile(
                 false,
                 "search-context-after",
                 { contextual: showSearchContextOpacity, continuation: true, lastInSection: true },
-                true,
                 <StorySearchContextBody body="Later context message in the room." />,
             )}
         </>
@@ -1393,7 +1410,7 @@ function EventTileViewStoryContent({
         if (shape === "Room") return renderRoomTiles();
         if (shape === "Search" && searchMessages === "result") return renderSearchTiles();
 
-        return renderTile(false, "event", { continuation: false, lastInSection: true }, true);
+        return renderTile(false, "event", { continuation: false, lastInSection: true });
     };
 
     const rightPanel =
@@ -1487,6 +1504,7 @@ const storyHelpers = {
     StoryOngoingCallBody,
     StoryPreviewBody,
     StoryShortBody,
+    StoryRightToLeftBody,
     StoryReplyChain,
     StoryStickerBody,
     StoryThreadListActionBar,

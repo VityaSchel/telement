@@ -54,7 +54,6 @@ const RoomContext = createContext<RoomContextType>({
     resizing: false,
     layout: Layout.Group,
     lowBandwidth: false,
-    alwaysShowTimestamps: false,
     showTwelveHourTimestamps: false,
     userTimezone: undefined,
     readMarkerInViewThresholdMs: 3000,

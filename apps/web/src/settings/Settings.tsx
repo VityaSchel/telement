@@ -248,7 +248,6 @@ export interface Settings {
     "showDisplaynameChanges": IBaseSetting<boolean>;
     "showReadReceipts": IBaseSetting<boolean>;
     "showTwelveHourTimestamps": IBaseSetting<boolean>;
-    "alwaysShowTimestamps": IBaseSetting<boolean>;
     "userTimezone": IBaseSetting<string>;
     "userTimezonePublish": IBaseSetting<boolean>;
     "autoplayGifs": IBaseSetting<boolean>;
@@ -813,11 +812,6 @@ export const SETTINGS: Settings = {
     "showTwelveHourTimestamps": {
         supportedLevels: LEVELS_ACCOUNT_SETTINGS,
         displayName: _td("settings|use_12_hour_format"),
-        default: false,
-    },
-    "alwaysShowTimestamps": {
-        supportedLevels: LEVELS_ACCOUNT_SETTINGS,
-        displayName: _td("settings|always_show_message_timestamps"),
         default: false,
     },
     "userTimezone": {

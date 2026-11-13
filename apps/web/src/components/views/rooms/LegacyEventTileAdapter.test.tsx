@@ -69,7 +69,6 @@ describe("<LegacyEventTileAdapter />", () => {
                 showReactions={true}
                 showUrlPreview={true}
                 isTwelveHour={true}
-                alwaysShowTimestamps={true}
                 permalinkCreator={permalinkCreator}
                 getRelationsForEvent={getRelationsForEvent}
             />,
@@ -83,7 +82,6 @@ describe("<LegacyEventTileAdapter />", () => {
             showReactions: true,
             showUrlPreview: true,
             isTwelveHour: true,
-            alwaysShowTimestamps: true,
             permalinkCreator,
             getRelationsForEvent,
         });

@@ -124,9 +124,6 @@ interface IProps {
     // which shape to use
     shape?: EventTileRenderingMode;
 
-    // whether to always show timestamps for an event
-    alwaysShowTimestamps?: boolean;
-
     editState?: EditorStateTransfer;
     permalinkCreator?: RoomPermalinkCreator;
     membersLoaded?: boolean;
@@ -198,9 +195,6 @@ interface IState {
 
     // should the event tiles have twelve hour times
     isTwelveHour: boolean;
-
-    // always show timestamps on event tiles?
-    alwaysShowTimestamps: boolean;
 
     // how long to show the RM for when it's visible in the window
     readMarkerInViewThresholdMs: number;
@@ -285,7 +279,6 @@ class TimelinePanel extends React.Component<IProps, IState> {
             backPaginating: false,
             forwardPaginating: false,
             isTwelveHour: SettingsStore.getValue("showTwelveHourTimestamps"),
-            alwaysShowTimestamps: SettingsStore.getValue("alwaysShowTimestamps"),
             readMarkerInViewThresholdMs: SettingsStore.getValue("readMarkerInViewThresholdMs"),
             readMarkerOutOfViewThresholdMs: SettingsStore.getValue("readMarkerOutOfViewThresholdMs"),
         };
@@ -1880,11 +1873,6 @@ class TimelinePanel extends React.Component<IProps, IState> {
                 onFillRequest={this.onMessageListFillRequest}
                 onUnfillRequest={this.onMessageListUnfillRequest}
                 isTwelveHour={this.context?.showTwelveHourTimestamps ?? this.state.isTwelveHour}
-                alwaysShowTimestamps={
-                    this.props.alwaysShowTimestamps ??
-                    this.context?.alwaysShowTimestamps ??
-                    this.state.alwaysShowTimestamps
-                }
                 className={this.props.className}
                 getRelationsForEvent={this.getRelationsForEvent}
                 editState={this.props.editState}

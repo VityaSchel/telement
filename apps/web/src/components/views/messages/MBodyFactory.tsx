@@ -216,7 +216,6 @@ export function ImageBodyFactory({
                 maxImageHeight,
                 mediaVisible,
                 permalinkCreator,
-                timelineRenderingType,
                 imageRef,
                 setMediaVisible,
             }),
@@ -251,11 +250,6 @@ export function ImageBodyFactory({
         if (shouldFallbackToFileBody) return;
         vm.setPermalinkCreator(permalinkCreator);
     }, [permalinkCreator, shouldFallbackToFileBody, vm]);
-
-    useEffect(() => {
-        if (shouldFallbackToFileBody) return;
-        vm.setTimelineRenderingType(timelineRenderingType);
-    }, [shouldFallbackToFileBody, timelineRenderingType, vm]);
 
     useEffect(() => {
         if (shouldFallbackToFileBody) return;

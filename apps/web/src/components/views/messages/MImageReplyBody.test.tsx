@@ -260,7 +260,7 @@ describe("<MImageReplyBody />", () => {
         );
     });
 
-    it("updates load dimensions and toggles hover/focus banner state", async () => {
+    it("updates load dimensions and tracks hover/focus without a file name banner", async () => {
         const { container, ref } = renderBase();
         await waitFor(() => expect(screen.getByRole("img", { name: "demo image" })).toBeInTheDocument());
         const image = container.querySelector("img.mx_MImageBody_thumbnail")!;
@@ -275,7 +275,8 @@ describe("<MImageReplyBody />", () => {
 
         fireEvent.mouseEnter(image);
         expect(ref.current!.state.hover).toBe(true);
-        expect(container.querySelector(".mx_MImageBody_banner")).not.toBeNull();
+        // Telement shows no file name and size over the picture.
+        expect(container.querySelector(".mx_MImageBody_banner")).toBeNull();
         expect(image).toHaveAttribute("src", "https://server/full.png");
 
         fireEvent.mouseLeave(image);

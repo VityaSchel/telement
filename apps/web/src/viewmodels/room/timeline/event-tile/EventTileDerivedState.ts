@@ -215,38 +215,15 @@ export interface ShouldShowTimestampInput {
     isRtcNotification: boolean;
     /** Whether timestamp rendering is disabled. */
     hideTimestamp?: boolean;
-    /** Whether timestamps should always show. */
-    alwaysShowTimestamps?: boolean;
-    /** Whether the tile is the last event in the timeline. */
-    last?: boolean;
-    /** Whether the tile is currently hovered. */
-    hover: boolean;
-    /** Whether focus is currently inside the tile. */
-    focusWithin: boolean;
-    /** Whether the action bar currently has focus. */
-    actionBarFocused: boolean;
-    /** Whether an EventTile context menu is currently open. */
-    hasContextMenu: boolean;
 }
 
-/** Whether EventTile should render the message timestamp. */
+/** Whether EventTile should render the message timestamp. Telement always shows it, not only on hover. */
 export function getShouldShowTimestamp({
     eventTs,
     isRtcNotification,
     hideTimestamp,
-    alwaysShowTimestamps,
-    last,
-    hover,
-    focusWithin,
-    actionBarFocused,
-    hasContextMenu,
 }: ShouldShowTimestampInput): boolean {
-    return (
-        !!eventTs &&
-        !isRtcNotification &&
-        !hideTimestamp &&
-        (alwaysShowTimestamps || last || hover || focusWithin || actionBarFocused || hasContextMenu)
-    );
+    return !!eventTs && !isRtcNotification && !hideTimestamp;
 }
 
 /** Inputs for EventTile timestamp value derivation. */
@@ -308,25 +285,6 @@ export function getTimestampDisplayState({
         showRealTimestamp,
         showLinkedTimestamp: showRealTimestamp && !hideTimestamp,
     };
-}
-
-/** Inputs for ReplyChain timestamp visibility derivation. */
-export interface ReplyChainTimestampInput {
-    /** Whether timestamps should always show. */
-    alwaysShowTimestamps?: boolean;
-    /** Whether the tile is currently hovered. */
-    hover: boolean;
-    /** Whether focus is currently inside the tile. */
-    focusWithin: boolean;
-}
-
-/** Whether ReplyChain should always show timestamps. */
-export function getReplyChainAlwaysShowTimestamps({
-    alwaysShowTimestamps,
-    hover,
-    focusWithin,
-}: ReplyChainTimestampInput): boolean {
-    return !!alwaysShowTimestamps || hover || focusWithin;
 }
 
 /** Inputs for EventTile footer display state derivation. */

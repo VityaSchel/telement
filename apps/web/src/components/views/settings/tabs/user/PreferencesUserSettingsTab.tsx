@@ -135,7 +135,7 @@ export default class PreferencesUserSettingsTab extends React.Component<EmptyObj
         "MessageComposerInput.insertTrailingColon",
     ];
 
-    private static TIME_SETTINGS: BooleanSettingKey[] = ["showTwelveHourTimestamps", "alwaysShowTimestamps"];
+    private static TIME_SETTINGS: BooleanSettingKey[] = ["showTwelveHourTimestamps"];
 
     private static CODE_BLOCKS_SETTINGS: BooleanSettingKey[] = [
         "enableSyntaxHighlightLanguageDetection",
