@@ -338,6 +338,18 @@ summary {
     }
 }
 
+/*
+ * Concentric corners (TELEMENT.md, "Radius and spacing"): the body's radius is the close button's radius plus the
+ * close button's inset, and Compound's Glass frame adds its padding. Only Modal's frame: CompleteSecurity also puts
+ * .mx_Dialog_border on a Glass, around a body with its own radius.
+ */
+.mx_Dialog_wrapper > .mx_Dialog_border {
+    /* .mx_Dialog_cancelButton, from customisedCancelButton's width and padding */
+    --dialog-close-button-size: calc(20px + 2 * var(--cpd-space-1x));
+
+    border-radius: calc(var(--dialog-close-button-size) / 2 + var(--cpd-space-4x) + var(--cpd-space-3x));
+}
+
 .mx_Dialog {
     background-color: $background;
     color: $light-fg-color;
@@ -346,6 +358,9 @@ summary {
     padding: var(--cpd-space-8x) var(--cpd-space-10x);
     box-sizing: border-box;
     overflow-y: auto;
+    border-radius: calc(var(--dialog-close-button-size) / 2 + var(--cpd-space-4x));
+    /* Always-on scrollbars ignore border-radius and would run over the corners and Glass's frame */
+    clip-path: border-box;
 
     .mx_Dialog_staticWrapper & {
         z-index: var(--dialog-zIndex-static);
@@ -517,6 +532,7 @@ summary {
 
 .mx_Dialog_cancelButton {
     @mixin customisedCancelButton;
+    border-radius: var(--tl-radius-control);
     position: absolute;
     top: var(--cpd-space-4x);
     right: var(--cpd-space-4x);

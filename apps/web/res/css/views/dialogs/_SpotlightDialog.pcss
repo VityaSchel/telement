@@ -22,6 +22,7 @@ Please see LICENSE files in the repository root for full details.
         position: relative;
         padding: 0;
         contain: unset; /* needed for #mx_SpotlightDialog_keyboardPrompt to not be culled */
+        clip-path: none; /* likewise */
 
         #mx_SpotlightDialog_keyboardPrompt {
             position: absolute;
@@ -184,6 +185,8 @@ Please see LICENSE files in the repository root for full details.
         padding: var(--tl-inset-surface);
         /* Clips the scrolled options and the scroll bar to the dialog's corners */
         border-radius: 0 0 var(--tl-radius-surface) var(--tl-radius-surface);
+        /* Always-on scroll bars ignore border-radius */
+        clip-path: border-box;
 
         ul {
             padding: 0;
