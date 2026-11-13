@@ -63,7 +63,8 @@ export function updateMobilePage(metadata: MobileAppMetadata, deepLinkUrl: strin
     appleMeta.setAttribute("content", `app-id=${metadata.appleAppId}`);
 
     if (server) {
-        (document.getElementById("header_title") as HTMLHeadingElement).innerText = `Join ${server} on Element`;
+        (document.getElementById("header_title") as HTMLHeadingElement).innerText =
+            `Join ${server} with a Matrix client`;
     }
     (document.getElementById("app_store_link") as HTMLAnchorElement).href = metadata.appStoreUrl;
     (document.getElementById("play_store_link") as HTMLAnchorElement).href = metadata.playStoreUrl;
@@ -73,6 +74,9 @@ export function updateMobilePage(metadata: MobileAppMetadata, deepLinkUrl: strin
     } else {
         document.getElementById("f_droid_section")!.style.display = "none";
     }
+
+    const introAppName = document.getElementById("intro_app_name");
+    if (introAppName) introAppName.innerText = metadata.name;
 
     const step1Heading = document.getElementById("step1_heading")!;
     step1Heading.innerHTML = step1Heading.innerHTML.replace("Element", metadata.name);

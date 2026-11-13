@@ -20,7 +20,6 @@ import AccessibleButton from "../elements/AccessibleButton";
 import QRCode from "../elements/QRCode";
 import Spinner from "../elements/Spinner";
 import { Click, Phase } from "./LoginWithQR-types";
-import SdkConfig from "../../../SdkConfig";
 import { type FailureReason, LoginWithQRFailureReason } from "./LoginWithQR";
 import { ErrorMessage } from "../../structures/ErrorMessage";
 
@@ -268,11 +267,7 @@ export default class LoginWithQRFlow extends React.Component<Props> {
                 if (this.props.intent === RendezvousIntent.LOGIN_ON_NEW_DEVICE) {
                     steps = (
                         <>
-                            <li>
-                                {_t("auth|qr_code_login|open_element_mobile_device", {
-                                    brand: SdkConfig.get().brand,
-                                })}
-                            </li>
+                            <li>{_t("telement|qr_code_login|open_matrix_client")}</li>
                             <li>
                                 {_t("auth|qr_code_login|tap_avatar_link_new_device", {
                                     linkNewDevice: <strong>{_t("settings|sessions|sign_in_with_qr")}</strong>,
@@ -294,11 +289,7 @@ export default class LoginWithQRFlow extends React.Component<Props> {
                 } else {
                     steps = (
                         <>
-                            <li>
-                                {_t("auth|qr_code_login|open_element_other_device", {
-                                    brand: SdkConfig.get().brand,
-                                })}
-                            </li>
+                            <li>{_t("telement|qr_code_login|open_matrix_client_other_device")}</li>
                             <li>
                                 {_t("auth|qr_code_login|select_qr_code", {
                                     scanQRCode: <strong>{_t("auth|qr_code_login|scan_qr_code")}</strong>,

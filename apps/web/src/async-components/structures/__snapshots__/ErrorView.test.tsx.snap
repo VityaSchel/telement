@@ -6,7 +6,7 @@ exports[`<ErrorView /> > should match snapshot 1`] = `
     class="mx_ErrorView cpd-theme-light"
   >
     <img
-      alt="Element"
+      alt="Telement"
       class="mx_ErrorView_logo"
       height="160"
       src="themes/element/img/logos/element-app-logo.png"
@@ -40,7 +40,7 @@ exports[`<UnsupportedBrowserView /> > should match snapshot 1`] = `
     class="mx_ErrorView cpd-theme-light"
   >
     <img
-      alt="Element"
+      alt="Telement"
       class="mx_ErrorView_logo"
       height="160"
       src="themes/element/img/logos/element-app-logo.png"
@@ -51,12 +51,12 @@ exports[`<UnsupportedBrowserView /> > should match snapshot 1`] = `
       <h1
         class="_typography _font-heading-md-semibold"
       >
-        Element does not support this browser
+        Telement does not support this browser
       </h1>
       <p
         class="_typography _font-body-lg-regular"
       >
-        Element uses some browser features which are not available in your current browser. Try updating this browser if you're not using the latest version and try again.
+        Telement uses some browser features which are not available in your current browser. Try updating this browser if you're not using the latest version and try again.
       </p>
       <p
         class="_typography _font-body-lg-regular"
@@ -136,7 +136,7 @@ exports[`<UnsupportedBrowserView /> > should match snapshot 1`] = `
     <h2
       class="_typography _font-heading-sm-semibold"
     >
-      Use Element Desktop instead
+      Use Telement Desktop instead
     </h2>
     <div
       class="_flex mx_ErrorView_flexContainer"
@@ -146,7 +146,7 @@ exports[`<UnsupportedBrowserView /> > should match snapshot 1`] = `
         class="_button _has-icon"
         data-kind="secondary"
         data-size="lg"
-        href="https://packages.element.io/desktop/install/macos/Element.dmg"
+        href="https://git.hloth.dev/hloth/telement"
         role="link"
         tabindex="0"
       >
@@ -170,7 +170,7 @@ exports[`<UnsupportedBrowserView /> > should match snapshot 1`] = `
         class="_button _has-icon"
         data-kind="secondary"
         data-size="lg"
-        href="https://packages.element.io/desktop/install/win32/x64/Element%20Setup.exe"
+        href="https://git.hloth.dev/hloth/telement"
         role="link"
         tabindex="0"
       >
@@ -192,7 +192,7 @@ exports[`<UnsupportedBrowserView /> > should match snapshot 1`] = `
         class="_button _has-icon"
         data-kind="secondary"
         data-size="lg"
-        href="https://packages.element.io/desktop/install/win32/arm64/Element%20Setup.exe"
+        href="https://git.hloth.dev/hloth/telement"
         role="link"
         tabindex="0"
       >
@@ -214,7 +214,7 @@ exports[`<UnsupportedBrowserView /> > should match snapshot 1`] = `
         class="_button _has-icon"
         data-kind="secondary"
         data-size="lg"
-        href="https://element.io/download#linux"
+        href="https://git.hloth.dev/hloth/telement"
         role="link"
         tabindex="0"
       >
@@ -255,14 +255,14 @@ exports[`<UnsupportedBrowserView /> > should match snapshot 1`] = `
     <h2
       class="_typography _font-heading-sm-semibold"
     >
-      Or use our mobile app
+      Or use a Matrix client on your phone
     </h2>
     <div
       class="_flex mx_ErrorView_flexContainer"
       style="--mx-flex-display: flex; --mx-flex-direction: row; --mx-flex-align: start; --mx-flex-justify: start; --mx-flex-gap: var(--cpd-space-6x); --mx-flex-wrap: nowrap;"
     >
       <a
-        href="https://apps.apple.com/app/vector/id1083446067"
+        href="https://apps.apple.com/app/element-x-secure-chat-call/id1631335820"
         rel="noreferrer noopener"
         target="_blank"
       >
@@ -273,7 +273,7 @@ exports[`<UnsupportedBrowserView /> > should match snapshot 1`] = `
         />
       </a>
       <a
-        href="https://play.google.com/store/apps/details?id=im.vector.app"
+        href="https://play.google.com/store/apps/details?id=io.element.android.x"
         rel="noreferrer noopener"
         target="_blank"
       >
@@ -284,7 +284,7 @@ exports[`<UnsupportedBrowserView /> > should match snapshot 1`] = `
         />
       </a>
       <a
-        href="https://f-droid.org/repository/browse/?fdid=im.vector.app"
+        href="https://f-droid.org/packages/io.element.android.x"
         rel="noreferrer noopener"
         target="_blank"
       >

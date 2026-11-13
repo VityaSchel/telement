@@ -13,13 +13,12 @@ import { type DeepReadonly } from "shared-types";
 import { SnakedObject } from "./utils/SnakedObject";
 import { type IConfigOptions, type ConfigOptions } from "./IConfigOptions";
 import { isObject, objectClone } from "./utils/objects";
-import ElementDesktopLogoSvg from "../res/img/element-desktop-logo.svg";
 
 // see element-web config.md for docs, or the IConfigOptions interface for dev docs
 export const DEFAULTS = {
-    brand: "Element",
+    brand: "Telement",
     branding: {
-        logo_link_url: "https://element.io",
+        logo_link_url: "https://telement.hloth.dev",
         auth_header_logo_url: "themes/element/img/logos/element-logo.svg",
         welcome_background_url: "themes/element/img/backgrounds/lake.jpg",
     },
@@ -45,8 +44,8 @@ export const DEFAULTS = {
     // be preferred over their config.
     desktopBuilds: {
         available: true,
-        logo: ElementDesktopLogoSvg,
-        url: "https://element.io/get-started",
+        logo: "vector-icons/1024.png",
+        url: "https://git.hloth.dev/hloth/telement",
     },
 
     feedback: {
@@ -58,16 +57,16 @@ export const DEFAULTS = {
     desktop_builds: {
         available: true,
         logo: "vector-icons/1024.png",
-        url: "https://element.io/download",
-        url_macos: "https://packages.element.io/desktop/install/macos/Element.dmg",
-        url_win64: "https://packages.element.io/desktop/install/win32/x64/Element%20Setup.exe",
-        url_win64arm: "https://packages.element.io/desktop/install/win32/arm64/Element%20Setup.exe",
-        url_linux: "https://element.io/download#linux",
+        url: "https://git.hloth.dev/hloth/telement",
+        url_macos: "https://git.hloth.dev/hloth/telement",
+        url_win64: "https://git.hloth.dev/hloth/telement",
+        url_win64arm: "https://git.hloth.dev/hloth/telement",
+        url_linux: "https://git.hloth.dev/hloth/telement",
     },
     mobile_builds: {
-        ios: "https://apps.apple.com/app/vector/id1083446067",
-        android: "https://play.google.com/store/apps/details?id=im.vector.app",
-        fdroid: "https://f-droid.org/repository/browse/?fdid=im.vector.app",
+        ios: "https://apps.apple.com/app/element-x-secure-chat-call/id1631335820",
+        android: "https://play.google.com/store/apps/details?id=io.element.android.x",
+        fdroid: "https://f-droid.org/packages/io.element.android.x",
     },
 } satisfies ConfigOptions;
 

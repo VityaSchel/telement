@@ -13,7 +13,6 @@ import SdkConfig from "../SdkConfig";
 import { GenericToast } from "@element-hq/web-shared-components";
 import ToastStore from "../stores/ToastStore";
 import QuestionDialog from "../components/views/dialogs/QuestionDialog";
-import ChangelogDialog, { checkVersion } from "../components/views/dialogs/ChangelogDialog";
 import PlatformPeg from "../PlatformPeg";
 import Modal from "../Modal";
 
@@ -36,18 +35,6 @@ export const showToast = (version: string, newVersion: string, releaseNotes?: st
                 title: _t("update|release_notes_toast_title"),
                 description: <pre>{releaseNotes}</pre>,
                 button: _t("action|update"),
-            });
-            void finished.then(([update]) => {
-                if (update && PlatformPeg.get()) {
-                    PlatformPeg.get()!.installUpdate();
-                }
-            });
-        };
-    } else if (checkVersion(version) && checkVersion(newVersion)) {
-        onAccept = () => {
-            const { finished } = Modal.createDialog(ChangelogDialog, {
-                version,
-                newVersion,
             });
             void finished.then(([update]) => {
                 if (update && PlatformPeg.get()) {

@@ -18,7 +18,6 @@ import ScrollPanel from "./ScrollPanel";
 import NewRoomIntro from "../views/rooms/NewRoomIntro";
 import { UnwrappedEventTile } from "../views/rooms/EventTile";
 import { _t } from "../../languageHandler";
-import SdkConfig from "../../SdkConfig";
 import { useScopedRoomContext } from "../../contexts/ScopedRoomContext.tsx";
 
 interface Props {
@@ -34,7 +33,6 @@ interface Props {
  */
 export const WaitingForThirdPartyRoomView: React.FC<Props> = ({ roomView, resizeNotifier, inviteEvent }) => {
     const context = useScopedRoomContext("room");
-    const brand = SdkConfig.get().brand;
 
     return (
         <div className="mx_RoomView mx_RoomView--local">
@@ -46,8 +44,8 @@ export const WaitingForThirdPartyRoomView: React.FC<Props> = ({ roomView, resize
                             <EventTileBubble
                                 icon={<LockSolidIcon />}
                                 className="mx_EventTileBubble mx_cryptoEvent"
-                                title={_t("room|waiting_for_join_title", { brand })}
-                                subtitle={_t("room|waiting_for_join_subtitle", { brand })}
+                                title={_t("telement|room|waiting_for_join_title")}
+                                subtitle={_t("telement|room|waiting_for_join_subtitle")}
                             />
                             <NewRoomIntro />
                             <UnwrappedEventTile mxEvent={inviteEvent} />

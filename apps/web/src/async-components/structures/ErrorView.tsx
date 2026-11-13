@@ -33,7 +33,7 @@ export const ErrorView: React.FC<IProps> = ({ title, messages, footer, children 
                 className="mx_ErrorView_logo"
                 height="160"
                 src="themes/element/img/logos/element-app-logo.png"
-                alt="Element"
+                alt="Telement"
             />
             <div className="mx_ErrorView_container">
                 <Heading size="md" weight="semibold">
@@ -119,7 +119,7 @@ export const UnsupportedBrowserView: React.FC<{
     onAccept?(this: void): void;
 }> = ({ onAccept }) => {
     const config = SdkConfig.get();
-    const brand = config.brand ?? "Element";
+    const brand = config.brand ?? "Telement";
 
     const hasDesktopBuilds =
         config.desktop_builds?.available &&
@@ -165,8 +165,8 @@ export const UnsupportedBrowserView: React.FC<{
                         <>
                             <Heading as="h2" size="sm" weight="semibold">
                                 {hasDesktopBuilds
-                                    ? _t("incompatible_browser|use_mobile_heading_after_desktop")
-                                    : _t("incompatible_browser|use_mobile_heading", { brand })}
+                                    ? _t("telement|incompatible_browser|use_mobile_heading_after_desktop")
+                                    : _t("telement|incompatible_browser|use_mobile_heading")}
                             </Heading>
                             <MobileAppLinks
                                 appleAppStoreUrl={config.mobile_builds?.ios ?? undefined}

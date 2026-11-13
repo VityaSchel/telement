@@ -36,7 +36,7 @@ export const showToast = (): void => {
         key: TOAST_KEY,
         title: _t("mobile_guide|toast_title"),
         props: {
-            description: _t("mobile_guide|toast_description", { brand }),
+            description: _t("telement|mobile_guide|toast_description", { brand }),
             primaryLabel: _t("mobile_guide|toast_accept"),
             onPrimaryClick: onAccept,
             secondaryLabel: _t("action|dismiss"),

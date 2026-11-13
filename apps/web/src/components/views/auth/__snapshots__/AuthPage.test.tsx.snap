@@ -26,25 +26,11 @@ exports[`<AuthPage /> > should match snapshot 1`] = `
       role="contentinfo"
     >
       <a
-        href="https://element.io/blog"
+        href="https://git.hloth.dev/hloth/telement"
         rel="noreferrer noopener"
         target="_blank"
       >
-        Blog
-      </a>
-      <a
-        href="https://mastodon.matrix.org/@Element"
-        rel="noreferrer noopener"
-        target="_blank"
-      >
-        Mastodon
-      </a>
-      <a
-        href="https://github.com/element-hq/element-web"
-        rel="noreferrer noopener"
-        target="_blank"
-      >
-        GitHub
+        Source code
       </a>
       <a
         href="https://matrix.org"

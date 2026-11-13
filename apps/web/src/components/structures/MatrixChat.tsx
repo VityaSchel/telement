@@ -537,7 +537,7 @@ export default class MatrixChat extends React.PureComponent<IProps, IState> {
 
         const waitText = _t("console_wait");
         const scamText = _t("console_scam_warning");
-        const devText = _t("console_dev_note");
+        const devText = _t("telement|console_dev_note");
 
         console.log(
             `%c${waitText}\n%c${scamText}\n%c${devText}`,

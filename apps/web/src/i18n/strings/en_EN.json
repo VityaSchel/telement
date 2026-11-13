@@ -258,8 +258,6 @@
             "error_user_declined": "You or the account provider declined the sign-in request.",
             "error_user_declined_title": "Sign-in declined",
             "follow_remaining_instructions": "Follow the remaining instructions",
-            "open_element_mobile_device": "Open %(brand)s on your mobile device",
-            "open_element_other_device": "Open %(brand)s on your other device",
             "point_the_camera": "Scan the QR code shown here",
             "ready_to_scan": "Ready to scan",
             "scan_code_instruction": "Scan the QR code",
@@ -597,7 +595,6 @@
         "send_voice_message": "Send voice message",
         "stop_voice_message": "Stop recording"
     },
-    "console_dev_note": "If you know what you're doing, Element is open-source, be sure to check out our GitHub (https://github.com/vector-im/element-web/) and contribute!",
     "console_scam_warning": "If someone told you to copy/paste something here, there is a high likelihood you're being scammed!",
     "console_wait": "Wait!",
     "create_room": {
@@ -1063,11 +1060,9 @@
         "hs_blocked": "This service has been blocked by the account provider.",
         "invalid_configuration_mixed_server": "Invalid configuration: a default_hs_url can't be specified along with default_server_name or default_server_config",
         "invalid_configuration_no_server": "Invalid configuration: no default server specified.",
-        "invalid_json": "Your Element configuration contains invalid JSON. Please correct the problem and reload the page.",
         "invalid_json_detail": "The message from the parser is: %(message)s",
         "invalid_json_generic": "Invalid JSON",
         "mau": "This service has hit its Monthly Active User limit.",
-        "misconfigured": "Your Element is misconfigured",
         "mixed_content": "Can't connect to homeserver via HTTP when an HTTPS URL is in your browser bar. Either use HTTPS or <a>enable unsafe scripts</a>.",
         "non_urgent_echo_failure_toast": "Your server isn't responding to some <a>requests</a>.",
         "resource_limits": "This service has exceeded one of its resource limits.",
@@ -1261,8 +1256,6 @@
         "supported_browsers": "For the best experience, use <Chrome>Chrome</Chrome>, <Firefox>Firefox</Firefox>, <Edge>Edge</Edge>, or <Safari>Safari</Safari>.",
         "title": "%(brand)s does not support this browser",
         "use_desktop_heading": "Use %(brand)s Desktop instead",
-        "use_mobile_heading": "Use %(brand)s on mobile instead",
-        "use_mobile_heading_after_desktop": "Or use our mobile app",
         "windows_64bit": "Windows (64-bit)",
         "windows_arm_64bit": "Windows (ARM 64-bit)"
     },
@@ -1639,7 +1632,6 @@
     "message_edit_dialog_title": "Message edits",
     "mobile_guide": {
         "toast_accept": "Use app",
-        "toast_description": "%(brand)s is experimental on a mobile web browser. For a better experience and the latest features, use our free native app.",
         "toast_title": "Use app for a better experience"
     },
     "name_and_id": "%(name)s (%(userId)s)",
@@ -2056,9 +2048,7 @@
             },
             "uploading_single_file": "Uploading %(filename)s"
         },
-        "video_room": "This room is a video room",
-        "waiting_for_join_subtitle": "Once invited users have joined %(brand)s, you will be able to chat and the room will be end-to-end encrypted",
-        "waiting_for_join_title": "Waiting for users to join %(brand)s"
+        "video_room": "This room is a video room"
     },
     "room_list": {
         "add_space_label": "Add space",
@@ -3172,6 +3162,9 @@
         "empty_add_prompt": "Add some now"
     },
     "telement": {
+        "auth_footer": {
+            "source_code": "Source code"
+        },
         "composer": {
             "cancel_reply": "Cancel reply",
             "file": "File",
@@ -3180,6 +3173,26 @@
             "photo_or_video": "Photo or video",
             "reply_to": "Reply to %(name)s",
             "stickers": "Stickers"
+        },
+        "console_dev_note": "If you know what you're doing, Telement is open-source, be sure to check out its source code (https://git.hloth.dev/hloth/telement) and contribute!",
+        "error": {
+            "invalid_json": "Your Telement configuration contains invalid JSON. Please correct the problem and reload the page.",
+            "misconfigured": "Your Telement is misconfigured"
+        },
+        "incompatible_browser": {
+            "use_mobile_heading": "Use a Matrix client on your phone instead",
+            "use_mobile_heading_after_desktop": "Or use a Matrix client on your phone"
+        },
+        "mobile_guide": {
+            "toast_description": "%(brand)s doesn't fully work in mobile browsers. For a better experience, use a Matrix client for your phone, such as Element X."
+        },
+        "qr_code_login": {
+            "open_matrix_client": "Open your Matrix client on your mobile device",
+            "open_matrix_client_other_device": "Open your Matrix client on your other device"
+        },
+        "room": {
+            "waiting_for_join_subtitle": "Once invited users have joined Matrix, you will be able to chat and the room will be end-to-end encrypted",
+            "waiting_for_join_title": "Waiting for users to join Matrix"
         },
         "video_note": {
             "pause": "Pause video message",
@@ -3722,19 +3735,16 @@
     "unsupported_server_description": "This server is using an older version of Matrix. Upgrade to Matrix %(version)s to use %(brand)s without errors.",
     "unsupported_server_title": "Your server is unsupported",
     "update": {
-        "changelog": "Changelog",
         "check_action": "Check for update",
         "checking": "Checking for an update…",
         "downloading": "Downloading update…",
         "error_encountered": "Error encountered (%(errorDetail)s).",
-        "error_unable_load_commit": "Unable to load commit detail: %(msg)s",
         "new_version_available": "New version available. <a>Update now.</a>",
         "no_update": "No update available.",
         "release_notes_toast_title": "What's New",
         "see_changes_button": "What's new?",
         "toast_description": "New version of %(brand)s is available",
-        "toast_title": "Update %(brand)s",
-        "unavailable": "Unavailable"
+        "toast_title": "Update %(brand)s"
     },
     "update_room_access_modal": {
         "description": "To create a share link, make this room <b>public</b> or enable the option for users to <b>ask to join</b>. This allows guests to join without being invited.",
