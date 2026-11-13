@@ -7,6 +7,7 @@ NodeList [
     aria-labelledby="mx_tabpanel_ROOM_GENERAL_TAB_label"
     aria-selected="true"
     class="mx_AccessibleButton mx_TabbedView_tabLabel mx_TabbedView_tabLabel_active"
+    data-autofocus="true"
     data-testid="settings-tab-ROOM_GENERAL_TAB"
     role="tab"
     tabindex="0"

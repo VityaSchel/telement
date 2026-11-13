@@ -53,6 +53,19 @@ describe("<TabbedView />", () => {
         expect(getActiveTabBody(container)?.textContent).toEqual("appearance");
     });
 
+    it("asks a dialog's focus lock to focus the active tab", () => {
+        const { getByTestId, rerender } = render(getComponent({ activeTabId: labsTab.id }));
+
+        expect(getByTestId(getTabTestId(labsTab))).toHaveAttribute("data-autofocus", "true");
+        expect(getByTestId(getTabTestId(generalTab))).not.toHaveAttribute("data-autofocus");
+        expect(getByTestId(getTabTestId(appearanceTab))).not.toHaveAttribute("data-autofocus");
+
+        rerender(getComponent({ activeTabId: appearanceTab.id }));
+
+        expect(getByTestId(getTabTestId(appearanceTab))).toHaveAttribute("data-autofocus", "true");
+        expect(getByTestId(getTabTestId(labsTab))).not.toHaveAttribute("data-autofocus");
+    });
+
     it("calls onchange on on tab click", () => {
         const onChange = vi.fn();
         const { getByTestId } = render(getComponent({ activeTabId: "GENERAL", onChange }));

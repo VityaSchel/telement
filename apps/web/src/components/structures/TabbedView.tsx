@@ -109,6 +109,9 @@ function TabLabel<T extends string>({ tab, isActive, showToolip, onClick }: ITab
             element="li"
             title={showToolip ? label : undefined}
             aria-labelledby={`${id}_label`}
+            // A dialog's focus lock would otherwise focus the panel's first control, which a loading panel may
+            // replace, dropping focus out of the dialog
+            data-autofocus={isActive || undefined}
         >
             {tabIcon}
             <span className="mx_TabbedView_tabLabel_text" id={`${id}_label`}>

@@ -15,6 +15,7 @@ exports[`<TabbedView /> > renders tabs 1`] = `
         aria-labelledby="mx_tabpanel_GENERAL_label"
         aria-selected="true"
         class="mx_AccessibleButton mx_TabbedView_tabLabel mx_TabbedView_tabLabel_active"
+        data-autofocus="true"
         data-testid="settings-tab-GENERAL"
         role="tab"
         tabindex="0"

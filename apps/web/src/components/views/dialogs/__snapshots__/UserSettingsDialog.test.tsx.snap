@@ -7,6 +7,7 @@ NodeList [
     aria-labelledby="mx_tabpanel_USER_ACCOUNT_TAB_label"
     aria-selected="true"
     class="mx_AccessibleButton mx_TabbedView_tabLabel mx_TabbedView_tabLabel_active"
+    data-autofocus="true"
     data-testid="settings-tab-USER_ACCOUNT_TAB"
     role="tab"
     tabindex="0"
