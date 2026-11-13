@@ -7,7 +7,26 @@ Please see LICENSE files in the repository root for full details.
 */
 
 .mx_GenericEventListSummary {
+    /* One line of the summary text */
+    --mx_GenericEventListSummary_text-line-height: calc(
+        var(--cpd-font-size-body-sm) * var(--cpd-font-line-height-regular)
+    );
+
     position: relative;
+
+    /* The avatars sit beside the text, centred on its first line */
+    &[data-expanded="false"] > .mx_EventTile_line > .mx_EventTile_info {
+        display: flex;
+        align-items: flex-start;
+        /* Keeps the line the summary had as inline text: the taller of its parent's line (1lh) and the text's */
+        line-height: max(1lh, var(--mx_GenericEventListSummary_text-line-height));
+
+        > .mx_GenericEventListSummary_summary {
+            line-height: inherit;
+            /* Lets a long name without spaces wrap instead of overflowing the timeline */
+            overflow-wrap: anywhere;
+        }
+    }
 
     .mx_GenericEventListSummary_avatars {
         margin-right: var(--cpd-space-2x);
@@ -26,6 +45,9 @@ Please see LICENSE files in the repository root for full details.
     .mx_GenericEventListSummary_toggle {
         /* We reuse a title cased translation */
         text-transform: lowercase;
+        /* The summary text's size, on the summary's line, so that the two line up */
+        font-size: var(--cpd-font-size-body-sm);
+        line-height: max(1lh, var(--mx_GenericEventListSummary_text-line-height));
     }
 
     &[data-layout="irc"],
@@ -63,7 +85,8 @@ Please see LICENSE files in the repository root for full details.
         }
 
         &[data-expanded="false"] {
-            align-items: center;
+            /* Keeps the toggle on the summary's first line when the summary wraps */
+            align-items: flex-start;
             justify-content: space-between;
             column-gap: 5px;
         }
@@ -122,9 +145,12 @@ Please see LICENSE files in the repository root for full details.
     color: $secondary-content;
 }
 
+/* As tall as one line of the summary text, so that the avatars centre on its first line */
 .mx_GenericEventListSummary_avatars {
-    display: inline-block;
-    line-height: $font-12px;
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    block-size: 1lh;
 
     .mx_BaseAvatar {
         margin-right: -4px;

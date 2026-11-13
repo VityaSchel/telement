@@ -13,9 +13,14 @@ Please see LICENSE files in the repository root for full details.
     }
 
     .mx_Dialog {
+        /* Concentric corners: the dialog's radius is its options' radius plus the padding around them */
+        --mx_SpotlightDialog_option_radius: 8px;
+        --mx_SpotlightDialog_padding: var(--cpd-space-4x);
+        --mx_SpotlightDialog_radius: calc(var(--mx_SpotlightDialog_option_radius) + var(--mx_SpotlightDialog_padding));
+
         /* !important because it's overriding compound  */
         width: fit-content !important;
-        border-radius: 8px !important;
+        border-radius: var(--mx_SpotlightDialog_radius) !important;
         height: 60% !important;
         overflow-y: initial;
         position: relative;
@@ -24,6 +29,10 @@ Please see LICENSE files in the repository root for full details.
 
         #mx_SpotlightDialog_keyboardPrompt {
             position: absolute;
+            /* Centres the words and the keys on one line, whatever the font's metrics */
+            display: flex;
+            align-items: center;
+            gap: var(--cpd-space-1-5x);
             padding: var(--cpd-space-2x);
             border-radius: 8px;
             background-color: $background;
@@ -35,17 +44,18 @@ Please see LICENSE files in the repository root for full details.
             color: $secondary-content;
 
             kbd {
-                display: inline-block;
                 padding: 2px var(--cpd-space-1x);
-                margin: 0 var(--cpd-space-1x);
                 border-radius: 6px;
                 background-color: $quinary-content;
-                vertical-align: middle;
                 color: $tertiary-content;
                 /* To avoid any styling inherent with <kbd> elements */
                 font-family: inherit;
                 font-weight: inherit;
                 font-size: inherit;
+
+                & + kbd {
+                    margin-inline-start: var(--cpd-space-0-5x);
+                }
             }
         }
     }
@@ -63,21 +73,24 @@ Please see LICENSE files in the repository root for full details.
     .mx_SpotlightDialog_searchBox {
         margin: 0;
         border: none;
-        border-radius: 8px 8px 0 0;
-        padding: var(--cpd-space-3x) var(--cpd-space-4x);
+        border-radius: var(--mx_SpotlightDialog_radius) var(--mx_SpotlightDialog_radius) 0 0;
+        padding: var(--cpd-space-3x) var(--mx_SpotlightDialog_padding);
         border-bottom: 1px solid $system;
 
         > .mx_SpotlightDialog_filter {
             display: flex;
             align-content: center;
             align-items: center;
-            border-radius: 8px;
+            /* Inset from the dialog's corner by the same padding as the options */
+            border-radius: var(--mx_SpotlightDialog_option_radius);
             margin-right: var(--cpd-space-2x);
             background-color: $quinary-content;
             vertical-align: middle;
             color: $primary-content;
             position: relative;
-            padding: var(--cpd-space-1x) var(--cpd-space-2x) var(--cpd-space-1x) 37px;
+            /* As tall as the input's line, so that it sits 16px from the dialog's top edge, as from its side */
+            padding: 0 var(--cpd-space-2x) 0 37px;
+            line-height: $font-24px;
 
             > svg {
                 color: $secondary-content;
@@ -143,7 +156,9 @@ Please see LICENSE files in the repository root for full details.
     #mx_SpotlightDialog_content {
         height: 100%;
         overflow-y: auto;
-        padding: var(--cpd-space-4x);
+        padding: var(--mx_SpotlightDialog_padding);
+        /* Clips the scrolled options and the scroll bar to the dialog's corners */
+        border-radius: 0 0 var(--mx_SpotlightDialog_radius) var(--mx_SpotlightDialog_radius);
 
         ul {
             padding: 0;
@@ -182,7 +197,7 @@ Please see LICENSE files in the repository root for full details.
         }
 
         .mx_SpotlightDialog_option {
-            border-radius: 8px;
+            border-radius: var(--mx_SpotlightDialog_option_radius);
             overflow: hidden;
             text-overflow: ellipsis;
 
