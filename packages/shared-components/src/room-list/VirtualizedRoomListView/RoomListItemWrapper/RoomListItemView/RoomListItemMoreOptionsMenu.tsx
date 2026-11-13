@@ -22,6 +22,8 @@ import {
 import { _t } from "../../../../core/i18n/i18n";
 import { useViewModel, type ViewModel } from "../../../../core/viewmodel";
 import type { RoomListItemViewSnapshot, RoomListItemViewActions } from "./RoomListItemView";
+import { RoomListItemNotificationMenu } from "./RoomListItemNotificationMenu";
+import styles from "./RoomListItemView.module.css";
 
 /**
  * View model type for room list item
@@ -68,12 +70,14 @@ export function RoomListItemMoreOptionsMenu({ vm }: RoomListItemMoreOptionsMenuP
 
 interface MoreOptionContentProps {
     vm: RoomListItemViewModel;
+    /** Whether the content is in the room's right-click menu rather than its more options menu */
+    inContextMenu?: boolean;
 }
 
-export function MoreOptionContent({ vm }: MoreOptionContentProps): JSX.Element {
+export function MoreOptionContent({ vm, inContextMenu }: MoreOptionContentProps): JSX.Element {
     const snapshot = useViewModel(vm);
     return (
-        <div onKeyDown={(e) => e.stopPropagation()}>
+        <div className={styles.menuContent} onKeyDown={(e) => e.stopPropagation()}>
             {snapshot.canMarkAsRead && (
                 <MenuItem
                     Icon={MarkAsReadIcon}
@@ -116,26 +120,32 @@ export function MoreOptionContent({ vm }: MoreOptionContentProps): JSX.Element {
                     />
                 </>
             )}
+            {snapshot.showNotificationMenu && <RoomListItemNotificationMenu vm={vm} inContextMenu={inContextMenu} />}
             <Separator />
-            {snapshot.canInvite && (
-                <MenuItem
-                    Icon={UserAddIcon}
-                    label={_t("action|invite")}
-                    onSelect={vm.onInvite}
-                    onClick={(evt) => evt.stopPropagation()}
-                    hideChevron={true}
-                />
+            {/* Without its items, as in a DM, the group's separator would draw a second line next to the first */}
+            {(snapshot.canInvite || snapshot.canCopyRoomLink) && (
+                <>
+                    {snapshot.canInvite && (
+                        <MenuItem
+                            Icon={UserAddIcon}
+                            label={_t("action|invite")}
+                            onSelect={vm.onInvite}
+                            onClick={(evt) => evt.stopPropagation()}
+                            hideChevron={true}
+                        />
+                    )}
+                    {snapshot.canCopyRoomLink && (
+                        <MenuItem
+                            Icon={LinkIcon}
+                            label={_t("room_list|more_options|copy_link")}
+                            onSelect={vm.onCopyRoomLink}
+                            onClick={(evt) => evt.stopPropagation()}
+                            hideChevron={true}
+                        />
+                    )}
+                    <Separator />
+                </>
             )}
-            {snapshot.canCopyRoomLink && (
-                <MenuItem
-                    Icon={LinkIcon}
-                    label={_t("room_list|more_options|copy_link")}
-                    onSelect={vm.onCopyRoomLink}
-                    onClick={(evt) => evt.stopPropagation()}
-                    hideChevron={true}
-                />
-            )}
-            <Separator />
             <MenuItem
                 kind="critical"
                 Icon={LeaveIcon}

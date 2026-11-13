@@ -107,13 +107,10 @@ export const ActivityIndicator: Story = {
 
 export const Muted: Story = {
     args: {
-        muted: true,
-    },
-};
-
-export const MutedWithoutActivity: Story = {
-    args: {
-        hasAnyNotificationOrActivity: false,
+        hasAnyNotificationOrActivity: true,
+        isNotification: true,
+        hasUnreadCount: true,
+        count: 3,
         muted: true,
     },
 };

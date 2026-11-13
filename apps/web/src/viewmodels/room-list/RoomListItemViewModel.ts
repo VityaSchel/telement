@@ -12,11 +12,11 @@ import {
     type RoomListItemViewActions,
     type UserStatus,
 } from "@element-hq/web-shared-components";
-import { ClientEvent, KnownMembership, RoomEvent } from "matrix-js-sdk/src/matrix";
+import { ClientEvent, EventType, KnownMembership, MatrixEventEvent, RoomEvent } from "matrix-js-sdk/src/matrix";
 import { CallType } from "matrix-js-sdk/src/webrtc/call";
 import { logger } from "matrix-js-sdk/src/logger";
 
-import type { Room, MatrixClient, RoomMember, ClientEventHandlerMap } from "matrix-js-sdk/src/matrix";
+import type { Room, MatrixClient, MatrixEvent, RoomMember, ClientEventHandlerMap } from "matrix-js-sdk/src/matrix";
 import type { RoomNotificationState } from "../../stores/notifications/RoomNotificationState";
 import { RoomNotificationStateStore } from "../../stores/notifications/RoomNotificationStateStore";
 import { NotificationStateEvents } from "../../stores/notifications/NotificationState";
@@ -31,7 +31,7 @@ import { RoomNotifState as ElementRoomNotifState } from "../../RoomNotifs";
 import { shouldShowComponent } from "../../customisations/helpers/UIComponents";
 import { UIComponent } from "../../settings/UIFeature";
 import { CallStore, CallStoreEvent } from "../../stores/CallStore";
-import { clearRoomNotification, setMarkedUnreadState } from "../../utils/notifications";
+import { clearRoomNotification, getMarkedUnreadState, setMarkedUnreadState } from "../../utils/notifications";
 import { tagRoom } from "../../utils/room/tagRoom";
 import { keepIfSame } from "../../utils/keepIfSame";
 import dispatcher from "../../dispatcher/dispatcher";
@@ -39,6 +39,7 @@ import { Action } from "../../dispatcher/actions";
 import type { ViewRoomPayload } from "../../dispatcher/payloads/ViewRoomPayload";
 import { type Call, CallEvent } from "../../models/Call";
 import { fetchUserStatus } from "../../utils/userStatus";
+import { countUnreadMessages } from "../../telement/room-list/countUnreadMessages";
 
 interface RoomItemProps {
     room: Room;
@@ -91,6 +92,19 @@ export class RoomListItemViewModel
         // Subscribe to room-specific events
         this.disposables.trackListener(props.room, RoomEvent.Name, this.onRoomChanged);
         this.disposables.trackListener(props.room, RoomEvent.Tags, this.onRoomChanged);
+
+        // The unread messages of a muted room are counted from its timeline and its mentions follow the user's push
+        // rules, which both change without a notification state update
+        this.disposables.trackListener(props.room, RoomEvent.Timeline, this.onMutedRoomChanged);
+        this.disposables.trackListener(props.room, RoomEvent.Redaction, this.onMutedRoomChanged);
+        this.disposables.trackListener(props.room, RoomEvent.Receipt, this.onMutedRoomChanged);
+        this.disposables.trackListener(props.room, RoomEvent.AccountData, this.onMutedRoomChanged);
+        props.client.on(MatrixEventEvent.Decrypted, this.onEventDecrypted);
+        props.client.on(ClientEvent.AccountData, this.onClientAccountData);
+        this.disposables.track(() => {
+            props.client.off(MatrixEventEvent.Decrypted, this.onEventDecrypted);
+            props.client.off(ClientEvent.AccountData, this.onClientAccountData);
+        });
 
         // Load message preview asynchronously (sync data is already complete)
         void this.loadAndSetMessagePreview();
@@ -173,6 +187,18 @@ export class RoomListItemViewModel
 
     private onRoomChanged = (): void => {
         this.updateItem();
+    };
+
+    private onMutedRoomChanged = (): void => {
+        if (this.snapshot.current.notification.muted) this.updateItem();
+    };
+
+    private onEventDecrypted = (event: MatrixEvent): void => {
+        if (event.getRoomId() === this.props.room.roomId) this.onMutedRoomChanged();
+    };
+
+    private onClientAccountData = (event: MatrixEvent): void => {
+        if (event.getType() === EventType.PushRules) this.onMutedRoomChanged();
     };
 
     /**
@@ -261,10 +287,6 @@ export class RoomListItemViewModel
         const showMoreOptionsMenu = hasAccessToOptionsMenu(room);
         const showNotificationMenu = hasAccessToNotificationMenu(room, client.isGuest(), isArchived);
 
-        // Notification levels
-        const canMarkAsRead = notifState.level > NotificationLevel.None;
-        const canMarkAsUnread = !canMarkAsRead && !isArchived;
-
         const canInvite = room.canInvite(client.getUserId()!) && !isDm && shouldShowComponent(UIComponent.InviteUsers);
         const canCopyRoomLink = !isDm;
 
@@ -293,6 +315,21 @@ export class RoomListItemViewModel
 
         const isNotificationMute = elementRoomNotifState === ElementRoomNotifState.Mute;
 
+        // Like Telegram, a muted room shows its unread messages in a grey counter, with the @ when one mentions the
+        // user. Its push rule gives it no notification count and no mentions, so they are found in the timeline.
+        const countsMutedUnread =
+            isNotificationMute &&
+            notifState.level === NotificationLevel.None &&
+            room.getMyMembership() === KnownMembership.Join;
+        const mutedUnread = countsMutedUnread ? countUnreadMessages(room) : { count: 0, mentionsMe: false };
+        const mutedUnreadCount = mutedUnread.count;
+        const isMutedUnread = countsMutedUnread && (mutedUnreadCount > 0 || Boolean(getMarkedUnreadState(room)));
+        const isMutedMention = isMutedUnread && mutedUnread.mentionsMe;
+
+        // Notification levels
+        const canMarkAsRead = notifState.level > NotificationLevel.None || isMutedUnread;
+        const canMarkAsUnread = !canMarkAsRead && !isArchived;
+
         // Video room and call state tracking
         const call = CallStore.instance.getCall(room.roomId);
         const participantCount = call?.participants.size ?? 0;
@@ -310,14 +347,15 @@ export class RoomListItemViewModel
             isBold: notifState.hasAnyNotificationOrActivity,
             messagePreview,
             notification: {
-                hasAnyNotificationOrActivity: notifState.hasAnyNotificationOrActivity || hasParticipantsInCall,
+                hasAnyNotificationOrActivity:
+                    notifState.hasAnyNotificationOrActivity || hasParticipantsInCall || isMutedUnread,
                 isUnsentMessage: notifState.isUnsentMessage,
                 invited: notifState.invited,
-                isMention: notifState.isMention,
+                isMention: notifState.isMention || isMutedMention,
                 isActivityNotification: notifState.isActivityNotification,
-                isNotification: notifState.isNotification,
-                hasUnreadCount: notifState.hasUnreadCount,
-                count: notifState.count,
+                isNotification: notifState.isNotification || (isMutedUnread && !isMutedMention),
+                hasUnreadCount: notifState.hasUnreadCount || mutedUnreadCount > 0,
+                count: isMutedUnread ? mutedUnreadCount : notifState.count,
                 muted: isNotificationMute,
                 callType: hasParticipantsInCall ? callType : undefined,
             },

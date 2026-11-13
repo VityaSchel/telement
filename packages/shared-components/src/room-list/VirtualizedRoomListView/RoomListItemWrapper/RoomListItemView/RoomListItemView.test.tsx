@@ -28,6 +28,7 @@ const {
     WithHoverMenu,
     WithoutHoverMenu,
     Muted,
+    MutedWithNotification,
     MutedWithLongName,
     Pinned,
     PinnedWithNotification,
@@ -117,6 +118,18 @@ describe("<RoomListItemView />", () => {
         expect(container).toMatchSnapshot();
     });
 
+    it("renders MutedWithNotification story", () => {
+        const { container } = render(<MutedWithNotification />);
+        expect(container).toMatchSnapshot();
+    });
+
+    it("should show the unread count of a muted room and its bell after its name", () => {
+        render(<MutedWithNotification />);
+        expect(screen.getByTestId("notification-decoration")).toHaveTextContent("3");
+        expect(screen.getByTestId("room-name").nextElementSibling).toBe(screen.getByTestId("muted-icon"));
+        expect(screen.getByRole("option")).toHaveAccessibleName("Open room General with 3 unread messages.");
+    });
+
     it("should show the bell of a muted room right after its name, outside the notification decoration", () => {
         render(<Muted />);
         const bell = screen.getByTestId("muted-icon");
@@ -158,8 +171,38 @@ describe("<RoomListItemView />", () => {
         // isFocused reveals the hover menu, which holds the notification options
         render(<Story isFocused={true} />);
 
-        await user.click(screen.getByRole("button", { name: "Notification options" }));
-        expect(screen.getByRole("menuitem", { name: "Mute room" })).toHaveAttribute("aria-selected", "true");
+        await user.click(screen.getByRole("button", { name: "More Options" }));
+        await user.click(screen.getByRole("menuitem", { name: "Notifications" }));
+        expect(await screen.findByRole("menuitemradio", { name: "Mute room" })).toHaveAttribute("aria-checked", "true");
+    });
+
+    it("should only show the more options button on hover, with the notification options inside it", () => {
+        render(<WithHoverMenu isFocused={true} />);
+        expect(screen.getByRole("button", { name: "More Options" })).toBeVisible();
+        expect(screen.queryByRole("button", { name: "Notification options" })).toBeNull();
+    });
+
+    it("should offer the notification options in the right-click menu", async () => {
+        const user = userEvent.setup();
+        render(<Default />);
+
+        await user.pointer({ keys: "[MouseRight]", target: screen.getByRole("option") });
+        const item = await screen.findByRole("menuitem", { name: "Notifications" });
+        expect(item).toHaveAttribute("aria-haspopup", "menu");
+
+        item.focus();
+        await user.keyboard("{ArrowRight}");
+        expect(await screen.findByRole("menuitemradio", { name: "Match default settings" })).toHaveAttribute(
+            "aria-checked",
+            "true",
+        );
+        await waitFor(() =>
+            expect(screen.getByRole("menuitemradio", { name: "Match default settings" })).toHaveFocus(),
+        );
+        await user.keyboard("{ArrowDown}{ArrowDown}");
+        expect(screen.getByRole("menuitemradio", { name: "Mentions and keywords" })).toHaveFocus();
+        await user.keyboard("{Enter}");
+        expect(Default.args.onSetRoomNotifState).toHaveBeenCalledWith("mentions_only");
     });
 
     it("should not show a pin for a room that isn't pinned", () => {

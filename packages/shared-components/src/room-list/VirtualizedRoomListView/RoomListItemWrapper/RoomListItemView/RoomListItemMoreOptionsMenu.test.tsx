@@ -5,16 +5,29 @@
  * Please see LICENSE files in the repository root for full details.
  */
 
+import "@vector-im/compound-design-tokens/assets/web/css/compound-design-tokens.css";
+import "@vector-im/compound-web/dist/style.css";
 import React, { type JSX } from "react";
-import { render, screen } from "@test-utils";
+import { render, screen, waitFor } from "@test-utils";
 import userEvent from "@testing-library/user-event";
 import { describe, it, expect, vi } from "vitest";
+import { userEvent as browserUserEvent } from "vitest/browser";
 
 import { RoomListItemMoreOptionsMenu, MoreOptionContent } from "./RoomListItemMoreOptionsMenu";
 import { useMockedViewModel } from "../../../../core/viewmodel";
 import type { RoomListItemViewSnapshot } from "./RoomListItemView";
 import { defaultSnapshot } from "./default-snapshot";
 import { mockedActions as mockCallbacks } from "./mocked-actions";
+
+/** The colour a token resolves to in the current theme. */
+function colourOf(token: string): string {
+    const probe = document.createElement("div");
+    probe.style.color = `var(${token})`;
+    document.body.append(probe);
+    const colour = getComputedStyle(probe).color;
+    probe.remove();
+    return colour;
+}
 
 describe("<RoomListItemMoreOptionsMenu />", () => {
     const renderMenu = (overrides: Partial<RoomListItemViewSnapshot> = {}): ReturnType<typeof render> => {
@@ -217,6 +230,135 @@ describe("<RoomListItemMoreOptionsMenu />", () => {
         await user.click(leaveRoomOption);
 
         expect(mockCallbacks.onLeaveRoom).toHaveBeenCalled();
+    });
+
+    it("should have the size of the message menu, with corners concentric with the item highlights", async () => {
+        const user = userEvent.setup();
+        renderMenu({ canMarkAsRead: true, canMarkAsUnread: false, showNotificationMenu: true });
+
+        await user.click(screen.getByRole("button", { name: "More Options" }));
+        const menu = screen.getByRole("menu", { name: "More Options" });
+        const items = Array.from(menu.querySelectorAll<HTMLElement>('[role^="menuitem"]'));
+        expect(items.map((item) => item.textContent)).toEqual([
+            "Mark as read",
+            "Pin",
+            "Low priority",
+            "Notifications",
+            "Invite",
+            "Copy link",
+            "Leave room",
+        ]);
+        const menuRect = menu.getBoundingClientRect();
+
+        // The menu's radius is an item highlight's radius plus the menu padding that insets the items
+        expect(getComputedStyle(menu).borderRadius).toBe("12px");
+        expect(items[0].getBoundingClientRect().top - menuRect.top).toBe(4);
+        expect(menuRect.bottom - items[items.length - 1].getBoundingClientRect().bottom).toBe(4);
+        for (const item of items) {
+            const rect = item.getBoundingClientRect();
+            expect(getComputedStyle(item).borderRadius).toBe("8px");
+            expect(rect.left - menuRect.left).toBe(4);
+            expect(menuRect.right - rect.right).toBe(4);
+            // The message menu's items: 15px regular text on a 22.5px line with 8px above and below
+            expect(rect.height).toBe(38.5);
+        }
+
+        const markAsRead = screen.getByRole("menuitem", { name: "Mark as read" });
+        const icon = markAsRead.querySelector("svg")!;
+        const label = screen.getByText("Mark as read");
+        expect(icon.getBoundingClientRect().width).toBe(16);
+        expect(icon.getBoundingClientRect().height).toBe(16);
+        expect(icon.getBoundingClientRect().left - markAsRead.getBoundingClientRect().left).toBe(8);
+        expect(label.getBoundingClientRect().left - icon.getBoundingClientRect().right).toBe(14);
+        expect(getComputedStyle(label).fontSize).toBe("15px");
+        expect(getComputedStyle(label).fontWeight).toBe("400");
+
+        // Separators span the menu padding and keep the item highlights that padding away
+        const separator = screen.getAllByRole("separator")[0];
+        const separatorRect = separator.getBoundingClientRect();
+        expect(separatorRect.left - menuRect.left).toBe(4);
+        expect(separatorRect.top - separator.previousElementSibling!.getBoundingClientRect().bottom).toBe(4);
+        expect(separator.nextElementSibling!.getBoundingClientRect().top - separatorRect.bottom).toBe(4);
+    });
+
+    it("should centre the icons, the Notifications chevron and the Low priority toggle on their labels", async () => {
+        const user = userEvent.setup();
+        renderMenu({ canMarkAsRead: true, canMarkAsUnread: false, showNotificationMenu: true });
+
+        await user.click(screen.getByRole("button", { name: "More Options" }));
+        const menu = screen.getByRole("menu", { name: "More Options" });
+        const centreOf = (element: Element): number => {
+            const rect = element.getBoundingClientRect();
+            return rect.top + rect.height / 2;
+        };
+
+        for (const item of menu.querySelectorAll<HTMLElement>('[role^="menuitem"]')) {
+            const label = item.querySelector("span")!;
+            const others = Array.from(item.children).filter((child) => child !== label);
+            // The icon, then the chevron or the toggle where there is one
+            expect(others.length).toBeGreaterThanOrEqual(1);
+            for (const other of others) {
+                expect(Math.abs(centreOf(other) - centreOf(label)), `${item.textContent}: ${other.tagName}`).toBe(0);
+            }
+            expect(centreOf(label)).toBe(centreOf(item));
+        }
+    });
+
+    it("should show a single separator before Leave room in a DM, which can't be invited to nor linked", async () => {
+        const user = userEvent.setup();
+        renderMenu({ canInvite: false, canCopyRoomLink: false, showNotificationMenu: true });
+
+        await user.click(screen.getByRole("button", { name: "More Options" }));
+        const separators = screen.getAllByRole("separator");
+        expect(separators).toHaveLength(1);
+        expect(separators[0].previousElementSibling).toHaveAccessibleName("Notifications");
+        expect(separators[0].nextElementSibling).toHaveAccessibleName("Leave room");
+    });
+
+    it.each([
+        ["Invite", { canInvite: true, canCopyRoomLink: false }],
+        ["Copy link", { canInvite: false, canCopyRoomLink: true }],
+    ])("should set %s apart with a separator on each side", async (name, overrides) => {
+        const user = userEvent.setup();
+        renderMenu(overrides);
+
+        await user.click(screen.getByRole("button", { name: "More Options" }));
+        const separators = screen.getAllByRole("separator");
+        expect(separators).toHaveLength(2);
+        expect(separators[0].nextElementSibling).toHaveAccessibleName(name);
+        expect(separators[1].previousElementSibling).toHaveAccessibleName(name);
+    });
+
+    it("should be as narrow as its items allow, down to the message menu's width", async () => {
+        const user = userEvent.setup();
+        renderMenu({ canChangeSection: false, canInvite: false, canCopyRoomLink: false });
+
+        await user.click(screen.getByRole("button", { name: "More Options" }));
+        const width = screen.getByRole("menu", { name: "More Options" }).getBoundingClientRect().width;
+        // Compound's items are at least 200px wide, which made this menu 208px wide
+        expect(width).toBeLessThan(208);
+        // The message menu is at least 146px wide inside its padding of 4px on each side
+        expect(width).toBeGreaterThanOrEqual(154);
+    });
+
+    it("should highlight an item focused with the keyboard as on hover, like the message menu", async () => {
+        renderMenu({ canMarkAsRead: true, canMarkAsUnread: false });
+
+        await browserUserEvent.click(screen.getByRole("button", { name: "More Options" }));
+        const markAsRead = screen.getByRole("menuitem", { name: "Mark as read" });
+        const leaveRoom = screen.getByRole("menuitem", { name: "Leave room" });
+        const pin = screen.getByRole("menuitem", { name: "Pin" });
+        const restingBackground = getComputedStyle(pin).backgroundColor;
+
+        await browserUserEvent.keyboard("{ArrowDown}");
+        await waitFor(() => expect(markAsRead).toHaveFocus());
+        expect(markAsRead.matches(":focus-visible")).toBe(true);
+        expect(getComputedStyle(markAsRead).backgroundColor).toBe(colourOf("--cpd-color-bg-action-secondary-hovered"));
+        expect(getComputedStyle(markAsRead).backgroundColor).not.toBe(restingBackground);
+
+        await browserUserEvent.keyboard("{End}");
+        await waitFor(() => expect(leaveRoom).toHaveFocus());
+        expect(getComputedStyle(leaveRoom).backgroundColor).toBe(colourOf("--cpd-color-bg-critical-subtle"));
     });
 
     it("should hide the favourite and low priority entries when the room cannot change section", () => {

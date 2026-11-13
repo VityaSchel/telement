@@ -39,7 +39,10 @@ export interface NotificationDecorationData {
     hasUnreadCount: boolean;
     /** Notification count */
     count: number;
-    /** Whether notifications are muted */
+    /**
+     * Whether notifications are muted, which makes the unread counter grey, like Telegram's. The activity dot is grey
+     * already, so a bell follows it instead.
+     */
     muted: boolean;
     /** Optional call type indicator */
     callType?: "video" | "voice";
@@ -65,7 +68,7 @@ export const NotificationDecoration: React.FC<NotificationDecorationProps> = ({
     count,
 }) => {
     // Don't render anything if there's nothing to show
-    if (!hasAnyNotificationOrActivity && !muted && !callType) {
+    if (!hasAnyNotificationOrActivity && !callType) {
         return null;
     }
 
@@ -82,9 +85,21 @@ export const NotificationDecoration: React.FC<NotificationDecorationProps> = ({
             )}
             {invited && <EmailSolidIcon width="20px" height="20px" fill="var(--cpd-color-icon-accent-primary)" />}
             {isMention && <MentionIcon width="20px" height="20px" fill="var(--cpd-color-icon-accent-primary)" />}
-            {(isMention || isNotification) && <UnreadCounter count={count || null} />}
+            {(isMention || isNotification) && (
+                <UnreadCounter
+                    count={count || null}
+                    style={muted ? { backgroundColor: "var(--cpd-color-icon-secondary)" } : undefined}
+                />
+            )}
             {isActivityNotification && <Unread />}
-            {muted && <NotificationsOffSolidIcon width="20px" height="20px" fill="var(--cpd-color-icon-tertiary)" />}
+            {muted && isActivityNotification && (
+                <NotificationsOffSolidIcon
+                    width="20px"
+                    height="20px"
+                    fill="var(--cpd-color-icon-tertiary)"
+                    data-testid="muted-activity-icon"
+                />
+            )}
         </Flex>
     );
 };

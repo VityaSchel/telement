@@ -233,7 +233,7 @@ export function isRuleMaybeRoomMuteRule(rule: IPushRule): boolean {
  * @param rule - push rule
  * @returns {boolean} true when rule mutes the given room
  */
-function isRuleRoomMuteRuleForRoomId(roomId: string, rule: IPushRule): boolean {
+export function isRuleRoomMuteRuleForRoomId(roomId: string, rule: IPushRule): boolean {
     if (!isRuleMaybeRoomMuteRule(rule)) {
         return false;
     }

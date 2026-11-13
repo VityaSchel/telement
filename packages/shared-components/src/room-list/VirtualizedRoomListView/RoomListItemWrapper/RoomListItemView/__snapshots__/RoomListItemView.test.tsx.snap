@@ -91,38 +91,6 @@ exports[`<RoomListItemView /> > renders Bold story 1`] = `
                 </svg>
               </div>
             </button>
-            <button
-              aria-disabled="false"
-              aria-expanded="false"
-              aria-haspopup="menu"
-              aria-label="Notification options"
-              aria-labelledby="react-use-id-3"
-              class="_icon-button_1215g_8"
-              data-kind="primary"
-              data-state="closed"
-              id="radix-react-use-id-4"
-              role="button"
-              style="--cpd-icon-button-size: 24px; padding: 2px;"
-              tabindex="0"
-              type="button"
-            >
-              <div
-                class="_indicator-icon_j097f_17"
-                style="--cpd-icon-button-size: 100%;"
-              >
-                <svg
-                  fill="currentColor"
-                  height="1em"
-                  viewBox="0 0 24 24"
-                  width="1em"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M20.293 17.293c.63.63.184 1.707-.707 1.707H4.414c-.89 0-1.337-1.077-.707-1.707L5 16v-6s0-7 7-7 7 7 7 7v6zM12 22a2 2 0 0 1-2-2h4a2 2 0 0 1-2 2"
-                  />
-                </svg>
-              </div>
-            </button>
           </div>
           <div
             aria-hidden="true"
@@ -226,38 +194,6 @@ exports[`<RoomListItemView /> > renders Default story 1`] = `
                 </svg>
               </div>
             </button>
-            <button
-              aria-disabled="false"
-              aria-expanded="false"
-              aria-haspopup="menu"
-              aria-label="Notification options"
-              aria-labelledby="react-use-id-3"
-              class="_icon-button_1215g_8"
-              data-kind="primary"
-              data-state="closed"
-              id="radix-react-use-id-4"
-              role="button"
-              style="--cpd-icon-button-size: 24px; padding: 2px;"
-              tabindex="0"
-              type="button"
-            >
-              <div
-                class="_indicator-icon_j097f_17"
-                style="--cpd-icon-button-size: 100%;"
-              >
-                <svg
-                  fill="currentColor"
-                  height="1em"
-                  viewBox="0 0 24 24"
-                  width="1em"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M20.293 17.293c.63.63.184 1.707-.707 1.707H4.414c-.89 0-1.337-1.077-.707-1.707L5 16v-6s0-7 7-7 7 7 7 7v6zM12 22a2 2 0 0 1-2-2h4a2 2 0 0 1-2 2"
-                  />
-                </svg>
-              </div>
-            </button>
           </div>
           <div
             aria-hidden="true"
@@ -357,38 +293,6 @@ exports[`<RoomListItemView /> > renders Invitation story 1`] = `
                 >
                   <path
                     d="M6 14q-.824 0-1.412-.588A1.93 1.93 0 0 1 4 12q0-.825.588-1.412A1.93 1.93 0 0 1 6 10q.824 0 1.412.588Q8 11.175 8 12t-.588 1.412A1.93 1.93 0 0 1 6 14m6 0q-.825 0-1.412-.588A1.93 1.93 0 0 1 10 12q0-.825.588-1.412A1.93 1.93 0 0 1 12 10q.825 0 1.412.588Q14 11.175 14 12t-.588 1.412A1.93 1.93 0 0 1 12 14m6 0q-.824 0-1.413-.588A1.93 1.93 0 0 1 16 12q0-.825.587-1.412A1.93 1.93 0 0 1 18 10q.824 0 1.413.588Q20 11.175 20 12t-.587 1.412A1.93 1.93 0 0 1 18 14"
-                  />
-                </svg>
-              </div>
-            </button>
-            <button
-              aria-disabled="false"
-              aria-expanded="false"
-              aria-haspopup="menu"
-              aria-label="Notification options"
-              aria-labelledby="react-use-id-3"
-              class="_icon-button_1215g_8"
-              data-kind="primary"
-              data-state="closed"
-              id="radix-react-use-id-4"
-              role="button"
-              style="--cpd-icon-button-size: 24px; padding: 2px;"
-              tabindex="0"
-              type="button"
-            >
-              <div
-                class="_indicator-icon_j097f_17"
-                style="--cpd-icon-button-size: 100%;"
-              >
-                <svg
-                  fill="currentColor"
-                  height="1em"
-                  viewBox="0 0 24 24"
-                  width="1em"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M20.293 17.293c.63.63.184 1.707-.707 1.707H4.414c-.89 0-1.337-1.077-.707-1.707L5 16v-6s0-7 7-7 7 7 7 7v6zM12 22a2 2 0 0 1-2-2h4a2 2 0 0 1-2 2"
                   />
                 </svg>
               </div>
@@ -531,16 +435,104 @@ exports[`<RoomListItemView /> > renders Muted story 1`] = `
                 </svg>
               </div>
             </button>
+          </div>
+          <div
+            aria-hidden="true"
+            class="RoomListItemView-module_notificationDecoration RoomListItemView-module_onMessagePreviewLine"
+          />
+        </div>
+      </div>
+    </button>
+  </div>
+</div>
+`;
+
+exports[`<RoomListItemView /> > renders MutedWithNotification story 1`] = `
+<div>
+  <div
+    aria-label="Room list"
+    role="listbox"
+    style="width: 320px; padding: 8px;"
+  >
+    <button
+      aria-haspopup="menu"
+      aria-label="Open room General with 3 unread messages."
+      aria-selected="false"
+      class="Flex-module_flex RoomListItemView-module_roomListItem mx_RoomListItemView"
+      data-state="closed"
+      role="option"
+      style="--mx-flex-display: flex; --mx-flex-direction: row; --mx-flex-align: stretch; --mx-flex-justify: start; --mx-flex-gap: var(--cpd-space-3x); --mx-flex-wrap: nowrap;"
+      tabindex="-1"
+      type="button"
+    >
+      <div
+        class="Flex-module_flex RoomListItemView-module_container"
+        style="--mx-flex-display: flex; --mx-flex-direction: row; --mx-flex-align: center; --mx-flex-justify: start; --mx-flex-gap: var(--cpd-space-3x); --mx-flex-wrap: nowrap;"
+      >
+        <div
+          aria-label="General avatar"
+          role="img"
+          style="width: 32px; height: 32px; border-radius: 50%; background-color: rgb(11, 127, 103); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 12px;"
+        >
+          GE
+        </div>
+        <div
+          class="Flex-module_flex RoomListItemView-module_content"
+          style="--mx-flex-display: flex; --mx-flex-direction: row; --mx-flex-align: center; --mx-flex-justify: space-between; --mx-flex-gap: var(--cpd-space-2x); --mx-flex-wrap: nowrap;"
+        >
+          <div
+            class="RoomListItemView-module_ellipsis"
+          >
+            <div
+              class="Flex-module_flex"
+              style="--mx-flex-display: flex; --mx-flex-direction: row; --mx-flex-align: center; --mx-flex-justify: start; --mx-flex-gap: var(--cpd-space-1x); --mx-flex-wrap: nowrap;"
+            >
+              <div
+                class="RoomListItemView-module_roomName"
+                data-testid="room-name"
+                title="General"
+              >
+                General
+              </div>
+              <svg
+                aria-hidden="true"
+                class="RoomListItemView-module_mutedIcon"
+                data-testid="muted-icon"
+                fill="var(--cpd-color-icon-tertiary)"
+                height="16px"
+                viewBox="0 0 24 24"
+                width="16px"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="m4.917 2.083 17 17a1 1 0 0 1-1.414 1.414L19.006 19H4.414c-.89 0-1.337-1.077-.707-1.707L5 16v-6s0-2.034 1.096-3.91L3.504 3.498a1 1 0 0 1 1.414-1.414M19 13.35 9.136 3.484C9.93 3.181 10.874 3 12 3c7 0 7 7 7 7z"
+                />
+                <path
+                  d="M10 20h4a2 2 0 0 1-4 0"
+                />
+              </svg>
+            </div>
+            <div
+              class="_typography_6v6n8_153 _font-body-sm-regular_6v6n8_31 RoomListItemView-module_ellipsis"
+              title="Alice: Hey everyone!"
+            >
+              Alice: Hey everyone!
+            </div>
+          </div>
+          <div
+            class="Flex-module_flex RoomListItemView-module_hoverMenu"
+            style="--mx-flex-display: flex; --mx-flex-direction: row; --mx-flex-align: center; --mx-flex-justify: start; --mx-flex-gap: var(--cpd-space-1x); --mx-flex-wrap: nowrap;"
+          >
             <button
               aria-disabled="false"
               aria-expanded="false"
               aria-haspopup="menu"
-              aria-label="Notification options"
-              aria-labelledby="react-use-id-3"
+              aria-label="More Options"
+              aria-labelledby="react-use-id-1"
               class="_icon-button_1215g_8"
               data-kind="primary"
               data-state="closed"
-              id="radix-react-use-id-4"
+              id="radix-react-use-id-2"
               role="button"
               style="--cpd-icon-button-size: 24px; padding: 2px;"
               tabindex="0"
@@ -558,10 +550,7 @@ exports[`<RoomListItemView /> > renders Muted story 1`] = `
                   xmlns="http://www.w3.org/2000/svg"
                 >
                   <path
-                    d="m4.917 2.083 17 17a1 1 0 0 1-1.414 1.414L19.006 19H4.414c-.89 0-1.337-1.077-.707-1.707L5 16v-6s0-2.034 1.096-3.91L3.504 3.498a1 1 0 0 1 1.414-1.414M19 13.35 9.136 3.484C9.93 3.181 10.874 3 12 3c7 0 7 7 7 7z"
-                  />
-                  <path
-                    d="M10 20h4a2 2 0 0 1-4 0"
+                    d="M6 14q-.824 0-1.412-.588A1.93 1.93 0 0 1 4 12q0-.825.588-1.412A1.93 1.93 0 0 1 6 10q.824 0 1.412.588Q8 11.175 8 12t-.588 1.412A1.93 1.93 0 0 1 6 14m6 0q-.825 0-1.412-.588A1.93 1.93 0 0 1 10 12q0-.825.588-1.412A1.93 1.93 0 0 1 12 10q.825 0 1.412.588Q14 11.175 14 12t-.588 1.412A1.93 1.93 0 0 1 12 14m6 0q-.824 0-1.413-.588A1.93 1.93 0 0 1 16 12q0-.825.587-1.412A1.93 1.93 0 0 1 18 10q.824 0 1.413.588Q20 11.175 20 12t-.587 1.412A1.93 1.93 0 0 1 18 14"
                   />
                 </svg>
               </div>
@@ -570,7 +559,20 @@ exports[`<RoomListItemView /> > renders Muted story 1`] = `
           <div
             aria-hidden="true"
             class="RoomListItemView-module_notificationDecoration RoomListItemView-module_onMessagePreviewLine"
-          />
+          >
+            <div
+              class="Flex-module_flex"
+              data-testid="notification-decoration"
+              style="--mx-flex-display: flex; --mx-flex-direction: row; --mx-flex-align: center; --mx-flex-justify: center; --mx-flex-gap: var(--cpd-space-1x); --mx-flex-wrap: nowrap;"
+            >
+              <span
+                class="_unread-counter_19zi2_8"
+                style="background-color: var(--cpd-color-icon-secondary);"
+              >
+                3
+              </span>
+            </div>
+          </div>
         </div>
       </div>
     </button>
@@ -659,38 +661,6 @@ exports[`<RoomListItemView /> > renders NoMessagePreview story 1`] = `
                 >
                   <path
                     d="M6 14q-.824 0-1.412-.588A1.93 1.93 0 0 1 4 12q0-.825.588-1.412A1.93 1.93 0 0 1 6 10q.824 0 1.412.588Q8 11.175 8 12t-.588 1.412A1.93 1.93 0 0 1 6 14m6 0q-.825 0-1.412-.588A1.93 1.93 0 0 1 10 12q0-.825.588-1.412A1.93 1.93 0 0 1 12 10q.825 0 1.412.588Q14 11.175 14 12t-.588 1.412A1.93 1.93 0 0 1 12 14m6 0q-.824 0-1.413-.588A1.93 1.93 0 0 1 16 12q0-.825.587-1.412A1.93 1.93 0 0 1 18 10q.824 0 1.413.588Q20 11.175 20 12t-.587 1.412A1.93 1.93 0 0 1 18 14"
-                  />
-                </svg>
-              </div>
-            </button>
-            <button
-              aria-disabled="false"
-              aria-expanded="false"
-              aria-haspopup="menu"
-              aria-label="Notification options"
-              aria-labelledby="react-use-id-3"
-              class="_icon-button_1215g_8"
-              data-kind="primary"
-              data-state="closed"
-              id="radix-react-use-id-4"
-              role="button"
-              style="--cpd-icon-button-size: 24px; padding: 2px;"
-              tabindex="0"
-              type="button"
-            >
-              <div
-                class="_indicator-icon_j097f_17"
-                style="--cpd-icon-button-size: 100%;"
-              >
-                <svg
-                  fill="currentColor"
-                  height="1em"
-                  viewBox="0 0 24 24"
-                  width="1em"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M20.293 17.293c.63.63.184 1.707-.707 1.707H4.414c-.89 0-1.337-1.077-.707-1.707L5 16v-6s0-7 7-7 7 7 7 7v6zM12 22a2 2 0 0 1-2-2h4a2 2 0 0 1-2 2"
                   />
                 </svg>
               </div>
@@ -795,38 +765,6 @@ exports[`<RoomListItemView /> > renders Pinned story 1`] = `
                 >
                   <path
                     d="M6 14q-.824 0-1.412-.588A1.93 1.93 0 0 1 4 12q0-.825.588-1.412A1.93 1.93 0 0 1 6 10q.824 0 1.412.588Q8 11.175 8 12t-.588 1.412A1.93 1.93 0 0 1 6 14m6 0q-.825 0-1.412-.588A1.93 1.93 0 0 1 10 12q0-.825.588-1.412A1.93 1.93 0 0 1 12 10q.825 0 1.412.588Q14 11.175 14 12t-.588 1.412A1.93 1.93 0 0 1 12 14m6 0q-.824 0-1.413-.588A1.93 1.93 0 0 1 16 12q0-.825.587-1.412A1.93 1.93 0 0 1 18 10q.824 0 1.413.588Q20 11.175 20 12t-.587 1.412A1.93 1.93 0 0 1 18 14"
-                  />
-                </svg>
-              </div>
-            </button>
-            <button
-              aria-disabled="false"
-              aria-expanded="false"
-              aria-haspopup="menu"
-              aria-label="Notification options"
-              aria-labelledby="react-use-id-4"
-              class="_icon-button_1215g_8"
-              data-kind="primary"
-              data-state="closed"
-              id="radix-react-use-id-5"
-              role="button"
-              style="--cpd-icon-button-size: 24px; padding: 2px;"
-              tabindex="0"
-              type="button"
-            >
-              <div
-                class="_indicator-icon_j097f_17"
-                style="--cpd-icon-button-size: 100%;"
-              >
-                <svg
-                  fill="currentColor"
-                  height="1em"
-                  viewBox="0 0 24 24"
-                  width="1em"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M20.293 17.293c.63.63.184 1.707-.707 1.707H4.414c-.89 0-1.337-1.077-.707-1.707L5 16v-6s0-7 7-7 7 7 7 7v6zM12 22a2 2 0 0 1-2-2h4a2 2 0 0 1-2 2"
                   />
                 </svg>
               </div>
@@ -954,38 +892,6 @@ exports[`<RoomListItemView /> > renders Selected story 1`] = `
                 </svg>
               </div>
             </button>
-            <button
-              aria-disabled="false"
-              aria-expanded="false"
-              aria-haspopup="menu"
-              aria-label="Notification options"
-              aria-labelledby="react-use-id-3"
-              class="_icon-button_1215g_8"
-              data-kind="primary"
-              data-state="closed"
-              id="radix-react-use-id-4"
-              role="button"
-              style="--cpd-icon-button-size: 24px; padding: 2px;"
-              tabindex="0"
-              type="button"
-            >
-              <div
-                class="_indicator-icon_j097f_17"
-                style="--cpd-icon-button-size: 100%;"
-              >
-                <svg
-                  fill="currentColor"
-                  height="1em"
-                  viewBox="0 0 24 24"
-                  width="1em"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M20.293 17.293c.63.63.184 1.707-.707 1.707H4.414c-.89 0-1.337-1.077-.707-1.707L5 16v-6s0-7 7-7 7 7 7 7v6zM12 22a2 2 0 0 1-2-2h4a2 2 0 0 1-2 2"
-                  />
-                </svg>
-              </div>
-            </button>
           </div>
           <div
             aria-hidden="true"
@@ -1085,38 +991,6 @@ exports[`<RoomListItemView /> > renders UnsentMessage story 1`] = `
                 >
                   <path
                     d="M6 14q-.824 0-1.412-.588A1.93 1.93 0 0 1 4 12q0-.825.588-1.412A1.93 1.93 0 0 1 6 10q.824 0 1.412.588Q8 11.175 8 12t-.588 1.412A1.93 1.93 0 0 1 6 14m6 0q-.825 0-1.412-.588A1.93 1.93 0 0 1 10 12q0-.825.588-1.412A1.93 1.93 0 0 1 12 10q.825 0 1.412.588Q14 11.175 14 12t-.588 1.412A1.93 1.93 0 0 1 12 14m6 0q-.824 0-1.413-.588A1.93 1.93 0 0 1 16 12q0-.825.587-1.412A1.93 1.93 0 0 1 18 10q.824 0 1.413.588Q20 11.175 20 12t-.587 1.412A1.93 1.93 0 0 1 18 14"
-                  />
-                </svg>
-              </div>
-            </button>
-            <button
-              aria-disabled="false"
-              aria-expanded="false"
-              aria-haspopup="menu"
-              aria-label="Notification options"
-              aria-labelledby="react-use-id-3"
-              class="_icon-button_1215g_8"
-              data-kind="primary"
-              data-state="closed"
-              id="radix-react-use-id-4"
-              role="button"
-              style="--cpd-icon-button-size: 24px; padding: 2px;"
-              tabindex="0"
-              type="button"
-            >
-              <div
-                class="_indicator-icon_j097f_17"
-                style="--cpd-icon-button-size: 100%;"
-              >
-                <svg
-                  fill="currentColor"
-                  height="1em"
-                  viewBox="0 0 24 24"
-                  width="1em"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M20.293 17.293c.63.63.184 1.707-.707 1.707H4.414c-.89 0-1.337-1.077-.707-1.707L5 16v-6s0-7 7-7 7 7 7 7v6zM12 22a2 2 0 0 1-2-2h4a2 2 0 0 1-2 2"
                   />
                 </svg>
               </div>
@@ -1242,38 +1116,6 @@ exports[`<RoomListItemView /> > renders WithHoverMenu story 1`] = `
                 </svg>
               </div>
             </button>
-            <button
-              aria-disabled="false"
-              aria-expanded="false"
-              aria-haspopup="menu"
-              aria-label="Notification options"
-              aria-labelledby="react-use-id-3"
-              class="_icon-button_1215g_8"
-              data-kind="primary"
-              data-state="closed"
-              id="radix-react-use-id-4"
-              role="button"
-              style="--cpd-icon-button-size: 24px; padding: 2px;"
-              tabindex="0"
-              type="button"
-            >
-              <div
-                class="_indicator-icon_j097f_17"
-                style="--cpd-icon-button-size: 100%;"
-              >
-                <svg
-                  fill="currentColor"
-                  height="1em"
-                  viewBox="0 0 24 24"
-                  width="1em"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M20.293 17.293c.63.63.184 1.707-.707 1.707H4.414c-.89 0-1.337-1.077-.707-1.707L5 16v-6s0-7 7-7 7 7 7 7v6zM12 22a2 2 0 0 1-2-2h4a2 2 0 0 1-2 2"
-                  />
-                </svg>
-              </div>
-            </button>
           </div>
           <div
             aria-hidden="true"
@@ -1373,38 +1215,6 @@ exports[`<RoomListItemView /> > renders WithMention story 1`] = `
                 >
                   <path
                     d="M6 14q-.824 0-1.412-.588A1.93 1.93 0 0 1 4 12q0-.825.588-1.412A1.93 1.93 0 0 1 6 10q.824 0 1.412.588Q8 11.175 8 12t-.588 1.412A1.93 1.93 0 0 1 6 14m6 0q-.825 0-1.412-.588A1.93 1.93 0 0 1 10 12q0-.825.588-1.412A1.93 1.93 0 0 1 12 10q.825 0 1.412.588Q14 11.175 14 12t-.588 1.412A1.93 1.93 0 0 1 12 14m6 0q-.824 0-1.413-.588A1.93 1.93 0 0 1 16 12q0-.825.587-1.412A1.93 1.93 0 0 1 18 10q.824 0 1.413.588Q20 11.175 20 12t-.587 1.412A1.93 1.93 0 0 1 18 14"
-                  />
-                </svg>
-              </div>
-            </button>
-            <button
-              aria-disabled="false"
-              aria-expanded="false"
-              aria-haspopup="menu"
-              aria-label="Notification options"
-              aria-labelledby="react-use-id-3"
-              class="_icon-button_1215g_8"
-              data-kind="primary"
-              data-state="closed"
-              id="radix-react-use-id-4"
-              role="button"
-              style="--cpd-icon-button-size: 24px; padding: 2px;"
-              tabindex="0"
-              type="button"
-            >
-              <div
-                class="_indicator-icon_j097f_17"
-                style="--cpd-icon-button-size: 100%;"
-              >
-                <svg
-                  fill="currentColor"
-                  height="1em"
-                  viewBox="0 0 24 24"
-                  width="1em"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M20.293 17.293c.63.63.184 1.707-.707 1.707H4.414c-.89 0-1.337-1.077-.707-1.707L5 16v-6s0-7 7-7 7 7 7 7v6zM12 22a2 2 0 0 1-2-2h4a2 2 0 0 1-2 2"
                   />
                 </svg>
               </div>
@@ -1535,38 +1345,6 @@ exports[`<RoomListItemView /> > renders WithNotification story 1`] = `
                 </svg>
               </div>
             </button>
-            <button
-              aria-disabled="false"
-              aria-expanded="false"
-              aria-haspopup="menu"
-              aria-label="Notification options"
-              aria-labelledby="react-use-id-3"
-              class="_icon-button_1215g_8"
-              data-kind="primary"
-              data-state="closed"
-              id="radix-react-use-id-4"
-              role="button"
-              style="--cpd-icon-button-size: 24px; padding: 2px;"
-              tabindex="0"
-              type="button"
-            >
-              <div
-                class="_indicator-icon_j097f_17"
-                style="--cpd-icon-button-size: 100%;"
-              >
-                <svg
-                  fill="currentColor"
-                  height="1em"
-                  viewBox="0 0 24 24"
-                  width="1em"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M20.293 17.293c.63.63.184 1.707-.707 1.707H4.414c-.89 0-1.337-1.077-.707-1.707L5 16v-6s0-7 7-7 7 7 7 7v6zM12 22a2 2 0 0 1-2-2h4a2 2 0 0 1-2 2"
-                  />
-                </svg>
-              </div>
-            </button>
           </div>
           <div
             aria-hidden="true"
@@ -1678,38 +1456,6 @@ exports[`<RoomListItemView /> > renders WithVideoCall story 1`] = `
                 >
                   <path
                     d="M6 14q-.824 0-1.412-.588A1.93 1.93 0 0 1 4 12q0-.825.588-1.412A1.93 1.93 0 0 1 6 10q.824 0 1.412.588Q8 11.175 8 12t-.588 1.412A1.93 1.93 0 0 1 6 14m6 0q-.825 0-1.412-.588A1.93 1.93 0 0 1 10 12q0-.825.588-1.412A1.93 1.93 0 0 1 12 10q.825 0 1.412.588Q14 11.175 14 12t-.588 1.412A1.93 1.93 0 0 1 12 14m6 0q-.824 0-1.413-.588A1.93 1.93 0 0 1 16 12q0-.825.587-1.412A1.93 1.93 0 0 1 18 10q.824 0 1.413.588Q20 11.175 20 12t-.587 1.412A1.93 1.93 0 0 1 18 14"
-                  />
-                </svg>
-              </div>
-            </button>
-            <button
-              aria-disabled="false"
-              aria-expanded="false"
-              aria-haspopup="menu"
-              aria-label="Notification options"
-              aria-labelledby="react-use-id-3"
-              class="_icon-button_1215g_8"
-              data-kind="primary"
-              data-state="closed"
-              id="radix-react-use-id-4"
-              role="button"
-              style="--cpd-icon-button-size: 24px; padding: 2px;"
-              tabindex="0"
-              type="button"
-            >
-              <div
-                class="_indicator-icon_j097f_17"
-                style="--cpd-icon-button-size: 100%;"
-              >
-                <svg
-                  fill="currentColor"
-                  height="1em"
-                  viewBox="0 0 24 24"
-                  width="1em"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M20.293 17.293c.63.63.184 1.707-.707 1.707H4.414c-.89 0-1.337-1.077-.707-1.707L5 16v-6s0-7 7-7 7 7 7 7v6zM12 22a2 2 0 0 1-2-2h4a2 2 0 0 1-2 2"
                   />
                 </svg>
               </div>
@@ -1831,38 +1577,6 @@ exports[`<RoomListItemView /> > renders WithVoiceCall story 1`] = `
                 >
                   <path
                     d="M6 14q-.824 0-1.412-.588A1.93 1.93 0 0 1 4 12q0-.825.588-1.412A1.93 1.93 0 0 1 6 10q.824 0 1.412.588Q8 11.175 8 12t-.588 1.412A1.93 1.93 0 0 1 6 14m6 0q-.825 0-1.412-.588A1.93 1.93 0 0 1 10 12q0-.825.588-1.412A1.93 1.93 0 0 1 12 10q.825 0 1.412.588Q14 11.175 14 12t-.588 1.412A1.93 1.93 0 0 1 12 14m6 0q-.824 0-1.413-.588A1.93 1.93 0 0 1 16 12q0-.825.587-1.412A1.93 1.93 0 0 1 18 10q.824 0 1.413.588Q20 11.175 20 12t-.587 1.412A1.93 1.93 0 0 1 18 14"
-                  />
-                </svg>
-              </div>
-            </button>
-            <button
-              aria-disabled="false"
-              aria-expanded="false"
-              aria-haspopup="menu"
-              aria-label="Notification options"
-              aria-labelledby="react-use-id-3"
-              class="_icon-button_1215g_8"
-              data-kind="primary"
-              data-state="closed"
-              id="radix-react-use-id-4"
-              role="button"
-              style="--cpd-icon-button-size: 24px; padding: 2px;"
-              tabindex="0"
-              type="button"
-            >
-              <div
-                class="_indicator-icon_j097f_17"
-                style="--cpd-icon-button-size: 100%;"
-              >
-                <svg
-                  fill="currentColor"
-                  height="1em"
-                  viewBox="0 0 24 24"
-                  width="1em"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M20.293 17.293c.63.63.184 1.707-.707 1.707H4.414c-.89 0-1.337-1.077-.707-1.707L5 16v-6s0-7 7-7 7 7 7 7v6zM12 22a2 2 0 0 1-2-2h4a2 2 0 0 1-2 2"
                   />
                 </svg>
               </div>

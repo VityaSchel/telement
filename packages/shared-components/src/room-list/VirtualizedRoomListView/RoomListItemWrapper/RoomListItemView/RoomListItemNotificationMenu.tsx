@@ -5,18 +5,16 @@
  * Please see LICENSE files in the repository root for full details.
  */
 
-import React, { useState, type JSX } from "react";
-import { IconButton, Menu, MenuItem } from "@vector-im/compound-web";
-import {
-    NotificationsSolidIcon,
-    NotificationsOffSolidIcon,
-    CheckIcon,
-} from "@vector-im/compound-design-tokens/assets/web/icons";
+import React, { useEffect, useRef, useState, type JSX } from "react";
+import { MenuItem, SubMenu } from "@vector-im/compound-web";
+import { NotificationsIcon, NotificationsOffIcon, CheckIcon } from "@vector-im/compound-design-tokens/assets/web/icons";
+import classNames from "classnames";
 
 import { _t } from "../../../../core/i18n/i18n";
 import { RoomNotifState } from "./RoomNotifs";
 import { useViewModel, type ViewModel } from "../../../../core/viewmodel";
 import type { RoomListItemViewSnapshot, RoomListItemViewActions } from "./RoomListItemView";
+import styles from "./RoomListItemView.module.css";
 
 /**
  * View model type for room list item
@@ -29,77 +27,90 @@ export type RoomListItemViewModel = ViewModel<RoomListItemViewSnapshot, RoomList
 export interface RoomListItemNotificationMenuProps {
     /** The room item view model */
     vm: RoomListItemViewModel;
+    /** Whether the item is in the room's right-click menu rather than its more options menu */
+    inContextMenu?: boolean;
 }
 
 /**
- * The notification settings menu for room list items.
- * Displays options to change notification settings.
+ * The "Notifications" item of the room menus, with a chevron at its end. It opens a submenu with the room's
+ * notification options, the current one checked. Right arrow and Enter open the submenu, Left arrow and Escape close it.
  */
-export function RoomListItemNotificationMenu({ vm }: RoomListItemNotificationMenuProps): JSX.Element {
+export function RoomListItemNotificationMenu({ vm, inContextMenu }: RoomListItemNotificationMenuProps): JSX.Element {
     const snapshot = useViewModel(vm);
     const [open, setOpen] = useState(false);
+    const contentRef = useRef<HTMLDivElement>(null);
     const isMuted = snapshot.roomNotifState === RoomNotifState.Mute;
-    const checkComponent = <CheckIcon width="24px" height="24px" color="var(--cpd-color-icon-primary)" />;
+
+    useEffect(() => {
+        if (!open) return;
+
+        // Radix closes every level on Escape from a document listener; the window sees the key first, so Escape closes
+        // only the submenu, as in the ARIA menu pattern
+        const onKeyDown = (event: KeyboardEvent): void => {
+            if (event.key !== "Escape") return;
+            event.stopPropagation();
+            event.preventDefault();
+
+            const subMenu = contentRef.current?.closest('[role="menu"]');
+            const triggerId = subMenu?.getAttribute("aria-labelledby");
+            if (triggerId) document.getElementById(triggerId)?.focus();
+            setOpen(false);
+        };
+
+        window.addEventListener("keydown", onKeyDown, { capture: true });
+        return () => window.removeEventListener("keydown", onKeyDown, { capture: true });
+    }, [open]);
+
+    const options = [
+        { state: RoomNotifState.AllMessages, label: _t("notifications|default_settings") },
+        { state: RoomNotifState.AllMessagesLoud, label: _t("notifications|all_messages") },
+        { state: RoomNotifState.MentionsOnly, label: _t("notifications|mentions_keywords") },
+        { state: RoomNotifState.Mute, label: _t("notifications|mute_room") },
+    ];
 
     return (
-        <Menu
+        <SubMenu
             open={open}
             onOpenChange={setOpen}
-            title={_t("room_list|notification_options")}
-            showTitle={false}
-            align="start"
             trigger={
-                <IconButton
-                    size="24px"
-                    style={{ padding: "2px" }}
-                    tooltip={_t("room_list|notification_options")}
-                    aria-label={_t("room_list|notification_options")}
-                >
-                    {isMuted ? <NotificationsOffSolidIcon /> : <NotificationsSolidIcon />}
-                </IconButton>
+                <MenuItem
+                    Icon={isMuted ? NotificationsOffIcon : NotificationsIcon}
+                    label={_t("telement|room_list|more_options|notifications")}
+                    onSelect={null}
+                    onClick={(evt) => evt.stopPropagation()}
+                />
             }
         >
             <div
-                // We don't want keyboard navigation events to bubble up to the ListView changing the focused item
-                onKeyDown={(e) => e.stopPropagation()}
+                ref={contentRef}
+                className={classNames(styles.menuContent, styles.subMenuContent, {
+                    [styles.contextSubMenuContent]: inContextMenu,
+                })}
             >
-                <MenuItem
-                    aria-selected={snapshot.roomNotifState === RoomNotifState.AllMessages}
-                    hideChevron={true}
-                    label={_t("notifications|default_settings")}
-                    onSelect={() => vm.onSetRoomNotifState(RoomNotifState.AllMessages)}
-                    onClick={(evt) => evt.stopPropagation()}
-                >
-                    {snapshot.roomNotifState === RoomNotifState.AllMessages && checkComponent}
-                </MenuItem>
-                <MenuItem
-                    aria-selected={snapshot.roomNotifState === RoomNotifState.AllMessagesLoud}
-                    hideChevron={true}
-                    label={_t("notifications|all_messages")}
-                    onSelect={() => vm.onSetRoomNotifState(RoomNotifState.AllMessagesLoud)}
-                    onClick={(evt) => evt.stopPropagation()}
-                >
-                    {snapshot.roomNotifState === RoomNotifState.AllMessagesLoud && checkComponent}
-                </MenuItem>
-                <MenuItem
-                    aria-selected={snapshot.roomNotifState === RoomNotifState.MentionsOnly}
-                    hideChevron={true}
-                    label={_t("notifications|mentions_keywords")}
-                    onSelect={() => vm.onSetRoomNotifState(RoomNotifState.MentionsOnly)}
-                    onClick={(evt) => evt.stopPropagation()}
-                >
-                    {snapshot.roomNotifState === RoomNotifState.MentionsOnly && checkComponent}
-                </MenuItem>
-                <MenuItem
-                    aria-selected={snapshot.roomNotifState === RoomNotifState.Mute}
-                    hideChevron={true}
-                    label={_t("notifications|mute_room")}
-                    onSelect={() => vm.onSetRoomNotifState(RoomNotifState.Mute)}
-                    onClick={(evt) => evt.stopPropagation()}
-                >
-                    {snapshot.roomNotifState === RoomNotifState.Mute && checkComponent}
-                </MenuItem>
+                {options.map(({ state, label }) => {
+                    const checked = snapshot.roomNotifState === state;
+                    return (
+                        <MenuItem
+                            key={state}
+                            role="menuitemradio"
+                            aria-checked={checked}
+                            hideChevron={true}
+                            label={label}
+                            onSelect={() => vm.onSetRoomNotifState(state)}
+                            onClick={(evt) => evt.stopPropagation()}
+                        >
+                            {checked && (
+                                <CheckIcon
+                                    width="16px"
+                                    height="16px"
+                                    color="var(--cpd-color-icon-primary)"
+                                    aria-hidden={true}
+                                />
+                            )}
+                        </MenuItem>
+                    );
+                })}
             </div>
-        </Menu>
+        </SubMenu>
     );
 }

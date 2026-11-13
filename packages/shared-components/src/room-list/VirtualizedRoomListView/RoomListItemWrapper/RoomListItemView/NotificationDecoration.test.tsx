@@ -5,8 +5,10 @@
  * Please see LICENSE files in the repository root for full details.
  */
 
+import "@vector-im/compound-design-tokens/assets/web/css/compound-design-tokens.css";
+import "@vector-im/compound-web/dist/style.css";
 import React from "react";
-import { render } from "@test-utils";
+import { render, screen } from "@test-utils";
 import { composeStories } from "@storybook/react-vite";
 import { describe, it, expect } from "vitest";
 
@@ -76,5 +78,57 @@ describe("<NotificationDecoration />", () => {
             const { container } = render(<Muted />);
             expect(container).toMatchSnapshot();
         });
+    });
+
+    /** The colour a token resolves to in the current theme. */
+    function colourOf(token: string): string {
+        const probe = document.createElement("div");
+        probe.style.color = `var(${token})`;
+        document.body.append(probe);
+        const colour = getComputedStyle(probe).color;
+        probe.remove();
+        return colour;
+    }
+
+    it("should show the unread counter of a muted room in grey, like Telegram", () => {
+        render(<Muted />);
+        const counter = screen.getByText("3");
+        expect(getComputedStyle(counter).backgroundColor).toBe(colourOf("--cpd-color-icon-secondary"));
+    });
+
+    it("should show the unread counter of a room that isn't muted in the accent colour", () => {
+        render(<NotificationWithCount />);
+        const counter = screen.getByText("3");
+        expect(getComputedStyle(counter).backgroundColor).toBe(colourOf("--cpd-color-icon-accent-primary"));
+    });
+
+    it("should keep the mention icon in the accent colour and the counter grey in a muted room", () => {
+        render(<Muted isMention={true} isNotification={false} />);
+        const counter = screen.getByText("3");
+        const mentionIcon = counter.previousElementSibling!;
+        expect(mentionIcon).toHaveAttribute("fill", "var(--cpd-color-icon-accent-primary)");
+        expect(getComputedStyle(counter).backgroundColor).toBe(colourOf("--cpd-color-icon-secondary"));
+    });
+
+    it("should show nothing for a muted room without unread messages, as its bell is next to the room name", () => {
+        render(<Muted hasAnyNotificationOrActivity={false} isNotification={false} count={0} />);
+        expect(screen.queryByTestId("notification-decoration")).toBeNull();
+    });
+
+    it("should show a bell after the grey activity dot of a muted room, as in a muted thread's row", () => {
+        render(<Muted isNotification={false} isActivityNotification={true} hasUnreadCount={false} count={0} />);
+        const bell = screen.getByTestId("muted-activity-icon");
+        expect(bell).toBeVisible();
+        expect(bell).toHaveAttribute("fill", "var(--cpd-color-icon-tertiary)");
+        expect(screen.getByTestId("notification-decoration").lastElementChild).toBe(bell);
+        expect(screen.getByTestId("notification-decoration").childElementCount).toBe(2);
+    });
+
+    it.each([
+        ["the counter of a muted room", <Muted key="muted" />],
+        ["the activity dot of a room that isn't muted", <ActivityIndicator key="activity" />],
+    ])("should not show a bell with %s", (_, story) => {
+        render(story);
+        expect(screen.queryByTestId("muted-activity-icon")).toBeNull();
     });
 });

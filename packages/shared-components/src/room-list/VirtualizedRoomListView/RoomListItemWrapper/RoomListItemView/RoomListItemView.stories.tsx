@@ -315,6 +315,23 @@ export const Muted: Story = {
     },
 };
 
+export const MutedWithNotification: Story = {
+    args: {
+        notification: {
+            hasAnyNotificationOrActivity: true,
+            isUnsentMessage: false,
+            invited: false,
+            isMention: false,
+            isActivityNotification: false,
+            isNotification: true,
+            hasUnreadCount: true,
+            count: 3,
+            muted: true,
+        },
+        roomNotifState: RoomNotifState.Mute,
+    },
+};
+
 export const MutedWithLongName: Story = {
     args: {
         name: "Loooooooooooooooooooooooooooooooooooooong name",

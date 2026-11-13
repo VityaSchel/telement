@@ -9,34 +9,24 @@ import React, { type JSX } from "react";
 
 import { Flex } from "../../../../core/utils/Flex";
 import { RoomListItemMoreOptionsMenu, type RoomListItemViewModel } from "./RoomListItemMoreOptionsMenu";
-import { RoomListItemNotificationMenu } from "./RoomListItemNotificationMenu";
 import styles from "./RoomListItemView.module.css";
 
 /**
  * Props for RoomListItemHoverMenu component
  */
 export interface RoomListItemHoverMenuProps {
-    /** Whether the more options menu should be shown */
-    showMoreOptionsMenu: boolean;
-    /** Whether the notification menu should be shown */
-    showNotificationMenu: boolean;
     /** The room item view model */
     vm: RoomListItemViewModel;
 }
 
 /**
  * The hover menu for room list items.
- * Displays more options and notification settings menus.
+ * Displays the more options menu, which holds the notification settings too.
  */
-export const RoomListItemHoverMenu: React.FC<RoomListItemHoverMenuProps> = ({
-    showMoreOptionsMenu,
-    showNotificationMenu,
-    vm,
-}): JSX.Element => {
+export const RoomListItemHoverMenu: React.FC<RoomListItemHoverMenuProps> = ({ vm }): JSX.Element => {
     return (
         <Flex className={styles.hoverMenu} align="center" gap="var(--cpd-space-1x)">
-            {showMoreOptionsMenu && <RoomListItemMoreOptionsMenu vm={vm} />}
-            {showNotificationMenu && <RoomListItemNotificationMenu vm={vm} />}
+            <RoomListItemMoreOptionsMenu vm={vm} />
         </Flex>
     );
 };

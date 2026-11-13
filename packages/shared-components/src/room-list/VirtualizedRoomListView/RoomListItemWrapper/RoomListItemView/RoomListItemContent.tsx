@@ -85,13 +85,7 @@ export const RoomListItemContent = memo(function RoomListItemContent({
                         </Text>
                     )}
                 </div>
-                {!isDragging && (item.showMoreOptionsMenu || item.showNotificationMenu) && (
-                    <RoomListItemHoverMenu
-                        showMoreOptionsMenu={item.showMoreOptionsMenu}
-                        showNotificationMenu={item.showNotificationMenu}
-                        vm={vm}
-                    />
-                )}
+                {!isDragging && item.showMoreOptionsMenu && <RoomListItemHoverMenu vm={vm} />}
 
                 {/* aria-hidden because we summarise the unread count/notification status in a11yLabel */}
                 <div
@@ -100,8 +94,7 @@ export const RoomListItemContent = memo(function RoomListItemContent({
                     })}
                     aria-hidden={true}
                 >
-                    {/* The bell of a muted room is next to its name instead */}
-                    <NotificationDecoration {...item.notification} muted={false} />
+                    <NotificationDecoration {...item.notification} />
                     {showPin && (
                         <PinSolidIcon
                             className={styles.pinnedIcon}

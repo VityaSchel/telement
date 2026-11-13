@@ -129,18 +129,21 @@ test.describe("Room list", () => {
             await roomItem.hover();
 
             await expect(roomItem).toMatchScreenshot("room-list-item-hover.png");
-            let roomItemMenu = roomItem.getByRole("button", { name: "Notification options" });
+            // Like Telegram, the notification options are in the room's menu rather than on the room
+            await expect(roomItem.getByRole("button", { name: "Notification options" })).toHaveCount(0);
+            let roomItemMenu = roomItem.getByRole("button", { name: "More Options" });
             await roomItemMenu.click();
+            await page.getByRole("menuitem", { name: "Notifications" }).click();
 
-            // Default settings should be selected
-            await expect(page.getByRole("menuitem", { name: "Match default settings" })).toHaveAttribute(
-                "aria-selected",
+            // Default settings should be checked
+            await expect(page.getByRole("menuitemradio", { name: "Match default settings" })).toHaveAttribute(
+                "aria-checked",
                 "true",
             );
             await expect(page).toMatchScreenshot("room-list-item-open-notification-options.png");
 
             // It should make the room muted
-            await page.getByRole("menuitem", { name: "Mute room" }).click();
+            await page.getByRole("menuitemradio", { name: "Mute room" }).click();
 
             // Put focus on the room list
             await roomListView.getByRole("option", { name: "Open room room28" }).click();
@@ -156,12 +159,33 @@ test.describe("Room list", () => {
             await expect(roomItem.getByTestId("muted-icon")).toBeVisible();
             await expect(roomItem).toMatchScreenshot("room-list-item-hover-silent.png");
 
-            roomItemMenu = roomItem.getByRole("button", { name: "Notification options" });
+            roomItemMenu = roomItem.getByRole("button", { name: "More Options" });
             await roomItemMenu.click();
+            await page.getByRole("menuitem", { name: "Notifications" }).click();
 
-            // The Mute room option should be selected
-            await expect(page.getByRole("menuitem", { name: "Mute room" })).toHaveAttribute("aria-selected", "true");
+            // The Mute room option should be checked
+            await expect(page.getByRole("menuitemradio", { name: "Mute room" })).toHaveAttribute(
+                "aria-checked",
+                "true",
+            );
             await expect(page).toMatchScreenshot("room-list-item-open-notification-options-selection.png");
+        });
+
+        test("should offer the notification options in the context menu", async ({ page, app, user }) => {
+            const roomListView = getRoomList(page);
+            const roomItem = roomListView.getByRole("option", { name: "Open room room29" });
+
+            await roomItem.click({ button: "right" });
+            await page.getByRole("menuitem", { name: "Notifications" }).click();
+            await page.getByRole("menuitemradio", { name: "Mentions and keywords" }).click();
+            await expect(page.getByRole("menu")).toHaveCount(0);
+
+            await roomItem.click({ button: "right" });
+            await page.getByRole("menuitem", { name: "Notifications" }).click();
+            await expect(page.getByRole("menuitemradio", { name: "Mentions and keywords" })).toHaveAttribute(
+                "aria-checked",
+                "true",
+            );
         });
 
         test("should scroll to the current room", async ({ page, app, user }) => {
@@ -251,32 +275,45 @@ test.describe("Room list", () => {
                 await expect(room28).not.toBeFocused();
             });
 
-            test("should navigate to the notification menu", async ({ page, app, user }) => {
+            test("should navigate to the notification options", async ({ page, app, user }) => {
                 const roomListView = getRoomList(page);
                 const room29 = roomListView.getByRole("option", { name: "Open room room29" });
                 const moreButton = room29.getByRole("button", { name: "More options" });
-                const notificationButton = room29.getByRole("button", { name: "Notification options" });
+                const notifications = page.getByRole("menuitem", { name: "Notifications" });
+                const defaultSettings = page.getByRole("menuitemradio", { name: "Match default settings" });
 
                 await room29.click();
                 // put focus back on the room list item
                 await room29.click();
                 await page.keyboard.press("Tab");
                 await expect(moreButton).toBeFocused();
-                await page.keyboard.press("Tab");
-                await expect(notificationButton).toBeFocused();
 
-                // Open the menu
+                // Open the menu and go down to its Notifications item, after Mark as unread, Pin and Low priority
                 await page.keyboard.press("Enter");
-                // Wait for the menu to be open
-                await expect(page.getByRole("menuitem", { name: "Match default settings" })).toHaveAttribute(
-                    "aria-selected",
-                    "true",
-                );
-
+                await expect(page.getByRole("menuitem", { name: "Mark as unread" })).toBeFocused();
                 await page.keyboard.press("ArrowDown");
+                await page.keyboard.press("ArrowDown");
+                await page.keyboard.press("ArrowDown");
+                await expect(notifications).toBeFocused();
+
+                // The right arrow opens the submenu and the left arrow closes it
+                await page.keyboard.press("ArrowRight");
+                await expect(defaultSettings).toBeFocused();
+                await page.keyboard.press("ArrowLeft");
+                await expect(defaultSettings).not.toBeVisible();
+                await expect(notifications).toBeFocused();
+
+                // Enter opens the submenu too, and Escape closes only the submenu
+                await page.keyboard.press("Enter");
+                await expect(defaultSettings).toBeFocused();
                 await page.keyboard.press("Escape");
-                // Focus should be back on the notification button
-                await expect(notificationButton).toBeFocused();
+                await expect(defaultSettings).not.toBeVisible();
+                await expect(notifications).toBeFocused();
+
+                // A second Escape closes the menu, and focus goes back to the more options button
+                await page.keyboard.press("Escape");
+                await expect(notifications).not.toBeVisible();
+                await expect(moreButton).toBeFocused();
             });
 
             test("should reveal the options menu when a room is focused with the keyboard", async ({
@@ -579,6 +616,50 @@ test.describe("Room list", () => {
 
             await expect(room).toMatchScreenshot("room-list-item-mark-as-unread.png");
         });
+
+        test(
+            "should render a grey unread count for a muted room",
+            { tag: "@screenshot" },
+            async ({ page, app, user, bot }) => {
+                const roomListView = getRoomList(page);
+
+                const roomId = await app.client.createRoom({ name: "muted" });
+                await app.client.inviteUser(roomId, bot.credentials!.userId);
+                await bot.joinRoom(roomId);
+
+                const room = roomListView.getByRole("option", { name: "Open room muted" });
+                await room.click({ button: "right" });
+                await page.getByRole("menuitem", { name: "Notifications" }).click();
+                await page.getByRole("menuitemradio", { name: "Mute room" }).click();
+
+                await bot.sendMessage(roomId, "I am a robot. Beep.");
+                await bot.sendMessage(roomId, "Beep beep.");
+
+                // Like Telegram, a muted room counts its unread messages, in grey, and keeps its bell after its name
+                await expect(room).toHaveAccessibleName("Open room muted with 2 unread messages.");
+                await expect(room.getByTestId("notification-decoration")).toHaveText("2");
+                await expect(room.getByTestId("muted-icon")).toBeVisible();
+
+                // focus the header to avoid to have hover decoration
+                await page.getByTestId("room-list-header").click();
+                await expect(room).toMatchScreenshot("room-list-item-muted-unread.png");
+
+                // Mark as read clears the count
+                await room.click({ button: "right" });
+                await page.getByRole("menuitem", { name: "Mark as read" }).click();
+                await expect(room).toHaveAccessibleName("Open room muted");
+                await expect(room.getByTestId("notification-decoration")).not.toBeVisible();
+
+                // Like Telegram, a mention of the user in a muted room adds the @ to the grey count
+                await bot.sendMessage(roomId, {
+                    "msgtype": "m.text",
+                    "body": "Hello there",
+                    "m.mentions": { user_ids: [user.userId] },
+                });
+                await expect(room).toHaveAccessibleName("Open room muted with 1 unread mention.");
+                await expect(room.getByTestId("notification-decoration")).toHaveText("1");
+            },
+        );
 
         test("should render silent decoration", { tag: "@screenshot" }, async ({ page, app, user, bot }) => {
             const roomListView = getRoomList(page);

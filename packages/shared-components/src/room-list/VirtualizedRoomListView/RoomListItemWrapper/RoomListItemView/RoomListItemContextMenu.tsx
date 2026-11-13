@@ -34,7 +34,7 @@ export const RoomListItemContextMenu: React.FC<PropsWithChildren<RoomListItemCon
             hasAccessibleAlternative={true}
             trigger={children}
         >
-            <MoreOptionContent vm={vm} />
+            <MoreOptionContent vm={vm} inContextMenu={true} />
         </ContextMenu>
     );
 };

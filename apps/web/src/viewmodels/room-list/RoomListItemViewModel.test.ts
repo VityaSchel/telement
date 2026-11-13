@@ -10,8 +10,11 @@
 import EventEmitter from "node:events";
 import { vi, describe, it, expect, beforeEach, afterEach, type Mock } from "vitest";
 import {
+    ClientEvent,
+    EventType,
     type MatrixClient,
-    type MatrixEvent,
+    MatrixEvent,
+    MatrixEventEvent,
     KnownMembership,
     Room,
     RoomEvent,
@@ -34,10 +37,20 @@ import { CallStore } from "../../stores/CallStore";
 import { CallEvent, type Call } from "../../models/Call";
 import { RoomListItemViewModel } from "./RoomListItemViewModel";
 import * as tagRoomModule from "../../utils/room/tagRoom";
+import { EchoChamber } from "../../stores/local-echo/EchoChamber";
+import { type RoomEchoChamber } from "../../stores/local-echo/RoomEchoChamber";
+import { RoomNotifState } from "../../RoomNotifs";
+import { NotificationLevel } from "../../stores/notifications/NotificationLevel";
+import { countUnreadMessages } from "../../telement/room-list/countUnreadMessages";
+import { MARKED_UNREAD_TYPE_STABLE } from "../../utils/notifications";
 
 vi.mock("./utils", () => ({
     hasAccessToOptionsMenu: vi.fn().mockReturnValue(true),
     hasAccessToNotificationMenu: vi.fn().mockReturnValue(true),
+}));
+
+vi.mock("../../telement/room-list/countUnreadMessages", () => ({
+    countUnreadMessages: vi.fn().mockReturnValue({ count: 0, mentionsMe: false }),
 }));
 
 vi.mock("../../stores/CallStore", () => ({
@@ -172,6 +185,195 @@ describe("RoomListItemViewModel", () => {
             await flushPromises();
 
             expect(viewModel.getSnapshot().notification.invited).toBe(true);
+        });
+    });
+
+    describe("Muted rooms", () => {
+        const mute = (): void => {
+            vi.spyOn(EchoChamber, "forRoom").mockReturnValue({
+                notificationVolume: RoomNotifState.Mute,
+            } as unknown as RoomEchoChamber);
+            // A muted room's push rule gives it no notification level
+            vi.spyOn(notificationState, "level", "get").mockReturnValue(NotificationLevel.None);
+        };
+
+        beforeEach(() => {
+            vi.spyOn(room, "getMyMembership").mockReturnValue(KnownMembership.Join);
+            vi.mocked(countUnreadMessages).mockReturnValue({ count: 0, mentionsMe: false });
+            // Its updates are mocked here, and its own listeners on the room would need full events
+            notificationState.destroy();
+        });
+
+        it("should count the unread messages of a muted room, to show them in a grey counter", () => {
+            mute();
+            vi.mocked(countUnreadMessages).mockReturnValue({ count: 4, mentionsMe: false });
+
+            viewModel = new RoomListItemViewModel({ room, client: matrixClient });
+
+            const snapshot = viewModel.getSnapshot();
+            expect(countUnreadMessages).toHaveBeenCalledWith(room);
+            expect(snapshot.notification).toEqual(
+                expect.objectContaining({
+                    muted: true,
+                    hasAnyNotificationOrActivity: true,
+                    isNotification: true,
+                    hasUnreadCount: true,
+                    count: 4,
+                    isMention: false,
+                }),
+            );
+            // Like Telegram, a muted room isn't emphasised
+            expect(snapshot.isBold).toBe(false);
+            expect(snapshot.canMarkAsRead).toBe(true);
+            expect(snapshot.canMarkAsUnread).toBe(false);
+        });
+
+        it("should show the @ of a muted room whose unread messages mention the user, with the grey counter", () => {
+            mute();
+            vi.mocked(countUnreadMessages).mockReturnValue({ count: 3, mentionsMe: true });
+
+            viewModel = new RoomListItemViewModel({ room, client: matrixClient });
+
+            const snapshot = viewModel.getSnapshot();
+            expect(snapshot.notification).toEqual(
+                expect.objectContaining({
+                    muted: true,
+                    hasAnyNotificationOrActivity: true,
+                    isMention: true,
+                    isNotification: false,
+                    hasUnreadCount: true,
+                    count: 3,
+                }),
+            );
+            expect(snapshot.isBold).toBe(false);
+            expect(snapshot.canMarkAsRead).toBe(true);
+        });
+
+        it("should show nothing for a muted room without unread messages", () => {
+            mute();
+
+            viewModel = new RoomListItemViewModel({ room, client: matrixClient });
+
+            const snapshot = viewModel.getSnapshot();
+            expect(snapshot.notification).toEqual(
+                expect.objectContaining({ muted: true, hasAnyNotificationOrActivity: false, isNotification: false }),
+            );
+            expect(snapshot.canMarkAsRead).toBe(false);
+            expect(snapshot.canMarkAsUnread).toBe(true);
+        });
+
+        it("should show a muted room marked as unread with an empty counter", () => {
+            mute();
+            room.addAccountData([new MatrixEvent({ type: MARKED_UNREAD_TYPE_STABLE, content: { unread: true } })]);
+
+            viewModel = new RoomListItemViewModel({ room, client: matrixClient });
+
+            expect(viewModel.getSnapshot().notification).toEqual(
+                expect.objectContaining({ isNotification: true, hasUnreadCount: false, count: 0 }),
+            );
+            expect(viewModel.getSnapshot().canMarkAsRead).toBe(true);
+        });
+
+        it("should not count the unread messages of a room that isn't muted", () => {
+            viewModel = new RoomListItemViewModel({ room, client: matrixClient });
+
+            expect(countUnreadMessages).not.toHaveBeenCalled();
+            expect(viewModel.getSnapshot().notification.isNotification).toBe(false);
+        });
+
+        it.each([
+            ["an unsent message", NotificationLevel.Unsent],
+            ["an invitation", NotificationLevel.Highlight],
+        ])("should keep the notification state of a muted room with %s", (_, level) => {
+            mute();
+            vi.spyOn(notificationState, "level", "get").mockReturnValue(level);
+
+            viewModel = new RoomListItemViewModel({ room, client: matrixClient });
+
+            expect(countUnreadMessages).not.toHaveBeenCalled();
+        });
+
+        // The handlers don't look at the arguments of the room's events
+        const emitOnRoom = (event: RoomEvent): void => {
+            (room as unknown as EventEmitter).emit(event);
+        };
+        const addMessage = (): Promise<void> =>
+            room.addLiveEvents(
+                [
+                    new MatrixEvent({
+                        type: "m.room.message",
+                        room_id: room.roomId,
+                        sender: "@alice:server",
+                        event_id: "$message",
+                        content: { body: "Hello" },
+                    }),
+                ],
+                { addToState: false },
+            );
+        const emitDecrypted = (roomId: string): void => {
+            matrixClient.emit(MatrixEventEvent.Decrypted, new MatrixEvent({ room_id: roomId }));
+        };
+        const emitAccountData = (type: string): void => {
+            matrixClient.emit(ClientEvent.AccountData, new MatrixEvent({ type, content: {} }));
+        };
+
+        it.each([
+            ["a message arrives", addMessage],
+            ["a message is redacted", (): void => emitOnRoom(RoomEvent.Redaction)],
+            ["a read receipt arrives", (): void => emitOnRoom(RoomEvent.Receipt)],
+            ["the room is marked as unread", (): void => emitOnRoom(RoomEvent.AccountData)],
+            ["a message is decrypted", (): void => emitDecrypted(room.roomId)],
+            ["the user's push rules change", (): void => emitAccountData(EventType.PushRules)],
+        ])("should recount the unread messages of a muted room when %s", async (_, emit) => {
+            mute();
+            viewModel = new RoomListItemViewModel({ room, client: matrixClient });
+            expect(viewModel.getSnapshot().notification.count).toBe(0);
+
+            vi.mocked(countUnreadMessages).mockReturnValue({ count: 2, mentionsMe: false });
+            await emit();
+
+            expect(viewModel.getSnapshot().notification.count).toBe(2);
+        });
+
+        it("should not recount when a message of another room is decrypted", () => {
+            mute();
+            viewModel = new RoomListItemViewModel({ room, client: matrixClient });
+            vi.mocked(countUnreadMessages).mockClear();
+
+            emitDecrypted("!other:server");
+
+            expect(countUnreadMessages).not.toHaveBeenCalled();
+        });
+
+        it("should not recount when other account data of the user changes", () => {
+            mute();
+            viewModel = new RoomListItemViewModel({ room, client: matrixClient });
+            vi.mocked(countUnreadMessages).mockClear();
+
+            emitAccountData(EventType.Direct);
+
+            expect(countUnreadMessages).not.toHaveBeenCalled();
+        });
+
+        it("should not recount a room that isn't muted when a message arrives", async () => {
+            viewModel = new RoomListItemViewModel({ room, client: matrixClient });
+            const getSnapshot = viewModel.getSnapshot();
+
+            await addMessage();
+
+            expect(viewModel.getSnapshot()).toBe(getSnapshot);
+        });
+
+        it("should stop listening to the client when disposed", () => {
+            mute();
+            viewModel = new RoomListItemViewModel({ room, client: matrixClient });
+            viewModel.dispose();
+            vi.mocked(countUnreadMessages).mockClear();
+
+            emitDecrypted(room.roomId);
+            emitAccountData(EventType.PushRules);
+
+            expect(countUnreadMessages).not.toHaveBeenCalled();
         });
     });
 

@@ -169,3 +169,85 @@
 .lastItem {
     --padding-bottom: 0px;
 }
+
+/*
+ * The room menus (more options, right-click and the notifications submenu) have the size of the message menu
+ * (_IconizedContextMenu.pcss): 16px icons and regular body text in items with 8px block padding. The items are inset
+ * by the menu padding, and the menu's corner radius is an item highlight's radius plus that padding, so the corners
+ * are concentric.
+ */
+[role="menu"]:has(> [role="none"] > .menuContent) {
+    border-radius: calc(var(--cpd-space-2x) + var(--cpd-space-1x));
+}
+
+[role="none"]:has(> .menuContent) {
+    padding: var(--cpd-space-1x);
+
+    --cpd-menu-padding-block-end: var(--cpd-space-1x);
+}
+
+/* Compound offsets a submenu by its own 20px top padding to line its first item up with the item that opened it */
+[role="menu"]:has(> [role="none"] > .subMenuContent) {
+    margin-block-start: calc(var(--cpd-space-5x) - var(--cpd-space-1x));
+}
+
+/*
+ * The more options menu's submenu meets the menu's edge, as Compound offsets it by the 4px that the menu padding insets
+ * its item. The right-click menu's submenu has no such offset, so it is moved out by that padding on whichever side
+ * Radix opened it.
+ */
+[role="menu"][data-side="right"]:has(> [role="none"] > .contextSubMenuContent) {
+    margin-left: var(--cpd-space-1x);
+}
+
+[role="menu"][data-side="left"]:has(> [role="none"] > .contextSubMenuContent) {
+    margin-right: var(--cpd-space-1x);
+}
+
+.menuContent {
+    /* Like the message menu's, separators span the menu with the menu padding above and below */
+    --cpd-separator-inset: 0;
+    --cpd-separator-spacing: var(--cpd-space-1x);
+
+    > [role^="menuitem"] {
+        padding-block: var(--cpd-space-2x);
+        padding-inline: var(--cpd-space-2x) var(--cpd-space-3x);
+        border-radius: var(--cpd-space-2x);
+        /* The message menu's minimum width (146px inside its padding), instead of Compound's 200px */
+        min-inline-size: 146px;
+
+        /* Compound puts the icon and what ends the item (chevron, toggle or check) in the first of the two rows that
+           the label spans. Shorter than the label, they would sit above its centre there, so they span both rows and
+           are centred on the label, like the message menu's */
+        > :not(span) {
+            grid-row: 1 / -1;
+        }
+
+        > svg:first-child {
+            inline-size: 16px;
+            block-size: 16px;
+            margin-inline-end: 14px;
+        }
+
+        > span {
+            font: var(--cpd-font-body-md-regular);
+            /* Compound keeps items without an icon as tall as its 24px icons */
+            min-block-size: 0;
+        }
+
+        /* Like the message menu's, an item focused with the keyboard is highlighted as on hover */
+        &[data-kind="primary"]:focus-visible {
+            background: var(--cpd-color-bg-action-secondary-hovered);
+        }
+
+        &[data-kind="critical"]:focus-visible {
+            background: var(--cpd-color-bg-critical-subtle);
+        }
+    }
+
+    /* The chevron of an item that opens a submenu, cropped to its width like Compound's */
+    > [aria-haspopup="menu"] > svg:last-child {
+        inline-size: auto;
+        block-size: 16px;
+    }
+}
