@@ -844,8 +844,16 @@
     .line:not(.lineEmote)
         > .slotBody
         > :global(.mx_EventTile_content)
-        > :is(:global(.mx_EventTile_body), [data-textual-body-annotation-wrapper]):last-child::after {
+        > :is(:global(.mx_EventTile_body), [data-textual-body-annotation-wrapper]):last-child::after,
+    .line:not(.lineEmote)
+        > .slotBody
+        > :global(.mx_EventTile_content)
+        > :global(.mx_EventTile_body):last-child
+        > p:last-child::after {
         content: "";
+        /* The app hides formatted text's ::after (github-markdown-css's clearfix, in _EventTile.pcss) from a later
+           cascade layer, which only an important declaration in this layer overrides. */
+        display: block !important;
         float: right;
         width: calc(var(--event-tile-timestamp-text-width) + var(--event-tile-timestamp-gap));
         height: var(--event-tile-bubble-line-height);
@@ -856,11 +864,36 @@
         > .slotBody
         > :global(.mx_EventTile_content)
         > :global(.mx_EventTile_caption)
-        > :is(:global(.mx_EventTile_body), [data-textual-body-annotation-wrapper]):last-child::after {
+        > :is(:global(.mx_EventTile_body), [data-textual-body-annotation-wrapper]):last-child::after,
+    .line
+        > .slotBody
+        > :global(.mx_EventTile_content)
+        > :global(.mx_EventTile_caption)
+        > :global(.mx_EventTile_body):last-child
+        > p:last-child::after {
         content: "";
+        display: block !important;
         float: right;
         width: var(--event-tile-timestamp-gutter);
         height: var(--event-tile-bubble-line-height);
+    }
+
+    /* Formatted text that ends in a paragraph makes the room at the end of that paragraph's last line instead, as a
+       float after the paragraph would take a line of its own. A text bubble that ends in a code block needs none:
+       the time sits in the block's bottom margin and the bubble's padding. */
+    .line:not(.lineEmote)
+        > .slotBody
+        > :global(.mx_EventTile_content)
+        > :global(.mx_EventTile_body):last-child:has(
+            > p:last-child,
+            > :global(.mx_EventTile_pre_container):last-child
+        )::after,
+    .line
+        > .slotBody
+        > :global(.mx_EventTile_content)
+        > :global(.mx_EventTile_caption)
+        > :global(.mx_EventTile_body):last-child:has(> p:last-child)::after {
+        display: none !important;
     }
 
     /* Media bodies provide their own appearance and dimensions. The shell
