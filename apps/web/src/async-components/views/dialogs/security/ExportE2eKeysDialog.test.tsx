@@ -27,6 +27,38 @@ describe("ExportE2eKeysDialog", () => {
         expect(asFragment()).toMatchSnapshot();
     });
 
+    it("marks Cancel as the footer's cancel button, which the footer leaves an outline", () => {
+        render(<ExportE2eKeysDialog matrixClient={createTestClient()} onFinished={vi.fn()} />);
+        const cancel = screen.getByRole("button", { name: "Cancel" });
+
+        expect(cancel).toHaveClass("mx_LegacyDialogButton", "cancel");
+        // The selector of the footer's cancel rule in _common.pcss, whose colors DialogButtons.test.browser.ts measures
+        expect(cancel.matches(".mx_Dialog_buttons button.mx_LegacyDialogButton.cancel")).toBe(true);
+    });
+
+    it("puts Cancel first and Export last in the footer, as DialogButtons does", () => {
+        const { container } = render(<ExportE2eKeysDialog matrixClient={createTestClient()} onFinished={vi.fn()} />);
+        const footer = container.querySelector(".mx_Dialog_buttons")!;
+        const exportButton = screen.getByRole("button", { name: "Export" });
+
+        expect([...footer.children].map((button) => button.textContent)).toEqual(["Cancel", "Export"]);
+        // The footer rule in _common.pcss that leaves no margin after the last button, which
+        // DialogButtons.test.browser.ts measures
+        expect(exportButton.matches("button.mx_LegacyDialogButton.mx_Dialog_primary:last-child")).toBe(true);
+    });
+
+    it("moves focus from the passphrase fields to Cancel, then to Export", async () => {
+        render(<ExportE2eKeysDialog matrixClient={createTestClient()} onFinished={vi.fn()} />);
+        expect(screen.getByLabelText("Enter passphrase")).toHaveFocus();
+
+        await userEvent.tab();
+        expect(screen.getByLabelText("Confirm passphrase")).toHaveFocus();
+        await userEvent.tab();
+        expect(screen.getByRole("button", { name: "Cancel" })).toHaveFocus();
+        await userEvent.tab();
+        expect(screen.getByRole("button", { name: "Export" })).toHaveFocus();
+    });
+
     it("should have disabled submit button initially", async () => {
         const cli = createTestClient();
         const onFinished = vi.fn();
@@ -85,5 +117,23 @@ describe("ExportE2eKeysDialog", () => {
         await waitFor(() =>
             expect(MegolmExportEncryption.encryptMegolmKeyFile).toHaveBeenCalledWith(JSON.stringify(keys), passphrase),
         );
+    });
+
+    it("still exports on Enter in a passphrase field, not cancels", async () => {
+        const cli = createTestClient();
+        const passphrase = "ThisIsAMoreSecurePW123$$";
+        const exportRoomKeysAsJson = vi.fn().mockResolvedValue("[]");
+        cli.getCrypto = () => ({ exportRoomKeysAsJson }) as unknown as CryptoApi;
+        vi.spyOn(MegolmExportEncryption, "encryptMegolmKeyFile").mockResolvedValue(new ArrayBuffer(3));
+        const onFinished = vi.fn();
+
+        render(<ExportE2eKeysDialog matrixClient={cli} onFinished={onFinished} />);
+        fireEvent.change(screen.getByLabelText("Enter passphrase"), { target: { value: passphrase } });
+        fireEvent.change(screen.getByLabelText("Confirm passphrase"), { target: { value: passphrase } });
+        screen.getByLabelText("Confirm passphrase").focus();
+        await userEvent.keyboard("{Enter}");
+
+        await waitFor(() => expect(exportRoomKeysAsJson).toHaveBeenCalled());
+        expect(onFinished).not.toHaveBeenCalledWith(false);
     });
 });

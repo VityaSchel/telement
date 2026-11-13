@@ -33,8 +33,8 @@ Please see LICENSE files in the repository root for full details.
         background-color: $call-view-button-on-background;
 
         border-radius: 100%;
-        height: 40px;
-        width: 40px;
+        height: var(--tl-control-size);
+        width: var(--tl-control-size);
 
         display: flex;
         justify-content: center;
@@ -49,8 +49,9 @@ Please see LICENSE files in the repository root for full details.
 
             color: $call-view-button-on-foreground;
 
-            height: 24px;
-            width: 24px;
+            /* Compound's md icon button: a 20px icon in the 36px circle, clear of the dropdown badge */
+            height: 20px;
+            width: 20px;
         }
 
         &.mx_LegacyCallViewButtons_dropdownButton {

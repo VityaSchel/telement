@@ -24,14 +24,14 @@ Please see LICENSE files in the repository root for full details.
 
     .mx_InviteDialog_editor {
         flex: 1;
-        margin-left: var(--cpd-space-0-5x);
     }
 
     .mx_InviteDialog_goButton {
         min-width: 86px;
-        margin-inline-start: 10px;
-        height: 41px;
-        line-height: $font-25px;
+        margin-inline-start: var(--cpd-space-3x);
+        /* Beside the editor's first row, which is as tall as the button, and left there as the pills wrap onto more
+           rows */
+        align-self: flex-start;
     }
 }
 

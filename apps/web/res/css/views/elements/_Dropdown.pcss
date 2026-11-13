@@ -21,7 +21,8 @@ Please see LICENSE files in the repository root for full details.
     position: relative;
     border-radius: 8px;
     border: 1px solid var(--cpd-color-border-interactive-secondary);
-    font: var(--cpd-font-body-sm-regular);
+    /* The text fields' font (_Field.pcss), so a dropdown under a field reads the same */
+    font: var(--cpd-font-body-md-regular);
     user-select: none;
 }
 
@@ -29,8 +30,17 @@ Please see LICENSE files in the repository root for full details.
     cursor: not-allowed;
 }
 
-.mx_Dropdown_input:focus {
+/* Focused, also while an option of the open menu has the focus, it looks like a focused text field (_Field.pcss): its
+   border turns the color of the menu's */
+.mx_Dropdown_input:focus-within {
     border-color: $accent-alt;
+}
+
+/* From the keyboard, a ring on the border instead of the browser's: a dropdown with a border looks as above, and one
+   without (the language and space pickers) still shows its focus */
+.mx_Dropdown_input:focus-visible {
+    outline: var(--cpd-border-width-1) solid $accent-alt;
+    outline-offset: calc(-1 * var(--cpd-border-width-1));
 }
 
 /* Disable dropdown highlight on focus */
@@ -41,18 +51,22 @@ Please see LICENSE files in the repository root for full details.
 svg.mx_Dropdown_arrow {
     width: 18px;
     height: 18px;
-    margin-right: 3px;
+    /* As far from the end as from the top and bottom of a 36px field */
+    margin-inline-end: calc((var(--tl-control-size) - 2 * var(--cpd-border-width-1) - 18px) / 2);
     color: $primary-content;
 }
 
 .mx_Dropdown_option {
     height: 35px;
     line-height: $font-35px;
-    /* Overwrites the default padding for any li elements */
-    padding: 0 8px;
+    /* Overwrites the default padding for any li elements. The text starts where a text field's does (_Field.pcss). */
+    padding: 0 var(--cpd-space-3x);
 }
 
 .mx_Dropdown_input > .mx_Dropdown_option {
+    /* Inside the input's border, a 36px field like the text fields */
+    height: calc(var(--tl-control-size) - 2 * var(--cpd-border-width-1));
+    line-height: calc(var(--tl-control-size) - 2 * var(--cpd-border-width-1));
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -95,20 +109,40 @@ input.mx_Dropdown_option:focus {
     position: absolute;
     left: -1px;
     right: -1px;
-    top: 100%;
+    /* 4px below the field, like Compound's menus */
+    top: calc(100% + var(--cpd-border-width-1) + var(--cpd-space-1x));
     z-index: 2;
     margin: 0;
-    padding: 0px;
-    border-radius: 4px;
+    /* Telement's menu geometry: the rows' highlights 4px inside the menu's edge, counting its border, and rounded so the
+       corners are concentric. The rows take the inline inset as a margin, so a menuWidth still sizes what is inside */
+    padding: calc(var(--tl-inset-menu) - var(--cpd-border-width-1)) 0;
+    scroll-padding-block: calc(var(--tl-inset-menu) - var(--cpd-border-width-1));
+    border-radius: var(--tl-radius-menu);
     border: 1px solid $accent-alt;
     background-color: $background;
-    max-height: 200px;
+    /* About five and a half rows, so the cut row shows that the list scrolls */
+    max-height: calc(5.5 * var(--cpd-space-10x));
     overflow-y: auto;
+    /* Always-on scrollbars ignore border-radius and would run over the corners */
+    clip-path: border-box;
 }
 
 .mx_Dropdown_menu .mx_Dropdown_option {
     height: auto;
-    min-height: 35px;
+    /* 40px rows, as in Telement's other menus, with what they hold in the middle */
+    min-height: var(--cpd-space-10x);
+    display: flex;
+    align-items: center;
+    margin-inline: calc(var(--tl-inset-menu) - var(--cpd-border-width-1));
+    /* Less the inset, the text starts where the closed field's does */
+    padding-inline: calc(var(--cpd-space-3x) + var(--cpd-border-width-1) - var(--tl-inset-menu));
+    border-radius: var(--tl-radius-row);
+}
+
+/* Inside the highlight, so the ring keeps clear of the menu's border, as in Telement's other menus */
+.mx_Dropdown_menu .mx_Dropdown_option:focus-visible {
+    outline: var(--cpd-border-width-2) solid var(--cpd-color-border-focused);
+    outline-offset: calc(-1 * var(--cpd-border-width-2));
 }
 
 ul.mx_Dropdown_menu li.mx_Dropdown_option {

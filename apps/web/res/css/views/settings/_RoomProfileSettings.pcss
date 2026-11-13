@@ -21,7 +21,8 @@ Please see LICENSE files in the repository root for full details.
             }
 
             .mx_RoomProfileSettings_profile_controls_topic {
-                margin-top: var(--cpd-space-2x);
+                /* 16px under the name, as fields are elsewhere (_Field.pcss), so the floated label keeps clear of it */
+                margin-top: var(--cpd-space-4x);
 
                 & > textarea {
                     font-family: inherit;

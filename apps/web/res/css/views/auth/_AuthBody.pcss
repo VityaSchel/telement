@@ -13,7 +13,7 @@ Please see LICENSE files in the repository root for full details.
     color: $authpage-secondary-color;
     background-color: $background;
     border-radius: 0 var(--cpd-space-6x) var(--cpd-space-6x) 0;
-    padding: 25px 60px;
+    padding: var(--cpd-space-6x) var(--cpd-space-15x);
     box-sizing: border-box;
 
     strong {
@@ -225,11 +225,12 @@ Please see LICENSE files in the repository root for full details.
 
 .mx_AuthBody_fieldRow {
     display: flex;
-    margin-bottom: 10px;
+    /* Fields 16px apart down and across, as elsewhere (_Field.pcss) */
+    margin-bottom: var(--cpd-space-4x);
 }
 
 .mx_AuthBody_fieldRow > .mx_Field {
-    margin: 0 5px;
+    margin: 0 var(--cpd-space-2x);
 }
 
 .mx_AuthBody_fieldRow > .mx_Field:first-child {

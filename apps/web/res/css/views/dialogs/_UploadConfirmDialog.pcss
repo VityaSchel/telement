@@ -14,6 +14,9 @@ Please see LICENSE files in the repository root for full details.
 }
 
 .mx_UploadConfirmDialog_previewInner {
+    /* The preview card keeps the card radius it has outside the timeline's layouts */
+    --MBody-border-radius: var(--tl-radius-bubble);
+
     display: inline-block;
     text-align: left;
     width: var(--MediaPreview-width);

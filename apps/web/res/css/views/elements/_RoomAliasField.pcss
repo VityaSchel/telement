@@ -32,7 +32,8 @@ Please see LICENSE files in the repository root for full details.
         border-left: none;
         border-right: none;
         font-weight: var(--cpd-font-weight-semibold);
-        padding: 9px 10px;
+        /* One line fills a 36px field, as in the input between them */
+        padding: calc((var(--tl-control-size) - 2 * var(--cpd-border-width-1) - 1lh) / 2) var(--cpd-space-3x);
         flex: 0 0 auto;
     }
 

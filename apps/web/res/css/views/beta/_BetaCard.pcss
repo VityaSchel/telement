@@ -9,7 +9,7 @@ Please see LICENSE files in the repository root for full details.
 .mx_BetaCard {
     padding: var(--cpd-space-6x);
     background-color: $panels;
-    border-radius: 8px;
+    border-radius: var(--tl-radius-bubble);
     box-sizing: border-box;
     color: $secondary-content;
 
@@ -46,7 +46,6 @@ Please see LICENSE files in the repository root for full details.
                 margin: var(--cpd-space-5x) auto 0;
 
                 .mx_AccessibleButton {
-                    padding: 7px 40px;
                     width: auto;
                     flex: 1;
                     white-space: nowrap; /* text might overflow */
@@ -107,12 +106,12 @@ Please see LICENSE files in the repository root for full details.
 
 .mx_BetaCard_betaPill {
     background-color: $accent-alt;
-    padding: var(--cpd-space-1x) 10px;
-    border-radius: 8px;
+    padding: var(--cpd-space-1x) var(--cpd-space-2x);
+    border-radius: var(--tl-radius-control);
     text-transform: uppercase;
     font-size: $font-12px;
     font-weight: var(--cpd-font-weight-semibold);
-    line-height: 15px;
+    line-height: 16px;
     color: $button-primary-fg-color;
     display: inline-block;
     vertical-align: text-bottom;

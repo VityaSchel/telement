@@ -1,0 +1,128 @@
+/*
+Copyright 2026 Viktor Shchelochkov
+
+SPDX-License-Identifier: AGPL-3.0-only OR GPL-3.0-only
+Please see LICENSE files in the repository root for full details.
+*/
+
+/*
+ * Compound values that Compound has no variable for. Its class names are hashed CSS modules, so these match the
+ * start of the class attribute, where Compound puts its own class; CompoundOverrides.test.browser.ts fails when an
+ * upgrade renames them.
+ */
+
+/* Text buttons drop the underline; Compound's Link keeps it */
+[class^="_button_"][data-kind="tertiary"] {
+    text-decoration: none;
+}
+
+/* Half a line plus the vertical padding: a pill on one line, a rounded rectangle once the label wraps */
+[class^="_tooltip_"] {
+    border-radius: calc(0.5lh + var(--cpd-space-1-5x));
+}
+
+/* No arrow, as in Telegram: shifted along a window edge it hangs off the pill's rounded end. Compound still offsets
+   the tooltip by the arrow's 6px, which leaves a 6px gap from the anchor. */
+[class^="_tooltip_"] > [class^="_arrow_"] {
+    display: none;
+}
+
+/*
+ * Menus of items, separators and titles only get the geometry of the message menu (_IconizedContextMenu.pcss) and the
+ * room menus: the item highlights are inset 4px from the menu's edge and rounded by 8, concentric with its 12px
+ * corners, and follow each other as 40px rows with 16px icons and regular text. What an item holds stays 16px from the
+ * menu's edge, as in Compound, which puts a 16px icon as far from the item's start as from its top and bottom.
+ * Separators span the highlights with 4px above and below. Menus with a layout of their own (the user menu, threads,
+ * jump to date, the room menus) style themselves. Compound puts its class after the caller's on menus and items.
+ */
+:is([class^="_menu_"], [class*=" _menu_"])[role="menu"]
+    > [role="none"]:not(:has(> :not([role^="menuitem"], [role="separator"], [class*="_menu-title_"]))) {
+    gap: 0;
+    padding-block: var(--tl-inset-menu);
+
+    --cpd-menu-padding-block-end: var(--tl-inset-menu);
+    --cpd-separator-inset: var(--tl-inset-menu);
+    --cpd-separator-spacing: var(--tl-inset-menu);
+
+    > [role^="menuitem"] {
+        inline-size: auto;
+        min-block-size: var(--cpd-space-10x);
+        margin-inline: var(--tl-inset-menu);
+        padding-inline: var(--cpd-space-3x);
+        border-radius: var(--tl-radius-row);
+        /* Compound puts the icon, radio or checkbox and what ends the item in the first of the two rows the label
+           spans. Made as tall as the label's first line, that row centers them on it, also when the label wraps; the
+           rows stay together in the middle of the item */
+        grid-template-rows: minmax(calc(var(--cpd-font-size-body-md) * var(--cpd-font-line-height-regular)), auto) auto;
+        align-content: center;
+
+        > svg:first-child {
+            inline-size: 16px;
+            block-size: 16px;
+        }
+
+        > span {
+            /* Items without an icon put their label in the first row only */
+            grid-row: 1 / -1;
+            font: var(--cpd-font-body-md-regular);
+            /* Compound makes the label of an item without an icon 24px tall, which would put its line above the
+               item's center */
+            min-block-size: 0;
+        }
+
+        /* The chevron shown on hover, cropped to its width like Compound's and as tall as the icons. The crop leaves
+           one of its 24 units after the stroke: pulled out by it, the chevron ends 16px from the menu's edge */
+        > [class*="_nav-hint_"] {
+            inline-size: auto;
+            block-size: 16px;
+            margin-inline-end: calc(-16px / 24);
+        }
+
+        /* An item focused with the keyboard is highlighted as on hover, with the focus ring inside the highlight, so
+           that it keeps clear of the menu's edge as far as the highlight does */
+        &:focus-visible {
+            outline: var(--cpd-border-width-2) solid var(--cpd-color-border-focused);
+            outline-offset: calc(-1 * var(--cpd-border-width-2));
+        }
+
+        &[data-kind="primary"]:focus-visible {
+            background: var(--cpd-color-bg-action-secondary-hovered);
+        }
+
+        &[data-kind="critical"]:focus-visible {
+            background: var(--cpd-color-bg-critical-subtle);
+        }
+    }
+
+    /* A title reads like a separator's label: 12px from the menu's top, its text where the items' content starts */
+    > [class*="_menu-title_"] {
+        margin: 0 var(--tl-inset-menu) var(--tl-inset-menu);
+        padding: var(--cpd-space-2x) var(--cpd-space-3x) calc(var(--cpd-space-2x) - var(--cpd-border-width-1));
+    }
+}
+
+/*
+ * Compound's Button is 48px tall at its default size lg, which callers get whenever they pass no size. Controls are
+ * 36px, so lg takes the md geometry: the same padding, height and 20px icon. :where() leaves the app's own rules for a
+ * button ahead of this one, as they are ahead of Compound's.
+ */
+:where([class^="_button_"][data-size="lg"]) {
+    padding-block: var(--cpd-space-1x);
+    padding-inline: var(--cpd-space-5x);
+    min-block-size: var(--tl-control-size);
+}
+
+:where([class^="_button_"][data-size="lg"][class*=" _has-icon_"]:not([class*=" _icon-only_"])) {
+    padding-inline-start: var(--cpd-space-4x);
+}
+
+:where([class^="_button_"][data-size="lg"][class*=" _icon-only_"]) {
+    padding-inline: var(--cpd-space-1x);
+    block-size: var(--tl-control-size);
+    inline-size: var(--tl-control-size);
+}
+
+:where([class^="_button_"][data-size="lg"][class*=" _icon-only_"] > svg) {
+    inline-size: 20px;
+    block-size: 20px;
+}

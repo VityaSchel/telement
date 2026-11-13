@@ -90,6 +90,11 @@ Please see LICENSE files in the repository root for full details.
 .mx_DevTools_eventTypeStateKeyGroup {
     display: flex;
     flex-wrap: wrap;
+
+    /* The text area's own margin puts it 16px under these fields, as fields are elsewhere (_Field.pcss) */
+    > .mx_Field {
+        margin-bottom: 0;
+    }
 }
 
 .mx_DevTools_content .mx_Field_input:first-of-type {

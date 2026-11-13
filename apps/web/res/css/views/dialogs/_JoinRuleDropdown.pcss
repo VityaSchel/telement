@@ -18,14 +18,14 @@ Please see LICENSE files in the repository root for full details.
         min-height: 32px;
 
         > div {
-            padding-left: var(--cpd-space-1-5x);
-
             svg {
                 width: 16px;
                 height: 16px;
                 color: $secondary-content;
-                vertical-align: -2px;
-                margin-right: var(--cpd-space-1-5x);
+                /* Centered on the line, in the option's text inset with the label 8px after it */
+                vertical-align: top;
+                margin-block: calc((1lh - 16px) / 2);
+                margin-inline-end: var(--cpd-space-2x);
             }
 
             &.mx_JoinRuleDropdown_knock::before {

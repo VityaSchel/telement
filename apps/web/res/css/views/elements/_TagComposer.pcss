@@ -13,15 +13,7 @@ Please see LICENSE files in the repository root for full details.
 
         .mx_AccessibleButton {
             min-width: 70px;
-            padding: 0 8px; /* override from button styles */
-            align-self: stretch; /* override default settingstab style */
-        }
-
-        .mx_Field,
-        .mx_Field input,
-        .mx_AccessibleButton {
-            /* So they look related to each other by feeling the same */
-            border-radius: 8px;
+            align-self: center;
         }
     }
 
@@ -34,6 +26,11 @@ Please see LICENSE files in the repository root for full details.
     .mx_Tag {
         margin-right: 12px;
         margin-top: 12px;
+
+        /* Settings tabs put buttons at the top of their row; the remove button stays centered in the chip */
+        .mx_Tag_delete {
+            align-self: center;
+        }
     }
 }
 
@@ -43,9 +40,13 @@ Please see LICENSE files in the repository root for full details.
     display: inline-flex;
     align-items: center;
 
+    /* A 36px chip; the 16px remove button sits as far from its end as from its top and bottom */
+    box-sizing: border-box;
+    min-block-size: var(--tl-control-size);
     gap: 8px;
-    padding: 8px;
-    border-radius: 8px;
+    padding-block: 0;
+    padding-inline: var(--cpd-space-3x) calc((var(--tl-control-size) - 16px) / 2);
+    border-radius: var(--tl-radius-control);
 
     color: $primary-content;
     background: $quinary-content;

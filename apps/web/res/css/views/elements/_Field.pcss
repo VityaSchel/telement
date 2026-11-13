@@ -12,7 +12,8 @@ Please see LICENSE files in the repository root for full details.
     flex: 1;
     min-width: 0;
     position: relative;
-    margin: 1em 0;
+    /* Fields one under another are 16px apart in any font size, which leaves a floated label room above its field */
+    margin: var(--cpd-space-4x) 0;
     border-radius: 8px;
     transition: border-color 0.25s;
     border: 1px solid var(--cpd-color-border-interactive-secondary);
@@ -34,7 +35,8 @@ Please see LICENSE files in the repository root for full details.
     /* Even without a border here, we still need this avoid overlapping the rounded */
     /* corners on the field above. */
     border-radius: 8px;
-    padding: 8px 9px;
+    /* One line fills a 36px field */
+    padding: calc((var(--tl-control-size) - 2 * var(--cpd-border-width-1) - 1lh) / 2) var(--cpd-space-3x);
     color: $primary-content;
     background-color: $background;
     flex: 1;
@@ -103,13 +105,16 @@ Please see LICENSE files in the repository root for full details.
     transform: translateY(0);
     position: absolute;
     left: 0px;
-    margin: 7px 8px;
-    padding: 2px;
+    /* Centered on the input's first line, its text where the input's starts. Floated, its smaller line is still
+       centered there before the transform moves it */
+    margin: calc((var(--tl-control-size) - 2 * var(--cpd-border-width-1) - 1lh) / 2)
+        calc(var(--cpd-space-3x) - var(--cpd-space-0-5x));
+    padding: 0 var(--cpd-space-0-5x);
     pointer-events: none; /* Allow clicks to fall through to the input */
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
-    max-width: calc(100% - 20px); /* 100% of parent minus margin and padding */
+    max-width: calc(100% - 2 * var(--cpd-space-3x)); /* 100% of parent minus margin and padding */
 }
 
 .mx_Field_labelAlwaysTopLeft label,
@@ -124,7 +129,8 @@ Please see LICENSE files in the repository root for full details.
         transform 0.25s ease-out 0s,
         background-color 0.25s ease-out 0s;
     font-size: $font-10px;
-    transform: translateY(-13px);
+    /* From the middle of the field's one line to the middle of its top border */
+    transform: translateY(calc(var(--cpd-border-width-1) / 2 - var(--tl-control-size) / 2));
     padding: 0 2px;
     background-color: $background;
     pointer-events: initial;

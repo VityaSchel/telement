@@ -41,9 +41,11 @@ Please see LICENSE files in the repository root for full details.
     }
 
     &.mx_AccessibleButton_hasKind {
-        padding: 7px 18px;
+        /* Compound's md button, less the 1px border of the bordered kinds */
+        padding-block: calc(var(--cpd-space-1x) - var(--cpd-border-width-1));
+        padding-inline: calc(var(--cpd-space-5x) - var(--cpd-border-width-1));
         text-align: center;
-        border-radius: 24px;
+        border-radius: var(--tl-radius-control);
         display: inline-flex;
         align-items: center;
         justify-content: center;
@@ -52,10 +54,22 @@ Please see LICENSE files in the repository root for full details.
         word-break: keep-all; /* prevent button text in Chinese/Japanese/Korean (CJK) from being collapsed */
         box-sizing: border-box;
 
-        &.mx_AccessibleButton_kind_primary_sm,
-        &.mx_AccessibleButton_kind_danger_sm,
-        &.mx_AccessibleButton_kind_link_sm {
-            padding: 5px 12px;
+        /* The link and icon kinds carry hasKind too, and keep their own height */
+        &:is(
+            .mx_AccessibleButton_kind_primary,
+            .mx_AccessibleButton_kind_primary_outline,
+            .mx_AccessibleButton_kind_secondary,
+            .mx_AccessibleButton_kind_danger,
+            .mx_AccessibleButton_kind_danger_outline,
+            .mx_AccessibleButton_kind_primary_sm,
+            .mx_AccessibleButton_kind_danger_sm,
+            .mx_AccessibleButton_kind_link_sm
+        ) {
+            min-block-size: var(--tl-control-size);
+            /* Keeps the label centered where a local rule makes the button a block */
+            align-content: center;
+            transition-duration: 0.1s;
+            transition-property: color, background-color, border-color;
         }
 
         &.mx_AccessibleButton_kind_primary_sm {
@@ -71,8 +85,10 @@ Please see LICENSE files in the repository root for full details.
         }
 
         &.mx_AccessibleButton_kind_link_sm {
+            padding-block: var(--cpd-space-1x);
+            padding-inline: var(--cpd-space-5x);
             color: var(--cpd-color-text-primary);
-            text-decoration: underline;
+            text-decoration: none;
             font-weight: var(--cpd-font-weight-semibold);
         }
 
@@ -107,8 +123,10 @@ Please see LICENSE files in the repository root for full details.
     }
 
     &.mx_AccessibleButton_kind_secondary {
+        padding-block: var(--cpd-space-1x);
+        padding-inline: var(--cpd-space-5x);
         color: var(--cpd-color-text-primary);
-        text-decoration: underline;
+        text-decoration: none;
     }
 
     &.mx_AccessibleButton_kind_danger {
@@ -136,6 +154,80 @@ Please see LICENSE files in the repository root for full details.
     &.mx_AccessibleButton_kind_danger_sm {
         &.mx_AccessibleButton_disabled {
             color: var(--cpd-color-text-disabled);
+            background-color: var(--cpd-color-bg-subtle-primary);
+        }
+    }
+
+    /* Compound Button's hover and pressed colors for the matching kind */
+    &:is(.mx_AccessibleButton_kind_primary, .mx_AccessibleButton_kind_primary_sm):not(.mx_AccessibleButton_disabled) {
+        @media (hover) {
+            &:hover {
+                border-color: var(--cpd-color-bg-action-primary-hovered);
+                background-color: var(--cpd-color-bg-action-primary-hovered);
+            }
+        }
+
+        &:active,
+        &[aria-expanded="true"] {
+            border-color: var(--cpd-color-bg-action-primary-pressed);
+            background-color: var(--cpd-color-bg-action-primary-pressed);
+        }
+    }
+
+    &:is(.mx_AccessibleButton_kind_danger, .mx_AccessibleButton_kind_danger_sm):not(.mx_AccessibleButton_disabled) {
+        @media (hover) {
+            &:hover {
+                border-color: var(--cpd-color-bg-critical-hovered);
+                background-color: var(--cpd-color-bg-critical-hovered);
+            }
+        }
+
+        &:active,
+        &[aria-expanded="true"] {
+            border-color: var(--cpd-color-red-1100);
+            background-color: var(--cpd-color-red-1100);
+        }
+    }
+
+    &.mx_AccessibleButton_kind_primary_outline:not(.mx_AccessibleButton_disabled) {
+        @media (hover) {
+            &:hover {
+                border-color: var(--cpd-color-border-interactive-hovered);
+                background-color: var(--cpd-color-bg-subtle-secondary);
+            }
+        }
+
+        &:active,
+        &[aria-expanded="true"] {
+            border-color: var(--cpd-color-border-interactive-hovered);
+            background-color: var(--cpd-color-bg-subtle-primary);
+        }
+    }
+
+    &.mx_AccessibleButton_kind_danger_outline:not(.mx_AccessibleButton_disabled) {
+        @media (hover) {
+            &:hover {
+                border-color: var(--cpd-color-border-critical-hovered);
+                background-color: var(--cpd-color-bg-critical-subtle);
+            }
+        }
+
+        &:active,
+        &[aria-expanded="true"] {
+            border-color: var(--cpd-color-border-critical-hovered);
+            background-color: var(--cpd-color-bg-critical-subtle-hovered);
+        }
+    }
+
+    &:is(.mx_AccessibleButton_kind_secondary, .mx_AccessibleButton_kind_link_sm):not(.mx_AccessibleButton_disabled) {
+        @media (hover) {
+            &:hover {
+                background-color: var(--cpd-color-bg-subtle-secondary);
+            }
+        }
+
+        &:active,
+        &[aria-expanded="true"] {
             background-color: var(--cpd-color-bg-subtle-primary);
         }
     }

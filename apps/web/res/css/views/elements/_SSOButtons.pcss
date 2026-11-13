@@ -26,22 +26,31 @@ Please see LICENSE files in the repository root for full details.
             height: 24px;
             object-fit: contain;
             position: absolute;
-            left: 8px;
-            top: 4px;
+            /* Centered in the button, with or without the border of the secondary kind, and as far from its start as
+               from its top and bottom: concentric with the pill's end */
+            inset-inline-start: calc((var(--tl-control-size) - 24px) / 2);
+            inset-block: 0;
+            margin-block: auto;
             color: var(--cpd-color-icon-primary);
+        }
+
+        &[data-kind="secondary"] :is(svg, img) {
+            inset-inline-start: calc((var(--tl-control-size) - 2 * var(--cpd-border-width-1) - 24px) / 2);
         }
     }
 
     .mx_SSOButton_mini {
+        /* A row of 36px icon buttons with the logo in their middle, rather than the labelled buttons' full width */
+        display: inline-flex;
+        width: var(--tl-control-size);
+
         svg,
         img {
-            /* 30px parent, 24px self */
-            padding: 3px;
             position: unset;
         }
 
         & + .mx_SSOButton_mini {
-            margin-left: 16px;
+            margin-inline-start: var(--cpd-space-4x);
         }
     }
 }

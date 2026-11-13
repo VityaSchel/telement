@@ -560,16 +560,19 @@ summary {
     /* align images in buttons (eg spinners) */
     vertical-align: middle;
     border: 0px;
-    border-radius: 24px;
-    font: var(--cpd-font-body-md-regular);
+    border-radius: var(--tl-radius-control);
+    font: var(--cpd-font-body-md-semibold);
     color: $button-fg-color;
     background-color: var(--cpd-color-bg-action-primary-rest);
     width: auto;
-    padding: 7px;
-    padding-left: 1.5em;
-    padding-right: 1.5em;
+    /* Compound's md button */
+    min-block-size: var(--tl-control-size);
+    box-sizing: border-box;
+    padding: var(--cpd-space-1x) var(--cpd-space-5x);
     cursor: pointer;
     display: inline-block;
+    transition-duration: 0.1s;
+    transition-property: color, background-color, border-color;
 
     &:not(:focus-visible) {
         outline: none;
@@ -593,6 +596,8 @@ summary {
     /* flip colours for the secondary ones */
     font-weight: var(--cpd-font-weight-semibold);
     border: 1px solid var(--cpd-color-border-interactive-secondary);
+    padding-block: calc(var(--cpd-space-1x) - var(--cpd-border-width-1));
+    padding-inline: calc(var(--cpd-space-5x) - var(--cpd-border-width-1));
     color: var(--cpd-color-text-primary);
     background-color: transparent;
     font-family: inherit;
@@ -602,8 +607,8 @@ summary {
     margin-right: 0px;
 }
 
-.mx_Dialog button.mx_LegacyDialogButton:focus,
-.mx_Dialog input.mx_LegacyDialogButton[type="submit"]:focus {
+.mx_Dialog button.mx_LegacyDialogButton:focus-visible,
+.mx_Dialog input.mx_LegacyDialogButton[type="submit"]:focus-visible {
     filter: brightness($focus-brightness);
 }
 
@@ -631,6 +636,8 @@ summary {
 .mx_Dialog input.mx_LegacyDialogButton[type="submit"].warning {
     border: solid 1px var(--cpd-color-border-critical-subtle);
     color: var(--cpd-color-text-critical-primary);
+    /* An outline, also as a footer's cancel button, which the footer would otherwise fill */
+    background-color: transparent;
 }
 
 .mx_Dialog_buttons button.mx_LegacyDialogButton.cancel {
@@ -645,6 +652,51 @@ summary {
     background-color: $light-fg-color;
     border: solid 1px $light-fg-color;
     opacity: 0.7;
+}
+
+/* Compound Button's hover and pressed colors: secondary on outline buttons, primary or critical on filled ones */
+@media (hover) {
+    .mx_Dialog :is(button, input[type="submit"]).mx_LegacyDialogButton:not(:disabled):hover {
+        border-color: var(--cpd-color-border-interactive-hovered);
+        background-color: var(--cpd-color-bg-subtle-secondary);
+    }
+
+    .mx_Dialog :is(button, input[type="submit"]).mx_LegacyDialogButton.mx_Dialog_primary:not(:disabled):hover,
+    .mx_Dialog_buttons button.mx_LegacyDialogButton:not(.cancel):not(:disabled):hover {
+        border-color: var(--cpd-color-bg-action-primary-hovered);
+        background-color: var(--cpd-color-bg-action-primary-hovered);
+    }
+
+    .mx_Dialog :is(button, input[type="submit"]).mx_LegacyDialogButton.danger:not(:disabled):hover {
+        border-color: var(--cpd-color-bg-critical-hovered);
+        background-color: var(--cpd-color-bg-critical-hovered);
+    }
+
+    .mx_Dialog :is(button, input[type="submit"]).mx_LegacyDialogButton.warning:not(:disabled):hover {
+        border-color: var(--cpd-color-border-critical-hovered);
+        background-color: var(--cpd-color-bg-critical-subtle);
+    }
+}
+
+.mx_Dialog :is(button, input[type="submit"]).mx_LegacyDialogButton:not(:disabled):active {
+    border-color: var(--cpd-color-border-interactive-hovered);
+    background-color: var(--cpd-color-bg-subtle-primary);
+}
+
+.mx_Dialog :is(button, input[type="submit"]).mx_LegacyDialogButton.mx_Dialog_primary:not(:disabled):active,
+.mx_Dialog_buttons button.mx_LegacyDialogButton:not(.cancel):not(:disabled):active {
+    border-color: var(--cpd-color-bg-action-primary-pressed);
+    background-color: var(--cpd-color-bg-action-primary-pressed);
+}
+
+.mx_Dialog :is(button, input[type="submit"]).mx_LegacyDialogButton.danger:not(:disabled):active {
+    border-color: var(--cpd-color-red-1100);
+    background-color: var(--cpd-color-red-1100);
+}
+
+.mx_Dialog :is(button, input[type="submit"]).mx_LegacyDialogButton.warning:not(:disabled):active {
+    border-color: var(--cpd-color-border-critical-hovered);
+    background-color: var(--cpd-color-bg-critical-subtle-hovered);
 }
 
 /* Spinner Dialog overide */
@@ -673,8 +725,20 @@ summary {
 /* Ref: https://github.com/vector-im/element-web/issues/8420 */
 .mx_GeneralButton {
     @mixin mx_DialogButton;
-    display: inline;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     margin: auto;
+}
+
+@media (hover) {
+    .mx_GeneralButton:hover {
+        background-color: var(--cpd-color-bg-action-primary-hovered);
+    }
+}
+
+.mx_GeneralButton:active {
+    background-color: var(--cpd-color-bg-action-primary-pressed);
 }
 
 .mx_TextInputDialog_label {

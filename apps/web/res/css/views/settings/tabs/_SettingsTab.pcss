@@ -20,6 +20,12 @@ Please see LICENSE files in the repository root for full details.
         flex-direction: column;
         gap: var(--cpd-space-3x);
         flex-grow: 1;
+
+        /* Fields one under another are 16px apart, as elsewhere (_Field.pcss), so a floated label keeps clear of the
+           field above */
+        > :is(.mx_Field, :has(> .mx_Field)) + :is(.mx_Field, :has(> .mx_Field)) {
+            margin-top: calc(var(--cpd-space-4x) - var(--cpd-space-3x));
+        }
     }
 
     /* never want full width buttons

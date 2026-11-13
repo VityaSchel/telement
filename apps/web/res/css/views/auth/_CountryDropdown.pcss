@@ -5,12 +5,9 @@ SPDX-License-Identifier: AGPL-3.0-only OR GPL-3.0-only OR LicenseRef-Element-Com
 Please see LICENSE files in the repository root for full details.
 */
 
-.mx_CountryDropdown .mx_Dropdown_input .mx_Dropdown_option {
-    padding: 0 3px;
-}
-
-.mx_CountryDropdown .mx_Dropdown_arrow {
-    padding-right: 3px;
+/* The flag starts where the option's text would, and the code or the name follows it on the 4px grid */
+.mx_CountryDropdown .mx_Dropdown_option .mx_Dropdown_option_emoji {
+    margin-inline: 0 var(--cpd-space-2x);
 }
 
 .mx_CountryDropdown_shortOption {

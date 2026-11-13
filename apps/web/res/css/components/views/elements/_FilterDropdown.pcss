@@ -7,32 +7,30 @@ Please see LICENSE files in the repository root for full details.
 */
 
 .mx_FilterDropdown {
+    /* Under the chip's end, with the rows and highlights of the other dropdowns' menus (_Dropdown.pcss) */
     .mx_Dropdown_menu {
-        margin-top: var(--cpd-space-1x);
         left: unset;
-        right: calc(-1 * var(--cpd-space-3x));
-        width: 232px;
-        padding: var(--cpd-space-3x);
+        box-sizing: border-box;
+        /* The descriptions don't wrap (_Dropdown.pcss), so they keep the 212px they had beside the check */
+        width: 264px;
 
         border: 1px solid $quinary-content;
-        border-radius: 8px;
-        box-shadow: 0px 1px 3px rgb(23, 25, 28, 0.05);
 
-        background-color: $system;
-
-        .mx_Dropdown_option_highlight {
-            background-color: transparent;
+        /* Less the inset, the content sits 16px from the menu's edge, as in Telement's other menus */
+        .mx_Dropdown_option {
+            padding-inline: calc(var(--cpd-space-4x) - var(--tl-inset-menu));
         }
     }
 
+    /* A 36px chip, like Compound's plain buttons */
     .mx_Dropdown_input {
-        height: 24px;
         background-color: transparent;
         border-color: transparent;
         color: $secondary-content;
-        border-radius: 4px;
+        border-radius: var(--tl-radius-control);
 
-        &:focus,
+        /* Also while its open menu has the focus, instead of the other dropdowns' accent border (_Dropdown.pcss) */
+        &:focus-within,
         &:hover {
             background-color: $quinary-content;
             border-color: $quinary-content;
@@ -51,7 +49,8 @@ Please see LICENSE files in the repository root for full details.
     padding: var(--cpd-space-2x) 0 var(--cpd-space-2x) var(--cpd-space-5x);
 
     font-size: $font-12px;
-    line-height: $font-15px;
+    /* Rows of one or two lines are 40 and 48px, on the grid */
+    line-height: $font-16px;
     color: $primary-content;
 }
 
@@ -59,7 +58,8 @@ Please see LICENSE files in the repository root for full details.
     height: 14px;
     width: 14px;
     position: absolute;
-    top: var(--cpd-space-2x);
+    /* Centered on the label's line */
+    top: calc(var(--cpd-space-2x) + (1lh - 14px) / 2);
     left: 0;
 }
 

@@ -205,19 +205,20 @@ export default class ExportE2eKeysDialog extends React.Component<IProps, IState>
                         </div>
                     </div>
                     <div className="mx_Dialog_buttons">
-                        <input
-                            className="mx_LegacyDialogButton mx_Dialog_primary"
-                            type="submit"
-                            value={_t("action|export")}
-                            disabled={disableForm}
-                        />
                         <button
                             onClick={this.onCancelClick}
                             disabled={disableForm}
-                            className="mx_LegacyDialogButton"
+                            className="mx_LegacyDialogButton cancel"
                             type="button"
                         >
                             {_t("action|cancel")}
+                        </button>
+                        <button
+                            className="mx_LegacyDialogButton mx_Dialog_primary"
+                            type="submit"
+                            disabled={disableForm}
+                        >
+                            {_t("action|export")}
                         </button>
                     </div>
                 </form>
