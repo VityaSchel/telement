@@ -1,18 +1,18 @@
 {
     "name": "element-desktop",
-    "productName": "Element",
+    "productName": "Telement",
     "main": "lib/electron-main.js",
     "exports": "./lib/electron-main.js",
     "version": "1.12.33",
     "description": "Element: the future of secure communication",
     "author": {
-        "name": "Element",
-        "email": "support@element.io"
+        "name": "Viktor Shchelochkov",
+        "email": "hi@hloth.dev"
     },
-    "homepage": "https://element.io",
+    "homepage": "https://telement.hloth.dev",
     "repository": {
         "type": "git",
-        "url": "https://github.com/vector-im/element-web"
+        "url": "https://git.hloth.dev/hloth/telement"
     },
     "license": "SEE LICENSE IN README.md",
     "type": "module",

@@ -1,0 +1,7 @@
+{
+    "appId": "dev.hloth.telement",
+    "name": "telement-desktop",
+    "productName": "Telement",
+    "description": "Telement: a Telegram-style Matrix client based on Element",
+    "protocols": ["dev.hloth.telement"]
+}
