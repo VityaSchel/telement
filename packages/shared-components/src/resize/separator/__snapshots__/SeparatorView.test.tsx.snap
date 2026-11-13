@@ -49,7 +49,6 @@ exports[`<SeparatorView /> > renders Default story 1`] = `
           class="SeparatorView-module_content"
         >
           <svg
-            class="SeparatorView-module_dragIcon"
             fill="currentColor"
             height="12px"
             transform="rotate(90)"
@@ -134,7 +133,6 @@ exports[`<SeparatorView /> > renders HoverWhenCollapsed story 1`] = `
           class="SeparatorView-module_content"
         >
           <svg
-            class="SeparatorView-module_dragIcon"
             fill="currentColor"
             height="12px"
             transform="rotate(90)"

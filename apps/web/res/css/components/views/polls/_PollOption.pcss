@@ -11,6 +11,7 @@ Please see LICENSE files in the repository root for full details.
     border-radius: 8px;
     padding: 6px 12px;
     background-color: $background;
+    cursor: default;
 
     .mx_StyledRadioButton_content,
     .mx_PollOption_endedOption {
@@ -21,13 +22,6 @@ Please see LICENSE files in the repository root for full details.
     .mx_StyledRadioButton_spacer {
         display: none;
     }
-}
-
-.mx_PollOption,
-/* label has cursor: default in user-agent stylesheet */
-/* override */
-.mx_PollOption_live-option {
-    cursor: pointer;
 }
 
 .mx_PollOption_content {

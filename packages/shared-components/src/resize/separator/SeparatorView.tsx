@@ -63,7 +63,6 @@ export function SeparatorView({ vm, className }: Props): React.ReactNode {
         <Tooltip description={_t("left_panel|separator_label")} placement="right" disabled={type === "border"}>
             <div className={styles.content}>
                 <DragIcon
-                    className={styles.dragIcon}
                     width="20px"
                     height="12px"
                     // Without a custom view-box, this svg would scale incorrectly and would appear tiny within the separator.

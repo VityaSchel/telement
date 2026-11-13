@@ -80,7 +80,6 @@
     color: var(--cpd-color-text-on-solid-primary);
     border-radius: 5px; /* no compund for 5px */
     padding-inline: var(--cpd-space-0-5x);
-    cursor: pointer;
 
     a {
         background-color: var(--cpd-color-text-action-accent);

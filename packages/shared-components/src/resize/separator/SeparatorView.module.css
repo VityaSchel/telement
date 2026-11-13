@@ -94,8 +94,3 @@
         transition: border 0.15s ease-in-out 0.3s;
     }
 }
-
-.dragIcon {
-    /* The important declaration is required to override the icon set by the library */
-    cursor: pointer !important;
-}
