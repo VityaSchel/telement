@@ -21,6 +21,14 @@ vi.mock("../../customisations/helpers/UIComponents", () => ({
     shouldShowComponent: vi.fn(),
 }));
 
+const platform = vi.hoisted(() => ({ isMac: false }));
+vi.mock("../../Keyboard", async (importOriginal) => ({
+    ...(await importOriginal<typeof import("../../Keyboard")>()),
+    get IS_MAC() {
+        return platform.isMac;
+    },
+}));
+
 describe("RoomListSearchViewModel", () => {
     const context = new TestSDKContext();
 
@@ -32,6 +40,7 @@ describe("RoomListSearchViewModel", () => {
 
     afterEach(() => {
         vi.restoreAllMocks();
+        platform.isMac = false;
     });
 
     describe("snapshot", () => {
@@ -83,6 +92,19 @@ describe("RoomListSearchViewModel", () => {
             });
 
             expect(vm.getSnapshot().displayDialButton).toBe(false);
+        });
+
+        it.each([
+            { isMac: true, searchShortcut: "⌘K" },
+            { isMac: false, searchShortcut: "Ctrl+K" },
+        ])("should write the search shortcut as $searchShortcut when isMac is $isMac", ({ isMac, searchShortcut }) => {
+            platform.isMac = isMac;
+            const vm = new RoomListSearchViewModel({
+                activeSpace: MetaSpace.Home,
+                legacyCallHandler: context.legacyCallHandler,
+            });
+
+            expect(vm.getSnapshot().searchShortcut).toBe(searchShortcut);
         });
     });
 

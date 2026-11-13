@@ -16,31 +16,5 @@
 .search {
     /* The search button should take all the remaining space */
     flex: 1;
-    font: var(--cpd-font-body-md-regular);
-    color: var(--cpd-color-text-secondary);
     min-width: 0;
-
-    svg {
-        fill: var(--cpd-color-icon-secondary);
-    }
-}
-
-.search_container {
-    flex: 1;
-
-    /* Shrink and truncate the search text */
-    white-space: nowrap;
-    overflow: hidden;
-
-    kbd {
-        font-family: inherit;
-    }
-}
-
-.search_text {
-    min-width: 0;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    text-align: start;
 }

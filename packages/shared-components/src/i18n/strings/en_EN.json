@@ -245,6 +245,9 @@
         }
     },
     "telement": {
+        "room_list": {
+            "search_with_shortcut": "Search (%(shortcut)s)"
+        },
         "search_field": {
             "clear": "Clear search"
         }

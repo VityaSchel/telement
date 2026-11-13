@@ -64,13 +64,27 @@ describe("RoomListSearchView", () => {
             const vm = new TestViewModel({
                 displayExploreButton: false,
                 displayDialButton: false,
-                searchShortcut: "⌘ K",
+                searchShortcut: "⌘K",
             });
 
             render(<RoomListSearchView vm={vm} />);
 
-            await user.click(screen.getByRole("button", { name: "Search ⌘ K" }));
+            await user.click(screen.getByRole("button", { name: "Search (⌘K)" }));
             expect(onSearchClick).toHaveBeenCalledTimes(1);
+        });
+
+        it("should keep the search a button that opens the search dialog rather than a field", () => {
+            const vm = new TestViewModel({
+                displayExploreButton: false,
+                displayDialButton: false,
+                searchShortcut: "Ctrl+K",
+            });
+
+            render(<RoomListSearchView vm={vm} />);
+
+            const search = screen.getByRole("button", { name: "Search (Ctrl+K)" });
+            expect(search).toHaveAttribute("id", "room-list-search-button");
+            expect(screen.queryByRole("textbox")).toBeNull();
         });
 
         it("should call onDialPadClick when dial pad button is clicked", async () => {
@@ -78,7 +92,7 @@ describe("RoomListSearchView", () => {
             const vm = new TestViewModel({
                 displayExploreButton: false,
                 displayDialButton: true,
-                searchShortcut: "⌘ K",
+                searchShortcut: "⌘K",
             });
 
             render(<RoomListSearchView vm={vm} />);
@@ -92,7 +106,7 @@ describe("RoomListSearchView", () => {
             const vm = new TestViewModel({
                 displayExploreButton: true,
                 displayDialButton: false,
-                searchShortcut: "⌘ K",
+                searchShortcut: "⌘K",
             });
 
             render(<RoomListSearchView vm={vm} />);

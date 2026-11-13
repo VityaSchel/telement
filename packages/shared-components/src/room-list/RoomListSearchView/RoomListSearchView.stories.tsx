@@ -41,7 +41,7 @@ const meta = {
     args: {
         displayExploreButton: true,
         displayDialButton: false,
-        searchShortcut: "⌘ K",
+        searchShortcut: "⌘K",
         onSearchClick: fn(),
         onDialPadClick: fn(),
         onExploreClick: fn(),
@@ -75,6 +75,6 @@ export const AllButtons: Story = {
     args: {
         displayExploreButton: true,
         displayDialButton: true,
-        searchShortcut: "⌘ K",
+        searchShortcut: "⌘K",
     },
 };

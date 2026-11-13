@@ -9,37 +9,31 @@ exports[`RoomListSearchView > Storybook snapshots > renders the default state 1`
     style="--mx-flex-display: flex; --mx-flex-direction: row; --mx-flex-align: center; --mx-flex-justify: start; --mx-flex-gap: var(--cpd-space-2x); --mx-flex-wrap: nowrap;"
   >
     <button
-      class="_button_1nw83_8 RoomListSearchView-module_search _has-icon_1nw83_60"
-      data-kind="secondary"
-      data-size="md"
+      class="SearchFieldView-module_field SearchFieldView-module_button RoomListSearchView-module_search"
       id="room-list-search-button"
-      role="button"
-      tabindex="0"
+      type="button"
     >
-      <svg
-        aria-hidden="true"
-        fill="currentColor"
-        height="20"
-        viewBox="0 0 24 24"
-        width="20"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <path
-          d="M15.05 16.463a7.5 7.5 0 1 1 1.414-1.414l3.243 3.244a1 1 0 0 1-1.414 1.414zM16 10.5a5.5 5.5 0 1 0-11 0 5.5 5.5 0 0 0 11 0"
-        />
-      </svg>
       <span
-        class="Flex-module_flex RoomListSearchView-module_search_container"
-        style="--mx-flex-display: flex; --mx-flex-direction: row; --mx-flex-align: start; --mx-flex-justify: space-between; --mx-flex-gap: 0; --mx-flex-wrap: nowrap;"
+        class="SearchFieldView-module_decoration"
       >
-        <span
-          class="RoomListSearchView-module_search_text"
+        <svg
+          aria-hidden="true"
+          class="SearchFieldView-module_icon"
+          fill="currentColor"
+          height="1em"
+          viewBox="0 0 24 24"
+          width="1em"
+          xmlns="http://www.w3.org/2000/svg"
         >
-          Search
+          <path
+            d="M15.05 16.463a7.5 7.5 0 1 1 1.414-1.414l3.243 3.244a1 1 0 0 1-1.414 1.414zM16 10.5a5.5 5.5 0 1 0-11 0 5.5 5.5 0 0 0 11 0"
+          />
+        </svg>
+        <span
+          class="SearchFieldView-module_placeholder"
+        >
+          Search (⌘K)
         </span>
-        <kbd>
-          ⌘ K
-        </kbd>
       </span>
     </button>
     <button
@@ -76,37 +70,31 @@ exports[`RoomListSearchView > Storybook snapshots > renders with all buttons vis
     style="--mx-flex-display: flex; --mx-flex-direction: row; --mx-flex-align: center; --mx-flex-justify: start; --mx-flex-gap: var(--cpd-space-2x); --mx-flex-wrap: nowrap;"
   >
     <button
-      class="_button_1nw83_8 RoomListSearchView-module_search _has-icon_1nw83_60"
-      data-kind="secondary"
-      data-size="md"
+      class="SearchFieldView-module_field SearchFieldView-module_button RoomListSearchView-module_search"
       id="room-list-search-button"
-      role="button"
-      tabindex="0"
+      type="button"
     >
-      <svg
-        aria-hidden="true"
-        fill="currentColor"
-        height="20"
-        viewBox="0 0 24 24"
-        width="20"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <path
-          d="M15.05 16.463a7.5 7.5 0 1 1 1.414-1.414l3.243 3.244a1 1 0 0 1-1.414 1.414zM16 10.5a5.5 5.5 0 1 0-11 0 5.5 5.5 0 0 0 11 0"
-        />
-      </svg>
       <span
-        class="Flex-module_flex RoomListSearchView-module_search_container"
-        style="--mx-flex-display: flex; --mx-flex-direction: row; --mx-flex-align: start; --mx-flex-justify: space-between; --mx-flex-gap: 0; --mx-flex-wrap: nowrap;"
+        class="SearchFieldView-module_decoration"
       >
-        <span
-          class="RoomListSearchView-module_search_text"
+        <svg
+          aria-hidden="true"
+          class="SearchFieldView-module_icon"
+          fill="currentColor"
+          height="1em"
+          viewBox="0 0 24 24"
+          width="1em"
+          xmlns="http://www.w3.org/2000/svg"
         >
-          Search
+          <path
+            d="M15.05 16.463a7.5 7.5 0 1 1 1.414-1.414l3.243 3.244a1 1 0 0 1-1.414 1.414zM16 10.5a5.5 5.5 0 1 0-11 0 5.5 5.5 0 0 0 11 0"
+          />
+        </svg>
+        <span
+          class="SearchFieldView-module_placeholder"
+        >
+          Search (⌘K)
         </span>
-        <kbd>
-          ⌘ K
-        </kbd>
       </span>
     </button>
     <button
@@ -164,37 +152,31 @@ exports[`RoomListSearchView > Storybook snapshots > renders with dial pad button
     style="--mx-flex-display: flex; --mx-flex-direction: row; --mx-flex-align: center; --mx-flex-justify: start; --mx-flex-gap: var(--cpd-space-2x); --mx-flex-wrap: nowrap;"
   >
     <button
-      class="_button_1nw83_8 RoomListSearchView-module_search _has-icon_1nw83_60"
-      data-kind="secondary"
-      data-size="md"
+      class="SearchFieldView-module_field SearchFieldView-module_button RoomListSearchView-module_search"
       id="room-list-search-button"
-      role="button"
-      tabindex="0"
+      type="button"
     >
-      <svg
-        aria-hidden="true"
-        fill="currentColor"
-        height="20"
-        viewBox="0 0 24 24"
-        width="20"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <path
-          d="M15.05 16.463a7.5 7.5 0 1 1 1.414-1.414l3.243 3.244a1 1 0 0 1-1.414 1.414zM16 10.5a5.5 5.5 0 1 0-11 0 5.5 5.5 0 0 0 11 0"
-        />
-      </svg>
       <span
-        class="Flex-module_flex RoomListSearchView-module_search_container"
-        style="--mx-flex-display: flex; --mx-flex-direction: row; --mx-flex-align: start; --mx-flex-justify: space-between; --mx-flex-gap: 0; --mx-flex-wrap: nowrap;"
+        class="SearchFieldView-module_decoration"
       >
-        <span
-          class="RoomListSearchView-module_search_text"
+        <svg
+          aria-hidden="true"
+          class="SearchFieldView-module_icon"
+          fill="currentColor"
+          height="1em"
+          viewBox="0 0 24 24"
+          width="1em"
+          xmlns="http://www.w3.org/2000/svg"
         >
-          Search
+          <path
+            d="M15.05 16.463a7.5 7.5 0 1 1 1.414-1.414l3.243 3.244a1 1 0 0 1-1.414 1.414zM16 10.5a5.5 5.5 0 1 0-11 0 5.5 5.5 0 0 0 11 0"
+          />
+        </svg>
+        <span
+          class="SearchFieldView-module_placeholder"
+        >
+          Search (⌘K)
         </span>
-        <kbd>
-          ⌘ K
-        </kbd>
       </span>
     </button>
     <button
@@ -252,37 +234,31 @@ exports[`RoomListSearchView > Storybook snapshots > renders without explore butt
     style="--mx-flex-display: flex; --mx-flex-direction: row; --mx-flex-align: center; --mx-flex-justify: start; --mx-flex-gap: var(--cpd-space-2x); --mx-flex-wrap: nowrap;"
   >
     <button
-      class="_button_1nw83_8 RoomListSearchView-module_search _has-icon_1nw83_60"
-      data-kind="secondary"
-      data-size="md"
+      class="SearchFieldView-module_field SearchFieldView-module_button RoomListSearchView-module_search"
       id="room-list-search-button"
-      role="button"
-      tabindex="0"
+      type="button"
     >
-      <svg
-        aria-hidden="true"
-        fill="currentColor"
-        height="20"
-        viewBox="0 0 24 24"
-        width="20"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <path
-          d="M15.05 16.463a7.5 7.5 0 1 1 1.414-1.414l3.243 3.244a1 1 0 0 1-1.414 1.414zM16 10.5a5.5 5.5 0 1 0-11 0 5.5 5.5 0 0 0 11 0"
-        />
-      </svg>
       <span
-        class="Flex-module_flex RoomListSearchView-module_search_container"
-        style="--mx-flex-display: flex; --mx-flex-direction: row; --mx-flex-align: start; --mx-flex-justify: space-between; --mx-flex-gap: 0; --mx-flex-wrap: nowrap;"
+        class="SearchFieldView-module_decoration"
       >
-        <span
-          class="RoomListSearchView-module_search_text"
+        <svg
+          aria-hidden="true"
+          class="SearchFieldView-module_icon"
+          fill="currentColor"
+          height="1em"
+          viewBox="0 0 24 24"
+          width="1em"
+          xmlns="http://www.w3.org/2000/svg"
         >
-          Search
+          <path
+            d="M15.05 16.463a7.5 7.5 0 1 1 1.414-1.414l3.243 3.244a1 1 0 0 1-1.414 1.414zM16 10.5a5.5 5.5 0 1 0-11 0 5.5 5.5 0 0 0 11 0"
+          />
+        </svg>
+        <span
+          class="SearchFieldView-module_placeholder"
+        >
+          Search (⌘K)
         </span>
-        <kbd>
-          ⌘ K
-        </kbd>
       </span>
     </button>
   </div>

@@ -8,13 +8,13 @@
 import React, { type JSX, type MouseEventHandler } from "react";
 import { Button } from "@vector-im/compound-web";
 import ExploreIcon from "@vector-im/compound-design-tokens/assets/web/icons/explore";
-import SearchIcon from "@vector-im/compound-design-tokens/assets/web/icons/search";
 import DialPadIcon from "@vector-im/compound-design-tokens/assets/web/icons/dial-pad";
 
 import styles from "./RoomListSearchView.module.css";
 import { type ViewModel, useViewModel } from "../../core/viewmodel";
 import { Flex } from "../../core/utils/Flex";
 import { useI18n } from "../../core/i18n/i18nContext";
+import { SearchFieldButtonView } from "../../telement/core/SearchFieldView";
 
 export interface RoomListSearchViewSnapshot {
     /**
@@ -27,7 +27,7 @@ export interface RoomListSearchViewSnapshot {
     displayDialButton: boolean;
     /**
      * The keyboard shortcut text to display for the search action.
-     * For example: "⌘ K" on macOS or "Ctrl K" on other platforms.
+     * For example: "⌘K" on macOS or "Ctrl+K" on other platforms.
      */
     searchShortcut: string;
 }
@@ -80,19 +80,10 @@ export function RoomListSearchView({ vm }: Readonly<RoomListSearchViewProps>): J
             gap="var(--cpd-space-2x)"
             align="center"
         >
-            <Button
-                id="room-list-search-button"
-                className={styles.search}
-                kind="secondary"
-                size="md"
-                Icon={SearchIcon}
-                onClick={vm.onSearchClick}
-            >
-                <Flex className={styles["search_container"]} as="span" justify="space-between">
-                    <span className={styles["search_text"]}>{_t("action|search")}</span>
-                    <kbd>{searchShortcut}</kbd>
-                </Flex>
-            </Button>
+            {/* Looks like Telegram's resting search field, but opens the search dialog */}
+            <SearchFieldButtonView id="room-list-search-button" className={styles.search} onClick={vm.onSearchClick}>
+                {_t("telement|room_list|search_with_shortcut", { shortcut: searchShortcut })}
+            </SearchFieldButtonView>
             {displayDialButton && (
                 <Button
                     kind="secondary"

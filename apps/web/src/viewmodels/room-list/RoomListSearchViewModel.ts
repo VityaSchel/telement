@@ -54,7 +54,8 @@ export class RoomListSearchViewModel
         supportsPstn: boolean,
     ): RoomListSearchViewSnapshot => {
         const displayExploreButton = activeSpace === MetaSpace.Home && shouldShowComponent(UIComponent.ExploreRooms);
-        const searchShortcut = IS_MAC ? "⌘ K" : _t(ALTERNATE_KEY_NAME[Key.CONTROL]) + " K";
+        // Written as each platform writes shortcuts: "⌘K" on macOS, "Ctrl+K" elsewhere
+        const searchShortcut = IS_MAC ? "⌘K" : _t(ALTERNATE_KEY_NAME[Key.CONTROL]) + "+K";
         return {
             displayExploreButton,
             displayDialButton: supportsPstn,
