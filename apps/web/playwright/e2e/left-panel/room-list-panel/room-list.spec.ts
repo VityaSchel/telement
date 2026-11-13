@@ -6,13 +6,13 @@
  */
 
 import { type Page } from "@playwright/test";
-import { closeReleaseAnnouncementIfExists, rejectToast } from "@element-hq/element-web-playwright-common";
+import { rejectToast } from "@element-hq/element-web-playwright-common";
 
 import type { AccountDataEvents, Visibility } from "matrix-js-sdk/src/matrix";
 import { expect, test } from "../../../element-web-test";
 import { type Bot } from "../../../pages/bot";
 import { type ElementAppPage } from "../../../pages/ElementAppPage";
-import { getRoomList, getSectionHeader } from "./utils";
+import { getRoomList } from "./utils";
 
 test.describe("Room list", () => {
     test.use({
@@ -26,9 +26,6 @@ test.describe("Room list", () => {
         // The toasts are displayed above the search section
         await rejectToast(page, "Verify this device");
         await rejectToast(page, "Notifications");
-
-        // Close the release announcement about the new room list sections
-        await closeReleaseAnnouncementIfExists(page, "Introducing Sections");
 
         // focus the user menu to avoid to have hover decoration
         await page.getByRole("button", { name: "User menu" }).focus();
@@ -86,7 +83,7 @@ test.describe("Room list", () => {
             await page.getByRole("menuitemcheckbox", { name: "Favourited" }).click();
 
             // Check that the room is favourited
-            roomItem = roomListView.getByRole("gridcell", { name: "Open room room29" });
+            roomItem = roomListView.getByRole("option", { name: "Open room room29" });
             await roomItem.hover();
             roomItemMenu = roomItem.getByRole("button", { name: "More Options" });
             await roomItemMenu.click();
@@ -345,7 +342,7 @@ test.describe("Room list", () => {
             await page.getByRole("menuitemcheckbox", { name: "Low priority" }).click();
 
             // Should have low priority decoration
-            publicRoom = roomListView.getByRole("gridcell", { name: "low priority room" });
+            publicRoom = roomListView.getByRole("option", { name: "low priority room" });
             await expect(publicRoom.locator(".mx_RoomAvatarView_icon")).toHaveAccessibleName(
                 "This is a low priority room",
             );
@@ -412,7 +409,7 @@ test.describe("Room list", () => {
         });
 
         test("should show a previewed room below the fold", async ({ page, app, bot }) => {
-            // Enough favourites to push the Chats section below the visible area
+            // Enough rooms to push the previewed room below the visible area
             await page.setViewportSize({ width: 1280, height: 560 });
             for (let i = 0; i < 10; i++) {
                 const roomId = await app.client.createRoom({ name: `favourite${i}` });
@@ -425,12 +422,12 @@ test.describe("Room list", () => {
             const summaryRoomId = await bot.createRoom({ name: "Summary room", visibility: "public" as Visibility });
 
             const roomListView = getRoomList(page);
-            await expect(roomListView.getByRole("button", { name: "Open room favourite9" })).toBeVisible();
+            await expect(roomListView.getByRole("option", { name: "Open room favourite9" })).toBeVisible();
             await app.viewRoomById(summaryRoomId);
             await expect(page.getByRole("button", { name: "Join the discussion" })).toBeVisible();
 
             await app.scrollListToBottom(roomListView);
-            await expect(roomListView.getByRole("button", { name: "Open room Summary room" })).toBeVisible();
+            await expect(roomListView.getByRole("option", { name: "Open room Summary room" })).toBeVisible();
             await expect(page.getByText("Something went wrong!")).not.toBeVisible();
         });
     });
@@ -445,12 +442,7 @@ test.describe("Room list", () => {
                 is_direct: true,
             });
 
-            // The Invites section starts collapsed, so expand it to reach the room tile
-            const invitesHeader = getSectionHeader(page, "Invites");
-            await expect(invitesHeader).toBeVisible();
-            await invitesHeader.click();
-
-            const invitedRoom = roomListView.getByRole("button", { name: "Open room invited room" });
+            const invitedRoom = roomListView.getByRole("option", { name: "Open room invited room" });
             await expect(invitedRoom).toBeVisible();
             await expect(invitedRoom).toMatchScreenshot("room-list-item-invited.png");
         });
@@ -517,28 +509,9 @@ test.describe("Room list", () => {
             await expect(room).toMatchScreenshot("room-list-item-message-preview.png");
         }
 
-        test(
-            "should render a message preview when enable in settings",
-            { tag: "@screenshot" },
-            async ({ page, app, user, bot }) => {
-                await app.settings.openUserSettings("Preferences");
-                await page.getByRole("switch", { name: "Show message previews" }).click();
-                await app.closeDialog();
-
-                await checkMessagePreview(page, app, bot);
-            },
-        );
-
-        test(
-            "should render a message preview when enabled in header",
-            { tag: "@screenshot" },
-            async ({ page, app, user, bot }) => {
-                await page.getByRole("button", { name: "Room Options" }).click();
-                await page.getByRole("menuitemcheckbox", { name: "Show message previews" }).click();
-
-                await checkMessagePreview(page, app, bot);
-            },
-        );
+        test("should render a message preview", { tag: "@screenshot" }, async ({ page, app, user, bot }) => {
+            await checkMessagePreview(page, app, bot);
+        });
 
         test("should render an activity decoration", { tag: "@screenshot" }, async ({ page, app, user, bot }) => {
             const roomListView = getRoomList(page);
@@ -650,9 +623,7 @@ test.describe("Room list", () => {
             await app.viewSpaceByName(SPACE_NAME);
 
             const roomListView = getRoomList(page);
-            // Hiding the DM leaves the Rooms section on its own, which turns the list flat and
-            // changes the role of a room from a treegrid button to a listbox option. The label is
-            // the same in both, so match on it instead.
+            // Match rooms on their label
             const dm = roomListView.getByLabel("Open room BotBob");
             const room = roomListView.getByLabel("Open room Space room");
             await expect(dm).toBeVisible();

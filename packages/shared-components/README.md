@@ -44,8 +44,8 @@ or in CSS file:
 
 Callers running outside the browser DOM (e.g. inside an `AudioWorkletGlobalScope`
 or a worker) can pull in the small standalone `numbers` utility bundle without
-loading the rest of the package bundle, which transitively imports React,
-dnd-kit, and other code that touches `window` / `document`:
+loading the rest of the package bundle, which transitively imports React
+and other code that touches `window` / `document`:
 
 ```javascript
 import { percentageOf, percentageWithin } from "@element-hq/web-shared-components/numbers";

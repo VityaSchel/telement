@@ -25,12 +25,7 @@ describe("ReleaseAnnouncement", () => {
 
     function renderReleaseAnnouncement() {
         return render(
-            <ReleaseAnnouncement
-                feature="room_list_section"
-                header="header"
-                description="description"
-                closeLabel="close"
-            >
+            <ReleaseAnnouncement feature="_test_dummy1" header="header" description="description" closeLabel="close">
                 <div>content</div>
             </ReleaseAnnouncement>,
         );

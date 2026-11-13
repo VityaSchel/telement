@@ -79,10 +79,6 @@
     color: var(--cpd-color-text-primary);
 }
 
-.dragSource .container {
-    opacity: 0.6;
-}
-
 .content {
     flex: 1;
     min-width: 0;

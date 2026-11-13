@@ -194,7 +194,7 @@ export default class SpaceStore extends AsyncStoreWithClient<EmptyObject> {
 
         let roomId: string | undefined;
         if (space === MetaSpace.Home && this.allRoomsInHome) {
-            const rooms = RoomListStoreV3.instance.getSortedRoomsInActiveSpace().sections.flatMap((s) => s.rooms);
+            const rooms = RoomListStoreV3.instance.getSortedRoomsInActiveSpace().rooms;
             const findRoom = (predicate: (state: RoomNotificationState) => boolean): Room | undefined =>
                 rooms.find((room) => predicate(RoomNotificationStateStore.instance.getRoomState(room)));
             // Prefer a room with a mention and fall back to any unread one. The summarised state

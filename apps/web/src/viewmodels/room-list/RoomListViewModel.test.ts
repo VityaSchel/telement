@@ -10,14 +10,7 @@
 import { vi, describe, it, expect, beforeEach, afterEach } from "vitest";
 import { KnownMembership, type MatrixClient, type Room } from "matrix-js-sdk/src/matrix";
 import { waitFor } from "test-utils-rtl";
-import {
-    createTestClient,
-    flushPromises,
-    flushPromisesWithFakeTimers,
-    mkStubRoom,
-    stubClient,
-    TestSDKContext,
-} from "test-utils";
+import { createTestClient, flushPromises, mkStubRoom, stubClient, TestSDKContext } from "test-utils";
 
 import RoomListStoreV3, { RoomListStoreV3Event } from "../../stores/room-list-v3/RoomListStoreV3";
 import { FilterEnum } from "../../stores/room-list-v3/skip-list/filters";
@@ -30,22 +23,8 @@ import { PreviewRoomListItemViewModel } from "./PreviewRoomListItemViewModel";
 import { type RoomViewStore } from "../../stores/RoomViewStore";
 import { UPDATE_EVENT } from "../../stores/AsyncStore";
 import { hasCreateRoomRights } from "./utils";
-import { DefaultTagID } from "../../stores/room-list-v3/skip-list/tag";
-import SettingsStore from "../../settings/SettingsStore";
-import { tagRoom } from "../../utils/room/tagRoom";
-import { getSectionTagForRoom } from "../../utils/room/getSectionTagForRoom";
-import { CHATS_TAG, CUSTOM_SECTION_TAG_PREFIX, type SectionExpansionState } from "../../stores/room-list-v3/section";
-import { MetaSpace } from "../../stores/spaces";
 import { RoomNotificationStateStore } from "../../stores/notifications/RoomNotificationStateStore";
 import { type RoomNotificationState } from "../../stores/notifications/RoomNotificationState";
-
-vi.mock("../../utils/room/tagRoom", () => ({
-    tagRoom: vi.fn(),
-}));
-
-vi.mock("../../utils/room/getSectionTagForRoom", () => ({
-    getSectionTagForRoom: vi.fn().mockReturnValue(null),
-}));
 
 vi.mock("./utils", () => ({
     hasCreateRoomRights: vi.fn().mockReturnValue(false),
@@ -60,27 +39,10 @@ describe("RoomListViewModel", () => {
     let room2: Room;
     let room3: Room;
     let viewModel: RoomListViewModel;
-    // In-memory backing store for the persisted section expansion setting, reset each test so
-    // collapse state does not leak between tests and writes round-trip synchronously.
-    let sectionExpansionState: SectionExpansionState;
 
     beforeEach(() => {
         matrixClient = createTestClient();
 
-        sectionExpansionState = {};
-        const realGetValue = SettingsStore.getValue.bind(SettingsStore);
-        vi.spyOn(SettingsStore, "getValue").mockImplementation((setting, roomId, excludeDefault) => {
-            if (setting === "RoomList.SectionExpansionState") return sectionExpansionState;
-            return realGetValue(setting, roomId, excludeDefault);
-        });
-        const realSetValue = SettingsStore.setValue.bind(SettingsStore);
-        vi.spyOn(SettingsStore, "setValue").mockImplementation(async (setting, roomId, level, value) => {
-            if (setting === "RoomList.SectionExpansionState") {
-                sectionExpansionState = value as SectionExpansionState;
-                return;
-            }
-            return realSetValue(setting, roomId, level, value);
-        });
         sdkContext = new TestSDKContext();
         sdkContext._client = matrixClient;
         room1 = mkStubRoom("!room1:server", "Room 1", matrixClient);
@@ -95,7 +57,7 @@ describe("RoomListViewModel", () => {
 
         vi.spyOn(RoomListStoreV3.instance, "getSortedRoomsInActiveSpace").mockReturnValue({
             spaceId: "home",
-            sections: [{ tag: CHATS_TAG, rooms: [room1, room2, room3] }],
+            rooms: [room1, room2, room3],
         });
 
         vi.spyOn(RoomListStoreV3.instance, "isLoadingRooms", "get").mockReturnValue(false);
@@ -119,7 +81,7 @@ describe("RoomListViewModel", () => {
             });
 
             const snapshot = viewModel.getSnapshot();
-            expect(snapshot.sections[0].roomIds).toEqual(["!room1:server", "!room2:server", "!room3:server"]);
+            expect(snapshot.roomIds).toEqual(["!room1:server", "!room2:server", "!room3:server"]);
             expect(snapshot.isRoomListEmpty).toBe(false);
             expect(snapshot.isLoadingRooms).toBe(false);
             expect(snapshot.roomListState.spaceId).toBe("home");
@@ -130,7 +92,7 @@ describe("RoomListViewModel", () => {
         it("should initialize with empty room list", () => {
             vi.spyOn(RoomListStoreV3.instance, "getSortedRoomsInActiveSpace").mockReturnValue({
                 spaceId: "home",
-                sections: [{ tag: CHATS_TAG, rooms: [] }],
+                rooms: [],
             });
 
             viewModel = new RoomListViewModel({
@@ -139,9 +101,8 @@ describe("RoomListViewModel", () => {
                 roomViewStore: SDKContextClass.instance.roomViewStore,
             });
 
-            expect(viewModel.getSnapshot().sections).toEqual([]);
+            expect(viewModel.getSnapshot().roomIds).toEqual([]);
             expect(viewModel.getSnapshot().isRoomListEmpty).toBe(true);
-            expect(viewModel.getSnapshot().isFlatList).toBe(true);
         });
 
         it("should set canCreateRoom based on user rights", () => {
@@ -167,12 +128,12 @@ describe("RoomListViewModel", () => {
             const newRoom = mkStubRoom("!room4:server", "Room 4", matrixClient);
             vi.spyOn(RoomListStoreV3.instance, "getSortedRoomsInActiveSpace").mockReturnValue({
                 spaceId: "home",
-                sections: [{ tag: CHATS_TAG, rooms: [room1, room2, room3, newRoom] }],
+                rooms: [room1, room2, room3, newRoom],
             });
 
             RoomListStoreV3.instance.emit(RoomListStoreV3Event.ListsUpdate);
 
-            expect(viewModel.getSnapshot().sections[0].roomIds).toEqual([
+            expect(viewModel.getSnapshot().roomIds).toEqual([
                 "!room1:server",
                 "!room2:server",
                 "!room3:server",
@@ -226,7 +187,7 @@ describe("RoomListViewModel", () => {
 
             vi.spyOn(RoomListStoreV3.instance, "getSortedRoomsInActiveSpace").mockReturnValue({
                 spaceId: "!space:server",
-                sections: [{ tag: CHATS_TAG, rooms: spaceRoomList }],
+                rooms: spaceRoomList,
             });
 
             vi.spyOn(SDKContextClass.instance.spaceStore, "getLastSelectedRoomIdForSpace").mockReturnValue(
@@ -236,7 +197,7 @@ describe("RoomListViewModel", () => {
             RoomListStoreV3.instance.emit(RoomListStoreV3Event.ListsUpdate);
 
             expect(viewModel.getSnapshot().roomListState.spaceId).toBe("!space:server");
-            expect(viewModel.getSnapshot().sections[0].roomIds).toEqual(["!room1:server", "!room2:server"]);
+            expect(viewModel.getSnapshot().roomIds).toEqual(["!room1:server", "!room2:server"]);
         });
 
         it("should clear view models when space changes", () => {
@@ -256,7 +217,7 @@ describe("RoomListViewModel", () => {
             // Change space
             vi.spyOn(RoomListStoreV3.instance, "getSortedRoomsInActiveSpace").mockReturnValue({
                 spaceId: "!space:server",
-                sections: [{ tag: CHATS_TAG, rooms: [room3] }],
+                rooms: [room3],
             });
 
             RoomListStoreV3.instance.emit(RoomListStoreV3Event.ListsUpdate);
@@ -276,7 +237,7 @@ describe("RoomListViewModel", () => {
 
             vi.spyOn(RoomListStoreV3.instance, "getSortedRoomsInActiveSpace").mockReturnValue({
                 spaceId: "!space:server",
-                sections: [{ tag: CHATS_TAG, rooms: [newSpaceRoom] }],
+                rooms: [newSpaceRoom],
             });
             vi.spyOn(SDKContextClass.instance.spaceStore, "getLastSelectedRoomIdForSpace").mockReturnValue(null);
 
@@ -357,7 +318,7 @@ describe("RoomListViewModel", () => {
                 viewModel = createViewModel();
 
                 await openRoom(previewRoomId);
-                expect(viewModel.getSnapshot().sections[0].roomIds).toEqual([
+                expect(viewModel.getSnapshot().roomIds).toEqual([
                     previewRoomId,
                     "!room1:server",
                     "!room2:server",
@@ -370,7 +331,7 @@ describe("RoomListViewModel", () => {
                 expect(item?.getSnapshot().name).toBe("Left room");
 
                 await openRoom("!room2:server");
-                expect(viewModel.getSnapshot().sections[0].roomIds).not.toContain(previewRoomId);
+                expect(viewModel.getSnapshot().roomIds).not.toContain(previewRoomId);
                 expect(viewModel.getSnapshot().roomListState.activeRoomIndex).toBe(1);
             });
 
@@ -419,7 +380,7 @@ describe("RoomListViewModel", () => {
                 vi.mocked(matrixClient.getRoom).mockReturnValue(null);
                 viewModel = createViewModel();
                 await openRoom(previewRoomId);
-                expect(viewModel.getSnapshot().sections[0].roomIds).not.toContain(previewRoomId);
+                expect(viewModel.getSnapshot().roomIds).not.toContain(previewRoomId);
 
                 // The summary arrives after the room has been opened
                 vi.spyOn(roomViewStore(), "getRoomSummary").mockReturnValue({
@@ -431,7 +392,7 @@ describe("RoomListViewModel", () => {
                     guest_can_join: false,
                 });
                 roomViewStore().emit(UPDATE_EVENT);
-                expect(viewModel.getSnapshot().sections[0].roomIds[0]).toBe(previewRoomId);
+                expect(viewModel.getSnapshot().roomIds[0]).toBe(previewRoomId);
                 expect(viewModel.getRoomItemViewModel(previewRoomId)?.getSnapshot().name).toBe("Knock room");
 
                 // The placeholder room has the same pending event ordering as the client's rooms,
@@ -444,10 +405,10 @@ describe("RoomListViewModel", () => {
                 vi.mocked(matrixClient.getRoom).mockReturnValue(knockRoom);
                 vi.mocked(RoomListStoreV3.instance.getSortedRoomsInActiveSpace).mockReturnValue({
                     spaceId: "home",
-                    sections: [{ tag: CHATS_TAG, rooms: [knockRoom, room1, room2, room3] }],
+                    rooms: [knockRoom, room1, room2, room3],
                 });
                 RoomListStoreV3.instance.emit(RoomListStoreV3Event.ListsUpdate);
-                expect(viewModel.getSnapshot().sections[0].roomIds).toEqual([
+                expect(viewModel.getSnapshot().roomIds).toEqual([
                     previewRoomId,
                     "!room1:server",
                     "!room2:server",
@@ -469,7 +430,7 @@ describe("RoomListViewModel", () => {
                 viewModel = createViewModel();
 
                 await openRoom(previewRoomId);
-                expect(viewModel.getSnapshot().sections[0].roomIds).not.toContain(previewRoomId);
+                expect(viewModel.getSnapshot().roomIds).not.toContain(previewRoomId);
                 expect(viewModel.getRoomItemViewModel(previewRoomId)).toBeUndefined();
             });
         });
@@ -496,14 +457,14 @@ describe("RoomListViewModel", () => {
             // Simulate room list update that would move room2 to front
             vi.spyOn(RoomListStoreV3.instance, "getSortedRoomsInActiveSpace").mockReturnValue({
                 spaceId: "home",
-                sections: [{ tag: CHATS_TAG, rooms: [room2, room1, room3] }], // room2 moved to front
+                rooms: [room2, room1, room3], // room2 moved to front
             });
 
             RoomListStoreV3.instance.emit(RoomListStoreV3Event.ListsUpdate);
 
             // Active room should still be at index 1 (sticky behavior)
             expect(viewModel.getSnapshot().roomListState.activeRoomIndex).toBe(1);
-            expect(viewModel.getSnapshot().sections[0].roomIds[1]).toBe("!room2:server");
+            expect(viewModel.getSnapshot().roomIds[1]).toBe("!room2:server");
         });
 
         it("should not apply sticky behavior when user changes rooms", async () => {
@@ -533,6 +494,57 @@ describe("RoomListViewModel", () => {
             await flushPromises();
             expect(viewModel.getSnapshot().roomListState.activeRoomIndex).toBe(2);
         });
+
+        it("should not keep the selected room at its old index when rooms above were removed", async () => {
+            viewModel = new RoomListViewModel({
+                client: matrixClient,
+                spaceStore: SDKContextClass.instance.spaceStore,
+                roomViewStore: SDKContextClass.instance.roomViewStore,
+            });
+
+            // Select room at index 2
+            vi.spyOn(SDKContextClass.instance.roomViewStore, "getRoomId").mockReturnValue("!room3:server");
+            dispatcher.dispatch({
+                action: Action.ActiveRoomChanged,
+                newRoomId: "!room3:server",
+            });
+            await flushPromises();
+            expect(viewModel.getSnapshot().roomListState.activeRoomIndex).toBe(2);
+
+            // The list shrinks so that index 2 no longer exists
+            vi.spyOn(RoomListStoreV3.instance, "getSortedRoomsInActiveSpace").mockReturnValue({
+                spaceId: "home",
+                rooms: [room3, room1],
+            });
+            RoomListStoreV3.instance.emit(RoomListStoreV3Event.ListsUpdate);
+
+            expect(viewModel.getSnapshot().roomIds).toEqual(["!room3:server", "!room1:server"]);
+            expect(viewModel.getSnapshot().roomListState.activeRoomIndex).toBe(0);
+        });
+
+        it("should not apply sticky behavior when the selected room left the list", async () => {
+            viewModel = new RoomListViewModel({
+                client: matrixClient,
+                spaceStore: SDKContextClass.instance.spaceStore,
+                roomViewStore: SDKContextClass.instance.roomViewStore,
+            });
+
+            vi.spyOn(SDKContextClass.instance.roomViewStore, "getRoomId").mockReturnValue("!room2:server");
+            dispatcher.dispatch({
+                action: Action.ActiveRoomChanged,
+                newRoomId: "!room2:server",
+            });
+            await flushPromises();
+
+            vi.spyOn(RoomListStoreV3.instance, "getSortedRoomsInActiveSpace").mockReturnValue({
+                spaceId: "home",
+                rooms: [room3, room1],
+            });
+            RoomListStoreV3.instance.emit(RoomListStoreV3Event.ListsUpdate);
+
+            expect(viewModel.getSnapshot().roomIds).toEqual(["!room3:server", "!room1:server"]);
+            expect(viewModel.getSnapshot().roomListState.activeRoomIndex).toBeUndefined();
+        });
     });
 
     describe("Filters", () => {
@@ -547,14 +559,14 @@ describe("RoomListViewModel", () => {
 
             vi.spyOn(RoomListStoreV3.instance, "getSortedRoomsInActiveSpace").mockReturnValue({
                 spaceId: "home",
-                sections: [{ tag: CHATS_TAG, rooms: [room1] }],
+                rooms: [room1],
                 filterKeys: [FilterEnum.UnreadFilter],
             });
 
             viewModel.onToggleFilter("unread");
 
             expect(viewModel.getSnapshot().activeFilterId).toBe("unread");
-            expect(viewModel.getSnapshot().sections[0].roomIds).toEqual(["!room1:server"]);
+            expect(viewModel.getSnapshot().roomIds).toEqual(["!room1:server"]);
         });
 
         it("should toggle filter off", () => {
@@ -567,7 +579,7 @@ describe("RoomListViewModel", () => {
             // Turn filter on
             vi.spyOn(RoomListStoreV3.instance, "getSortedRoomsInActiveSpace").mockReturnValue({
                 spaceId: "home",
-                sections: [{ tag: CHATS_TAG, rooms: [room1] }],
+                rooms: [room1],
                 filterKeys: [FilterEnum.UnreadFilter],
             });
             viewModel.onToggleFilter("unread");
@@ -577,101 +589,25 @@ describe("RoomListViewModel", () => {
             // Turn filter off
             vi.spyOn(RoomListStoreV3.instance, "getSortedRoomsInActiveSpace").mockReturnValue({
                 spaceId: "home",
-                sections: [{ tag: CHATS_TAG, rooms: [room1, room2, room3] }],
+                rooms: [room1, room2, room3],
             });
             viewModel.onToggleFilter("unread");
 
             expect(viewModel.getSnapshot().activeFilterId).toBeUndefined();
-            expect(viewModel.getSnapshot().sections[0].roomIds).toEqual([
-                "!room1:server",
-                "!room2:server",
-                "!room3:server",
-            ]);
+            expect(viewModel.getSnapshot().roomIds).toEqual(["!room1:server", "!room2:server", "!room3:server"]);
         });
 
-        describe("Section-only filters (RoomList.showSections)", () => {
-            function mockShowSections(showSections: boolean): void {
-                vi.spyOn(SettingsStore, "getValue").mockImplementation((setting) => {
-                    if (setting === "RoomList.showSections") return showSections;
-                    if (setting === "RoomList.CustomSectionData") return {};
-                    if (setting === "RoomList.OrderedCustomSections") return [];
-                    if (setting === "RoomList.SectionExpansionState") return {};
-                    return undefined as any;
-                });
-            }
-
-            it("hides the Favourites, Low Priority and Invites filters when sections are enabled", () => {
-                mockShowSections(true);
-                viewModel = new RoomListViewModel({
-                    client: matrixClient,
-                    roomViewStore: sdkContext.roomViewStore,
-                    spaceStore: sdkContext.spaceStore,
-                });
-
-                const { filterIds } = viewModel.getSnapshot();
-                expect(filterIds).not.toContain("favourite");
-                expect(filterIds).not.toContain("low_priority");
-                expect(filterIds).not.toContain("invites");
+        it("shows the Favourites, Low Priority and Invites filters", () => {
+            viewModel = new RoomListViewModel({
+                client: matrixClient,
+                roomViewStore: sdkContext.roomViewStore,
+                spaceStore: sdkContext.spaceStore,
             });
 
-            it("shows the Favourites, Low Priority and Invites filters when sections are disabled", () => {
-                mockShowSections(false);
-                viewModel = new RoomListViewModel({
-                    client: matrixClient,
-                    roomViewStore: sdkContext.roomViewStore,
-                    spaceStore: sdkContext.spaceStore,
-                });
-
-                const { filterIds } = viewModel.getSnapshot();
-                expect(filterIds).toContain("favourite");
-                expect(filterIds).toContain("low_priority");
-                expect(filterIds).toContain("invites");
-            });
-
-            it("recomputes the filters and clears the active filter when the setting changes", () => {
-                let showSections = false;
-                let watchCallback: () => void = () => {};
-                vi.spyOn(SettingsStore, "getValue").mockImplementation((setting) => {
-                    if (setting === "RoomList.showSections") return showSections;
-                    if (setting === "RoomList.CustomSectionData") return {};
-                    if (setting === "RoomList.OrderedCustomSections") return [];
-                    if (setting === "RoomList.SectionExpansionState") return {};
-                    return undefined as any;
-                });
-                vi.spyOn(SettingsStore, "watchSetting").mockImplementation((setting, _room, callback) => {
-                    if (setting === "RoomList.showSections") watchCallback = callback as () => void;
-                    return "watcher-id";
-                });
-
-                viewModel = new RoomListViewModel({
-                    client: matrixClient,
-                    roomViewStore: sdkContext.roomViewStore,
-                    spaceStore: sdkContext.spaceStore,
-                });
-                expect(viewModel.getSnapshot().filterIds).toContain("favourite");
-
-                // Activate the Favourites filter
-                vi.spyOn(RoomListStoreV3.instance, "getSortedRoomsInActiveSpace").mockReturnValue({
-                    spaceId: "home",
-                    sections: [{ tag: CHATS_TAG, rooms: [room1] }],
-                    filterKeys: [FilterEnum.FavouriteFilter],
-                });
-                viewModel.onToggleFilter("favourite");
-                expect(viewModel.getSnapshot().activeFilterId).toBe("favourite");
-
-                // Enabling sections hides the Favourites filter and resets the active filter
-                showSections = true;
-                vi.spyOn(RoomListStoreV3.instance, "getSortedRoomsInActiveSpace").mockReturnValue({
-                    spaceId: "home",
-                    sections: [{ tag: CHATS_TAG, rooms: [room1, room2, room3] }],
-                });
-                watchCallback();
-
-                const snapshot = viewModel.getSnapshot();
-                expect(snapshot.filterIds).not.toContain("favourite");
-                expect(snapshot.filterIds).not.toContain("low_priority");
-                expect(snapshot.activeFilterId).toBeUndefined();
-            });
+            const { filterIds } = viewModel.getSnapshot();
+            expect(filterIds).toContain("favourite");
+            expect(filterIds).toContain("low_priority");
+            expect(filterIds).toContain("invites");
         });
     });
 
@@ -722,7 +658,7 @@ describe("RoomListViewModel", () => {
             // Normal list update removes room2 from the list
             vi.spyOn(RoomListStoreV3.instance, "getSortedRoomsInActiveSpace").mockReturnValue({
                 spaceId: "home",
-                sections: [{ tag: CHATS_TAG, rooms: [room1, room3] }],
+                rooms: [room1, room3],
             });
 
             RoomListStoreV3.instance.emit(RoomListStoreV3Event.ListsUpdate);
@@ -742,7 +678,7 @@ describe("RoomListViewModel", () => {
             // Space change: new space only has spaceRoom
             vi.spyOn(RoomListStoreV3.instance, "getSortedRoomsInActiveSpace").mockReturnValue({
                 spaceId: "!space:server",
-                sections: [{ tag: CHATS_TAG, rooms: [spaceRoom] }],
+                rooms: [spaceRoom],
             });
             vi.spyOn(SDKContextClass.instance.spaceStore, "getLastSelectedRoomIdForSpace").mockReturnValue(null);
 
@@ -1084,79 +1020,15 @@ describe("RoomListViewModel", () => {
         });
 
         describe("Toast", () => {
-            it("should show toast when SectionCreated event fires", () => {
-                viewModel = new RoomListViewModel({
-                    client: matrixClient,
-                    spaceStore: SDKContextClass.instance.spaceStore,
-                    roomViewStore: SDKContextClass.instance.roomViewStore,
-                });
-                RoomListStoreV3.instance.emit(RoomListStoreV3Event.SectionCreated);
-                expect(viewModel.getSnapshot().toast).toBe("section_created");
-            });
-
-            it("should show toast when RoomTagged event fires", () => {
-                viewModel = new RoomListViewModel({
-                    client: matrixClient,
-                    spaceStore: SDKContextClass.instance.spaceStore,
-                    roomViewStore: SDKContextClass.instance.roomViewStore,
-                });
-                RoomListStoreV3.instance.emit(RoomListStoreV3Event.RoomTagged);
-                expect(viewModel.getSnapshot().toast).toBe("chat_moved");
-            });
-
-            it("should clear toast when closeToast is called", () => {
-                viewModel = new RoomListViewModel({
-                    client: matrixClient,
-                    spaceStore: SDKContextClass.instance.spaceStore,
-                    roomViewStore: SDKContextClass.instance.roomViewStore,
-                });
-
-                RoomListStoreV3.instance.emit(RoomListStoreV3Event.SectionCreated);
-                expect(viewModel.getSnapshot().toast).toBe("section_created");
-
-                viewModel.closeToast();
-                expect(viewModel.getSnapshot().toast).toBeUndefined();
-            });
-
-            it("should auto-close toast after 15 seconds", () => {
-                viewModel = new RoomListViewModel({
-                    client: matrixClient,
-                    spaceStore: SDKContextClass.instance.spaceStore,
-                    roomViewStore: SDKContextClass.instance.roomViewStore,
-                });
-
-                RoomListStoreV3.instance.emit(RoomListStoreV3Event.SectionCreated);
-                expect(viewModel.getSnapshot().toast).toBe("section_created");
-
-                vi.advanceTimersByTime(15 * 1000);
-                expect(viewModel.getSnapshot().toast).toBeUndefined();
-            });
-
-            it("should reset the auto-close timer when a new section is created", () => {
-                viewModel = new RoomListViewModel({
-                    client: matrixClient,
-                    spaceStore: SDKContextClass.instance.spaceStore,
-                    roomViewStore: SDKContextClass.instance.roomViewStore,
-                });
-
-                RoomListStoreV3.instance.emit(RoomListStoreV3Event.SectionCreated);
-                vi.advanceTimersByTime(10 * 1000);
-
-                // Second section created — resets the timer
-                RoomListStoreV3.instance.emit(RoomListStoreV3Event.SectionCreated);
-                vi.advanceTimersByTime(10 * 1000);
-
-                // Toast should still be visible (only 10s since last emit)
-                expect(viewModel.getSnapshot().toast).toBe("section_created");
-
-                vi.advanceTimersByTime(5 * 1000);
-                expect(viewModel.getSnapshot().toast).toBeUndefined();
-            });
-
             /** Make only `room3` report an unread count, so it is the unread room below the fold. */
             const mockRoom3Unread = (): void => {
                 vi.spyOn(RoomNotificationStateStore.instance, "getRoomState").mockImplementation(
-                    (room) => ({ hasUnreadCount: room === room3 }) as unknown as RoomNotificationState,
+                    (room) =>
+                        ({
+                            hasUnreadCount: room === room3,
+                            on: vi.fn(),
+                            off: vi.fn(),
+                        }) as unknown as RoomNotificationState,
                 );
             };
 
@@ -1174,7 +1046,18 @@ describe("RoomListViewModel", () => {
                 expect(viewModel.getSnapshot().toast).toBe("unread_activity");
             });
 
-            it("should prefer the event toast over the unread-activity toast, restoring it on auto-close", () => {
+            it("should not show the unread-activity toast before the view reports the fold", () => {
+                mockRoom3Unread();
+                viewModel = new RoomListViewModel({
+                    client: matrixClient,
+                    spaceStore: SDKContextClass.instance.spaceStore,
+                    roomViewStore: SDKContextClass.instance.roomViewStore,
+                });
+
+                expect(viewModel.getSnapshot().toast).toBeUndefined();
+            });
+
+            it("should hide the unread-activity toast once the unread room scrolls into view", () => {
                 mockRoom3Unread();
                 viewModel = new RoomListViewModel({
                     client: matrixClient,
@@ -1184,797 +1067,26 @@ describe("RoomListViewModel", () => {
                 viewModel.updateVisibleFold(1);
                 expect(viewModel.getSnapshot().toast).toBe("unread_activity");
 
-                // A transient event toast takes precedence over the persistent unread-activity toast…
-                RoomListStoreV3.instance.emit(RoomListStoreV3Event.RoomTagged);
-                expect(viewModel.getSnapshot().toast).toBe("chat_moved");
-
-                // …and once it auto-dismisses, the unread-activity toast returns.
-                vi.advanceTimersByTime(15 * 1000);
-                expect(viewModel.getSnapshot().toast).toBe("unread_activity");
-            });
-        });
-
-        describe("Sections", () => {
-            let favRoom1: Room;
-            let favRoom2: Room;
-            let lowPriorityRoom: Room;
-            let regularRoom1: Room;
-            let regularRoom2: Room;
-
-            beforeEach(() => {
-                favRoom1 = mkStubRoom("!fav1:server", "Fav 1", matrixClient);
-                favRoom2 = mkStubRoom("!fav2:server", "Fav 2", matrixClient);
-                lowPriorityRoom = mkStubRoom("!low1:server", "Low 1", matrixClient);
-                regularRoom1 = mkStubRoom("!reg1:server", "Reg 1", matrixClient);
-                regularRoom2 = mkStubRoom("!reg2:server", "Reg 2", matrixClient);
-
-                vi.spyOn(RoomListStoreV3.instance, "getSortedRoomsInActiveSpace").mockReturnValue({
-                    spaceId: "home",
-                    sections: [
-                        { tag: DefaultTagID.Favourite, rooms: [favRoom1, favRoom2] },
-                        { tag: CHATS_TAG, rooms: [regularRoom1, regularRoom2] },
-                        { tag: DefaultTagID.LowPriority, rooms: [lowPriorityRoom] },
-                    ],
-                });
+                // Every room, room3 included, is now visible.
+                viewModel.updateVisibleFold(2);
+                expect(viewModel.getSnapshot().toast).toBeUndefined();
             });
 
-            it("should initialize with multiple sections", () => {
+            it("should scroll to the unread room below the fold when the toast is clicked", () => {
+                mockRoom3Unread();
                 viewModel = new RoomListViewModel({
                     client: matrixClient,
                     spaceStore: SDKContextClass.instance.spaceStore,
                     roomViewStore: SDKContextClass.instance.roomViewStore,
                 });
+                const scrollSpy = vi.fn();
+                viewModel.setScrollToIndex(scrollSpy);
+                viewModel.updateVisibleFold(1);
 
-                const snapshot = viewModel.getSnapshot();
-                expect(snapshot.sections).toHaveLength(3);
-                expect(snapshot.sections[0].id).toBe(DefaultTagID.Favourite);
-                expect(snapshot.sections[0].roomIds).toEqual(["!fav1:server", "!fav2:server"]);
-                expect(snapshot.sections[1].id).toBe(CHATS_TAG);
-                expect(snapshot.sections[1].roomIds).toEqual(["!reg1:server", "!reg2:server"]);
-                expect(snapshot.sections[2].id).toBe(DefaultTagID.LowPriority);
-                expect(snapshot.sections[2].roomIds).toEqual(["!low1:server"]);
+                viewModel.scrollToUnreadActivity();
+
+                expect(scrollSpy).toHaveBeenCalledWith(2);
             });
-
-            it("should not be a flat list when multiple sections exist", () => {
-                viewModel = new RoomListViewModel({
-                    client: matrixClient,
-                    spaceStore: SDKContextClass.instance.spaceStore,
-                    roomViewStore: SDKContextClass.instance.roomViewStore,
-                });
-
-                expect(viewModel.getSnapshot().isFlatList).toBe(false);
-            });
-
-            it("should be a flat list when only chats section has rooms", () => {
-                vi.spyOn(RoomListStoreV3.instance, "getSortedRoomsInActiveSpace").mockReturnValue({
-                    spaceId: "home",
-                    sections: [
-                        { tag: DefaultTagID.Favourite, rooms: [] },
-                        { tag: CHATS_TAG, rooms: [regularRoom1] },
-                        { tag: DefaultTagID.LowPriority, rooms: [] },
-                    ],
-                });
-
-                viewModel = new RoomListViewModel({
-                    client: matrixClient,
-                    spaceStore: SDKContextClass.instance.spaceStore,
-                    roomViewStore: SDKContextClass.instance.roomViewStore,
-                });
-
-                expect(viewModel.getSnapshot().isFlatList).toBe(true);
-                expect(viewModel.getSnapshot().sections).toHaveLength(1);
-                expect(viewModel.getSnapshot().sections[0].id).toBe(CHATS_TAG);
-            });
-
-            it("should be a flat list when the room list is empty", () => {
-                vi.spyOn(RoomListStoreV3.instance, "getSortedRoomsInActiveSpace").mockReturnValue({
-                    spaceId: "home",
-                    sections: [
-                        { tag: DefaultTagID.Favourite, rooms: [] },
-                        { tag: CHATS_TAG, rooms: [] },
-                        { tag: DefaultTagID.LowPriority, rooms: [] },
-                    ],
-                });
-
-                viewModel = new RoomListViewModel({
-                    client: matrixClient,
-                    spaceStore: SDKContextClass.instance.spaceStore,
-                    roomViewStore: SDKContextClass.instance.roomViewStore,
-                });
-
-                expect(viewModel.getSnapshot().isFlatList).toBe(true);
-                expect(viewModel.getSnapshot().sections).toHaveLength(0);
-            });
-
-            it("should exclude favourite, low_priority and invites from filter list", () => {
-                viewModel = new RoomListViewModel({
-                    client: matrixClient,
-                    spaceStore: SDKContextClass.instance.spaceStore,
-                    roomViewStore: SDKContextClass.instance.roomViewStore,
-                });
-
-                const snapshot = viewModel.getSnapshot();
-                expect(snapshot.filterIds).not.toContain("favourite");
-                expect(snapshot.filterIds).not.toContain("low_priority");
-                expect(snapshot.filterIds).not.toContain("invites");
-                // Other filters should still be present
-                expect(snapshot.filterIds).toContain("unread");
-                expect(snapshot.filterIds).toContain("people");
-            });
-
-            it("should omit empty sections from snapshot", () => {
-                vi.spyOn(RoomListStoreV3.instance, "getSortedRoomsInActiveSpace").mockReturnValue({
-                    spaceId: "home",
-                    sections: [
-                        { tag: DefaultTagID.Favourite, rooms: [] },
-                        { tag: CHATS_TAG, rooms: [regularRoom1] },
-                        { tag: DefaultTagID.LowPriority, rooms: [] },
-                    ],
-                });
-
-                viewModel = new RoomListViewModel({
-                    client: matrixClient,
-                    spaceStore: SDKContextClass.instance.spaceStore,
-                    roomViewStore: SDKContextClass.instance.roomViewStore,
-                });
-
-                const snapshot = viewModel.getSnapshot();
-                expect(snapshot.sections).toHaveLength(1);
-                expect(snapshot.sections[0].id).toBe(CHATS_TAG);
-            });
-
-            it("should create section header view models on demand", () => {
-                viewModel = new RoomListViewModel({
-                    client: matrixClient,
-                    spaceStore: SDKContextClass.instance.spaceStore,
-                    roomViewStore: SDKContextClass.instance.roomViewStore,
-                });
-
-                const headerVM = viewModel.getSectionHeaderViewModel(DefaultTagID.Favourite);
-                expect(headerVM).toBeDefined();
-                expect(headerVM.getSnapshot().id).toBe(DefaultTagID.Favourite);
-                expect(headerVM.getSnapshot().isExpanded).toBe(true);
-            });
-
-            it.each([
-                { tag: DefaultTagID.Favourite, showPeopleSection: false, title: "Favourites" },
-                // Without a People section, the Chats section holds the direct messages too
-                { tag: CHATS_TAG, showPeopleSection: false, title: "Chats" },
-                { tag: CHATS_TAG, showPeopleSection: true, title: "Rooms" },
-                { tag: DefaultTagID.DM, showPeopleSection: true, title: "People" },
-            ])(
-                'should title the $tag section header "$title" when showPeopleSection is $showPeopleSection',
-                ({ tag, showPeopleSection, title }) => {
-                    const getValueSpy = vi.spyOn(SettingsStore, "getValue");
-                    const getValue = getValueSpy.getMockImplementation()!;
-                    getValueSpy.mockImplementation((setting, roomId, excludeDefault) =>
-                        setting === "RoomList.showPeopleSection"
-                            ? showPeopleSection
-                            : getValue(setting, roomId, excludeDefault),
-                    );
-
-                    viewModel = new RoomListViewModel({
-                        client: matrixClient,
-                        spaceStore: SDKContextClass.instance.spaceStore,
-                        roomViewStore: SDKContextClass.instance.roomViewStore,
-                    });
-
-                    expect(viewModel.getSectionHeaderViewModel(tag).getSnapshot().title).toBe(title);
-                },
-            );
-
-            it("should retitle the Chats section header when showPeopleSection changes", () => {
-                let showPeopleSection = false;
-                let watchCallback: () => void = () => {};
-                const getValueSpy = vi.spyOn(SettingsStore, "getValue");
-                const getValue = getValueSpy.getMockImplementation()!;
-                getValueSpy.mockImplementation((setting, roomId, excludeDefault) =>
-                    setting === "RoomList.showPeopleSection"
-                        ? showPeopleSection
-                        : getValue(setting, roomId, excludeDefault),
-                );
-                vi.spyOn(SettingsStore, "watchSetting").mockImplementation((setting, _room, callback) => {
-                    if (setting === "RoomList.showPeopleSection") watchCallback = callback as () => void;
-                    return "watcher-id";
-                });
-
-                viewModel = new RoomListViewModel({
-                    client: matrixClient,
-                    spaceStore: SDKContextClass.instance.spaceStore,
-                    roomViewStore: SDKContextClass.instance.roomViewStore,
-                });
-                expect(viewModel.getSectionHeaderViewModel(CHATS_TAG).getSnapshot().title).toBe("Chats");
-
-                showPeopleSection = true;
-                watchCallback();
-
-                expect(viewModel.getSectionHeaderViewModel(CHATS_TAG).getSnapshot().title).toBe("Rooms");
-            });
-
-            it("should reuse section header view models", () => {
-                viewModel = new RoomListViewModel({
-                    client: matrixClient,
-                    spaceStore: SDKContextClass.instance.spaceStore,
-                    roomViewStore: SDKContextClass.instance.roomViewStore,
-                });
-
-                const headerVM1 = viewModel.getSectionHeaderViewModel(DefaultTagID.Favourite);
-                const headerVM2 = viewModel.getSectionHeaderViewModel(DefaultTagID.Favourite);
-                expect(headerVM1).toBe(headerVM2);
-            });
-
-            it("should hide room IDs when a section is collapsed", async () => {
-                viewModel = new RoomListViewModel({
-                    client: matrixClient,
-                    spaceStore: SDKContextClass.instance.spaceStore,
-                    roomViewStore: SDKContextClass.instance.roomViewStore,
-                });
-
-                // Collapse the favourite section
-                const favHeader = viewModel.getSectionHeaderViewModel(DefaultTagID.Favourite);
-                await favHeader.onClick();
-                expect(favHeader.isExpanded).toBe(false);
-
-                const snapshot = viewModel.getSnapshot();
-                const favSection = snapshot.sections.find((s) => s.id === DefaultTagID.Favourite);
-                expect(favSection).toBeDefined();
-                // Collapsed sections have an empty roomIds list
-                expect(favSection!.roomIds).toEqual([]);
-
-                // Other sections remain unaffected
-                const chatsSection = snapshot.sections.find((s) => s.id === CHATS_TAG);
-                expect(chatsSection!.roomIds).toEqual(["!reg1:server", "!reg2:server"]);
-            });
-
-            it("should compute activeRoomIndex relative to visible rooms when a section is collapsed", async () => {
-                viewModel = new RoomListViewModel({
-                    client: matrixClient,
-                    spaceStore: SDKContextClass.instance.spaceStore,
-                    roomViewStore: SDKContextClass.instance.roomViewStore,
-                });
-
-                // Collapse the favourite section (which has 2 rooms: fav1, fav2)
-                const favHeader = viewModel.getSectionHeaderViewModel(DefaultTagID.Favourite);
-                await favHeader.onClick();
-                expect(favHeader.isExpanded).toBe(false);
-
-                // Select regularRoom1, which is the first room in the chats section
-                vi.spyOn(SDKContextClass.instance.roomViewStore, "getRoomId").mockReturnValue("!reg1:server");
-                dispatcher.dispatch({
-                    action: Action.ActiveRoomChanged,
-                    newRoomId: "!reg1:server",
-                });
-
-                // `waitFor` polls using real timers, which never fire while fake timers are
-                // installed (and vitest fake timers aren't auto-detected by testing-library the
-                // way jest's are). Use the fake-timer-aware flush helper instead.
-                await flushPromisesWithFakeTimers();
-
-                const snapshot = viewModel.getSnapshot();
-                // The favourite section is collapsed so its 2 rooms are not visible.
-                // regularRoom1 should be at index 0 in the visible list, not index 2.
-                expect(snapshot.roomListState.activeRoomIndex).toBe(0);
-            });
-
-            it("should restore room IDs when a section is re-expanded", async () => {
-                viewModel = new RoomListViewModel({
-                    client: matrixClient,
-                    spaceStore: SDKContextClass.instance.spaceStore,
-                    roomViewStore: SDKContextClass.instance.roomViewStore,
-                });
-
-                const favHeader = viewModel.getSectionHeaderViewModel(DefaultTagID.Favourite);
-
-                // Collapse then re-expand
-                await favHeader.onClick();
-                await favHeader.onClick();
-                expect(favHeader.isExpanded).toBe(true);
-
-                const snapshot = viewModel.getSnapshot();
-                const favSection = snapshot.sections.find((s) => s.id === DefaultTagID.Favourite);
-                expect(favSection!.roomIds).toEqual(["!fav1:server", "!fav2:server"]);
-            });
-
-            it("should update sections when room list changes", () => {
-                viewModel = new RoomListViewModel({
-                    client: matrixClient,
-                    spaceStore: SDKContextClass.instance.spaceStore,
-                    roomViewStore: SDKContextClass.instance.roomViewStore,
-                });
-
-                const newFav = mkStubRoom("!fav3:server", "Fav 3", matrixClient);
-
-                vi.spyOn(RoomListStoreV3.instance, "getSortedRoomsInActiveSpace").mockReturnValue({
-                    spaceId: "home",
-                    sections: [
-                        { tag: DefaultTagID.Favourite, rooms: [favRoom1, favRoom2, newFav] },
-                        { tag: CHATS_TAG, rooms: [regularRoom1, regularRoom2] },
-                        { tag: DefaultTagID.LowPriority, rooms: [lowPriorityRoom] },
-                    ],
-                });
-
-                RoomListStoreV3.instance.emit(RoomListStoreV3Event.ListsUpdate);
-
-                const snapshot = viewModel.getSnapshot();
-                expect(snapshot.sections[0].roomIds).toEqual(["!fav1:server", "!fav2:server", "!fav3:server"]);
-            });
-
-            it("should preserve section collapse state across list updates", async () => {
-                viewModel = new RoomListViewModel({
-                    client: matrixClient,
-                    spaceStore: SDKContextClass.instance.spaceStore,
-                    roomViewStore: SDKContextClass.instance.roomViewStore,
-                });
-
-                // Collapse favourites
-                const favHeader = viewModel.getSectionHeaderViewModel(DefaultTagID.Favourite);
-                await favHeader.onClick();
-
-                // Trigger a list update
-                RoomListStoreV3.instance.emit(RoomListStoreV3Event.ListsUpdate);
-
-                const snapshot = viewModel.getSnapshot();
-                const favSection = snapshot.sections.find((s) => s.id === DefaultTagID.Favourite);
-                expect(favSection!.roomIds).toEqual([]);
-            });
-
-            it("should track section collapse state per space", async () => {
-                viewModel = new RoomListViewModel({
-                    client: matrixClient,
-                    spaceStore: SDKContextClass.instance.spaceStore,
-                    roomViewStore: SDKContextClass.instance.roomViewStore,
-                });
-
-                // Collapse favourites in the home space
-                const favHeader = viewModel.getSectionHeaderViewModel(DefaultTagID.Favourite);
-                await favHeader.onClick();
-
-                // Switch to a different space with its own rooms
-                const spaceFav = mkStubRoom("!spacefav:server", "Space Fav", matrixClient);
-                const spaceReg = mkStubRoom("!spacereg:server", "Space Reg", matrixClient);
-                vi.spyOn(RoomListStoreV3.instance, "getSortedRoomsInActiveSpace").mockReturnValue({
-                    spaceId: "!space:server",
-                    sections: [
-                        { tag: DefaultTagID.Favourite, rooms: [spaceFav] },
-                        { tag: CHATS_TAG, rooms: [spaceReg] },
-                        { tag: DefaultTagID.LowPriority, rooms: [] },
-                    ],
-                });
-                vi.spyOn(SDKContextClass.instance.spaceStore, "getLastSelectedRoomIdForSpace").mockReturnValue(null);
-
-                RoomListStoreV3.instance.emit(RoomListStoreV3Event.ListsUpdate);
-
-                let snapshot = viewModel.getSnapshot();
-                // Favourites should be expanded in the new space (per-space state)
-                let favSection = snapshot.sections.find((s) => s.id === DefaultTagID.Favourite);
-                expect(favSection).toBeDefined();
-                expect(favSection!.roomIds).toEqual(["!spacefav:server"]);
-
-                // Other sections should also be expanded
-                let chatsSection = snapshot.sections.find((s) => s.id === CHATS_TAG);
-                expect(chatsSection!.roomIds).toEqual(["!spacereg:server"]);
-
-                // Switch back to home space
-                vi.spyOn(RoomListStoreV3.instance, "getSortedRoomsInActiveSpace").mockReturnValue({
-                    spaceId: "home",
-                    sections: [
-                        { tag: DefaultTagID.Favourite, rooms: [favRoom1, favRoom2] },
-                        { tag: CHATS_TAG, rooms: [regularRoom1] },
-                        { tag: DefaultTagID.LowPriority, rooms: [] },
-                    ],
-                });
-
-                RoomListStoreV3.instance.emit(RoomListStoreV3Event.ListsUpdate);
-
-                snapshot = viewModel.getSnapshot();
-                // Favourites should still be collapsed in the home space
-                favSection = snapshot.sections.find((s) => s.id === DefaultTagID.Favourite);
-                expect(favSection).toBeDefined();
-                expect(favSection!.roomIds).toEqual([]);
-
-                // Chats should be expanded
-                chatsSection = snapshot.sections.find((s) => s.id === CHATS_TAG);
-                expect(chatsSection!.roomIds).toEqual(["!reg1:server"]);
-            });
-
-            it("should apply filters across all sections", () => {
-                viewModel = new RoomListViewModel({
-                    client: matrixClient,
-                    spaceStore: SDKContextClass.instance.spaceStore,
-                    roomViewStore: SDKContextClass.instance.roomViewStore,
-                });
-
-                // Only favRoom1 is unread
-                vi.spyOn(RoomListStoreV3.instance, "getSortedRoomsInActiveSpace").mockReturnValue({
-                    spaceId: "home",
-                    sections: [
-                        { tag: DefaultTagID.Favourite, rooms: [favRoom1] },
-                        { tag: CHATS_TAG, rooms: [] },
-                        { tag: DefaultTagID.LowPriority, rooms: [] },
-                    ],
-                    filterKeys: [FilterEnum.UnreadFilter],
-                });
-
-                viewModel.onToggleFilter("unread");
-
-                const snapshot = viewModel.getSnapshot();
-                expect(snapshot.activeFilterId).toBe("unread");
-                // Only the favourite section should remain (chats and low priority are empty)
-                expect(snapshot.sections).toHaveLength(1);
-                expect(snapshot.sections[0].id).toBe(DefaultTagID.Favourite);
-                expect(snapshot.sections[0].roomIds).toEqual(["!fav1:server"]);
-            });
-
-            describe("custom section visibility by originating space", () => {
-                const customTag = `${CUSTOM_SECTION_TAG_PREFIX}test-uuid` as const;
-
-                beforeEach(() => {
-                    vi.spyOn(SDKContextClass.instance.spaceStore, "enabledMetaSpaces", "get").mockReturnValue([
-                        MetaSpace.Home,
-                    ]);
-                    vi.spyOn(SDKContextClass.instance.spaceStore, "spacePanelSpaces", "get").mockReturnValue([
-                        mkStubRoom("!space:server", "My Space", matrixClient),
-                    ]);
-                    vi.spyOn(SettingsStore, "getValue").mockImplementation((setting: string) => {
-                        if (setting === "RoomList.CustomSectionData")
-                            return {
-                                [customTag]: { tag: customTag, name: "My Section", spaceId: "!space:server" },
-                            };
-                        return false;
-                    });
-                });
-
-                it("shows an empty custom section when viewing its originating space", () => {
-                    vi.spyOn(SettingsStore, "getValue").mockImplementation((setting: string) => {
-                        if (setting === "RoomList.CustomSectionData")
-                            return { [customTag]: { tag: customTag, name: "My Section", spaceId: MetaSpace.Home } };
-                        return false;
-                    });
-                    vi.spyOn(RoomListStoreV3.instance, "getSortedRoomsInActiveSpace").mockReturnValue({
-                        spaceId: MetaSpace.Home,
-                        sections: [
-                            { tag: customTag, rooms: [] },
-                            { tag: CHATS_TAG, rooms: [regularRoom1] },
-                        ],
-                    });
-
-                    viewModel = new RoomListViewModel({
-                        client: matrixClient,
-                        spaceStore: SDKContextClass.instance.spaceStore,
-                        roomViewStore: SDKContextClass.instance.roomViewStore,
-                    });
-
-                    expect(viewModel.getSnapshot().sections.some((s) => s.id === customTag)).toBe(true);
-                });
-
-                it("hides an empty custom section in a different space", () => {
-                    vi.spyOn(RoomListStoreV3.instance, "getSortedRoomsInActiveSpace").mockReturnValue({
-                        spaceId: MetaSpace.Home,
-                        sections: [
-                            { tag: customTag, rooms: [] },
-                            { tag: CHATS_TAG, rooms: [regularRoom1] },
-                        ],
-                    });
-
-                    viewModel = new RoomListViewModel({
-                        client: matrixClient,
-                        spaceStore: SDKContextClass.instance.spaceStore,
-                        roomViewStore: SDKContextClass.instance.roomViewStore,
-                    });
-
-                    expect(viewModel.getSnapshot().sections.some((s) => s.id === customTag)).toBe(false);
-                });
-
-                it("shows a non-empty custom section regardless of originating space", () => {
-                    vi.spyOn(RoomListStoreV3.instance, "getSortedRoomsInActiveSpace").mockReturnValue({
-                        spaceId: MetaSpace.Home,
-                        sections: [
-                            { tag: customTag, rooms: [regularRoom1] },
-                            { tag: CHATS_TAG, rooms: [regularRoom2] },
-                        ],
-                    });
-
-                    viewModel = new RoomListViewModel({
-                        client: matrixClient,
-                        spaceStore: SDKContextClass.instance.spaceStore,
-                        roomViewStore: SDKContextClass.instance.roomViewStore,
-                    });
-
-                    expect(viewModel.getSnapshot().sections.some((s) => s.id === customTag)).toBe(true);
-                });
-            });
-
-            describe("Collapse/expand all sections", () => {
-                it("should collapse all sections when Action.RoomListCollapseAllSections is dispatched", async () => {
-                    viewModel = new RoomListViewModel({
-                        client: matrixClient,
-                        spaceStore: SDKContextClass.instance.spaceStore,
-                        roomViewStore: SDKContextClass.instance.roomViewStore,
-                    });
-
-                    const favHeader = viewModel.getSectionHeaderViewModel(DefaultTagID.Favourite);
-                    const chatsHeader = viewModel.getSectionHeaderViewModel(CHATS_TAG);
-                    expect(favHeader.isExpanded).toBe(true);
-
-                    dispatcher.dispatch({ action: Action.RoomListCollapseAllSections });
-                    await flushPromisesWithFakeTimers();
-
-                    expect(favHeader.isExpanded).toBe(false);
-                    expect(chatsHeader.isExpanded).toBe(false);
-
-                    const snapshot = viewModel.getSnapshot();
-                    expect(snapshot.sections.find((s) => s.id === DefaultTagID.Favourite)!.roomIds).toEqual([]);
-                    expect(snapshot.sections.find((s) => s.id === CHATS_TAG)!.roomIds).toEqual([]);
-                });
-
-                it("should expand all sections when Action.RoomListExpandAllSections is dispatched", async () => {
-                    viewModel = new RoomListViewModel({
-                        client: matrixClient,
-                        spaceStore: SDKContextClass.instance.spaceStore,
-                        roomViewStore: SDKContextClass.instance.roomViewStore,
-                    });
-
-                    // Collapse first
-                    const favHeader = viewModel.getSectionHeaderViewModel(DefaultTagID.Favourite);
-                    await favHeader.onClick();
-                    expect(favHeader.isExpanded).toBe(false);
-
-                    dispatcher.dispatch({ action: Action.RoomListExpandAllSections });
-                    await flushPromisesWithFakeTimers();
-
-                    expect(favHeader.isExpanded).toBe(true);
-                    const snapshot = viewModel.getSnapshot();
-                    expect(snapshot.sections.find((s) => s.id === DefaultTagID.Favourite)!.roomIds).toEqual([
-                        "!fav1:server",
-                        "!fav2:server",
-                    ]);
-                });
-            });
-
-            describe("notifyCollapseState", () => {
-                it("should dispatch collapseSections=expand when all sections are expanded (default)", () => {
-                    viewModel = new RoomListViewModel({
-                        client: matrixClient,
-                        spaceStore: SDKContextClass.instance.spaceStore,
-                        roomViewStore: SDKContextClass.instance.roomViewStore,
-                    });
-
-                    const dispatchSpy = vi.spyOn(dispatcher, "dispatch").mockImplementation(() => {});
-                    RoomListStoreV3.instance.emit(RoomListStoreV3Event.ListsUpdate);
-
-                    expect(dispatchSpy).toHaveBeenCalledWith({
-                        action: Action.RoomListSectionsCollapseStateChanged,
-                        collapseSections: "expand",
-                    });
-                });
-
-                it("should dispatch collapseSection=collapse when all sections are collapsed", () => {
-                    viewModel = new RoomListViewModel({
-                        client: matrixClient,
-                        spaceStore: SDKContextClass.instance.spaceStore,
-                        roomViewStore: SDKContextClass.instance.roomViewStore,
-                    });
-
-                    // Collapse all sections
-                    viewModel.getSectionHeaderViewModel(DefaultTagID.Favourite).isExpanded = false;
-                    viewModel.getSectionHeaderViewModel(CHATS_TAG).isExpanded = false;
-                    viewModel.getSectionHeaderViewModel(DefaultTagID.LowPriority).isExpanded = false;
-
-                    const dispatchSpy = vi.spyOn(dispatcher, "dispatch").mockImplementation(() => {});
-                    RoomListStoreV3.instance.emit(RoomListStoreV3Event.ListsUpdate);
-
-                    expect(dispatchSpy).toHaveBeenCalledWith({
-                        action: Action.RoomListSectionsCollapseStateChanged,
-                        collapseSections: "collapse",
-                    });
-                });
-
-                it.each([
-                    { label: "flat list", chatsRooms: true },
-                    { label: "empty room list", chatsRooms: false },
-                ])("should dispatch collapseSection=undefined when it is a $label", ({ chatsRooms }) => {
-                    vi.spyOn(RoomListStoreV3.instance, "getSortedRoomsInActiveSpace").mockReturnValue({
-                        spaceId: "home",
-                        sections: [
-                            { tag: DefaultTagID.Favourite, rooms: [] },
-                            { tag: CHATS_TAG, rooms: chatsRooms ? [regularRoom1] : [] },
-                            { tag: DefaultTagID.LowPriority, rooms: [] },
-                        ],
-                    });
-                    viewModel = new RoomListViewModel({
-                        client: matrixClient,
-                        spaceStore: SDKContextClass.instance.spaceStore,
-                        roomViewStore: SDKContextClass.instance.roomViewStore,
-                    });
-
-                    const dispatchSpy = vi.spyOn(dispatcher, "dispatch").mockImplementation(() => {});
-                    RoomListStoreV3.instance.emit(RoomListStoreV3Event.ListsUpdate);
-
-                    expect(dispatchSpy).toHaveBeenCalledWith({
-                        action: Action.RoomListSectionsCollapseStateChanged,
-                        collapseSections: undefined,
-                    });
-                });
-            });
-
-            it("should apply sticky room within the correct section", async () => {
-                stubClient();
-                viewModel = new RoomListViewModel({
-                    client: matrixClient,
-                    spaceStore: SDKContextClass.instance.spaceStore,
-                    roomViewStore: SDKContextClass.instance.roomViewStore,
-                });
-
-                // Select favRoom1 (index 0 globally, index 0 in favourites section)
-                vi.spyOn(SDKContextClass.instance.roomViewStore, "getRoomId").mockReturnValue("!fav1:server");
-                dispatcher.dispatch({
-                    action: Action.ActiveRoomChanged,
-                    newRoomId: "!fav1:server",
-                });
-                await flushPromisesWithFakeTimers();
-
-                expect(viewModel.getSnapshot().roomListState.activeRoomIndex).toBe(0);
-
-                // Room list update moves favRoom1 to second position within favourites
-                vi.spyOn(RoomListStoreV3.instance, "getSortedRoomsInActiveSpace").mockReturnValue({
-                    spaceId: "home",
-                    sections: [
-                        { tag: DefaultTagID.Favourite, rooms: [favRoom2, favRoom1] },
-                        { tag: CHATS_TAG, rooms: [regularRoom1, regularRoom2] },
-                        { tag: DefaultTagID.LowPriority, rooms: [lowPriorityRoom] },
-                    ],
-                });
-
-                RoomListStoreV3.instance.emit(RoomListStoreV3Event.ListsUpdate);
-
-                // Sticky room should keep favRoom1 at index 0 within the favourites section
-                const snapshot = viewModel.getSnapshot();
-                expect(snapshot.sections[0].roomIds[0]).toBe("!fav1:server");
-                expect(snapshot.roomListState.activeRoomIndex).toBe(0);
-            });
-
-            describe("Drag and drop", () => {
-                beforeEach(() => {
-                    viewModel = new RoomListViewModel({
-                        client: matrixClient,
-                        spaceStore: SDKContextClass.instance.spaceStore,
-                        roomViewStore: SDKContextClass.instance.roomViewStore,
-                    });
-                    // Ensure section header VMs are created before tests that interact with them
-                    viewModel.getSectionHeaderViewModel(DefaultTagID.Favourite);
-                    viewModel.getSectionHeaderViewModel(CHATS_TAG);
-                    viewModel.getSectionHeaderViewModel(DefaultTagID.LowPriority);
-                });
-
-                it("should delegate changeSectionOrder to RoomListStoreV3.reorderSection", async () => {
-                    const reorderSpy = vi
-                        .spyOn(RoomListStoreV3.instance, "reorderSection")
-                        .mockResolvedValue(undefined);
-
-                    await viewModel.changeSectionOrder(DefaultTagID.Favourite, CHATS_TAG);
-
-                    expect(reorderSpy).toHaveBeenCalledWith(DefaultTagID.Favourite, CHATS_TAG);
-                });
-
-                it("should scroll the moved section back into view after reordering", async () => {
-                    vi.spyOn(RoomListStoreV3.instance, "reorderSection").mockResolvedValue(undefined);
-
-                    await viewModel.changeSectionOrder(DefaultTagID.Favourite, CHATS_TAG);
-                    expect(viewModel.getSnapshot().roomListState.scrollToSectionTag).toBe(DefaultTagID.Favourite);
-                });
-
-                it("should collapse every section on drag start", () => {
-                    expect(viewModel.getSectionHeaderViewModel(DefaultTagID.Favourite).isExpanded).toBe(true);
-
-                    viewModel.onSectionOrRoomDragStart();
-
-                    expect(viewModel.getSectionHeaderViewModel(DefaultTagID.Favourite).isExpanded).toBe(false);
-                    expect(viewModel.getSectionHeaderViewModel(CHATS_TAG).isExpanded).toBe(false);
-                    expect(viewModel.getSectionHeaderViewModel(DefaultTagID.LowPriority).isExpanded).toBe(false);
-
-                    for (const section of viewModel.getSnapshot().sections) {
-                        expect(section.roomIds).toEqual([]);
-                    }
-                });
-
-                it("should restore the pre-drag expansion state on drag end", async () => {
-                    // Collapse Favourite before the drag; other sections remain expanded
-                    await viewModel.getSectionHeaderViewModel(DefaultTagID.Favourite).onClick();
-
-                    viewModel.onSectionOrRoomDragStart();
-                    viewModel.onSectionOrRoomDragEnd();
-
-                    expect(viewModel.getSectionHeaderViewModel(DefaultTagID.Favourite).isExpanded).toBe(false);
-                    expect(viewModel.getSectionHeaderViewModel(CHATS_TAG).isExpanded).toBe(true);
-                    expect(viewModel.getSectionHeaderViewModel(DefaultTagID.LowPriority).isExpanded).toBe(true);
-
-                    const snapshot = viewModel.getSnapshot();
-                    expect(snapshot.sections.find((s) => s.id === DefaultTagID.Favourite)!.roomIds).toEqual([]);
-                    expect(snapshot.sections.find((s) => s.id === CHATS_TAG)!.roomIds).toEqual([
-                        "!reg1:server",
-                        "!reg2:server",
-                    ]);
-                    expect(snapshot.sections.find((s) => s.id === DefaultTagID.LowPriority)!.roomIds).toEqual([
-                        "!low1:server",
-                    ]);
-                });
-
-                it("should re-snapshot expansion state on each drag start", async () => {
-                    // First cycle: Favourite is collapsed before the drag
-                    await viewModel.getSectionHeaderViewModel(DefaultTagID.Favourite).onClick();
-                    viewModel.onSectionOrRoomDragStart();
-                    viewModel.onSectionOrRoomDragEnd();
-
-                    // Between cycles: collapse CHATS_TAG as well
-                    await viewModel.getSectionHeaderViewModel(CHATS_TAG).onClick();
-                    viewModel.onSectionOrRoomDragStart();
-                    viewModel.onSectionOrRoomDragEnd();
-
-                    // The second drag end must restore the state captured at the second drag start
-                    // (Favourite collapsed, CHATS_TAG collapsed, LowPriority expanded), not the first cycle's snapshot.
-                    expect(viewModel.getSectionHeaderViewModel(DefaultTagID.Favourite).isExpanded).toBe(false);
-                    expect(viewModel.getSectionHeaderViewModel(CHATS_TAG).isExpanded).toBe(false);
-                    expect(viewModel.getSectionHeaderViewModel(DefaultTagID.LowPriority).isExpanded).toBe(true);
-                });
-
-                it("should be a no-op when drag end is called without drag start", () => {
-                    viewModel.onSectionOrRoomDragEnd();
-
-                    expect(viewModel.getSectionHeaderViewModel(DefaultTagID.Favourite).isExpanded).toBe(true);
-                    expect(viewModel.getSectionHeaderViewModel(CHATS_TAG).isExpanded).toBe(true);
-                    expect(viewModel.getSectionHeaderViewModel(DefaultTagID.LowPriority).isExpanded).toBe(true);
-
-                    const snapshot = viewModel.getSnapshot();
-                    expect(snapshot.sections.find((s) => s.id === DefaultTagID.Favourite)!.roomIds).toEqual([
-                        "!fav1:server",
-                        "!fav2:server",
-                    ]);
-                    expect(snapshot.sections.find((s) => s.id === CHATS_TAG)!.roomIds).toEqual([
-                        "!reg1:server",
-                        "!reg2:server",
-                    ]);
-                    expect(snapshot.sections.find((s) => s.id === DefaultTagID.LowPriority)!.roomIds).toEqual([
-                        "!low1:server",
-                    ]);
-                });
-            });
-        });
-    });
-
-    describe("changeRoomSection", () => {
-        beforeEach(() => {
-            viewModel = new RoomListViewModel({
-                client: matrixClient,
-                spaceStore: SDKContextClass.instance.spaceStore,
-                roomViewStore: SDKContextClass.instance.roomViewStore,
-            });
-            vi.mocked(tagRoom).mockClear();
-        });
-
-        it("should call tagRoom with the room and target tag", () => {
-            vi.spyOn(matrixClient, "getRoom").mockReturnValue(room1);
-            vi.mocked(getSectionTagForRoom).mockReturnValue(null);
-
-            viewModel.changeRoomSection(room1.roomId, DefaultTagID.Favourite);
-
-            expect(tagRoom).toHaveBeenCalledWith(room1, DefaultTagID.Favourite, true);
-        });
-
-        it("should do nothing when the room is not found", () => {
-            vi.spyOn(matrixClient, "getRoom").mockReturnValue(null);
-
-            viewModel.changeRoomSection("!unknown:server", DefaultTagID.Favourite);
-
-            expect(tagRoom).not.toHaveBeenCalled();
-        });
-
-        it("should do nothing when the room is already in the target section", () => {
-            vi.spyOn(matrixClient, "getRoom").mockReturnValue(room1);
-            vi.mocked(getSectionTagForRoom).mockReturnValue(DefaultTagID.Favourite);
-
-            viewModel.changeRoomSection(room1.roomId, DefaultTagID.Favourite);
-
-            expect(tagRoom).not.toHaveBeenCalled();
         });
     });
 
@@ -1991,7 +1103,7 @@ describe("RoomListViewModel", () => {
                 { action: Action.ViewRoom, room_id: "!room2:server", show_room_tile: true, metricsTrigger: undefined },
             ],
             ["the active room changing", { action: Action.ActiveRoomChanged, newRoomId: "!room2:server" }],
-        ])("should scroll a room into view in a flat list on %s", async (_trigger, payload) => {
+        ])("should scroll a room into view on %s", async (_trigger, payload) => {
             viewModel = new RoomListViewModel({
                 client: matrixClient,
                 roomViewStore: sdkContext.roomViewStore,
@@ -2002,38 +1114,7 @@ describe("RoomListViewModel", () => {
 
             dispatcher.dispatch(payload);
 
-            // Flat list: entry index == room index.
             await waitFor(() => expect(scrollSpy).toHaveBeenCalledWith(1));
-        });
-
-        it("should scroll a room into view in a grouped list, accounting for section headers", async () => {
-            const favRoom1 = mkStubRoom("!fav1:server", "Fav 1", matrixClient);
-            const favRoom2 = mkStubRoom("!fav2:server", "Fav 2", matrixClient);
-            const regularRoom1 = mkStubRoom("!reg1:server", "Reg 1", matrixClient);
-            vi.spyOn(RoomListStoreV3.instance, "getSortedRoomsInActiveSpace").mockReturnValue({
-                spaceId: "home",
-                sections: [
-                    { tag: DefaultTagID.Favourite, rooms: [favRoom1, favRoom2] },
-                    { tag: CHATS_TAG, rooms: [regularRoom1] },
-                ],
-            });
-            viewModel = new RoomListViewModel({
-                client: matrixClient,
-                roomViewStore: sdkContext.roomViewStore,
-                spaceStore: sdkContext.spaceStore,
-            });
-            const scrollSpy = vi.fn();
-            viewModel.setScrollToIndex(scrollSpy);
-
-            dispatcher.dispatch({
-                action: Action.ViewRoom,
-                room_id: "!reg1:server",
-                show_room_tile: true,
-                metricsTrigger: undefined,
-            });
-
-            // Entry space: [Fav header(0), fav1(1), fav2(2), Chats header(3), reg1(4)]
-            await waitFor(() => expect(scrollSpy).toHaveBeenCalledWith(4));
         });
 
         it("should not scroll when the room is not in the current list", async () => {
@@ -2054,39 +1135,6 @@ describe("RoomListViewModel", () => {
 
             await flushPromises();
             expect(scrollSpy).not.toHaveBeenCalled();
-        });
-
-        it("should expand a collapsed section whose header view model does not exist yet", async () => {
-            const favRoom1 = mkStubRoom("!fav1:server", "Fav 1", matrixClient);
-            const favRoom2 = mkStubRoom("!fav2:server", "Fav 2", matrixClient);
-            const regularRoom1 = mkStubRoom("!reg1:server", "Reg 1", matrixClient);
-            vi.spyOn(RoomListStoreV3.instance, "getSortedRoomsInActiveSpace").mockReturnValue({
-                spaceId: "home",
-                sections: [
-                    { tag: DefaultTagID.Favourite, rooms: [favRoom1, favRoom2] },
-                    { tag: CHATS_TAG, rooms: [regularRoom1] },
-                ],
-            });
-            // Favourites is collapsed from a previous session, and no header view model has been
-            // created for it yet.
-            sectionExpansionState = { home: { [DefaultTagID.Favourite]: false } };
-
-            viewModel = new RoomListViewModel({
-                client: matrixClient,
-                roomViewStore: sdkContext.roomViewStore,
-                spaceStore: sdkContext.spaceStore,
-            });
-            const scrollSpy = vi.fn();
-            viewModel.setScrollToIndex(scrollSpy);
-
-            dispatcher.dispatch({
-                action: Action.ActiveRoomChanged,
-                newRoomId: "!fav2:server",
-            });
-
-            // Entry space: [Fav header(0), fav1(1), fav2(2), Chats header(3), reg1(4)]
-            await waitFor(() => expect(scrollSpy).toHaveBeenCalledWith(2));
-            expect(viewModel.getSectionHeaderViewModel(DefaultTagID.Favourite).isExpanded).toBe(true);
         });
 
         it("should scroll once the view registers its scroll handle", async () => {
@@ -2132,7 +1180,7 @@ describe("RoomListViewModel", () => {
             const spaceRoom = mkStubRoom("!spacereg:server", "Space Reg", matrixClient);
             vi.spyOn(RoomListStoreV3.instance, "getSortedRoomsInActiveSpace").mockReturnValue({
                 spaceId: "!space:server",
-                sections: [{ tag: CHATS_TAG, rooms: [room1, spaceRoom] }],
+                rooms: [room1, spaceRoom],
             });
             vi.spyOn(sdkContext.spaceStore, "getLastSelectedRoomIdForSpace").mockReturnValue(null);
             RoomListStoreV3.instance.emit(RoomListStoreV3Event.ListsUpdate);
@@ -2168,7 +1216,7 @@ describe("RoomListViewModel", () => {
             const spaceRoom = mkStubRoom("!spacereg:server", "Space Reg", matrixClient);
             vi.spyOn(RoomListStoreV3.instance, "getSortedRoomsInActiveSpace").mockReturnValue({
                 spaceId: "home",
-                sections: [{ tag: CHATS_TAG, rooms: [room1, spaceRoom] }],
+                rooms: [room1, spaceRoom],
             });
             RoomListStoreV3.instance.emit(RoomListStoreV3Event.ListsUpdate);
             await flushPromises();

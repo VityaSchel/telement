@@ -25,7 +25,7 @@ import { RoomNotificationState } from "../../stores/notifications/RoomNotificati
 import { RoomNotificationStateStore } from "../../stores/notifications/RoomNotificationStateStore";
 import { NotificationStateEvents } from "../../stores/notifications/NotificationState";
 import { type MessagePreview, MessagePreviewStore } from "../../stores/message-preview";
-import SettingsStore, { type CallbackFn } from "../../settings/SettingsStore";
+import SettingsStore from "../../settings/SettingsStore";
 import DMRoomMap from "../../utils/DMRoomMap";
 import { DefaultTagID } from "../../stores/room-list-v3/skip-list/tag";
 import dispatcher from "../../dispatcher/dispatcher";
@@ -33,9 +33,7 @@ import { Action } from "../../dispatcher/actions";
 import { CallStore } from "../../stores/CallStore";
 import { CallEvent, type Call } from "../../models/Call";
 import { RoomListItemViewModel } from "./RoomListItemViewModel";
-import RoomListStoreV3 from "../../stores/room-list-v3/RoomListStoreV3";
 import * as tagRoomModule from "../../utils/room/tagRoom";
-import { CHATS_TAG } from "../../stores/room-list-v3/section";
 
 vi.mock("./utils", () => ({
     hasAccessToOptionsMenu: vi.fn().mockReturnValue(true),
@@ -80,18 +78,12 @@ describe("RoomListItemViewModel", () => {
         } as unknown as DMRoomMap;
         DMRoomMap.setShared(dmRoomMap);
 
-        vi.spyOn(SettingsStore, "getValue").mockImplementation((setting) => {
-            if (setting === "RoomList.showMessagePreview") return false;
-            if (setting === "RoomList.OrderedCustomSections") return [];
-            if (setting === "RoomList.CustomSectionData") return {};
-            return false;
-        });
+        vi.spyOn(SettingsStore, "getValue").mockImplementation(() => false);
         vi.spyOn(SettingsStore, "setValue").mockResolvedValue(undefined);
         vi.spyOn(SettingsStore, "watchSetting").mockImplementation(() => "watcher-id");
 
         vi.spyOn(MessagePreviewStore.instance, "getPreviewForRoom").mockResolvedValue(null);
         vi.spyOn(CallStore.instance, "getCall").mockReturnValue(null);
-        vi.spyOn(RoomListStoreV3.instance, "orderedSectionTags", "get").mockReturnValue([]);
     });
 
     afterEach(() => {
@@ -111,8 +103,7 @@ describe("RoomListItemViewModel", () => {
             expect(snapshot.name).toBe("Test Room");
         });
 
-        it("should load message preview when enabled", async () => {
-            vi.spyOn(SettingsStore, "getValue").mockReturnValue(true);
+        it("should load message preview", async () => {
             vi.spyOn(MessagePreviewStore.instance, "getPreviewForRoom").mockResolvedValue({
                 text: "Hello world!",
             } as MessagePreview);
@@ -123,16 +114,6 @@ describe("RoomListItemViewModel", () => {
             await flushPromises();
 
             expect(viewModel.getSnapshot().messagePreview).toBe("Hello world!");
-        });
-
-        it("should not load message preview when disabled", async () => {
-            vi.spyOn(SettingsStore, "getValue").mockReturnValue(false);
-
-            viewModel = new RoomListItemViewModel({ room, client: matrixClient });
-
-            await flushPromises();
-
-            expect(viewModel.getSnapshot().messagePreview).toBeUndefined();
         });
     });
 
@@ -196,7 +177,6 @@ describe("RoomListItemViewModel", () => {
 
     describe("Message preview", () => {
         it("should update message preview when store emits update", async () => {
-            vi.spyOn(SettingsStore, "getValue").mockReturnValue(true);
             vi.spyOn(MessagePreviewStore.instance, "getPreviewForRoom").mockResolvedValue({
                 text: "Initial message",
             } as MessagePreview);
@@ -215,32 +195,6 @@ describe("RoomListItemViewModel", () => {
 
             await flushPromises();
             expect(viewModel.getSnapshot().messagePreview).toBe("Updated message");
-        });
-
-        it("should show/hide preview when setting changes", async () => {
-            let showPreview = false;
-            let watchCallback: any;
-
-            vi.spyOn(SettingsStore, "getValue").mockImplementation(() => showPreview);
-            vi.spyOn(SettingsStore, "watchSetting").mockImplementation((setting, _room, callback) => {
-                if (setting === "RoomList.showMessagePreview") watchCallback = callback;
-                return "watcher-id";
-            });
-            vi.spyOn(MessagePreviewStore.instance, "getPreviewForRoom").mockResolvedValue({
-                text: "Test message",
-            } as MessagePreview);
-
-            viewModel = new RoomListItemViewModel({ room, client: matrixClient });
-
-            await flushPromises();
-            expect(viewModel.getSnapshot().messagePreview).toBeUndefined();
-
-            // Enable previews
-            showPreview = true;
-            watchCallback(null, "device", true);
-
-            await flushPromises();
-            expect(viewModel.getSnapshot().messagePreview).toBe("Test message");
         });
     });
 
@@ -496,7 +450,6 @@ describe("RoomListItemViewModel", () => {
 
             await flushPromises();
 
-            expect(viewModel.getSnapshot().isDm).toBe(true);
             // DM rooms should not show copy room link option
             expect(viewModel.getSnapshot().canCopyRoomLink).toBe(false);
         });
@@ -509,7 +462,6 @@ describe("RoomListItemViewModel", () => {
 
             await flushPromises();
 
-            expect(viewModel.getSnapshot().isDm).toBe(false);
             expect(viewModel.getSnapshot().canCopyRoomLink).toBe(true);
         });
     });
@@ -585,120 +537,19 @@ describe("RoomListItemViewModel", () => {
                 room_id: "!room:server",
             });
         });
-
-        it("should call createSection on RoomListStoreV3 with the room preselected when onCreateSection is called", async () => {
-            const createSectionSpy = vi
-                .spyOn(RoomListStoreV3.instance, "createSection")
-                .mockResolvedValue("element.io.section.work");
-            const tagRoomSpy = vi.spyOn(tagRoomModule, "tagRoom").mockImplementation(() => {});
-
-            viewModel = new RoomListItemViewModel({ room, client: matrixClient });
-            await viewModel.onCreateSection();
-
-            expect(createSectionSpy).toHaveBeenCalledWith(room.roomId);
-            // The dialog tags the preselected room itself, tagging it again here would toggle it back off.
-            expect(tagRoomSpy).not.toHaveBeenCalled();
-        });
-
-        it("should call tagRoom when onToggleSection is called", () => {
-            const tagRoomSpy = vi.spyOn(tagRoomModule, "tagRoom").mockImplementation(() => {});
-            viewModel = new RoomListItemViewModel({ room, client: matrixClient });
-
-            viewModel.onToggleSection(DefaultTagID.Favourite);
-
-            expect(tagRoomSpy).toHaveBeenCalledWith(room, DefaultTagID.Favourite, true);
-        });
     });
 
-    describe("Sections", () => {
-        const customTag = "element.io.section.custom1";
-
-        beforeEach(() => {
-            vi.spyOn(RoomListStoreV3.instance, "orderedSectionTags", "get").mockReturnValue([
-                DefaultTagID.Favourite,
-                customTag,
-                CHATS_TAG,
-                DefaultTagID.LowPriority,
-            ]);
-        });
-
-        it("should include sections from orderedSectionTags excluding CHATS_TAG, favourite, and low priority", () => {
+    describe("Favourite and low priority", () => {
+        it.each([
+            { action: "onToggleFavorite" as const, tag: DefaultTagID.Favourite },
+            { action: "onToggleLowPriority" as const, tag: DefaultTagID.LowPriority },
+        ])("should toggle $tag when $action is called", ({ action, tag }) => {
+            const tagRoomSpy = vi.spyOn(tagRoomModule, "tagRoom").mockImplementation(() => {});
             viewModel = new RoomListItemViewModel({ room, client: matrixClient });
 
-            const sections = viewModel.getSnapshot().sections;
-            expect(sections.map((s) => s.tag)).toEqual([customTag]);
-        });
+            viewModel[action]();
 
-        it("should mark the room current section as selected", () => {
-            room.tags = { [customTag]: { order: 0 } };
-
-            viewModel = new RoomListItemViewModel({ room, client: matrixClient });
-
-            const sections = viewModel.getSnapshot().sections;
-            expect(sections.find((s) => s.tag === customTag)?.isSelected).toBe(true);
-        });
-
-        it("should use custom section name from CustomSectionData", () => {
-            vi.spyOn(SettingsStore, "getValue").mockImplementation((setting) => {
-                if (setting === "RoomList.CustomSectionData")
-                    return { [customTag]: { name: "My Custom Section", tag: customTag } };
-                return false;
-            });
-            viewModel = new RoomListItemViewModel({ room, client: matrixClient });
-
-            const section = viewModel.getSnapshot().sections.find((s) => s.tag === customTag);
-            expect(section?.name).toBe("My Custom Section");
-        });
-
-        it("should update sections when OrderedCustomSections setting changes", () => {
-            let watchCallback: CallbackFn<"RoomList.OrderedCustomSections"> = () => {};
-            vi.spyOn(SettingsStore, "watchSetting").mockImplementation((setting, _room, callback) => {
-                if (setting === "RoomList.OrderedCustomSections") watchCallback = callback;
-                return "watcher-id";
-            });
-
-            viewModel = new RoomListItemViewModel({ room, client: matrixClient });
-            expect(viewModel.getSnapshot().sections).toHaveLength(1);
-
-            // Simulate reordering: custom section removed
-            vi.spyOn(RoomListStoreV3.instance, "orderedSectionTags", "get").mockReturnValue([
-                DefaultTagID.Favourite,
-                CHATS_TAG,
-                DefaultTagID.LowPriority,
-            ]);
-            watchCallback("RoomList.OrderedCustomSections", null, null as any, null, null);
-
-            expect(viewModel.getSnapshot().sections.map((s) => s.tag)).toEqual([]);
-        });
-
-        it("should set areSectionsEnabled to true when RoomList.showSections is enabled", () => {
-            vi.spyOn(SettingsStore, "getValue").mockImplementation((setting) => {
-                if (setting === "RoomList.showSections") return true;
-                return false;
-            });
-
-            viewModel = new RoomListItemViewModel({ room, client: matrixClient });
-            expect(viewModel.getSnapshot().areSectionsEnabled).toBe(true);
-        });
-
-        it("should update areSectionsEnabled when RoomList.showSections setting changes", () => {
-            let watchCallback: CallbackFn<"RoomList.showSections"> = () => {};
-            vi.spyOn(SettingsStore, "watchSetting").mockImplementation((setting, _room, callback) => {
-                if (setting === "RoomList.showSections") watchCallback = callback;
-                return "watcher-id";
-            });
-
-            viewModel = new RoomListItemViewModel({ room, client: matrixClient });
-            expect(viewModel.getSnapshot().areSectionsEnabled).toBe(false);
-
-            // Enable sections
-            vi.spyOn(SettingsStore, "getValue").mockImplementation((setting) => {
-                if (setting === "RoomList.showSections") return true;
-                return false;
-            });
-            watchCallback("RoomList.showSections", null, null as any, null, null);
-
-            expect(viewModel.getSnapshot().areSectionsEnabled).toBe(true);
+            expect(tagRoomSpy).toHaveBeenCalledWith(room, tag);
         });
 
         it.each([

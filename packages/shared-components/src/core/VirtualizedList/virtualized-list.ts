@@ -6,7 +6,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { type CalculateViewLocation, type ListRange, type VirtuosoHandle, type VirtuosoProps } from "react-virtuoso";
+import { type ListRange, type VirtuosoHandle, type VirtuosoProps } from "react-virtuoso";
 
 /**
  * Keyboard key codes
@@ -82,13 +82,6 @@ export interface VirtualizedListProps<Item, Context> extends Omit<
     onKeyDown?: (e: React.KeyboardEvent<HTMLDivElement>) => void;
 
     /**
-     * When true, keyboard navigation (Arrow keys, Home, End, Page Up/Down) is disabled.
-     * All key events are forwarded directly to `onKeyDown` instead.
-     * Use this to prevent the list from scrolling while an item is being dragged via keyboard.
-     */
-    disableKeyboardNavigation?: boolean;
-
-    /**
      * Optional total count of items (for virtualization with partial data loading).
      * If provided, this will be used instead of items.length for the total count.
      */
@@ -100,39 +93,6 @@ export interface VirtualizedListProps<Item, Context> extends Omit<
      * @param range - The new visible range with startIndex and endIndex
      */
     rangeChanged?: (range: ListRange) => void;
-
-    /**
-     * Optional function to map from the items array index to the scroll index
-     * used by virtuoso's scrollIntoView. This is needed when the items array
-     * contains entries (such as group headers) that don't have a direct 1:1
-     * mapping with virtuoso's own item indices.
-     *
-     * @param itemsIndex - The index in the items array
-     * @returns The index to pass to virtuoso's scrollIntoView
-     */
-    mapScrollIndex?: (itemsIndex: number) => number;
-
-    /**
-     * Optional function to map from virtuoso's reported visible-range indices
-     * back to the items array indices. This is needed when virtuoso reports
-     * ranges in a different index space than the items array (e.g., in
-     * GroupedVirtuoso where group headers are not counted in the range).
-     *
-     * @param virtuosoIndex - The index reported by virtuoso's rangeChanged
-     * @returns The corresponding index in the items array
-     */
-    mapRangeIndex?: (virtuosoIndex: number) => number;
-
-    /**
-     * Optional space, in pixels, reserved at the top of the scroll viewport — e.g. for a pinned
-     * sticky header that overlays the top of the list. When set, keyboard navigation scrolls
-     * focused items to just below this offset rather than flush to the top, so the focused item
-     * (and its focus ring / hover affordances) is never hidden behind the pinned header.
-     *
-     * Pass a function to vary the reserved space per item index — e.g. return 0 for an item that is
-     * itself the pinned header (so it lands flush at the top) and the header height for the rest.
-     */
-    scrollPaddingTop?: number | ((index: number) => number);
 }
 
 /**
@@ -154,28 +114,6 @@ export interface UseVirtualizedListResult<Item, Context> extends Omit<
     rangeChanged: (range: ListRange) => void;
     onFocusForGetItemComponent: (item: Item, e: React.FocusEvent) => void;
     context: VirtualizedListContext<Context>;
-}
-
-/**
- * Builds a Virtuoso `calculateViewLocation` that keeps `paddingTop` pixels clear at the top of the
- * viewport (e.g. for a pinned sticky header). It honours the requested alignment and only insets
- * the cases that would otherwise place the item against the top edge — so a focused item lands just
- * below the pinned header instead of underneath it. `offset` is negative because Virtuoso adds it to
- * the computed `scrollTop`, and a smaller scrollTop pushes the item further down the viewport.
- */
-function reserveTopViewLocation(paddingTop: number): CalculateViewLocation {
-    return ({ itemTop, itemBottom, viewportTop, viewportBottom, locationParams: { align, behavior, ...rest } }) => {
-        if (align === "start" || (align === undefined && itemTop < viewportTop + paddingTop)) {
-            return { ...rest, behavior, align: "start", offset: -paddingTop };
-        }
-        if (align === "end" || (align === undefined && itemBottom > viewportBottom)) {
-            return { ...rest, behavior, align: "end" };
-        }
-        if (align === "center") {
-            return { ...rest, behavior, align: "center" };
-        }
-        return null;
-    };
 }
 
 /**
@@ -204,13 +142,9 @@ export function useVirtualizedList<Item, Context>(
         getItemKey,
         context,
         onKeyDown,
-        disableKeyboardNavigation,
         totalCount,
         rangeChanged,
-        mapScrollIndex,
-        mapRangeIndex,
         scrollerRef: externalScrollerRef,
-        scrollPaddingTop,
         ...virtuosoProps
     } = props;
     /** Reference to the Virtuoso component for programmatic scrolling */
@@ -250,20 +184,14 @@ export function useVirtualizedList<Item, Context>(
             if (items[clampedIndex]) {
                 const key = getItemKey(items[clampedIndex]);
                 setTabIndexKey(key);
-                const scrollIndex = mapScrollIndex ? mapScrollIndex(clampedIndex) : clampedIndex;
-                // Reserve space for a pinned header so the focused item isn't hidden behind it.
-                // The reserved amount can vary per item (e.g. 0 for the header that itself pins).
-                const paddingTop =
-                    typeof scrollPaddingTop === "function" ? scrollPaddingTop(clampedIndex) : (scrollPaddingTop ?? 0);
                 virtuosoHandleRef.current?.scrollIntoView({
-                    index: scrollIndex,
+                    index: clampedIndex,
                     align: align,
                     behavior: "auto",
-                    ...(paddingTop > 0 ? { calculateViewLocation: reserveTopViewLocation(paddingTop) } : {}),
                 });
             }
         },
-        [items, getItemKey, mapScrollIndex, scrollPaddingTop],
+        [items, getItemKey],
     );
 
     /**
@@ -308,13 +236,6 @@ export function useVirtualizedList<Item, Context>(
                 return;
             }
 
-            // When keyboard navigation is disabled (e.g. during a keyboard drag),
-            // forward all events to the parent handler without handling navigation.
-            if (disableKeyboardNavigation) {
-                onKeyDown?.(e);
-                return;
-            }
-
             if (e.code === Key.ARROW_UP && currentIndex !== undefined) {
                 scrollToItem(currentIndex - 1, false);
                 handled = true;
@@ -355,16 +276,7 @@ export function useVirtualizedList<Item, Context>(
                 onKeyDown?.(e);
             }
         },
-        [
-            scrollToIndex,
-            scrollToItem,
-            tabIndexKey,
-            keyToIndexMap,
-            visibleRange,
-            items,
-            onKeyDown,
-            disableKeyboardNavigation,
-        ],
+        [scrollToIndex, scrollToItem, tabIndexKey, keyToIndexMap, visibleRange, items, onKeyDown],
     );
 
     /**
@@ -442,13 +354,10 @@ export function useVirtualizedList<Item, Context>(
     // Combine internal range tracking with optional external callback
     const handleRangeChanged = useCallback(
         (range: ListRange) => {
-            const internalRange = mapRangeIndex
-                ? { startIndex: mapRangeIndex(range.startIndex), endIndex: mapRangeIndex(range.endIndex) }
-                : range;
-            setVisibleRange(internalRange);
+            setVisibleRange(range);
             rangeChanged?.(range);
         },
-        [rangeChanged, mapRangeIndex],
+        [rangeChanged],
     );
 
     const setRef = useCallback(
@@ -460,10 +369,10 @@ export function useVirtualizedList<Item, Context>(
     );
 
     // Key items by id, not position, so react-virtuoso preserves (moves) the existing DOM
-    // node when an item's absolute index shifts — e.g. sections collapsing on drag start removes
-    // the rooms above a header, shifting its index. Without this, Virtuoso's default key is the
-    // index, so the wrapper (and the focused header inside it) remounts, the roving-tabindex effect
-    // refocuses the fresh node, and screen readers re-announce the header mid-drag.
+    // node when an item's absolute index shifts — e.g. an item moving to the top of the list shifts
+    // the index of every item above its old position. Without this, Virtuoso's default key is the
+    // index, so the wrapper (and the focused item inside it) remounts, the roving-tabindex effect
+    // refocuses the fresh node, and screen readers re-announce the item.
     const computeItemKey = useCallback((_index: number, item: Item): string => getItemKey(item), [getItemKey]);
 
     return {

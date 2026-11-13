@@ -15,22 +15,18 @@ import { getMockClientWithEventEmitter } from "test-utils";
 import RoomListActions from "../../actions/RoomListActions";
 import defaultDispatcher from "../../dispatcher/dispatcher";
 import { DefaultTagID, type TagID } from "../../stores/room-list-v3/skip-list/tag";
-import { CHATS_TAG, CUSTOM_SECTION_TAG_PREFIX } from "../../stores/room-list-v3/section";
 import { tagRoom } from "./tagRoom";
-import * as getSectionTagForRoomUtils from "./getSectionTagForRoom";
 
 describe("tagRoom()", () => {
     const userId = "@alice:server.org";
     const roomId = "!room:server.org";
-    const customTag = `${CUSTOM_SECTION_TAG_PREFIX}my-section`;
 
-    const makeRoom = (currentSectionTag: TagID | null = null): Room => {
+    const makeRoom = (tags: TagID[] = []): Room => {
         const client = getMockClientWithEventEmitter({
             isGuest: vi.fn(),
         });
         const room = new Room(roomId, client, userId);
-
-        vi.spyOn(getSectionTagForRoomUtils, "getSectionTagForRoom").mockReturnValue(currentSectionTag);
+        room.tags = Object.fromEntries(tags.map((tag) => [tag, {}]));
 
         return room;
     };
@@ -45,9 +41,7 @@ describe("tagRoom()", () => {
         vi.restoreAllMocks();
     });
 
-    // The invite tag is a section tag, but it is derived from the membership rather than stored as
-    // account data, so it can never be applied or removed.
-    it.each([DefaultTagID.ServerNotice, DefaultTagID.Invite])("does nothing when applying %s", (tag) => {
+    it.each([DefaultTagID.ServerNotice, DefaultTagID.Invite, "u.custom"])("does nothing when applying %s", (tag) => {
         const room = makeRoom();
 
         tagRoom(room, tag);
@@ -56,91 +50,38 @@ describe("tagRoom()", () => {
         expect(RoomListActions.tagRoom).not.toHaveBeenCalled();
     });
 
-    describe("when a room has a pending invitation", () => {
-        it.each([DefaultTagID.Favourite, DefaultTagID.LowPriority, customTag])(
-            "should apply %s without removing the invite tag",
-            (tag) => {
-                const room = makeRoom(DefaultTagID.Invite);
-
-                tagRoom(room, tag);
-
-                expect(defaultDispatcher.dispatch).toHaveBeenCalled();
-                expect(RoomListActions.tagRoom).toHaveBeenCalledWith(
-                    room.client,
-                    room,
-                    null, // remove
-                    tag, // add
-                    false,
-                );
-            },
-        );
-    });
-
-    describe("when a room has no section tag", () => {
-        it("should tag a room as favourite", () => {
+    describe("when a room has no favourite or low priority tag", () => {
+        it.each([DefaultTagID.Favourite, DefaultTagID.LowPriority])("should tag the room with %s", (tag) => {
             const room = makeRoom();
+
+            tagRoom(room, tag);
+
+            expect(defaultDispatcher.dispatch).toHaveBeenCalled();
+            expect(RoomListActions.tagRoom).toHaveBeenCalledWith(
+                room.client,
+                room,
+                null, // remove
+                tag, // add
+            );
+        });
+
+        it("should leave the other tags of the room alone", () => {
+            const room = makeRoom(["u.custom"]);
 
             tagRoom(room, DefaultTagID.Favourite);
 
-            expect(defaultDispatcher.dispatch).toHaveBeenCalled();
             expect(RoomListActions.tagRoom).toHaveBeenCalledWith(
                 room.client,
                 room,
                 null, // remove
                 DefaultTagID.Favourite, // add
-                false, // showToast
-            );
-        });
-
-        it("should tag a room low priority", () => {
-            const room = makeRoom();
-
-            tagRoom(room, DefaultTagID.LowPriority);
-
-            expect(defaultDispatcher.dispatch).toHaveBeenCalled();
-            expect(RoomListActions.tagRoom).toHaveBeenCalledWith(
-                room.client,
-                room,
-                null, // remove
-                DefaultTagID.LowPriority, // add
-                false, // showToast
-            );
-        });
-
-        it("should tag a room with a custom section", () => {
-            const room = makeRoom();
-
-            tagRoom(room, customTag);
-
-            expect(defaultDispatcher.dispatch).toHaveBeenCalled();
-            expect(RoomListActions.tagRoom).toHaveBeenCalledWith(
-                room.client,
-                room,
-                null, // remove
-                customTag, // add
-                false, // showToast
-            );
-        });
-
-        it("should do nothing meaningful when applying CHATS_TAG", () => {
-            const room = makeRoom();
-
-            tagRoom(room, CHATS_TAG);
-
-            expect(defaultDispatcher.dispatch).toHaveBeenCalled();
-            expect(RoomListActions.tagRoom).toHaveBeenCalledWith(
-                room.client,
-                room,
-                null, // remove
-                null, // add
-                false, // showToast
             );
         });
     });
 
     describe("when a room is tagged as favourite", () => {
         it("should unfavourite a room", () => {
-            const room = makeRoom(DefaultTagID.Favourite);
+            const room = makeRoom([DefaultTagID.Favourite]);
 
             tagRoom(room, DefaultTagID.Favourite);
 
@@ -150,12 +91,11 @@ describe("tagRoom()", () => {
                 room,
                 DefaultTagID.Favourite, // remove
                 null, // add
-                false, // showToast
             );
         });
 
         it("should tag a room low priority", () => {
-            const room = makeRoom(DefaultTagID.Favourite);
+            const room = makeRoom([DefaultTagID.Favourite]);
 
             tagRoom(room, DefaultTagID.LowPriority);
 
@@ -165,29 +105,13 @@ describe("tagRoom()", () => {
                 room,
                 DefaultTagID.Favourite, // remove
                 DefaultTagID.LowPriority, // add
-                false, // showToast
-            );
-        });
-
-        it("should remove the favourite tag when applying CHATS_TAG", () => {
-            const room = makeRoom(DefaultTagID.Favourite);
-
-            tagRoom(room, CHATS_TAG);
-
-            expect(defaultDispatcher.dispatch).toHaveBeenCalled();
-            expect(RoomListActions.tagRoom).toHaveBeenCalledWith(
-                room.client,
-                room,
-                DefaultTagID.Favourite, // remove
-                null, // add
-                false, // showToast
             );
         });
     });
 
     describe("when a room is tagged as low priority", () => {
         it("should favourite a room", () => {
-            const room = makeRoom(DefaultTagID.LowPriority);
+            const room = makeRoom([DefaultTagID.LowPriority]);
 
             tagRoom(room, DefaultTagID.Favourite);
 
@@ -197,12 +121,11 @@ describe("tagRoom()", () => {
                 room,
                 DefaultTagID.LowPriority, // remove
                 DefaultTagID.Favourite, // add
-                false, // showToast
             );
         });
 
         it("should untag a room low priority", () => {
-            const room = makeRoom(DefaultTagID.LowPriority);
+            const room = makeRoom([DefaultTagID.LowPriority]);
 
             tagRoom(room, DefaultTagID.LowPriority);
 
@@ -212,31 +135,6 @@ describe("tagRoom()", () => {
                 room,
                 DefaultTagID.LowPriority, // remove
                 null, // add
-                false, // showToast
-            );
-        });
-    });
-
-    describe("when a room is tagged with a custom section", () => {
-        const otherCustomTag = `${CUSTOM_SECTION_TAG_PREFIX}other-section`;
-
-        it.each([
-            { label: "untag the custom section", applyTag: customTag, expectedAdd: null },
-            { label: "replace with favourite", applyTag: DefaultTagID.Favourite, expectedAdd: DefaultTagID.Favourite },
-            { label: "replace with another custom section", applyTag: otherCustomTag, expectedAdd: otherCustomTag },
-            { label: "remove section tag when applying CHATS_TAG", applyTag: CHATS_TAG, expectedAdd: null },
-        ])("should $label", ({ applyTag, expectedAdd }) => {
-            const room = makeRoom(customTag);
-
-            tagRoom(room, applyTag);
-
-            expect(defaultDispatcher.dispatch).toHaveBeenCalled();
-            expect(RoomListActions.tagRoom).toHaveBeenCalledWith(
-                room.client,
-                room,
-                customTag, // remove
-                expectedAdd, // add
-                false, // showToast
             );
         });
     });

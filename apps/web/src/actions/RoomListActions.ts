@@ -31,8 +31,6 @@ export default class RoomListActions {
      * @param newTag the tag with which to tag the room.
      * @param oldIndex the previous position of the room in the
      *                           list of rooms.
-     * @param showToast whether the room list should surface the "chat moved" toast for this change.
-     *                  Defaults to false; pass true for section moves (context-menu "Move to section" or drag-and-drop).
      * @returns an async action payload
      * @see asyncAction
      */
@@ -41,7 +39,6 @@ export default class RoomListActions {
         room: Room,
         oldTag: TagID | null | undefined,
         newTag: TagID | null | undefined,
-        showToast = false,
     ): AsyncActionPayload {
         return asyncAction(
             "RoomListActions.tagRoom",
@@ -96,7 +93,7 @@ export default class RoomListActions {
                     promises.push(promiseToAdd);
                 }
 
-                return Promise.all(promises).then(() => ({ showToast }));
+                return Promise.all(promises);
             },
             () => {
                 // For an optimistic update

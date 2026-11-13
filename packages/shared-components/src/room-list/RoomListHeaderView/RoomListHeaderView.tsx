@@ -7,7 +7,7 @@
 
 import React, { type JSX } from "react";
 import { IconButton, H1 } from "@vector-im/compound-web";
-import { CollapseAllIcon, ExpandAllIcon, ChatIcon } from "@vector-im/compound-design-tokens/assets/web/icons";
+import { ChatIcon } from "@vector-im/compound-design-tokens/assets/web/icons";
 
 import { type ViewModel, useViewModel } from "../../core/viewmodel";
 import { Flex } from "../../core/utils/Flex";
@@ -19,11 +19,6 @@ import styles from "./RoomListHeaderView.module.css";
  * The available sorting options for the room list.
  */
 export type SortOption = "recent" | "alphabetical" | "unread-first";
-
-/**
- * The available options for collapsing sections in the room list.
- */
-export type CollapseSectionsOption = "collapse" | "expand";
 
 export interface RoomListHeaderViewSnapshot {
     /**
@@ -55,24 +50,6 @@ export interface RoomListHeaderViewSnapshot {
      * The currently active sort option.
      */
     activeSortOption: SortOption;
-    /**
-     * Whether message previews are enabled in the room list.
-     */
-    isMessagePreviewEnabled: boolean;
-    /**
-     * Whether sections are enabled in the room list.
-     */
-    areSectionsEnabled: boolean;
-    /**
-     * If "collapse", an icon to collapse all sections is shown.
-     * If "expand", an icon to expand all sections is shown.
-     * If undefined, no  icon are shown.
-     */
-    collapseSections?: CollapseSectionsOption;
-    /**
-     *  Whether to display the section release announcement
-     */
-    displaySectionReleaseAnnouncement: boolean;
 }
 
 export interface RoomListHeaderViewActions {
@@ -108,22 +85,6 @@ export interface RoomListHeaderViewActions {
      * Change the sort order of the room-list.
      */
     sort: (option: SortOption) => void;
-    /**
-     * Toggle message preview display in the room list.
-     */
-    toggleMessagePreview: () => void;
-    /**
-     * Create a new section in the room list.
-     */
-    createSection: () => void;
-    /**
-     * Collapse or expand all sections in the room list depending on the current state.
-     */
-    collapseOrExpandSections: () => void;
-    /**
-     * Close the section release announcement
-     */
-    closeSectionReleaseAnnouncement: () => void;
 }
 
 /**
@@ -149,9 +110,8 @@ interface RoomListHeaderViewProps {
  */
 export function RoomListHeaderView({ vm }: Readonly<RoomListHeaderViewProps>): JSX.Element {
     const { translate: _t } = useI18n();
-    const { title, displaySpaceMenu, collapseSections, areSectionsEnabled, canCreateRoom, canCreateVideoRoom } =
-        useViewModel(vm);
-    const canOnlyStartChat = !areSectionsEnabled && !canCreateRoom && !canCreateVideoRoom;
+    const { title, displaySpaceMenu, canCreateRoom, canCreateVideoRoom } = useViewModel(vm);
+    const canOnlyStartChat = !canCreateRoom && !canCreateVideoRoom;
 
     return (
         <Flex
@@ -170,24 +130,6 @@ export function RoomListHeaderView({ vm }: Readonly<RoomListHeaderViewProps>): J
                 </Flex>
                 <Flex align="center" gap="var(--cpd-space-2x)">
                     <OptionMenuView vm={vm} />
-                    {areSectionsEnabled && collapseSections && (
-                        <IconButton
-                            size="28px"
-                            style={{ padding: "4px" }}
-                            onClick={() => vm.collapseOrExpandSections()}
-                            tooltip={
-                                collapseSections === "collapse"
-                                    ? _t("room_list|collapse_all_sections")
-                                    : _t("room_list|expand_all_sections")
-                            }
-                        >
-                            {collapseSections === "collapse" ? (
-                                <CollapseAllIcon color="var(--cpd-color-icon-secondary)" aria-hidden />
-                            ) : (
-                                <ExpandAllIcon color="var(--cpd-color-icon-secondary)" aria-hidden />
-                            )}
-                        </IconButton>
-                    )}
                     {canOnlyStartChat ? (
                         <IconButton
                             size="28px"

@@ -18,7 +18,6 @@
         "invite": "Invite",
         "new_conversation": "New",
         "new_room": "New room",
-        "new_section": "New section",
         "new_video_room": "New video room",
         "no": "No",
         "open_menu": "Open menu",
@@ -132,11 +131,6 @@
         "zoom_in": "Zoom in",
         "zoom_out": "Zoom out"
     },
-    "release_announcement": {
-        "room_list_section_close": "Ok",
-        "room_list_section_description": "Group your chats into sections to keep conversations organised and easy to navigate.",
-        "room_list_section_title": "Introducing Sections"
-    },
     "room": {
         "context_menu": {
             "title": "Room options"
@@ -172,17 +166,6 @@
     "room_list": {
         "a11y": {
             "default": "Open room %(roomName)s",
-            "drag_cancelled": "Dragging cancelled",
-            "drag_end": "%(source)s was dropped on %(target)s",
-            "drag_end_after": "%(source)s was dropped after %(target)s",
-            "drag_end_before": "%(source)s was dropped before %(target)s",
-            "drag_end_original": "%(source)s returned to its original position",
-            "drag_instructions": "Press space to start or to stop dragging, arrow keys to move, and escape to cancel.",
-            "drag_over": "%(source)s is over %(target)s",
-            "drag_over_after": "%(source)s will be dropped after %(target)s",
-            "drag_over_before": "%(source)s will be dropped before %(target)s",
-            "drag_over_original": "%(source)s will return to its original position",
-            "drag_start": "Dragging %(source)s",
             "invitation": "Open room %(roomName)s invitation.",
             "mention": {
                 "one": "Open room %(roomName)s with 1 unread mention.",
@@ -196,9 +179,6 @@
             "video_call": "Open room %(roomName)s, video call in progress.",
             "voice_call": "Open room %(roomName)s, voice call in progress."
         },
-        "appearance": "Appearance",
-        "chat_moved": "Chat moved",
-        "collapse_all_sections": "Collapse all sections",
         "collapse_filters": "Collapse filter list",
         "empty": {
             "no_chats": "No chats yet",
@@ -214,7 +194,6 @@
             "show_activity": "See all activity",
             "show_chats": "Show all chats"
         },
-        "expand_all_sections": "Expand all sections",
         "expand_filters": "Expand filter list",
         "filters": {
             "favourite": "Favourites",
@@ -232,9 +211,7 @@
             "leave_room": "Leave room",
             "low_priority": "Low priority",
             "mark_read": "Mark as read",
-            "mark_unread": "Mark as unread",
-            "move_to_section": "Move to",
-            "remove_from_section": "Remove from section"
+            "mark_unread": "Mark as unread"
         },
         "notification_options": "Notification options",
         "open_space_menu": "Open space menu",
@@ -243,19 +220,6 @@
             "more_options": "More Options"
         },
         "room_options": "Room Options",
-        "section_created": "Section created",
-        "section_creation": {
-            "description": "Sections are only for you",
-            "label": "Section name"
-        },
-        "section_header": {
-            "edit_section": "Edit section",
-            "more_options": "More options",
-            "remove_section": "Remove section",
-            "toggle": "Toggle %(section)s section",
-            "toggle_unread": "Toggle %(section)s section with unread rooms"
-        },
-        "show_message_previews": "Show message previews",
         "sort": "Sort",
         "sort_type": {
             "activity": "Latest activity",

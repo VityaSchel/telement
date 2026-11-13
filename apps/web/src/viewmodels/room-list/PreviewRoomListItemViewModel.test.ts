@@ -33,7 +33,6 @@ describe("PreviewRoomListItemViewModel", () => {
             showNotificationMenu: false,
             isFavourite: false,
             isLowPriority: false,
-            isDm: false,
             canChangeSection: false,
         });
         // The avatar renderer tells the preview data apart from a Room by its class
@@ -66,9 +65,6 @@ describe("PreviewRoomListItemViewModel", () => {
         vm.onCopyRoomLink();
         vm.onLeaveRoom();
         vm.onSetRoomNotifState();
-        vm.onCreateSection();
-        vm.onToggleSection();
-        vm.onRemoveFromSection();
 
         expect(dispatchSpy).not.toHaveBeenCalled();
         expect(vm.getSnapshot()).toBe(snapshot);

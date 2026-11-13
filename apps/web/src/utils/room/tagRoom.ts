@@ -12,34 +12,25 @@ import { logger } from "matrix-js-sdk/src/logger";
 import { DefaultTagID, type TagID } from "../../stores/room-list-v3/skip-list/tag";
 import RoomListActions from "../../actions/RoomListActions";
 import dis from "../../dispatcher/dispatcher";
-import { CHATS_TAG, isSectionTag } from "../../stores/room-list-v3/section";
-import { getSectionTagForRoom } from "./getSectionTagForRoom";
 
 /**
- * Toggle tag for a given room.
- * A room can only be in one section: either a custom section, Favourite, or LowPriority.
- * Applying any of these will atomically replace the current section tag.
+ * Toggle the favourite or low priority tag of a room. A room can't be both, so applying one
+ * atomically replaces the other.
  * @param room The room to tag
  * @param tagId The tag to invert
- * @param showToast Whether the room list should surface the "chat moved" toast for this change. Defaults to false.
  */
-export function tagRoom(room: Room, tagId: TagID, showToast = false): void {
-    const isChatTag = tagId === CHATS_TAG;
-    const tag = isChatTag ? null : tagId;
-
-    // The invite tag is a section tag, but it comes from the membership rather than from account
-    // data, so it can never be written to or removed from a room.
-    if (!isSectionTag(tagId) || tagId === DefaultTagID.Invite) {
-        logger.warn(`Unexpected tag ${tag} applied to ${room.roomId}`);
+export function tagRoom(room: Room, tagId: TagID): void {
+    if (tagId !== DefaultTagID.Favourite && tagId !== DefaultTagID.LowPriority) {
+        logger.warn(`Unexpected tag ${tagId} applied to ${room.roomId}`);
         return;
     }
 
-    // Find the section tag currently applied (Fav, LowPriority, or custom) — at most one exists
-    const currentSectionTag = getSectionTagForRoom(room);
+    // Find the favourite or low priority tag currently applied, at most one exists
+    const currentTag = Object.keys(room.tags).find(
+        (tag) => tag === DefaultTagID.Favourite || tag === DefaultTagID.LowPriority,
+    );
 
-    const isApplied = currentSectionTag === tag;
-    // A room with a pending invitation has no section tag in its account data to remove
-    const removeTag = currentSectionTag === DefaultTagID.Invite ? null : currentSectionTag;
-    const addTag = isApplied ? null : tag;
-    dis.dispatch(RoomListActions.tagRoom(room.client, room, removeTag, addTag, showToast));
+    const removeTag = currentTag ?? null;
+    const addTag = currentTag === tagId ? null : tagId;
+    dis.dispatch(RoomListActions.tagRoom(room.client, room, removeTag, addTag));
 }

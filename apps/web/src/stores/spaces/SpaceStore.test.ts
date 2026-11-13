@@ -40,7 +40,6 @@ import { SettingLevel } from "../../settings/SettingLevel";
 import { Action } from "../../dispatcher/actions";
 import { MatrixClientPeg } from "../../MatrixClientPeg";
 import RoomListStoreV3 from "../room-list-v3/RoomListStoreV3";
-import { DefaultTagID } from "../room-list-v3/skip-list/tag";
 import { RoomNotificationStateStore } from "../notifications/RoomNotificationStateStore";
 import { type SummarizedNotificationState } from "../notifications/SummarizedNotificationState";
 import { NotificationLevel } from "../notifications/NotificationLevel";
@@ -1461,7 +1460,7 @@ describe("SpaceStore", () => {
             state._level = NotificationLevel.Notification;
             vi.spyOn(RoomListStoreV3.instance, "getSortedRoomsInActiveSpace").mockReturnValue({
                 spaceId: MetaSpace.Home,
-                sections: [{ tag: DefaultTagID.Untagged, rooms: [room] }],
+                rooms: [room],
             });
 
             // init the store
@@ -1485,7 +1484,7 @@ describe("SpaceStore", () => {
             state._level = NotificationLevel.Notification;
             vi.spyOn(RoomListStoreV3.instance, "getSortedRoomsInActiveSpace").mockReturnValue({
                 spaceId: MetaSpace.Home,
-                sections: [{ tag: DefaultTagID.Untagged, rooms: [room] }],
+                rooms: [room],
             });
             // The summary the badge renders from lags behind the per-room states, so it can still
             // claim a mention which no room state backs up any more.
@@ -1517,7 +1516,7 @@ describe("SpaceStore", () => {
             RoomNotificationStateStore.instance.getRoomState(mentioned)._level = NotificationLevel.Highlight;
             vi.spyOn(RoomListStoreV3.instance, "getSortedRoomsInActiveSpace").mockReturnValue({
                 spaceId: MetaSpace.Home,
-                sections: [{ tag: DefaultTagID.Untagged, rooms: [unread, mentioned] }],
+                rooms: [unread, mentioned],
             });
 
             // init the store
@@ -1542,7 +1541,7 @@ describe("SpaceStore", () => {
             state._level = NotificationLevel.None;
             vi.spyOn(RoomListStoreV3.instance, "getSortedRoomsInActiveSpace").mockReturnValue({
                 spaceId: MetaSpace.Home,
-                sections: [{ tag: DefaultTagID.Untagged, rooms: [room] }],
+                rooms: [room],
             });
 
             // init the store

@@ -27,8 +27,6 @@ import {
 } from "../src";
 import { setLanguage } from "../src/core/i18n/i18n";
 import { type StoryContext } from "storybook/internal/csf";
-import { DragDropProvider } from "@dnd-kit/react";
-import { PointerActivationConstraints, PointerSensor } from "@dnd-kit/dom";
 
 export const globalTypes = {
     theme: {
@@ -189,27 +187,6 @@ const withEventPresentationProvider: Decorator = (Story, context) => {
     );
 };
 
-/**
- * Wrap all stories in a DragDropProvider that excludes the Accessibility plugin.
- * dnd-kit's Accessibility plugin adds aria attributes (tabindex, aria-pressed, etc.)
- * that conflict with the existing ARIA roles used in the room list components.
- */
-const withDragDropProvider: Decorator = (Story) => {
-    return (
-        <DragDropProvider
-            sensors={[
-                // By default, the PointerSensor activates dragging immediately on pointer down, which interferes with keyboard navigation.
-                // So we start dragging after the pointer has moved by 5 pixels, to allow for click without dragging
-                PointerSensor.configure({
-                    activationConstraints: [new PointerActivationConstraints.Distance({ value: 5 })],
-                }),
-            ]}
-        >
-            <Story />
-        </DragDropProvider>
-    );
-};
-
 const preview: Preview = {
     tags: ["autodocs", "snapshot"],
     initialGlobals: {
@@ -226,7 +203,6 @@ const preview: Preview = {
         withTooltipProvider,
         withI18nProvider,
         withLinkedTextProvider,
-        withDragDropProvider,
     ],
     parameters: {
         options: {

@@ -19,19 +19,3 @@
 .itemSelected {
     background-color: #559f24;
 }
-
-.group {
-    width: 100%;
-    padding: 8px;
-    background-color: #00adad;
-    border: 1px solid lightgrey;
-    font-weight: "bold";
-
-    button {
-        all: unset;
-    }
-}
-
-.groupSelected {
-    background-color: #559f24;
-}

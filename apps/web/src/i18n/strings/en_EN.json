@@ -562,7 +562,6 @@
         "settings": "Settings",
         "setup_secure_messages": "Set up Secure Messages",
         "show_more": "Show more",
-        "skip": "Skip",
         "someone": "Someone",
         "space": "Space",
         "spaces": "Spaces",
@@ -677,16 +676,6 @@
         "unfederated_label_default_off": "You might enable this if the room will only be used for collaborating with internal teams on your service. This cannot be changed later.",
         "unfederated_label_default_on": "You might disable this if the room will be used for collaborating with external teams who have their own account provider. This cannot be changed later.",
         "unsupported_version": "The server does not support the room version specified."
-    },
-    "create_section_dialog": {
-        "add_rooms": "Add chats",
-        "create_section": "Create section",
-        "empty_list_text": "No chats found",
-        "list_title": "Suggested",
-        "placeholder": "Search your chats",
-        "title": "Create a section",
-        "title_add_rooms": "Add chats to %(section)s",
-        "title_edition": "Edit a section"
     },
     "create_space": {
         "add_details_prompt": "Add some details to help people recognise it.",
@@ -1858,12 +1847,6 @@
         "ongoing": "Removing…",
         "reason_label": "Reason (optional)"
     },
-    "remove_section_dialog": {
-        "confirmation": "Are you sure you want to remove this section?",
-        "description": "The chats in this section will still be available in your chats list.",
-        "remove_section": "Remove section",
-        "title": "Remove section?"
-    },
     "report_content": {
         "description": "Reporting this message will send its unique 'event ID' to your account provider. If messages in this chat are encrypted, your account provider will not be able to read the message text or view any files or images.",
         "hide_messages_from_user": "Check if you want to hide all current and future messages from this user.",
@@ -2153,12 +2136,6 @@
             "leave_room": "Leave room"
         },
         "notification_options": "Notification options",
-        "section": {
-            "chats": "Chats",
-            "favourites": "Favourites",
-            "invites": "Invites",
-            "low_priority": "Low Priority"
-        },
         "show_less": "Show less"
     },
     "room_settings": {
@@ -2979,13 +2956,9 @@
         "show_chat_effects": "Show chat effects (animations when receiving e.g. confetti)",
         "show_displayname_changes": "Show display name changes",
         "show_join_leave": "Show join/leave messages (invites/removes/bans unaffected)",
-        "show_message_previews": "Show message previews",
         "show_nsfw_content": "Show NSFW content",
-        "show_people_sections": "Show People as a section",
         "show_read_receipts": "Show read receipts sent by other users",
         "show_redaction_placeholder": "Show a placeholder for removed messages",
-        "show_sections": "Show sections",
-        "show_stickers_button": "Show stickers button",
         "show_typing_notifications": "Show typing notifications",
         "showbold": "Show all activity in the room list (dots or number of unread messages)",
         "sidebar": {

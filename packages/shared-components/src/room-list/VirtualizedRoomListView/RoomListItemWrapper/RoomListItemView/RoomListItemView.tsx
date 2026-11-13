@@ -46,19 +46,6 @@ function getA11yLabel(roomName: string, notification: NotificationDecorationData
 }
 
 /**
- * Describes a section that a room can be assigned to.
- * Used to render toggle items in the "Move to section" submenu.
- */
-export interface Section {
-    /** The tag that identifies this section (e.g. `m.favourite`, custom tag) */
-    tag: string;
-    /** The human-readable display name of the section */
-    name: string;
-    /** Whether the room currently belongs to this section */
-    isSelected: boolean;
-}
-
-/**
  * Snapshot for a room list item.
  * Contains all the data needed to render a room in the list.
  */
@@ -85,8 +72,6 @@ export interface RoomListItemViewSnapshot {
     isFavourite: boolean;
     /** Whether the room is a low priority room */
     isLowPriority: boolean;
-    /** Whether the room is a direct message */
-    isDm: boolean;
     /** Can invite other users in the room */
     canInvite: boolean;
     /** Can copy the room link */
@@ -97,13 +82,9 @@ export interface RoomListItemViewSnapshot {
     canMarkAsUnread: boolean;
     /** The room's notification state */
     roomNotifState: RoomNotifState;
-    /** Available sections the room can be assigned to */
-    sections: Section[];
-    /** Whether sections are enabled in the room list */
-    areSectionsEnabled: boolean;
     /**
-     * Whether the room can be moved to another section, by dragging it or through the menu entries
-     * that assign a section (Favourited, Low priority and "Move to").
+     * Whether the room can be marked as favourite or low priority, which a room with a pending
+     * invitation can't.
      */
     canChangeSection: boolean;
 }
@@ -131,12 +112,6 @@ export interface RoomListItemViewActions {
     onLeaveRoom: () => void;
     /** Called when setting the room notification state */
     onSetRoomNotifState: (state: RoomNotifState) => void;
-    /** Called when creating a new section */
-    onCreateSection: () => void;
-    /** Called when toggling a room's membership in a section */
-    onToggleSection: (tag: string) => void;
-    /** Called when removing the room from a section */
-    onRemoveFromSection: () => void;
 }
 
 /**
@@ -162,8 +137,6 @@ export interface RoomListItemViewProps extends Omit<React.HTMLAttributes<HTMLBut
     isLastItem: boolean;
     /** Function to render the room avatar */
     renderAvatar: (room: Room) => ReactNode;
-    /** Whether this item is the source of an active drag operation */
-    isDragSource?: boolean;
     ref?: Ref<Element>;
 }
 
@@ -179,7 +152,6 @@ export const RoomListItemView = memo(function RoomListItemView({
     isFirstItem,
     isLastItem,
     renderAvatar,
-    isDragSource = false,
     ref,
     ...props
 }: RoomListItemViewProps): JSX.Element {
@@ -233,7 +205,6 @@ export const RoomListItemView = memo(function RoomListItemView({
                     [styles.bold]: item.isBold,
                     [styles.firstItem]: isFirstItem,
                     [styles.lastItem]: isLastItem,
-                    [styles.dragSource]: isDragSource,
                     mx_RoomListItemView_selected: isSelected,
                 })}
                 gap="var(--cpd-space-3x)"

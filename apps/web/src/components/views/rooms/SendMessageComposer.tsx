@@ -50,6 +50,7 @@ import { CHAT_EFFECTS } from "../../../effects";
 import { MatrixClientPeg } from "../../../MatrixClientPeg";
 import { getKeyBindingsManager } from "../../../KeyBindingsManager";
 import SettingsStore from "../../../settings/SettingsStore";
+import { UIFeature } from "../../../settings/UIFeature";
 import { type ActionPayload } from "../../../dispatcher/payloads";
 import { decorateStartSendingTime, sendRoundTripMetric } from "../../../sendTimePerformanceMetrics";
 import RoomContext, { TimelineRenderingType } from "../../../contexts/RoomContext";
@@ -228,7 +229,7 @@ export class SendMessageComposer extends React.Component<ISendMessageComposerPro
                 break;
             }
             case KeyBindingAction.ShowStickerPicker: {
-                if (!SettingsStore.getValue("MessageComposerInput.showStickersButton")) {
+                if (!SettingsStore.getValue(UIFeature.Widgets)) {
                     return; // Do nothing if there is no Stickers button
                 }
                 this.props.toggleStickerPickerOpen();

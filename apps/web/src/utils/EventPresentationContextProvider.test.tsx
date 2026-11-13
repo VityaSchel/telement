@@ -25,6 +25,8 @@ const PresentationProbe: React.FC = () => {
 
 describe("EventPresentationContextProvider", () => {
     beforeEach(async () => {
+        // The compact layout setting is forced off outside of the group layout
+        await SettingsStore.setValue("layout", null, SettingLevel.DEVICE, Layout.Group);
         await SettingsStore.setValue("useCompactLayout", null, SettingLevel.DEVICE, false);
     });
 

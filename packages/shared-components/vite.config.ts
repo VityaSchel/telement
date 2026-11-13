@@ -50,8 +50,8 @@ export default defineConfig({
         lib: {
             // Two entries: the main bundle and a standalone `numbers` utility that callers
             // running outside the browser DOM (e.g. AudioWorkletGlobalScope) can import without
-            // pulling in the rest of the package — which transitively loads dnd-kit and
-            // other window/document-dependent code.
+            // pulling in the rest of the package — which transitively loads
+            // window/document-dependent code.
             entry: {
                 "element-web-shared-components": fileURLToPath(import.meta.resolve("./src/index.ts")),
                 "numbers": fileURLToPath(import.meta.resolve("./src/core/utils/numbers.ts")),

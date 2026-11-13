@@ -214,101 +214,16 @@ describe("<RoomListItemMoreOptionsMenu />", () => {
         expect(mockCallbacks.onLeaveRoom).toHaveBeenCalled();
     });
 
-    it("should call onCreateSection when new section is clicked", async () => {
-        const user = userEvent.setup();
-        // We need to render the MoreOptionContent directly here as radix is kind of messing in the test env
-        const TestComponent = (): JSX.Element => {
-            const vm = useMockedViewModel(defaultSnapshot, mockCallbacks);
-            return <MoreOptionContent vm={vm} />;
-        };
-        render(<TestComponent />);
-
-        const newSection = screen.getByRole("menuitem", { name: "New section" });
-        await user.click(newSection);
-
-        expect(mockCallbacks.onCreateSection).toHaveBeenCalled();
-    });
-
-    it("should call onRemoveFromSection when Remove from section is clicked", async () => {
-        const user = userEvent.setup();
-        const TestComponent = (): JSX.Element => {
-            const vm = useMockedViewModel({ ...defaultSnapshot, isInSection: true }, mockCallbacks);
-            return <MoreOptionContent vm={vm} />;
-        };
-        render(<TestComponent />);
-
-        const removeFromSection = screen.getByRole("menuitem", { name: "Remove from section" });
-        await user.click(removeFromSection);
-
-        expect(mockCallbacks.onRemoveFromSection).toHaveBeenCalled();
-    });
-
-    it("should render section items in move to section submenu", () => {
-        const sections = [
-            { tag: "m.favourite", name: "Favourites", isSelected: false },
-            { tag: "element.io.section.custom1", name: "Work", isSelected: true },
-            { tag: "element.io.section.custom2", name: "Personal", isSelected: false },
-        ];
-
-        const TestComponent = (): JSX.Element => {
-            const vm = useMockedViewModel({ ...defaultSnapshot, sections }, mockCallbacks);
-            return <MoreOptionContent vm={vm} />;
-        };
-        render(<TestComponent />);
-
-        const favouriteItem = screen.getByRole("menuitem", { name: "Favourites" });
-        expect(favouriteItem).toBeInTheDocument();
-        expect(favouriteItem).toHaveAttribute("aria-checked", "false");
-
-        const workItem = screen.getByRole("menuitem", { name: "Work" });
-        expect(workItem).toBeInTheDocument();
-        expect(workItem).toHaveAttribute("aria-checked", "true");
-
-        const personalItem = screen.getByRole("menuitem", { name: "Personal" });
-        expect(personalItem).toBeInTheDocument();
-        expect(personalItem).toHaveAttribute("aria-checked", "false");
-    });
-
-    it("should call onToggleSection when a section item is clicked", async () => {
-        const user = userEvent.setup();
-        const sections = [
-            { tag: "m.favourite", name: "Favourites", isSelected: false },
-            { tag: "element.io.section.custom1", name: "Work", isSelected: false },
-        ];
-
-        const TestComponent = (): JSX.Element => {
-            const vm = useMockedViewModel({ ...defaultSnapshot, sections }, mockCallbacks);
-            return <MoreOptionContent vm={vm} />;
-        };
-        render(<TestComponent />);
-
-        const workItem = screen.getByRole("menuitem", { name: "Work" });
-        await user.click(workItem);
-
-        expect(mockCallbacks.onToggleSection).toHaveBeenCalledWith("element.io.section.custom1");
-    });
-
-    it("should not render section items when sections array is empty", () => {
-        const TestComponent = (): JSX.Element => {
-            const vm = useMockedViewModel({ ...defaultSnapshot, sections: [] }, mockCallbacks);
-            return <MoreOptionContent vm={vm} />;
-        };
-        render(<TestComponent />);
-
-        expect(screen.getByRole("menuitem", { name: "New section" })).toBeInTheDocument();
-    });
-
-    it("should hide the section entries when the room cannot change section", () => {
+    it("should hide the favourite and low priority entries when the room cannot change section", () => {
         const TestComponent = (): JSX.Element => {
             const vm = useMockedViewModel({ ...defaultSnapshot, canChangeSection: false }, mockCallbacks);
             return <MoreOptionContent vm={vm} />;
         };
         render(<TestComponent />);
 
-        // Assigning a section does nothing for a room whose section is fixed, such as an invitation
+        // A room with a pending invitation can't be marked as favourite or low priority
         expect(screen.queryByRole("menuitemcheckbox", { name: "Favourited" })).not.toBeInTheDocument();
         expect(screen.queryByRole("menuitemcheckbox", { name: "Low priority" })).not.toBeInTheDocument();
-        expect(screen.queryByRole("menuitem", { name: "Move to" })).not.toBeInTheDocument();
         // The remaining entries are unaffected
         expect(screen.getByRole("menuitem", { name: "Leave room" })).toBeInTheDocument();
     });

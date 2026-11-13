@@ -29,10 +29,6 @@ const RoomListHeaderViewWrapperImpl = ({
     inviteInSpace,
     openSpacePreferences,
     sort,
-    toggleMessagePreview,
-    createSection,
-    collapseOrExpandSections,
-    closeSectionReleaseAnnouncement,
     ...rest
 }: RoomListHeaderProps): JSX.Element => {
     const vm = useMockedViewModel(rest, {
@@ -44,10 +40,6 @@ const RoomListHeaderViewWrapperImpl = ({
         inviteInSpace,
         sort,
         openSpacePreferences,
-        toggleMessagePreview,
-        createSection,
-        collapseOrExpandSections,
-        closeSectionReleaseAnnouncement,
     });
     return <RoomListHeaderView vm={vm} />;
 };
@@ -67,10 +59,6 @@ const meta = {
         inviteInSpace: fn(),
         sort: fn(),
         openSpacePreferences: fn(),
-        toggleMessagePreview: fn(),
-        createSection: fn(),
-        collapseOrExpandSections: fn(),
-        closeSectionReleaseAnnouncement: fn(),
     },
     parameters: {
         design: {
@@ -104,55 +92,9 @@ export const LongTitle: Story = {
     },
 };
 
-export const CollapseSections: Story = {
-    args: {
-        collapseSections: "collapse",
-    },
-};
-
-export const ExpandSections: Story = {
-    args: {
-        collapseSections: "expand",
-    },
-};
-
-export const DisplaySectionReleaseAnnouncement: Story = {
-    decorators: [
-        (Story) => (
-            <div style={{ width: "300px" }}>
-                <Story />
-            </div>
-        ),
-    ],
-    args: {
-        displaySectionReleaseAnnouncement: true,
-    },
-    parameters: {
-        a11y: {
-            config: {
-                rules: [
-                    {
-                        // compound-web's ReleaseAnnouncement renders its header as <h3>,
-                        // which jumps from RoomListHeaderView's <h1> ("Rooms").
-                        id: "heading-order",
-                        enabled: false,
-                    },
-                ],
-            },
-        },
-    },
-};
-
-export const SectionsDisabled: Story = {
-    args: {
-        areSectionsEnabled: false,
-    },
-};
-
 export const NoComposeMenu: Story = {
     args: {
         canCreateRoom: false,
         canCreateVideoRoom: false,
-        areSectionsEnabled: false,
     },
 };

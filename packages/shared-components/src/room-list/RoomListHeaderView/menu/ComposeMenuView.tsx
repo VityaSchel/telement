@@ -6,11 +6,10 @@
  */
 
 import React, { useState, type JSX } from "react";
-import { IconButton, Menu, MenuItem, ReleaseAnnouncement } from "@vector-im/compound-web";
+import { IconButton, Menu, MenuItem } from "@vector-im/compound-web";
 import VideoCallIcon from "@vector-im/compound-design-tokens/assets/web/icons/video-call";
 import ChatIcon from "@vector-im/compound-design-tokens/assets/web/icons/chat";
 import RoomIcon from "@vector-im/compound-design-tokens/assets/web/icons/room";
-import SectionIcon from "@vector-im/compound-design-tokens/assets/web/icons/section";
 import PlusIcon from "@vector-im/compound-design-tokens/assets/web/icons/plus";
 
 import { type RoomListHeaderViewModel } from "../RoomListHeaderView";
@@ -36,8 +35,7 @@ interface ComposeMenuViewProps {
 export function ComposeMenuView({ vm }: ComposeMenuViewProps): JSX.Element {
     const { translate: _t } = useI18n();
     const [open, setOpen] = useState(false);
-    const { canCreateRoom, canCreateVideoRoom, displaySectionReleaseAnnouncement, areSectionsEnabled } =
-        useViewModel(vm);
+    const { canCreateRoom, canCreateVideoRoom } = useViewModel(vm);
 
     // 28px button with a 20px icon
     const button = (
@@ -45,20 +43,6 @@ export function ComposeMenuView({ vm }: ComposeMenuViewProps): JSX.Element {
             <PlusIcon color="var(--cpd-color-icon-secondary)" aria-hidden />
         </IconButton>
     );
-
-    if (displaySectionReleaseAnnouncement) {
-        return (
-            <ReleaseAnnouncement
-                open={displaySectionReleaseAnnouncement}
-                onClick={vm.closeSectionReleaseAnnouncement}
-                header={_t("release_announcement|room_list_section_title")}
-                description={_t("release_announcement|room_list_section_description")}
-                closeLabel={_t("release_announcement|room_list_section_close")}
-            >
-                {button}
-            </ReleaseAnnouncement>
-        );
-    }
 
     return (
         <Menu
@@ -80,9 +64,6 @@ export function ComposeMenuView({ vm }: ComposeMenuViewProps): JSX.Element {
                     onSelect={vm.createVideoRoom}
                     hideChevron
                 />
-            )}
-            {areSectionsEnabled && (
-                <MenuItem Icon={SectionIcon} label={_t("action|new_section")} onSelect={vm.createSection} hideChevron />
             )}
         </Menu>
     );

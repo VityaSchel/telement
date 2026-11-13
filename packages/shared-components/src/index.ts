@@ -79,12 +79,10 @@ export * from "./core/rich-list/RichItem";
 export * from "./core/rich-list/RichList";
 export * from "./room-list/RoomListHeaderView";
 export * from "./room-list/RoomListSearchView";
-export * from "./room-list/SectionCreationView";
 export * from "./room-list/RoomListView";
 export * from "./room-list/VirtualizedRoomListView/RoomListItemWrapper/RoomListItemView";
 export * from "./room-list/RoomListPrimaryFilters";
 export * from "./room-list/VirtualizedRoomListView";
-export * from "./room-list/VirtualizedRoomListView/RoomListSectionHeaderView";
 export * from "./room-list/VirtualizedRoomListView/RoomListItemWrapper";
 export * from "./core/utils/Box";
 export * from "./core/utils/Flex";
@@ -92,7 +90,6 @@ export * from "./core/utils/LinkedText";
 export * from "./core/utils/Scrollbar";
 export * from "./core/VirtualizedList";
 export * from "./resize";
-export * from "./core/RoomPickerView";
 export * from "./core/toast";
 
 // Utils

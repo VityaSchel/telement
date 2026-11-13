@@ -18,7 +18,6 @@ const meta = {
     tags: ["autodocs"],
     args: {
         roomIndex: 0,
-        roomIndexInSection: 0,
         roomCount: 10,
         onFocus: fn(),
         isFirstItem: false,
@@ -41,25 +40,9 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const FlatList: Story = {
-    args: {
-        isInFlatList: true,
-    },
     decorators: [
         (Story) => (
             <div role="listbox" aria-label="Room list">
-                <Story />
-            </div>
-        ),
-    ],
-};
-
-export const Sections: Story = {
-    args: {
-        isInFlatList: false,
-    },
-    decorators: [
-        (Story) => (
-            <div role="treegrid" aria-label="Room list" aria-rowcount={10}>
                 <Story />
             </div>
         ),

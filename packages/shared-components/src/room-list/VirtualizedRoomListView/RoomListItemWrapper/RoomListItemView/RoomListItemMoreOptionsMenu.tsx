@@ -5,8 +5,8 @@
  * Please see LICENSE files in the repository root for full details.
  */
 
-import React, { useMemo, useState, type JSX } from "react";
-import { IconButton, Menu, MenuItem, Separator, SubMenu, ToggleMenuItem } from "@vector-im/compound-web";
+import React, { useState, type JSX } from "react";
+import { IconButton, Menu, MenuItem, Separator, ToggleMenuItem } from "@vector-im/compound-web";
 import {
     MarkAsReadIcon,
     MarkAsUnreadIcon,
@@ -16,15 +16,11 @@ import {
     LinkIcon,
     LeaveIcon,
     OverflowHorizontalIcon,
-    ArrowRightIcon,
-    CheckIcon,
-    MinusIcon,
 } from "@vector-im/compound-design-tokens/assets/web/icons";
 
 import { _t } from "../../../../core/i18n/i18n";
 import { useViewModel, type ViewModel } from "../../../../core/viewmodel";
 import type { RoomListItemViewSnapshot, RoomListItemViewActions } from "./RoomListItemView";
-import styles from "./RoomListItemMoreOptionsMenu.module.css";
 
 /**
  * View model type for room list item
@@ -75,8 +71,6 @@ interface MoreOptionContentProps {
 
 export function MoreOptionContent({ vm }: MoreOptionContentProps): JSX.Element {
     const snapshot = useViewModel(vm);
-    const hasSections = snapshot.sections.length > 0;
-    const isInSection = useMemo(() => snapshot.sections.some((section) => section.isSelected), [snapshot.sections]);
     return (
         <div onKeyDown={(e) => e.stopPropagation()}>
             {snapshot.canMarkAsRead && (
@@ -97,8 +91,7 @@ export function MoreOptionContent({ vm }: MoreOptionContentProps): JSX.Element {
                     hideChevron={true}
                 />
             )}
-            {/* Favourited and Low priority assign a section, so they are hidden for a room whose
-                section is fixed, such as one with a pending invitation */}
+            {/* Favourited and Low priority are hidden for a room with a pending invitation */}
             {snapshot.canChangeSection && (
                 <>
                     <ToggleMenuItem
@@ -135,46 +128,6 @@ export function MoreOptionContent({ vm }: MoreOptionContentProps): JSX.Element {
                     onClick={(evt) => evt.stopPropagation()}
                     hideChevron={true}
                 />
-            )}
-            {snapshot.areSectionsEnabled && snapshot.canChangeSection && (
-                <>
-                    <SubMenu
-                        trigger={
-                            <MenuItem
-                                Icon={ArrowRightIcon}
-                                label={_t("room_list|more_options|move_to_section")}
-                                onSelect={null}
-                            />
-                        }
-                    >
-                        {snapshot.sections.map((section) => (
-                            <MenuItem
-                                key={section.tag}
-                                label={section.name}
-                                labelProps={{ className: styles.sectionLabel }}
-                                onSelect={() => vm.onToggleSection(section.tag)}
-                                onClick={(evt) => evt.stopPropagation()}
-                                hideChevron={true}
-                                aria-checked={section.isSelected}
-                            >
-                                {section.isSelected && (
-                                    <CheckIcon color="var(--cpd-color-icon-tertiary)" width="24px" height="24px" />
-                                )}
-                            </MenuItem>
-                        ))}
-                        {hasSections && <Separator />}
-                        <MenuItem label={_t("action|new_section")} onSelect={vm.onCreateSection} hideChevron={true} />
-                    </SubMenu>
-                    {isInSection && (
-                        <MenuItem
-                            Icon={MinusIcon}
-                            label={_t("room_list|more_options|remove_from_section")}
-                            onSelect={vm.onRemoveFromSection}
-                            onClick={(evt) => evt.stopPropagation()}
-                            hideChevron={true}
-                        />
-                    )}
-                </>
             )}
             <Separator />
             <MenuItem

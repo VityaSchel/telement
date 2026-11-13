@@ -55,8 +55,8 @@ test.describe("Media preview settings", () => {
         });
 
         const testRoomTile = page
-            .getByRole("treegrid", { name: "Room list" })
-            .getByRole("button", { name: "Test room" });
+            .getByRole("listbox", { name: "Room list" })
+            .getByRole("option", { name: "Test room" });
         await expect(testRoomTile).toBeVisible();
         await expect(testRoomTile).toMatchScreenshot("invite-room-tree-no-avatar.png");
 

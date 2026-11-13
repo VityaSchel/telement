@@ -9,7 +9,7 @@ import { type Page } from "@playwright/test";
 import { rejectToast } from "@element-hq/element-web-playwright-common";
 
 import { test, expect } from "../../../element-web-test";
-import { createFillerRooms, getRoomList, getSearchSection, getSectionHeader, sortAlphabetically } from "./utils";
+import { createFillerRooms, getRoomList, getSearchSection, sortAlphabetically } from "./utils";
 
 test.describe("Search section of the room list", () => {
     test.beforeEach(async ({ page, app, user }) => {
@@ -62,26 +62,6 @@ test.describe("Search section of the room list", () => {
 
         await pickRoomFromSpotlight(page, "zzz search target");
 
-        await expect(targetRow).toBeInViewport();
-    });
-
-    test("should expand a collapsed section to show a room picked from the spotlight", async ({ page, app, user }) => {
-        const targetId = await app.client.createRoom({ name: "zzz search target" });
-        await app.client.evaluate(async (client, roomId) => {
-            await client.setRoomTag(roomId, "m.favourite");
-        }, targetId);
-        await createFillerRooms(app, 5);
-
-        const favouritesHeader = getSectionHeader(page, "Favourites");
-        await expect(favouritesHeader).toBeVisible();
-        await favouritesHeader.click();
-        await expect(favouritesHeader).toHaveAttribute("aria-expanded", "false");
-
-        await pickRoomFromSpotlight(page, "zzz search target");
-
-        await expect(favouritesHeader).toHaveAttribute("aria-expanded", "true");
-        // A sectioned list is a treegrid, so rooms are rows rather than options.
-        const targetRow = getRoomList(page).getByRole("row", { name: "Open room zzz search target" });
         await expect(targetRow).toBeInViewport();
     });
 });

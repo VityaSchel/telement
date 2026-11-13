@@ -77,14 +77,11 @@ export class PreviewRoomListItemViewModel
             showNotificationMenu: false,
             isFavourite: false,
             isLowPriority: false,
-            isDm: false,
             canInvite: false,
             canCopyRoomLink: false,
             canMarkAsRead: false,
             canMarkAsUnread: false,
             roomNotifState: RoomNotifState.AllMessages,
-            sections: [],
-            areSectionsEnabled: false,
             canChangeSection: false,
         };
     }
@@ -106,7 +103,4 @@ export class PreviewRoomListItemViewModel
     public onCopyRoomLink = (): void => {};
     public onLeaveRoom = (): void => {};
     public onSetRoomNotifState = (): void => {};
-    public onCreateSection = (): void => {};
-    public onToggleSection = (): void => {};
-    public onRemoveFromSection = (): void => {};
 }

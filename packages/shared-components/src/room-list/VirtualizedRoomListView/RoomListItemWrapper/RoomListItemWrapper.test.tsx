@@ -7,53 +7,19 @@
 
 import React from "react";
 import { render, screen } from "@test-utils";
-import userEvent from "@testing-library/user-event";
 import { composeStories } from "@storybook/react-vite";
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect } from "vitest";
 
 import * as stories from "./RoomListItemWrapper.stories";
 
-const { Sections } = composeStories(stories);
+const { FlatList } = composeStories(stories);
 
-describe("<RoomListItemWrapper /> keyboard re-dispatch", () => {
-    it("ArrowLeft on the first room of a section re-dispatches as ArrowUp", async () => {
-        const user = userEvent.setup();
-        const onKeyDown = vi.fn();
-        render(
-            <div onKeyDown={onKeyDown}>
-                <Sections roomIndexInSection={0} isFocused={true} />
-            </div>,
-        );
+describe("<RoomListItemWrapper />", () => {
+    it("renders the room as an option of the room list", () => {
+        render(<FlatList roomIndex={2} roomCount={10} />);
 
-        // Make sure the room's button is focused before sending the key event.
-        const button = screen.getByRole("button", { name: /Room name/ });
-        button.focus();
-
-        await user.keyboard("{ArrowLeft}");
-
-        const arrowUpEvents = onKeyDown.mock.calls.filter(([event]) => event.code === "ArrowUp");
-        expect(arrowUpEvents).toHaveLength(1);
-    });
-
-    it("ArrowLeft on a non-first room of a section does NOT re-dispatch", async () => {
-        const user = userEvent.setup();
-        const onKeyDown = vi.fn();
-        render(
-            <div onKeyDown={onKeyDown}>
-                <Sections roomIndexInSection={2} isFocused={true} />
-            </div>,
-        );
-
-        const button = screen.getByRole("button", { name: /Room name/ });
-        button.focus();
-
-        await user.keyboard("{ArrowLeft}");
-
-        const arrowUpEvents = onKeyDown.mock.calls.filter(([event]) => event.code === "ArrowUp");
-        expect(arrowUpEvents).toHaveLength(0);
-
-        // The original ArrowLeft event should still bubble (the handler is a no-op for non-first items).
-        const arrowLeftEvents = onKeyDown.mock.calls.filter(([event]) => event.code === "ArrowLeft");
-        expect(arrowLeftEvents.length).toBeGreaterThan(0);
+        const option = screen.getByRole("option", { name: /Room name/ });
+        expect(option).toHaveAttribute("aria-posinset", "3");
+        expect(option).toHaveAttribute("aria-setsize", "10");
     });
 });

@@ -6,8 +6,6 @@ SPDX-License-Identifier: AGPL-3.0-only OR GPL-3.0-only OR LicenseRef-Element-Com
 Please see LICENSE files in the repository root for full details.
 */
 
-import { closeReleaseAnnouncementIfExists } from "@element-hq/element-web-playwright-common";
-
 import { test, expect } from "../../element-web-test";
 import { SettingLevel } from "../../../src/settings/SettingLevel";
 import { getSampleFilePath } from "../../sample-files";
@@ -29,7 +27,6 @@ test.describe("Composer", () => {
 
     test.beforeEach(async ({ room, page }) => {
         // trigger room fixture
-        await closeReleaseAnnouncementIfExists(page, "Introducing Sections");
     });
 
     test.describe("Rich text editor", () => {

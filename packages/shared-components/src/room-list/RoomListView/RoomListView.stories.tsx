@@ -6,7 +6,7 @@
  */
 
 import React, { type JSX } from "react";
-import { expect, fn, waitFor } from "storybook/test";
+import { fn } from "storybook/test";
 
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import type { FilterId } from "../RoomListPrimaryFilters";
@@ -18,10 +18,7 @@ import {
     renderAvatar,
     createGetRoomItemViewModel,
     mockRoomIds,
-    mockSections,
-    createGetSectionHeaderViewModel,
-    mockSmallListSections,
-    mockLargeListSections,
+    mockSmallListRoomIds,
     mockLargeListRoomIds,
 } from "../story-mocks";
 
@@ -36,17 +33,11 @@ const RoomListViewWrapperImpl = ({
     createChatRoom,
     createRoom,
     getRoomItemViewModel,
-    getSectionHeaderViewModel,
     updateVisibleRooms,
     updateVisibleFold,
     renderAvatar: renderAvatarProp,
-    closeToast,
     scrollToUnreadActivity,
     setScrollToIndex,
-    changeRoomSection,
-    changeSectionOrder,
-    onSectionOrRoomDragStart,
-    onSectionOrRoomDragEnd,
     ...rest
 }: RoomListViewProps): JSX.Element => {
     const vm = useMockedViewModel(rest, {
@@ -54,16 +45,10 @@ const RoomListViewWrapperImpl = ({
         createChatRoom,
         createRoom,
         getRoomItemViewModel,
-        getSectionHeaderViewModel,
         updateVisibleRooms,
         updateVisibleFold,
-        closeToast,
         scrollToUnreadActivity,
         setScrollToIndex,
-        changeRoomSection,
-        changeSectionOrder,
-        onSectionOrRoomDragStart,
-        onSectionOrRoomDragEnd,
     });
     return <RoomListView vm={vm} renderAvatar={renderAvatarProp} />;
 };
@@ -103,26 +88,19 @@ const meta = {
             spaceId: "!space:server",
             filterKeys: undefined,
         },
-        sections: mockSections,
+        roomIds: mockRoomIds,
         canCreateRoom: true,
         // Action properties (callbacks)
         onToggleFilter: fn(),
         createChatRoom: fn(),
         createRoom: fn(),
         getRoomItemViewModel: createGetRoomItemViewModel(mockRoomIds),
-        getSectionHeaderViewModel: createGetSectionHeaderViewModel(mockSections.map((section) => section.id)),
         updateVisibleRooms: fn(),
         updateVisibleFold: fn(),
         renderAvatar,
-        isFlatList: true,
         toast: undefined,
-        closeToast: fn(),
         scrollToUnreadActivity: fn(),
         setScrollToIndex: fn(),
-        changeRoomSection: fn(),
-        changeSectionOrder: fn(),
-        onSectionOrRoomDragStart: fn(),
-        onSectionOrRoomDragEnd: fn(),
     },
     parameters: {
         design: {
@@ -136,12 +114,6 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
-
-export const Section: Story = {
-    args: {
-        isFlatList: false,
-    },
-};
 
 export const Loading: Story = {
     args: {
@@ -227,72 +199,19 @@ export const EmptyMentionsFilter: Story = {
 
 export const SmallFlatList: Story = {
     args: {
-        sections: mockSmallListSections,
+        roomIds: mockSmallListRoomIds,
     },
 };
 
 export const LargeFlatList: Story = {
     args: {
-        sections: mockLargeListSections,
+        roomIds: mockLargeListRoomIds,
         getRoomItemViewModel: createGetRoomItemViewModel(mockLargeListRoomIds),
-        getSectionHeaderViewModel: createGetSectionHeaderViewModel(mockLargeListSections.map((section) => section.id)),
-    },
-};
-
-export const SmallSectionList: Story = {
-    args: {
-        isFlatList: false,
-        sections: mockSmallListSections,
-    },
-};
-
-export const LargeSectionList: Story = {
-    args: {
-        isFlatList: false,
-        sections: mockLargeListSections,
-        getRoomItemViewModel: createGetRoomItemViewModel(mockLargeListRoomIds),
-        getSectionHeaderViewModel: createGetSectionHeaderViewModel(mockLargeListSections.map((section) => section.id)),
-    },
-};
-
-export const Toast: Story = {
-    args: {
-        toast: "section_created",
     },
 };
 
 export const UnreadActivityBelow: Story = {
     args: {
         toast: "unread_activity",
-    },
-};
-
-export const ToastOverStickySection: Story = {
-    tags: ["autodocs", "!snapshot"],
-    args: {
-        isFlatList: false,
-        toast: "unread_activity",
-    },
-    play: async ({ canvas, canvasElement }) => {
-        // Wait for the virtualized list to mount its rows before scrolling.
-        await canvas.findByRole("button", { name: "Toggle Favourites section" });
-        const scroller = canvasElement.querySelector<HTMLElement>('[role="treegrid"]')!;
-
-        // Scroll to the end of the list so the last section header ("Low-priority") gets mounted.
-        scroller.scrollTop = scroller.scrollHeight;
-        await canvas.findByRole("button", { name: "Toggle Low-priority section" });
-
-        // Scroll until the header row sits just above the bottom edge of the viewport, overlapping the toast.
-        const bottomOffset = 28;
-        await waitFor(() => {
-            const header = canvas.getByRole("button", { name: "Toggle Low-priority section" });
-            const gap = scroller.getBoundingClientRect().bottom - header.getBoundingClientRect().bottom;
-            if (Math.abs(gap - bottomOffset) > 1) {
-                scroller.scrollTop -= gap - bottomOffset;
-                throw new Error(`Header is not parked over the toast yet (gap: ${gap}px)`);
-            }
-        });
-
-        await expect(canvasElement).toMatchImageSnapshot();
     },
 };

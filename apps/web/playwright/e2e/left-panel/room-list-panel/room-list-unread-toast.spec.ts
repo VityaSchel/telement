@@ -9,7 +9,7 @@ import { type Page } from "@playwright/test";
 import { rejectToast } from "@element-hq/element-web-playwright-common";
 
 import { expect, test } from "../../../element-web-test";
-import { createFillerRooms, getRoomList, getSectionHeader, sortAlphabetically } from "./utils";
+import { createFillerRooms, getRoomList, sortAlphabetically } from "./utils";
 
 /**
  * The unread-activity toast ("Unread messages") appears at the bottom of the room list when a room with a
@@ -116,60 +116,6 @@ test.describe("Room list unread activity toast", () => {
             await expect(roomList.getByRole("option", { name: "Open room room 00" })).toBeVisible();
             await expect(targetRow).not.toBeInViewport();
             await expect(getToast(page)).not.toBeVisible();
-        });
-    });
-
-    test.describe("sections", () => {
-        test.beforeEach(async ({ page, app, user }) => {
-            await rejectToast(page, "Verify this device");
-            await rejectToast(page, "Notifications");
-            await page.getByRole("button", { name: "User menu" }).focus();
-        });
-
-        test("shows a toast for a collapsed section that hides a notifying room", async ({ page, app, bot }) => {
-            const roomList = getRoomList(page);
-
-            // A regular (Chats) room with a notification count.
-            const notifyId = await app.client.createRoom({ name: "chats notify room" });
-            await app.client.inviteUser(notifyId, bot.credentials!.userId);
-            await bot.joinRoom(notifyId);
-
-            // A favourite room so the list renders in section mode from the start.
-            const favouriteId = await app.client.createRoom({ name: "favourite room" });
-            await app.client.evaluate(async (client, roomId) => {
-                await client.setRoomTag(roomId, "m.favourite");
-            }, favouriteId);
-
-            const roomsHeader = getSectionHeader(page, "Rooms");
-            await expect(roomsHeader).toBeVisible();
-
-            // Notify the Chats room and collapse the section while its header is still on screen.
-            await bot.sendMessage(notifyId, "Hidden in a collapsed section");
-            await expect(
-                roomList
-                    .getByRole("row", { name: "Open room chats notify room" })
-                    .getByTestId("notification-decoration"),
-            ).toBeVisible();
-            await roomsHeader.click();
-            await expect(roomsHeader).toHaveAttribute("aria-expanded", "false");
-
-            // Grow the Favourites section until the collapsed Chats header is pushed below the fold.
-            for (let i = 0; i < 20; i++) {
-                const id = await app.client.createRoom({ name: `favourite ${String(i).padStart(2, "0")}` });
-                await app.client.evaluate(async (client, roomId) => {
-                    await client.setRoomTag(roomId, "m.favourite");
-                }, id);
-            }
-
-            // Wait until the collapsed Chats header has been pushed offscreen (all favourites synced).
-            await expect(roomsHeader).not.toBeInViewport();
-
-            // The collapsed Chats header is offscreen, but its hidden notification raises the toast.
-            await expect(getToast(page)).toBeVisible();
-
-            // Clicking the toast scrolls the collapsed section header into view.
-            await getToast(page).click();
-            await expect(roomsHeader).toBeInViewport();
         });
     });
 });

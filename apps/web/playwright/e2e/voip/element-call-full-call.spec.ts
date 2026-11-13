@@ -7,7 +7,6 @@ Please see LICENSE files in the repository root for full details.
 
 import { type FrameLocator, type Page } from "@playwright/test";
 import {
-    closeReleaseAnnouncementIfExists,
     populateLocalStorageWithCredentials,
     rejectToast,
     routeConfigJson,
@@ -41,7 +40,6 @@ test.skip(({ homeserverType }) => homeserverType !== "synapse", "Needs Synapse's
 async function settleNewSession(page: Page): Promise<void> {
     await rejectToast(page, "Verify this device");
     await rejectToast(page, "Notifications");
-    await closeReleaseAnnouncementIfExists(page, "Introducing Sections");
 }
 
 for (const embedding of ["widget", "react"] as const) {

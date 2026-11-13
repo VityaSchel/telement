@@ -42,9 +42,6 @@ const RoomListItemWrapperImpl = ({
     onCopyRoomLink,
     onLeaveRoom,
     onSetRoomNotifState,
-    onCreateSection,
-    onToggleSection,
-    onRemoveFromSection,
     isSelected,
     isFocused,
     onFocus,
@@ -63,9 +60,6 @@ const RoomListItemWrapperImpl = ({
         onCopyRoomLink,
         onLeaveRoom,
         onSetRoomNotifState,
-        onCreateSection,
-        onToggleSection,
-        onRemoveFromSection,
     });
     return (
         <RoomListItemView
@@ -310,12 +304,6 @@ export const LastItem: Story = {
     args: {
         isLastItem: true,
         isSelected: true,
-    },
-};
-
-export const SectionDisabled: Story = {
-    args: {
-        areSectionsEnabled: false,
     },
 };
 

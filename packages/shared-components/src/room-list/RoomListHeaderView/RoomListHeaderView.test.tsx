@@ -12,7 +12,7 @@ import React from "react";
 
 import * as stories from "./RoomListHeaderView.stories";
 
-const { Default, NoSpaceMenu, CollapseSections, ExpandSections } = composeStories(stories);
+const { Default, NoSpaceMenu, NoComposeMenu } = composeStories(stories);
 
 describe("RoomListHeaderView", () => {
     it("renders the default state", () => {
@@ -25,20 +25,9 @@ describe("RoomListHeaderView", () => {
         expect(container).toMatchSnapshot();
     });
 
-    it("renders collapse button", () => {
-        const { container } = render(<CollapseSections />);
-        expect(container).toMatchSnapshot();
-    });
-
-    it("renders expand button", () => {
-        const { container } = render(<ExpandSections />);
-        expect(container).toMatchSnapshot();
-    });
-
-    it("should bind the collapse all sections action", () => {
-        const { getByRole } = render(<CollapseSections />);
-        const collapseButton = getByRole("button", { name: "Collapse all sections" });
-        collapseButton.click();
-        expect(CollapseSections.args?.collapseOrExpandSections).toHaveBeenCalled();
+    it("renders a start chat button instead of the compose menu when rooms can't be created", () => {
+        const { getByRole } = render(<NoComposeMenu />);
+        getByRole("button", { name: "Start chat" }).click();
+        expect(NoComposeMenu.args?.createChatRoom).toHaveBeenCalled();
     });
 });

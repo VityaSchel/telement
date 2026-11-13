@@ -10,15 +10,9 @@ import { render, screen } from "@test-utils";
 import userEvent from "@testing-library/user-event";
 import { VirtuosoMockContext } from "react-virtuoso";
 import { composeStories } from "@storybook/react-vite";
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect } from "vitest";
 
 import * as stories from "./RoomListView.stories";
-
-// Stable UUIDs so snapshots don't change between runs.
-let uuidCounter = 0;
-vi.spyOn(crypto, "randomUUID").mockImplementation(
-    () => `00000000-0000-0000-0000-${String(++uuidCounter).padStart(12, "0")}` as ReturnType<typeof crypto.randomUUID>,
-);
 
 const {
     Default,
@@ -28,14 +22,12 @@ const {
     WithActiveFilter,
     SmallFlatList,
     LargeFlatList,
-    SmallSectionList,
-    LargeSectionList,
     EmptyPeopleFilter,
     EmptyRoomsFilter,
     EmptyUnreadFilter,
     EmptyInvitesFilter,
     EmptyMentionsFilter,
-    Toast,
+    UnreadActivityBelow,
 } = composeStories(stories);
 
 const renderWithMockContext = (component: React.ReactElement): ReturnType<typeof render> => {
@@ -84,16 +76,6 @@ describe("<RoomListView />", () => {
         expect(container).toMatchSnapshot();
     });
 
-    it("renders SmallSectionList story", () => {
-        const { container } = renderWithMockContext(<SmallSectionList />);
-        expect(container).toMatchSnapshot();
-    });
-
-    it("renders LargeSectionList story", () => {
-        const { container } = renderWithMockContext(<LargeSectionList />);
-        expect(container).toMatchSnapshot();
-    });
-
     it("renders EmptyPeopleFilter story", () => {
         const { container } = renderWithMockContext(<EmptyPeopleFilter />);
         expect(container).toMatchSnapshot();
@@ -116,11 +98,6 @@ describe("<RoomListView />", () => {
 
     it("renders EmptyMentionsFilter story", () => {
         const { container } = renderWithMockContext(<EmptyMentionsFilter />);
-        expect(container).toMatchSnapshot();
-    });
-
-    it("renders Toast story", () => {
-        const { container } = renderWithMockContext(<Toast />);
         expect(container).toMatchSnapshot();
     });
 
@@ -178,12 +155,12 @@ describe("<RoomListView />", () => {
         expect(EmptyMentionsFilter.args.onToggleFilter).toHaveBeenCalled();
     });
 
-    it("should call closeToast when close button is clicked on toast", async () => {
+    it("should call scrollToUnreadActivity when the unread activity toast is clicked", async () => {
         const user = userEvent.setup();
-        renderWithMockContext(<Toast />);
+        renderWithMockContext(<UnreadActivityBelow />);
 
-        await user.click(screen.getByRole("button", { name: "Close" }));
+        await user.click(screen.getByRole("button", { name: "Unread messages" }));
 
-        expect(Toast.args.closeToast).toHaveBeenCalled();
+        expect(UnreadActivityBelow.args.scrollToUnreadActivity).toHaveBeenCalled();
     });
 });

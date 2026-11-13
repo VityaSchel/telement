@@ -13,18 +13,10 @@ import { RoomListLoadingSkeleton } from "./RoomListLoadingSkeleton";
 import { RoomListEmptyStateView } from "./RoomListEmptyStateView";
 import { VirtualizedRoomListView, type RoomListViewState } from "../VirtualizedRoomListView";
 import { type Room, type RoomListItemViewModel } from "../VirtualizedRoomListView/RoomListItemWrapper/RoomListItemView";
-import { type RoomListSectionHeaderViewModel } from "../VirtualizedRoomListView/RoomListSectionHeaderView";
 import { type ToastType, RoomListToast } from "./RoomListToast";
 import styles from "./RoomListView.module.css";
 import { Flex } from "../../core/utils/Flex";
 import { AutoHideScrollbar } from "../../core/utils/Scrollbar";
-
-export type RoomListSection = {
-    /** Unique identifier for the section */
-    id: string;
-    /** Array of room IDs that belong to this section */
-    roomIds: string[];
-};
 
 /**
  * Snapshot for the room list view
@@ -40,21 +32,15 @@ export type RoomListViewSnapshot = {
     activeFilterId?: FilterId;
     /** Room list state */
     roomListState: RoomListViewState;
-    /** Array of sections in the room list */
-    sections: RoomListSection[];
+    /** Array of room IDs for virtualization */
+    roomIds: string[];
     /** Optional description for the empty state */
     emptyStateDescription?: string;
     /** Optional action element for the empty state */
     emptyStateAction?: ReactNode;
     /** Whether the user can create rooms */
     canCreateRoom?: boolean;
-    /** Whether the room list is displayed as a flat list */
-    isFlatList: boolean;
-    /**
-     * The single toast to display (if any). The view model owns which toast wins when more
-     * than one applies (e.g. a transient "chat_moved" event toast takes precedence over the
-     * persistent "unread_activity" toast), so the view just renders whatever it is given.
-     */
+    /** The toast to display (if any) */
     toast?: ToastType;
 };
 
@@ -74,8 +60,8 @@ export interface RoomListViewActions {
      */
     getRoomItemViewModel: (roomId: string) => RoomListItemViewModel | undefined;
     /**
-     * Called when the rendered range changes (virtualization API). Indices are in room-index
-     * space (section header entries excluded): startIndex is inclusive, endIndex exclusive.
+     * Called when the rendered range changes (virtualization API).
+     * startIndex is inclusive, endIndex exclusive.
      */
     updateVisibleRooms: (startIndex: number, endIndex: number) => void;
     /**
@@ -83,10 +69,6 @@ export interface RoomListViewActions {
      * overscan buffer), used to decide whether unread activity is below the fold.
      */
     updateVisibleFold: (visibleEndIndex: number) => void;
-    /** Get view model for a specific section header (virtualization API) */
-    getSectionHeaderViewModel: (sectionId: string) => RoomListSectionHeaderViewModel;
-    /** Called to close the toast message */
-    closeToast: () => void;
     /** Called to scroll the next unread room below the visible area of the list into view */
     scrollToUnreadActivity: () => void;
     /**
@@ -96,14 +78,6 @@ export interface RoomListViewActions {
      * clicking the "unread activity" toast.
      */
     setScrollToIndex: (scrollToIndex: ((index: number) => void) | undefined) => void;
-    /** Called to change the section of a room */
-    changeRoomSection: (roomId: string, tag: string) => void;
-    /** Called to change the order of sections */
-    changeSectionOrder: (sourceTag: string, targetTag: string) => void;
-    /** Called when a section drag starts — collapses all sections */
-    onSectionOrRoomDragStart: () => void;
-    /** Called when a section drag ends (drop or cancel) — restores expansion states */
-    onSectionOrRoomDragEnd: () => void;
 }
 
 /**
@@ -150,13 +124,7 @@ export const RoomListView: React.FC<RoomListViewProps> = ({ vm, renderAvatar, on
             <Flex direction="column" className={styles.list}>
                 <AutoHideScrollbar className={styles.scrollbar}>
                     {listBody}
-                    {snapshot.toast && (
-                        <RoomListToast
-                            type={snapshot.toast}
-                            onClose={vm.closeToast}
-                            onClick={vm.scrollToUnreadActivity}
-                        />
-                    )}
+                    {snapshot.toast && <RoomListToast onClick={vm.scrollToUnreadActivity} />}
                 </AutoHideScrollbar>
             </Flex>
         </>

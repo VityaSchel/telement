@@ -101,15 +101,4 @@ describe("<ComposeMenuView />", () => {
 
         expect(vm.createVideoRoom).toHaveBeenCalledTimes(1);
     });
-
-    it("should create a new section", async () => {
-        const user = userEvent.setup();
-
-        const vm = new MockedViewModel({ ...defaultSnapshot, isMessagePreviewEnabled: true });
-        render(<ComposeMenuView vm={vm} />);
-
-        await user.click(screen.getByRole("button", { name: "New" }));
-        await user.click(screen.getByRole("menuitem", { name: "New section" }));
-        expect(vm.createSection).toHaveBeenCalled();
-    });
 });

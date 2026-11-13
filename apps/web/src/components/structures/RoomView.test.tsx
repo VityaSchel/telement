@@ -596,15 +596,14 @@ describe("RoomView", () => {
         );
 
         const { container } = await renderRoomView();
-        // We no longer show the grey shield for encrypted rooms, so it should not be there.
-        await waitFor(() => expect(container.querySelector(".mx_E2EIcon")).not.toBeInTheDocument());
+        // The room header shows no shield while the members are neither verified nor warned about.
+        const verifiedIconSelector = ".mx_RoomHeader_icon.mx_Verified";
+        await waitFor(() => expect(container.querySelector(verifiedIconSelector)).not.toBeInTheDocument());
 
         const verificationStatus = new UserVerificationStatus(true, true, false);
         vi.spyOn(cli.getCrypto()!, "getUserVerificationStatus").mockResolvedValue(verificationStatus);
         cli.emit(CryptoEvent.UserTrustStatusChanged, cli.getSafeUserId(), verificationStatus);
-        await waitFor(() =>
-            expect(container.querySelector(".mx_E2EIcon")).toHaveAccessibleName("Everyone in this room is verified"),
-        );
+        await waitFor(() => expect(container.querySelector(verifiedIconSelector)).toHaveAccessibleName("Verified"));
     });
 
     describe("video rooms", () => {

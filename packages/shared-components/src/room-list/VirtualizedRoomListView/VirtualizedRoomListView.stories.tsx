@@ -15,13 +15,7 @@ import type { RoomListViewSnapshot, RoomListViewActions } from "../RoomListView"
 import { useMockedViewModel } from "../../core/viewmodel";
 import { withViewDocs } from "../../../.storybook/withViewDocs";
 import type { FilterId } from "../RoomListPrimaryFilters";
-import {
-    renderAvatar,
-    createGetRoomItemViewModel,
-    mock10RoomsIds,
-    createGetSectionHeaderViewModel,
-    mock10RoomsSections,
-} from "../story-mocks";
+import { renderAvatar, createGetRoomItemViewModel, mock10RoomsIds } from "../story-mocks";
 
 type RoomListStoryProps = RoomListViewSnapshot &
     RoomListViewActions & { renderAvatar: (room: Room) => React.ReactElement };
@@ -32,17 +26,11 @@ const RoomListWrapperImpl = ({
     createChatRoom,
     createRoom,
     getRoomItemViewModel,
-    getSectionHeaderViewModel,
     updateVisibleRooms,
     updateVisibleFold,
-    closeToast,
     scrollToUnreadActivity,
     setScrollToIndex,
     renderAvatar: renderAvatarProp,
-    changeRoomSection,
-    changeSectionOrder,
-    onSectionOrRoomDragStart,
-    onSectionOrRoomDragEnd,
     ...rest
 }: RoomListStoryProps): JSX.Element => {
     const vm = useMockedViewModel(rest, {
@@ -50,16 +38,10 @@ const RoomListWrapperImpl = ({
         createChatRoom,
         createRoom,
         getRoomItemViewModel,
-        getSectionHeaderViewModel,
         updateVisibleRooms,
         updateVisibleFold,
-        closeToast,
         scrollToUnreadActivity,
         setScrollToIndex,
-        changeRoomSection,
-        changeSectionOrder,
-        onSectionOrRoomDragStart,
-        onSectionOrRoomDragEnd,
     });
 
     return (
@@ -87,25 +69,18 @@ const meta = {
         isRoomListEmpty: false,
         filterIds: mockFilterIds,
         activeFilterId: undefined,
-        sections: mock10RoomsSections,
+        roomIds: mock10RoomsIds,
         roomListState: defaultRoomListState,
         canCreateRoom: true,
         onToggleFilter: fn(),
         createChatRoom: fn(),
         createRoom: fn(),
         getRoomItemViewModel: createGetRoomItemViewModel(mock10RoomsIds),
-        getSectionHeaderViewModel: createGetSectionHeaderViewModel(mock10RoomsSections.map((section) => section.id)),
         updateVisibleRooms: fn(),
         updateVisibleFold: fn(),
         renderAvatar,
-        isFlatList: true,
-        closeToast: fn(),
         scrollToUnreadActivity: fn(),
         setScrollToIndex: fn(),
-        changeRoomSection: fn(),
-        changeSectionOrder: fn(),
-        onSectionOrRoomDragStart: fn(),
-        onSectionOrRoomDragEnd: fn(),
     },
     parameters: {
         design: {
@@ -126,9 +101,3 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
-
-export const Sections: Story = {
-    args: {
-        isFlatList: false,
-    },
-};

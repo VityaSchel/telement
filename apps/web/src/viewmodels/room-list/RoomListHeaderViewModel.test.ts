@@ -27,7 +27,6 @@ import {
 } from "../../utils/space";
 import { createRoom, hasCreateRoomRights } from "./utils";
 import PosthogTrackers from "../../PosthogTrackers";
-import { ReleaseAnnouncementStore } from "../../stores/ReleaseAnnouncementStore";
 
 vi.mock("../../PosthogTrackers", () => ({
     default: {
@@ -66,14 +65,10 @@ describe("RoomListHeaderViewModel", () => {
         vi.mocked(hasCreateRoomRights).mockReturnValue(true);
         vi.mocked(shouldShowSpaceSettings).mockReturnValue(true);
 
-        vi.spyOn(ReleaseAnnouncementStore.instance, "getReleaseAnnouncement").mockReturnValue(null);
-        vi.spyOn(ReleaseAnnouncementStore.instance, "nextReleaseAnnouncement").mockResolvedValue(undefined);
-
         vi.spyOn(SettingsStore, "getValue").mockImplementation((settingName: string) => {
             if (settingName === "RoomList.preferredSorting") return SortingAlgorithm.Recency;
             if (settingName === "feature_video_rooms") return true;
             if (settingName === "feature_element_call_video_rooms") return true;
-            if (settingName === "RoomList.OrderedCustomSections") return [];
             return false;
         });
     });
@@ -150,53 +145,6 @@ describe("RoomListHeaderViewModel", () => {
 
             vm = new RoomListHeaderViewModel({ matrixClient, spaceStore: sdkContext.spaceStore });
             expect(vm.getSnapshot().canAccessSpaceSettings).toBe(false);
-        });
-
-        it("should show message preview when RoomList.showMessagePreview is enabled", () => {
-            vi.spyOn(SettingsStore, "getValue").mockImplementation((settingName: string) => {
-                if (settingName === "RoomList.showMessagePreview") return true;
-                return false;
-            });
-
-            vm = new RoomListHeaderViewModel({ matrixClient, spaceStore: sdkContext.spaceStore });
-            expect(vm.getSnapshot().isMessagePreviewEnabled).toBe(true);
-        });
-
-        it("should set areSectionsEnabled to true when RoomList.showSections is enabled", () => {
-            vi.spyOn(SettingsStore, "getValue").mockImplementation((settingName: string) => {
-                if (settingName === "RoomList.showSections") return true;
-                return false;
-            });
-
-            vm = new RoomListHeaderViewModel({ matrixClient, spaceStore: sdkContext.spaceStore });
-            expect(vm.getSnapshot().areSectionsEnabled).toBe(true);
-        });
-
-        it("should update areSectionsEnabled when RoomList.showSections setting changes", () => {
-            let watchCallback: () => void = () => {};
-            vi.spyOn(SettingsStore, "watchSetting").mockImplementation((settingName, _roomId, callback) => {
-                if (settingName === "RoomList.showSections") watchCallback = callback as () => void;
-                return "watcher-id";
-            });
-
-            vm = new RoomListHeaderViewModel({ matrixClient, spaceStore: sdkContext.spaceStore });
-            expect(vm.getSnapshot().areSectionsEnabled).toBe(false);
-
-            // Enable sections
-            vi.spyOn(SettingsStore, "getValue").mockImplementation((settingName: string) => {
-                if (settingName === "RoomList.showSections") return true;
-                return false;
-            });
-            watchCallback();
-
-            expect(vm.getSnapshot().areSectionsEnabled).toBe(true);
-        });
-
-        it("should set displaySectionReleaseAnnouncement to true when sections feature is enabled and announcement is active", () => {
-            vi.spyOn(ReleaseAnnouncementStore.instance, "getReleaseAnnouncement").mockReturnValue("room_list_section");
-
-            vm = new RoomListHeaderViewModel({ matrixClient, spaceStore: sdkContext.spaceStore });
-            expect(vm.getSnapshot().displaySectionReleaseAnnouncement).toBe(true);
         });
     });
 
@@ -333,123 +281,6 @@ describe("RoomListHeaderViewModel", () => {
                 SortingAlgorithm.Alphabetic,
                 SortingAlgorithm.Unread,
             );
-        });
-
-        it("should call createSection on RoomListStoreV3 when createSection is called", () => {
-            const createSectionSpy = vi
-                .spyOn(RoomListStoreV3.instance, "createSection")
-                .mockResolvedValue("element.io.section.work");
-            vm = new RoomListHeaderViewModel({ matrixClient, spaceStore: sdkContext.spaceStore });
-            vm.createSection();
-            expect(createSectionSpy).toHaveBeenCalled();
-        });
-
-        describe("collapseOrExpandSections", () => {
-            it("should dispatch RoomListCollapseAllSections when collapseSections is not 'expand'", () => {
-                const fireSpy = vi.spyOn(defaultDispatcher, "fire");
-                vm = new RoomListHeaderViewModel({ matrixClient, spaceStore: sdkContext.spaceStore });
-
-                vm.collapseOrExpandSections();
-
-                expect(fireSpy).toHaveBeenCalledWith(Action.RoomListCollapseAllSections);
-            });
-
-            it("should dispatch RoomListExpandAllSections when collapseSections is 'expand'", () => {
-                const fireSpy = vi.spyOn(defaultDispatcher, "fire");
-                vm = new RoomListHeaderViewModel({ matrixClient, spaceStore: sdkContext.spaceStore });
-
-                // Drive the VM into the "expand" state by simulating all sections collapsed
-                defaultDispatcher.dispatch(
-                    {
-                        action: Action.RoomListSectionsCollapseStateChanged,
-                        collapseSections: "collapse",
-                    },
-                    true,
-                );
-                expect(vm.getSnapshot().collapseSections).toBe("expand");
-                vm.collapseOrExpandSections();
-
-                expect(fireSpy).toHaveBeenCalledWith(Action.RoomListExpandAllSections);
-            });
-        });
-
-        describe("RoomListSectionsCollapseStateChanged handling", () => {
-            it("should set collapseSections to 'expand' when collapseSections is collapse", () => {
-                vm = new RoomListHeaderViewModel({ matrixClient, spaceStore: sdkContext.spaceStore });
-
-                defaultDispatcher.dispatch(
-                    {
-                        action: Action.RoomListSectionsCollapseStateChanged,
-                        collapseSections: "collapse",
-                    },
-                    true,
-                );
-
-                expect(vm.getSnapshot().collapseSections).toBe("expand");
-            });
-
-            it("should set collapseSections to 'collapse' when collapseSections is expand", () => {
-                vm = new RoomListHeaderViewModel({ matrixClient, spaceStore: sdkContext.spaceStore });
-
-                defaultDispatcher.dispatch(
-                    {
-                        action: Action.RoomListSectionsCollapseStateChanged,
-                        collapseSections: "expand",
-                    },
-                    true,
-                );
-
-                expect(vm.getSnapshot().collapseSections).toBe("collapse");
-            });
-
-            it("should set collapseSections to undefined when collapseSections is undefined", () => {
-                vm = new RoomListHeaderViewModel({ matrixClient, spaceStore: sdkContext.spaceStore });
-
-                // First drive it into a non-undefined state
-                defaultDispatcher.dispatch(
-                    {
-                        action: Action.RoomListSectionsCollapseStateChanged,
-                        collapseSections: "collapse",
-                    },
-                    true,
-                );
-                expect(vm.getSnapshot().collapseSections).toBe("expand");
-
-                defaultDispatcher.dispatch(
-                    {
-                        action: Action.RoomListSectionsCollapseStateChanged,
-                        collapseSections: undefined,
-                    },
-                    true,
-                );
-
-                expect(vm.getSnapshot().collapseSections).toBeUndefined();
-            });
-        });
-
-        it("should toggle message preview from enabled to disabled", () => {
-            vi.spyOn(SettingsStore, "getValue").mockImplementation((settingName: string) => {
-                if (settingName === "RoomList.showMessagePreview") return true;
-                return false;
-            });
-            const setValueSpy = vi.spyOn(SettingsStore, "setValue").mockImplementation(vi.fn());
-
-            vm = new RoomListHeaderViewModel({ matrixClient, spaceStore: sdkContext.spaceStore });
-            expect(vm.getSnapshot().isMessagePreviewEnabled).toBe(true);
-
-            vm.toggleMessagePreview();
-
-            expect(setValueSpy).toHaveBeenCalledWith("RoomList.showMessagePreview", null, expect.anything(), false);
-            expect(vm.getSnapshot().isMessagePreviewEnabled).toBe(false);
-        });
-
-        it("should call nextReleaseAnnouncement and set displaySectionReleaseAnnouncement to false when closeSectionReleaseAnnouncement is called", () => {
-            vm = new RoomListHeaderViewModel({ matrixClient, spaceStore: sdkContext.spaceStore });
-
-            vm.closeSectionReleaseAnnouncement();
-
-            expect(ReleaseAnnouncementStore.instance.nextReleaseAnnouncement).toHaveBeenCalled();
-            expect(vm.getSnapshot().displaySectionReleaseAnnouncement).toBe(false);
         });
     });
 });

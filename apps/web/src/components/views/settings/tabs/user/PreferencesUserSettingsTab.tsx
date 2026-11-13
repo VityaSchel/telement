@@ -117,6 +117,9 @@ const SpellCheckSection: React.FC = () => {
 };
 
 export default class PreferencesUserSettingsTab extends React.Component<EmptyObject, IState> {
+    // Telement: previews are always on and sections always off, so the section only shows if a setting is added here
+    private static ROOM_LIST_SETTINGS: BooleanSettingKey[] = [];
+
     private static SPACES_SETTINGS: BooleanSettingKey[] = ["Spaces.allRoomsInHome"];
 
     private static KEYBINDINGS_SETTINGS: BooleanSettingKey[] = ["ctrlFForSearch"];
@@ -129,7 +132,6 @@ export default class PreferencesUserSettingsTab extends React.Component<EmptyObj
         "MessageComposerInput.suggestEmoji",
         "MessageComposerInput.ctrlEnterToSend",
         "MessageComposerInput.surroundWith",
-        "MessageComposerInput.showStickersButton",
         "MessageComposerInput.insertTrailingColon",
     ];
 
@@ -275,15 +277,11 @@ export default class PreferencesUserSettingsTab extends React.Component<EmptyObj
                         </SettingsSubsection>
                     )}
 
-                    <SettingsSubsection heading={_t("settings|preferences|room_list_heading")} formWrap>
-                        <SettingsFlag name="RoomList.showMessagePreview" level={SettingLevel.DEVICE} />
-                        <SettingsFlag name="RoomList.showSections" level={SettingLevel.ACCOUNT} />
-                        <SettingsFlag
-                            name="RoomList.showPeopleSection"
-                            level={SettingLevel.ACCOUNT}
-                            requires={["RoomList.showSections"]}
-                        />
-                    </SettingsSubsection>
+                    {PreferencesUserSettingsTab.ROOM_LIST_SETTINGS.length > 0 && (
+                        <SettingsSubsection heading={_t("settings|preferences|room_list_heading")} formWrap>
+                            {this.renderGroup(PreferencesUserSettingsTab.ROOM_LIST_SETTINGS, SettingLevel.ACCOUNT)}
+                        </SettingsSubsection>
+                    )}
 
                     <SettingsSubsection heading={_t("common|spaces")} formWrap>
                         {this.renderGroup(PreferencesUserSettingsTab.SPACES_SETTINGS, SettingLevel.ACCOUNT)}

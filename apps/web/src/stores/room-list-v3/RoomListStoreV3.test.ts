@@ -14,14 +14,7 @@ import { mkEvent, mkMessage, mkSpace, mkStubRoom, stubClient, upsertRoomStateEve
 
 import type { MatrixClient } from "matrix-js-sdk/src/matrix";
 import type { RoomNotificationState } from "../notifications/RoomNotificationState";
-import {
-    LISTS_UPDATE_EVENT,
-    ROOM_TAGGED_EVENT,
-    SECTION_CREATED_EVENT,
-    RoomListStoreV3Class,
-    type Section,
-} from "./RoomListStoreV3";
-import * as sectionModule from "./section";
+import { LISTS_UPDATE_EVENT, RoomListStoreV3Class } from "./RoomListStoreV3";
 import { AsyncStoreWithClient } from "../AsyncStoreWithClient";
 import { RecencySorter } from "./skip-list/sorters/RecencySorter";
 import { getMockedRooms } from "./skip-list/__mocks__";
@@ -38,7 +31,6 @@ import * as utils from "../../utils/notifications";
 import * as utilsRLS from "./utils.ts";
 import { Action } from "../../dispatcher/actions";
 import { SettingLevel } from "../../settings/SettingLevel.ts";
-import { CHATS_TAG } from "./section";
 import { SDKContextClass } from "../../contexts/SDKContextClass.ts";
 import { UPDATE_EVENT } from "../AsyncStore.ts";
 
@@ -350,34 +342,6 @@ describe("RoomListStoreV3", () => {
             expect(fn).toHaveBeenCalled();
         });
 
-        it("emits ROOM_TAGGED_EVENT on a local user tag action when showToast is true", async () => {
-            const { store, dispatcher } = await getRoomListStore();
-            const fn = vi.fn();
-            store.on(ROOM_TAGGED_EVENT, fn);
-            dispatcher.dispatch(
-                {
-                    action: "RoomListActions.tagRoom.success",
-                    result: { showToast: true },
-                },
-                true,
-            );
-            expect(fn).toHaveBeenCalled();
-        });
-
-        it("does not emit ROOM_TAGGED_EVENT when showToast is false", async () => {
-            const { store, dispatcher } = await getRoomListStore();
-            const fn = vi.fn();
-            store.on(ROOM_TAGGED_EVENT, fn);
-            dispatcher.dispatch(
-                {
-                    action: "RoomListActions.tagRoom.success",
-                    result: { showToast: false },
-                },
-                true,
-            );
-            expect(fn).not.toHaveBeenCalled();
-        });
-
         it("Room is re-inserted on decryption", async () => {
             const { store, rooms, client, dispatcher } = await getRoomListStore();
             vi.spyOn(client, "getRoom").mockImplementation(() => rooms[10]);
@@ -547,10 +511,7 @@ describe("RoomListStoreV3", () => {
                 store.on(LISTS_UPDATE_EVENT, fn);
 
                 // The rooms which belong to the space should not be shown
-                const result = store
-                    .getSortedRoomsInActiveSpace()
-                    .sections.flatMap((s) => s.rooms)
-                    .map((r) => r.roomId);
+                const result = store.getSortedRoomsInActiveSpace().rooms.map((r) => r.roomId);
                 for (const id of roomIds) {
                     expect(result).not.toContain(id);
                 }
@@ -561,10 +522,7 @@ describe("RoomListStoreV3", () => {
                 );
                 SDKContextClass.instance.spaceStore.emit(UPDATE_SELECTED_SPACE);
                 expect(fn).toHaveBeenCalled();
-                const result2 = store
-                    .getSortedRoomsInActiveSpace()
-                    .sections.flatMap((s) => s.rooms)
-                    .map((r) => r.roomId);
+                const result2 = store.getSortedRoomsInActiveSpace().rooms.map((r) => r.roomId);
                 for (const id of roomIds) {
                     expect(result2).toContain(id);
                 }
@@ -600,10 +558,7 @@ describe("RoomListStoreV3", () => {
                 store.on(LISTS_UPDATE_EVENT, fn);
 
                 const roomIdsInActiveSpace = (): string[] =>
-                    store
-                        .getSortedRoomsInActiveSpace()
-                        .sections.flatMap((s) => s.rooms)
-                        .map((r) => r.roomId);
+                    store.getSortedRoomsInActiveSpace().rooms.map((r) => r.roomId);
 
                 expect(roomIdsInActiveSpace()).toContain(dmRoomId);
 
@@ -638,9 +593,7 @@ describe("RoomListStoreV3", () => {
                 await store.start();
 
                 // Sorted, filtered rooms should be 8, 27 and 75
-                const result = store
-                    .getSortedRoomsInActiveSpace([FilterEnum.FavouriteFilter])
-                    .sections.flatMap((s) => s.rooms);
+                const result = store.getSortedRoomsInActiveSpace([FilterEnum.FavouriteFilter]).rooms;
                 expect(result).toHaveLength(3);
                 for (const i of [8, 27, 75]) {
                     expect(result).toContain(rooms[i]);
@@ -675,9 +628,7 @@ describe("RoomListStoreV3", () => {
                 expect(fn).toHaveBeenCalled();
 
                 // Sorted, filtered rooms should be 27 and 75
-                const result = store
-                    .getSortedRoomsInActiveSpace([FilterEnum.FavouriteFilter])
-                    .sections.flatMap((s) => s.rooms);
+                const result = store.getSortedRoomsInActiveSpace([FilterEnum.FavouriteFilter]).rooms;
                 expect(result).toHaveLength(2);
                 for (const i of [8, 75]) {
                     expect(result).toContain(rooms[i]);
@@ -712,9 +663,7 @@ describe("RoomListStoreV3", () => {
                     await store.start();
 
                     // Should only give us rooms at index 8 and 27 when Notifications.activityIsUnread=false
-                    const result = store
-                        .getSortedRoomsInActiveSpace([FilterEnum.UnreadFilter])
-                        .sections.flatMap((s) => s.rooms);
+                    const result = store.getSortedRoomsInActiveSpace([FilterEnum.UnreadFilter]).rooms;
                     expect(result).toHaveLength(2);
                     for (const i of [8, 27]) {
                         expect(result).toContain(rooms[i]);
@@ -732,9 +681,7 @@ describe("RoomListStoreV3", () => {
                 await store.start();
 
                 // Since there's no unread yet, we expect zero results
-                let result = store
-                    .getSortedRoomsInActiveSpace([FilterEnum.UnreadFilter])
-                    .sections.flatMap((s) => s.rooms);
+                let result = store.getSortedRoomsInActiveSpace([FilterEnum.UnreadFilter]).rooms;
                 expect(result).toHaveLength(0);
 
                 // Mock so that room at index 8 is marked as unread
@@ -749,7 +696,7 @@ describe("RoomListStoreV3", () => {
                 );
 
                 // Now we expect room at index 8 to show as unread
-                result = store.getSortedRoomsInActiveSpace([FilterEnum.UnreadFilter]).sections.flatMap((s) => s.rooms);
+                result = store.getSortedRoomsInActiveSpace([FilterEnum.UnreadFilter]).rooms;
                 expect(result).toHaveLength(1);
                 expect(result).toContain(rooms[8]);
             });
@@ -777,9 +724,7 @@ describe("RoomListStoreV3", () => {
                 await store.start();
 
                 // When we ask which rooms to display
-                const result = store
-                    .getSortedRoomsInActiveSpace([FilterEnum.UnreadFilter])
-                    .sections.flatMap((s) => s.rooms);
+                const result = store.getSortedRoomsInActiveSpace([FilterEnum.UnreadFilter]).rooms;
 
                 // Then our room is included, along with the unread ones
                 expect(result).toHaveLength(3);
@@ -806,18 +751,14 @@ describe("RoomListStoreV3", () => {
                 await store.start();
 
                 // Should only give us rooms at index 8 and 27
-                const peopleRooms = store
-                    .getSortedRoomsInActiveSpace([FilterEnum.PeopleFilter])
-                    .sections.flatMap((s) => s.rooms);
+                const peopleRooms = store.getSortedRoomsInActiveSpace([FilterEnum.PeopleFilter]).rooms;
                 expect(peopleRooms).toHaveLength(2);
                 for (const i of [8, 27]) {
                     expect(peopleRooms).toContain(rooms[i]);
                 }
 
                 // Rest are normal rooms
-                const nonDms = store
-                    .getSortedRoomsInActiveSpace([FilterEnum.RoomsFilter])
-                    .sections.flatMap((s) => s.rooms);
+                const nonDms = store.getSortedRoomsInActiveSpace([FilterEnum.RoomsFilter]).rooms;
                 expect(nonDms).toHaveLength(3);
                 for (const i of [6, 13, 75]) {
                     expect(nonDms).toContain(rooms[i]);
@@ -841,9 +782,7 @@ describe("RoomListStoreV3", () => {
                 const store = new RoomListStoreV3Class(dispatcher);
                 await store.start();
 
-                const result = store
-                    .getSortedRoomsInActiveSpace([FilterEnum.InvitesFilter])
-                    .sections.flatMap((s) => s.rooms);
+                const result = store.getSortedRoomsInActiveSpace([FilterEnum.InvitesFilter]).rooms;
                 expect(result).toHaveLength(5);
                 for (const room of invitedRooms) {
                     expect(result).toContain(room);
@@ -868,9 +807,7 @@ describe("RoomListStoreV3", () => {
                 await store.start();
 
                 // Should only give us rooms at index 8 and 27
-                const result = store
-                    .getSortedRoomsInActiveSpace([FilterEnum.MentionsFilter])
-                    .sections.flatMap((s) => s.rooms);
+                const result = store.getSortedRoomsInActiveSpace([FilterEnum.MentionsFilter]).rooms;
                 expect(result).toHaveLength(2);
                 for (const i of [8, 27]) {
                     expect(result).toContain(rooms[i]);
@@ -892,9 +829,7 @@ describe("RoomListStoreV3", () => {
                 await store.start();
 
                 // Sorted, filtered rooms should be 8, 27 and 75
-                const result = store
-                    .getSortedRoomsInActiveSpace([FilterEnum.LowPriorityFilter])
-                    .sections.flatMap((s) => s.rooms);
+                const result = store.getSortedRoomsInActiveSpace([FilterEnum.LowPriorityFilter]).rooms;
                 expect(result).toHaveLength(3);
                 for (const i of [8, 27, 75]) {
                     expect(result).toContain(rooms[i]);
@@ -922,9 +857,10 @@ describe("RoomListStoreV3", () => {
                 await store.start();
 
                 // Should give us only room at 8 since that's the only room which matches both filters
-                const result = store
-                    .getSortedRoomsInActiveSpace([FilterEnum.UnreadFilter, FilterEnum.FavouriteFilter])
-                    .sections.flatMap((s) => s.rooms);
+                const result = store.getSortedRoomsInActiveSpace([
+                    FilterEnum.UnreadFilter,
+                    FilterEnum.FavouriteFilter,
+                ]).rooms;
                 expect(result).toHaveLength(1);
                 expect(result).toContain(rooms[8]);
             });
@@ -943,9 +879,7 @@ describe("RoomListStoreV3", () => {
                     },
                     true,
                 );
-                expect(
-                    store.getSortedRoomsInActiveSpace([FilterEnum.InvitesFilter]).sections.flatMap((s) => s.rooms),
-                ).not.toContain(room);
+                expect(store.getSortedRoomsInActiveSpace([FilterEnum.InvitesFilter]).rooms).not.toContain(room);
 
                 room.getMyMembership = vi.fn().mockReturnValue(KnownMembership.Invite);
                 dispatcher.dispatch(
@@ -957,9 +891,7 @@ describe("RoomListStoreV3", () => {
                     },
                     true,
                 );
-                expect(
-                    store.getSortedRoomsInActiveSpace([FilterEnum.InvitesFilter]).sections.flatMap((s) => s.rooms),
-                ).toContain(room);
+                expect(store.getSortedRoomsInActiveSpace([FilterEnum.InvitesFilter]).rooms).toContain(room);
             });
 
             it("updates filters when Notifications.activityIsUnread setting changes", async () => {
@@ -979,9 +911,7 @@ describe("RoomListStoreV3", () => {
                 await SettingsStore.setValue("Notifications.activityIsUnread", null, SettingLevel.DEVICE, true);
 
                 // Then both rooms are in the room list
-                const showboldRooms = store
-                    .getSortedRoomsInActiveSpace([FilterEnum.UnreadFilter])
-                    .sections.flatMap((s) => s.rooms);
+                const showboldRooms = store.getSortedRoomsInActiveSpace([FilterEnum.UnreadFilter]).rooms;
                 expect(showboldRooms).toContain(rooms[27]);
                 expect(showboldRooms).toContain(rooms[8]);
 
@@ -989,9 +919,7 @@ describe("RoomListStoreV3", () => {
                 await SettingsStore.setValue("Notifications.activityIsUnread", null, SettingLevel.DEVICE, false);
 
                 // Then only the room with a notification is in the room list
-                const noShowboldRooms = store
-                    .getSortedRoomsInActiveSpace([FilterEnum.UnreadFilter])
-                    .sections.flatMap((s) => s.rooms);
+                const noShowboldRooms = store.getSortedRoomsInActiveSpace([FilterEnum.UnreadFilter]).rooms;
                 expect(noShowboldRooms).toContain(rooms[27]);
                 expect(noShowboldRooms).not.toContain(rooms[8]);
             });
@@ -1022,9 +950,7 @@ describe("RoomListStoreV3", () => {
                 await store.start();
 
                 // Then the current room is in the room list
-                const showboldRooms = store
-                    .getSortedRoomsInActiveSpace([FilterEnum.UnreadFilter])
-                    .sections.flatMap((s) => s.rooms);
+                const showboldRooms = store.getSortedRoomsInActiveSpace([FilterEnum.UnreadFilter]).rooms;
 
                 expect(showboldRooms).toContain(rooms[27]);
                 expect(showboldRooms).toContain(rooms[13]);
@@ -1035,9 +961,7 @@ describe("RoomListStoreV3", () => {
                 store.emit(UPDATE_EVENT);
 
                 // Then the newly-current room is in the list and the previous one is not
-                const noShowboldRooms = store
-                    .getSortedRoomsInActiveSpace([FilterEnum.UnreadFilter])
-                    .sections.flatMap((s) => s.rooms);
+                const noShowboldRooms = store.getSortedRoomsInActiveSpace([FilterEnum.UnreadFilter]).rooms;
 
                 expect(noShowboldRooms).toContain(rooms[27]);
                 expect(noShowboldRooms).not.toContain(rooms[75]);
@@ -1069,8 +993,7 @@ describe("RoomListStoreV3", () => {
                 const store = new RoomListStoreV3Class(dispatcher);
                 await store.start();
 
-                const unreadRooms = (): Room[] =>
-                    store.getSortedRoomsInActiveSpace([FilterEnum.UnreadFilter]).sections.flatMap((s) => s.rooms);
+                const unreadRooms = (): Room[] => store.getSortedRoomsInActiveSpace([FilterEnum.UnreadFilter]).rooms;
 
                 // Then room 13 is kept in the list even though it is read
                 expect(unreadRooms()).toEqual(expect.arrayContaining([rooms[27], rooms[13]]));
@@ -1186,21 +1109,7 @@ describe("RoomListStoreV3", () => {
         });
     });
 
-    describe("Sections", () => {
-        function enableSections(showPeopleSection = false): void {
-            vi.spyOn(SettingsStore, "getValue").mockImplementation((setting: string) => {
-                if (setting === "RoomList.showSections") return true;
-                if (setting === "RoomList.showPeopleSection") return showPeopleSection;
-                if (setting === "RoomList.OrderedCustomSections") return [];
-                if (setting === "RoomList.CustomSectionData") return {};
-                return false;
-            });
-        }
-
-        function findSection(sections: Section[], tag: string): Section | undefined {
-            return sections.find((s) => s.tag === tag);
-        }
-
+    describe("Flat list", () => {
         function mockDmRooms(dmRooms: Room[]): void {
             const dmRoomIds = dmRooms.map((room) => room.roomId);
             vi.spyOn(DMRoomMap, "shared").mockImplementation((() => {
@@ -1210,279 +1119,17 @@ describe("RoomListStoreV3", () => {
             }) as () => DMRoomMap);
         }
 
-        function getClientAndRooms() {
+        it("returns every room once, whatever its tags, membership or DM status", async () => {
             const client = stubClient();
             const rooms = getMockedRooms(client);
             client.getVisibleRooms = vi.fn().mockReturnValue(rooms);
             vi.spyOn(AsyncStoreWithClient.prototype, "matrixClient", "get").mockReturnValue(client);
-            return { client, rooms };
-        }
-
-        it("returns the default sections in the correct order", async () => {
-            enableSections();
-            getClientAndRooms();
-
-            const store = new RoomListStoreV3Class(dispatcher);
-            await store.start();
-
-            const result = store.getSortedRoomsInActiveSpace();
-            expect(result.sections.map((s) => s.tag)).toEqual([
-                DefaultTagID.Invite,
-                DefaultTagID.Favourite,
-                CHATS_TAG,
-                DefaultTagID.LowPriority,
-            ]);
-        });
-
-        it("moves a room to another section when it is tagged at runtime", async () => {
-            enableSections();
-            const { rooms } = getClientAndRooms();
-
-            const store = new RoomListStoreV3Class(dispatcher);
-            await store.start();
-
-            // Given an untagged room sits in the Chats section
-            const room = rooms[3];
-            let sections = store.getSortedRoomsInActiveSpace().sections;
-            expect(findSection(sections, CHATS_TAG)!.rooms).toContain(room);
-            expect(findSection(sections, DefaultTagID.Favourite)!.rooms).not.toContain(room);
-
-            // When the user favourites it
-            room.tags[DefaultTagID.Favourite] = {};
-            dispatcher.dispatch({ action: "MatrixActions.Room.tags", room }, true);
-
-            // Then it moves to the Favourites section
-            sections = store.getSortedRoomsInActiveSpace().sections;
-            expect(findSection(sections, DefaultTagID.Favourite)!.rooms).toContain(room);
-            expect(findSection(sections, CHATS_TAG)!.rooms).not.toContain(room);
-        });
-
-        it("does not load the sections before the matrix client is ready", () => {
-            enableSections();
-            const getOrderedSectionTagsSpy = vi.spyOn(sectionModule, "getOrderedSectionTags");
-
-            // Constructing the store must not read the sections yet: at this point account data
-            // (e.g. custom section ordering) may not have been loaded, so sections would be empty.
-            const store = new RoomListStoreV3Class(dispatcher);
-
-            expect(getOrderedSectionTagsSpy).not.toHaveBeenCalled();
-            expect(store.orderedSectionTags).toEqual([]);
-        });
-
-        it("loads the sections once the store becomes ready", async () => {
-            enableSections();
-            getClientAndRooms();
-            const getOrderedSectionTagsSpy = vi.spyOn(sectionModule, "getOrderedSectionTags");
-
-            const store = new RoomListStoreV3Class(dispatcher);
-            expect(getOrderedSectionTagsSpy).not.toHaveBeenCalled();
-
-            await store.start();
-
-            expect(getOrderedSectionTagsSpy).toHaveBeenCalled();
-            expect(store.orderedSectionTags).toEqual([
-                DefaultTagID.Invite,
-                DefaultTagID.Favourite,
-                CHATS_TAG,
-                DefaultTagID.LowPriority,
-            ]);
-        });
-
-        describe("RoomList.showSections disabled", () => {
-            function disableSections(): void {
-                vi.spyOn(SettingsStore, "getValue").mockImplementation((setting: string) => {
-                    if (setting === "RoomList.showSections") return false;
-                    if (setting === "RoomList.OrderedCustomSections") return [];
-                    if (setting === "RoomList.CustomSectionData") return {};
-                    return false;
-                });
-            }
-
-            it("returns a single Chats section containing the rooms", async () => {
-                disableSections();
-                const { rooms } = getClientAndRooms();
-
-                rooms[3].tags[DefaultTagID.Favourite] = {};
-                rooms[7].tags[DefaultTagID.LowPriority] = {};
-
-                const store = new RoomListStoreV3Class(dispatcher);
-                await store.start();
-
-                const { sections } = store.getSortedRoomsInActiveSpace();
-                expect(sections).toHaveLength(1);
-                expect(sections[0].tag).toBe(CHATS_TAG);
-                expect(sections[0].rooms).toContain(rooms[3]);
-                expect(sections[0].rooms).toContain(rooms[7]);
-            });
-        });
-
-        describe("RoomList.showPeopleSection enabled", () => {
-            const customTag = "element.io.section.custom";
-
-            it("adds the People section above the other reorderable sections", async () => {
-                enableSections(true);
-                getClientAndRooms();
-
-                const store = new RoomListStoreV3Class(dispatcher);
-                await store.start();
-
-                const { sections } = store.getSortedRoomsInActiveSpace();
-                expect(sections.map((section) => section.tag)).toEqual([
-                    DefaultTagID.Invite,
-                    DefaultTagID.Favourite,
-                    DefaultTagID.DM,
-                    CHATS_TAG,
-                    DefaultTagID.LowPriority,
-                ]);
-            });
-
-            it("places direct messages only in the People section", async () => {
-                enableSections(true);
-                const { rooms } = getClientAndRooms();
-                mockDmRooms([rooms[3], rooms[7]]);
-
-                const store = new RoomListStoreV3Class(dispatcher);
-                await store.start();
-
-                const { sections } = store.getSortedRoomsInActiveSpace();
-                const peopleSection = findSection(sections, DefaultTagID.DM)!;
-                const chatsSection = findSection(sections, CHATS_TAG)!;
-
-                expect(peopleSection.rooms).toHaveLength(2);
-                for (const i of [3, 7]) {
-                    expect(peopleSection.rooms).toContain(rooms[i]);
-                    expect(chatsSection.rooms).not.toContain(rooms[i]);
-                }
-            });
-
-            it.each([DefaultTagID.Favourite, DefaultTagID.LowPriority, customTag])(
-                "places a direct message tagged with %s in that section only",
-                async (tag) => {
-                    const { rooms } = getClientAndRooms();
-                    mockDmRooms([rooms[3]]);
-                    rooms[3].tags[tag] = {};
-
-                    vi.spyOn(SettingsStore, "getValue").mockImplementation((setting: string) => {
-                        if (setting === "RoomList.showSections") return true;
-                        if (setting === "RoomList.showPeopleSection") return true;
-                        if (setting === "RoomList.OrderedCustomSections") return [customTag];
-                        if (setting === "RoomList.CustomSectionData")
-                            return { [customTag]: { tag: customTag, name: "Custom" } };
-                        return false;
-                    });
-
-                    const store = new RoomListStoreV3Class(dispatcher);
-                    await store.start();
-
-                    const { sections } = store.getSortedRoomsInActiveSpace();
-                    expect(findSection(sections, tag)!.rooms).toContain(rooms[3]);
-                    expect(findSection(sections, DefaultTagID.DM)!.rooms).not.toContain(rooms[3]);
-                    expect(findSection(sections, CHATS_TAG)!.rooms).not.toContain(rooms[3]);
-                },
-            );
-
-            it("moves the direct messages into the People section when the setting is turned on", async () => {
-                enableSections();
-                const { rooms } = getClientAndRooms();
-                mockDmRooms([rooms[3]]);
-
-                let settingsWatcher: () => void = () => {};
-                vi.spyOn(SettingsStore, "watchSetting").mockImplementation((settingName, _roomId, callback) => {
-                    if (settingName === "RoomList.showPeopleSection") settingsWatcher = callback as () => void;
-                    return "watcher-id";
-                });
-
-                const store = new RoomListStoreV3Class(dispatcher);
-                await store.start();
-
-                expect(findSection(store.getSortedRoomsInActiveSpace().sections, DefaultTagID.DM)).toBeUndefined();
-
-                enableSections(true);
-                await Promise.resolve(settingsWatcher());
-
-                const peopleSection = findSection(store.getSortedRoomsInActiveSpace().sections, DefaultTagID.DM)!;
-                expect(peopleSection.rooms).toEqual([rooms[3]]);
-            });
-        });
-
-        it("emits LISTS_UPDATE_EVENT when RoomList.showSections setting changes", async () => {
-            enableSections();
-            getClientAndRooms();
-
-            let settingsWatcher: () => void = () => {};
-            vi.spyOn(SettingsStore, "watchSetting").mockImplementation((settingName, _roomId, callback) => {
-                if (settingName === "RoomList.showSections") settingsWatcher = callback as () => void;
-                return "watcher-id";
-            });
-
-            const store = new RoomListStoreV3Class(dispatcher);
-            await store.start();
-
-            const listsUpdateListener = vi.fn();
-            store.on(LISTS_UPDATE_EVENT, listsUpdateListener);
-
-            settingsWatcher();
-
-            expect(listsUpdateListener).toHaveBeenCalled();
-        });
-
-        it.each([
-            { tag: DefaultTagID.Favourite, label: "Favourite" },
-            { tag: DefaultTagID.LowPriority, label: "LowPriority" },
-        ])("places tagged rooms only in the $label section", async ({ tag }) => {
-            enableSections();
-            const { rooms } = getClientAndRooms();
-
-            // Mark rooms 3, 7 with the given tag
-            [3, 7].forEach((i) => {
-                rooms[i].tags[tag] = {};
-            });
-
-            const store = new RoomListStoreV3Class(dispatcher);
-            await store.start();
-
-            const { sections } = store.getSortedRoomsInActiveSpace();
-            const targetSection = findSection(sections, tag)!;
-            const chatsSection = findSection(sections, CHATS_TAG)!;
-
-            for (const i of [3, 7]) {
-                expect(targetSection.rooms).toContain(rooms[i]);
-                expect(chatsSection.rooms).not.toContain(rooms[i]);
-            }
-        });
-
-        it("places regular rooms only in the Chats section", async () => {
-            enableSections();
-            const { rooms } = getClientAndRooms();
-
-            // Mark some rooms as favourite / low priority so the rest are regular
-            rooms[0].tags[DefaultTagID.Favourite] = {};
-            rooms[1].tags[DefaultTagID.LowPriority] = {};
-
-            const store = new RoomListStoreV3Class(dispatcher);
-            await store.start();
-
-            const { sections } = store.getSortedRoomsInActiveSpace();
-            const favSection = findSection(sections, DefaultTagID.Favourite)!;
-            const chatsSection = findSection(sections, CHATS_TAG)!;
-            const lowPrioritySection = findSection(sections, DefaultTagID.LowPriority)!;
-
-            // A regular room (index 5) should be in chats only
-            expect(chatsSection.rooms).toContain(rooms[5]);
-            expect(favSection.rooms).not.toContain(rooms[5]);
-            expect(lowPrioritySection.rooms).not.toContain(rooms[5]);
-        });
-
-        it("all rooms appear in exactly one section", async () => {
-            enableSections();
-            const { rooms } = getClientAndRooms();
 
             [2, 5].forEach((i) => {
                 rooms[i].tags[DefaultTagID.Favourite] = {};
             });
-            [11].forEach((i) => {
-                rooms[i].tags[DefaultTagID.LowPriority] = {};
-            });
+            rooms[11].tags[DefaultTagID.LowPriority] = {};
+            rooms[14].tags["u.custom"] = {};
             // Room 5 is both a favourite and a DM, and room 8 is only a DM
             mockDmRooms([rooms[5], rooms[8]]);
             // Room 2 is a favourite with a pending invitation
@@ -1491,251 +1138,22 @@ describe("RoomListStoreV3", () => {
             const store = new RoomListStoreV3Class(dispatcher);
             await store.start();
 
-            const { sections } = store.getSortedRoomsInActiveSpace();
-            const allRooms = sections.flatMap((s) => s.rooms);
-            // All 100 rooms should be distributed across the sections, without any duplicate
-            expect(allRooms).toHaveLength(rooms.length);
-            expect(new Set(allRooms).size).toBe(rooms.length);
-            // Without a People section, the untagged DM sits in the Chats section
-            expect(findSection(sections, DefaultTagID.DM)).toBeUndefined();
-            expect(findSection(sections, CHATS_TAG)!.rooms).toContain(rooms[8]);
+            const result = store.getSortedRoomsInActiveSpace();
+            expect(result.spaceId).toBe(MetaSpace.Home);
+            expect(result.filterKeys).toBeUndefined();
+            expect(result.rooms).toHaveLength(rooms.length);
+            expect(new Set(result.rooms).size).toBe(rooms.length);
+            [2, 5, 8, 11, 14].forEach((i) => expect(result.rooms).toContain(rooms[i]));
         });
 
-        it("places rooms with a pending invitation only in the Invites section", async () => {
-            enableSections();
-            const { rooms } = getClientAndRooms();
-
-            // Room 3 is only invited, room 7 is invited while also being a favourite DM
-            vi.spyOn(rooms[3], "getMyMembership").mockReturnValue(KnownMembership.Invite);
-            vi.spyOn(rooms[7], "getMyMembership").mockReturnValue(KnownMembership.Invite);
-            rooms[7].tags[DefaultTagID.Favourite] = {};
-            mockDmRooms([rooms[7]]);
-
+        it("returns no rooms before the store is ready", () => {
+            const client = stubClient();
+            client.getVisibleRooms = vi.fn().mockReturnValue(getMockedRooms(client));
+            vi.spyOn(AsyncStoreWithClient.prototype, "matrixClient", "get").mockReturnValue(client);
             const store = new RoomListStoreV3Class(dispatcher);
-            await store.start();
 
-            const { sections } = store.getSortedRoomsInActiveSpace();
-            const invitesSection = findSection(sections, DefaultTagID.Invite)!;
-
-            expect(invitesSection.rooms).toHaveLength(2);
-            for (const i of [3, 7]) {
-                expect(invitesSection.rooms).toContain(rooms[i]);
-                expect(findSection(sections, DefaultTagID.Favourite)!.rooms).not.toContain(rooms[i]);
-                expect(findSection(sections, CHATS_TAG)!.rooms).not.toContain(rooms[i]);
-            }
-        });
-
-        it("applies additional filter keys within each section", async () => {
-            enableSections();
-            const { rooms } = getClientAndRooms();
-
-            // Rooms 3 and 7 are favourites; room 7 is also unread
-            [3, 7].forEach((i) => {
-                rooms[i].tags[DefaultTagID.Favourite] = {};
-            });
-            vi.spyOn(RoomNotificationStateStore.instance, "getRoomState").mockImplementation((room) => {
-                const state = {
-                    hasUnreadCount: room === rooms[7],
-                } as unknown as RoomNotificationState;
-                return state;
-            });
-
-            const store = new RoomListStoreV3Class(dispatcher);
-            await store.start();
-
-            const { sections } = store.getSortedRoomsInActiveSpace([FilterEnum.UnreadFilter]);
-            const favSection = findSection(sections, DefaultTagID.Favourite)!;
-
-            // Only room 7 is both favourite AND unread
-            expect(favSection.rooms).toHaveLength(1);
-            expect(favSection.rooms).toContain(rooms[7]);
-        });
-
-        it("hides empty sections when filters are applied", async () => {
-            enableSections();
-            const { rooms } = getClientAndRooms();
-
-            // Mark room 3 as favourite; it's the only unread room
-            rooms[3].tags[DefaultTagID.Favourite] = {};
-            vi.spyOn(RoomNotificationStateStore.instance, "getRoomState").mockImplementation((room) => {
-                const state = {
-                    hasUnreadCount: room === rooms[3],
-                } as unknown as RoomNotificationState;
-                return state;
-            });
-
-            const store = new RoomListStoreV3Class(dispatcher);
-            await store.start();
-
-            // With the unread filter, only the Favourite section has matching rooms.
-            // The Chats and LowPriority sections should be hidden because they're empty.
-            const { sections } = store.getSortedRoomsInActiveSpace([FilterEnum.UnreadFilter]);
-            expect(sections).toHaveLength(1);
-            expect(sections[0].tag).toBe(DefaultTagID.Favourite);
-            expect(sections[0].rooms).toContain(rooms[3]);
-        });
-
-        it("shows empty sections when no filters are applied", async () => {
-            enableSections();
-            getClientAndRooms();
-
-            // No rooms are tagged, so Favourite and LowPriority sections will be empty
-            const store = new RoomListStoreV3Class(dispatcher);
-            await store.start();
-
-            const { sections } = store.getSortedRoomsInActiveSpace();
-            // All the sections should be present even though Invite/Favourite/LowPriority are empty
-            expect(sections).toHaveLength(4);
-            expect(findSection(sections, DefaultTagID.Invite)!.rooms).toHaveLength(0);
-            expect(findSection(sections, DefaultTagID.Favourite)!.rooms).toHaveLength(0);
-            expect(findSection(sections, DefaultTagID.LowPriority)!.rooms).toHaveLength(0);
-        });
-
-        it("sections respect space filtering", async () => {
-            enableSections();
-            const { rooms } = getClientAndRooms();
-
-            // Room 3 is a favourite room in the space
-            rooms[3].tags[DefaultTagID.Favourite] = {};
-
-            const spaceRoomId = "!space1:matrix.org";
-            const inSpaceIds = [3, 10, 20].map((i) => rooms[i].roomId);
-            vi.spyOn(SDKContextClass.instance.spaceStore, "isRoomInSpace").mockImplementation((space, id) => {
-                if (space === spaceRoomId && inSpaceIds.includes(id)) return true;
-                return false;
-            });
-            vi.spyOn(SDKContextClass.instance.spaceStore, "activeSpace", "get").mockImplementation(() => spaceRoomId);
-
-            const store = new RoomListStoreV3Class(dispatcher);
-            await store.start();
-
-            const { sections, spaceId } = store.getSortedRoomsInActiveSpace();
-            expect(spaceId).toBe(spaceRoomId);
-
-            const allRooms = sections.flatMap((s) => s.rooms);
-            const allRoomIds = allRooms.map((r) => r.roomId);
-
-            // Only rooms in the space should appear
-            for (const id of inSpaceIds) {
-                expect(allRoomIds).toContain(id);
-            }
-            // Rooms not in the space should not appear
-            expect(allRoomIds).not.toContain(rooms[50].roomId);
-
-            // Room 3 should be in the Favourite section specifically
-            const favSection = findSection(sections, DefaultTagID.Favourite)!;
-            expect(favSection.rooms).toContain(rooms[3]);
-        });
-
-        describe("createSection", () => {
-            it("emits SECTION_CREATED_EVENT and LISTS_UPDATE_EVENT when section is created", async () => {
-                enableSections();
-                getClientAndRooms();
-                vi.spyOn(sectionModule, "createSection").mockResolvedValue("element.io.section.test-tag");
-
-                const store = new RoomListStoreV3Class(dispatcher);
-                await store.start();
-
-                const sectionCreatedListener = vi.fn();
-                store.on(SECTION_CREATED_EVENT, sectionCreatedListener);
-
-                const tag = await store.createSection();
-                expect(tag).toBe("element.io.section.test-tag");
-
-                expect(sectionCreatedListener).toHaveBeenCalledWith("element.io.section.test-tag");
-            });
-
-            it("does not emit when section creation is cancelled", async () => {
-                enableSections();
-                getClientAndRooms();
-                vi.spyOn(sectionModule, "createSection").mockResolvedValue(undefined);
-
-                const store = new RoomListStoreV3Class(dispatcher);
-                await store.start();
-
-                const sectionCreatedListener = vi.fn();
-                store.on(SECTION_CREATED_EVENT, sectionCreatedListener);
-
-                await store.createSection();
-
-                expect(sectionCreatedListener).not.toHaveBeenCalled();
-            });
-        });
-
-        describe("editSection", () => {
-            it("delegates to the section module", async () => {
-                enableSections();
-                getClientAndRooms();
-                const editSectionSpy = vi.spyOn(sectionModule, "editSection").mockResolvedValue(undefined);
-
-                const store = new RoomListStoreV3Class(dispatcher);
-                await store.start();
-
-                await store.editSection("element.io.section.test-tag");
-                expect(editSectionSpy).toHaveBeenCalledWith("element.io.section.test-tag");
-            });
-        });
-
-        describe("removeSection", () => {
-            it("delegates to the section module and emits LISTS_UPDATE_EVENT", async () => {
-                enableSections();
-                getClientAndRooms();
-                vi.spyOn(sectionModule, "deleteSection").mockResolvedValue(undefined);
-
-                const store = new RoomListStoreV3Class(dispatcher);
-                await store.start();
-
-                const listsUpdateListener = vi.fn();
-                store.on(LISTS_UPDATE_EVENT, listsUpdateListener);
-
-                await store.removeSection("element.io.section.test-tag", false);
-                expect(sectionModule.deleteSection).toHaveBeenCalledWith("element.io.section.test-tag", false);
-                expect(listsUpdateListener).toHaveBeenCalled();
-            });
-        });
-
-        it("updates sections when RoomList.OrderedCustomSections setting changes", async () => {
-            enableSections();
-            const { rooms } = getClientAndRooms();
-
-            let settingsWatcher: (settingName: string) => void = () => {};
-            vi.spyOn(SettingsStore, "watchSetting").mockImplementation((settingName, _roomId, callback) => {
-                if (settingName === "RoomList.OrderedCustomSections") settingsWatcher = callback as () => void;
-                return "watcher-id";
-            });
-
-            const customTag = "element.io.section.custom";
-
-            vi.spyOn(SettingsStore, "getValue").mockImplementation((setting: string) => {
-                if (setting === "RoomList.showSections") return true;
-                if (setting === "RoomList.OrderedCustomSections") return [];
-                if (setting === "RoomList.CustomSectionData") return {};
-                return false;
-            });
-
-            const store = new RoomListStoreV3Class(dispatcher);
-            await store.start();
-
-            // Initial state: 5 sections (Invite, Favourite, Chats, LowPriority)
-            expect(store.getSortedRoomsInActiveSpace().sections).toHaveLength(4);
-
-            // Mark a room with the custom tag and update the settings
-            rooms[0].tags = { [customTag]: { order: 0 } };
-            vi.spyOn(SettingsStore, "getValue").mockImplementation((setting: string) => {
-                if (setting === "RoomList.showSections") return true;
-                if (setting === "RoomList.OrderedCustomSections") return [customTag];
-                if (setting === "RoomList.CustomSectionData")
-                    return { [customTag]: { tag: customTag, name: "Custom" } };
-                return false;
-            });
-
-            // Trigger the settings watcher
-            await Promise.resolve(settingsWatcher("RoomList.OrderedCustomSections"));
-
-            // Now there should be 6 sections (Invite, Favourite, custom, Chats, LowPriority)
-            expect(store.getSortedRoomsInActiveSpace().sections).toHaveLength(5);
-            const customSection = findSection(store.getSortedRoomsInActiveSpace().sections, customTag)!;
-            expect(customSection.rooms).toContain(rooms[0]);
+            expect(store.isLoadingRooms).toBe(true);
+            expect(store.getSortedRoomsInActiveSpace().rooms).toEqual([]);
         });
     });
 

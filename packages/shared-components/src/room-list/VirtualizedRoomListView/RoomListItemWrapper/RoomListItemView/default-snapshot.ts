@@ -31,29 +31,10 @@ export const defaultSnapshot: RoomListItemViewSnapshot = {
     showNotificationMenu: true,
     isFavourite: false,
     isLowPriority: false,
-    isDm: false,
     canInvite: true,
     canCopyRoomLink: true,
     canMarkAsRead: false,
     canMarkAsUnread: true,
     roomNotifState: RoomNotifState.AllMessages,
-    sections: [
-        {
-            tag: "m.favourite",
-            name: "Favourites",
-            isSelected: false,
-        },
-        {
-            tag: "element.io.section.work",
-            name: "Work with a very long name that should be truncated",
-            isSelected: true,
-        },
-        {
-            tag: "m.lowpriority",
-            name: "Low Priority",
-            isSelected: false,
-        },
-    ],
-    areSectionsEnabled: true,
     canChangeSection: true,
 };

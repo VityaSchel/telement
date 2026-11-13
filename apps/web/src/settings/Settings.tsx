@@ -55,11 +55,6 @@ import InviteRulesConfigController from "./controllers/InviteRulesConfigControll
 import { type ComputedInviteConfig } from "../@types/invite-rules.ts";
 import BlockInvitesConfigController from "./controllers/BlockInvitesConfigController.ts";
 import RequiresSettingsController from "./controllers/RequiresSettingsController.ts";
-import {
-    type ReorderableSection,
-    type CustomSectionsData,
-    type SectionExpansionState,
-} from "../stores/room-list-v3/section.ts";
 import { type NotificationSound } from "../Notifier.ts";
 import VideoRoomsBetaImage from "../../res/img/betas/video_rooms.png";
 
@@ -249,7 +244,6 @@ export interface Settings {
     "fontSizeDelta": IBaseSetting<number>;
     "useCustomFontSize": IBaseSetting<boolean>;
     "MessageComposerInput.suggestEmoji": IBaseSetting<boolean>;
-    "MessageComposerInput.showStickersButton": IBaseSetting<boolean>;
     "MessageComposerInput.showPollsButton": IBaseSetting<boolean>;
     "MessageComposerInput.insertTrailingColon": IBaseSetting<boolean>;
     "Notifications.showbold": IBaseSetting<boolean>;
@@ -338,7 +332,6 @@ export interface Settings {
     "RoomList.preferredSorting": IBaseSetting<SortingAlgorithm>;
     "RoomList.panelSize": IBaseSetting<number | null>;
     "RoomList.isPanelCollapsed": IBaseSetting<boolean>;
-    "RoomList.showMessagePreview": IBaseSetting<boolean>;
     "RightPanel.phasesGlobal": IBaseSetting<IRightPanelForRoomStored | null>;
     "RightPanel.phases": IBaseSetting<IRightPanelForRoomStored | null>;
     "enableEventIndexing": IBaseSetting<boolean>;
@@ -374,11 +367,6 @@ export interface Settings {
     "blockInvites": IBaseSetting<boolean>;
     "Developer.elementCallUrl": IBaseSetting<string>;
     "Developer.elementCallMockComponent": IBaseSetting<boolean>;
-    "RoomList.CustomSectionData": IBaseSetting<CustomSectionsData>;
-    "RoomList.OrderedCustomSections": IBaseSetting<ReorderableSection[]>;
-    "RoomList.SectionExpansionState": IBaseSetting<SectionExpansionState>;
-    "RoomList.showSections": IBaseSetting<boolean>;
-    "RoomList.showPeopleSection": IBaseSetting<boolean>;
     "composerUrlPreviewCollapsed": IBaseSetting<boolean>;
 }
 
@@ -705,12 +693,6 @@ export const SETTINGS: Settings = {
         default: true,
         invertedSettingName: "MessageComposerInput.dontSuggestEmoji",
     },
-    "MessageComposerInput.showStickersButton": {
-        supportedLevels: LEVELS_ACCOUNT_SETTINGS,
-        displayName: _td("settings|show_stickers_button"),
-        default: true,
-        controller: new UIFeatureController(UIFeature.Widgets, false),
-    },
     "MessageComposerInput.showPollsButton": {
         supportedLevels: LEVELS_ACCOUNT_SETTINGS,
         displayName: _td("settings|preferences|show_polls_button"),
@@ -885,7 +867,7 @@ export const SETTINGS: Settings = {
     "autoplayGifs": {
         supportedLevels: LEVELS_ACCOUNT_SETTINGS,
         displayName: _td("settings|autoplay_gifs"),
-        default: false,
+        default: true,
     },
     "autoplayVideo": {
         supportedLevels: LEVELS_ACCOUNT_SETTINGS,
@@ -1274,26 +1256,6 @@ export const SETTINGS: Settings = {
         supportedLevels: [SettingLevel.DEVICE],
         default: false,
     },
-    "RoomList.showMessagePreview": {
-        supportedLevels: LEVELS_DEVICE_ONLY_SETTINGS_WITH_CONFIG,
-        default: false,
-        displayName: _td("settings|show_message_previews"),
-    },
-    "RoomList.showSections": {
-        supportedLevels: LEVELS_ACCOUNT_SETTINGS,
-        default: true,
-        displayName: _td("settings|show_sections"),
-        controller: new AnalyticsController("WebRoomListSectionToggle"),
-    },
-    "RoomList.showPeopleSection": {
-        supportedLevels: LEVELS_ACCOUNT_SETTINGS,
-        default: true,
-        displayName: _td("settings|show_people_sections"),
-        controller: [
-            new AnalyticsController("WebRoomListPeopleSectionToggle"),
-            new RequiresSettingsController(["RoomList.showSections"]),
-        ],
-    },
     "composerUrlPreviewCollapsed": {
         supportedLevels: LEVELS_DEVICE_ONLY_SETTINGS,
         default: true,
@@ -1330,7 +1292,7 @@ export const SETTINGS: Settings = {
     },
     "layout": {
         supportedLevels: LEVELS_ACCOUNT_SETTINGS,
-        default: Layout.Group,
+        default: Layout.Bubble,
     },
     "Images.size": {
         supportedLevels: LEVELS_ACCOUNT_SETTINGS,
@@ -1414,30 +1376,6 @@ export const SETTINGS: Settings = {
      */
     "releaseAnnouncementData": {
         supportedLevels: LEVELS_ACCOUNT_SETTINGS,
-        default: {},
-    },
-    /**
-     * Managed by the {@link RoomListStoreV3}
-     * Store the custom section data for the room list
-     */
-    "RoomList.CustomSectionData": {
-        supportedLevels: LEVELS_ACCOUNT_SETTINGS,
-        default: {},
-    },
-    /**
-     * Managed by the {@link RoomListStoreV3}
-     * Store the ordering of the custom sections for the room list
-     */
-    "RoomList.OrderedCustomSections": {
-        supportedLevels: LEVELS_ACCOUNT_SETTINGS,
-        default: [],
-    },
-    /**
-     * Managed by the {@link RoomListSectionHeaderViewModel}
-     * Store the expanded/collapsed state of the room list sections, per space and per section tag
-     */
-    "RoomList.SectionExpansionState": {
-        supportedLevels: LEVELS_DEVICE_ONLY_SETTINGS,
         default: {},
     },
     [UIFeature.RoomHistorySettings]: {

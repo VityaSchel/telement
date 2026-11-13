@@ -179,7 +179,6 @@ exports[`AppearanceUserSettingsTab > should render 1`] = `
                         class="_container"
                       >
                         <input
-                          checked=""
                           class="_input"
                           id="radix-react-use-id-4"
                           name="layout"
@@ -288,6 +287,7 @@ exports[`AppearanceUserSettingsTab > should render 1`] = `
                         class="_container"
                       >
                         <input
+                          checked=""
                           class="_input"
                           id="radix-react-use-id-5"
                           name="layout"
@@ -513,6 +513,7 @@ exports[`AppearanceUserSettingsTab > should render 1`] = `
                       <input
                         aria-describedby="radix-react-use-id-7"
                         class="_input"
+                        disabled=""
                         id="radix-react-use-id-8"
                         name="compactLayout"
                         role="switch"

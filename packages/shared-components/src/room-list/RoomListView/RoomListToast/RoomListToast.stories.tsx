@@ -16,15 +16,7 @@ const meta = {
     component: RoomListToast,
     tags: ["autodocs"],
     args: {
-        type: "section_created",
-        onClose: fn(),
         onClick: fn(),
-    },
-    argTypes: {
-        type: {
-            control: "select",
-            options: ["section_created", "chat_moved", "unread_activity"],
-        },
     },
     decorators: [
         (Story) => (
@@ -44,16 +36,4 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const SectionCreated: Story = {};
-
-export const ChatMoved: Story = {
-    args: {
-        type: "chat_moved",
-    },
-};
-
-export const UnreadActivity: Story = {
-    args: {
-        type: "unread_activity",
-    },
-};
+export const UnreadActivity: Story = {};

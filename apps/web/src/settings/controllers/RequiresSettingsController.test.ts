@@ -15,8 +15,14 @@ import RequiresSettingsController from "./RequiresSettingsController";
 import { SettingLevel } from "../SettingLevel";
 import SettingsStore from "../SettingsStore";
 import MatrixClientBackedController from "./MatrixClientBackedController";
+import { Layout } from "../enums/Layout";
 
 describe("RequiresSettingsController", () => {
+    beforeEach(async () => {
+        // The compact layout setting used below is forced off outside of the group layout
+        await SettingsStore.setValue("layout", null, SettingLevel.DEVICE, Layout.Group);
+    });
+
     afterEach(() => {
         SettingsStore.reset();
     });
