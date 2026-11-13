@@ -74,18 +74,6 @@ export function findHighContrastTheme(theme: string): string | undefined {
 }
 
 /**
- * Given a high-contrast theme, find the corresponding non-high-contrast one
- * if it exists, or return undefined if not.
- */
-export function findNonHighContrastTheme(hcTheme: string): string | undefined {
-    for (const theme in HIGH_CONTRAST_THEMES) {
-        if (HIGH_CONTRAST_THEMES[theme] === hcTheme) {
-            return theme;
-        }
-    }
-}
-
-/**
  * Decide whether the supplied theme is high contrast.
  */
 export function isHighContrastTheme(theme: string): boolean {

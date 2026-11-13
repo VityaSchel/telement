@@ -1,10 +1,9 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`QuickSettingsButton > should render the quick settings button in expanded mode 1`] = `
+exports[`QuickSettingsButton > shows its label when the panel is expanded 1`] = `
 <DocumentFragment>
   <button
-    aria-expanded="true"
-    aria-label="Quick settings"
+    aria-label="Settings"
     class="_icon-button mx_QuickSettingsButton expanded"
     data-kind="primary"
     role="button"
