@@ -69,6 +69,28 @@ test.describe("Room list", () => {
             await expect(page.getByRole("menu", { name: "More Options" })).toBeVisible();
         });
 
+        test("should pin a room to the top of the list", async ({ page }) => {
+            const roomListView = getRoomList(page);
+            const roomItem = roomListView.getByRole("option", { name: "Open room room25" });
+
+            await roomItem.click({ button: "right" });
+            await page.getByRole("menuitem", { name: "Pin", exact: true }).click();
+            // Hovering a room hides its decorations, the pin among them
+            await page.getByRole("button", { name: "User menu" }).hover();
+
+            await expect(roomListView.getByRole("option").first()).toHaveAccessibleName("Open room room25");
+            await expect(roomItem).toHaveAccessibleDescription("Pinned");
+            await expect(roomItem.getByTestId("pinned-icon")).toBeVisible();
+
+            await roomItem.click({ button: "right" });
+            await page.getByRole("menuitem", { name: "Unpin" }).click();
+            await page.getByRole("button", { name: "User menu" }).hover();
+
+            await expect(roomListView.getByRole("option").first()).toHaveAccessibleName("Open room room29");
+            await expect(roomItem).toHaveAccessibleDescription("");
+            await expect(roomItem.getByTestId("pinned-icon")).not.toBeVisible();
+        });
+
         test("should open the more options menu", { tag: "@screenshot" }, async ({ page, app, user }) => {
             const roomListView = getRoomList(page);
             let roomItem = roomListView.getByRole("option", { name: "Open room room29" });
@@ -79,15 +101,15 @@ test.describe("Room list", () => {
             await roomItemMenu.click();
             await expect(page).toMatchScreenshot("room-list-item-open-more-options.png");
 
-            // It should make the room favourited
-            await page.getByRole("menuitemcheckbox", { name: "Favourited" }).click();
+            // It should pin the room
+            await page.getByRole("menuitem", { name: "Pin", exact: true }).click();
 
-            // Check that the room is favourited
+            // Check that the room is pinned
             roomItem = roomListView.getByRole("option", { name: "Open room room29" });
             await roomItem.hover();
             roomItemMenu = roomItem.getByRole("button", { name: "More Options" });
             await roomItemMenu.click();
-            await expect(page.getByRole("menuitemcheckbox", { name: "Favourited" })).toBeChecked();
+            await expect(page.getByRole("menuitem", { name: "Unpin" })).toBeVisible();
             // It should show the invite dialog
             await page.getByRole("menuitem", { name: "invite" }).click();
             await expect(page.getByRole("heading", { name: "Invite to room29" })).toBeVisible();
@@ -124,15 +146,14 @@ test.describe("Room list", () => {
             await roomListView.getByRole("option", { name: "Open room room28" }).click();
             await roomItem.scrollIntoViewIfNeeded();
 
-            // Not hovered, the room decoration should be the muted icon
-            await expect(roomItem.getByTestId("notification-decoration")).toBeVisible();
-
-            // During hover the room decoration should still be the muted icon
-            await expect(roomItem.getByTestId("notification-decoration")).toBeVisible();
+            // Not hovered, the room shows the muted icon after its name, like Telegram
+            await expect(roomItem.getByTestId("muted-icon")).toBeVisible();
+            await expect(roomItem.getByTestId("notification-decoration")).not.toBeVisible();
 
             await roomItem.hover();
 
-            // On hover, the room should show the muted icon
+            // On hover, the room should still show the muted icon
+            await expect(roomItem.getByTestId("muted-icon")).toBeVisible();
             await expect(roomItem).toMatchScreenshot("room-list-item-hover-silent.png");
 
             roomItemMenu = roomItem.getByRole("button", { name: "Notification options" });
@@ -572,7 +593,9 @@ test.describe("Room list", () => {
             await app.settings.closeDialog();
 
             const room = roomListView.getByRole("option", { name: "silent" });
-            await expect(room.getByTestId("notification-decoration")).toBeVisible();
+            // Like Telegram, the bell of a muted room is after its name, not in the notification decoration
+            await expect(room.getByTestId("muted-icon")).toBeVisible();
+            await expect(room.getByTestId("notification-decoration")).not.toBeVisible();
             await expect(room).toMatchScreenshot("room-list-item-silent.png");
         });
     });

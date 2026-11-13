@@ -73,6 +73,25 @@
     min-width: 0;
 }
 
+.notificationDecoration {
+    display: flex;
+    align-items: center;
+    gap: var(--cpd-space-1x);
+}
+
+/* Like in Telegram, the notification decoration and the pin sit at the end of the message preview line */
+.notificationDecoration.onMessagePreviewLine {
+    align-self: flex-end;
+    height: calc(var(--cpd-font-size-body-sm) * var(--cpd-font-line-height-regular));
+}
+
+/* Like Telegram's, the pin is tilted and smaller than the other decorations, padded to keep their 20px size */
+.pinnedIcon {
+    flex-shrink: 0;
+    margin: var(--cpd-space-0-5x);
+    transform: rotate(45deg);
+}
+
 .dragging {
     outline: 1px solid var(--cpd-color-border-interactive-hovered);
     background-color: color-mix(in srgb, var(--cpd-color-bg-action-tertiary-hovered) 95%, transparent);
@@ -98,6 +117,11 @@
 .roomName {
     /* Allow the room name to shrink and truncate when displayed next to the user status emoji */
     min-width: 0;
+}
+
+/* The bell of a muted room stays visible when the room name is truncated */
+.mutedIcon {
+    flex-shrink: 0;
 }
 
 .userStatusEmoji {

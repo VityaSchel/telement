@@ -20,7 +20,6 @@ import { AlphabeticSorter } from "./skip-list/sorters/AlphabeticSorter";
 import { readReceiptChangeIsFor } from "../../utils/read-receipts";
 import { EffectiveMembership, getEffectiveMembership, getEffectiveMembershipTag } from "../../utils/membership";
 import { type SpaceKey, UPDATE_HOME_BEHAVIOUR, UPDATE_SELECTED_SPACE } from "../spaces";
-import { FavouriteFilter } from "./skip-list/filters/FavouriteFilter";
 import { UnreadFilter } from "./skip-list/filters/UnreadFilter";
 import { PeopleFilter } from "./skip-list/filters/PeopleFilter";
 import { RoomsFilter } from "./skip-list/filters/RoomsFilter";
@@ -38,6 +37,7 @@ import { RoomSkipList } from "./skip-list/RoomSkipList";
 import { getTagsForRoom } from "../../utils/room/getTagsForRoom";
 import { DefaultTagID, type TagID } from "./skip-list/tag";
 import { SDKContextClass } from "../../contexts/SDKContextClass.ts";
+import { PinnedFirstSorter } from "../../telement/room-list/PinnedFirstSorter";
 
 export enum RoomListStoreV3Event {
     // The event/channel which is called when the room lists have been changed.
@@ -111,7 +111,6 @@ export class RoomListStoreV3Class extends AsyncStoreWithClient<EmptyObject> {
     private buildFilters(): void {
         const activityIsUnread = SettingsStore.getValue("Notifications.activityIsUnread");
         const filters = [
-            new FavouriteFilter(),
             new UnreadFilter(activityIsUnread),
             new PeopleFilter(),
             new RoomsFilter(),
@@ -185,14 +184,16 @@ export class RoomListStoreV3Class extends AsyncStoreWithClient<EmptyObject> {
     }
 
     /**
-     * Resort the list of rooms using a different algorithm.
+     * Resort the list of rooms using a different algorithm. Pinned rooms stay above the other rooms.
      * @param algorithm The sorting algorithm to use.
      */
     public resort(algorithm: SortingAlgorithm): void {
         if (!this.roomSkipList) throw new Error("Cannot resort room list before skip list is created.");
         if (!this.matrixClient) throw new Error("Cannot resort room list without matrix client.");
         if (this.roomSkipList.activeSortAlgorithm === algorithm) return;
-        const sorter = this.getSorterFromSortingAlgorithm(algorithm, this.matrixClient.getSafeUserId());
+        const sorter = new PinnedFirstSorter(
+            this.getSorterFromSortingAlgorithm(algorithm, this.matrixClient.getSafeUserId()),
+        );
         this.roomSkipList.useNewSorter(sorter, this.getRooms());
         this.emit(LISTS_UPDATE_EVENT);
         void SettingsStore.setValue("RoomList.preferredSorting", null, SettingLevel.DEVICE, algorithm);
@@ -374,13 +375,13 @@ export class RoomListStoreV3Class extends AsyncStoreWithClient<EmptyObject> {
     }
 
     /**
-     * Create the correct sorter depending on the persisted user preference.
+     * Create the correct sorter depending on the persisted user preference, with pinned rooms first.
      * @param myUserId The user-id of our user.
      * @returns Sorter object that can be passed to the skip list.
      */
     private getPreferredSorter(myUserId: string): Sorter {
         const preferred = SettingsStore.getValue("RoomList.preferredSorting");
-        return this.getSorterFromSortingAlgorithm(preferred, myUserId);
+        return new PinnedFirstSorter(this.getSorterFromSortingAlgorithm(preferred, myUserId));
     }
 
     /**

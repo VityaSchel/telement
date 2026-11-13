@@ -248,7 +248,7 @@ export class RoomSkipList implements Iterable<Room> {
      * for(const room of RLS.getRoomsInActiveSpace()) { something(room); }
      *
      * @example Additional filtering:
-     * Array.from(RLS.getRoomsInActiveSpace([FilterKeys.Favourite]));
+     * Array.from(RLS.getRoomsInActiveSpace([FilterEnum.LowPriorityFilter]));
      */
     public getRoomsInActiveSpace(filterKeys: FilterKey[] = []): SortedSpaceFilteredIterator {
         return new SortedSpaceFilteredIterator(this.levels[0].head!, filterKeys);

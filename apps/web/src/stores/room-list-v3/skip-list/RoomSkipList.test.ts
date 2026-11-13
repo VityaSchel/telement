@@ -20,7 +20,7 @@ import { AlphabeticSorter } from "./sorters/AlphabeticSorter";
 import { getMockedRooms } from "./__mocks__";
 import { MetaSpace } from "../../spaces";
 import { RoomNotificationStateStore } from "../../notifications/RoomNotificationStateStore";
-import { FavouriteFilter } from "./filters/FavouriteFilter";
+import { LowPriorityFilter } from "./filters/LowPriorityFilter";
 import { FilterEnum } from "./filters";
 import { DefaultTagID } from "./tag";
 import { SDKContextClass } from "../../../contexts/SDKContextClass.ts";
@@ -143,21 +143,21 @@ describe("RoomSkipList", () => {
     it("Filters are applied to existing nodes when useNewFilters is called", () => {
         const { skipList, rooms } = generateSkipList(10);
 
-        // Mark some rooms as favourite
-        const favouriteRooms = [rooms[2], rooms[5], rooms[8]];
-        for (const room of favouriteRooms) {
-            room.tags = { [DefaultTagID.Favourite]: { order: 0 } };
+        // Mark some rooms as low priority
+        const lowPriorityRooms = [rooms[2], rooms[5], rooms[8]];
+        for (const room of lowPriorityRooms) {
+            room.tags = { [DefaultTagID.LowPriority]: { order: 0 } };
         }
 
         // No filters yet — all rooms are in the list
         expect(skipList.size).toEqual(10);
 
-        // Apply the favourite filter
-        skipList.useNewFilters([new FavouriteFilter()]);
+        // Apply the low priority filter
+        skipList.useNewFilters([new LowPriorityFilter()]);
 
-        // Only favourite rooms should be returned when filtering by favourite
-        const filteredRooms = Array.from(skipList.getRoomsInActiveSpace([FilterEnum.FavouriteFilter]));
-        expect(filteredRooms).toHaveLength(favouriteRooms.length);
+        // Only low priority rooms should be returned when filtering by low priority
+        const filteredRooms = Array.from(skipList.getRoomsInActiveSpace([FilterEnum.LowPriorityFilter]));
+        expect(filteredRooms).toHaveLength(lowPriorityRooms.length);
     });
 
     it("Re-sort works when sorter is swapped", () => {

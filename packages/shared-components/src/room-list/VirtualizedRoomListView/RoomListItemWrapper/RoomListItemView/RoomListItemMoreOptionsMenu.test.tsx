@@ -8,7 +8,7 @@
 import React, { type JSX } from "react";
 import { render, screen } from "@test-utils";
 import userEvent from "@testing-library/user-event";
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 
 import { RoomListItemMoreOptionsMenu, MoreOptionContent } from "./RoomListItemMoreOptionsMenu";
 import { useMockedViewModel } from "../../../../core/viewmodel";
@@ -104,30 +104,35 @@ describe("<RoomListItemMoreOptionsMenu />", () => {
         expect(mockCallbacks.onMarkAsUnread).toHaveBeenCalled();
     });
 
-    it("should show favorite option and call onToggleFavorite", async () => {
+    it("should offer to pin a room that isn't pinned and call onToggleFavorite", async () => {
+        vi.mocked(mockCallbacks.onToggleFavorite).mockClear();
         const user = userEvent.setup();
         renderMenu({ isFavourite: false });
 
         const button = screen.getByRole("button", { name: "More Options" });
         await user.click(button);
 
-        const favoriteOption = screen.getByRole("menuitemcheckbox", { name: "Favourited" });
-        expect(favoriteOption).toBeInTheDocument();
-        expect(favoriteOption).toHaveAttribute("aria-checked", "false");
+        expect(screen.queryByRole("menuitem", { name: "Unpin" })).not.toBeInTheDocument();
+        expect(screen.queryByRole("menuitemcheckbox", { name: /pin/i })).not.toBeInTheDocument();
 
-        await user.click(favoriteOption);
+        await user.click(screen.getByRole("menuitem", { name: "Pin" }));
         expect(mockCallbacks.onToggleFavorite).toHaveBeenCalled();
+        // Like other actions, pinning closes the menu
+        expect(screen.queryByRole("menu")).not.toBeInTheDocument();
     });
 
-    it("should show favorite as checked when isFavourite is true", async () => {
+    it("should offer to unpin a pinned room and call onToggleFavorite", async () => {
+        vi.mocked(mockCallbacks.onToggleFavorite).mockClear();
         const user = userEvent.setup();
         renderMenu({ isFavourite: true });
 
         const button = screen.getByRole("button", { name: "More Options" });
         await user.click(button);
 
-        const favoriteOption = screen.getByRole("menuitemcheckbox", { name: "Favourited" });
-        expect(favoriteOption).toHaveAttribute("aria-checked", "true");
+        expect(screen.queryByRole("menuitem", { name: "Pin" })).not.toBeInTheDocument();
+
+        await user.click(screen.getByRole("menuitem", { name: "Unpin" }));
+        expect(mockCallbacks.onToggleFavorite).toHaveBeenCalled();
     });
 
     it("should show low priority option and call onToggleLowPriority", async () => {
@@ -222,7 +227,7 @@ describe("<RoomListItemMoreOptionsMenu />", () => {
         render(<TestComponent />);
 
         // A room with a pending invitation can't be marked as favourite or low priority
-        expect(screen.queryByRole("menuitemcheckbox", { name: "Favourited" })).not.toBeInTheDocument();
+        expect(screen.queryByRole("menuitem", { name: "Pin" })).not.toBeInTheDocument();
         expect(screen.queryByRole("menuitemcheckbox", { name: "Low priority" })).not.toBeInTheDocument();
         // The remaining entries are unaffected
         expect(screen.getByRole("menuitem", { name: "Leave room" })).toBeInTheDocument();

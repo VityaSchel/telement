@@ -184,10 +184,8 @@ test.describe("Room list filters and sort", () => {
             await expect.poll(() => roomList.locator("role=option").count()).toBe(5);
 
             await getFilterExpandButton(page).click();
-
-            await primaryFilters.getByRole("option", { name: "Favourites" }).click();
-            await expect(roomList.getByRole("option", { name: "Open room favourite room" })).toBeVisible();
-            await expect.poll(() => roomList.locator("role=option").count()).toBe(1);
+            // Pinned rooms are always at the top of the list, so there is no filter for them
+            await expect(primaryFilters.getByRole("option", { name: "Pinned" })).toHaveCount(0);
 
             await primaryFilters.getByRole("option", { name: "Low priority" }).click();
             await expect(roomList.getByRole("option", { name: "Open room Low prio room" })).toBeVisible();
@@ -286,7 +284,9 @@ test.describe("Room list filters and sort", () => {
             await getRoomOptionsMenu(page).click();
             await page.getByRole("menuitemradio", { name: "A-Z" }).click();
 
-            await expect(roomListView.getByRole("option").first()).toHaveText(/empty room/);
+            // The pinned room stays at the top
+            await expect(roomListView.getByRole("option").first()).toHaveText(/favourite room/);
+            await expect(roomListView.getByRole("option").nth(1)).toHaveText(/empty room/);
         });
 
         test("should move room to the top on message when sorting by activity", async ({ page, bot }) => {
@@ -294,7 +294,9 @@ test.describe("Room list filters and sort", () => {
 
             await bot.sendMessage(unReadDmId, "Hello!");
 
-            await expect(roomListView.getByRole("option").first()).toHaveText(/unread dm/);
+            // The pinned room stays at the top
+            await expect(roomListView.getByRole("option").first()).toHaveText(/favourite room/);
+            await expect(roomListView.getByRole("option").nth(1)).toHaveText(/unread dm/);
         });
     });
 

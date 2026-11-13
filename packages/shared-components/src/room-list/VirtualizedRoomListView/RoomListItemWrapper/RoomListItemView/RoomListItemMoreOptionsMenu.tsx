@@ -10,7 +10,8 @@ import { IconButton, Menu, MenuItem, Separator, ToggleMenuItem } from "@vector-i
 import {
     MarkAsReadIcon,
     MarkAsUnreadIcon,
-    FavouriteIcon,
+    PinIcon,
+    UnpinIcon,
     ArrowDownIcon,
     UserAddIcon,
     LinkIcon,
@@ -37,7 +38,7 @@ export interface RoomListItemMoreOptionsMenuProps {
 
 /**
  * The more options menu for room list items.
- * Displays additional room actions like mark as read/unread, favorite, invite, etc.
+ * Displays additional room actions like mark as read/unread, pin, invite, etc.
  */
 export function RoomListItemMoreOptionsMenu({ vm }: RoomListItemMoreOptionsMenuProps): JSX.Element {
     const [open, setOpen] = useState(false);
@@ -91,15 +92,20 @@ export function MoreOptionContent({ vm }: MoreOptionContentProps): JSX.Element {
                     hideChevron={true}
                 />
             )}
-            {/* Favourited and Low priority are hidden for a room with a pending invitation */}
+            {/* Pin and Low priority are hidden for a room with a pending invitation */}
             {snapshot.canChangeSection && (
                 <>
-                    <ToggleMenuItem
-                        checked={snapshot.isFavourite}
-                        Icon={FavouriteIcon}
-                        label={_t("room_list|more_options|favourited")}
+                    {/* Like Telegram, an action whose label says what it does rather than a checkbox */}
+                    <MenuItem
+                        Icon={snapshot.isFavourite ? UnpinIcon : PinIcon}
+                        label={
+                            snapshot.isFavourite
+                                ? _t("telement|room_list|more_options|unpin")
+                                : _t("telement|room_list|more_options|pin")
+                        }
                         onSelect={vm.onToggleFavorite}
                         onClick={(evt) => evt.stopPropagation()}
+                        hideChevron={true}
                     />
                     <ToggleMenuItem
                         checked={snapshot.isLowPriority}

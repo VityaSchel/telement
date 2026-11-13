@@ -156,6 +156,35 @@ describe("RoomListActions", () => {
                 );
             });
 
+            it.each([
+                { oldTag: null, newTag: DefaultTagID.Favourite, title: "Failed to pin room" },
+                { oldTag: DefaultTagID.LowPriority, newTag: DefaultTagID.Favourite, title: "Failed to pin room" },
+                { oldTag: DefaultTagID.Favourite, newTag: null, title: "Failed to unpin room" },
+                {
+                    oldTag: DefaultTagID.Favourite,
+                    newTag: DefaultTagID.LowPriority,
+                    title: "Failed to add tag m.lowpriority to room",
+                },
+                {
+                    oldTag: DefaultTagID.LowPriority,
+                    newTag: null,
+                    title: "Failed to remove tag m.lowpriority from room",
+                },
+            ])(
+                "titles the ErrorDialog '$title' when moving from $oldTag to $newTag fails",
+                async ({ oldTag, newTag, title }) => {
+                    vi.spyOn(client, "deleteRoomTag").mockRejectedValue(new Error("delete failed"));
+                    vi.spyOn(client, "setRoomTag").mockRejectedValue(new Error("set failed"));
+
+                    await invokeTagRoom(oldTag, newTag);
+
+                    expect(Modal.createDialog).toHaveBeenCalledWith(
+                        expect.anything(),
+                        expect.objectContaining({ title }),
+                    );
+                },
+            );
+
             it("shows an ErrorDialog and dispatches failure when setRoomTag fails", async () => {
                 const error = new Error("set failed");
                 vi.spyOn(client, "setRoomTag").mockRejectedValue(error);

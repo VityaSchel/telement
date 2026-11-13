@@ -70,7 +70,10 @@ export default class RoomListActions {
                     const promiseToDelete = matrixClient.deleteRoomTag(roomId, oldTag).catch(function (err) {
                         logger.error("Failed to remove tag " + oldTag + " from room: " + err);
                         Modal.createDialog(ErrorDialog, {
-                            title: _t("room_list|failed_remove_tag", { tagName: oldTag }),
+                            title:
+                                oldTag === DefaultTagID.Favourite
+                                    ? _t("telement|room_list|failed_unpin")
+                                    : _t("room_list|failed_remove_tag", { tagName: oldTag }),
                             description: err?.message ?? _t("invite|failed_generic"),
                         });
                     });
@@ -83,7 +86,10 @@ export default class RoomListActions {
                     const promiseToAdd = matrixClient.setRoomTag(roomId, newTag).catch(function (err) {
                         logger.error("Failed to add tag " + newTag + " to room: " + err);
                         Modal.createDialog(ErrorDialog, {
-                            title: _t("room_list|failed_add_tag", { tagName: newTag }),
+                            title:
+                                newTag === DefaultTagID.Favourite
+                                    ? _t("telement|room_list|failed_pin")
+                                    : _t("room_list|failed_add_tag", { tagName: newTag }),
                             description: err?.message ?? _t("invite|failed_generic"),
                         });
 

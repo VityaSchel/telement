@@ -10,7 +10,8 @@ import { logger } from "matrix-js-sdk/src/logger";
 import { type Room, RoomEvent } from "matrix-js-sdk/src/matrix";
 import React, { type JSX, useContext } from "react";
 import {
-    FavouriteSolidIcon,
+    PinIcon,
+    UnpinIcon,
     LinkIcon,
     SettingsSolidIcon,
     ArrowDownIcon,
@@ -157,11 +158,10 @@ export const RoomGeneralContextMenu: React.FC<RoomGeneralContextMenuProps> = ({
 
     const isFavorite = roomTags.includes(DefaultTagID.Favourite);
     const favoriteOption: JSX.Element = (
-        <IconizedContextMenuCheckbox
-            onClick={wrapHandler((ev) => onTagRoom(ev, DefaultTagID.Favourite), onPostFavoriteClick, true)}
-            active={isFavorite}
-            label={isFavorite ? _t("room|context_menu|unfavourite") : _t("room|context_menu|favourite")}
-            icon={<FavouriteSolidIcon />}
+        <IconizedContextMenuOption
+            onClick={wrapHandler((ev) => onTagRoom(ev, DefaultTagID.Favourite), onPostFavoriteClick)}
+            label={isFavorite ? _t("telement|room|context_menu|unpin") : _t("telement|room|context_menu|pin")}
+            icon={isFavorite ? <UnpinIcon /> : <PinIcon />}
         />
     );
 

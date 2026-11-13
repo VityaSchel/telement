@@ -196,7 +196,6 @@
         },
         "expand_filters": "Expand filter list",
         "filters": {
-            "favourite": "Favourites",
             "invites": "Invites",
             "low_priority": "Low priority",
             "mentions": "Mentions",
@@ -207,7 +206,6 @@
         "list_title": "Room list",
         "more_options": {
             "copy_link": "Copy link",
-            "favourited": "Favourited",
             "leave_room": "Leave room",
             "low_priority": "Low priority",
             "mark_read": "Mark as read",
@@ -246,6 +244,13 @@
     },
     "telement": {
         "room_list": {
+            "a11y": {
+                "pinned": "Pinned"
+            },
+            "more_options": {
+                "pin": "Pin",
+                "unpin": "Unpin"
+            },
             "search_with_shortcut": "Search (%(shortcut)s)"
         },
         "search_field": {

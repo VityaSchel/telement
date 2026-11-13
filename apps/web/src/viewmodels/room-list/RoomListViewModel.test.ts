@@ -14,6 +14,7 @@ import { createTestClient, flushPromises, mkStubRoom, stubClient, TestSDKContext
 
 import RoomListStoreV3, { RoomListStoreV3Event } from "../../stores/room-list-v3/RoomListStoreV3";
 import { FilterEnum } from "../../stores/room-list-v3/skip-list/filters";
+import { DefaultTagID } from "../../stores/room-list-v3/skip-list/tag";
 import dispatcher from "../../dispatcher/dispatcher";
 import { Action } from "../../dispatcher/actions";
 import { SDKContextClass } from "../../contexts/SDKContextClass";
@@ -374,6 +375,32 @@ describe("RoomListViewModel", () => {
                 );
             });
 
+            it("shows the room below the pinned rooms", async () => {
+                const leftRoom = mkStubRoom(previewRoomId, "Left room", matrixClient);
+                vi.mocked(leftRoom.getMyMembership).mockReturnValue(KnownMembership.Leave);
+                vi.mocked(matrixClient.getRoom).mockImplementation((roomId) =>
+                    roomId === previewRoomId ? leftRoom : null,
+                );
+                room1.tags = { [DefaultTagID.Favourite]: { order: 0.5 } };
+                room2.tags = { [DefaultTagID.Favourite]: { order: 0.5 } };
+                viewModel = createViewModel();
+
+                await openRoom(previewRoomId);
+                const roomIds = ["!room1:server", "!room2:server", previewRoomId, "!room3:server"];
+                expect(viewModel.getSnapshot().roomIds).toEqual(roomIds);
+                expect(viewModel.roomIds).toEqual(roomIds);
+                expect(viewModel.getSnapshot().roomListState.activeRoomIndex).toBe(2);
+
+                // Alt+ArrowDown moves from the preview room to the first room that isn't pinned
+                const dispatchSpy = vi.spyOn(dispatcher, "dispatch");
+                dispatcher.dispatch({ action: Action.ViewRoomDelta, delta: 1, unread: false });
+                dispatchSpy.mockImplementation(() => {});
+                await flushPromises();
+                expect(dispatchSpy).toHaveBeenCalledWith(
+                    expect.objectContaining({ action: Action.ViewRoom, room_id: "!room3:server" }),
+                );
+            });
+
             it("shows a room from its summary until it enters the room list", async () => {
                 // The client doesn't know the room, so RoomView gets its summary
                 vi.mocked(matrixClient.getRoom).mockReturnValue(null);
@@ -544,6 +571,94 @@ describe("RoomListViewModel", () => {
             expect(viewModel.getSnapshot().roomIds).toEqual(["!room3:server", "!room1:server"]);
             expect(viewModel.getSnapshot().roomListState.activeRoomIndex).toBeUndefined();
         });
+
+        describe("with pinned rooms", () => {
+            function pin(...rooms: Room[]): void {
+                for (const room of rooms) room.tags = { [DefaultTagID.Favourite]: { order: 0.5 } };
+            }
+
+            async function openRoom(roomId: string): Promise<void> {
+                vi.spyOn(SDKContextClass.instance.roomViewStore, "getRoomId").mockReturnValue(roomId);
+                dispatcher.dispatch({ action: Action.ActiveRoomChanged, newRoomId: roomId });
+                await flushPromises();
+            }
+
+            function updateList(rooms: Room[]): void {
+                vi.spyOn(RoomListStoreV3.instance, "getSortedRoomsInActiveSpace").mockReturnValue({
+                    spaceId: "home",
+                    rooms,
+                });
+                RoomListStoreV3.instance.emit(RoomListStoreV3Event.ListsUpdate);
+            }
+
+            beforeEach(() => {
+                viewModel = new RoomListViewModel({
+                    client: matrixClient,
+                    spaceStore: SDKContextClass.instance.spaceStore,
+                    roomViewStore: SDKContextClass.instance.roomViewStore,
+                });
+            });
+
+            it("should not keep the selected room above a room that was pinned", async () => {
+                await openRoom("!room1:server");
+                expect(viewModel.getSnapshot().roomListState.activeRoomIndex).toBe(0);
+
+                pin(room3);
+                updateList([room3, room1, room2]);
+
+                expect(viewModel.getSnapshot().roomIds).toEqual(["!room3:server", "!room1:server", "!room2:server"]);
+                expect(viewModel.getSnapshot().roomListState.activeRoomIndex).toBe(1);
+            });
+
+            it("should move the selected room up when it is pinned", async () => {
+                await openRoom("!room3:server");
+
+                pin(room3);
+                updateList([room3, room1, room2]);
+
+                expect(viewModel.getSnapshot().roomListState.activeRoomIndex).toBe(0);
+            });
+
+            it("should move the selected room down when it is unpinned", async () => {
+                pin(room1, room2);
+                updateList([room1, room2, room3]);
+                await openRoom("!room1:server");
+
+                room1.tags = {};
+                updateList([room2, room1, room3]);
+
+                expect(viewModel.getSnapshot().roomIds).toEqual(["!room2:server", "!room1:server", "!room3:server"]);
+                expect(viewModel.getSnapshot().roomListState.activeRoomIndex).toBe(1);
+            });
+
+            it("should keep the selected room at its index among the pinned rooms", async () => {
+                pin(room1, room2);
+                updateList([room1, room2, room3]);
+                await openRoom("!room2:server");
+
+                updateList([room2, room1, room3]);
+
+                expect(viewModel.getSnapshot().roomIds).toEqual(["!room1:server", "!room2:server", "!room3:server"]);
+                expect(viewModel.getSnapshot().roomListState.activeRoomIndex).toBe(1);
+            });
+
+            it("should keep the selected room at its index below the pinned rooms", async () => {
+                const room4 = mkStubRoom("!room4:server", "Room 4", matrixClient);
+                pin(room1);
+                updateList([room1, room2, room3, room4]);
+                await openRoom("!room4:server");
+
+                updateList([room1, room4, room2, room3]);
+
+                expect(viewModel.getSnapshot().roomIds).toEqual([
+                    "!room1:server",
+                    "!room2:server",
+                    "!room3:server",
+                    "!room4:server",
+                ]);
+                expect(viewModel.getSnapshot().roomListState.activeRoomIndex).toBe(3);
+            });
+        });
     });
 
     describe("Filters", () => {
@@ -596,17 +711,21 @@ describe("RoomListViewModel", () => {
             expect(viewModel.getSnapshot().roomIds).toEqual(["!room1:server", "!room2:server", "!room3:server"]);
         });
 
-        it("shows the Favourites, Low Priority and Invites filters", () => {
+        it("shows the filters in order, with none for pinned rooms", () => {
             viewModel = new RoomListViewModel({
                 client: matrixClient,
                 roomViewStore: sdkContext.roomViewStore,
                 spaceStore: sdkContext.spaceStore,
             });
 
-            const { filterIds } = viewModel.getSnapshot();
-            expect(filterIds).toContain("favourite");
-            expect(filterIds).toContain("low_priority");
-            expect(filterIds).toContain("invites");
+            expect(viewModel.getSnapshot().filterIds).toEqual([
+                "unread",
+                "people",
+                "rooms",
+                "mentions",
+                "invites",
+                "low_priority",
+            ]);
         });
     });
 

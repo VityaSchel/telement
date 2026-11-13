@@ -578,43 +578,21 @@ describe("RoomListStoreV3", () => {
         });
 
         describe("Filters", () => {
-            it("filters by both space and favourite", async () => {
-                const { client, rooms } = getClientAndRooms();
-                // Let's choose 5 rooms to put in space
-                const { spaceRoom, roomIds } = createSpace(rooms, [6, 8, 13, 27, 75], client);
-
-                // Let's say that 8, 27 an 75 are favourite rooms
-                [8, 27, 75].forEach((i) => {
-                    rooms[i].tags[DefaultTagID.Favourite] = {};
-                });
-
-                setupMocks(spaceRoom, roomIds);
-                const store = new RoomListStoreV3Class(dispatcher);
-                await store.start();
-
-                // Sorted, filtered rooms should be 8, 27 and 75
-                const result = store.getSortedRoomsInActiveSpace([FilterEnum.FavouriteFilter]).rooms;
-                expect(result).toHaveLength(3);
-                for (const i of [8, 27, 75]) {
-                    expect(result).toContain(rooms[i]);
-                }
-            });
-
             it("filters are recalculated on room update", async () => {
                 const { client, rooms } = getClientAndRooms();
                 // Let's choose 5 rooms to put in space
                 const { spaceRoom, roomIds } = createSpace(rooms, [6, 8, 13, 27, 75], client);
 
-                // Let's say that 8, 27 an 75 are favourite rooms
+                // Let's say that 8, 27 an 75 are low priority rooms
                 [8, 27, 75].forEach((i) => {
-                    rooms[i].tags[DefaultTagID.Favourite] = {};
+                    rooms[i].tags[DefaultTagID.LowPriority] = {};
                 });
 
                 setupMocks(spaceRoom, roomIds);
                 const store = new RoomListStoreV3Class(dispatcher);
                 await store.start();
 
-                // Let's say 27 got unfavourited
+                // Let's say 27 is no longer low priority
                 const fn = vi.fn();
                 store.on(LISTS_UPDATE_EVENT, fn);
                 rooms[27].tags = {};
@@ -627,8 +605,8 @@ describe("RoomListStoreV3", () => {
                 );
                 expect(fn).toHaveBeenCalled();
 
-                // Sorted, filtered rooms should be 27 and 75
-                const result = store.getSortedRoomsInActiveSpace([FilterEnum.FavouriteFilter]).rooms;
+                // Sorted, filtered rooms should be 8 and 75
+                const result = store.getSortedRoomsInActiveSpace([FilterEnum.LowPriorityFilter]).rooms;
                 expect(result).toHaveLength(2);
                 for (const i of [8, 75]) {
                     expect(result).toContain(rooms[i]);
@@ -841,8 +819,8 @@ describe("RoomListStoreV3", () => {
                 // Let's choose 5 rooms to put in space
                 const { spaceRoom, roomIds } = createSpace(rooms, [6, 8, 13, 27, 75], client);
 
-                // Let's say that 8 is a favourite room
-                rooms[8].tags[DefaultTagID.Favourite] = {};
+                // Let's say that 8 is a low priority room
+                rooms[8].tags[DefaultTagID.LowPriority] = {};
 
                 // Let's say 8, 27 are unread
                 vi.spyOn(RoomNotificationStateStore.instance, "getRoomState").mockImplementation((room) => {
@@ -859,7 +837,7 @@ describe("RoomListStoreV3", () => {
                 // Should give us only room at 8 since that's the only room which matches both filters
                 const result = store.getSortedRoomsInActiveSpace([
                     FilterEnum.UnreadFilter,
-                    FilterEnum.FavouriteFilter,
+                    FilterEnum.LowPriorityFilter,
                 ]).rooms;
                 expect(result).toHaveLength(1);
                 expect(result).toContain(rooms[8]);
@@ -1282,6 +1260,104 @@ describe("RoomListStoreV3", () => {
                 .slice(90)
                 .map((r) => r.roomId);
             expect(result).toEqual(expectedRoomIds);
+        });
+    });
+
+    describe("Pinned rooms", () => {
+        async function getRoomListStoreWithPinnedRooms(pinnedIndices: number[]) {
+            const client = stubClient();
+            const rooms = getMockedRooms(client);
+            for (const i of pinnedIndices) {
+                rooms[i].tags[DefaultTagID.Favourite] = {};
+            }
+            client.getVisibleRooms = vi.fn().mockReturnValue(rooms);
+            vi.spyOn(AsyncStoreWithClient.prototype, "matrixClient", "get").mockReturnValue(client);
+            const store = new RoomListStoreV3Class(dispatcher);
+            await store.start();
+            return { client, rooms, store };
+        }
+
+        function sendMessage(room: Room, ts: number): void {
+            const event = mkMessage({ room: room.roomId, user: "@foo3:matrix.org", ts, event: true });
+            vi.spyOn(room.getLiveTimeline(), "getEvents").mockReturnValue([event]);
+            dispatcher.dispatch(
+                {
+                    action: "MatrixActions.Room.timeline",
+                    event,
+                    isLiveEvent: true,
+                    isLiveUnfilteredRoomTimelineEvent: true,
+                    room,
+                },
+                true,
+            );
+        }
+
+        function setTag(room: Room, isPinned: boolean): void {
+            if (isPinned) room.tags[DefaultTagID.Favourite] = {};
+            else delete room.tags[DefaultTagID.Favourite];
+            dispatcher.dispatch({ action: "MatrixActions.Room.tags", room }, true);
+        }
+
+        it("Pinned rooms are at the top of the list, sorted among themselves by recency", async () => {
+            const { store, rooms, client } = await getRoomListStoreWithPinnedRooms([10, 50, 3]);
+            const pinnedRooms = [rooms[50], rooms[10], rooms[3]];
+            const otherRooms = new RecencySorter(client.getSafeUserId()).sort(
+                rooms.filter((room) => !pinnedRooms.includes(room)),
+            );
+            expect(store.getSortedRooms()).toEqual([...pinnedRooms, ...otherRooms]);
+        });
+
+        it("Pinning a room moves it to the top and unpinning it moves it back", async () => {
+            const { store, rooms, client } = await getRoomListStoreWithPinnedRooms([50]);
+
+            setTag(rooms[20], true);
+            expect(store.getSortedRooms().slice(0, 3)).toEqual([rooms[50], rooms[20], rooms[99]]);
+
+            setTag(rooms[50], false);
+            const otherRooms = new RecencySorter(client.getSafeUserId()).sort(
+                rooms.filter((room) => room !== rooms[20]),
+            );
+            expect(store.getSortedRooms()).toEqual([rooms[20], ...otherRooms]);
+        });
+
+        it("A new message moves a room to the top of the pinned or the other rooms", async () => {
+            const { store, rooms } = await getRoomListStoreWithPinnedRooms([50, 60]);
+
+            sendMessage(rooms[10], 1000);
+            expect(store.getSortedRooms().slice(0, 4)).toEqual([rooms[60], rooms[50], rooms[10], rooms[99]]);
+
+            sendMessage(rooms[50], 1001);
+            expect(store.getSortedRooms().slice(0, 4)).toEqual([rooms[50], rooms[60], rooms[10], rooms[99]]);
+        });
+
+        it("Pinned rooms stay at the top when sorting alphabetically", async () => {
+            const { store, rooms } = await getRoomListStoreWithPinnedRooms([70, 7]);
+
+            store.resort(SortingAlgorithm.Alphabetic);
+
+            expect(store.activeSortAlgorithm).toEqual(SortingAlgorithm.Alphabetic);
+            const otherRooms = new AlphabeticSorter().sort(
+                rooms.filter((room) => room !== rooms[7] && room !== rooms[70]),
+            );
+            expect(store.getSortedRooms()).toEqual([rooms[7], rooms[70], ...otherRooms]);
+
+            // Resorting saves the preferred sorting, which the stores of the next tests would use
+            store.resort(SortingAlgorithm.Recency);
+        });
+
+        it("Pinned rooms are at the top of a space and of a filtered list", async () => {
+            const { store, rooms } = await getRoomListStoreWithPinnedRooms([5, 80]);
+            const spaceId = "!space:matrix.org";
+            const roomIdsInSpace = [5, 30, 80, 90].map((i) => rooms[i].roomId);
+            vi.spyOn(SDKContextClass.instance.spaceStore, "isRoomInSpace").mockImplementation(
+                (space, roomId) => space === spaceId && roomIdsInSpace.includes(roomId),
+            );
+            vi.spyOn(SDKContextClass.instance.spaceStore, "activeSpace", "get").mockReturnValue(spaceId);
+            SDKContextClass.instance.spaceStore.emit(UPDATE_SELECTED_SPACE);
+
+            const expectedRooms = [rooms[80], rooms[5], rooms[90], rooms[30]];
+            expect(store.getSortedRoomsInActiveSpace().rooms).toEqual(expectedRooms);
+            expect(store.getSortedRoomsInActiveSpace([FilterEnum.RoomsFilter]).rooms).toEqual(expectedRooms);
         });
     });
 });

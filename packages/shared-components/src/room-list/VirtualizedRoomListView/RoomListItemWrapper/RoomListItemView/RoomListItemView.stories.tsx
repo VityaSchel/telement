@@ -20,6 +20,7 @@ import { withViewDocs } from "../../../../../.storybook/withViewDocs";
 import { defaultSnapshot } from "./default-snapshot";
 import { renderAvatar } from "../../../story-mocks";
 import { mockedActions } from "./mocked-actions";
+import { RoomNotifState } from "./RoomNotifs";
 
 type RoomListItemProps = RoomListItemViewSnapshot &
     RoomListItemViewActions & {
@@ -304,6 +305,63 @@ export const LastItem: Story = {
     args: {
         isLastItem: true,
         isSelected: true,
+    },
+};
+
+export const Muted: Story = {
+    args: {
+        notification: { ...defaultSnapshot.notification, muted: true },
+        roomNotifState: RoomNotifState.Mute,
+    },
+};
+
+export const MutedWithLongName: Story = {
+    args: {
+        name: "Loooooooooooooooooooooooooooooooooooooong name",
+        notification: { ...defaultSnapshot.notification, muted: true },
+        roomNotifState: RoomNotifState.Mute,
+    },
+};
+
+export const Pinned: Story = {
+    args: {
+        isFavourite: true,
+    },
+};
+
+export const PinnedWithNotification: Story = {
+    args: {
+        isFavourite: true,
+        isBold: true,
+        notification: {
+            hasAnyNotificationOrActivity: true,
+            isUnsentMessage: false,
+            invited: false,
+            isMention: false,
+            isActivityNotification: false,
+            isNotification: true,
+            hasUnreadCount: true,
+            count: 3,
+            muted: false,
+        },
+    },
+};
+
+export const PinnedAndMuted: Story = {
+    args: {
+        isFavourite: true,
+        notification: {
+            hasAnyNotificationOrActivity: false,
+            isUnsentMessage: false,
+            invited: false,
+            isMention: false,
+            isActivityNotification: false,
+            isNotification: false,
+            hasUnreadCount: false,
+            count: 0,
+            muted: true,
+        },
+        roomNotifState: RoomNotifState.Mute,
     },
 };
 

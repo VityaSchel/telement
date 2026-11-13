@@ -5,7 +5,7 @@
  * Please see LICENSE files in the repository root for full details.
  */
 
-import React, { type JSX, memo, useEffect, useRef, useState, type ReactNode, type Ref } from "react";
+import React, { type JSX, memo, useEffect, useId, useRef, useState, type ReactNode, type Ref } from "react";
 import classNames from "classnames";
 import { useMergeRefs } from "react-merge-refs";
 
@@ -193,6 +193,8 @@ export const RoomListItemView = memo(function RoomListItemView({
 
     // Generate a11y label from notification state and room name
     const a11yLabel = getA11yLabel(item.name, item.notification);
+    // The pin is hidden from assistive technologies, so a pinned room says it is pinned in its description
+    const pinnedDescriptionId = useId();
 
     return (
         <RoomListItemContextMenu vm={vm}>
@@ -211,6 +213,7 @@ export const RoomListItemView = memo(function RoomListItemView({
                 align="stretch"
                 type="button"
                 aria-label={a11yLabel}
+                aria-describedby={item.isFavourite ? pinnedDescriptionId : undefined}
                 onClick={vm.onOpenRoom}
                 onFocus={onItemFocus}
                 onBlur={onItemBlur}
@@ -219,6 +222,11 @@ export const RoomListItemView = memo(function RoomListItemView({
                 {...props}
             >
                 <RoomListItemContent vm={vm} renderAvatar={renderAvatar} />
+                {item.isFavourite && (
+                    <span id={pinnedDescriptionId} hidden>
+                        {_t("telement|room_list|a11y|pinned")}
+                    </span>
+                )}
             </Flex>
         </RoomListItemContextMenu>
     );

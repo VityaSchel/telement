@@ -28,6 +28,8 @@ import { shouldShowComponent } from "../../../customisations/helpers/UIComponent
 import { UIComponent } from "../../../settings/UIFeature";
 import SettingsStore from "../../../settings/SettingsStore";
 import * as getTagsForRoomUtils from "../../../utils/room/getTagsForRoom";
+import RoomListActions from "../../../actions/RoomListActions";
+import dis from "../../../dispatcher/dispatcher";
 
 vi.mock("../../../customisations/helpers/UIComponents", () => ({
     shouldShowComponent: vi.fn(),
@@ -114,6 +116,40 @@ describe("RoomGeneralContextMenu", () => {
 
         expect(shouldShowComponent).toHaveBeenCalledWith(UIComponent.InviteUsers);
         expect(screen.getByRole("menuitem", { name: "Invite" })).toBeInTheDocument();
+    });
+
+    it.each([
+        {
+            tags: [],
+            label: "Pin",
+            otherLabel: "Unpin",
+            removeTag: DefaultTagID.LowPriority,
+            addTag: DefaultTagID.Favourite,
+        },
+        {
+            tags: [DefaultTagID.Favourite],
+            label: "Unpin",
+            otherLabel: "Pin",
+            removeTag: DefaultTagID.Favourite,
+            addTag: null,
+        },
+    ])("offers to $label the room and closes the menu", ({ tags, label, otherLabel, removeTag, addTag }) => {
+        vi.spyOn(getTagsForRoomUtils, "getTagsForRoom").mockReset().mockReturnValue(tags);
+        const tagRoomSpy = vi
+            .spyOn(RoomListActions, "tagRoom")
+            .mockReturnValue({} as ReturnType<typeof RoomListActions.tagRoom>);
+        const dispatchSpy = vi.spyOn(dis, "dispatch").mockImplementation(() => {});
+
+        getComponent({});
+
+        expect(screen.queryByRole("menuitem", { name: otherLabel })).not.toBeInTheDocument();
+        expect(screen.queryByRole("menuitemcheckbox", { name: /pin/i })).not.toBeInTheDocument();
+        fireEvent.click(screen.getByRole("menuitem", { name: label }));
+
+        expect(tagRoomSpy).toHaveBeenCalledWith(mockClient, room, removeTag, addTag);
+        expect(onFinished).toHaveBeenCalled();
+        tagRoomSpy.mockRestore();
+        dispatchSpy.mockRestore();
     });
 
     it("marks the room as read", async () => {

@@ -32,6 +32,7 @@ import { keepIfSame } from "../../utils/keepIfSame";
 import { type RoomViewStore } from "../../stores/RoomViewStore.tsx";
 import { UPDATE_EVENT } from "../../stores/AsyncStore";
 import { EffectiveMembership, getEffectiveMembership } from "../../utils/membership";
+import { isPinnedRoom } from "../../telement/room-list/isPinnedRoom";
 
 interface RoomListViewModelProps {
     client: MatrixClient;
@@ -43,7 +44,6 @@ const filterKeyToIdMap: Map<FilterEnum, FilterId> = new Map([
     [FilterEnum.UnreadFilter, "unread"],
     [FilterEnum.PeopleFilter, "people"],
     [FilterEnum.RoomsFilter, "rooms"],
-    [FilterEnum.FavouriteFilter, "favourite"],
     [FilterEnum.MentionsFilter, "mentions"],
     [FilterEnum.InvitesFilter, "invites"],
     [FilterEnum.LowPriorityFilter, "low_priority"],
@@ -97,7 +97,7 @@ export class RoomListViewModel
     private previewItem?: PreviewRoomListItemViewModel;
 
     /**
-     * The room of {@link previewItem}, added at the top of the list by {@link withPreviewRoom}.
+     * The room of {@link previewItem}, added below the pinned rooms by {@link withPreviewRoom}.
      * When the client doesn't know the room, this is an empty `Room` used only to place the item in the list.
      */
     private previewRoom?: Room;
@@ -194,13 +194,16 @@ export class RoomListViewModel
     }
 
     /**
-     * Add the room of the preview item at the top of the list, so it is listed like any other room.
+     * Add the room of the preview item at the top of the list, below the pinned rooms, so it is listed like any
+     * other room.
      */
     private withPreviewRoom(roomsResult: RoomsResult): RoomsResult {
         const previewRoom = this.previewRoom;
         if (!previewRoom) return roomsResult;
 
-        return { ...roomsResult, rooms: [previewRoom, ...roomsResult.rooms] };
+        const rooms = [...roomsResult.rooms];
+        rooms.splice(rooms.filter(isPinnedRoom).length, 0, previewRoom);
+        return { ...roomsResult, rooms };
     }
 
     /**
@@ -632,6 +635,11 @@ export class RoomListViewModel
         // (usually because rooms were removed), we can no longer place
         // the active room in the same old position
         if (oldIndex > rooms.length - 1) return rooms;
+
+        // Pinned rooms stay above the other rooms, so the active room only keeps its old index
+        // while that index is among the rooms of its own kind, pinned or not
+        const pinnedRoomCount = rooms.filter(isPinnedRoom).length;
+        if (isPinnedRoom(rooms[newIndex]) !== oldIndex < pinnedRoomCount) return rooms;
 
         // Making the active room sticky is as simple as removing it from
         // its new index and placing it in the old index

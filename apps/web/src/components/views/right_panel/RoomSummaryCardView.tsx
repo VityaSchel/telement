@@ -20,7 +20,6 @@ import {
     Search,
     Form,
 } from "@vector-im/compound-web";
-import FavouriteIcon from "@vector-im/compound-design-tokens/assets/web/icons/favourite";
 import UserAddIcon from "@vector-im/compound-design-tokens/assets/web/icons/user-add";
 import LinkIcon from "@vector-im/compound-design-tokens/assets/web/icons/link";
 import SettingsIcon from "@vector-im/compound-design-tokens/assets/web/icons/settings";
@@ -238,8 +237,8 @@ const RoomSummaryCardView: React.FC<IProps> = ({
 
             <div role="menubar" aria-orientation="vertical">
                 <ToggleMenuItem
-                    Icon={FavouriteIcon}
-                    label={_t("room|context_menu|favourite")}
+                    Icon={PinIcon}
+                    label={_t("telement|right_panel|pin_to_top")}
                     checked={vm.isFavorite}
                     onSelect={vm.onFavoriteToggleClick}
                 />

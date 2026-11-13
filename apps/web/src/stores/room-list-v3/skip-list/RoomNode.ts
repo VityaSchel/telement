@@ -52,7 +52,7 @@ export class RoomNode {
 
     /**
      * Aggregates all the filter keys that apply to this room.
-     * eg: if filterKeysSet.has(Filter.FavouriteFilter) is true, then this room is a favourite room.
+     * eg: if filterKeysSet.has(FilterEnum.LowPriorityFilter) is true, then this room is a low priority room.
      */
     private filterKeysSet: Set<FilterKey> = new Set();
 

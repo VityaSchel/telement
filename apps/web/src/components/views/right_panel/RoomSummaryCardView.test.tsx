@@ -222,7 +222,7 @@ describe("<RoomSummaryCard />", () => {
     it("fires favourite dispatch on button click", () => {
         const { getByText } = getComponent();
 
-        fireEvent.click(getByText(_t("room|context_menu|favourite")));
+        fireEvent.click(getByText("Pin to top"));
 
         expect(vmDefaultValues.onFavoriteToggleClick).toHaveBeenCalled();
     });

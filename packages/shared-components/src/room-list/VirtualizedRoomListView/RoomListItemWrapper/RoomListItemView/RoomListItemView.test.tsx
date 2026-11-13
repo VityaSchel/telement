@@ -12,6 +12,7 @@ import { composeStories } from "@storybook/react-vite";
 import { describe, it, expect } from "vitest";
 
 import * as stories from "./RoomListItemView.stories";
+import styles from "./RoomListItemView.module.css";
 
 const {
     Default,
@@ -26,6 +27,11 @@ const {
     NoMessagePreview,
     WithHoverMenu,
     WithoutHoverMenu,
+    Muted,
+    MutedWithLongName,
+    Pinned,
+    PinnedWithNotification,
+    PinnedAndMuted,
 } = composeStories(stories);
 
 describe("<RoomListItemView />", () => {
@@ -82,6 +88,131 @@ describe("<RoomListItemView />", () => {
     it("renders WithHoverMenu story", () => {
         const { container } = render(<WithHoverMenu />);
         expect(container).toMatchSnapshot();
+    });
+
+    it("renders Pinned story", () => {
+        const { container } = render(<Pinned />);
+        expect(container).toMatchSnapshot();
+    });
+
+    it("should show a pin for a pinned room", () => {
+        render(<Pinned />);
+        expect(screen.getByTestId("pinned-icon")).toBeInTheDocument();
+    });
+
+    it("should show a smaller, tilted pin, like Telegram", () => {
+        render(<Pinned />);
+        const pin = screen.getByTestId("pinned-icon");
+        expect(pin).toHaveClass(styles.pinnedIcon);
+        expect(pin).toHaveAttribute("width", "16px");
+        expect(pin).toHaveAttribute("height", "16px");
+        // rotate(45deg) as a matrix: cos and sin of 45° are both about 0.707
+        expect(getComputedStyle(pin).transform).toMatch(
+            /^matrix\(0\.707\d*, 0\.707\d*, -0\.707\d*, 0\.707\d*, 0, 0\)$/,
+        );
+    });
+
+    it("renders Muted story", () => {
+        const { container } = render(<Muted />);
+        expect(container).toMatchSnapshot();
+    });
+
+    it("should show the bell of a muted room right after its name, outside the notification decoration", () => {
+        render(<Muted />);
+        const bell = screen.getByTestId("muted-icon");
+        expect(screen.getByTestId("room-name").nextElementSibling).toBe(bell);
+        expect(screen.queryByTestId("notification-decoration")).toBeNull();
+    });
+
+    it("should not show a bell for a room that isn't muted", () => {
+        render(<Default />);
+        expect(screen.queryByTestId("muted-icon")).toBeNull();
+    });
+
+    it("should keep the bell of a muted room visible when its name is truncated", () => {
+        render(<MutedWithLongName />);
+        const name = screen.getByTestId("room-name");
+        const bell = screen.getByTestId("muted-icon");
+
+        expect(name.scrollWidth).toBeGreaterThan(name.clientWidth);
+        expect(bell.getBoundingClientRect().width).toBe(16);
+        expect(bell.getBoundingClientRect().left).toBeGreaterThanOrEqual(name.getBoundingClientRect().right);
+        expect(bell.getBoundingClientRect().right).toBeLessThanOrEqual(
+            name.parentElement!.getBoundingClientRect().right,
+        );
+    });
+
+    it("should keep the bell of a muted room visible while the hover menu is shown", () => {
+        // isFocused focuses the row via the keyboard on mount, which shows the hover menu as hovering does
+        const { container } = render(<Muted isFocused={true} />);
+        expect(container.querySelector('[aria-label="More Options"]')).toBeVisible();
+        expect(screen.getByTestId("muted-icon")).toBeVisible();
+    });
+
+    it.each([
+        ["Muted", Muted],
+        ["MutedWithLongName", MutedWithLongName],
+        ["PinnedAndMuted", PinnedAndMuted],
+    ])("should show the %s story's notification options in the muted state, as the app does", async (_, Story) => {
+        const user = userEvent.setup();
+        // isFocused reveals the hover menu, which holds the notification options
+        render(<Story isFocused={true} />);
+
+        await user.click(screen.getByRole("button", { name: "Notification options" }));
+        expect(screen.getByRole("menuitem", { name: "Mute room" })).toHaveAttribute("aria-selected", "true");
+    });
+
+    it("should not show a pin for a room that isn't pinned", () => {
+        render(<Default />);
+        expect(screen.queryByTestId("pinned-icon")).toBeNull();
+    });
+
+    it("should show the notification decoration instead of the pin of a pinned room", () => {
+        render(<PinnedWithNotification />);
+        expect(screen.getByTestId("notification-decoration")).toBeInTheDocument();
+        expect(screen.queryByTestId("pinned-icon")).toBeNull();
+    });
+
+    it("should show the bell of a muted pinned room next to its name and the pin at the end", () => {
+        render(<PinnedAndMuted />);
+        expect(screen.getByTestId("room-name").nextElementSibling).toBe(screen.getByTestId("muted-icon"));
+        expect(screen.getByTestId("pinned-icon").parentElement).toHaveClass(styles.notificationDecoration);
+        expect(screen.queryByTestId("notification-decoration")).toBeNull();
+    });
+
+    it("should show the notification decoration and the pin on the message preview line", () => {
+        const { unmount } = render(<WithNotification />);
+        expect(screen.getByTestId("notification-decoration").parentElement).toHaveClass(styles.onMessagePreviewLine);
+        unmount();
+
+        render(<Pinned />);
+        expect(screen.getByTestId("pinned-icon").parentElement).toHaveClass(styles.onMessagePreviewLine);
+    });
+
+    it("should centre the pin of a pinned room without a message preview", () => {
+        render(<NoMessagePreview isFavourite={true} />);
+        expect(screen.getByTestId("pinned-icon").parentElement).not.toHaveClass(styles.onMessagePreviewLine);
+    });
+
+    it("should describe a pinned room as pinned to assistive technologies", () => {
+        render(<PinnedWithNotification />);
+        const item = screen.getByRole("option", { name: "Open room General with 3 unread messages." });
+        expect(item).toHaveAccessibleDescription("Pinned");
+    });
+
+    it("should not describe a room that isn't pinned as pinned", () => {
+        render(<Default />);
+        expect(screen.getByRole("option")).not.toHaveAttribute("aria-describedby");
+        expect(screen.queryByText("Pinned")).toBeNull();
+    });
+
+    it("should not show a pin for a pinned room with a call", () => {
+        render(
+            <Pinned
+                notification={{ ...Pinned.args.notification!, hasAnyNotificationOrActivity: false, callType: "video" }}
+            />,
+        );
+        expect(screen.queryByTestId("pinned-icon")).toBeNull();
     });
 
     it("should call onOpenRoom when clicked", async () => {

@@ -68,7 +68,8 @@ changed at runtime, which rebuilds the list.
 
 **Filters.** A filter answers a single yes/no question about a room, and each room's matching
 filters are precomputed on its node. The filters back the primary filter chips in the UI (Unread,
-People, Rooms, Favourites, Mentions, Invites, Low Priority).
+People, Rooms, Mentions, Invites, Low Priority). Pinned rooms (tagged `m.favourite`) always come
+first, ordered among themselves by the active sort, so they have no filter.
 
 **Spaces and updates.** The list is always scoped to the active space; rather than re-filter on
 every read, each node caches its active-space membership and the store recomputes that flag when
