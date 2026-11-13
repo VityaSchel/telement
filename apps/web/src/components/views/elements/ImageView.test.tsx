@@ -32,12 +32,12 @@ describe("<ImageView />", () => {
         expect(container).toMatchSnapshot();
     });
 
-    it("should download on click", async () => {
+    it("should save as on click, downloading where the browser has no save dialog", async () => {
         fetchMock.get("https://example.com/image.png", "TESTFILE");
         const { getByRole } = render(
             <ImageView src="https://example.com/image.png" name="filename.png" onFinished={vi.fn()} />,
         );
-        fireEvent.click(getByRole("button", { name: "Download" }));
+        fireEvent.click(getByRole("button", { name: "Save as…" }));
         await waitFor(() =>
             expect(vi.mocked(FileDownloader).mock.instances[0].download).toHaveBeenCalledWith({
                 blob: expect.anything(),
@@ -65,7 +65,7 @@ describe("<ImageView />", () => {
         const { getByRole } = render(
             <ImageView src="https://test.dummy/fromSrc.png" name="fromName.png" onFinished={vi.fn()} mxEvent={event} />,
         );
-        fireEvent.click(getByRole("button", { name: "Download" }));
+        fireEvent.click(getByRole("button", { name: "Save as…" }));
         await waitFor(() =>
             expect(vi.mocked(FileDownloader).mock.instances[0].download).toHaveBeenCalledWith({
                 blob: expect.anything(),
@@ -75,7 +75,7 @@ describe("<ImageView />", () => {
         expect(fetchMock).toHaveFetched("http://this.is.a.url/test.dummy/fromEvent.png");
     });
 
-    it("should start download on Ctrl+S", async () => {
+    it("should save as on Ctrl+S", async () => {
         fetchMock.get("https://example.com/image.png", "TESTFILE");
 
         const { container } = render(
@@ -97,18 +97,37 @@ describe("<ImageView />", () => {
         expect(fetchMock).toHaveFetched("https://example.com/image.png");
     });
 
-    it("should handle download errors", async () => {
+    it("should open the save dialog where the browser has one", async () => {
+        const write = vi.fn();
+        const showSaveFilePicker = vi.fn().mockResolvedValue({
+            createWritable: vi.fn().mockResolvedValue({ write, close: vi.fn(), abort: vi.fn() }),
+        });
+        Object.assign(window, { showSaveFilePicker });
+        fetchMock.get("https://example.com/image.png", "TESTFILE");
+        const { getByRole } = render(
+            <ImageView src="https://example.com/image.png" name="filename.png" onFinished={vi.fn()} />,
+        );
+
+        fireEvent.click(getByRole("button", { name: "Save as…" }));
+
+        expect(showSaveFilePicker).toHaveBeenCalledWith({ suggestedName: "filename.png" });
+        await waitFor(() => expect(write).toHaveBeenCalledWith(expect.any(Blob)));
+        expect(FileDownloader).not.toHaveBeenCalled();
+        Reflect.deleteProperty(window, "showSaveFilePicker");
+    });
+
+    it("should handle save errors", async () => {
         const modalSpy = vi.spyOn(Modal, "createDialog");
         fetchMock.get("https://example.com/image.png", { status: 500 });
         const { getByRole } = render(
             <ImageView src="https://example.com/image.png" name="filename.png" onFinished={vi.fn()} />,
         );
-        fireEvent.click(getByRole("button", { name: "Download" }));
+        fireEvent.click(getByRole("button", { name: "Save as…" }));
         await waitFor(() =>
             expect(modalSpy).toHaveBeenCalledWith(
                 ErrorDialog,
                 expect.objectContaining({
-                    title: "Download failed",
+                    title: "Couldn't save the file",
                 }),
             ),
         );

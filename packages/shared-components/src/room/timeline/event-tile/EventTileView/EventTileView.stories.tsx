@@ -33,6 +33,7 @@ import { ReactionsRowView } from "../reactions/ReactionsRow";
 import { ReactionsRowButtonView } from "../reactions/ReactionsRowButton";
 import { type ReactionsRowButtonTooltipViewModel } from "../reactions/ReactionsRowButtonTooltip";
 import { ImageBodyView, ImageBodyViewState, type ImageBodyViewSnapshot } from "../body/MImageBodyView";
+import { VideoBodyView, VideoBodyViewState, type VideoBodyViewSnapshot } from "../body/MVideoBodyView";
 import {
     FileBodyView,
     FileBodyViewInfoIcon,
@@ -489,6 +490,20 @@ const StoryMediaImage = ({
 const StoryMediaBody = ({ size = "medium" }: { size?: StoryMediaSize }): React.ReactElement => (
     <StoryMediaImage {...storyMediaSizes[size]} />
 );
+/** A video's poster without a thumbnail, which has no size of its own beyond the one the body gives it. */
+const StoryVideoBody = (): React.ReactElement => {
+    const snapshot: VideoBodyViewSnapshot = {
+        state: VideoBodyViewState.READY,
+        playLabel: "Play video: Example video",
+        maxWidth: 320,
+        maxHeight: 180,
+        aspectRatio: "16 / 9",
+        durationLabel: "1:05",
+        playable: true,
+    };
+    const vm = useMockedViewModel(snapshot, { onPlayClick: fn() });
+    return <VideoBodyView vm={vm} />;
+};
 const StoryStickerBody = (): React.ReactElement => (
     <div className={styles.stickerBody} role="img" aria-label="Example sticker">
         🌈
@@ -1509,6 +1524,7 @@ const storyHelpers = {
     StoryStickerBody,
     StoryThreadListActionBar,
     StoryThreadListInfo,
+    StoryVideoBody,
     shapeDescriptionParameters,
 };
 

@@ -119,6 +119,16 @@ export class VideoNoteBodyViewModel
         });
     }
 
+    /**
+     * Pauses the note that is playing with sound, so that other media, such as the video viewer, plays alone.
+     */
+    public static pausePlayingWithSound(): void {
+        const note = VideoNoteBodyViewModel.playingWithSound;
+        if (note?.state.playbackState === VideoNotePlaybackState.PLAYING) {
+            note.updateState({ playbackState: VideoNotePlaybackState.PAUSED });
+        }
+    }
+
     private static canPlay(props: VideoNoteBodyViewModelProps): boolean {
         return !props.inhibitInteraction && !props.forExport;
     }

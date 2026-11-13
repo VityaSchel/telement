@@ -255,6 +255,21 @@
         },
         "search_field": {
             "clear": "Clear search"
+        },
+        "video_lightbox": {
+            "exit_full_screen": "Exit full screen",
+            "forward": "Forward",
+            "full_screen": "Full screen",
+            "mute": "Mute",
+            "playback_speed": "Playback speed",
+            "playback_speed_value": "Playback speed: %(rate)s",
+            "position": "%(currentTime)s of %(duration)s",
+            "save_as": "Save as…",
+            "seek": "Playback position",
+            "title": "Video view",
+            "unmute": "Unmute",
+            "view_profile": "View profile",
+            "volume": "Volume"
         }
     },
     "terms": {

@@ -6,7 +6,6 @@
  */
 
 import { decode } from "blurhash";
-import { type RefObject } from "react";
 import { logger } from "matrix-js-sdk/src/logger";
 import { type MatrixEvent } from "matrix-js-sdk/src/matrix";
 import { type MediaEventContent, type VideoInfo } from "matrix-js-sdk/src/types";
@@ -23,6 +22,9 @@ import { mediaFromContent } from "../../customisations/Media";
 import { BLURHASH_FIELD } from "../../utils/image-media";
 import { type ImageSize, suggestedSize as suggestedVideoSize } from "../../settings/enums/ImageSize";
 import { type MediaEventHelper } from "../../utils/MediaEventHelper";
+import { type RoomPermalinkCreator } from "../../utils/permalinks/Permalinks";
+import { formatVideoTime } from "../../telement/media/formatVideoTime";
+import { openVideoLightbox } from "../../telement/media/VideoLightboxDialog";
 
 export interface VideoBodyViewModelProps {
     /**
@@ -34,11 +36,11 @@ export interface VideoBodyViewModelProps {
      */
     mediaEventHelper?: MediaEventHelper;
     /**
-     * Whether the video is being rendered for export instead of live playback.
+     * Whether the video is being rendered for export instead of the live timeline.
      */
     forExport?: boolean;
     /**
-     * Whether playback controls and autoplay should be disabled.
+     * Whether opening the video should be disabled.
      */
     inhibitInteraction?: boolean;
     /**
@@ -50,32 +52,20 @@ export interface VideoBodyViewModelProps {
      */
     onPreviewClick?: () => void;
     /**
-     * Ref to the underlying video element used for replay after lazy decryption.
+     * Creates the link to the message that the video viewer's date opens.
      */
-    videoRef: RefObject<HTMLVideoElement | null>;
+    permalinkCreator?: RoomPermalinkCreator;
 }
 
 interface InternalState {
-    /**
-     * Decrypted playable media URL for encrypted videos.
-     */
-    decryptedUrl: string | null;
     /**
      * Decrypted thumbnail URL for encrypted videos.
      */
     decryptedThumbnailUrl: string | null;
     /**
-     * Decrypted media blob cached for download or replay.
-     */
-    decryptedBlob: Blob | null;
-    /**
      * Last media-processing error, if any.
      */
     error: unknown | null;
-    /**
-     * Whether an on-demand media fetch is in progress.
-     */
-    fetchingData: boolean;
     /**
      * Whether the blurhash poster is being shown while the real poster loads.
      */
@@ -90,12 +80,16 @@ interface InternalState {
     imageSize: ImageSize;
 }
 
+/** Width assumed for a video whose message doesn't give its size. */
+const DEFAULT_VIDEO_WIDTH = 1920;
+
 type VideoInfoWithBlurhash = VideoInfo & {
     [BLURHASH_FIELD]?: string;
 };
 
 /**
- * View model for the video message body, encapsulating media-loading and playback state.
+ * View model for the video message body: the video's poster, which opens the video viewer. Telement never plays
+ * these videos in the timeline; round video notes have their own body.
  */
 export class VideoBodyViewModel
     extends BaseViewModel<VideoBodyViewSnapshot, VideoBodyViewModelProps>
@@ -116,16 +110,13 @@ export class VideoBodyViewModel
 
     public loadInitialMediaIfVisible(): void {
         if (this.props.mediaVisible) {
-            void this.downloadVideo();
+            void this.loadPoster();
         }
     }
 
     private static createInitialState(): InternalState {
         return {
-            fetchingData: false,
-            decryptedUrl: null,
             decryptedThumbnailUrl: null,
-            decryptedBlob: null,
             error: null,
             posterLoading: false,
             blurhashUrl: null,
@@ -133,70 +124,78 @@ export class VideoBodyViewModel
         };
     }
 
+    private static getInfo(mxEvent: MatrixEvent): VideoInfoWithBlurhash | undefined {
+        return mxEvent.getContent<MediaEventContent & { info?: VideoInfoWithBlurhash }>().info;
+    }
+
     /**
-     * Derive the aspect ratio for the video frame from the event metadata, when available.
+     * The video's size from the event metadata. Without one, the poster still needs a video's shape, so assume a
+     * full HD video shaped like its thumbnail, or 16:9.
      */
-    private static getAspectRatio(mxEvent: MatrixEvent): string | undefined {
-        const { w, h } = mxEvent.getContent<MediaEventContent & { info: VideoInfoWithBlurhash }>().info ?? {};
-        if (!w || !h) {
-            return undefined;
+    private static getVideoSize(mxEvent: MatrixEvent): { w: number; h: number } {
+        const info = VideoBodyViewModel.getInfo(mxEvent);
+        if (info?.w && info.h) {
+            return { w: info.w, h: info.h };
         }
 
+        const thumbnail = info?.thumbnail_info;
+        const ratio = thumbnail?.w && thumbnail.h ? thumbnail.w / thumbnail.h : 16 / 9;
+        return { w: DEFAULT_VIDEO_WIDTH, h: Math.round(DEFAULT_VIDEO_WIDTH / ratio) };
+    }
+
+    /**
+     * Derive the aspect ratio for the video frame from the video's size.
+     */
+    private static getAspectRatio(mxEvent: MatrixEvent): string {
+        const { w, h } = VideoBodyViewModel.getVideoSize(mxEvent);
         return `${w}/${h}`;
     }
 
     /**
-     * Compute the rendered video dimensions from the event metadata and current image-size setting.
+     * Compute the rendered video dimensions from the video's size and current image-size setting.
      */
     private static getDimensions(mxEvent: MatrixEvent, imageSize: ImageSize): Required<{ w?: number; h?: number }> {
-        const { w, h } = mxEvent.getContent<MediaEventContent & { info: VideoInfoWithBlurhash }>().info ?? {};
-        return suggestedVideoSize(imageSize, { w, h });
+        return suggestedVideoSize(imageSize, VideoBodyViewModel.getVideoSize(mxEvent));
     }
 
     /**
-     * Resolve the current playable video source URL for the event.
+     * Format the video's length from the event metadata, which gives it in milliseconds.
      */
-    private static getContentUrl(props: VideoBodyViewModelProps, state: InternalState): string | undefined {
-        const content = props.mxEvent.getContent<MediaEventContent>();
-        if (props.forExport) {
-            return content.file?.url ?? content.url;
+    private static getDurationLabel(mxEvent: MatrixEvent): string | undefined {
+        const duration = VideoBodyViewModel.getInfo(mxEvent)?.duration;
+        if (typeof duration !== "number" || !Number.isFinite(duration) || duration <= 0) {
+            return undefined;
         }
 
-        const media = mediaFromContent(content);
-        if (media.isEncrypted) {
-            return state.decryptedUrl ?? undefined;
-        }
-
-        return media.srcHttp ?? undefined;
+        return formatVideoTime(duration / 1000);
     }
 
     /**
-     * Resolve the best thumbnail or poster URL for the current video state.
+     * Resolve the poster: the decrypted thumbnail of an encrypted video, the blurhash while the thumbnail loads, or
+     * the thumbnail's address.
      */
-    private static getThumbnailUrl(props: VideoBodyViewModelProps, state: InternalState): string | null {
+    private static getPosterUrl(props: VideoBodyViewModelProps, state: InternalState): string | undefined {
         if (props.forExport) {
-            return null;
+            return undefined;
         }
 
-        const content = props.mxEvent.getContent<MediaEventContent>();
-        const media = mediaFromContent(content);
-
+        const media = mediaFromContent(props.mxEvent.getContent<MediaEventContent>());
         if (media.isEncrypted && state.decryptedThumbnailUrl) {
             return state.decryptedThumbnailUrl;
         }
-        if (state.posterLoading) {
+        if (state.posterLoading && state.blurhashUrl) {
             return state.blurhashUrl;
         }
-        if (media.hasThumbnail) {
+        // An encrypted thumbnail's address serves the encrypted bytes.
+        if (!media.isEncrypted && media.hasThumbnail && media.thumbnailHttp) {
             return media.thumbnailHttp;
         }
 
-        return null;
+        return undefined;
     }
 
     private static computeSnapshot(props: VideoBodyViewModelProps, state: InternalState): VideoBodyViewSnapshot {
         const content = props.mxEvent.getContent<MediaEventContent>();
-        const autoplay = !props.inhibitInteraction && SettingsStore.getValue("autoplayVideo");
         const aspectRatio = VideoBodyViewModel.getAspectRatio(props.mxEvent);
         const { w: maxWidth, h: maxHeight } = VideoBodyViewModel.getDimensions(props.mxEvent, state.imageSize);
 
@@ -220,46 +219,22 @@ export class VideoBodyViewModel
             };
         }
 
-        if (!props.forExport && content.file !== undefined && state.decryptedUrl === null && autoplay) {
-            return {
-                state: VideoBodyViewState.LOADING,
-                maxWidth,
-                maxHeight,
-                aspectRatio,
-            };
-        }
-
-        const thumbnailUrl = VideoBodyViewModel.getThumbnailUrl(props, state);
-        let preload: VideoBodyViewSnapshot["preload"] = "metadata";
-        let poster: string | undefined;
-        if (content.info && thumbnailUrl) {
-            preload = "none";
-            poster = thumbnailUrl;
-        }
-
         return {
             state: VideoBodyViewState.READY,
-            videoLabel: content.body,
-            videoTitle: content.body,
+            playLabel: _t("telement|media|play_video", { name: content.body }),
             maxWidth,
             maxHeight,
             aspectRatio,
-            src: VideoBodyViewModel.getContentUrl(props, state),
-            poster,
-            preload,
-            controls: !props.inhibitInteraction,
-            muted: autoplay,
-            autoPlay: autoplay,
+            poster: VideoBodyViewModel.getPosterUrl(props, state),
+            durationLabel: VideoBodyViewModel.getDurationLabel(props.mxEvent),
+            playable: !props.forExport && !props.inhibitInteraction,
+            // An exported chat replaces the file's mxc address with the saved file's path.
+            href: props.forExport ? (content.file?.url ?? content.url) : undefined,
         };
     }
 
     private updateSnapshotFromState(): void {
         this.snapshot.set(VideoBodyViewModel.computeSnapshot(this.props, this.state));
-    }
-
-    private hasContentUrl(): boolean {
-        const url = VideoBodyViewModel.getContentUrl(this.props, this.state);
-        return !!url && !url.startsWith("data:");
     }
 
     private setImageSize(imageSize: ImageSize): void {
@@ -277,19 +252,15 @@ export class VideoBodyViewModel
     private resetMediaState(): void {
         this.state = {
             ...this.state,
-            decryptedUrl: null,
             decryptedThumbnailUrl: null,
-            decryptedBlob: null,
             error: null,
-            fetchingData: false,
             posterLoading: false,
             blurhashUrl: null,
         };
     }
 
     private loadBlurhash(): void {
-        const info = this.props.mxEvent.getContent<MediaEventContent & { info: VideoInfoWithBlurhash }>().info;
-        const blurhash = info?.[BLURHASH_FIELD];
+        const blurhash = VideoBodyViewModel.getInfo(this.props.mxEvent)?.[BLURHASH_FIELD];
         if (!blurhash) {
             return;
         }
@@ -318,7 +289,7 @@ export class VideoBodyViewModel
         this.updateSnapshotFromState();
 
         const media = mediaFromContent(this.props.mxEvent.getContent<MediaEventContent>());
-        if (!media.hasThumbnail || !media.thumbnailHttp) {
+        if (media.isEncrypted || !media.hasThumbnail || !media.thumbnailHttp) {
             return;
         }
 
@@ -338,21 +309,20 @@ export class VideoBodyViewModel
         image.src = media.thumbnailHttp;
     }
 
-    private async downloadVideo(): Promise<void> {
+    private async loadPoster(): Promise<void> {
         try {
             this.loadBlurhash();
         } catch (error) {
             logger.error("Failed to load blurhash", error);
         }
 
-        if (!this.props.mediaEventHelper?.media.isEncrypted || this.state.decryptedUrl !== null) {
+        if (!this.props.mediaEventHelper?.media.isEncrypted || this.state.decryptedThumbnailUrl !== null) {
             return;
         }
 
         const currentEvent = this.props.mxEvent;
         const currentHelper = this.props.mediaEventHelper;
         try {
-            const autoplay = !this.props.inhibitInteraction && SettingsStore.getValue("autoplayVideo");
             const thumbnailUrl = await currentHelper.thumbnailUrl.value;
 
             if (
@@ -363,30 +333,10 @@ export class VideoBodyViewModel
                 return;
             }
 
-            if (autoplay) {
-                logger.log("Preloading video");
-                this.state = {
-                    ...this.state,
-                    decryptedUrl: await currentHelper.sourceUrl.value,
-                    decryptedThumbnailUrl: thumbnailUrl,
-                    decryptedBlob: await currentHelper.sourceBlob.value,
-                };
-            } else {
-                logger.log("NOT preloading video");
-                const content = currentEvent.getContent<MediaEventContent>();
-                let mimetype = content.info?.mimetype ?? "application/octet-stream";
-                if (mimetype === "video/quicktime") {
-                    mimetype = "video/mp4";
-                }
-
-                this.state = {
-                    ...this.state,
-                    decryptedUrl: `data:${mimetype},`,
-                    decryptedThumbnailUrl: thumbnailUrl || `data:${mimetype},`,
-                    decryptedBlob: null,
-                };
-            }
-
+            this.state = {
+                ...this.state,
+                decryptedThumbnailUrl: thumbnailUrl,
+            };
             this.updateSnapshotFromState();
         } catch (error) {
             if (
@@ -420,7 +370,7 @@ export class VideoBodyViewModel
         this.updateSnapshotFromState();
 
         if (this.props.mediaVisible) {
-            void this.downloadVideo();
+            void this.loadPoster();
         }
     }
 
@@ -460,7 +410,7 @@ export class VideoBodyViewModel
         this.updateSnapshotFromState();
 
         if (mediaVisible) {
-            void this.downloadVideo();
+            void this.loadPoster();
         }
     }
 
@@ -475,69 +425,30 @@ export class VideoBodyViewModel
         };
     }
 
+    public setPermalinkCreator(permalinkCreator?: RoomPermalinkCreator): void {
+        if (this.props.permalinkCreator === permalinkCreator) {
+            return;
+        }
+
+        this.props = {
+            ...this.props,
+            permalinkCreator,
+        };
+    }
+
     public onPreviewClick = (): void => {
         this.props.onPreviewClick?.();
     };
 
-    public onPlay = async (): Promise<void> => {
-        if (this.hasContentUrl() || this.state.fetchingData || this.state.error !== null) {
+    public onPlayClick = (): void => {
+        if (!this.snapshot.current.playable) {
             return;
         }
 
-        this.state = {
-            ...this.state,
-            fetchingData: true,
-        };
-
-        if (!this.props.mediaEventHelper?.media.isEncrypted) {
-            this.state = {
-                ...this.state,
-                error: "No file given in content",
-                fetchingData: false,
-            };
-            this.updateSnapshotFromState();
-            return;
-        }
-
-        const currentEvent = this.props.mxEvent;
-        const currentHelper = this.props.mediaEventHelper;
-
-        try {
-            const decryptedUrl = await currentHelper.sourceUrl.value;
-            const decryptedBlob = await currentHelper.sourceBlob.value;
-
-            if (
-                this.isDisposed ||
-                currentEvent !== this.props.mxEvent ||
-                currentHelper !== this.props.mediaEventHelper
-            ) {
-                return;
-            }
-
-            this.state = {
-                ...this.state,
-                decryptedUrl,
-                decryptedBlob,
-                fetchingData: false,
-            };
-            this.updateSnapshotFromState();
-            void this.props.videoRef.current?.play();
-        } catch (error) {
-            if (
-                this.isDisposed ||
-                currentEvent !== this.props.mxEvent ||
-                currentHelper !== this.props.mediaEventHelper
-            ) {
-                return;
-            }
-
-            logger.warn("Unable to decrypt attachment: ", error);
-            this.state = {
-                ...this.state,
-                error,
-                fetchingData: false,
-            };
-            this.updateSnapshotFromState();
-        }
+        openVideoLightbox({
+            mxEvent: this.props.mxEvent,
+            mediaEventHelper: this.props.mediaEventHelper,
+            permalinkCreator: this.props.permalinkCreator,
+        });
     };
 }

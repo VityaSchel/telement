@@ -1,0 +1,2316 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`VideoLightboxView > matches snapshot for buffering story 1`] = `
+<div>
+  <div
+    style="height: 560px; background-color: rgb(0, 0, 0);"
+  >
+    <div
+      aria-label="Video view"
+      aria-modal="true"
+      class="cpd-theme-dark VideoLightboxView-module_root"
+      role="dialog"
+    >
+      <div
+        class="VideoLightboxView-module_topBar"
+      >
+        <div
+          class="VideoLightboxView-module_sender"
+        >
+          <button
+            aria-label="View profile"
+            class="VideoLightboxView-module_avatarButton"
+            type="button"
+          >
+            <span
+              aria-label="@alice:example.org"
+              class="_avatar_va14e_8 VideoLightboxView-module_avatar"
+              data-color="3"
+              data-type="round"
+              role="img"
+              style="--cpd-avatar-size: 32px;"
+            >
+              <img
+                alt=""
+                class="_image_va14e_43"
+                data-type="round"
+                height="32px"
+                loading="lazy"
+                referrerpolicy="no-referrer"
+                src="/static/profile-pics/profile1.png"
+                width="32px"
+              />
+            </span>
+          </button>
+          <div
+            class="VideoLightboxView-module_senderText"
+          >
+            <span
+              class="VideoLightboxView-module_senderName"
+            >
+              Alice
+            </span>
+            <a
+              class="VideoLightboxView-module_date"
+              href="https://matrix.to/#/!room:example.org/$event"
+            >
+              Thu, Nov 12, 2026, 10:42 AM
+            </a>
+          </div>
+        </div>
+        <div
+          class="VideoLightboxView-module_actions"
+        >
+          <button
+            aria-disabled="false"
+            aria-label="Save as…"
+            aria-labelledby="react-use-id-1"
+            class="_icon-button_1215g_8 VideoLightboxView-module_iconButton"
+            data-kind="primary"
+            role="button"
+            style="--cpd-icon-button-size: 32px;"
+            tabindex="0"
+          >
+            <div
+              class="_indicator-icon_j097f_17"
+              style="--cpd-icon-button-size: 100%;"
+            >
+              <svg
+                fill="currentColor"
+                height="1em"
+                viewBox="0 0 24 24"
+                width="1em"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M12 15.575q-.2 0-.375-.062a.9.9 0 0 1-.325-.213l-3.6-3.6a.95.95 0 0 1-.275-.7q0-.425.275-.7.274-.275.712-.288t.713.263L11 12.15V5q0-.424.287-.713A.97.97 0 0 1 12 4q.424 0 .713.287Q13 4.576 13 5v7.15l1.875-1.875q.274-.274.713-.263.437.014.712.288a.95.95 0 0 1 .275.7.95.95 0 0 1-.275.7l-3.6 3.6q-.15.15-.325.212a1.1 1.1 0 0 1-.375.063M6 20q-.824 0-1.412-.587A1.93 1.93 0 0 1 4 18v-2q0-.424.287-.713A.97.97 0 0 1 5 15q.424 0 .713.287Q6 15.576 6 16v2h12v-2q0-.424.288-.713A.97.97 0 0 1 19 15q.424 0 .712.287.288.288.288.713v2q0 .824-.587 1.413A1.93 1.93 0 0 1 18 20z"
+                />
+              </svg>
+            </div>
+          </button>
+          <button
+            aria-label="Forward"
+            aria-labelledby="react-use-id-2"
+            class="_icon-button_1215g_8 VideoLightboxView-module_iconButton"
+            data-kind="primary"
+            role="button"
+            style="--cpd-icon-button-size: 32px;"
+            tabindex="0"
+          >
+            <div
+              class="_indicator-icon_j097f_17"
+              style="--cpd-icon-button-size: 100%;"
+            >
+              <svg
+                fill="currentColor"
+                height="1em"
+                viewBox="0 0 24 24"
+                width="1em"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M14.597 5.708a1.004 1.004 0 0 1 0-1.416.996.996 0 0 1 1.412 0l4.699 4.714c.39.391.39 1.025 0 1.416l-4.7 4.714a.996.996 0 0 1-1.411 0 1.004 1.004 0 0 1 0-1.416l3.043-3.053H8.487c-1.888 0-3.485 1.604-3.485 3.666C5.002 16.396 6.599 18 8.487 18h2.093a1 1 0 1 1 0 2H8.487c-3.067 0-5.485-2.575-5.485-5.667S5.42 8.667 8.487 8.667h9.059z"
+                />
+              </svg>
+            </div>
+          </button>
+          <button
+            aria-label="Close"
+            aria-labelledby="react-use-id-3"
+            class="_icon-button_1215g_8 VideoLightboxView-module_iconButton"
+            data-kind="primary"
+            role="button"
+            style="--cpd-icon-button-size: 32px;"
+            tabindex="0"
+          >
+            <div
+              class="_indicator-icon_j097f_17"
+              style="--cpd-icon-button-size: 100%;"
+            >
+              <svg
+                fill="currentColor"
+                height="1em"
+                viewBox="0 0 24 24"
+                width="1em"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M6.293 6.293a1 1 0 0 1 1.414 0L12 10.586l4.293-4.293a1 1 0 1 1 1.414 1.414L13.414 12l4.293 4.293a1 1 0 0 1-1.414 1.414L12 13.414l-4.293 4.293a1 1 0 0 1-1.414-1.414L10.586 12 6.293 7.707a1 1 0 0 1 0-1.414"
+                />
+              </svg>
+            </div>
+          </button>
+        </div>
+      </div>
+      <div
+        class="VideoLightboxView-module_stage"
+      >
+        <video
+          autoplay=""
+          class="VideoLightboxView-module_video"
+          crossorigin="anonymous"
+          playsinline=""
+          poster="/static/element.png"
+        />
+        <div
+          class="VideoLightboxView-module_status VideoLightboxView-module_buffering"
+        >
+          <span
+            class="VideoLightboxView-module_spinner"
+          >
+            <svg
+              aria-label="Loading…"
+              class="_icon_1855a_18"
+              fill="currentColor"
+              height="1em"
+              role="progressbar"
+              style="width: 32px; height: 32px;"
+              viewBox="0 0 24 24"
+              width="1em"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                clip-rule="evenodd"
+                d="M12 4.031a8 8 0 1 0 8 8 1 1 0 0 1 2 0c0 5.523-4.477 10-10 10s-10-4.477-10-10 4.477-10 10-10a1 1 0 1 1 0 2"
+                fill-rule="evenodd"
+              />
+            </svg>
+          </span>
+        </div>
+      </div>
+      <div
+        class="VideoLightboxView-module_controls"
+      >
+        <button
+          aria-label="Pause"
+          aria-labelledby="react-use-id-4"
+          class="_icon-button_1215g_8 VideoLightboxView-module_iconButton"
+          data-autofocus="true"
+          data-kind="primary"
+          role="button"
+          style="--cpd-icon-button-size: 36px;"
+          tabindex="0"
+        >
+          <div
+            class="_indicator-icon_j097f_17"
+            style="--cpd-icon-button-size: 100%;"
+          >
+            <svg
+              fill="currentColor"
+              height="1em"
+              viewBox="0 0 24 24"
+              width="1em"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M8 4a2 2 0 0 0-2 2v12a2 2 0 1 0 4 0V6a2 2 0 0 0-2-2m8 0a2 2 0 0 0-2 2v12a2 2 0 1 0 4 0V6a2 2 0 0 0-2-2"
+              />
+            </svg>
+          </div>
+        </button>
+        <div
+          class="VideoLightboxView-module_timeline"
+        >
+          <span
+            class="VideoLightboxView-module_time"
+          >
+            0:12
+          </span>
+          <input
+            aria-label="Playback position"
+            aria-valuetext="0:12 of 1:05"
+            class="VideoLightboxView-module_range VideoLightboxView-module_seekBar"
+            max="65"
+            min="0"
+            step="any"
+            style="--fill: 18.461538461538463%;"
+            type="range"
+            value="12"
+          />
+          <span
+            class="VideoLightboxView-module_time"
+          >
+            1:05
+          </span>
+        </div>
+        <button
+          aria-label="Mute"
+          aria-labelledby="react-use-id-5"
+          class="_icon-button_1215g_8 VideoLightboxView-module_iconButton VideoLightboxView-module_mute"
+          data-kind="primary"
+          role="button"
+          style="--cpd-icon-button-size: 36px;"
+          tabindex="0"
+        >
+          <div
+            class="_indicator-icon_j097f_17"
+            style="--cpd-icon-button-size: 100%;"
+          >
+            <svg
+              fill="currentColor"
+              height="1em"
+              viewBox="0 0 24 24"
+              width="1em"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M3 14v-4a2 2 0 0 1 2-2h2l3.293-3.293c.63-.63 1.707-.184 1.707.707v13.172c0 .89-1.077 1.337-1.707.707L7 16H5a2 2 0 0 1-2-2m11.122-5.536a1 1 0 0 1 1.414 0A5 5 0 0 1 17 12c0 1.38-.56 2.632-1.464 3.536a1 1 0 0 1-1.415-1.415 3 3 0 0 0 .88-2.121c0-.829-.335-1.577-.88-2.121a1 1 0 0 1 0-1.415"
+              />
+              <path
+                d="M16.95 5.636a1 1 0 0 1 1.414 0A8.98 8.98 0 0 1 21 12a8.98 8.98 0 0 1-2.636 6.364 1 1 0 0 1-1.414-1.414A6.98 6.98 0 0 0 19 12a6.98 6.98 0 0 0-2.05-4.95 1 1 0 0 1 0-1.414"
+              />
+            </svg>
+          </div>
+        </button>
+        <input
+          aria-label="Volume"
+          class="VideoLightboxView-module_range VideoLightboxView-module_volume"
+          max="1"
+          min="0"
+          step="0.05"
+          style="--fill: 80%;"
+          type="range"
+          value="0.8"
+        />
+        <div
+          class="VideoLightboxView-module_speed"
+        >
+          <button
+            aria-expanded="false"
+            aria-haspopup="menu"
+            aria-label="Playback speed: 1×"
+            class="VideoLightboxView-module_speedButton"
+            type="button"
+          >
+            1×
+          </button>
+        </div>
+        <button
+          aria-label="Full screen"
+          aria-labelledby="react-use-id-6"
+          class="_icon-button_1215g_8 VideoLightboxView-module_iconButton"
+          data-kind="primary"
+          role="button"
+          style="--cpd-icon-button-size: 36px;"
+          tabindex="0"
+        >
+          <div
+            class="_indicator-icon_j097f_17"
+            style="--cpd-icon-button-size: 100%;"
+          >
+            <svg
+              fill="currentColor"
+              height="1em"
+              viewBox="0 0 24 24"
+              width="1em"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M4 14a1 1 0 0 1 1 1v4h4a1 1 0 1 1 0 2H3v-6a1 1 0 0 1 1-1m16 0a1 1 0 0 1 1 1v6h-6a1 1 0 1 1 0-2h4v-4a1 1 0 0 1 1-1M9 3a1 1 0 0 1 0 2H5v4a1 1 0 0 1-2 0V3zm12 6a1 1 0 1 1-2 0V5h-4a1 1 0 1 1 0-2h6z"
+              />
+            </svg>
+          </div>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`VideoLightboxView > matches snapshot for controls hidden story 1`] = `
+<div>
+  <div
+    style="height: 560px; background-color: rgb(0, 0, 0);"
+  >
+    <div
+      aria-label="Video view"
+      aria-modal="true"
+      class="cpd-theme-dark VideoLightboxView-module_root VideoLightboxView-module_controlsHidden"
+      role="dialog"
+    >
+      <div
+        class="VideoLightboxView-module_topBar"
+      >
+        <div
+          class="VideoLightboxView-module_sender"
+        >
+          <button
+            aria-label="View profile"
+            class="VideoLightboxView-module_avatarButton"
+            type="button"
+          >
+            <span
+              aria-label="@alice:example.org"
+              class="_avatar_va14e_8 VideoLightboxView-module_avatar"
+              data-color="3"
+              data-type="round"
+              role="img"
+              style="--cpd-avatar-size: 32px;"
+            >
+              <img
+                alt=""
+                class="_image_va14e_43"
+                data-type="round"
+                height="32px"
+                loading="lazy"
+                referrerpolicy="no-referrer"
+                src="/static/profile-pics/profile1.png"
+                width="32px"
+              />
+            </span>
+          </button>
+          <div
+            class="VideoLightboxView-module_senderText"
+          >
+            <span
+              class="VideoLightboxView-module_senderName"
+            >
+              Alice
+            </span>
+            <a
+              class="VideoLightboxView-module_date"
+              href="https://matrix.to/#/!room:example.org/$event"
+            >
+              Thu, Nov 12, 2026, 10:42 AM
+            </a>
+          </div>
+        </div>
+        <div
+          class="VideoLightboxView-module_actions"
+        >
+          <button
+            aria-disabled="false"
+            aria-label="Save as…"
+            aria-labelledby="react-use-id-1"
+            class="_icon-button_1215g_8 VideoLightboxView-module_iconButton"
+            data-kind="primary"
+            role="button"
+            style="--cpd-icon-button-size: 32px;"
+            tabindex="0"
+          >
+            <div
+              class="_indicator-icon_j097f_17"
+              style="--cpd-icon-button-size: 100%;"
+            >
+              <svg
+                fill="currentColor"
+                height="1em"
+                viewBox="0 0 24 24"
+                width="1em"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M12 15.575q-.2 0-.375-.062a.9.9 0 0 1-.325-.213l-3.6-3.6a.95.95 0 0 1-.275-.7q0-.425.275-.7.274-.275.712-.288t.713.263L11 12.15V5q0-.424.287-.713A.97.97 0 0 1 12 4q.424 0 .713.287Q13 4.576 13 5v7.15l1.875-1.875q.274-.274.713-.263.437.014.712.288a.95.95 0 0 1 .275.7.95.95 0 0 1-.275.7l-3.6 3.6q-.15.15-.325.212a1.1 1.1 0 0 1-.375.063M6 20q-.824 0-1.412-.587A1.93 1.93 0 0 1 4 18v-2q0-.424.287-.713A.97.97 0 0 1 5 15q.424 0 .713.287Q6 15.576 6 16v2h12v-2q0-.424.288-.713A.97.97 0 0 1 19 15q.424 0 .712.287.288.288.288.713v2q0 .824-.587 1.413A1.93 1.93 0 0 1 18 20z"
+                />
+              </svg>
+            </div>
+          </button>
+          <button
+            aria-label="Forward"
+            aria-labelledby="react-use-id-2"
+            class="_icon-button_1215g_8 VideoLightboxView-module_iconButton"
+            data-kind="primary"
+            role="button"
+            style="--cpd-icon-button-size: 32px;"
+            tabindex="0"
+          >
+            <div
+              class="_indicator-icon_j097f_17"
+              style="--cpd-icon-button-size: 100%;"
+            >
+              <svg
+                fill="currentColor"
+                height="1em"
+                viewBox="0 0 24 24"
+                width="1em"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M14.597 5.708a1.004 1.004 0 0 1 0-1.416.996.996 0 0 1 1.412 0l4.699 4.714c.39.391.39 1.025 0 1.416l-4.7 4.714a.996.996 0 0 1-1.411 0 1.004 1.004 0 0 1 0-1.416l3.043-3.053H8.487c-1.888 0-3.485 1.604-3.485 3.666C5.002 16.396 6.599 18 8.487 18h2.093a1 1 0 1 1 0 2H8.487c-3.067 0-5.485-2.575-5.485-5.667S5.42 8.667 8.487 8.667h9.059z"
+                />
+              </svg>
+            </div>
+          </button>
+          <button
+            aria-label="Close"
+            aria-labelledby="react-use-id-3"
+            class="_icon-button_1215g_8 VideoLightboxView-module_iconButton"
+            data-kind="primary"
+            role="button"
+            style="--cpd-icon-button-size: 32px;"
+            tabindex="0"
+          >
+            <div
+              class="_indicator-icon_j097f_17"
+              style="--cpd-icon-button-size: 100%;"
+            >
+              <svg
+                fill="currentColor"
+                height="1em"
+                viewBox="0 0 24 24"
+                width="1em"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M6.293 6.293a1 1 0 0 1 1.414 0L12 10.586l4.293-4.293a1 1 0 1 1 1.414 1.414L13.414 12l4.293 4.293a1 1 0 0 1-1.414 1.414L12 13.414l-4.293 4.293a1 1 0 0 1-1.414-1.414L10.586 12 6.293 7.707a1 1 0 0 1 0-1.414"
+                />
+              </svg>
+            </div>
+          </button>
+        </div>
+      </div>
+      <div
+        class="VideoLightboxView-module_stage"
+      >
+        <video
+          autoplay=""
+          class="VideoLightboxView-module_video"
+          crossorigin="anonymous"
+          playsinline=""
+          poster="/static/element.png"
+        />
+      </div>
+      <div
+        class="VideoLightboxView-module_controls"
+      >
+        <button
+          aria-label="Pause"
+          aria-labelledby="react-use-id-4"
+          class="_icon-button_1215g_8 VideoLightboxView-module_iconButton"
+          data-autofocus="true"
+          data-kind="primary"
+          role="button"
+          style="--cpd-icon-button-size: 36px;"
+          tabindex="0"
+        >
+          <div
+            class="_indicator-icon_j097f_17"
+            style="--cpd-icon-button-size: 100%;"
+          >
+            <svg
+              fill="currentColor"
+              height="1em"
+              viewBox="0 0 24 24"
+              width="1em"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M8 4a2 2 0 0 0-2 2v12a2 2 0 1 0 4 0V6a2 2 0 0 0-2-2m8 0a2 2 0 0 0-2 2v12a2 2 0 1 0 4 0V6a2 2 0 0 0-2-2"
+              />
+            </svg>
+          </div>
+        </button>
+        <div
+          class="VideoLightboxView-module_timeline"
+        >
+          <span
+            class="VideoLightboxView-module_time"
+          >
+            0:12
+          </span>
+          <input
+            aria-label="Playback position"
+            aria-valuetext="0:12 of 1:05"
+            class="VideoLightboxView-module_range VideoLightboxView-module_seekBar"
+            max="65"
+            min="0"
+            step="any"
+            style="--fill: 18.461538461538463%;"
+            type="range"
+            value="12"
+          />
+          <span
+            class="VideoLightboxView-module_time"
+          >
+            1:05
+          </span>
+        </div>
+        <button
+          aria-label="Mute"
+          aria-labelledby="react-use-id-5"
+          class="_icon-button_1215g_8 VideoLightboxView-module_iconButton VideoLightboxView-module_mute"
+          data-kind="primary"
+          role="button"
+          style="--cpd-icon-button-size: 36px;"
+          tabindex="0"
+        >
+          <div
+            class="_indicator-icon_j097f_17"
+            style="--cpd-icon-button-size: 100%;"
+          >
+            <svg
+              fill="currentColor"
+              height="1em"
+              viewBox="0 0 24 24"
+              width="1em"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M3 14v-4a2 2 0 0 1 2-2h2l3.293-3.293c.63-.63 1.707-.184 1.707.707v13.172c0 .89-1.077 1.337-1.707.707L7 16H5a2 2 0 0 1-2-2m11.122-5.536a1 1 0 0 1 1.414 0A5 5 0 0 1 17 12c0 1.38-.56 2.632-1.464 3.536a1 1 0 0 1-1.415-1.415 3 3 0 0 0 .88-2.121c0-.829-.335-1.577-.88-2.121a1 1 0 0 1 0-1.415"
+              />
+              <path
+                d="M16.95 5.636a1 1 0 0 1 1.414 0A8.98 8.98 0 0 1 21 12a8.98 8.98 0 0 1-2.636 6.364 1 1 0 0 1-1.414-1.414A6.98 6.98 0 0 0 19 12a6.98 6.98 0 0 0-2.05-4.95 1 1 0 0 1 0-1.414"
+              />
+            </svg>
+          </div>
+        </button>
+        <input
+          aria-label="Volume"
+          class="VideoLightboxView-module_range VideoLightboxView-module_volume"
+          max="1"
+          min="0"
+          step="0.05"
+          style="--fill: 80%;"
+          type="range"
+          value="0.8"
+        />
+        <div
+          class="VideoLightboxView-module_speed"
+        >
+          <button
+            aria-expanded="false"
+            aria-haspopup="menu"
+            aria-label="Playback speed: 1×"
+            class="VideoLightboxView-module_speedButton"
+            type="button"
+          >
+            1×
+          </button>
+        </div>
+        <button
+          aria-label="Full screen"
+          aria-labelledby="react-use-id-6"
+          class="_icon-button_1215g_8 VideoLightboxView-module_iconButton"
+          data-kind="primary"
+          role="button"
+          style="--cpd-icon-button-size: 36px;"
+          tabindex="0"
+        >
+          <div
+            class="_indicator-icon_j097f_17"
+            style="--cpd-icon-button-size: 100%;"
+          >
+            <svg
+              fill="currentColor"
+              height="1em"
+              viewBox="0 0 24 24"
+              width="1em"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M4 14a1 1 0 0 1 1 1v4h4a1 1 0 1 1 0 2H3v-6a1 1 0 0 1 1-1m16 0a1 1 0 0 1 1 1v6h-6a1 1 0 1 1 0-2h4v-4a1 1 0 0 1 1-1M9 3a1 1 0 0 1 0 2H5v4a1 1 0 0 1-2 0V3zm12 6a1 1 0 1 1-2 0V5h-4a1 1 0 1 1 0-2h6z"
+              />
+            </svg>
+          </div>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`VideoLightboxView > matches snapshot for error story 1`] = `
+<div>
+  <div
+    style="height: 560px; background-color: rgb(0, 0, 0);"
+  >
+    <div
+      aria-label="Video view"
+      aria-modal="true"
+      class="cpd-theme-dark VideoLightboxView-module_root"
+      role="dialog"
+    >
+      <div
+        class="VideoLightboxView-module_topBar"
+      >
+        <div
+          class="VideoLightboxView-module_sender"
+        >
+          <button
+            aria-label="View profile"
+            class="VideoLightboxView-module_avatarButton"
+            type="button"
+          >
+            <span
+              aria-label="@alice:example.org"
+              class="_avatar_va14e_8 VideoLightboxView-module_avatar"
+              data-color="3"
+              data-type="round"
+              role="img"
+              style="--cpd-avatar-size: 32px;"
+            >
+              <img
+                alt=""
+                class="_image_va14e_43"
+                data-type="round"
+                height="32px"
+                loading="lazy"
+                referrerpolicy="no-referrer"
+                src="/static/profile-pics/profile1.png"
+                width="32px"
+              />
+            </span>
+          </button>
+          <div
+            class="VideoLightboxView-module_senderText"
+          >
+            <span
+              class="VideoLightboxView-module_senderName"
+            >
+              Alice
+            </span>
+            <a
+              class="VideoLightboxView-module_date"
+              href="https://matrix.to/#/!room:example.org/$event"
+            >
+              Thu, Nov 12, 2026, 10:42 AM
+            </a>
+          </div>
+        </div>
+        <div
+          class="VideoLightboxView-module_actions"
+        >
+          <button
+            aria-disabled="false"
+            aria-label="Save as…"
+            aria-labelledby="react-use-id-1"
+            class="_icon-button_1215g_8 VideoLightboxView-module_iconButton"
+            data-kind="primary"
+            role="button"
+            style="--cpd-icon-button-size: 32px;"
+            tabindex="0"
+          >
+            <div
+              class="_indicator-icon_j097f_17"
+              style="--cpd-icon-button-size: 100%;"
+            >
+              <svg
+                fill="currentColor"
+                height="1em"
+                viewBox="0 0 24 24"
+                width="1em"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M12 15.575q-.2 0-.375-.062a.9.9 0 0 1-.325-.213l-3.6-3.6a.95.95 0 0 1-.275-.7q0-.425.275-.7.274-.275.712-.288t.713.263L11 12.15V5q0-.424.287-.713A.97.97 0 0 1 12 4q.424 0 .713.287Q13 4.576 13 5v7.15l1.875-1.875q.274-.274.713-.263.437.014.712.288a.95.95 0 0 1 .275.7.95.95 0 0 1-.275.7l-3.6 3.6q-.15.15-.325.212a1.1 1.1 0 0 1-.375.063M6 20q-.824 0-1.412-.587A1.93 1.93 0 0 1 4 18v-2q0-.424.287-.713A.97.97 0 0 1 5 15q.424 0 .713.287Q6 15.576 6 16v2h12v-2q0-.424.288-.713A.97.97 0 0 1 19 15q.424 0 .712.287.288.288.288.713v2q0 .824-.587 1.413A1.93 1.93 0 0 1 18 20z"
+                />
+              </svg>
+            </div>
+          </button>
+          <button
+            aria-label="Forward"
+            aria-labelledby="react-use-id-2"
+            class="_icon-button_1215g_8 VideoLightboxView-module_iconButton"
+            data-kind="primary"
+            role="button"
+            style="--cpd-icon-button-size: 32px;"
+            tabindex="0"
+          >
+            <div
+              class="_indicator-icon_j097f_17"
+              style="--cpd-icon-button-size: 100%;"
+            >
+              <svg
+                fill="currentColor"
+                height="1em"
+                viewBox="0 0 24 24"
+                width="1em"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M14.597 5.708a1.004 1.004 0 0 1 0-1.416.996.996 0 0 1 1.412 0l4.699 4.714c.39.391.39 1.025 0 1.416l-4.7 4.714a.996.996 0 0 1-1.411 0 1.004 1.004 0 0 1 0-1.416l3.043-3.053H8.487c-1.888 0-3.485 1.604-3.485 3.666C5.002 16.396 6.599 18 8.487 18h2.093a1 1 0 1 1 0 2H8.487c-3.067 0-5.485-2.575-5.485-5.667S5.42 8.667 8.487 8.667h9.059z"
+                />
+              </svg>
+            </div>
+          </button>
+          <button
+            aria-label="Close"
+            aria-labelledby="react-use-id-3"
+            class="_icon-button_1215g_8 VideoLightboxView-module_iconButton"
+            data-kind="primary"
+            role="button"
+            style="--cpd-icon-button-size: 32px;"
+            tabindex="0"
+          >
+            <div
+              class="_indicator-icon_j097f_17"
+              style="--cpd-icon-button-size: 100%;"
+            >
+              <svg
+                fill="currentColor"
+                height="1em"
+                viewBox="0 0 24 24"
+                width="1em"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M6.293 6.293a1 1 0 0 1 1.414 0L12 10.586l4.293-4.293a1 1 0 1 1 1.414 1.414L13.414 12l4.293 4.293a1 1 0 0 1-1.414 1.414L12 13.414l-4.293 4.293a1 1 0 0 1-1.414-1.414L10.586 12 6.293 7.707a1 1 0 0 1 0-1.414"
+                />
+              </svg>
+            </div>
+          </button>
+        </div>
+      </div>
+      <div
+        class="VideoLightboxView-module_stage"
+      >
+        <p
+          class="VideoLightboxView-module_error"
+          role="alert"
+        >
+          This video can't be played here. Save it to watch it in another app.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`VideoLightboxView > matches snapshot for loading story 1`] = `
+<div>
+  <div
+    style="height: 560px; background-color: rgb(0, 0, 0);"
+  >
+    <div
+      aria-label="Video view"
+      aria-modal="true"
+      class="cpd-theme-dark VideoLightboxView-module_root"
+      role="dialog"
+    >
+      <div
+        class="VideoLightboxView-module_topBar"
+      >
+        <div
+          class="VideoLightboxView-module_sender"
+        >
+          <button
+            aria-label="View profile"
+            class="VideoLightboxView-module_avatarButton"
+            type="button"
+          >
+            <span
+              aria-label="@alice:example.org"
+              class="_avatar_va14e_8 VideoLightboxView-module_avatar"
+              data-color="3"
+              data-type="round"
+              role="img"
+              style="--cpd-avatar-size: 32px;"
+            >
+              <img
+                alt=""
+                class="_image_va14e_43"
+                data-type="round"
+                height="32px"
+                loading="lazy"
+                referrerpolicy="no-referrer"
+                src="/static/profile-pics/profile1.png"
+                width="32px"
+              />
+            </span>
+          </button>
+          <div
+            class="VideoLightboxView-module_senderText"
+          >
+            <span
+              class="VideoLightboxView-module_senderName"
+            >
+              Alice
+            </span>
+            <a
+              class="VideoLightboxView-module_date"
+              href="https://matrix.to/#/!room:example.org/$event"
+            >
+              Thu, Nov 12, 2026, 10:42 AM
+            </a>
+          </div>
+        </div>
+        <div
+          class="VideoLightboxView-module_actions"
+        >
+          <button
+            aria-disabled="false"
+            aria-label="Save as…"
+            aria-labelledby="react-use-id-1"
+            class="_icon-button_1215g_8 VideoLightboxView-module_iconButton"
+            data-kind="primary"
+            role="button"
+            style="--cpd-icon-button-size: 32px;"
+            tabindex="0"
+          >
+            <div
+              class="_indicator-icon_j097f_17"
+              style="--cpd-icon-button-size: 100%;"
+            >
+              <svg
+                fill="currentColor"
+                height="1em"
+                viewBox="0 0 24 24"
+                width="1em"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M12 15.575q-.2 0-.375-.062a.9.9 0 0 1-.325-.213l-3.6-3.6a.95.95 0 0 1-.275-.7q0-.425.275-.7.274-.275.712-.288t.713.263L11 12.15V5q0-.424.287-.713A.97.97 0 0 1 12 4q.424 0 .713.287Q13 4.576 13 5v7.15l1.875-1.875q.274-.274.713-.263.437.014.712.288a.95.95 0 0 1 .275.7.95.95 0 0 1-.275.7l-3.6 3.6q-.15.15-.325.212a1.1 1.1 0 0 1-.375.063M6 20q-.824 0-1.412-.587A1.93 1.93 0 0 1 4 18v-2q0-.424.287-.713A.97.97 0 0 1 5 15q.424 0 .713.287Q6 15.576 6 16v2h12v-2q0-.424.288-.713A.97.97 0 0 1 19 15q.424 0 .712.287.288.288.288.713v2q0 .824-.587 1.413A1.93 1.93 0 0 1 18 20z"
+                />
+              </svg>
+            </div>
+          </button>
+          <button
+            aria-label="Forward"
+            aria-labelledby="react-use-id-2"
+            class="_icon-button_1215g_8 VideoLightboxView-module_iconButton"
+            data-kind="primary"
+            role="button"
+            style="--cpd-icon-button-size: 32px;"
+            tabindex="0"
+          >
+            <div
+              class="_indicator-icon_j097f_17"
+              style="--cpd-icon-button-size: 100%;"
+            >
+              <svg
+                fill="currentColor"
+                height="1em"
+                viewBox="0 0 24 24"
+                width="1em"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M14.597 5.708a1.004 1.004 0 0 1 0-1.416.996.996 0 0 1 1.412 0l4.699 4.714c.39.391.39 1.025 0 1.416l-4.7 4.714a.996.996 0 0 1-1.411 0 1.004 1.004 0 0 1 0-1.416l3.043-3.053H8.487c-1.888 0-3.485 1.604-3.485 3.666C5.002 16.396 6.599 18 8.487 18h2.093a1 1 0 1 1 0 2H8.487c-3.067 0-5.485-2.575-5.485-5.667S5.42 8.667 8.487 8.667h9.059z"
+                />
+              </svg>
+            </div>
+          </button>
+          <button
+            aria-label="Close"
+            aria-labelledby="react-use-id-3"
+            class="_icon-button_1215g_8 VideoLightboxView-module_iconButton"
+            data-kind="primary"
+            role="button"
+            style="--cpd-icon-button-size: 32px;"
+            tabindex="0"
+          >
+            <div
+              class="_indicator-icon_j097f_17"
+              style="--cpd-icon-button-size: 100%;"
+            >
+              <svg
+                fill="currentColor"
+                height="1em"
+                viewBox="0 0 24 24"
+                width="1em"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M6.293 6.293a1 1 0 0 1 1.414 0L12 10.586l4.293-4.293a1 1 0 1 1 1.414 1.414L13.414 12l4.293 4.293a1 1 0 0 1-1.414 1.414L12 13.414l-4.293 4.293a1 1 0 0 1-1.414-1.414L10.586 12 6.293 7.707a1 1 0 0 1 0-1.414"
+                />
+              </svg>
+            </div>
+          </button>
+        </div>
+      </div>
+      <div
+        class="VideoLightboxView-module_stage"
+      >
+        <video
+          autoplay=""
+          class="VideoLightboxView-module_video"
+          crossorigin="anonymous"
+          playsinline=""
+          poster="/static/element.png"
+        />
+        <div
+          class="VideoLightboxView-module_status"
+        >
+          <span
+            class="VideoLightboxView-module_spinner"
+          >
+            <svg
+              aria-label="Loading…"
+              class="_icon_1855a_18"
+              fill="currentColor"
+              height="1em"
+              role="progressbar"
+              style="width: 32px; height: 32px;"
+              viewBox="0 0 24 24"
+              width="1em"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                clip-rule="evenodd"
+                d="M12 4.031a8 8 0 1 0 8 8 1 1 0 0 1 2 0c0 5.523-4.477 10-10 10s-10-4.477-10-10 4.477-10 10-10a1 1 0 1 1 0 2"
+                fill-rule="evenodd"
+              />
+            </svg>
+          </span>
+        </div>
+      </div>
+      <div
+        class="VideoLightboxView-module_controls"
+      >
+        <button
+          aria-label="Play"
+          aria-labelledby="react-use-id-4"
+          class="_icon-button_1215g_8 VideoLightboxView-module_iconButton"
+          data-autofocus="true"
+          data-kind="primary"
+          role="button"
+          style="--cpd-icon-button-size: 36px;"
+          tabindex="0"
+        >
+          <div
+            class="_indicator-icon_j097f_17"
+            style="--cpd-icon-button-size: 100%;"
+          >
+            <svg
+              fill="currentColor"
+              height="1em"
+              viewBox="0 0 24 24"
+              width="1em"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="m8.98 4.677 9.921 5.58c1.36.764 1.36 2.722 0 3.486l-9.92 5.58C7.647 20.073 6 19.11 6 17.58V6.42c0-1.53 1.647-2.493 2.98-1.743"
+              />
+            </svg>
+          </div>
+        </button>
+        <div
+          class="VideoLightboxView-module_timeline"
+        >
+          <span
+            class="VideoLightboxView-module_time"
+          >
+            0:00
+          </span>
+          <input
+            aria-label="Playback position"
+            aria-valuetext="0:00 of 1:05"
+            class="VideoLightboxView-module_range VideoLightboxView-module_seekBar"
+            disabled=""
+            max="0"
+            min="0"
+            step="any"
+            style="--fill: 0%;"
+            type="range"
+            value="0"
+          />
+          <span
+            class="VideoLightboxView-module_time"
+          >
+            1:05
+          </span>
+        </div>
+        <button
+          aria-label="Mute"
+          aria-labelledby="react-use-id-5"
+          class="_icon-button_1215g_8 VideoLightboxView-module_iconButton VideoLightboxView-module_mute"
+          data-kind="primary"
+          role="button"
+          style="--cpd-icon-button-size: 36px;"
+          tabindex="0"
+        >
+          <div
+            class="_indicator-icon_j097f_17"
+            style="--cpd-icon-button-size: 100%;"
+          >
+            <svg
+              fill="currentColor"
+              height="1em"
+              viewBox="0 0 24 24"
+              width="1em"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M3 14v-4a2 2 0 0 1 2-2h2l3.293-3.293c.63-.63 1.707-.184 1.707.707v13.172c0 .89-1.077 1.337-1.707.707L7 16H5a2 2 0 0 1-2-2m11.122-5.536a1 1 0 0 1 1.414 0A5 5 0 0 1 17 12c0 1.38-.56 2.632-1.464 3.536a1 1 0 0 1-1.415-1.415 3 3 0 0 0 .88-2.121c0-.829-.335-1.577-.88-2.121a1 1 0 0 1 0-1.415"
+              />
+              <path
+                d="M16.95 5.636a1 1 0 0 1 1.414 0A8.98 8.98 0 0 1 21 12a8.98 8.98 0 0 1-2.636 6.364 1 1 0 0 1-1.414-1.414A6.98 6.98 0 0 0 19 12a6.98 6.98 0 0 0-2.05-4.95 1 1 0 0 1 0-1.414"
+              />
+            </svg>
+          </div>
+        </button>
+        <input
+          aria-label="Volume"
+          class="VideoLightboxView-module_range VideoLightboxView-module_volume"
+          max="1"
+          min="0"
+          step="0.05"
+          style="--fill: 80%;"
+          type="range"
+          value="0.8"
+        />
+        <div
+          class="VideoLightboxView-module_speed"
+        >
+          <button
+            aria-expanded="false"
+            aria-haspopup="menu"
+            aria-label="Playback speed: 1×"
+            class="VideoLightboxView-module_speedButton"
+            type="button"
+          >
+            1×
+          </button>
+        </div>
+        <button
+          aria-label="Full screen"
+          aria-labelledby="react-use-id-6"
+          class="_icon-button_1215g_8 VideoLightboxView-module_iconButton"
+          data-kind="primary"
+          role="button"
+          style="--cpd-icon-button-size: 36px;"
+          tabindex="0"
+        >
+          <div
+            class="_indicator-icon_j097f_17"
+            style="--cpd-icon-button-size: 100%;"
+          >
+            <svg
+              fill="currentColor"
+              height="1em"
+              viewBox="0 0 24 24"
+              width="1em"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M4 14a1 1 0 0 1 1 1v4h4a1 1 0 1 1 0 2H3v-6a1 1 0 0 1 1-1m16 0a1 1 0 0 1 1 1v6h-6a1 1 0 1 1 0-2h4v-4a1 1 0 0 1 1-1M9 3a1 1 0 0 1 0 2H5v4a1 1 0 0 1-2 0V3zm12 6a1 1 0 1 1-2 0V5h-4a1 1 0 1 1 0-2h6z"
+              />
+            </svg>
+          </div>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`VideoLightboxView > matches snapshot for narrow story 1`] = `
+<div>
+  <div
+    style="height: 560px; background-color: rgb(0, 0, 0);"
+  >
+    <div
+      style="width: 360px; height: 100%;"
+    >
+      <div
+        aria-label="Video view"
+        aria-modal="true"
+        class="cpd-theme-dark VideoLightboxView-module_root"
+        role="dialog"
+      >
+        <div
+          class="VideoLightboxView-module_topBar"
+        >
+          <div
+            class="VideoLightboxView-module_sender"
+          >
+            <button
+              aria-label="View profile"
+              class="VideoLightboxView-module_avatarButton"
+              type="button"
+            >
+              <span
+                aria-label="@alice:example.org"
+                class="_avatar_va14e_8 VideoLightboxView-module_avatar"
+                data-color="3"
+                data-type="round"
+                role="img"
+                style="--cpd-avatar-size: 32px;"
+              >
+                <img
+                  alt=""
+                  class="_image_va14e_43"
+                  data-type="round"
+                  height="32px"
+                  loading="lazy"
+                  referrerpolicy="no-referrer"
+                  src="/static/profile-pics/profile1.png"
+                  width="32px"
+                />
+              </span>
+            </button>
+            <div
+              class="VideoLightboxView-module_senderText"
+            >
+              <span
+                class="VideoLightboxView-module_senderName"
+              >
+                Alice Wonderland-Liddell of Oxford
+              </span>
+              <a
+                class="VideoLightboxView-module_date"
+                href="https://matrix.to/#/!room:example.org/$event"
+              >
+                Thu, Nov 12, 2026, 10:42 AM
+              </a>
+            </div>
+          </div>
+          <div
+            class="VideoLightboxView-module_actions"
+          >
+            <button
+              aria-disabled="false"
+              aria-label="Save as…"
+              aria-labelledby="react-use-id-1"
+              class="_icon-button_1215g_8 VideoLightboxView-module_iconButton"
+              data-kind="primary"
+              role="button"
+              style="--cpd-icon-button-size: 32px;"
+              tabindex="0"
+            >
+              <div
+                class="_indicator-icon_j097f_17"
+                style="--cpd-icon-button-size: 100%;"
+              >
+                <svg
+                  fill="currentColor"
+                  height="1em"
+                  viewBox="0 0 24 24"
+                  width="1em"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M12 15.575q-.2 0-.375-.062a.9.9 0 0 1-.325-.213l-3.6-3.6a.95.95 0 0 1-.275-.7q0-.425.275-.7.274-.275.712-.288t.713.263L11 12.15V5q0-.424.287-.713A.97.97 0 0 1 12 4q.424 0 .713.287Q13 4.576 13 5v7.15l1.875-1.875q.274-.274.713-.263.437.014.712.288a.95.95 0 0 1 .275.7.95.95 0 0 1-.275.7l-3.6 3.6q-.15.15-.325.212a1.1 1.1 0 0 1-.375.063M6 20q-.824 0-1.412-.587A1.93 1.93 0 0 1 4 18v-2q0-.424.287-.713A.97.97 0 0 1 5 15q.424 0 .713.287Q6 15.576 6 16v2h12v-2q0-.424.288-.713A.97.97 0 0 1 19 15q.424 0 .712.287.288.288.288.713v2q0 .824-.587 1.413A1.93 1.93 0 0 1 18 20z"
+                  />
+                </svg>
+              </div>
+            </button>
+            <button
+              aria-label="Forward"
+              aria-labelledby="react-use-id-2"
+              class="_icon-button_1215g_8 VideoLightboxView-module_iconButton"
+              data-kind="primary"
+              role="button"
+              style="--cpd-icon-button-size: 32px;"
+              tabindex="0"
+            >
+              <div
+                class="_indicator-icon_j097f_17"
+                style="--cpd-icon-button-size: 100%;"
+              >
+                <svg
+                  fill="currentColor"
+                  height="1em"
+                  viewBox="0 0 24 24"
+                  width="1em"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M14.597 5.708a1.004 1.004 0 0 1 0-1.416.996.996 0 0 1 1.412 0l4.699 4.714c.39.391.39 1.025 0 1.416l-4.7 4.714a.996.996 0 0 1-1.411 0 1.004 1.004 0 0 1 0-1.416l3.043-3.053H8.487c-1.888 0-3.485 1.604-3.485 3.666C5.002 16.396 6.599 18 8.487 18h2.093a1 1 0 1 1 0 2H8.487c-3.067 0-5.485-2.575-5.485-5.667S5.42 8.667 8.487 8.667h9.059z"
+                  />
+                </svg>
+              </div>
+            </button>
+            <button
+              aria-label="Close"
+              aria-labelledby="react-use-id-3"
+              class="_icon-button_1215g_8 VideoLightboxView-module_iconButton"
+              data-kind="primary"
+              role="button"
+              style="--cpd-icon-button-size: 32px;"
+              tabindex="0"
+            >
+              <div
+                class="_indicator-icon_j097f_17"
+                style="--cpd-icon-button-size: 100%;"
+              >
+                <svg
+                  fill="currentColor"
+                  height="1em"
+                  viewBox="0 0 24 24"
+                  width="1em"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M6.293 6.293a1 1 0 0 1 1.414 0L12 10.586l4.293-4.293a1 1 0 1 1 1.414 1.414L13.414 12l4.293 4.293a1 1 0 0 1-1.414 1.414L12 13.414l-4.293 4.293a1 1 0 0 1-1.414-1.414L10.586 12 6.293 7.707a1 1 0 0 1 0-1.414"
+                  />
+                </svg>
+              </div>
+            </button>
+          </div>
+        </div>
+        <div
+          class="VideoLightboxView-module_stage"
+        >
+          <video
+            autoplay=""
+            class="VideoLightboxView-module_video"
+            crossorigin="anonymous"
+            playsinline=""
+            poster="/static/element.png"
+          />
+        </div>
+        <div
+          class="VideoLightboxView-module_controls"
+        >
+          <button
+            aria-label="Play"
+            aria-labelledby="react-use-id-4"
+            class="_icon-button_1215g_8 VideoLightboxView-module_iconButton"
+            data-autofocus="true"
+            data-kind="primary"
+            role="button"
+            style="--cpd-icon-button-size: 36px;"
+            tabindex="0"
+          >
+            <div
+              class="_indicator-icon_j097f_17"
+              style="--cpd-icon-button-size: 100%;"
+            >
+              <svg
+                fill="currentColor"
+                height="1em"
+                viewBox="0 0 24 24"
+                width="1em"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="m8.98 4.677 9.921 5.58c1.36.764 1.36 2.722 0 3.486l-9.92 5.58C7.647 20.073 6 19.11 6 17.58V6.42c0-1.53 1.647-2.493 2.98-1.743"
+                />
+              </svg>
+            </div>
+          </button>
+          <div
+            class="VideoLightboxView-module_timeline"
+          >
+            <span
+              class="VideoLightboxView-module_time"
+            >
+              0:12
+            </span>
+            <input
+              aria-label="Playback position"
+              aria-valuetext="0:12 of 1:05"
+              class="VideoLightboxView-module_range VideoLightboxView-module_seekBar"
+              max="65"
+              min="0"
+              step="any"
+              style="--fill: 18.461538461538463%;"
+              type="range"
+              value="12"
+            />
+            <span
+              class="VideoLightboxView-module_time"
+            >
+              1:05
+            </span>
+          </div>
+          <button
+            aria-label="Mute"
+            aria-labelledby="react-use-id-5"
+            class="_icon-button_1215g_8 VideoLightboxView-module_iconButton VideoLightboxView-module_mute"
+            data-kind="primary"
+            role="button"
+            style="--cpd-icon-button-size: 36px;"
+            tabindex="0"
+          >
+            <div
+              class="_indicator-icon_j097f_17"
+              style="--cpd-icon-button-size: 100%;"
+            >
+              <svg
+                fill="currentColor"
+                height="1em"
+                viewBox="0 0 24 24"
+                width="1em"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M3 14v-4a2 2 0 0 1 2-2h2l3.293-3.293c.63-.63 1.707-.184 1.707.707v13.172c0 .89-1.077 1.337-1.707.707L7 16H5a2 2 0 0 1-2-2m11.122-5.536a1 1 0 0 1 1.414 0A5 5 0 0 1 17 12c0 1.38-.56 2.632-1.464 3.536a1 1 0 0 1-1.415-1.415 3 3 0 0 0 .88-2.121c0-.829-.335-1.577-.88-2.121a1 1 0 0 1 0-1.415"
+                />
+                <path
+                  d="M16.95 5.636a1 1 0 0 1 1.414 0A8.98 8.98 0 0 1 21 12a8.98 8.98 0 0 1-2.636 6.364 1 1 0 0 1-1.414-1.414A6.98 6.98 0 0 0 19 12a6.98 6.98 0 0 0-2.05-4.95 1 1 0 0 1 0-1.414"
+                />
+              </svg>
+            </div>
+          </button>
+          <input
+            aria-label="Volume"
+            class="VideoLightboxView-module_range VideoLightboxView-module_volume"
+            max="1"
+            min="0"
+            step="0.05"
+            style="--fill: 80%;"
+            type="range"
+            value="0.8"
+          />
+          <div
+            class="VideoLightboxView-module_speed"
+          >
+            <button
+              aria-expanded="false"
+              aria-haspopup="menu"
+              aria-label="Playback speed: 1×"
+              class="VideoLightboxView-module_speedButton"
+              type="button"
+            >
+              1×
+            </button>
+          </div>
+          <button
+            aria-label="Full screen"
+            aria-labelledby="react-use-id-6"
+            class="_icon-button_1215g_8 VideoLightboxView-module_iconButton"
+            data-kind="primary"
+            role="button"
+            style="--cpd-icon-button-size: 36px;"
+            tabindex="0"
+          >
+            <div
+              class="_indicator-icon_j097f_17"
+              style="--cpd-icon-button-size: 100%;"
+            >
+              <svg
+                fill="currentColor"
+                height="1em"
+                viewBox="0 0 24 24"
+                width="1em"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M4 14a1 1 0 0 1 1 1v4h4a1 1 0 1 1 0 2H3v-6a1 1 0 0 1 1-1m16 0a1 1 0 0 1 1 1v6h-6a1 1 0 1 1 0-2h4v-4a1 1 0 0 1 1-1M9 3a1 1 0 0 1 0 2H5v4a1 1 0 0 1-2 0V3zm12 6a1 1 0 1 1-2 0V5h-4a1 1 0 1 1 0-2h6z"
+                />
+              </svg>
+            </div>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`VideoLightboxView > matches snapshot for paused story 1`] = `
+<div>
+  <div
+    style="height: 560px; background-color: rgb(0, 0, 0);"
+  >
+    <div
+      aria-label="Video view"
+      aria-modal="true"
+      class="cpd-theme-dark VideoLightboxView-module_root"
+      role="dialog"
+    >
+      <div
+        class="VideoLightboxView-module_topBar"
+      >
+        <div
+          class="VideoLightboxView-module_sender"
+        >
+          <button
+            aria-label="View profile"
+            class="VideoLightboxView-module_avatarButton"
+            type="button"
+          >
+            <span
+              aria-label="@alice:example.org"
+              class="_avatar_va14e_8 VideoLightboxView-module_avatar"
+              data-color="3"
+              data-type="round"
+              role="img"
+              style="--cpd-avatar-size: 32px;"
+            >
+              <img
+                alt=""
+                class="_image_va14e_43"
+                data-type="round"
+                height="32px"
+                loading="lazy"
+                referrerpolicy="no-referrer"
+                src="/static/profile-pics/profile1.png"
+                width="32px"
+              />
+            </span>
+          </button>
+          <div
+            class="VideoLightboxView-module_senderText"
+          >
+            <span
+              class="VideoLightboxView-module_senderName"
+            >
+              Alice
+            </span>
+            <a
+              class="VideoLightboxView-module_date"
+              href="https://matrix.to/#/!room:example.org/$event"
+            >
+              Thu, Nov 12, 2026, 10:42 AM
+            </a>
+          </div>
+        </div>
+        <div
+          class="VideoLightboxView-module_actions"
+        >
+          <button
+            aria-disabled="false"
+            aria-label="Save as…"
+            aria-labelledby="react-use-id-1"
+            class="_icon-button_1215g_8 VideoLightboxView-module_iconButton"
+            data-kind="primary"
+            role="button"
+            style="--cpd-icon-button-size: 32px;"
+            tabindex="0"
+          >
+            <div
+              class="_indicator-icon_j097f_17"
+              style="--cpd-icon-button-size: 100%;"
+            >
+              <svg
+                fill="currentColor"
+                height="1em"
+                viewBox="0 0 24 24"
+                width="1em"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M12 15.575q-.2 0-.375-.062a.9.9 0 0 1-.325-.213l-3.6-3.6a.95.95 0 0 1-.275-.7q0-.425.275-.7.274-.275.712-.288t.713.263L11 12.15V5q0-.424.287-.713A.97.97 0 0 1 12 4q.424 0 .713.287Q13 4.576 13 5v7.15l1.875-1.875q.274-.274.713-.263.437.014.712.288a.95.95 0 0 1 .275.7.95.95 0 0 1-.275.7l-3.6 3.6q-.15.15-.325.212a1.1 1.1 0 0 1-.375.063M6 20q-.824 0-1.412-.587A1.93 1.93 0 0 1 4 18v-2q0-.424.287-.713A.97.97 0 0 1 5 15q.424 0 .713.287Q6 15.576 6 16v2h12v-2q0-.424.288-.713A.97.97 0 0 1 19 15q.424 0 .712.287.288.288.288.713v2q0 .824-.587 1.413A1.93 1.93 0 0 1 18 20z"
+                />
+              </svg>
+            </div>
+          </button>
+          <button
+            aria-label="Forward"
+            aria-labelledby="react-use-id-2"
+            class="_icon-button_1215g_8 VideoLightboxView-module_iconButton"
+            data-kind="primary"
+            role="button"
+            style="--cpd-icon-button-size: 32px;"
+            tabindex="0"
+          >
+            <div
+              class="_indicator-icon_j097f_17"
+              style="--cpd-icon-button-size: 100%;"
+            >
+              <svg
+                fill="currentColor"
+                height="1em"
+                viewBox="0 0 24 24"
+                width="1em"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M14.597 5.708a1.004 1.004 0 0 1 0-1.416.996.996 0 0 1 1.412 0l4.699 4.714c.39.391.39 1.025 0 1.416l-4.7 4.714a.996.996 0 0 1-1.411 0 1.004 1.004 0 0 1 0-1.416l3.043-3.053H8.487c-1.888 0-3.485 1.604-3.485 3.666C5.002 16.396 6.599 18 8.487 18h2.093a1 1 0 1 1 0 2H8.487c-3.067 0-5.485-2.575-5.485-5.667S5.42 8.667 8.487 8.667h9.059z"
+                />
+              </svg>
+            </div>
+          </button>
+          <button
+            aria-label="Close"
+            aria-labelledby="react-use-id-3"
+            class="_icon-button_1215g_8 VideoLightboxView-module_iconButton"
+            data-kind="primary"
+            role="button"
+            style="--cpd-icon-button-size: 32px;"
+            tabindex="0"
+          >
+            <div
+              class="_indicator-icon_j097f_17"
+              style="--cpd-icon-button-size: 100%;"
+            >
+              <svg
+                fill="currentColor"
+                height="1em"
+                viewBox="0 0 24 24"
+                width="1em"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M6.293 6.293a1 1 0 0 1 1.414 0L12 10.586l4.293-4.293a1 1 0 1 1 1.414 1.414L13.414 12l4.293 4.293a1 1 0 0 1-1.414 1.414L12 13.414l-4.293 4.293a1 1 0 0 1-1.414-1.414L10.586 12 6.293 7.707a1 1 0 0 1 0-1.414"
+                />
+              </svg>
+            </div>
+          </button>
+        </div>
+      </div>
+      <div
+        class="VideoLightboxView-module_stage"
+      >
+        <video
+          autoplay=""
+          class="VideoLightboxView-module_video"
+          crossorigin="anonymous"
+          playsinline=""
+          poster="/static/element.png"
+        />
+      </div>
+      <div
+        class="VideoLightboxView-module_controls"
+      >
+        <button
+          aria-label="Play"
+          aria-labelledby="react-use-id-4"
+          class="_icon-button_1215g_8 VideoLightboxView-module_iconButton"
+          data-autofocus="true"
+          data-kind="primary"
+          role="button"
+          style="--cpd-icon-button-size: 36px;"
+          tabindex="0"
+        >
+          <div
+            class="_indicator-icon_j097f_17"
+            style="--cpd-icon-button-size: 100%;"
+          >
+            <svg
+              fill="currentColor"
+              height="1em"
+              viewBox="0 0 24 24"
+              width="1em"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="m8.98 4.677 9.921 5.58c1.36.764 1.36 2.722 0 3.486l-9.92 5.58C7.647 20.073 6 19.11 6 17.58V6.42c0-1.53 1.647-2.493 2.98-1.743"
+              />
+            </svg>
+          </div>
+        </button>
+        <div
+          class="VideoLightboxView-module_timeline"
+        >
+          <span
+            class="VideoLightboxView-module_time"
+          >
+            0:12
+          </span>
+          <input
+            aria-label="Playback position"
+            aria-valuetext="0:12 of 1:05"
+            class="VideoLightboxView-module_range VideoLightboxView-module_seekBar"
+            max="65"
+            min="0"
+            step="any"
+            style="--fill: 18.461538461538463%;"
+            type="range"
+            value="12"
+          />
+          <span
+            class="VideoLightboxView-module_time"
+          >
+            1:05
+          </span>
+        </div>
+        <button
+          aria-label="Mute"
+          aria-labelledby="react-use-id-5"
+          class="_icon-button_1215g_8 VideoLightboxView-module_iconButton VideoLightboxView-module_mute"
+          data-kind="primary"
+          role="button"
+          style="--cpd-icon-button-size: 36px;"
+          tabindex="0"
+        >
+          <div
+            class="_indicator-icon_j097f_17"
+            style="--cpd-icon-button-size: 100%;"
+          >
+            <svg
+              fill="currentColor"
+              height="1em"
+              viewBox="0 0 24 24"
+              width="1em"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M3 14v-4a2 2 0 0 1 2-2h2l3.293-3.293c.63-.63 1.707-.184 1.707.707v13.172c0 .89-1.077 1.337-1.707.707L7 16H5a2 2 0 0 1-2-2m11.122-5.536a1 1 0 0 1 1.414 0A5 5 0 0 1 17 12c0 1.38-.56 2.632-1.464 3.536a1 1 0 0 1-1.415-1.415 3 3 0 0 0 .88-2.121c0-.829-.335-1.577-.88-2.121a1 1 0 0 1 0-1.415"
+              />
+              <path
+                d="M16.95 5.636a1 1 0 0 1 1.414 0A8.98 8.98 0 0 1 21 12a8.98 8.98 0 0 1-2.636 6.364 1 1 0 0 1-1.414-1.414A6.98 6.98 0 0 0 19 12a6.98 6.98 0 0 0-2.05-4.95 1 1 0 0 1 0-1.414"
+              />
+            </svg>
+          </div>
+        </button>
+        <input
+          aria-label="Volume"
+          class="VideoLightboxView-module_range VideoLightboxView-module_volume"
+          max="1"
+          min="0"
+          step="0.05"
+          style="--fill: 80%;"
+          type="range"
+          value="0.8"
+        />
+        <div
+          class="VideoLightboxView-module_speed"
+        >
+          <button
+            aria-expanded="false"
+            aria-haspopup="menu"
+            aria-label="Playback speed: 1×"
+            class="VideoLightboxView-module_speedButton"
+            type="button"
+          >
+            1×
+          </button>
+        </div>
+        <button
+          aria-label="Full screen"
+          aria-labelledby="react-use-id-6"
+          class="_icon-button_1215g_8 VideoLightboxView-module_iconButton"
+          data-kind="primary"
+          role="button"
+          style="--cpd-icon-button-size: 36px;"
+          tabindex="0"
+        >
+          <div
+            class="_indicator-icon_j097f_17"
+            style="--cpd-icon-button-size: 100%;"
+          >
+            <svg
+              fill="currentColor"
+              height="1em"
+              viewBox="0 0 24 24"
+              width="1em"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M4 14a1 1 0 0 1 1 1v4h4a1 1 0 1 1 0 2H3v-6a1 1 0 0 1 1-1m16 0a1 1 0 0 1 1 1v6h-6a1 1 0 1 1 0-2h4v-4a1 1 0 0 1 1-1M9 3a1 1 0 0 1 0 2H5v4a1 1 0 0 1-2 0V3zm12 6a1 1 0 1 1-2 0V5h-4a1 1 0 1 1 0-2h6z"
+              />
+            </svg>
+          </div>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`VideoLightboxView > matches snapshot for playing story 1`] = `
+<div>
+  <div
+    style="height: 560px; background-color: rgb(0, 0, 0);"
+  >
+    <div
+      aria-label="Video view"
+      aria-modal="true"
+      class="cpd-theme-dark VideoLightboxView-module_root"
+      role="dialog"
+    >
+      <div
+        class="VideoLightboxView-module_topBar"
+      >
+        <div
+          class="VideoLightboxView-module_sender"
+        >
+          <button
+            aria-label="View profile"
+            class="VideoLightboxView-module_avatarButton"
+            type="button"
+          >
+            <span
+              aria-label="@alice:example.org"
+              class="_avatar_va14e_8 VideoLightboxView-module_avatar"
+              data-color="3"
+              data-type="round"
+              role="img"
+              style="--cpd-avatar-size: 32px;"
+            >
+              <img
+                alt=""
+                class="_image_va14e_43"
+                data-type="round"
+                height="32px"
+                loading="lazy"
+                referrerpolicy="no-referrer"
+                src="/static/profile-pics/profile1.png"
+                width="32px"
+              />
+            </span>
+          </button>
+          <div
+            class="VideoLightboxView-module_senderText"
+          >
+            <span
+              class="VideoLightboxView-module_senderName"
+            >
+              Alice
+            </span>
+            <a
+              class="VideoLightboxView-module_date"
+              href="https://matrix.to/#/!room:example.org/$event"
+            >
+              Thu, Nov 12, 2026, 10:42 AM
+            </a>
+          </div>
+        </div>
+        <div
+          class="VideoLightboxView-module_actions"
+        >
+          <button
+            aria-disabled="false"
+            aria-label="Save as…"
+            aria-labelledby="react-use-id-1"
+            class="_icon-button_1215g_8 VideoLightboxView-module_iconButton"
+            data-kind="primary"
+            role="button"
+            style="--cpd-icon-button-size: 32px;"
+            tabindex="0"
+          >
+            <div
+              class="_indicator-icon_j097f_17"
+              style="--cpd-icon-button-size: 100%;"
+            >
+              <svg
+                fill="currentColor"
+                height="1em"
+                viewBox="0 0 24 24"
+                width="1em"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M12 15.575q-.2 0-.375-.062a.9.9 0 0 1-.325-.213l-3.6-3.6a.95.95 0 0 1-.275-.7q0-.425.275-.7.274-.275.712-.288t.713.263L11 12.15V5q0-.424.287-.713A.97.97 0 0 1 12 4q.424 0 .713.287Q13 4.576 13 5v7.15l1.875-1.875q.274-.274.713-.263.437.014.712.288a.95.95 0 0 1 .275.7.95.95 0 0 1-.275.7l-3.6 3.6q-.15.15-.325.212a1.1 1.1 0 0 1-.375.063M6 20q-.824 0-1.412-.587A1.93 1.93 0 0 1 4 18v-2q0-.424.287-.713A.97.97 0 0 1 5 15q.424 0 .713.287Q6 15.576 6 16v2h12v-2q0-.424.288-.713A.97.97 0 0 1 19 15q.424 0 .712.287.288.288.288.713v2q0 .824-.587 1.413A1.93 1.93 0 0 1 18 20z"
+                />
+              </svg>
+            </div>
+          </button>
+          <button
+            aria-label="Forward"
+            aria-labelledby="react-use-id-2"
+            class="_icon-button_1215g_8 VideoLightboxView-module_iconButton"
+            data-kind="primary"
+            role="button"
+            style="--cpd-icon-button-size: 32px;"
+            tabindex="0"
+          >
+            <div
+              class="_indicator-icon_j097f_17"
+              style="--cpd-icon-button-size: 100%;"
+            >
+              <svg
+                fill="currentColor"
+                height="1em"
+                viewBox="0 0 24 24"
+                width="1em"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M14.597 5.708a1.004 1.004 0 0 1 0-1.416.996.996 0 0 1 1.412 0l4.699 4.714c.39.391.39 1.025 0 1.416l-4.7 4.714a.996.996 0 0 1-1.411 0 1.004 1.004 0 0 1 0-1.416l3.043-3.053H8.487c-1.888 0-3.485 1.604-3.485 3.666C5.002 16.396 6.599 18 8.487 18h2.093a1 1 0 1 1 0 2H8.487c-3.067 0-5.485-2.575-5.485-5.667S5.42 8.667 8.487 8.667h9.059z"
+                />
+              </svg>
+            </div>
+          </button>
+          <button
+            aria-label="Close"
+            aria-labelledby="react-use-id-3"
+            class="_icon-button_1215g_8 VideoLightboxView-module_iconButton"
+            data-kind="primary"
+            role="button"
+            style="--cpd-icon-button-size: 32px;"
+            tabindex="0"
+          >
+            <div
+              class="_indicator-icon_j097f_17"
+              style="--cpd-icon-button-size: 100%;"
+            >
+              <svg
+                fill="currentColor"
+                height="1em"
+                viewBox="0 0 24 24"
+                width="1em"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M6.293 6.293a1 1 0 0 1 1.414 0L12 10.586l4.293-4.293a1 1 0 1 1 1.414 1.414L13.414 12l4.293 4.293a1 1 0 0 1-1.414 1.414L12 13.414l-4.293 4.293a1 1 0 0 1-1.414-1.414L10.586 12 6.293 7.707a1 1 0 0 1 0-1.414"
+                />
+              </svg>
+            </div>
+          </button>
+        </div>
+      </div>
+      <div
+        class="VideoLightboxView-module_stage"
+      >
+        <video
+          autoplay=""
+          class="VideoLightboxView-module_video"
+          crossorigin="anonymous"
+          playsinline=""
+          poster="/static/element.png"
+        />
+      </div>
+      <div
+        class="VideoLightboxView-module_controls"
+      >
+        <button
+          aria-label="Pause"
+          aria-labelledby="react-use-id-4"
+          class="_icon-button_1215g_8 VideoLightboxView-module_iconButton"
+          data-autofocus="true"
+          data-kind="primary"
+          role="button"
+          style="--cpd-icon-button-size: 36px;"
+          tabindex="0"
+        >
+          <div
+            class="_indicator-icon_j097f_17"
+            style="--cpd-icon-button-size: 100%;"
+          >
+            <svg
+              fill="currentColor"
+              height="1em"
+              viewBox="0 0 24 24"
+              width="1em"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M8 4a2 2 0 0 0-2 2v12a2 2 0 1 0 4 0V6a2 2 0 0 0-2-2m8 0a2 2 0 0 0-2 2v12a2 2 0 1 0 4 0V6a2 2 0 0 0-2-2"
+              />
+            </svg>
+          </div>
+        </button>
+        <div
+          class="VideoLightboxView-module_timeline"
+        >
+          <span
+            class="VideoLightboxView-module_time"
+          >
+            0:12
+          </span>
+          <input
+            aria-label="Playback position"
+            aria-valuetext="0:12 of 1:05"
+            class="VideoLightboxView-module_range VideoLightboxView-module_seekBar"
+            max="65"
+            min="0"
+            step="any"
+            style="--fill: 18.461538461538463%;"
+            type="range"
+            value="12"
+          />
+          <span
+            class="VideoLightboxView-module_time"
+          >
+            1:05
+          </span>
+        </div>
+        <button
+          aria-label="Mute"
+          aria-labelledby="react-use-id-5"
+          class="_icon-button_1215g_8 VideoLightboxView-module_iconButton VideoLightboxView-module_mute"
+          data-kind="primary"
+          role="button"
+          style="--cpd-icon-button-size: 36px;"
+          tabindex="0"
+        >
+          <div
+            class="_indicator-icon_j097f_17"
+            style="--cpd-icon-button-size: 100%;"
+          >
+            <svg
+              fill="currentColor"
+              height="1em"
+              viewBox="0 0 24 24"
+              width="1em"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M3 14v-4a2 2 0 0 1 2-2h2l3.293-3.293c.63-.63 1.707-.184 1.707.707v13.172c0 .89-1.077 1.337-1.707.707L7 16H5a2 2 0 0 1-2-2m11.122-5.536a1 1 0 0 1 1.414 0A5 5 0 0 1 17 12c0 1.38-.56 2.632-1.464 3.536a1 1 0 0 1-1.415-1.415 3 3 0 0 0 .88-2.121c0-.829-.335-1.577-.88-2.121a1 1 0 0 1 0-1.415"
+              />
+              <path
+                d="M16.95 5.636a1 1 0 0 1 1.414 0A8.98 8.98 0 0 1 21 12a8.98 8.98 0 0 1-2.636 6.364 1 1 0 0 1-1.414-1.414A6.98 6.98 0 0 0 19 12a6.98 6.98 0 0 0-2.05-4.95 1 1 0 0 1 0-1.414"
+              />
+            </svg>
+          </div>
+        </button>
+        <input
+          aria-label="Volume"
+          class="VideoLightboxView-module_range VideoLightboxView-module_volume"
+          max="1"
+          min="0"
+          step="0.05"
+          style="--fill: 80%;"
+          type="range"
+          value="0.8"
+        />
+        <div
+          class="VideoLightboxView-module_speed"
+        >
+          <button
+            aria-expanded="false"
+            aria-haspopup="menu"
+            aria-label="Playback speed: 1×"
+            class="VideoLightboxView-module_speedButton"
+            type="button"
+          >
+            1×
+          </button>
+        </div>
+        <button
+          aria-label="Full screen"
+          aria-labelledby="react-use-id-6"
+          class="_icon-button_1215g_8 VideoLightboxView-module_iconButton"
+          data-kind="primary"
+          role="button"
+          style="--cpd-icon-button-size: 36px;"
+          tabindex="0"
+        >
+          <div
+            class="_indicator-icon_j097f_17"
+            style="--cpd-icon-button-size: 100%;"
+          >
+            <svg
+              fill="currentColor"
+              height="1em"
+              viewBox="0 0 24 24"
+              width="1em"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M4 14a1 1 0 0 1 1 1v4h4a1 1 0 1 1 0 2H3v-6a1 1 0 0 1 1-1m16 0a1 1 0 0 1 1 1v6h-6a1 1 0 1 1 0-2h4v-4a1 1 0 0 1 1-1M9 3a1 1 0 0 1 0 2H5v4a1 1 0 0 1-2 0V3zm12 6a1 1 0 1 1-2 0V5h-4a1 1 0 1 1 0-2h6z"
+              />
+            </svg>
+          </div>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`VideoLightboxView > matches snapshot for speed menu open story 1`] = `
+<div>
+  <div
+    style="height: 560px; background-color: rgb(0, 0, 0);"
+  >
+    <div
+      aria-label="Video view"
+      aria-modal="true"
+      class="cpd-theme-dark VideoLightboxView-module_root"
+      role="dialog"
+    >
+      <div
+        class="VideoLightboxView-module_topBar"
+      >
+        <div
+          class="VideoLightboxView-module_sender"
+        >
+          <button
+            aria-label="View profile"
+            class="VideoLightboxView-module_avatarButton"
+            type="button"
+          >
+            <span
+              aria-label="@alice:example.org"
+              class="_avatar_va14e_8 VideoLightboxView-module_avatar"
+              data-color="3"
+              data-type="round"
+              role="img"
+              style="--cpd-avatar-size: 32px;"
+            >
+              <img
+                alt=""
+                class="_image_va14e_43"
+                data-type="round"
+                height="32px"
+                loading="lazy"
+                referrerpolicy="no-referrer"
+                src="/static/profile-pics/profile1.png"
+                width="32px"
+              />
+            </span>
+          </button>
+          <div
+            class="VideoLightboxView-module_senderText"
+          >
+            <span
+              class="VideoLightboxView-module_senderName"
+            >
+              Alice
+            </span>
+            <a
+              class="VideoLightboxView-module_date"
+              href="https://matrix.to/#/!room:example.org/$event"
+            >
+              Thu, Nov 12, 2026, 10:42 AM
+            </a>
+          </div>
+        </div>
+        <div
+          class="VideoLightboxView-module_actions"
+        >
+          <button
+            aria-disabled="false"
+            aria-label="Save as…"
+            aria-labelledby="react-use-id-1"
+            class="_icon-button_1215g_8 VideoLightboxView-module_iconButton"
+            data-kind="primary"
+            role="button"
+            style="--cpd-icon-button-size: 32px;"
+            tabindex="0"
+          >
+            <div
+              class="_indicator-icon_j097f_17"
+              style="--cpd-icon-button-size: 100%;"
+            >
+              <svg
+                fill="currentColor"
+                height="1em"
+                viewBox="0 0 24 24"
+                width="1em"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M12 15.575q-.2 0-.375-.062a.9.9 0 0 1-.325-.213l-3.6-3.6a.95.95 0 0 1-.275-.7q0-.425.275-.7.274-.275.712-.288t.713.263L11 12.15V5q0-.424.287-.713A.97.97 0 0 1 12 4q.424 0 .713.287Q13 4.576 13 5v7.15l1.875-1.875q.274-.274.713-.263.437.014.712.288a.95.95 0 0 1 .275.7.95.95 0 0 1-.275.7l-3.6 3.6q-.15.15-.325.212a1.1 1.1 0 0 1-.375.063M6 20q-.824 0-1.412-.587A1.93 1.93 0 0 1 4 18v-2q0-.424.287-.713A.97.97 0 0 1 5 15q.424 0 .713.287Q6 15.576 6 16v2h12v-2q0-.424.288-.713A.97.97 0 0 1 19 15q.424 0 .712.287.288.288.288.713v2q0 .824-.587 1.413A1.93 1.93 0 0 1 18 20z"
+                />
+              </svg>
+            </div>
+          </button>
+          <button
+            aria-label="Forward"
+            aria-labelledby="react-use-id-2"
+            class="_icon-button_1215g_8 VideoLightboxView-module_iconButton"
+            data-kind="primary"
+            role="button"
+            style="--cpd-icon-button-size: 32px;"
+            tabindex="0"
+          >
+            <div
+              class="_indicator-icon_j097f_17"
+              style="--cpd-icon-button-size: 100%;"
+            >
+              <svg
+                fill="currentColor"
+                height="1em"
+                viewBox="0 0 24 24"
+                width="1em"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M14.597 5.708a1.004 1.004 0 0 1 0-1.416.996.996 0 0 1 1.412 0l4.699 4.714c.39.391.39 1.025 0 1.416l-4.7 4.714a.996.996 0 0 1-1.411 0 1.004 1.004 0 0 1 0-1.416l3.043-3.053H8.487c-1.888 0-3.485 1.604-3.485 3.666C5.002 16.396 6.599 18 8.487 18h2.093a1 1 0 1 1 0 2H8.487c-3.067 0-5.485-2.575-5.485-5.667S5.42 8.667 8.487 8.667h9.059z"
+                />
+              </svg>
+            </div>
+          </button>
+          <button
+            aria-label="Close"
+            aria-labelledby="react-use-id-3"
+            class="_icon-button_1215g_8 VideoLightboxView-module_iconButton"
+            data-kind="primary"
+            role="button"
+            style="--cpd-icon-button-size: 32px;"
+            tabindex="0"
+          >
+            <div
+              class="_indicator-icon_j097f_17"
+              style="--cpd-icon-button-size: 100%;"
+            >
+              <svg
+                fill="currentColor"
+                height="1em"
+                viewBox="0 0 24 24"
+                width="1em"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M6.293 6.293a1 1 0 0 1 1.414 0L12 10.586l4.293-4.293a1 1 0 1 1 1.414 1.414L13.414 12l4.293 4.293a1 1 0 0 1-1.414 1.414L12 13.414l-4.293 4.293a1 1 0 0 1-1.414-1.414L10.586 12 6.293 7.707a1 1 0 0 1 0-1.414"
+                />
+              </svg>
+            </div>
+          </button>
+        </div>
+      </div>
+      <div
+        class="VideoLightboxView-module_stage"
+      >
+        <video
+          autoplay=""
+          class="VideoLightboxView-module_video"
+          crossorigin="anonymous"
+          playsinline=""
+          poster="/static/element.png"
+        />
+      </div>
+      <div
+        class="VideoLightboxView-module_controls"
+      >
+        <button
+          aria-label="Play"
+          aria-labelledby="react-use-id-4"
+          class="_icon-button_1215g_8 VideoLightboxView-module_iconButton"
+          data-autofocus="true"
+          data-kind="primary"
+          role="button"
+          style="--cpd-icon-button-size: 36px;"
+          tabindex="0"
+        >
+          <div
+            class="_indicator-icon_j097f_17"
+            style="--cpd-icon-button-size: 100%;"
+          >
+            <svg
+              fill="currentColor"
+              height="1em"
+              viewBox="0 0 24 24"
+              width="1em"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="m8.98 4.677 9.921 5.58c1.36.764 1.36 2.722 0 3.486l-9.92 5.58C7.647 20.073 6 19.11 6 17.58V6.42c0-1.53 1.647-2.493 2.98-1.743"
+              />
+            </svg>
+          </div>
+        </button>
+        <div
+          class="VideoLightboxView-module_timeline"
+        >
+          <span
+            class="VideoLightboxView-module_time"
+          >
+            0:12
+          </span>
+          <input
+            aria-label="Playback position"
+            aria-valuetext="0:12 of 1:05"
+            class="VideoLightboxView-module_range VideoLightboxView-module_seekBar"
+            max="65"
+            min="0"
+            step="any"
+            style="--fill: 18.461538461538463%;"
+            type="range"
+            value="12"
+          />
+          <span
+            class="VideoLightboxView-module_time"
+          >
+            1:05
+          </span>
+        </div>
+        <button
+          aria-label="Mute"
+          aria-labelledby="react-use-id-5"
+          class="_icon-button_1215g_8 VideoLightboxView-module_iconButton VideoLightboxView-module_mute"
+          data-kind="primary"
+          role="button"
+          style="--cpd-icon-button-size: 36px;"
+          tabindex="0"
+        >
+          <div
+            class="_indicator-icon_j097f_17"
+            style="--cpd-icon-button-size: 100%;"
+          >
+            <svg
+              fill="currentColor"
+              height="1em"
+              viewBox="0 0 24 24"
+              width="1em"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M3 14v-4a2 2 0 0 1 2-2h2l3.293-3.293c.63-.63 1.707-.184 1.707.707v13.172c0 .89-1.077 1.337-1.707.707L7 16H5a2 2 0 0 1-2-2m11.122-5.536a1 1 0 0 1 1.414 0A5 5 0 0 1 17 12c0 1.38-.56 2.632-1.464 3.536a1 1 0 0 1-1.415-1.415 3 3 0 0 0 .88-2.121c0-.829-.335-1.577-.88-2.121a1 1 0 0 1 0-1.415"
+              />
+              <path
+                d="M16.95 5.636a1 1 0 0 1 1.414 0A8.98 8.98 0 0 1 21 12a8.98 8.98 0 0 1-2.636 6.364 1 1 0 0 1-1.414-1.414A6.98 6.98 0 0 0 19 12a6.98 6.98 0 0 0-2.05-4.95 1 1 0 0 1 0-1.414"
+              />
+            </svg>
+          </div>
+        </button>
+        <input
+          aria-label="Volume"
+          class="VideoLightboxView-module_range VideoLightboxView-module_volume"
+          max="1"
+          min="0"
+          step="0.05"
+          style="--fill: 80%;"
+          type="range"
+          value="0.8"
+        />
+        <div
+          class="VideoLightboxView-module_speed"
+        >
+          <button
+            aria-expanded="true"
+            aria-haspopup="menu"
+            aria-label="Playback speed: 1.5×"
+            class="VideoLightboxView-module_speedButton"
+            type="button"
+          >
+            1.5×
+          </button>
+          <div
+            aria-label="Playback speed"
+            class="VideoLightboxView-module_speedMenu"
+            role="menu"
+            tabindex="-1"
+          >
+            <button
+              aria-checked="false"
+              class="VideoLightboxView-module_speedMenuItem"
+              role="menuitemradio"
+              type="button"
+            >
+              0.5×
+            </button>
+            <button
+              aria-checked="false"
+              class="VideoLightboxView-module_speedMenuItem"
+              role="menuitemradio"
+              type="button"
+            >
+              1×
+            </button>
+            <button
+              aria-checked="false"
+              class="VideoLightboxView-module_speedMenuItem"
+              role="menuitemradio"
+              type="button"
+            >
+              1.25×
+            </button>
+            <button
+              aria-checked="true"
+              class="VideoLightboxView-module_speedMenuItem"
+              role="menuitemradio"
+              type="button"
+            >
+              1.5×
+              <svg
+                aria-hidden="true"
+                fill="currentColor"
+                height="20"
+                viewBox="0 0 24 24"
+                width="20"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M9.55 17.575q-.2 0-.375-.062a.9.9 0 0 1-.325-.213L4.55 13q-.274-.274-.262-.713.012-.437.287-.712a.95.95 0 0 1 .7-.275q.425 0 .7.275L9.55 15.15l8.475-8.475q.274-.275.713-.275.437 0 .712.275.275.274.275.713 0 .437-.275.712l-9.2 9.2q-.15.15-.325.212a1.1 1.1 0 0 1-.375.063"
+                />
+              </svg>
+            </button>
+            <button
+              aria-checked="false"
+              class="VideoLightboxView-module_speedMenuItem"
+              role="menuitemradio"
+              type="button"
+            >
+              2×
+            </button>
+          </div>
+        </div>
+        <button
+          aria-label="Full screen"
+          aria-labelledby="react-use-id-6"
+          class="_icon-button_1215g_8 VideoLightboxView-module_iconButton"
+          data-kind="primary"
+          role="button"
+          style="--cpd-icon-button-size: 36px;"
+          tabindex="0"
+        >
+          <div
+            class="_indicator-icon_j097f_17"
+            style="--cpd-icon-button-size: 100%;"
+          >
+            <svg
+              fill="currentColor"
+              height="1em"
+              viewBox="0 0 24 24"
+              width="1em"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M4 14a1 1 0 0 1 1 1v4h4a1 1 0 1 1 0 2H3v-6a1 1 0 0 1 1-1m16 0a1 1 0 0 1 1 1v6h-6a1 1 0 1 1 0-2h4v-4a1 1 0 0 1 1-1M9 3a1 1 0 0 1 0 2H5v4a1 1 0 0 1-2 0V3zm12 6a1 1 0 1 1-2 0V5h-4a1 1 0 1 1 0-2h6z"
+              />
+            </svg>
+          </div>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+`;

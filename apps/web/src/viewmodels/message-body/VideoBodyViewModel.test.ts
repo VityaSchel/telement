@@ -18,10 +18,15 @@ import { ImageSize } from "../../settings/enums/ImageSize";
 import { type Media, mediaFromContent } from "../../customisations/Media";
 import { BLURHASH_FIELD } from "../../utils/image-media";
 import { type MediaEventHelper } from "../../utils/MediaEventHelper";
+import { type RoomPermalinkCreator } from "../../utils/permalinks/Permalinks";
+import { openVideoLightbox } from "../../telement/media/VideoLightboxDialog";
 import { VideoBodyViewModel } from "./VideoBodyViewModel";
 
 vi.mock("../../customisations/Media", () => ({
     mediaFromContent: vi.fn(),
+}));
+vi.mock("../../telement/media/VideoLightboxDialog", () => ({
+    openVideoLightbox: vi.fn(),
 }));
 vi.mock("blurhash", () => ({
     decode: vi.fn(),
@@ -30,7 +35,6 @@ vi.mock("blurhash", () => ({
 describe("VideoBodyViewModel", () => {
     const mockedMediaFromContent = vi.mocked(mediaFromContent);
     const mockedDecode = vi.mocked(decode);
-    const videoRef = { current: null };
     let imageSizeWatcher: ((...args: [unknown, unknown, unknown, unknown, ImageSize]) => void) | undefined;
 
     const flushPromises = async (): Promise<void> => {
@@ -90,7 +94,6 @@ describe("VideoBodyViewModel", () => {
         new VideoBodyViewModel({
             mxEvent: createEvent(),
             mediaVisible: false,
-            videoRef,
             ...overrides,
         });
 
@@ -117,9 +120,6 @@ describe("VideoBodyViewModel", () => {
             if (setting === "Images.size") {
                 return ImageSize.Normal;
             }
-            if (setting === "autoplayVideo") {
-                return false;
-            }
             return originalGetValue(setting, ...args);
         });
         vi.spyOn(SettingsStore, "watchSetting").mockImplementation((_name, _roomId, callback) => {
@@ -130,6 +130,7 @@ describe("VideoBodyViewModel", () => {
 
         mockedMediaFromContent.mockImplementation((content) => createMockMedia(content));
         mockedDecode.mockReturnValue(new Uint8ClampedArray(320 * 180 * 4));
+        vi.mocked(openVideoLightbox).mockClear();
     });
 
     afterEach(() => {
@@ -146,17 +147,48 @@ describe("VideoBodyViewModel", () => {
         expect(vm.getSnapshot().maxHeight).toBe(180);
     });
 
-    it("updates to ready when media becomes visible", () => {
+    it("shows the poster when media becomes visible", () => {
         const vm = createVm();
 
         vm.setMediaVisible(true);
 
-        expect(vm.getSnapshot().state).toBe(VideoBodyViewState.READY);
-        expect(vm.getSnapshot().src).toBe("https://server/video.mp4");
-        expect(vm.getSnapshot().poster).toBe("https://server/poster.jpg");
+        expect(vm.getSnapshot()).toMatchObject({
+            state: VideoBodyViewState.READY,
+            playLabel: "Play video: demo video",
+            poster: "https://server/poster.jpg",
+            playable: true,
+            href: undefined,
+        });
+        expect(vm.getSnapshot()).not.toHaveProperty("src");
     });
 
-    it("uses the export urls directly when rendering for export", () => {
+    it("draws a placeholder when the video has no thumbnail", () => {
+        const vm = createVm({
+            mxEvent: createEvent({ content: { info: { thumbnail_url: null } } }),
+            mediaVisible: true,
+        });
+
+        expect(vm.getSnapshot().poster).toBeUndefined();
+    });
+
+    it.each([
+        [65_000, "1:05"],
+        [64_600, "1:04"],
+        [5_400, "0:05"],
+        [3_723_000, "1:02:03"],
+    ])("shows a duration of %d ms as %s", (duration, label) => {
+        const vm = createVm({ mxEvent: createEvent({ content: { info: { duration } } }), mediaVisible: true });
+
+        expect(vm.getSnapshot().durationLabel).toBe(label);
+    });
+
+    it.each([undefined, 0, -1, "12"])("shows no duration when it is %j", (duration) => {
+        const vm = createVm({ mxEvent: createEvent({ content: { info: { duration } } }), mediaVisible: true });
+
+        expect(vm.getSnapshot().durationLabel).toBeUndefined();
+    });
+
+    it("links the poster to the file when rendering for export", () => {
         const vm = createVm({
             mxEvent: createEvent({
                 content: {
@@ -173,20 +205,32 @@ describe("VideoBodyViewModel", () => {
 
         expect(vm.getSnapshot()).toMatchObject({
             state: VideoBodyViewState.READY,
-            src: "mxc://server/export-video",
-            preload: "metadata",
+            href: "mxc://server/export-video",
+            playable: false,
             poster: undefined,
         });
     });
 
-    it("updates controls and autoplay flags when interaction is inhibited", () => {
+    it("cannot be played when interaction is inhibited", () => {
         const vm = createVm({ mediaVisible: true });
 
         vm.setInhibitInteraction(true);
+        vm.onPlayClick();
 
-        expect(vm.getSnapshot().controls).toBe(false);
-        expect(vm.getSnapshot().muted).toBe(false);
-        expect(vm.getSnapshot().autoPlay).toBe(false);
+        expect(vm.getSnapshot().playable).toBe(false);
+        expect(openVideoLightbox).not.toHaveBeenCalled();
+    });
+
+    it("opens the video viewer when the poster is clicked", () => {
+        const mxEvent = createEvent();
+        const mediaEventHelper = createMediaEventHelper({ encrypted: false });
+        const permalinkCreator = {} as RoomPermalinkCreator;
+        const vm = createVm({ mxEvent, mediaEventHelper, mediaVisible: true });
+        vm.setPermalinkCreator(permalinkCreator);
+
+        vm.onPlayClick();
+
+        expect(openVideoLightbox).toHaveBeenCalledWith({ mxEvent, mediaEventHelper, permalinkCreator });
     });
 
     it("forwards preview clicks", () => {
@@ -198,72 +242,39 @@ describe("VideoBodyViewModel", () => {
         expect(onPreviewClick).toHaveBeenCalledTimes(1);
     });
 
-    it("preloads encrypted video when autoplay is enabled", async () => {
-        const originalGetValue = SettingsStore.getValue;
-        vi.spyOn(SettingsStore, "getValue").mockImplementation((setting, ...args) => {
-            if (setting === "Images.size") return ImageSize.Normal;
-            if (setting === "autoplayVideo") return true;
-            return originalGetValue(setting, ...args);
-        });
-
+    it("decrypts only the thumbnail of an encrypted video", async () => {
+        const sourceBlob = vi.fn();
+        const mediaEventHelper = {
+            ...createMediaEventHelper({ encrypted: true, thumbnailUrl: "blob:encrypted-poster" }),
+            sourceUrl: {
+                get value() {
+                    return sourceBlob();
+                },
+            },
+        } as unknown as MediaEventHelper;
         const vm = createVm({
             mxEvent: createEvent({
                 content: {
                     file: { url: "mxc://server/encrypted-video" },
                 },
             }),
-            mediaEventHelper: createMediaEventHelper({
-                encrypted: true,
-                thumbnailUrl: "blob:encrypted-poster",
-                sourceUrl: "blob:encrypted-video",
-            }),
+            mediaEventHelper,
             mediaVisible: true,
         });
+
+        expect(vm.getSnapshot().poster).toBeUndefined();
+
         vm.loadInitialMediaIfVisible();
-
-        expect(vm.getSnapshot().state).toBe(VideoBodyViewState.LOADING);
-
         await flushPromises();
 
         expect(vm.getSnapshot()).toMatchObject({
             state: VideoBodyViewState.READY,
-            src: "blob:encrypted-video",
             poster: "blob:encrypted-poster",
-            muted: true,
-            autoPlay: true,
         });
+        expect(sourceBlob).not.toHaveBeenCalled();
     });
 
-    it("keeps encrypted video lazy-loadable when autoplay is disabled", async () => {
-        const vm = createVm({
-            mxEvent: createEvent({
-                content: {
-                    file: { url: "mxc://server/encrypted-video" },
-                    info: {
-                        mimetype: "video/quicktime",
-                    },
-                },
-            }),
-            mediaEventHelper: createMediaEventHelper({
-                encrypted: true,
-                thumbnailUrl: null,
-            }),
-            mediaVisible: true,
-        });
-        vm.loadInitialMediaIfVisible();
-
-        await flushPromises();
-
-        expect(vm.getSnapshot()).toMatchObject({
-            state: VideoBodyViewState.READY,
-            src: "data:video/mp4,",
-            poster: "data:video/mp4,",
-            preload: "none",
-            autoPlay: false,
-        });
-    });
-
-    it("switches to the error state when encrypted preload fails", async () => {
+    it("switches to the error state when the encrypted thumbnail cannot be decrypted", async () => {
         vi.spyOn(logger, "warn").mockImplementation(vi.fn());
         const vm = createVm({
             mxEvent: createEvent({
@@ -283,47 +294,6 @@ describe("VideoBodyViewModel", () => {
 
         expect(vm.getSnapshot().state).toBe(VideoBodyViewState.ERROR);
         expect(vm.getSnapshot().errorLabel).toBeTruthy();
-    });
-
-    it("loads the encrypted source on play when only a placeholder url is present", async () => {
-        const play = vi.fn();
-        const vm = createVm({
-            mxEvent: createEvent({
-                content: {
-                    file: { url: "mxc://server/encrypted-video" },
-                },
-            }),
-            mediaEventHelper: createMediaEventHelper({
-                encrypted: true,
-                thumbnailUrl: null,
-                sourceUrl: "blob:played-video",
-            }),
-            mediaVisible: true,
-            videoRef: { current: { play } } as any,
-        });
-        vm.loadInitialMediaIfVisible();
-
-        await flushPromises();
-        await vm.onPlay();
-
-        expect(vm.getSnapshot().src).toBe("blob:played-video");
-        expect(play).toHaveBeenCalledTimes(1);
-    });
-
-    it("shows an error when play is requested without encrypted media data", async () => {
-        const vm = createVm({
-            mxEvent: createEvent({
-                content: {
-                    file: { url: "mxc://server/encrypted-video" },
-                },
-            }),
-            mediaVisible: true,
-        });
-        vm.loadInitialMediaIfVisible();
-
-        await vm.onPlay();
-
-        expect(vm.getSnapshot().state).toBe(VideoBodyViewState.ERROR);
     });
 
     it("recomputes dimensions when the image-size setting changes", () => {
@@ -346,6 +316,26 @@ describe("VideoBodyViewModel", () => {
 
         expect(vm.getSnapshot().maxWidth).toBe(800);
         expect(vm.getSnapshot().maxHeight).toBe(450);
+    });
+
+    it("shapes the poster like the thumbnail when the video's size is unknown", () => {
+        const vm = createVm({
+            mxEvent: createEvent({
+                content: { info: { w: undefined, h: undefined, thumbnail_info: { w: 540, h: 960 } } },
+            }),
+            mediaVisible: true,
+        });
+
+        expect(vm.getSnapshot()).toMatchObject({ maxWidth: 182, maxHeight: 324, aspectRatio: "1920/3413" });
+    });
+
+    it("gives a poster 16:9 when neither the video's nor the thumbnail's size is known", () => {
+        const vm = createVm({
+            mxEvent: createEvent({ content: { info: { w: undefined, h: undefined } } }),
+            mediaVisible: true,
+        });
+
+        expect(vm.getSnapshot()).toMatchObject({ maxWidth: 324, maxHeight: 182, aspectRatio: "1920/1080" });
     });
 
     it("uses the blurhash poster while the thumbnail image is loading", () => {
@@ -414,15 +404,14 @@ describe("VideoBodyViewModel", () => {
             }),
             mediaEventHelper: createMediaEventHelper({
                 encrypted: true,
-                thumbnailUrl: null,
-                sourceUrl: "blob:first-video",
+                thumbnailUrl: "blob:first-poster",
             }),
             mediaVisible: true,
         });
         vm.loadInitialMediaIfVisible();
 
         await flushPromises();
-        expect(vm.getSnapshot().src).toBe("data:video/mp4,");
+        expect(vm.getSnapshot().poster).toBe("blob:first-poster");
 
         vm.setEvent(
             createEvent({
@@ -433,15 +422,15 @@ describe("VideoBodyViewModel", () => {
             }),
             createMediaEventHelper({
                 encrypted: true,
-                thumbnailUrl: null,
-                sourceUrl: "blob:second-video",
+                thumbnailUrl: "blob:second-poster",
             }),
         );
+        expect(vm.getSnapshot().poster).toBeUndefined();
 
         await flushPromises();
 
-        expect(vm.getSnapshot().videoLabel).toBe("second video");
-        expect(vm.getSnapshot().src).toBe("data:video/mp4,");
+        expect(vm.getSnapshot().playLabel).toBe("Play video: second video");
+        expect(vm.getSnapshot().poster).toBe("blob:second-poster");
     });
 
     it("does not emit for unchanged targeted setters", () => {
@@ -460,6 +449,7 @@ describe("VideoBodyViewModel", () => {
         vm.setInhibitInteraction(undefined);
         vm.setMediaVisible(false);
         vm.setOnPreviewClick(onPreviewClick);
+        vm.setPermalinkCreator(undefined);
 
         expect(listener).not.toHaveBeenCalled();
     });

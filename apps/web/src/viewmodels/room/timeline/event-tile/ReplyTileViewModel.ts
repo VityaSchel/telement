@@ -32,7 +32,11 @@ import { type RoomPermalinkCreator } from "../../../../utils/permalinks/Permalin
 import { renderReplyTile } from "../../../../events/EventTileFactory";
 import { type GetRelationsForEvent } from "../../../../components/views/rooms/EventTile";
 import { type IBodyProps } from "../../../../components/views/messages/IBodyProps";
-import { FileBodyFactory, VideoBodyFactory, renderMBody } from "../../../../components/views/messages/MBodyFactory";
+import {
+    FileBodyFactory,
+    ReplyVideoBodyFactory,
+    renderMBody,
+} from "../../../../components/views/messages/MBodyFactory";
 import MImageReplyBody from "../../../../components/views/messages/MImageReplyBody";
 import MVoiceMessageBody from "../../../../components/views/messages/MVoiceMessageBody";
 import { isVoiceMessage } from "../../../../utils/EventUtils";
@@ -165,7 +169,7 @@ export class ReplyTileViewModel
             [MsgType.Image]: MImageReplyBody,
             // Audio attachments render as a file body, voice messages keep their player.
             [MsgType.Audio]: isVoiceMessage(mxEvent) ? MVoiceMessageBody : ReplyTileFileBody,
-            [MsgType.Video]: VideoBodyFactory,
+            [MsgType.Video]: ReplyVideoBodyFactory,
         };
         const evOverrides: Record<string, ComponentType<IBodyProps>> = {
             // Use the image reply body so the sticker does not take up a lot of space.

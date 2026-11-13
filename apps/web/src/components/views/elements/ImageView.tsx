@@ -38,7 +38,7 @@ import { KeyBindingAction } from "../../../accessibility/KeyboardShortcuts";
 import { getKeyBindingsManager } from "../../../KeyBindingsManager";
 import { presentableTextForFile } from "../../../utils/FileUtils";
 import AccessibleButton from "./AccessibleButton";
-import { useDownloadMedia } from "../../../hooks/useDownloadMedia.ts";
+import { useSaveMediaAs } from "../../../telement/media/useSaveMediaAs";
 import {
     MessageTimestampViewModel,
     type MessageTimestampViewModelProps,
@@ -130,7 +130,7 @@ export default class ImageView extends React.Component<IProps, IState> {
     private imageWrapper = createRef<HTMLDivElement>();
     private image = createRef<HTMLImageElement>();
 
-    private downloadFunction?: () => Promise<void>;
+    private saveAsFunction?: () => Promise<void>;
 
     private initX = 0;
     private initY = 0;
@@ -314,8 +314,8 @@ export default class ImageView extends React.Component<IProps, IState> {
             case KeyBindingAction.Save:
                 ev.preventDefault();
                 ev.stopPropagation();
-                if (this.downloadFunction) {
-                    void this.downloadFunction();
+                if (this.saveAsFunction) {
+                    void this.saveAsFunction();
                 }
                 break;
         }
@@ -343,8 +343,8 @@ export default class ImageView extends React.Component<IProps, IState> {
         });
     };
 
-    private onDownloadFunctionReady = (download: () => Promise<void>): void => {
-        this.downloadFunction = download;
+    private onSaveAsFunctionReady = (saveAs: () => Promise<void>): void => {
+        this.saveAsFunction = saveAs;
     };
 
     private onPermalinkClicked = (ev: React.MouseEvent): void => {
@@ -571,11 +571,11 @@ export default class ImageView extends React.Component<IProps, IState> {
                         >
                             <RotateRightIcon />
                         </AccessibleButton>
-                        <DownloadButton
+                        <SaveAsButton
                             url={this.props.src}
                             fileName={this.props.name}
                             mxEvent={this.props.mxEvent}
-                            onDownloadReady={this.onDownloadFunctionReady}
+                            onSaveAsReady={this.onSaveAsFunctionReady}
                         />
                         {contextMenuButton}
                         <AccessibleButton
@@ -611,28 +611,29 @@ export default class ImageView extends React.Component<IProps, IState> {
     }
 }
 
-interface DownloadButtonProps {
+interface SaveAsButtonProps {
     url: string;
     fileName?: string;
     mxEvent?: MatrixEvent;
-    onDownloadReady?: (download: () => Promise<void>) => void;
+    onSaveAsReady?: (saveAs: () => Promise<void>) => void;
 }
 
-export const DownloadButton: React.FC<DownloadButtonProps> = ({ url, fileName, mxEvent, onDownloadReady }) => {
-    const { download, loading, canDownload } = useDownloadMedia(url, fileName, mxEvent);
+/** Telement: "Save as…" replaces Element's download button, so the user picks where the file goes. */
+const SaveAsButton: React.FC<SaveAsButtonProps> = ({ url, fileName, mxEvent, onSaveAsReady }) => {
+    const { saveAs, saving, canSave } = useSaveMediaAs(url, fileName, mxEvent);
 
     useEffect(() => {
-        if (onDownloadReady) onDownloadReady(download);
-    }, [download, onDownloadReady]);
+        if (onSaveAsReady) onSaveAsReady(saveAs);
+    }, [saveAs, onSaveAsReady]);
 
-    if (!canDownload) return null;
+    if (!canSave) return null;
 
     return (
         <AccessibleButton
             className="mx_ImageView_button"
-            title={loading ? _t("timeline|download_action_downloading") : _t("action|download")}
-            onClick={download}
-            disabled={loading}
+            title={_t("telement|media|save_as")}
+            onClick={saveAs}
+            disabled={saving}
         >
             <DownloadIcon />
         </AccessibleButton>

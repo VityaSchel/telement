@@ -118,10 +118,12 @@ export function VideoBodyFactory({
     mediaEventHelper,
     forExport,
     inhibitInteraction,
-}: Readonly<Pick<IBodyProps, "mxEvent" | "mediaEventHelper" | "forExport" | "inhibitInteraction">>): JSX.Element {
+    permalinkCreator,
+}: Readonly<
+    Pick<IBodyProps, "mxEvent" | "mediaEventHelper" | "forExport" | "inhibitInteraction" | "permalinkCreator">
+>): JSX.Element {
     const { timelineRenderingType } = useContext(RoomContext);
     const [mediaVisible, setMediaVisible] = useMediaVisible(mxEvent);
-    const videoRef = useRef<HTMLVideoElement>(null);
 
     const vm = useCreateAutoDisposedViewModel(
         () =>
@@ -132,7 +134,7 @@ export function VideoBodyFactory({
                 inhibitInteraction,
                 mediaVisible,
                 onPreviewClick: (): void => setMediaVisible(true),
-                videoRef,
+                permalinkCreator,
             }),
     );
 
@@ -160,6 +162,10 @@ export function VideoBodyFactory({
         vm.setOnPreviewClick((): void => setMediaVisible(true));
     }, [setMediaVisible, vm]);
 
+    useEffect(() => {
+        vm.setPermalinkCreator(permalinkCreator);
+    }, [permalinkCreator, vm]);
+
     const showFileBody =
         !forExport &&
         timelineRenderingType !== TimelineRenderingType.Room &&
@@ -167,12 +173,7 @@ export function VideoBodyFactory({
         timelineRenderingType !== TimelineRenderingType.Search;
 
     return (
-        <VideoBodyView
-            vm={vm}
-            className="mx_MVideoBody"
-            containerClassName="mx_MVideoBody_container"
-            videoRef={videoRef}
-        >
+        <VideoBodyView vm={vm} className="mx_MVideoBody" containerClassName="mx_MVideoBody_container">
             {showFileBody ? (
                 <FileBodyFactory
                     mxEvent={mxEvent}
@@ -183,6 +184,16 @@ export function VideoBodyFactory({
             ) : null}
         </VideoBodyView>
     );
+}
+
+/**
+ * Telement: the video body of a quoted reply, a poster that doesn't open the video. Clicking the quote shows the
+ * quoted message instead, and a control inside the quote's link would be nested interactive content.
+ */
+export function ReplyVideoBodyFactory(
+    props: Readonly<Pick<IBodyProps, "mxEvent" | "mediaEventHelper" | "forExport" | "permalinkCreator">>,
+): JSX.Element {
+    return <VideoBodyFactory {...props} inhibitInteraction={true} />;
 }
 
 export function ImageBodyFactory({

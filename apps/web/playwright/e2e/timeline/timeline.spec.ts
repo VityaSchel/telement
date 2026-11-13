@@ -903,6 +903,46 @@ test.describe("Timeline", () => {
             await expect(page.locator("video")).not.toBeVisible();
         });
 
+        test("should play a video in the video viewer, not in the timeline", async ({
+            page,
+            app,
+            homeserver,
+            room,
+        }) => {
+            await app.viewRoomById(room.roomId);
+
+            const bot = new Bot(page, homeserver, {});
+            await bot.prepareClient();
+            await app.client.inviteUser(room.roomId, bot.credentials!.userId);
+
+            const upload = await bot.uploadContent(VIDEO_FILE, { name: "bbb.webm", type: "video/webm" });
+            await bot.sendEvent(room.roomId, null, "m.room.message" as EventType, {
+                msgtype: "m.video" as MsgType,
+                body: "bbb.webm",
+                url: upload.content_uri,
+                info: { duration: 5000, mimetype: "video/webm" },
+            });
+
+            await app.timeline.scrollToBottom();
+            const poster = page.getByRole("button", { name: "Play video: bbb.webm" });
+            await expect(poster).toBeVisible();
+            await expect(poster).toContainText("0:05");
+            await expect(page.locator(".mx_RoomView_body video")).toHaveCount(0);
+
+            await poster.click();
+            const viewer = page.getByRole("dialog", { name: "Video view" });
+            await expect(viewer).toBeVisible();
+            await expect(
+                viewer.getByRole("button", { name: "Play" }).or(viewer.getByRole("button", { name: "Pause" })),
+            ).toBeFocused();
+            await expect(viewer.getByRole("button", { name: "Save as…" })).toBeVisible();
+            await expect(viewer.getByRole("slider", { name: "Playback position" })).toBeVisible();
+
+            await page.keyboard.press("Escape");
+            await expect(viewer).not.toBeVisible();
+            await expect(poster).toBeFocused();
+        });
+
         test("should insert a mention when clicking sender profile in timeline", async ({
             page,
             app,

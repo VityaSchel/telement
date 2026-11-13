@@ -18,9 +18,9 @@ const EDITABLE_SELECTOR = "input, textarea, select, [contenteditable]:not([conte
 
 /**
  * Avatars draw their picture inside an element that is itself the image, custom reactions sit in the reactions
- * toolbar, and replies quote another message.
+ * toolbar, replies quote another message, and a video's poster is part of the video, which the menu saves instead.
  */
-const NOT_A_MESSAGE_PICTURE_SELECTOR = "[role='img'], [role='toolbar'], .mx_ReplyChain";
+const NOT_A_MESSAGE_PICTURE_SELECTOR = "[role='img'], [role='toolbar'], .mx_ReplyChain, .mx_MVideoBody";
 
 /** Media download addresses that only work inside this page or with the user's access token. */
 const MEDIA_PATH_PREFIXES = ["/_matrix/media/", "/_matrix/client/v1/media/"];
@@ -39,8 +39,8 @@ function isShareableLink(href: string): boolean {
  * Works out what the message context menu offers for a right click on `target`, or returns `null` when the
  * browser's own menu should open instead.
  *
- * Pictures in the message can be copied, but not avatars or pictures in a quoted reply. Links can be copied too,
- * except for media download addresses, which nobody else can open.
+ * Pictures in the message can be copied, but not avatars, video posters or pictures in a quoted reply. Links can be
+ * copied too, except for media download addresses, which nobody else can open.
  */
 export function getMessageContextMenuTarget(target: EventTarget | null): MessageContextMenuTarget | null {
     if (!(target instanceof Element)) return {};

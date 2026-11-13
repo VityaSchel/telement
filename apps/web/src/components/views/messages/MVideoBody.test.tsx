@@ -11,7 +11,7 @@ Please see LICENSE files in the repository root for full details.
 import React from "react";
 import { describe, it, expect, vi, beforeEach, afterEach, type MockedObject } from "vitest";
 import { EventType, getHttpUriForMxc, type IContent, type MatrixClient, MatrixEvent } from "matrix-js-sdk/src/matrix";
-import { fireEvent, render, screen } from "test-utils-rtl";
+import { fireEvent, render, screen, waitFor } from "test-utils-rtl";
 import fetchMock from "@fetch-mock/vitest";
 
 import {
@@ -25,10 +25,12 @@ import {
 import MatrixClientContext from "../../../contexts/MatrixClientContext";
 import { type RoomPermalinkCreator } from "../../../utils/permalinks/Permalinks";
 import { MediaEventHelper } from "../../../utils/MediaEventHelper";
-import { VideoBodyFactory } from "./MBodyFactory";
+import { ReplyVideoBodyFactory, VideoBodyFactory } from "./MBodyFactory";
 import type { IBodyProps } from "./IBodyProps";
 import SettingsStore from "../../../settings/SettingsStore";
 import { MediaPreviewValue } from "../../../@types/media_preview";
+import Modal from "../../../Modal";
+import { VideoLightboxDialog } from "../../../telement/media/VideoLightboxDialog";
 
 // Needed so we don't throw an error about failing to decrypt.
 vi.mock("matrix-encrypt-attachment", () => ({
@@ -132,10 +134,11 @@ describe("VideoBodyFactory", () => {
             </MatrixClientContext.Provider>,
             withClientContextRenderOptions(cli),
         );
-        expect(container.querySelector("video")).not.toBeNull();
+        expect(screen.getByRole("button", { name: /^Play video/ })).toBeInTheDocument();
+        expect(container.querySelector("video")).toBeNull();
     });
 
-    it("should show poster for encrypted media before downloading it", async () => {
+    it("should show the decrypted poster of encrypted media without downloading the video", async () => {
         fetchMock.getOnce(thumbUrl, { status: 200 });
         render(
             <VideoBodyFactory
@@ -144,7 +147,51 @@ describe("VideoBodyFactory", () => {
             />,
             withClientContextRenderOptions(cli),
         );
-        expect(await screen.findByLabelText("alt for a test video")).toHaveAttribute("poster");
+        const poster = await screen.findByRole("button", { name: "Play video: alt for a test video" });
+        await waitFor(() => expect(poster.querySelector("img")?.getAttribute("src")).toMatch(/^blob:/));
+        expect(poster).toHaveTextContent("0:00");
+        expect(fetchMock).toHaveFetchedTimes(1);
+    });
+
+    it("opens the video viewer when the poster is clicked", async () => {
+        const createDialog = vi
+            .spyOn(Modal, "createDialog")
+            .mockReturnValue({} as ReturnType<typeof Modal.createDialog>);
+        const mediaEventHelper = new MediaEventHelper(encryptedMediaEvent);
+        fetchMock.getOnce(thumbUrl, { status: 200 });
+        render(
+            <VideoBodyFactory mxEvent={encryptedMediaEvent} mediaEventHelper={mediaEventHelper} />,
+            withClientContextRenderOptions(cli),
+        );
+
+        fireEvent.click(await screen.findByRole("button", { name: "Play video: alt for a test video" }));
+
+        expect(createDialog).toHaveBeenCalledWith(
+            VideoLightboxDialog,
+            expect.objectContaining({ mxEvent: encryptedMediaEvent, mediaEventHelper }),
+            "mx_Dialog_lightbox",
+            undefined,
+            true,
+        );
+        createDialog.mockRestore();
+    });
+
+    it("shows a poster that does not open the video in a reply quote", async () => {
+        const createDialog = vi.spyOn(Modal, "createDialog");
+        fetchMock.getOnce(thumbUrl, { status: 200 });
+        const { container } = render(
+            <ReplyVideoBodyFactory
+                mxEvent={encryptedMediaEvent}
+                mediaEventHelper={new MediaEventHelper(encryptedMediaEvent)}
+            />,
+            withClientContextRenderOptions(cli),
+        );
+
+        await waitFor(() => expect(container.querySelector(".mx_MVideoBody img")).not.toBeNull());
+        expect(screen.queryByRole("button")).toBeNull();
+        fireEvent.click(container.querySelector(".mx_MVideoBody img")!);
+        expect(createDialog).not.toHaveBeenCalled();
+        createDialog.mockRestore();
     });
 
     describe("with video previews/thumbnails disabled", () => {
@@ -195,7 +242,7 @@ describe("VideoBodyFactory", () => {
             expect(placeholderButton).toBeInTheDocument();
             fireEvent.click(placeholderButton);
 
-            await screen.findByLabelText("alt for a test video");
+            await screen.findByRole("button", { name: "Play video: alt for a test video" });
             expect(fetchMock).toHaveFetched(thumbUrl);
         });
 
@@ -229,7 +276,7 @@ describe("VideoBodyFactory", () => {
                 withClientContextRenderOptions(cli),
             );
 
-            expect(await screen.findByLabelText("alt for a test video")).toBeInTheDocument();
+            expect(await screen.findByRole("button", { name: "Play video: alt for a test video" })).toBeInTheDocument();
             expect(fetchMock).toHaveFetched(thumbUrl);
         });
     });

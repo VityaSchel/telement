@@ -19,22 +19,34 @@ import {
     type VideoBodyViewSnapshot,
 } from "./VideoBodyView";
 
-const { Ready, Hidden, ErrorState } = composeStories(stories);
+const { Ready, WithoutPoster, Hidden, ErrorState } = composeStories(stories);
 
 class TestVideoBodyViewModel extends MockViewModel<VideoBodyViewSnapshot> implements VideoBodyViewActions {
     public onPreviewClick?: VideoBodyViewActions["onPreviewClick"];
-    public onPlay?: VideoBodyViewActions["onPlay"];
+    public onPlayClick?: VideoBodyViewActions["onPlayClick"];
 
     public constructor(snapshot: VideoBodyViewSnapshot, actions: VideoBodyViewActions = {}) {
         super(snapshot);
         this.onPreviewClick = actions.onPreviewClick;
-        this.onPlay = actions.onPlay;
+        this.onPlayClick = actions.onPlayClick;
     }
 }
+
+const readySnapshot: VideoBodyViewSnapshot = {
+    state: VideoBodyViewState.READY,
+    playLabel: "Play video: Product demo video",
+    maxWidth: 320,
+    maxHeight: 180,
+    aspectRatio: "16/9",
+    poster: "https://example.org/demo-poster.jpg",
+    durationLabel: "1:05",
+    playable: true,
+};
 
 describe("VideoBodyView", () => {
     it.each([
         ["ready", Ready],
+        ["without poster", WithoutPoster],
         ["hidden", Hidden],
         ["error", ErrorState],
     ])("matches snapshot for %s story", (_name, Story) => {
@@ -61,19 +73,6 @@ describe("VideoBodyView", () => {
         expect(onPreviewClick).toHaveBeenCalledTimes(1);
     });
 
-    it("renders a loading spinner while the media is being prepared", () => {
-        const vm = new TestVideoBodyViewModel({
-            state: VideoBodyViewState.LOADING,
-            maxWidth: 320,
-            maxHeight: 180,
-            aspectRatio: "16/9",
-        });
-
-        render(<VideoBodyView vm={vm} />);
-
-        expect(screen.getByRole("progressbar")).toBeInTheDocument();
-    });
-
     it("renders an error message when media processing fails", () => {
         const vm = new TestVideoBodyViewModel({
             state: VideoBodyViewState.ERROR,
@@ -85,45 +84,93 @@ describe("VideoBodyView", () => {
         expect(screen.getByText("Error decrypting video")).toBeInTheDocument();
     });
 
-    it("renders a video element with the expected attributes and file body content", () => {
-        const onPlay = vi.fn();
-        const vm = new TestVideoBodyViewModel(
-            {
-                state: VideoBodyViewState.READY,
-                videoLabel: "Product demo video",
-                maxWidth: 320,
-                maxHeight: 180,
-                aspectRatio: "16/9",
-                src: "https://example.org/demo.mp4",
-                poster: "https://example.org/demo-poster.jpg",
-                preload: "none",
-                controls: true,
-                muted: true,
-                autoPlay: true,
-            },
-            { onPlay },
-        );
+    it("renders the poster with its duration and file body content, and never a video", () => {
+        const vm = new TestVideoBodyViewModel(readySnapshot);
 
-        const videoRef = React.createRef<HTMLVideoElement>();
-        render(
-            <VideoBodyView vm={vm} videoRef={videoRef}>
+        const { container } = render(
+            <VideoBodyView vm={vm}>
                 <div>File body slot</div>
             </VideoBodyView>,
         );
 
-        const video = screen.getByLabelText("Product demo video") as HTMLVideoElement;
-        expect(video).toHaveStyle({ position: "relative" });
-        expect(video).toHaveAttribute("src", "https://example.org/demo.mp4");
-        expect(video).toHaveAttribute("poster", "https://example.org/demo-poster.jpg");
-        expect(video).toHaveAttribute("preload", "none");
-        expect(video).toHaveAttribute("controlslist", "nodownload");
-        expect(video).toHaveAttribute("crossorigin", "anonymous");
-        expect(video.muted).toBe(true);
-        expect(video.autoplay).toBe(true);
-        expect(videoRef.current).toBe(video);
+        const poster = screen.getByRole("button", { name: "Play video: Product demo video" });
+        expect(poster.querySelector("img")).toHaveAttribute("src", "https://example.org/demo-poster.jpg");
+        expect(poster).toHaveTextContent("1:05");
+        expect(container.querySelector("video")).toBeNull();
         expect(screen.getByText("File body slot")).toBeInTheDocument();
+    });
 
-        fireEvent.play(video);
-        expect(onPlay).toHaveBeenCalledTimes(1);
+    it("draws a placeholder without a poster or duration", () => {
+        const vm = new TestVideoBodyViewModel({ ...readySnapshot, poster: undefined, durationLabel: undefined });
+
+        render(<VideoBodyView vm={vm} />);
+
+        const poster = screen.getByRole("button", { name: "Play video: Product demo video" });
+        expect(poster.querySelector("img")).toBeNull();
+        expect(poster).toHaveTextContent("");
+    });
+
+    it("keeps the poster's size inside a parent that fits its content", () => {
+        const vm = new TestVideoBodyViewModel({ ...readySnapshot, poster: undefined });
+
+        render(
+            <div style={{ width: "fit-content" }}>
+                <VideoBodyView vm={vm} />
+            </div>,
+        );
+
+        const { width, height } = screen
+            .getByRole("button", { name: "Play video: Product demo video" })
+            .getBoundingClientRect();
+        expect(width).toBe(320);
+        expect(height).toBe(180);
+    });
+
+    it("fits the poster into a narrower parent", () => {
+        const vm = new TestVideoBodyViewModel(readySnapshot);
+
+        render(
+            <div style={{ width: "160px" }}>
+                <VideoBodyView vm={vm} />
+            </div>,
+        );
+
+        const { width, height } = screen
+            .getByRole("button", { name: "Play video: Product demo video" })
+            .getBoundingClientRect();
+        expect(width).toBe(160);
+        expect(height).toBe(90);
+    });
+
+    it("focuses the poster and asks to play the video when clicked", () => {
+        const onPlayClick = vi.fn();
+        const vm = new TestVideoBodyViewModel(readySnapshot, { onPlayClick });
+
+        render(<VideoBodyView vm={vm} />);
+
+        const poster = screen.getByRole("button", { name: "Play video: Product demo video" });
+        fireEvent.click(poster);
+        expect(onPlayClick).toHaveBeenCalledTimes(1);
+        expect(poster).toHaveFocus();
+    });
+
+    it("renders a poster that cannot be clicked when the video cannot be played", () => {
+        const vm = new TestVideoBodyViewModel({ ...readySnapshot, playable: false });
+
+        render(<VideoBodyView vm={vm} />);
+
+        expect(screen.queryByRole("button")).toBeNull();
+        expect(screen.getByText("1:05")).toBeInTheDocument();
+    });
+
+    it("links the poster to the video file in exported chats", () => {
+        const vm = new TestVideoBodyViewModel({ ...readySnapshot, playable: false, href: "files/demo.mp4" });
+
+        render(<VideoBodyView vm={vm} />);
+
+        expect(screen.getByRole("link", { name: "Play video: Product demo video" })).toHaveAttribute(
+            "href",
+            "files/demo.mp4",
+        );
     });
 });

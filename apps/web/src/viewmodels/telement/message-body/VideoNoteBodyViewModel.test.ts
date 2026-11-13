@@ -187,6 +187,20 @@ describe("VideoNoteBodyViewModel", () => {
         expect(second.getSnapshot().playbackState).toBe(VideoNotePlaybackState.PLAYING);
     });
 
+    it("pauses the note playing with sound when other media starts", async () => {
+        const playing = createVm();
+        const silent = createVm();
+        await playing.onToggle();
+
+        VideoNoteBodyViewModel.pausePlayingWithSound();
+
+        expect(playing.getSnapshot().playbackState).toBe(VideoNotePlaybackState.PAUSED);
+        expect(silent.getSnapshot().playbackState).toBe(VideoNotePlaybackState.PREVIEW);
+
+        await playing.onToggle();
+        expect(playing.getSnapshot().playbackState).toBe(VideoNotePlaybackState.PLAYING);
+    });
+
     it("ignores clicks when interaction is inhibited", async () => {
         const vm = createVm({ inhibitInteraction: true });
 

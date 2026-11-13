@@ -227,11 +227,6 @@
     font: var(--cpd-font-body-xs-medium);
 }
 
-/* Native video controls run along the bottom edge, so the badge moves to the top corner. */
-.root .line.lineTimestampOverMedia .slotBody:has(video[controls]) > .slotTimestamp {
-    inset-block: var(--cpd-space-2x) auto;
-}
-
 .root.stateInfo {
     padding-top: 0;
     font-size: var(--cpd-font-size-body-sm);

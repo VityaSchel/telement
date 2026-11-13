@@ -17,7 +17,6 @@ import {
 } from "./VideoBodyView";
 import { useMockedViewModel } from "../../../../../core/viewmodel/useMockedViewModel";
 import { withViewDocs } from "../../../../../../.storybook/withViewDocs";
-import demoVideo from "../../../../../../static/videoBodyDemo.webm";
 
 type VideoBodyViewProps = VideoBodyViewSnapshot &
     VideoBodyViewActions & {
@@ -27,12 +26,12 @@ type VideoBodyViewProps = VideoBodyViewSnapshot &
 
 const VideoBodyViewWrapperImpl = ({
     onPreviewClick,
-    onPlay,
+    onPlayClick,
     className,
     children,
     ...snapshotProps
 }: VideoBodyViewProps): ReactNode => {
-    const vm = useMockedViewModel(snapshotProps, { onPreviewClick, onPlay });
+    const vm = useMockedViewModel(snapshotProps, { onPreviewClick, onPlayClick });
 
     return (
         <VideoBodyView vm={vm} className={className}>
@@ -58,18 +57,15 @@ const meta = {
     },
     args: {
         state: VideoBodyViewState.READY,
-        videoLabel: "Product demo video",
+        playLabel: "Play video: Product demo video",
         hiddenButtonLabel: "Show video",
         errorLabel: "Error decrypting video",
         maxWidth: 320,
         maxHeight: 180,
         aspectRatio: "16/9",
-        src: demoVideo,
         poster: posterImage,
-        preload: "none",
-        controls: true,
-        muted: false,
-        autoPlay: false,
+        durationLabel: "1:05",
+        playable: true,
         className: undefined,
         children: <div>File body slot</div>,
     },
@@ -80,15 +76,21 @@ type Story = StoryObj<typeof meta>;
 
 export const Ready: Story = {};
 
-export const Hidden: Story = {
+export const WithoutPoster: Story = {
     args: {
-        state: VideoBodyViewState.HIDDEN,
+        poster: undefined,
     },
 };
 
-export const Loading: Story = {
+export const WithoutDuration: Story = {
     args: {
-        state: VideoBodyViewState.LOADING,
+        durationLabel: undefined,
+    },
+};
+
+export const Hidden: Story = {
+    args: {
+        state: VideoBodyViewState.HIDDEN,
     },
 };
 

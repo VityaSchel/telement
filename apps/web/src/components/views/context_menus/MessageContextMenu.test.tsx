@@ -10,7 +10,7 @@ Please see LICENSE files in the repository root for full details.
 
 import React from "react";
 import { describe, it, expect, beforeEach, afterEach, afterAll, vi, type MockInstance } from "vitest";
-import { fireEvent, render, type RenderResult, screen, waitFor } from "test-utils-rtl";
+import { act, fireEvent, render, type RenderResult, screen, waitFor } from "test-utils-rtl";
 import {
     EventStatus,
     MatrixEvent,
@@ -45,6 +45,7 @@ import {
     canCopyImageToClipboard,
     copyImageToClipboard,
 } from "../../../telement/message-context-menu/copyImageToClipboard";
+import { checkMediaSavingAllowed, saveMediaAs } from "../../../telement/media/saveMediaAs";
 
 vi.mock("../../../utils/strings", () => ({
     getSelectedText: vi.fn(),
@@ -61,6 +62,10 @@ vi.mock("../../../dispatcher/dispatcher");
 vi.mock("../../../telement/message-context-menu/copyImageToClipboard", () => ({
     canCopyImageToClipboard: vi.fn(),
     copyImageToClipboard: vi.fn(),
+}));
+vi.mock("../../../telement/media/saveMediaAs", () => ({
+    checkMediaSavingAllowed: vi.fn(),
+    saveMediaAs: vi.fn(),
 }));
 
 const roomId = "roomid";
@@ -89,6 +94,94 @@ describe("MessageContextMenu", () => {
         createMenuWithContent(eventContent);
         const copyLinkButton = document.querySelector('a[aria-label="Copy link"]');
         expect(copyLinkButton).toBeFalsy();
+    });
+
+    describe("save as", () => {
+        const fileContent = {
+            msgtype: "m.file",
+            body: "report.pdf",
+            url: "mxc://server/report",
+        };
+
+        it.each([
+            ["picture", { msgtype: "m.image", body: "photo.jpg", url: "mxc://server/photo" }],
+            ["video", { msgtype: "m.video", body: "clip.mp4", url: "mxc://server/clip" }],
+            [
+                "video note",
+                {
+                    "msgtype": "m.video",
+                    "body": "note.mp4",
+                    "url": "mxc://server/note",
+                    "org.interferolog.circle": true,
+                },
+            ],
+            [
+                "voice message",
+                {
+                    "msgtype": "m.audio",
+                    "body": "voice.ogg",
+                    "url": "mxc://server/voice",
+                    "org.matrix.msc3245.voice": {},
+                },
+            ],
+            ["file", fileContent],
+        ])("saves the file of a %s", (_name, content) => {
+            const onFinished = vi.fn();
+            const mxEvent = new MatrixEvent({ type: EventType.RoomMessage, content });
+
+            createMenu(mxEvent, { onFinished });
+            fireEvent.click(screen.getByRole("menuitem", { name: "Save as…" }));
+
+            expect(saveMediaAs).toHaveBeenCalledWith(mxEvent);
+            expect(onFinished).toHaveBeenCalled();
+        });
+
+        it("saves the file of a sticker", () => {
+            const mxEvent = new MatrixEvent({
+                type: EventType.Sticker,
+                content: { body: "cat", url: "mxc://server/cat", info: {} },
+            });
+
+            createMenu(mxEvent);
+
+            expect(screen.getByRole("menuitem", { name: "Save as…" })).toBeInTheDocument();
+        });
+
+        it("is not offered for a message without a file", () => {
+            createMenuWithContent(createMessageEventContent("hello"));
+
+            expect(screen.queryByRole("menuitem", { name: "Save as…" })).toBeNull();
+        });
+
+        it("is not offered for a file that failed to send", () => {
+            const mxEvent = new MatrixEvent({ type: EventType.RoomMessage, content: fileContent });
+
+            createMenu(mxEvent);
+            act(() => mxEvent.setStatus(EventStatus.NOT_SENT));
+
+            expect(screen.queryByRole("menuitem", { name: "Save as…" })).toBeNull();
+        });
+
+        it("waits for a module to allow saving", async () => {
+            const { promise, resolve } = Promise.withResolvers<boolean>();
+            vi.mocked(checkMediaSavingAllowed).mockReturnValue(promise);
+
+            createMenuWithContent(fileContent);
+            expect(screen.queryByRole("menuitem", { name: "Save as…" })).toBeNull();
+
+            resolve(true);
+            expect(await screen.findByRole("menuitem", { name: "Save as…" })).toBeInTheDocument();
+        });
+
+        it("is not offered when a module refuses", async () => {
+            const check = Promise.resolve(false);
+            vi.mocked(checkMediaSavingAllowed).mockReturnValue(check);
+
+            createMenuWithContent(fileContent);
+            await check;
+
+            expect(screen.queryByRole("menuitem", { name: "Save as…" })).toBeNull();
+        });
     });
 
     describe("message pinning", () => {
@@ -696,6 +789,17 @@ describe("MessageContextMenu", () => {
             createRightClickMenuWithContent(eventContent, context);
             const reactButton = document.querySelector('li[aria-label="React"]');
             expect(reactButton).toBeTruthy();
+        });
+
+        it("opens the reaction picker in a menu rounded like the picker, without a chevron", async () => {
+            createRightClickMenuWithContent(createMessageEventContent("hello"), { canReact: true });
+
+            await userEvent.click(screen.getByRole("menuitem", { name: "React" }));
+
+            const menu = (await screen.findByLabelText("Emoji picker")).closest(".mx_ContextualMenu");
+            expect(menu).toHaveClass("mx_TelementEmojiPickerMenu");
+            expect(menu).not.toHaveClass("mx_ContextualMenu_withChevron_left");
+            expect(menu!.querySelector(":scope > .mx_ContextualMenu_chevron_left")).toBeNull();
         });
 
         it("does not show react button when we cannot react", () => {

@@ -1,0 +1,405 @@
+/*
+Copyright 2026 Viktor Shchelochkov
+
+SPDX-License-Identifier: AGPL-3.0-only OR GPL-3.0-only
+Please see LICENSE files in the repository root for full details.
+*/
+
+/* The viewer sits over a black backdrop in every theme, so it uses the dark theme's tokens. Its top bar lines up with
+   the image viewer's: 32px from the start edge and 16px from the end edge. */
+.root {
+    /* The size of the playback controls, which the view also gives the icon buttons. */
+    --control-size: 36px;
+    --bar-padding: var(--cpd-space-1x);
+    /* How far the controls float above the bottom edge, which is also where the video's space ends. */
+    --bar-inset: var(--cpd-space-6x);
+    --slider-height: var(--cpd-space-6x);
+
+    container: video-lightbox / inline-size;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+    width: 100%;
+    height: 100%;
+    pointer-events: auto;
+    color: var(--cpd-color-text-primary);
+    font: var(--cpd-font-body-md-regular);
+}
+
+.topBar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--cpd-space-4x);
+    padding-block: var(--cpd-space-4x);
+    padding-inline: var(--cpd-space-8x) var(--cpd-space-4x);
+}
+
+/* While the video plays and the user is idle, the bars fade out and the pointer hides. The bars stay in place and
+   only turn transparent, so that screen readers still reach their controls. Their controls ignore the pointer then,
+   so that a touch on a hidden bar only brings it back. */
+.topBar,
+.controls {
+    transition: opacity 0.2s ease-out;
+}
+
+.controlsHidden {
+    cursor: none;
+}
+
+.controlsHidden :is(.topBar, .controls) {
+    opacity: 0;
+}
+
+.controlsHidden :is(.topBar, .controls) > * {
+    pointer-events: none;
+}
+
+.sender {
+    display: flex;
+    align-items: center;
+    gap: var(--cpd-space-3x);
+    min-width: 0;
+}
+
+.avatar {
+    flex-shrink: 0;
+}
+
+.avatarButton {
+    display: flex;
+    flex-shrink: 0;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background: none;
+}
+
+.avatarButton:focus-visible {
+    outline: 2px solid var(--cpd-color-border-focused);
+    outline-offset: 2px;
+}
+
+.senderText {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.senderName {
+    overflow: hidden;
+    font: var(--cpd-font-body-md-semibold);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.date {
+    overflow: hidden;
+    color: var(--cpd-color-text-secondary);
+    font: var(--cpd-font-body-sm-regular);
+    text-decoration: none;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.date:hover,
+.date:focus-visible {
+    text-decoration: underline;
+}
+
+.actions {
+    display: flex;
+    flex-shrink: 0;
+    gap: var(--cpd-space-3x);
+}
+
+/* Compound draws icon buttons in the secondary icon color; the viewer draws every control in one bright color. */
+.iconButton {
+    --cpd-color-icon-secondary: var(--cpd-color-icon-primary);
+}
+
+/* The video reaches down under the floating controls, which hide while it plays. A video limited by the window's
+   height ends where the controls do. */
+.stage {
+    position: relative;
+    display: flex;
+    flex: 1;
+    align-items: center;
+    justify-content: center;
+    min-height: 0;
+    padding: 0 var(--cpd-space-4x) var(--bar-inset);
+}
+
+.video {
+    display: block;
+    max-width: 100%;
+    max-height: 100%;
+}
+
+/* Covers the video's space, so that the spinner is centred on the video. */
+.status {
+    position: absolute;
+    inset: 0 0 var(--bar-inset);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+}
+
+/* A dark disc, like the play button on a video's poster, keeps the spinner visible over a bright poster. */
+.spinner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background-color: rgb(0 0 0 / 55%);
+}
+
+.spinner > svg {
+    color: var(--cpd-color-icon-primary);
+}
+
+/* A seek also makes the video wait for a moment, so the spinner only shows when it waits longer. */
+.buffering {
+    animation: show-late 0s 0.5s backwards;
+}
+
+@keyframes show-late {
+    from {
+        visibility: hidden;
+    }
+}
+
+.error {
+    max-width: 480px;
+    margin: 0;
+    color: var(--cpd-color-text-secondary);
+    text-align: center;
+}
+
+/* The controls float centred over the bottom of the video, up to 640px wide. Their dark grey translucent background
+   shows on the black backdrop too, and keeps them readable over any picture: white on it over a white picture is
+   above 9:1. Its corners are concentric with the round buttons at its ends: their 18px radius plus the bar's 4px
+   padding, which makes a one-row bar a pill. */
+.controls {
+    /* Compound's hover color is the bar's own, so the controls lighten it instead. */
+    --control-hover-color: var(--cpd-color-alpha-gray-400);
+
+    position: absolute;
+    inset-block-end: var(--bar-inset);
+    inset-inline: 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--cpd-space-2x);
+    box-sizing: border-box;
+    width: calc(100% - 2 * var(--cpd-space-4x));
+    max-width: 640px;
+    margin-inline: auto;
+    padding: var(--bar-padding);
+    border-radius: calc(var(--control-size) / 2 + var(--bar-padding));
+    background-color: color-mix(in srgb, var(--cpd-color-bg-subtle-primary) 90%, transparent);
+}
+
+.controls .iconButton {
+    --cpd-color-bg-subtle-primary: var(--control-hover-color);
+}
+
+/* The bar's padding leaves no room for a focus ring around a control, so the rings sit on the controls' edges,
+   concentric with the bar. */
+.controls .iconButton:focus-visible {
+    outline: 2px solid var(--cpd-color-border-focused);
+    outline-offset: 0;
+}
+
+.timeline {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    gap: var(--cpd-space-2x);
+}
+
+.time {
+    flex-shrink: 0;
+    min-width: 4ch;
+    font: var(--cpd-font-body-sm-medium);
+    font-variant-numeric: tabular-nums;
+    text-align: center;
+}
+
+/* Sliders: a thin track filled up to the value, set in --fill, with a round handle. */
+.range {
+    --fill: 0%;
+    --track-height: 4px;
+    --thumb-size: 12px;
+
+    appearance: none;
+    height: var(--slider-height);
+    margin: 0;
+    background: transparent;
+}
+
+.range::-webkit-slider-runnable-track {
+    height: var(--track-height);
+    border-radius: var(--track-height);
+    background: linear-gradient(
+        to right,
+        var(--cpd-color-icon-primary) var(--fill),
+        var(--cpd-color-alpha-gray-600) var(--fill)
+    );
+}
+
+.range::-moz-range-track {
+    height: var(--track-height);
+    border-radius: var(--track-height);
+    background: linear-gradient(
+        to right,
+        var(--cpd-color-icon-primary) var(--fill),
+        var(--cpd-color-alpha-gray-600) var(--fill)
+    );
+}
+
+.range::-webkit-slider-thumb {
+    appearance: none;
+    width: var(--thumb-size);
+    height: var(--thumb-size);
+    margin-top: calc((var(--track-height) - var(--thumb-size)) / 2);
+    border: none;
+    border-radius: 50%;
+    background-color: var(--cpd-color-icon-primary);
+}
+
+.range::-moz-range-thumb {
+    width: var(--thumb-size);
+    height: var(--thumb-size);
+    border: none;
+    border-radius: 50%;
+    background-color: var(--cpd-color-icon-primary);
+}
+
+.range:focus-visible {
+    outline: 2px solid var(--cpd-color-border-focused);
+    outline-offset: 0;
+    border-radius: calc(var(--slider-height) / 2);
+}
+
+.range:disabled {
+    opacity: 0.5;
+}
+
+.seekBar {
+    flex: 1;
+    min-width: 96px;
+}
+
+.volume {
+    flex-shrink: 0;
+    width: 80px;
+}
+
+.speed {
+    position: relative;
+    flex-shrink: 0;
+}
+
+/* Round-ended like the icon buttons, so that it stays concentric with the bar when it is the last control. */
+.speedButton {
+    min-width: 48px;
+    height: var(--control-size);
+    padding: 0 var(--cpd-space-2x);
+    border: none;
+    border-radius: calc(var(--control-size) / 2);
+    background: none;
+    color: var(--cpd-color-icon-primary);
+    font: var(--cpd-font-body-sm-semibold);
+    font-variant-numeric: tabular-nums;
+}
+
+.speedButton:hover,
+.speedButton[aria-expanded="true"] {
+    background-color: var(--control-hover-color);
+}
+
+.speedButton:focus-visible {
+    outline: 2px solid var(--cpd-color-border-focused);
+    outline-offset: 0;
+}
+
+/* The menu opens 8px above the bar, lined up with the end of the speed button. */
+.speedMenu {
+    --bar-above-speed: var(--bar-padding);
+
+    position: absolute;
+    inset-block-end: calc(100% + var(--bar-above-speed) + var(--cpd-space-2x));
+    inset-inline-end: 0;
+    display: flex;
+    flex-direction: column;
+    min-width: 120px;
+    padding: var(--cpd-space-2x) 0;
+    border: 1px solid var(--cpd-color-border-interactive-secondary);
+    border-radius: var(--cpd-space-3x);
+    background-color: var(--cpd-color-bg-canvas-default);
+    box-shadow: 0 4px 24px rgb(0 0 0 / 40%);
+}
+
+.speedMenuItem {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--cpd-space-4x);
+    padding: var(--cpd-space-2x) var(--cpd-space-4x);
+    border: none;
+    background: none;
+    color: var(--cpd-color-text-primary);
+    font: var(--cpd-font-body-md-regular);
+    text-align: start;
+}
+
+.speedMenuItem:hover,
+.speedMenuItem:focus-visible {
+    outline: none;
+    background-color: var(--cpd-color-bg-subtle-secondary);
+}
+
+.speedMenuItem > svg {
+    color: var(--cpd-color-icon-accent-primary);
+}
+
+/* On narrow screens the seek bar takes a row of its own above the buttons, which keep play at the start and the
+   rest at the end. The row keeps its times clear of the bar's rounded corners. */
+@container video-lightbox (width < 560px) {
+    .topBar {
+        padding-inline: var(--cpd-space-4x);
+    }
+
+    .timeline {
+        flex-basis: 100%;
+        order: -1;
+        padding-inline: var(--cpd-space-2x);
+    }
+
+    /* The speed button is in the second row, under the seek bar's row and the gap between the rows. */
+    .speedMenu {
+        --bar-above-speed: calc(var(--bar-padding) + var(--slider-height) + var(--cpd-space-2x));
+    }
+
+    .mute {
+        margin-inline-start: auto;
+    }
+}
+
+@container video-lightbox (width < 320px) {
+    .volume {
+        display: none;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .topBar,
+    .controls {
+        transition: none;
+    }
+}

@@ -35,6 +35,7 @@ const {
     StoryStickerBody,
     StoryThreadListActionBar,
     StoryThreadListInfo,
+    StoryVideoBody,
     shapeDescriptionParameters,
 } = layoutMeta.storyHelpers;
 
@@ -369,6 +370,21 @@ export const Sticker: Story = {
     },
 };
 
+export const Video: Story = {
+    tags: interactiveTags,
+    ...shapeDescriptionParameters(
+        "Room",
+        "State variant: the body renders a video's poster, with the video's length at the top left and the timestamp at the bottom right.",
+    ),
+    args: {
+        shape: "Room",
+        roomMessages: "media",
+        line: { media: true, timestampOverMedia: true },
+        state: { hasReply: false },
+        slots: { ...minimalRoomSlots, body: <StoryVideoBody /> },
+    },
+};
+
 export const HighlightedThreadGroup: Story = {
     name: "Highlighted thread - Group - Default",
     tags: visualTags,
@@ -597,6 +613,21 @@ export const MediaIrc: Story = {
     tags: visualTags,
     globals: ircGlobals,
     args: Media.args,
+};
+
+export const VideoBubble: Story = {
+    name: "Video - Bubble - Default",
+    tags: visualTags,
+    globals: bubbleGlobals,
+    parameters: Video.parameters,
+    args: Video.args,
+};
+
+export const VideoGroup: Story = {
+    name: "Video - Group - Default",
+    tags: visualTags,
+    globals: groupGlobals,
+    args: Video.args,
 };
 
 export const StickerBubble: Story = {

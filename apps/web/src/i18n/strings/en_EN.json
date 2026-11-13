@@ -3180,6 +3180,13 @@
             "use_mobile_heading": "Use a Matrix client on your phone instead",
             "use_mobile_heading_after_desktop": "Or use a Matrix client on your phone"
         },
+        "media": {
+            "play_video": "Play video: %(name)s",
+            "save_as": "Save as…",
+            "save_as_failed_description": "An error occurred while saving this file.",
+            "save_as_failed_title": "Couldn't save the file",
+            "video_unplayable": "This video can't be played here. Save it to watch it in another app."
+        },
         "mobile_guide": {
             "toast_description": "%(brand)s doesn't fully work in mobile browsers. For a better experience, use a Matrix client for your phone, such as Element X."
         },
@@ -3307,7 +3314,6 @@
             "unable_to_decrypt": "Unable to decrypt message"
         },
         "disambiguated_profile": "%(displayName)s (%(matrixId)s)",
-        "download_action_downloading": "Downloading",
         "download_failed": "Download failed",
         "download_failed_description": "An error occurred while downloading this file",
         "edits": {

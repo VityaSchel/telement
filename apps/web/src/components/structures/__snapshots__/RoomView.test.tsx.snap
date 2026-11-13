@@ -430,7 +430,6 @@ exports[`RoomView > for a local room > in state NEW > should match the snapshot 
               role="button"
               style="--cpd-icon-button-size: 36px;"
               tabindex="0"
-              title="Attachment"
               type="button"
             >
               <div
@@ -806,7 +805,6 @@ exports[`RoomView > for a local room > in state NEW > that is encrypted > should
               role="button"
               style="--cpd-icon-button-size: 36px;"
               tabindex="0"
-              title="Attachment"
               type="button"
             >
               <div
@@ -1409,7 +1407,6 @@ exports[`RoomView > should hide the header when hideHeader=true 1`] = `
                 role="button"
                 style="--cpd-icon-button-size: 36px;"
                 tabindex="0"
-                title="Attachment"
                 type="button"
               >
                 <div
@@ -1870,7 +1867,6 @@ exports[`RoomView > should hide the pinned message banner when hidePinnedMessage
                 role="button"
                 style="--cpd-icon-button-size: 36px;"
                 tabindex="0"
-                title="Attachment"
                 type="button"
               >
                 <div
@@ -2331,7 +2327,6 @@ exports[`RoomView > should hide the right panel when hideRightPanel=true 1`] = `
                 role="button"
                 style="--cpd-icon-button-size: 36px;"
                 tabindex="0"
-                title="Attachment"
                 type="button"
               >
                 <div
@@ -3045,7 +3040,6 @@ exports[`RoomView > should not display the timeline when the room encryption is 
                 role="button"
                 style="--cpd-icon-button-size: 36px;"
                 tabindex="0"
-                title="Attachment"
                 type="button"
               >
                 <div
@@ -3588,7 +3582,6 @@ exports[`RoomView > video rooms > should render joined video room view 1`] = `
                     role="button"
                     style="--cpd-icon-button-size: 36px;"
                     tabindex="0"
-                    title="Attachment"
                     type="button"
                   >
                     <div

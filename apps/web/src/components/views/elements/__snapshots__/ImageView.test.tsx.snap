@@ -115,7 +115,7 @@ exports[`<ImageView /> > renders correctly 1`] = `
           </svg>
         </div>
         <div
-          aria-label="Download"
+          aria-label="Save as…"
           class="mx_AccessibleButton mx_ImageView_button"
           role="button"
           tabindex="0"

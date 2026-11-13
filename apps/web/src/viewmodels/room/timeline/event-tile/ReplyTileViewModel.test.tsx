@@ -12,7 +12,7 @@ import { EventType, type MatrixClient, MatrixEvent, MsgType } from "matrix-js-sd
 import { vi, describe, it, expect, beforeEach } from "vitest";
 import { stubClient } from "test-utils";
 
-import { FileBodyFactory, VideoBodyFactory } from "../../../../components/views/messages/MBodyFactory";
+import { FileBodyFactory, ReplyVideoBodyFactory } from "../../../../components/views/messages/MBodyFactory";
 import { type IBodyProps } from "../../../../components/views/messages/IBodyProps";
 import MImageReplyBody from "../../../../components/views/messages/MImageReplyBody";
 import MVoiceMessageBody from "../../../../components/views/messages/MVoiceMessageBody";
@@ -132,7 +132,7 @@ describe("ReplyTileViewModel", () => {
                 showHiddenEvents: false,
                 maxImageHeight: 96,
                 overrideBodyTypes: expect.objectContaining({
-                    [MsgType.Video]: VideoBodyFactory,
+                    [MsgType.Video]: ReplyVideoBodyFactory,
                 }),
             }),
             false,
@@ -152,7 +152,7 @@ describe("ReplyTileViewModel", () => {
         const { overrideBodyTypes, overrideEventTypes } = getReplyTileOverrides();
         expect(overrideBodyTypes).toMatchObject({
             [MsgType.Image]: MImageReplyBody,
-            [MsgType.Video]: VideoBodyFactory,
+            [MsgType.Video]: ReplyVideoBodyFactory,
         });
         expect(overrideEventTypes).toMatchObject({
             [EventType.Sticker]: MImageReplyBody,

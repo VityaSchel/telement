@@ -31,7 +31,7 @@ exports[`VideoBodyView > matches snapshot for hidden story 1`] = `
   >
     <div
       class="VideoBodyView-module_container"
-      style="width: min(100%, 320px); max-width: 320px; max-height: 180px; aspect-ratio: 16 / 9;"
+      style="width: 320px; max-width: 100%; max-height: 180px; aspect-ratio: 16 / 9;"
     >
       <button
         class="VideoBodyView-module_hiddenButton"
@@ -66,22 +66,79 @@ exports[`VideoBodyView > matches snapshot for ready story 1`] = `
   <span
     class="VideoBodyView-module_root"
   >
-    <div
-      class="VideoBodyView-module_container"
-      data-video-body-mask-target=""
-      style="width: min(100%, 320px); max-width: 320px; max-height: 180px; aspect-ratio: 16 / 9;"
+    <button
+      aria-label="Play video: Product demo video"
+      class="VideoBodyView-module_container VideoBodyView-module_frame"
+      style="width: 320px; max-width: 100%; max-height: 180px; aspect-ratio: 16 / 9;"
+      type="button"
     >
-      <video
-        aria-label="Product demo video"
-        class="VideoBodyView-module_video"
-        controls=""
-        controlslist="nodownload"
-        crossorigin="anonymous"
-        poster="/static/element.png"
-        preload="none"
-        src="/static/videoBodyDemo.webm"
+      <img
+        alt=""
+        class="VideoBodyView-module_poster"
+        src="/static/element.png"
       />
+      <span
+        class="VideoBodyView-module_playButton"
+      >
+        <svg
+          aria-hidden="true"
+          fill="currentColor"
+          height="28"
+          viewBox="0 0 24 24"
+          width="28"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="m8.98 4.677 9.921 5.58c1.36.764 1.36 2.722 0 3.486l-9.92 5.58C7.647 20.073 6 19.11 6 17.58V6.42c0-1.53 1.647-2.493 2.98-1.743"
+          />
+        </svg>
+      </span>
+      <span
+        class="VideoBodyView-module_duration"
+      >
+        1:05
+      </span>
+    </button>
+    <div>
+      File body slot
     </div>
+  </span>
+</div>
+`;
+
+exports[`VideoBodyView > matches snapshot for without poster story 1`] = `
+<div>
+  <span
+    class="VideoBodyView-module_root"
+  >
+    <button
+      aria-label="Play video: Product demo video"
+      class="VideoBodyView-module_container VideoBodyView-module_frame"
+      style="width: 320px; max-width: 100%; max-height: 180px; aspect-ratio: 16 / 9;"
+      type="button"
+    >
+      <span
+        class="VideoBodyView-module_playButton"
+      >
+        <svg
+          aria-hidden="true"
+          fill="currentColor"
+          height="28"
+          viewBox="0 0 24 24"
+          width="28"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="m8.98 4.677 9.921 5.58c1.36.764 1.36 2.722 0 3.486l-9.92 5.58C7.647 20.073 6 19.11 6 17.58V6.42c0-1.53 1.647-2.493 2.98-1.743"
+          />
+        </svg>
+      </span>
+      <span
+        class="VideoBodyView-module_duration"
+      >
+        1:05
+      </span>
+    </button>
     <div>
       File body slot
     </div>

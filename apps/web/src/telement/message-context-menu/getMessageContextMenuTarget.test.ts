@@ -99,6 +99,14 @@ describe("getMessageContextMenuTarget", () => {
         expect(getMessageContextMenuTarget(container.querySelector("img"))).toEqual({});
     });
 
+    it("does not offer to copy a video's poster", () => {
+        const container = mount(
+            "<span class='mx_MVideoBody'><button><img src='https://example.org/poster.jpg' alt='' /></button></span>",
+        );
+
+        expect(getMessageContextMenuTarget(container.querySelector("img"))).toEqual({});
+    });
+
     it("does not offer to copy a picture in a quoted reply", () => {
         const container = mount(
             "<blockquote class='mx_ReplyChain'><img src='https://example.org/cat.png' /></blockquote>",

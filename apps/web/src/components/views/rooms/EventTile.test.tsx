@@ -811,6 +811,8 @@ describe("EventTile", () => {
 
             await waitFor(() => expect(document.querySelector(".mx_ContextualMenu")).not.toBeNull());
             expect(screen.queryByTestId("mx_MessageContextMenu")).toBeNull();
+            // Rounded like the picker in it
+            expect(document.querySelector(".mx_ContextualMenu")).toHaveClass("mx_TelementEmojiPickerMenu");
         });
 
         it("hides the copy picture option when the browser cannot copy pictures", async () => {

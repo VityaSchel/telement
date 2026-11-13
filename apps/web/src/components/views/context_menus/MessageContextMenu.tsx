@@ -42,6 +42,7 @@ import {
     CopyIcon,
     TreeIcon,
     ImageIcon,
+    DownloadIcon,
 } from "@vector-im/compound-design-tokens/assets/web/icons";
 import { copyPlainTextToClipboard } from "@element-hq/element-web-shared-utils";
 
@@ -58,7 +59,7 @@ import { Action } from "../../../dispatcher/actions";
 import { type RoomPermalinkCreator } from "../../../utils/permalinks/Permalinks";
 import { type ButtonEvent } from "../elements/AccessibleButton";
 import { getSelectedText } from "../../../utils/strings";
-import ContextMenu, { toRightOf, type MenuProps } from "../../structures/ContextMenu";
+import ContextMenu, { ChevronFace, toRightOf, type MenuProps } from "../../structures/ContextMenu";
 import ReactionPicker from "../emojipicker/ReactionPicker";
 import ViewSource from "../../structures/ViewSource";
 import { createRedactEventDialog } from "../dialogs/ConfirmRedactDialog";
@@ -80,6 +81,8 @@ import {
     canCopyImageToClipboard,
     copyImageToClipboard,
 } from "../../../telement/message-context-menu/copyImageToClipboard";
+import { MediaEventHelper } from "../../../utils/MediaEventHelper";
+import { checkMediaSavingAllowed, saveMediaAs } from "../../../telement/media/saveMediaAs";
 
 interface IReplyInThreadButton {
     mxEvent: MatrixEvent;
@@ -145,6 +148,8 @@ interface IState {
     canRedact: boolean;
     canPin: boolean;
     reactionPickerDisplayed: boolean;
+    // Whether a module lets the user save the message's file
+    canSaveMedia: boolean;
 }
 
 export default class MessageContextMenu extends React.Component<IProps, IState> {
@@ -152,14 +157,19 @@ export default class MessageContextMenu extends React.Component<IProps, IState> 
     declare public context: React.ContextType<typeof RoomContext>;
 
     private reactButtonRef = createRef<any>(); // XXX Ref to a functional component
+    private readonly mediaSavingCheck: Promise<boolean> | undefined;
 
     public constructor(props: IProps) {
         super(props);
 
+        this.mediaSavingCheck = MediaEventHelper.isEligible(props.mxEvent)
+            ? checkMediaSavingAllowed(props.mxEvent)
+            : undefined;
         this.state = {
             canRedact: false,
             canPin: false,
             reactionPickerDisplayed: false,
+            canSaveMedia: !this.mediaSavingCheck,
         };
     }
 
@@ -171,6 +181,7 @@ export default class MessageContextMenu extends React.Component<IProps, IState> 
         this.props.mxEvent.on(MatrixEventEvent.Status, this.checkPermissions);
 
         this.checkPermissions();
+        void this.mediaSavingCheck?.then((canSaveMedia) => this.setState({ canSaveMedia }));
     }
 
     public componentWillUnmount(): void {
@@ -317,6 +328,11 @@ export default class MessageContextMenu extends React.Component<IProps, IState> 
 
     private onCopyImageClick = (): void => {
         if (this.props.loadImage) void copyImageToClipboard(this.props.loadImage());
+        this.closeMenu();
+    };
+
+    private onSaveAsClick = (): void => {
+        void saveMediaAs(this.props.mxEvent);
         this.closeMenu();
     };
 
@@ -628,6 +644,17 @@ export default class MessageContextMenu extends React.Component<IProps, IState> 
             );
         }
 
+        let saveAsButton: JSX.Element | undefined;
+        if (contentActionable && MediaEventHelper.isEligible(mxEvent) && this.state.canSaveMedia) {
+            saveAsButton = (
+                <IconizedContextMenuOption
+                    icon={<DownloadIcon />}
+                    label={_t("telement|media|save_as")}
+                    onClick={this.onSaveAsClick}
+                />
+            );
+        }
+
         const selectedText = getSelectedText();
 
         let copyButton: JSX.Element | undefined;
@@ -719,12 +746,13 @@ export default class MessageContextMenu extends React.Component<IProps, IState> 
         }
 
         let nativeItemsList: JSX.Element | undefined;
-        if (copyButton || quoteButton || copyImageButton || copyLinkButton) {
+        if (copyButton || quoteButton || copyImageButton || saveAsButton || copyLinkButton) {
             nativeItemsList = (
                 <IconizedContextMenuOptionList>
                     {copyButton}
                     {quoteButton}
                     {copyImageButton}
+                    {saveAsButton}
                     {copyLinkButton}
                 </IconizedContextMenuOptionList>
             );
@@ -769,7 +797,15 @@ export default class MessageContextMenu extends React.Component<IProps, IState> 
         if (this.state.reactionPickerDisplayed) {
             const buttonRect = (this.reactButtonRef.current as HTMLElement)?.getBoundingClientRect();
             reactionPicker = (
-                <ContextMenu {...toRightOf(buttonRect)} onFinished={this.closeMenu} managed={false} focusLock>
+                <ContextMenu
+                    {...toRightOf(buttonRect)}
+                    // The chevron would sit on the picker's round corner
+                    chevronFace={ChevronFace.None}
+                    menuClassName="mx_TelementEmojiPickerMenu"
+                    onFinished={this.closeMenu}
+                    managed={false}
+                    focusLock
+                >
                     <ReactionPicker mxEvent={mxEvent} onFinished={this.onCloseReactionPicker} reactions={reactions} />
                 </ContextMenu>
             );

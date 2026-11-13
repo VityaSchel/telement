@@ -114,7 +114,7 @@ test.describe("Custom Component API", () => {
             await image.click();
             const imageView = page.getByLabel("Image view");
             await expect(imageView).toBeVisible();
-            await expect(imageView.getByLabel("Download")).not.toBeVisible();
+            await expect(imageView.getByLabel("Save as…")).not.toBeVisible();
         });
         test("should allow downloading media when the allowDownloading hint is set to true", async ({
             page,
@@ -140,7 +140,7 @@ test.describe("Custom Component API", () => {
             await image.click();
             const imageView = page.getByLabel("Image view");
             await expect(imageView).toBeVisible();
-            await expect(imageView.getByLabel("Download")).toBeVisible();
+            await expect(imageView.getByLabel("Save as…")).toBeVisible();
         });
         test("should hide sender profile when the renderAsInfoMessage hint is set to true", async ({
             page,

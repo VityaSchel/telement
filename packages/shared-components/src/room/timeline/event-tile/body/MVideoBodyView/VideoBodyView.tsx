@@ -5,17 +5,9 @@
  * Please see LICENSE files in the repository root for full details.
  */
 
-import React, {
-    type CSSProperties,
-    type JSX,
-    type MouseEventHandler,
-    type PropsWithChildren,
-    type ReactEventHandler,
-    type Ref,
-} from "react";
+import React, { type CSSProperties, type JSX, type MouseEventHandler, type PropsWithChildren } from "react";
 import classNames from "classnames";
-import { FileErrorIcon, VisibilityOnIcon } from "@vector-im/compound-design-tokens/assets/web/icons";
-import { InlineSpinner } from "@vector-im/compound-web";
+import { FileErrorIcon, PlaySolidIcon, VisibilityOnIcon } from "@vector-im/compound-design-tokens/assets/web/icons";
 
 import { type ViewModel, useViewModel } from "../../../../../core/viewmodel";
 import styles from "./VideoBodyView.module.css";
@@ -26,7 +18,6 @@ import styles from "./VideoBodyView.module.css";
 export const VideoBodyViewState = {
     ERROR: "ERROR",
     HIDDEN: "HIDDEN",
-    LOADING: "LOADING",
     READY: "READY",
 } as const;
 
@@ -38,13 +29,9 @@ export interface VideoBodyViewSnapshot {
      */
     state: VideoBodyViewState;
     /**
-     * Accessible label applied to the video element.
+     * Accessible label of the poster, which opens the video.
      */
-    videoLabel?: string;
-    /**
-     * Title applied to the video element.
-     */
-    videoTitle?: string;
+    playLabel?: string;
     /**
      * Label shown in the hidden-preview placeholder.
      */
@@ -66,29 +53,21 @@ export interface VideoBodyViewSnapshot {
      */
     aspectRatio?: CSSProperties["aspectRatio"];
     /**
-     * Video source URL.
-     */
-    src?: string;
-    /**
-     * Poster image URL.
+     * Poster image URL. Without one, the frame is a dark placeholder.
      */
     poster?: string;
     /**
-     * Preload mode for the video.
+     * The video's length, such as "1:05", shown in the frame's top corner.
      */
-    preload?: "none" | "metadata" | "auto";
+    durationLabel?: string;
     /**
-     * Whether native controls are visible.
+     * Whether clicking the poster opens the video.
      */
-    controls?: boolean;
+    playable?: boolean;
     /**
-     * Whether the video is muted.
+     * Address the poster links to instead, for chats exported to HTML, which have no video viewer.
      */
-    muted?: boolean;
-    /**
-     * Whether the video should autoplay.
-     */
-    autoPlay?: boolean;
+    href?: string;
 }
 
 export interface VideoBodyViewActions {
@@ -97,9 +76,9 @@ export interface VideoBodyViewActions {
      */
     onPreviewClick?: MouseEventHandler<HTMLButtonElement>;
     /**
-     * Invoked when the video starts playing.
+     * Invoked when the user clicks the poster to watch the video.
      */
-    onPlay?: ReactEventHandler<HTMLVideoElement>;
+    onPlayClick?: () => void;
 }
 
 export type VideoBodyViewModel = ViewModel<VideoBodyViewSnapshot, VideoBodyViewActions>;
@@ -118,17 +97,14 @@ interface VideoBodyViewProps {
      */
     containerClassName?: string;
     /**
-     * Optional ref to the rendered video element.
-     */
-    videoRef?: Ref<HTMLVideoElement>;
-    /**
      * Optional supplemental content rendered after the video frame.
      */
     children?: PropsWithChildren["children"];
 }
 
 /**
- * Renders the body of a video message with ready, hidden, loading, and error states.
+ * Renders the body of a video message: the video's poster with a play button and its length, or the hidden and
+ * error states. The video never plays in the timeline: clicking the poster asks to open it in a viewer.
  *
  * The media frame preserves layout while loading and can render
  * supplemental content such as a file body row after the video.
@@ -137,35 +113,31 @@ export function VideoBodyView({
     vm,
     className,
     containerClassName,
-    videoRef,
     children,
 }: Readonly<VideoBodyViewProps>): JSX.Element {
     const {
         state,
-        videoLabel,
-        videoTitle,
+        playLabel,
         hiddenButtonLabel,
         errorLabel,
         maxWidth,
         maxHeight,
         aspectRatio,
-        src,
         poster,
-        preload,
-        controls,
-        muted,
-        autoPlay,
+        durationLabel,
+        playable,
+        href,
     } = useViewModel(vm);
 
     const rootClassName = classNames(className, styles.root);
     const resolvedContainerClassName = classNames(containerClassName, styles.container);
 
     // Reserve the media box on the container itself so the timeline doesn't jump
-    // while the video element or loading state is still settling.
-    const resolvedWidth = maxWidth === undefined ? undefined : `min(100%, ${maxWidth}px)`;
+    // while the poster is still loading. The width is definite, as in ImageBodyView: inside the timestamp badge's
+    // `fit-content` slot a percentage width is cyclic and the poster would shrink to its play button.
     const containerStyle: CSSProperties = {
-        width: resolvedWidth,
-        maxWidth,
+        width: maxWidth === undefined ? undefined : `${maxWidth}px`,
+        maxWidth: maxWidth === undefined ? undefined : "100%",
         maxHeight,
         aspectRatio,
     };
@@ -194,38 +166,52 @@ export function VideoBodyView({
         );
     }
 
-    if (state === VideoBodyViewState.LOADING) {
-        return (
-            <span className={rootClassName}>
-                <div className={resolvedContainerClassName} style={containerStyle}>
-                    <div className={styles.loadingContainer}>
-                        <InlineSpinner aria-label="Loading..." role="progressbar" />
-                    </div>
-                </div>
+    const frameContent = (
+        <>
+            {poster && <img className={styles.poster} src={poster} alt="" />}
+            <span className={styles.playButton}>
+                <PlaySolidIcon width="28" height="28" aria-hidden="true" />
             </span>
+            {durationLabel && <span className={styles.duration}>{durationLabel}</span>}
+        </>
+    );
+    const frameClassName = classNames(resolvedContainerClassName, styles.frame);
+
+    let frame: JSX.Element;
+    if (href) {
+        frame = (
+            <a className={frameClassName} style={containerStyle} href={href} aria-label={playLabel}>
+                {frameContent}
+            </a>
+        );
+    } else if (playable) {
+        frame = (
+            <button
+                type="button"
+                className={frameClassName}
+                style={containerStyle}
+                aria-label={playLabel}
+                onClick={(event): void => {
+                    // Browsers differ on whether a click focuses a button. Focus it, so that focus returns here
+                    // when the viewer closes.
+                    event.currentTarget.focus();
+                    vm.onPlayClick?.();
+                }}
+            >
+                {frameContent}
+            </button>
+        );
+    } else {
+        frame = (
+            <div className={frameClassName} style={containerStyle}>
+                {frameContent}
+            </div>
         );
     }
 
     return (
         <span className={rootClassName}>
-            <div className={resolvedContainerClassName} style={containerStyle} data-video-body-mask-target="">
-                {/* Captions will be supplied from app-side data once the VM wiring is in place. */}
-                <video
-                    className={styles.video}
-                    ref={videoRef}
-                    src={src}
-                    aria-label={videoLabel}
-                    title={videoTitle}
-                    controls={controls}
-                    controlsList="nodownload"
-                    crossOrigin="anonymous"
-                    preload={preload}
-                    muted={muted}
-                    autoPlay={autoPlay}
-                    poster={poster}
-                    onPlay={vm.onPlay}
-                />
-            </div>
+            {frame}
             {children}
         </span>
     );
