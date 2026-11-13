@@ -14,7 +14,6 @@ import { randomUUID } from "node:crypto";
 
 import { type Args, getArgsForProtocolRegistration } from "./args.js";
 
-const LEGACY_PROTOCOL = "element";
 const SEARCH_PARAM = "element-desktop-ssoid";
 const STORE_FILE_NAME = "sso-sessions.json";
 
@@ -25,7 +24,14 @@ export default class ProtocolHandler {
     private readonly store: Record<string, string> = {};
     private readonly sessionId: string;
 
-    public constructor(private readonly protocol: string) {
+    /**
+     * @param protocol - URL scheme used for OIDC callbacks and deep links.
+     * @param legacyProtocol - Older `scheme://` URL scheme also accepted for deep links, if the build has one.
+     */
+    public constructor(
+        private readonly protocol: string,
+        private readonly legacyProtocol?: string,
+    ) {
         if (process.platform === "darwin") {
             // Protocol handler for macos
             app.on("open-url", (ev, url) => {
@@ -49,19 +55,30 @@ export default class ProtocolHandler {
     }
 
     private checkArgIsUrl = (arg: string): boolean => {
-        return arg.startsWith(`${this.protocol}:/`) || arg.startsWith(`${LEGACY_PROTOCOL}://`);
+        return (
+            arg.startsWith(`${this.protocol}:/`) ||
+            (this.legacyProtocol !== undefined && arg.startsWith(`${this.legacyProtocol}://`))
+        );
     };
+
+    private isOwnProtocol(protocol: string): boolean {
+        return this.registeredProtocols.some((registered) => protocol === `${registered}:`);
+    }
+
+    private get registeredProtocols(): string[] {
+        return this.legacyProtocol === undefined ? [this.protocol] : [this.protocol, this.legacyProtocol];
+    }
 
     private setAsDefaultProtocolClient(parsedArgs: Args): void {
         const args = getArgsForProtocolRegistration(parsedArgs);
-        if (app.isPackaged) {
-            app.setAsDefaultProtocolClient(this.protocol, process.execPath, args);
-            app.setAsDefaultProtocolClient(LEGACY_PROTOCOL, process.execPath, args);
-        } else if (process.platform === "win32") {
-            // on Mac/Linux this would just cause the electron binary to open
-            // special handler for running without being packaged, e.g `electron .` by passing our app path to electron
-            app.setAsDefaultProtocolClient(this.protocol, process.execPath, [app.getAppPath(), ...args]);
-            app.setAsDefaultProtocolClient(LEGACY_PROTOCOL, process.execPath, [app.getAppPath(), ...args]);
+        for (const protocol of this.registeredProtocols) {
+            if (app.isPackaged) {
+                app.setAsDefaultProtocolClient(protocol, process.execPath, args);
+            } else if (process.platform === "win32") {
+                // on Mac/Linux this would just cause the electron binary to open
+                // special handler for running without being packaged, e.g `electron .` by passing our app path to electron
+                app.setAsDefaultProtocolClient(protocol, process.execPath, [app.getAppPath(), ...args]);
+            }
         }
     }
 
@@ -79,7 +96,7 @@ export default class ProtocolHandler {
         // sanity check: we only register for the one protocol, so we shouldn't
         // be getting anything else unless the user is forcing a URL to open
         // with the Element app.
-        if (parsed.protocol !== `${this.protocol}:` && parsed.protocol !== `${LEGACY_PROTOCOL}:`) {
+        if (!this.isOwnProtocol(parsed.protocol)) {
             console.log("Ignoring unexpected protocol: ", parsed.protocol);
             return false;
         }
@@ -142,12 +159,10 @@ export default class ProtocolHandler {
 
     public getProfileFromDeeplink(args: string[]): string | undefined {
         // check if we are passed a profile in the SSO callback url
-        const deeplinkUrl = args.find(
-            (arg) => arg.startsWith(`${this.protocol}:/`) || arg.startsWith(`${LEGACY_PROTOCOL}://`),
-        );
+        const deeplinkUrl = args.find(this.checkArgIsUrl);
         if (deeplinkUrl?.includes(SEARCH_PARAM)) {
             const parsedUrl = new URL(deeplinkUrl);
-            if (parsedUrl.protocol === `${this.protocol}:` || parsedUrl.protocol === `${LEGACY_PROTOCOL}:`) {
+            if (this.isOwnProtocol(parsedUrl.protocol)) {
                 const store = this.readStore();
                 let sessionId = parsedUrl.searchParams.get(SEARCH_PARAM);
                 if (!sessionId) {

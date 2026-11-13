@@ -39,4 +39,31 @@ describe("getBuildConfig", () => {
         expect(config.protocol).toBe("proto");
         expect(config.windowsCertSubjectName).toBe("subject.name");
     });
+
+    describe("legacyProtocol", () => {
+        async function loadBuildConfig(
+            packageJson: Record<string, string>,
+        ): Promise<ReturnType<typeof getBuildConfig>> {
+            vol.fromJSON({ "../package.json": JSON.stringify(packageJson) }, __dirname);
+            vi.resetModules();
+            const buildConfigModule = await import("./build-config.js");
+            return buildConfigModule.getBuildConfig();
+        }
+
+        it("should read the legacy protocol from package.json", async () => {
+            const config = await loadBuildConfig({ electron_protocol: "proto", electron_legacy_protocol: "legacy" });
+            expect(config.legacyProtocol).toBe("legacy");
+        });
+
+        it("should have no legacy protocol when the packaged variant has none", async () => {
+            const config = await loadBuildConfig({ electron_protocol: "proto" });
+            expect(config.legacyProtocol).toBeUndefined();
+        });
+
+        it("should fall back to the element protocols when not packaged", async () => {
+            const config = await loadBuildConfig({});
+            expect(config.protocol).toBe("io.element.desktop");
+            expect(config.legacyProtocol).toBe("element");
+        });
+    });
 });

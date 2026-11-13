@@ -53,7 +53,7 @@ import { type ConfigOptions, loadConfig } from "./config.js";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const buildConfig = getBuildConfig();
-const protocolHandler = new ProtocolHandler(buildConfig.protocol);
+const protocolHandler = new ProtocolHandler(buildConfig.protocol, buildConfig.legacyProtocol);
 const args = getArgs(protocolHandler);
 
 app.setPath("userData", args.userDataPath);

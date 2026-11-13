@@ -13,6 +13,7 @@ import { app } from "electron";
 import ProtocolHandler from "./protocol.js";
 
 const TEST_PROTOCOL = "test.proto";
+const TEST_LEGACY_PROTOCOL = "element";
 const TEST_SESSION_ID = "test_session_id";
 const USER_DATA_DIR = "/Users/name/Library/Application Support/Element";
 
@@ -54,7 +55,7 @@ describe("ProtocolHandler", () => {
     });
 
     describe("getProfileFromDeeplink", () => {
-        const handler = new ProtocolHandler(TEST_PROTOCOL);
+        const handler = new ProtocolHandler(TEST_PROTOCOL, TEST_LEGACY_PROTOCOL);
 
         it("should handle legacy SSO URIs", () => {
             expect(
@@ -88,6 +89,16 @@ describe("ProtocolHandler", () => {
                 handler.getProfileFromDeeplink([
                     "Element.app",
                     `${TEST_PROTOCOL}:/vector/webapp/?no_universal_links=true#code=DEADBEEF:element-desktop-ssoid:${TEST_SESSION_ID}`,
+                ]),
+            ).toBeUndefined();
+        });
+
+        it("should ignore legacy SSO URIs when there is no legacy protocol", () => {
+            const handlerWithoutLegacy = new ProtocolHandler(TEST_PROTOCOL);
+            expect(
+                handlerWithoutLegacy.getProfileFromDeeplink([
+                    "Element.app",
+                    `element://vector/webapp/?element-desktop-ssoid=${TEST_SESSION_ID}`,
                 ]),
             ).toBeUndefined();
         });
@@ -133,13 +144,33 @@ describe("ProtocolHandler", () => {
         expect(global.mainWindow!.loadURL).not.toHaveBeenCalled();
     });
 
+    it("should handle legacy protocol deeplinks only when the build has a legacy protocol", () => {
+        vi.spyOn(process, "platform", "get").mockReturnValue("darwin");
+        vi.stubGlobal("mainWindow", {
+            loadURL: vi.fn(),
+        });
+        const legacyUri = "element://vector/webapp/#/room/#matrix:matrix.org";
+
+        const handlerWithoutLegacy = new ProtocolHandler(TEST_PROTOCOL);
+        app.emit("open-url", new Event("test"), legacyUri);
+        expect(global.mainWindow!.loadURL).not.toHaveBeenCalled();
+
+        app.removeAllListeners();
+        const handlerWithLegacy = new ProtocolHandler(TEST_PROTOCOL, TEST_LEGACY_PROTOCOL);
+        app.emit("open-url", new Event("test"), legacyUri);
+        expect(global.mainWindow!.loadURL).toHaveBeenCalledWith("vector://vector/webapp/#/room/#matrix:matrix.org");
+
+        expect(handlerWithoutLegacy).toBeTruthy();
+        expect(handlerWithLegacy).toBeTruthy();
+    });
+
     describe("initialise", () => {
         beforeEach(() => {
             vi.spyOn(process, "execPath", "get").mockReturnValue("/bin/element-desktop");
         });
 
         it("should set as default protocol client", () => {
-            const handler = new ProtocolHandler(TEST_PROTOCOL);
+            const handler = new ProtocolHandler(TEST_PROTOCOL, TEST_LEGACY_PROTOCOL);
             handler.initialise({
                 userDataPath: USER_DATA_DIR,
                 devtools: false,
@@ -151,6 +182,23 @@ describe("ProtocolHandler", () => {
             const args = ["--no-update"];
             expect(app.setAsDefaultProtocolClient).toHaveBeenCalledWith(TEST_PROTOCOL, "/bin/element-desktop", args);
             expect(app.setAsDefaultProtocolClient).toHaveBeenCalledWith("element", "/bin/element-desktop", args);
+        });
+
+        it("should not register a legacy protocol when the build has none", () => {
+            vi.mocked(app.setAsDefaultProtocolClient).mockClear();
+            const handler = new ProtocolHandler(TEST_PROTOCOL);
+            handler.initialise({
+                userDataPath: USER_DATA_DIR,
+                devtools: false,
+                update: false,
+                hidden: false,
+                positional: ["/bin/element-desktop"],
+            });
+
+            expect(app.setAsDefaultProtocolClient).toHaveBeenCalledTimes(1);
+            expect(app.setAsDefaultProtocolClient).toHaveBeenCalledWith(TEST_PROTOCOL, "/bin/element-desktop", [
+                "--no-update",
+            ]);
         });
 
         it("should handle deeplink", () => {

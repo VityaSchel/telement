@@ -53,6 +53,7 @@ interface ExtraMetadata extends Metadata {
     desktopName: string;
     electron_appId: string;
     electron_protocol: string;
+    electron_legacy_protocol?: string;
     electron_windows_cert_sn?: string;
 }
 
@@ -139,6 +140,7 @@ const config: Omit<Writable<Configuration>, "electronFuses"> & {
         desktopName: `${variant.name}.desktop`,
         electron_appId: variant.appId,
         electron_protocol: variant.protocols[0],
+        electron_legacy_protocol: variant.protocols[1],
     },
     linux: {
         target: ["tar.gz", "deb"],

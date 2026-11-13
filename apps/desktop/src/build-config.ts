@@ -20,6 +20,8 @@ interface BuildConfig {
     appId: string;
     // Protocol string used for OIDC callbacks
     protocol: string;
+    // Older `scheme://` protocol also handled for deep links, if the build has one
+    legacyProtocol: string | undefined;
     // Subject name of the code signing cert used for Windows packages, if signed
     // used as a basis for the Tray GUID which must be rolled if the certificate changes.
     windowsCertSubjectName: string | undefined;
@@ -28,9 +30,12 @@ interface BuildConfig {
 export function getBuildConfig(): BuildConfig {
     if (!buildConfig) {
         const packageJson = loadJsonFile(path.join(__dirname, "..", "package.json")) as JsonObject;
+        const protocol = packageJson["electron_protocol"] as string | undefined;
         buildConfig = {
             appId: (packageJson["electron_appId"] as string) || "im.riot.app",
-            protocol: (packageJson["electron_protocol"] as string) || "io.element.desktop",
+            protocol: protocol || "io.element.desktop",
+            // Packaged builds get both protocols from their variant, which may not have a legacy one
+            legacyProtocol: protocol ? (packageJson["electron_legacy_protocol"] as string | undefined) : "element",
             windowsCertSubjectName: packageJson["electron_windows_cert_sn"] as string,
         };
     }
