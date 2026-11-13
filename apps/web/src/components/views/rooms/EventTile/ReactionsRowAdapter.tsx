@@ -272,7 +272,13 @@ export function ReactionsRowAdapter({
     let contextMenu: JSX.Element | undefined;
     if (menuDisplayed && menuAnchorRect && reactions && roomContext.canReact) {
         contextMenu = (
-            <ContextMenu {...aboveLeftOf(menuAnchorRect)} onFinished={closeReactionMenu} managed={false} focusLock>
+            <ContextMenu
+                {...aboveLeftOf(menuAnchorRect)}
+                menuClassName="mx_TelementEmojiPickerMenu"
+                onFinished={closeReactionMenu}
+                managed={false}
+                focusLock
+            >
                 <ReactionPicker mxEvent={mxEvent} reactions={reactions} onFinished={closeReactionMenu} />
             </ContextMenu>
         );

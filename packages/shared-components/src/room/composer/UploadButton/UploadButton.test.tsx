@@ -20,6 +20,13 @@ describe("UploadButton", () => {
         const { container } = render(<Default />);
         expect(container).toMatchSnapshot();
     });
+    it("is named by its tooltip alone, without the browser's own tooltip", () => {
+        const { getByRole } = render(<Default />);
+
+        const button = getByRole("button", { name: "Attachment" });
+        expect(button).not.toHaveAttribute("title");
+        expect(document.getElementById(button.getAttribute("aria-labelledby")!)).toHaveTextContent("Attachment");
+    });
     it("will provide one option when only one is available", async () => {
         userEvent.setup();
         const onUploadOptionSelected = fn();

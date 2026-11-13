@@ -9,7 +9,7 @@ Please see LICENSE files in the repository root for full details.
 // @vitest-environment happy-dom
 
 import React from "react";
-import { describe, it, expect, vi, beforeAll, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, vi, beforeAll, beforeEach, afterEach, onTestFinished } from "vitest";
 import { act, fireEvent, render, screen, waitFor } from "test-utils-rtl";
 import { EventType, type MatrixEvent, RoomMember, THREAD_RELATION_TYPE } from "matrix-js-sdk/src/matrix";
 import userEvent from "@testing-library/user-event";
@@ -37,6 +37,7 @@ import dis from "../../../dispatcher/dispatcher";
 import { E2EStatus } from "../../../utils/ShieldUtils";
 import UIStore, { UI_EVENTS } from "../../../stores/UIStore";
 import { Action } from "../../../dispatcher/actions";
+import { UIFeature } from "../../../settings/UIFeature";
 import { ScopedRoomContextProvider } from "../../../contexts/ScopedRoomContext.tsx";
 import { TimelineRenderingType, type RoomContextType } from "../../../contexts/RoomContext.ts";
 import { RoomUploadContextProvider } from "../../../viewmodels/room/RoomUploadViewModel.tsx";
@@ -44,19 +45,13 @@ import { SDKContext } from "../../../contexts/SDKContext.ts";
 import { SDKContextClass } from "../../../contexts/SDKContextClass.ts";
 
 const openStickerPicker = async (): Promise<void> => {
-    await userEvent.click(screen.getByLabelText("More options"));
-    await userEvent.click(screen.getByLabelText("Sticker"));
+    await userEvent.click(screen.getByRole("button", { name: "Emoji" }));
+    await userEvent.click(screen.getByRole("tab", { name: "Stickers" }));
+    await userEvent.click(screen.getByRole("button", { name: "Open sticker packs" }));
 };
 
-const startVoiceMessage = async (): Promise<void> => {
-    await userEvent.click(screen.getByLabelText("More options"));
-    await userEvent.click(screen.getByLabelText("Voice Message"));
-};
-
-const expectVoiceMessageRecordingTriggered = (): void => {
-    // Checking for the voice message dialog text, if no mic can be found.
-    // By this we know at least that starting a voice message was triggered.
-    expect(screen.getByText("No microphone found")).toBeInTheDocument();
+const openAttachmentMenu = async (): Promise<void> => {
+    await userEvent.click(screen.getByRole("button", { name: "Attachment" }));
 };
 
 beforeAll(initOnce, 10000);
@@ -76,13 +71,7 @@ describe("MessageComposer", () => {
         // restore settings
         await act(async () => {
             await Promise.all(
-                (
-                    [
-                        "MessageComposerInput.showStickersButton",
-                        "MessageComposerInput.showPollsButton",
-                        "feature_wysiwyg_composer",
-                    ] as const
-                ).map((setting) =>
+                (["MessageComposerInput.showPollsButton", "feature_wysiwyg_composer"] as const).map((setting) =>
                     SettingsStore.setValue(setting, null, SettingLevel.DEVICE, SettingsStore.getDefaultValue(setting)),
                 ),
             );
@@ -131,18 +120,21 @@ describe("MessageComposer", () => {
     describe("for a Room", () => {
         const room = mkStubRoom("!roomId:server", "Room 1", cli);
 
-        it("Renders a SendMessageComposer and MessageComposerButtons by default", () => {
+        it("Renders a SendMessageComposer and the composer buttons by default", () => {
             wrapAndRender({ room });
             expect(screen.getByLabelText("Send an unencrypted message…")).toBeInTheDocument();
+            expect(screen.getByRole("button", { name: "Attachment" })).toBeInTheDocument();
+            expect(screen.getByRole("button", { name: "Emoji" })).toBeInTheDocument();
         });
 
-        it("Does not render a SendMessageComposer or MessageComposerButtons when user has no permission", () => {
+        it("Does not render a SendMessageComposer or the composer buttons when user has no permission", () => {
             wrapAndRender({ room }, false);
             expect(screen.queryByLabelText("Send an unencrypted message…")).not.toBeInTheDocument();
+            expect(screen.queryByRole("button", { name: "Attachment" })).not.toBeInTheDocument();
             expect(screen.getByText("You do not have permission to post to this room")).toBeInTheDocument();
         });
 
-        it("Does not render a SendMessageComposer or MessageComposerButtons when room is tombstoned", () => {
+        it("Does not render a SendMessageComposer or the composer buttons when room is tombstoned", () => {
             wrapAndRender(
                 { room },
                 true,
@@ -198,30 +190,26 @@ describe("MessageComposer", () => {
             });
         });
 
-        // test button display depending on settings
+        // test menu item display depending on settings
         [
             {
-                setting: "MessageComposerInput.showStickersButton" as const,
-                buttonLabel: "Sticker",
-            },
-            {
                 setting: "MessageComposerInput.showPollsButton" as const,
-                buttonLabel: "Poll",
+                itemLabel: "Poll",
             },
-        ].forEach(({ setting, buttonLabel }) => {
+        ].forEach(({ setting, itemLabel }) => {
             [true, false].forEach((value: boolean) => {
                 describe(`when ${setting} = ${value}`, () => {
                     beforeEach(async () => {
                         await act(() => SettingsStore.setValue(setting, null, SettingLevel.DEVICE, value));
                         wrapAndRender({ room });
-                        await userEvent.click(screen.getByLabelText("More options"));
+                        await openAttachmentMenu();
                     });
 
-                    it(`should${value ? "" : " not"} display the button`, () => {
+                    it(`should${value ? "" : " not"} display the menu item`, () => {
                         if (value) {
-                            expect(screen.getByLabelText(buttonLabel)).toBeInTheDocument();
+                            expect(screen.getByRole("menuitem", { name: itemLabel })).toBeInTheDocument();
                         } else {
-                            expect(screen.queryByLabelText(buttonLabel)).not.toBeInTheDocument();
+                            expect(screen.queryByRole("menuitem", { name: itemLabel })).not.toBeInTheDocument();
                         }
                     });
 
@@ -241,16 +229,36 @@ describe("MessageComposer", () => {
                             });
                         });
 
-                        it(`should${!value || "not"} display the button`, () => {
+                        it(`should${!value || "not"} display the menu item`, () => {
                             if (!value) {
-                                expect(screen.getByLabelText(buttonLabel)).toBeInTheDocument();
+                                expect(screen.getByRole("menuitem", { name: itemLabel })).toBeInTheDocument();
                             } else {
-                                expect(screen.queryByLabelText(buttonLabel)).not.toBeInTheDocument();
+                                expect(screen.queryByRole("menuitem", { name: itemLabel })).not.toBeInTheDocument();
                             }
                         });
                     });
                 });
             });
+        });
+
+        it("should offer stickers in the emoji drawer", async () => {
+            wrapAndRender({ room });
+            await userEvent.click(screen.getByRole("button", { name: "Emoji" }));
+            expect(screen.getByRole("tab", { name: "Stickers" })).toBeInTheDocument();
+        });
+
+        it("should not offer stickers when widgets are disabled", async () => {
+            const getValue = SettingsStore.getValue.bind(SettingsStore);
+            const getValueSpy = vi
+                .spyOn(SettingsStore, "getValue")
+                .mockImplementation((setting, ...args) =>
+                    setting === UIFeature.Widgets ? false : getValue(setting, ...args),
+                );
+            onTestFinished(() => getValueSpy.mockRestore());
+            wrapAndRender({ room });
+            await userEvent.click(screen.getByRole("button", { name: "Emoji" }));
+            expect(screen.getByRole("tab", { name: "Emoji" })).toBeInTheDocument();
+            expect(screen.queryByRole("tab", { name: "Stickers" })).not.toBeInTheDocument();
         });
 
         it("should not render the send button", () => {
@@ -292,41 +300,15 @@ describe("MessageComposer", () => {
                 });
             });
 
-            describe("when a resize to narrow event occurred in UIStore", () => {
+            describe.each([true, false])("when a resize event occurred in UIStore with narrow = %s", (narrow) => {
                 beforeEach(async () => {
-                    wrapAndRender({ room }, true, true);
+                    wrapAndRender({ room }, true, narrow);
                     await openStickerPicker();
                     act(() => resizeCallback(UI_EVENTS.Resize, {}));
-                });
-
-                it("should close the menu", () => {
-                    expect(screen.queryByLabelText("Sticker")).not.toBeInTheDocument();
-                });
-
-                it("should not show the attachment button", () => {
-                    expect(screen.queryByLabelText("Attachment")).not.toBeInTheDocument();
-                });
-
-                it("should close the sticker picker", () => {
-                    expect(
-                        screen.queryByText("You don't currently have any stickerpacks enabled"),
-                    ).not.toBeInTheDocument();
-                });
-            });
-
-            describe("when a resize to non-narrow event occurred in UIStore", () => {
-                beforeEach(async () => {
-                    wrapAndRender({ room }, true, false);
-                    await openStickerPicker();
-                    act(() => resizeCallback(UI_EVENTS.Resize, {}));
-                });
-
-                it("should close the menu", () => {
-                    expect(screen.queryByLabelText("Sticker")).not.toBeInTheDocument();
                 });
 
                 it("should show the attachment button", () => {
-                    expect(screen.getByLabelText("Attachment")).toBeInTheDocument();
+                    expect(screen.getByRole("button", { name: "Attachment" })).toBeInTheDocument();
                 });
 
                 it("should close the sticker picker", () => {
@@ -413,29 +395,16 @@ describe("MessageComposer", () => {
                 });
             });
         });
-
-        describe("when clicking start a voice message", () => {
-            beforeEach(async () => {
-                wrapAndRender({ room });
-                await startVoiceMessage();
-                await flushPromises();
-            });
-
-            it("should try to start a voice message", () => {
-                expectVoiceMessageRecordingTriggered();
-            });
-        });
     });
 
     describe("for a LocalRoom", () => {
         const localRoom = new LocalRoom("!room:example.com", cli, cli.getUserId()!);
 
-        it("should not show the stickers button", async () => {
+        it("should not offer stickers", async () => {
             wrapAndRender({ room: localRoom });
-            await act(async () => {
-                await userEvent.click(screen.getByLabelText("More options"));
-            });
-            expect(screen.queryByLabelText("Sticker")).not.toBeInTheDocument();
+            await userEvent.click(screen.getByRole("button", { name: "Emoji" }));
+            expect(screen.getByRole("tab", { name: "Emoji" })).toBeInTheDocument();
+            expect(screen.queryByRole("tab", { name: "Stickers" })).not.toBeInTheDocument();
         });
     });
 });

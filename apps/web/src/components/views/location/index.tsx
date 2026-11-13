@@ -32,16 +32,6 @@ export function SmartMarker(props: ComponentProps<typeof SmartMarkerComponent>):
     );
 }
 
-const LocationButtonComponent = lazy(() => import("./LocationButton"));
-
-export function LocationButton(props: ComponentProps<typeof LocationButtonComponent>): JSX.Element {
-    return (
-        <Suspense fallback={<Spinner />}>
-            <LocationButtonComponent {...props} />
-        </Suspense>
-    );
-}
-
 const LocationViewDialogComponent = lazy(() => import("./LocationViewDialog"));
 
 export function LocationViewDialog(props: ComponentProps<typeof LocationViewDialogComponent>): JSX.Element {

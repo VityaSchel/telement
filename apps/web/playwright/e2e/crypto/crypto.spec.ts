@@ -217,7 +217,7 @@ test.describe("Cryptography", function () {
             await page.getByRole("textbox", { name: "Send a message…" }).press("Enter");
             await checkDMRoom(page);
             const bobRoomId = await bobJoin(page, bob);
-            // We no longer show the grey badge in the composer, check that it is not there.
+            // The composer shows no encryption icon, check that it is not there.
             await expect(page.locator(".mx_MessageComposer_e2eIcon")).toHaveCount(0);
 
             await testMessages(page, bob, bobRoomId);
@@ -230,7 +230,6 @@ test.describe("Cryptography", function () {
 
             // Take a snapshot of RoomSummaryCard with a verified E2EE icon
             await expect(page.locator(".mx_RightPanel")).toMatchScreenshot("RoomSummaryCard-with-verified-e2ee.png");
-            await expect(page.locator(".mx_MessageComposer_e2eIcon")).toMatchScreenshot("composer-e2e-icon.png");
         },
     );
 

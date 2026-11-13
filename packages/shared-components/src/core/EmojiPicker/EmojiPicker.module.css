@@ -12,18 +12,48 @@
     max-height: 80vh;
 
     border-radius: 4px;
+    /*
+     * The top corners are concentric with the search field: its radius plus its inset (see .search). The sticky category
+     * bar and the scrollbar reach them, so they're clipped.
+     */
+    border-start-start-radius: calc(var(--cpd-space-9x) / 2 + var(--cpd-space-2x));
+    border-start-end-radius: calc(var(--cpd-space-9x) / 2 + var(--cpd-space-2x));
+    overflow: clip;
 
     display: flex;
     flex-direction: column;
+
+    /* Emoji and labels aren't text to copy; the search input stays selectable */
+    user-select: none;
 }
 
 .body {
-    margin-left: var(--cpd-space-1-5x);
     flex: 1;
     overflow-y: scroll;
+    /* Keep emoji focused with the keyboard clear of the sticky category bar */
+    scroll-padding-top: calc(var(--cpd-space-9x) + var(--cpd-space-1x) + var(--cpd-border-width-1));
 }
 
+/* The category bar stays at the top once the search field above it has scrolled away */
+.stickyHeader {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background-color: var(--cpd-color-bg-canvas-default);
+}
+
+/*
+ * Room below the last row of emoji, which otherwise sits on the picker's bottom edge. The left padding centers the
+ * fixed-width rows, while the search field and the category bar above span the whole width.
+ */
+.groups {
+    padding-left: var(--cpd-space-1-5x);
+    padding-bottom: var(--cpd-space-2x);
+}
+
+/* The anchors share the width left beside the scrollbar, so they stay on one line */
 .header {
+    display: flex;
     padding: var(--cpd-space-1x) var(--cpd-space-2x) 0;
     border-bottom: 1px solid var(--cpd-color-gray-400);
 }
@@ -39,7 +69,8 @@
     background-color: transparent;
     border-radius: 4px 4px 0 0;
 
-    width: 36px;
+    flex: 1 1 0;
+    min-width: 0;
     height: 36px;
 
     color: var(--cpd-color-text-primary);
@@ -70,53 +101,15 @@
 }
 
 .search {
-    margin: 8px;
-    border-radius: 4px;
-    border: 1px solid var(--cpd-color-border-interactive-secondary);
-    background-color: var(--cpd-color-bg-canvas-default);
-    display: flex;
-
-    input {
-        flex: 1;
-        border: none;
-        padding: var(--cpd-space-1x) var(--cpd-space-3x);
-        border-radius: 4px 0;
-
-        &::placeholder {
-            color: var(--cpd-color-text-secondary);
-        }
-    }
-
-    button {
-        border: none;
-        background-color: inherit;
-        margin: 0;
-        padding: var(--cpd-space-2x);
-        align-self: center;
-        width: 32px;
-        height: 32px;
-        cursor: pointer;
-
-        svg {
-            width: 100%;
-            height: 100%;
-        }
-    }
-}
-
-.searchIcon {
-    width: 18px;
     margin: var(--cpd-space-2x);
-
-    svg {
-        width: 100%;
-        height: 100%;
-        color: var(--cpd-color-text-primary);
-    }
 }
 
 .category {
     padding: 0 var(--cpd-space-3x);
+}
+
+.categoryHeader {
+    padding: var(--cpd-space-2x) var(--cpd-space-3x) var(--cpd-space-1x);
 }
 
 .categoryLabel {

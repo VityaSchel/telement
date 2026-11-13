@@ -176,6 +176,7 @@ export function ActionBarAdapter({
             {reactionsMenuAnchorRect ? (
                 <ContextMenu
                     {...aboveLeftOf(reactionsMenuAnchorRect)}
+                    menuClassName="mx_TelementEmojiPickerMenu"
                     onFinished={closeReactionsMenu}
                     managed={false}
                     focusLock

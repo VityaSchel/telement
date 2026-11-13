@@ -47,6 +47,11 @@ export type ReplyTileViewModel = ViewModel<ReplyTileViewSnapshot, ReplyTileViewA
 export interface ReplyTileViewProps {
     /** ViewModel providing reply presentation and activation behavior. */
     vm: ReplyTileViewModel;
+    /**
+     * Show only one line of the quoted body, without the sender, and media at thumbnail size. The composer's reply
+     * preview uses it under its own "Reply to" title.
+     */
+    excerpt?: boolean;
 }
 
 /**
@@ -55,7 +60,7 @@ export interface ReplyTileViewProps {
  * Event-specific data and body rendering remain in the host application so
  * this component can be reused by different timeline implementations.
  */
-export function ReplyTileView({ vm }: ReplyTileViewProps): JSX.Element {
+export function ReplyTileView({ vm, excerpt }: ReplyTileViewProps): JSX.Element {
     const { href, sender, inline, info, body } = useViewModel(vm);
 
     return (
@@ -66,11 +71,12 @@ export function ReplyTileView({ vm }: ReplyTileViewProps): JSX.Element {
                 className={classNames(styles.root, {
                     [styles.inline]: inline,
                     [styles.info]: info,
+                    [styles.excerpt]: excerpt,
                 })}
                 data-testid="reply-tile"
             >
                 <a className={styles.link} href={href} onClick={vm.onClick}>
-                    {sender ? (
+                    {sender && !excerpt ? (
                         <div className={styles.sender} data-testid="reply-tile-sender">
                             {sender.avatarViewModel ? (
                                 <MemberAvatarView vm={sender.avatarViewModel} classNames={styles.avatar} />

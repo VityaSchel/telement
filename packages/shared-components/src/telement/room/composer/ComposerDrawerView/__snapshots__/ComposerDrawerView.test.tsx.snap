@@ -1,0 +1,52 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`ComposerDrawerView > matches snapshot 1`] = `
+<div>
+  <div
+    class="ComposerDrawerView-module_drawer"
+  >
+    <div
+      aria-labelledby="react-use-id-1-tab-emoji"
+      class="ComposerDrawerView-module_panel"
+      id="react-use-id-1-panel"
+      role="tabpanel"
+    >
+      <div
+        style="padding: 16px;"
+      >
+        Content of the 
+        emoji
+         tab
+      </div>
+    </div>
+    <div
+      class="ComposerDrawerView-module_tabs"
+      role="tablist"
+    >
+      <button
+        aria-controls="react-use-id-1-panel"
+        aria-selected="true"
+        class="ComposerDrawerView-module_tab ComposerDrawerView-module_selected"
+        data-autofocus="true"
+        id="react-use-id-1-tab-emoji"
+        role="tab"
+        tabindex="0"
+        type="button"
+      >
+        Emoji
+      </button>
+      <button
+        aria-controls="react-use-id-1-panel"
+        aria-selected="false"
+        class="ComposerDrawerView-module_tab"
+        id="react-use-id-1-tab-stickers"
+        role="tab"
+        tabindex="-1"
+        type="button"
+      >
+        Stickers
+      </button>
+    </div>
+  </div>
+</div>
+`;

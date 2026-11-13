@@ -13,9 +13,15 @@ import { type MemberAvatarViewSnapshot } from "../../../../../core/MemberAvatar/
 import { useMockedViewModel } from "../../../../../core/viewmodel";
 import { withViewDocs } from "../../../../../../.storybook/withViewDocs";
 import { type DisambiguatedProfileViewSnapshot } from "../DisambiguatedProfile";
-import { ReplyTileView, type ReplyTileViewActions, type ReplyTileViewSnapshot } from "./ReplyTileView";
+import {
+    ReplyTileView,
+    type ReplyTileViewActions,
+    type ReplyTileViewProps,
+    type ReplyTileViewSnapshot,
+} from "./ReplyTileView";
 
-interface ReplyTileStoryProps extends Omit<ReplyTileViewSnapshot, "sender">, ReplyTileViewActions {
+interface ReplyTileStoryProps
+    extends Omit<ReplyTileViewSnapshot, "sender">, ReplyTileViewActions, Pick<ReplyTileViewProps, "excerpt"> {
     senderName?: string;
     showAvatar?: boolean;
     showProfile?: boolean;
@@ -25,6 +31,7 @@ const ReplyTileViewWrapperImpl = ({
     senderName,
     showAvatar = true,
     showProfile = true,
+    excerpt,
     onClick,
     ...snapshot
 }: ReplyTileStoryProps): JSX.Element => {
@@ -56,7 +63,7 @@ const ReplyTileViewWrapperImpl = ({
         { onClick },
     );
 
-    return <ReplyTileView vm={vm} />;
+    return <ReplyTileView vm={vm} excerpt={excerpt} />;
 };
 
 const ReplyTileViewWrapper = withViewDocs(ReplyTileViewWrapperImpl, ReplyTileView);
@@ -126,6 +133,25 @@ export const LongEditedReply: Story = {
                 </span>
                 <span data-textual-body-edited-marker>Edited</span>
             </span>
+        ),
+    },
+};
+
+export const Excerpt: Story = {
+    decorators: [
+        (Story) => (
+            <div style={{ width: 320 }}>
+                <Story />
+            </div>
+        ),
+    ],
+    args: {
+        excerpt: true,
+        body: (
+            <p>
+                The composer's reply preview shows one line of the quoted message under its own title, without the
+                sender row.
+            </p>
         ),
     },
 };

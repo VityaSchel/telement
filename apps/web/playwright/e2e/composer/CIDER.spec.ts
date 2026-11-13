@@ -133,9 +133,9 @@ test.describe("Composer", () => {
             const emojiPicker = page.getByLabel("Emoji picker");
             await expect(emojiPicker).toBeVisible();
 
-            // Get initial focused element (should be search input)
-            const searchInput = emojiPicker.getByRole("textbox", { name: "Search" });
-            await expect(searchInput).toBeFocused();
+            // The selected category has focus, and the search field waits for the user
+            await expect(emojiPicker.getByRole("tab", { selected: true })).toBeFocused();
+            await expect(emojiPicker.getByRole("textbox", { name: "Search" })).not.toBeFocused();
 
             // Try to tab multiple times - focus should stay within emoji picker
             await page.keyboard.press("Tab");
@@ -156,6 +156,52 @@ test.describe("Composer", () => {
 
             // Verify focus returns to emoji button
             await expect(emojiButton).toBeFocused();
+        });
+
+        test("keeps its buttons next to the last line of text, with 20px icons on 36px targets", async ({ app }) => {
+            const composer = app.getComposer(false);
+            const field = composer.getByRole("textbox", { name: "Send an unencrypted message…" });
+            await field.pressSequentially("one line");
+            const buttons = ["Attachment", "Emoji", "Send message"].map((name) =>
+                composer.getByRole("button", { name }),
+            );
+            for (const button of buttons) {
+                expect(await button.boundingBox()).toMatchObject({ width: 36, height: 36 });
+                expect(await button.locator("svg").boundingBox()).toMatchObject({ width: 20, height: 20 });
+            }
+
+            // How far each button sits from the bottom and from the middle of the text field
+            const measure = async (): Promise<{ fromBottom: number; fromMiddle: number }[]> => {
+                const fieldBox = (await field.boundingBox())!;
+                return Promise.all(
+                    buttons.map(async (button) => {
+                        const box = (await button.boundingBox())!;
+                        return {
+                            fromBottom: fieldBox.y + fieldBox.height - (box.y + box.height),
+                            fromMiddle: fieldBox.y + fieldBox.height / 2 - (box.y + box.height / 2),
+                        };
+                    }),
+                );
+            };
+
+            // One line: the buttons sit in the middle of the field
+            const oneLine = await measure();
+            for (const { fromMiddle } of oneLine) {
+                expect(Math.abs(fromMiddle)).toBeLessThanOrEqual(1);
+            }
+            const oneLineHeight = (await field.boundingBox())!.height;
+
+            await field.press("Shift+Enter");
+            await field.pressSequentially("two lines");
+            await field.press("Shift+Enter");
+            await field.pressSequentially("three lines");
+            await expect.poll(async () => (await field.boundingBox())!.height).toBeGreaterThan(oneLineHeight + 30);
+
+            // Three lines: the buttons stay next to the last one, as in Telegram
+            const threeLines = await measure();
+            threeLines.forEach(({ fromBottom }, index) => {
+                expect(fromBottom).toBeCloseTo(oneLine[index].fromBottom, 0);
+            });
         });
 
         test.describe("when Control+Enter is required to send", () => {

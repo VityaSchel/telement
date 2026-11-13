@@ -22,19 +22,21 @@ Please see LICENSE files in the repository root for full details.
         flex: 1;
         display: flex;
         flex-direction: column;
-        /* min-height at this level so the mx_BasicMessageComposer_input */
-        /* still stays vertically centered when less than 55px. */
-        /* We also set this to ensure the voice message recording widget */
-        /* doesn't cause a jump. */
-        min-height: 55px;
 
         .mx_BasicMessageComposer_input {
-            padding: 3px 0;
-            /* this will center the contenteditable */
-            /* in it's parent vertically */
-            /* while keeping the autocomplete at the top */
-            /* of the composer. The parent needs to be a flex container for this to work. */
-            margin: auto 0;
+            /* The same space above and below one line or many, so the text keeps its distance from the */
+            /* composer's top border as it grows. One line is still taller than the voice message recording */
+            /* widget, so starting a recording doesn't make the composer jump. */
+            padding: var(--cpd-space-4x) 0;
+            /* Once long text scrolls, it fades out in that space instead of running into the border, and the */
+            /* caret is kept out of it. */
+            scroll-padding-block: var(--cpd-space-4x);
+            mask-image: linear-gradient(
+                transparent,
+                black var(--cpd-space-4x),
+                black calc(100% - var(--cpd-space-4x)),
+                transparent
+            );
             /* max-height at this level so autocomplete doesn't get scrolled too */
             max-height: 140px;
             overflow-y: auto;

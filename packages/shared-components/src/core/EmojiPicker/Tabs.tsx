@@ -45,6 +45,10 @@ interface Props {
      * When omitted, a default mapping based on `KeyboardEvent.key` is used.
      */
     getAction?: RovingTabIndexProviderProps["getAction"];
+    /**
+     * Whether to focus the selected tab when the tabs mount.
+     */
+    autoFocus?: boolean;
 }
 
 const getDefaultAction = (ev: React.KeyboardEvent): RovingAction | undefined => {
@@ -72,6 +76,7 @@ export const Tabs: React.FC<Props> = ({
     onAnchorClick,
     pickerBodyId,
     getAction,
+    autoFocus,
 }) => {
     const findNearestEnabled = useCallback(
         (index: number, delta: number): number | undefined => {
@@ -165,10 +170,15 @@ export const Tabs: React.FC<Props> = ({
                         role="tab"
                         tabIndex={category.id === selectedCategory ? 0 : -1} // roving
                         aria-selected={category.id === selectedCategory}
+                        // The focus lock of the menu the picker opens in focuses this, leaving the search field at rest
+                        data-autofocus={category.id === selectedCategory || undefined}
+                        autoFocus={autoFocus && category.id === selectedCategory}
+                        // Tells the picker which category's emoji the down arrow moves to
+                        data-category-tab={category.id}
                         // Normally with tabs, this would be the ID of a tabpanel role but this isn't a real
                         // tab control, it controls a scroller and virtuoso doesn't render sections that are
-                        // off screen so they may not be in the DOM anyway. We point it at the whole scrollable
-                        // region instead.
+                        // off screen so they may not be in the DOM anyway. We point it at the list of all categories
+                        // instead.
                         aria-controls={pickerBodyId}
                     >
                         {category.emoji}

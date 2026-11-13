@@ -1,0 +1,173 @@
+/*
+Copyright 2026 Viktor Shchelochkov
+
+SPDX-License-Identifier: AGPL-3.0-only OR GPL-3.0-only
+Please see LICENSE files in the repository root for full details.
+*/
+
+/*
+ * Telegram's search field: a filled 36px pill. At rest the magnifier and the placeholder sit in the middle; once the
+ * field is active they slide to the left edge, where the input's text starts.
+ */
+.field {
+    --search-field-padding: var(--cpd-space-3x);
+    --search-field-icon-size: 20px;
+    --search-field-gap: var(--cpd-space-2x);
+    --search-field-clear-size: var(--cpd-space-7x);
+    --search-field-transition: 0.2s ease-out;
+
+    position: relative;
+    box-sizing: border-box;
+    block-size: var(--cpd-space-9x);
+    border-radius: var(--cpd-radius-pill-effect);
+    background-color: var(--cpd-color-bg-subtle-secondary);
+    color: var(--cpd-color-text-secondary);
+    font: var(--cpd-font-body-md-regular);
+    letter-spacing: var(--cpd-font-letter-spacing-body-md);
+}
+
+/* The magnifier and the placeholder, drawn above the input so they can be centered and moved */
+.decoration {
+    position: absolute;
+    inset-block: 0;
+    left: 50%;
+    display: flex;
+    align-items: center;
+    gap: var(--search-field-gap);
+    max-inline-size: calc(100% - 2 * var(--search-field-padding));
+    translate: -50% 0;
+    pointer-events: none;
+    transition:
+        left var(--search-field-transition),
+        translate var(--search-field-transition);
+}
+
+.active .decoration {
+    left: var(--search-field-padding);
+    max-inline-size: calc(100% - 2 * var(--search-field-padding) - var(--search-field-clear-size));
+    translate: 0 0;
+}
+
+.icon {
+    flex-shrink: 0;
+    inline-size: var(--search-field-icon-size);
+    block-size: var(--search-field-icon-size);
+    color: var(--cpd-color-icon-secondary);
+}
+
+.placeholder {
+    min-inline-size: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.hasValue .placeholder {
+    visibility: hidden;
+}
+
+.input {
+    display: block;
+    box-sizing: border-box;
+    inline-size: 100%;
+    block-size: 100%;
+    margin: 0;
+    border: none;
+    padding: 0 calc(var(--search-field-padding) + var(--search-field-clear-size)) 0
+        calc(var(--search-field-padding) + var(--search-field-icon-size) + var(--search-field-gap));
+    background: none;
+    outline: none;
+    color: var(--cpd-color-text-primary);
+    font: inherit;
+    letter-spacing: inherit;
+    user-select: text;
+
+    /* The decoration shows the placeholder instead, so it can sit in the middle */
+    &::placeholder {
+        color: transparent;
+    }
+}
+
+.clear {
+    position: absolute;
+    top: 50%;
+    right: var(--cpd-space-1x);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    inline-size: var(--search-field-clear-size);
+    block-size: var(--search-field-clear-size);
+    margin: 0;
+    border: none;
+    border-radius: 50%;
+    padding: 0;
+    background: none;
+    color: var(--cpd-color-icon-on-solid-primary);
+    translate: 0 -50%;
+    opacity: 0;
+    visibility: hidden;
+    transition:
+        opacity var(--search-field-transition),
+        visibility var(--search-field-transition);
+
+    /* A 16px filled circle inside the larger click target */
+    &::before {
+        content: "";
+        position: absolute;
+        inset: var(--cpd-space-1-5x);
+        border-radius: 50%;
+        background-color: var(--cpd-color-icon-tertiary);
+    }
+
+    svg {
+        position: relative;
+        inline-size: var(--cpd-space-4x);
+        block-size: var(--cpd-space-4x);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--cpd-color-border-focused);
+        outline-offset: -2px;
+    }
+}
+
+@media (hover) {
+    .clear:hover::before {
+        background-color: var(--cpd-color-icon-secondary);
+    }
+}
+
+.active .clear {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* The same pill as a button, for searches that open elsewhere such as the room list's */
+.button {
+    display: block;
+    /* A button is only as wide as its content, and all of it is absolutely positioned */
+    inline-size: 100%;
+    margin: 0;
+    border: none;
+    padding: 0;
+    appearance: none;
+
+    &:focus-visible {
+        outline: 2px solid var(--cpd-color-border-focused);
+        outline-offset: 1px;
+    }
+}
+
+@media (hover) {
+    .button:hover {
+        background-color: var(--cpd-color-bg-subtle-primary);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .decoration,
+    .clear {
+        transition: none;
+    }
+}

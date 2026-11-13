@@ -9,10 +9,9 @@ Please see LICENSE files in the repository root for full details.
 .mx_MessageComposer_wrapper {
     vertical-align: middle;
     margin: auto;
-    border-top: 1px solid $primary-hairline-color;
+    border-top: var(--cpd-border-width-1) solid var(--cpd-color-bg-subtle-primary);
     position: relative;
-    padding-left: 42px;
-    padding-right: 16px;
+    padding: 0 var(--cpd-space-2x);
 }
 
 .mx_MessageComposer_replaced_wrapper {
@@ -39,9 +38,14 @@ Please see LICENSE files in the repository root for full details.
 }
 
 .mx_MessageComposer_row {
+    /* The height of the text field with one line, which the buttons are centered on */
+    --MessageComposer-oneLineHeight: calc(2 * var(--cpd-space-4x) + $font-18px);
+
     display: flex;
     flex-direction: row;
-    align-items: center;
+    /* As in Telegram, the buttons stay next to the last line while the text grows */
+    align-items: flex-end;
+    gap: var(--cpd-space-1x);
     width: 100%;
 }
 
@@ -49,6 +53,7 @@ Please see LICENSE files in the repository root for full details.
     display: flex;
     align-items: center;
     gap: 6px;
+    min-height: var(--MessageComposer-oneLineHeight);
 }
 
 .mx_MessageComposer {
@@ -59,22 +64,6 @@ Please see LICENSE files in the repository root for full details.
         .mx_BaseAvatar {
             display: block;
         }
-    }
-}
-
-.mx_MessageComposer_e2eIconWrapper {
-    height: 12px; /* Match the height of the E2E icon for alignment */
-    width: 12px;
-    position: absolute;
-    left: 20px;
-    top: 22px;
-    margin-right: 0; /* Counteract the E2EIcon class */
-    margin-left: 3px; /* Counteract the E2EIcon class */
-
-    .mx_MessageComposer_e2eIcon {
-        margin: 0;
-        width: inherit;
-        height: inherit;
     }
 }
 
@@ -97,7 +86,6 @@ Please see LICENSE files in the repository root for full details.
     justify-content: flex-start;
     align-items: flex-start;
     font: var(--cpd-font-body-md-regular);
-    margin-right: 6px;
 
     pre {
         background-color: $rte-code-bg-color;
@@ -134,13 +122,9 @@ Please see LICENSE files in the repository root for full details.
     }
 }
 
-.mx_MessageComposer_button_highlight {
-    @mixin composerButtonHighLight;
-}
-
 .mx_MessageComposer_button {
     @mixin composerButton 50%, var(--cpd-color-icon-primary), var(--cpd-color-bg-subtle-primary);
-    padding: 3px;
+    padding: var(--cpd-space-2x);
     height: 20px;
     width: 20px;
 
@@ -165,19 +149,10 @@ Please see LICENSE files in the repository root for full details.
     }
 }
 .mx_MessageComposer_wysiwyg {
-    .mx_MessageComposer_wrapper {
-        padding-left: 16px;
-        margin-top: 6px;
-        margin-bottom: 12px;
-    }
-
     .mx_MessageComposer_row {
-        align-items: flex-end;
-    }
-
-    .mx_MessageComposer_actions {
         /* Height of the composer editor */
-        height: 40px;
+        --MessageComposer-oneLineHeight: 38px;
+        padding-block: var(--cpd-space-2x);
     }
 
     .mx_MediaBody {
@@ -201,25 +176,14 @@ Please see LICENSE files in the repository root for full details.
     }
 }
 
-.mx_MessageComposer_buttonMenu {
-    width: 24px;
-    height: 24px;
-    padding: 1px;
-
-    svg {
-        width: 24px;
-        height: 24px;
-    }
-}
-
 .mx_MessageComposer_sendMessage {
     cursor: pointer;
     position: relative;
     padding: var(--cpd-space-2x);
     border-radius: 100%;
     background-color: var(--cpd-color-icon-accent-tertiary);
-    height: 16px;
-    width: 16px;
+    height: 20px;
+    width: 20px;
 
     svg {
         height: inherit;

@@ -211,6 +211,52 @@ test.describe("Composer", () => {
             await expect(page.getByTestId("event-tile-slot-body").locator("strong").getByText("bold")).toBeVisible();
         });
 
+        test("keeps its buttons in line with each other and the last line of text", async ({ app }) => {
+            const composer = app.getComposer(false);
+            const field = app.getComposerField(false);
+            await field.pressSequentially("one line");
+            const formatting = composer.getByRole("button", { name: /^(Show|Hide) formatting$/ });
+            const buttons = [
+                composer.getByRole("button", { name: "Attachment" }),
+                formatting,
+                composer.getByRole("button", { name: "Emoji" }),
+                composer.getByRole("button", { name: "Send message" }),
+            ];
+            for (const button of buttons) {
+                expect(await button.boundingBox()).toMatchObject({ width: 36, height: 36 });
+            }
+            // Its glyph is small for its box, so the formatting icon is bigger than its neighbors' to look as big
+            expect(await formatting.locator("svg").boundingBox()).toMatchObject({ width: 24, height: 24 });
+
+            // How far each button sits from the bottom of the text field
+            const measure = async (): Promise<number[]> => {
+                const fieldBox = (await field.boundingBox())!;
+                return Promise.all(
+                    buttons.map(async (button) => {
+                        const box = (await button.boundingBox())!;
+                        return fieldBox.y + fieldBox.height - (box.y + box.height);
+                    }),
+                );
+            };
+
+            const oneLine = await measure();
+            for (const fromBottom of oneLine) {
+                expect(fromBottom).toBeCloseTo(oneLine[0], 0);
+            }
+            const oneLineHeight = (await field.boundingBox())!.height;
+
+            await field.press("Shift+Enter");
+            await field.pressSequentially("two lines");
+            await field.press("Shift+Enter");
+            await field.pressSequentially("three lines");
+            await expect.poll(async () => (await field.boundingBox())!.height).toBeGreaterThan(oneLineHeight + 30);
+
+            const threeLines = await measure();
+            threeLines.forEach((fromBottom, index) => {
+                expect(fromBottom).toBeCloseTo(oneLine[index], 0);
+            });
+        });
+
         test("can paste a file", async ({ page, bot, app }) => {
             await app.composerDragAndPasteFile("room", getSampleFilePath("riot.png"), "image/png");
             await expect(page.locator(".mx_ImageBody")).toBeVisible();
@@ -362,7 +408,7 @@ test.describe("Composer", () => {
                 await app.viewRoomByName(firstRoomname);
 
                 // Assert reply mode and reply text
-                await expect(page.getByText("Replying")).toBeVisible();
+                await expect(page.getByText("Reply to Janet", { exact: true })).toBeVisible();
                 await expect(page.locator("div[contenteditable=true]", { hasText: "my reply" })).toBeVisible();
             });
 

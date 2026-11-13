@@ -122,3 +122,37 @@
 .body :where([data-event-tile-line-numbers]) {
     display: none;
 }
+
+/* The composer's reply preview: one line of the quoted body, under the preview's own title. */
+.excerpt .link {
+    display: block;
+}
+
+.excerpt .body,
+.excerpt .body > :where(*),
+.excerpt .body :where(pre) {
+    -webkit-line-clamp: 1;
+}
+
+/* Videos get the 44px height that pictures have in every reply. The frame keeps its aspect ratio, so the video's
+   root must not stretch it as the one-line box above does. */
+.excerpt .body :global(.mx_MVideoBody) {
+    display: block;
+}
+
+.excerpt .body :global(.mx_MVideoBody_container) {
+    /* VideoBodyView reserves the timeline width inline, which only an important declaration overrides. */
+    width: auto !important;
+    height: 44px;
+}
+
+/* The length doesn't fit a thumbnail, and the play button only stays, at half size, to mark a video without a
+   picture, whose frame is otherwise blank. */
+.excerpt .body :global(.mx_MVideoBody_container) > span:not(:first-of-type),
+.excerpt .body :global(.mx_MVideoBody_container):has(> img) > span {
+    display: none;
+}
+
+.excerpt .body :global(.mx_MVideoBody_container) > span:first-of-type {
+    transform: scale(0.5);
+}

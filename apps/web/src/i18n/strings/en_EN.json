@@ -567,7 +567,6 @@
         "space": "Space",
         "spaces": "Spaces",
         "state_encryption_enabled": "Experimental state encryption enabled",
-        "sticker": "Sticker",
         "stickerpack": "Stickerpack",
         "success": "Success",
         "suggestions": "Suggestions",
@@ -605,7 +604,6 @@
             "user_a11y": "User Autocomplete",
             "user_description": "Users"
         },
-        "close_sticker_picker": "Hide stickers",
         "edit_composer_label": "Edit message",
         "format_bold": "Bold",
         "format_code_block": "Code block",
@@ -639,15 +637,13 @@
         "poll_button": "Poll",
         "poll_button_no_perms_description": "You do not have permission to start polls in this room.",
         "poll_button_no_perms_title": "Permission Required",
-        "replying_title": "Replying",
         "room_unencrypted": "Messages in this room are not end-to-end encrypted",
         "room_upgraded_link": "The conversation continues here.",
         "room_upgraded_notice": "This room has been replaced and is no longer active.",
         "send_button_title": "Send message",
         "send_button_voice_message": "Send voice message",
         "send_voice_message": "Send voice message",
-        "stop_voice_message": "Stop recording",
-        "voice_message_button": "Voice Message"
+        "stop_voice_message": "Stop recording"
     },
     "console_dev_note": "If you know what you're doing, Element is open-source, be sure to check out our GitHub (https://github.com/vector-im/element-web/) and contribute!",
     "console_scam_warning": "If someone told you to copy/paste something here, there is a high likelihood you're being scammed!",
@@ -3273,6 +3269,15 @@
         "empty_add_prompt": "Add some now"
     },
     "telement": {
+        "composer": {
+            "cancel_reply": "Cancel reply",
+            "file": "File",
+            "integration_stickers_description": "Sticker packs from your integration manager.",
+            "open_integration_stickers": "Open sticker packs",
+            "photo_or_video": "Photo or video",
+            "reply_to": "Reply to %(name)s",
+            "stickers": "Stickers"
+        },
         "video_note": {
             "pause": "Pause video message",
             "play": "Play video message"

@@ -1,0 +1,15 @@
+/*
+Copyright 2026 Viktor Shchelochkov
+
+SPDX-License-Identifier: AGPL-3.0-only OR GPL-3.0-only
+Please see LICENSE files in the repository root for full details.
+*/
+
+/*
+ * A menu holding the emoji picker. Its top corners are concentric with the picker's search field, like the picker's own
+ * (see EmojiPicker.module.css), plus the menu's border.
+ */
+.mx_ContextualMenu.mx_TelementEmojiPickerMenu {
+    border-top-left-radius: calc(var(--cpd-space-9x) / 2 + var(--cpd-space-2x) + var(--cpd-border-width-1));
+    border-top-right-radius: calc(var(--cpd-space-9x) / 2 + var(--cpd-space-2x) + var(--cpd-border-width-1));
+}

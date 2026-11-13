@@ -674,6 +674,18 @@ describe("EventTile", () => {
             expect(container.querySelector(".mx_MessageActionBar")).toBeNull();
         });
 
+        it("opens the reaction picker from the action bar in a menu rounded like the picker", async () => {
+            const { container } = getComponent({}, TimelineRenderingType.Room, { canReact: true });
+            const tile = getTile(container);
+            stubHoverMatches(tile);
+            await userEvent.hover(tile);
+
+            await userEvent.click(screen.getByRole("button", { name: "React" }));
+
+            const picker = await screen.findByLabelText("Emoji picker");
+            expect(picker.closest(".mx_ContextualMenu")).toHaveClass("mx_TelementEmojiPickerMenu");
+        });
+
         it("does not render the message action bar on hover when exporting", async () => {
             const { container } = getComponent({ forExport: true });
 

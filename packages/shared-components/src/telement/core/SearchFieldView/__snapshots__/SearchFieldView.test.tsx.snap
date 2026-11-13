@@ -1,0 +1,217 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`SearchFieldButtonView > matches snapshot 1`] = `
+<div>
+  <div
+    style="width: 320px;"
+  >
+    <button
+      class="SearchFieldView-module_field SearchFieldView-module_button"
+      type="button"
+    >
+      <span
+        class="SearchFieldView-module_decoration"
+      >
+        <svg
+          aria-hidden="true"
+          class="SearchFieldView-module_icon"
+          fill="currentColor"
+          height="1em"
+          viewBox="0 0 24 24"
+          width="1em"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M15.05 16.463a7.5 7.5 0 1 1 1.414-1.414l3.243 3.244a1 1 0 0 1-1.414 1.414zM16 10.5a5.5 5.5 0 1 0-11 0 5.5 5.5 0 0 0 11 0"
+          />
+        </svg>
+        <span
+          class="SearchFieldView-module_placeholder"
+        >
+          Search (Ctrl+K)
+        </span>
+      </span>
+    </button>
+  </div>
+</div>
+`;
+
+exports[`SearchFieldView > matches snapshot empty 1`] = `
+<div>
+  <div
+    style="width: 320px;"
+  >
+    <div
+      class="SearchFieldView-module_field"
+    >
+      <span
+        aria-hidden="true"
+        class="SearchFieldView-module_decoration"
+      >
+        <svg
+          class="SearchFieldView-module_icon"
+          fill="currentColor"
+          height="1em"
+          viewBox="0 0 24 24"
+          width="1em"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M15.05 16.463a7.5 7.5 0 1 1 1.414-1.414l3.243 3.244a1 1 0 0 1-1.414 1.414zM16 10.5a5.5 5.5 0 1 0-11 0 5.5 5.5 0 0 0 11 0"
+          />
+        </svg>
+        <span
+          class="SearchFieldView-module_placeholder"
+        >
+          Search
+        </span>
+      </span>
+      <input
+        aria-label="Search"
+        autocomplete="off"
+        class="SearchFieldView-module_input"
+        placeholder="Search"
+        spellcheck="false"
+        value=""
+      />
+      <button
+        aria-label="Clear search"
+        class="SearchFieldView-module_clear"
+        type="button"
+      >
+        <svg
+          fill="currentColor"
+          height="1em"
+          viewBox="0 0 24 24"
+          width="1em"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M6.293 6.293a1 1 0 0 1 1.414 0L12 10.586l4.293-4.293a1 1 0 1 1 1.414 1.414L13.414 12l4.293 4.293a1 1 0 0 1-1.414 1.414L12 13.414l-4.293 4.293a1 1 0 0 1-1.414-1.414L10.586 12 6.293 7.707a1 1 0 0 1 0-1.414"
+          />
+        </svg>
+      </button>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`SearchFieldView > matches snapshot with a custom placeholder 1`] = `
+<div>
+  <div
+    style="width: 320px;"
+  >
+    <div
+      class="SearchFieldView-module_field"
+    >
+      <span
+        aria-hidden="true"
+        class="SearchFieldView-module_decoration"
+      >
+        <svg
+          class="SearchFieldView-module_icon"
+          fill="currentColor"
+          height="1em"
+          viewBox="0 0 24 24"
+          width="1em"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M15.05 16.463a7.5 7.5 0 1 1 1.414-1.414l3.243 3.244a1 1 0 0 1-1.414 1.414zM16 10.5a5.5 5.5 0 1 0-11 0 5.5 5.5 0 0 0 11 0"
+          />
+        </svg>
+        <span
+          class="SearchFieldView-module_placeholder"
+        >
+          Search KLIPY
+        </span>
+      </span>
+      <input
+        aria-label="Search KLIPY"
+        autocomplete="off"
+        class="SearchFieldView-module_input"
+        placeholder="Search KLIPY"
+        spellcheck="false"
+        value=""
+      />
+      <button
+        aria-label="Clear search"
+        class="SearchFieldView-module_clear"
+        type="button"
+      >
+        <svg
+          fill="currentColor"
+          height="1em"
+          viewBox="0 0 24 24"
+          width="1em"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M6.293 6.293a1 1 0 0 1 1.414 0L12 10.586l4.293-4.293a1 1 0 1 1 1.414 1.414L13.414 12l4.293 4.293a1 1 0 0 1-1.414 1.414L12 13.414l-4.293 4.293a1 1 0 0 1-1.414-1.414L10.586 12 6.293 7.707a1 1 0 0 1 0-1.414"
+          />
+        </svg>
+      </button>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`SearchFieldView > matches snapshot with a value 1`] = `
+<div>
+  <div
+    style="width: 320px;"
+  >
+    <div
+      class="SearchFieldView-module_field SearchFieldView-module_active SearchFieldView-module_hasValue"
+    >
+      <span
+        aria-hidden="true"
+        class="SearchFieldView-module_decoration"
+      >
+        <svg
+          class="SearchFieldView-module_icon"
+          fill="currentColor"
+          height="1em"
+          viewBox="0 0 24 24"
+          width="1em"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M15.05 16.463a7.5 7.5 0 1 1 1.414-1.414l3.243 3.244a1 1 0 0 1-1.414 1.414zM16 10.5a5.5 5.5 0 1 0-11 0 5.5 5.5 0 0 0 11 0"
+          />
+        </svg>
+        <span
+          class="SearchFieldView-module_placeholder"
+        >
+          Search
+        </span>
+      </span>
+      <input
+        aria-label="Search"
+        autocomplete="off"
+        class="SearchFieldView-module_input"
+        placeholder="Search"
+        spellcheck="false"
+        value="thumbs up"
+      />
+      <button
+        aria-label="Clear search"
+        class="SearchFieldView-module_clear"
+        type="button"
+      >
+        <svg
+          fill="currentColor"
+          height="1em"
+          viewBox="0 0 24 24"
+          width="1em"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M6.293 6.293a1 1 0 0 1 1.414 0L12 10.586l4.293-4.293a1 1 0 1 1 1.414 1.414L13.414 12l4.293 4.293a1 1 0 0 1-1.414 1.414L12 13.414l-4.293 4.293a1 1 0 0 1-1.414-1.414L10.586 12 6.293 7.707a1 1 0 0 1 0-1.414"
+          />
+        </svg>
+      </button>
+    </div>
+  </div>
+</div>
+`;

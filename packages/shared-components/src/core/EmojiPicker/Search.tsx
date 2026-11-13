@@ -7,11 +7,10 @@
  * Please see LICENSE files in the repository root for full details.
  */
 
-import React, { type JSX, useCallback, useContext, useEffect } from "react";
-import { CloseIcon, SearchIcon } from "@vector-im/compound-design-tokens/assets/web/icons";
+import React, { useCallback, useContext } from "react";
 
-import { _t } from "../i18n/i18n";
 import { RovingTabIndexContext } from "../roving";
+import { SearchFieldView } from "../../telement/core/SearchFieldView";
 import styles from "./EmojiPicker.module.css";
 
 interface IProps {
@@ -46,16 +45,10 @@ interface IProps {
 }
 
 /**
- * The search input at the top of the emoji picker.
+ * The search field at the top of the emoji picker, which scrolls away with the emoji.
  */
 export const Search: React.FC<IProps> = ({ query, onChange, onEnter, onKeyDown, inputRef, controlsId }) => {
     const context = useContext(RovingTabIndexContext);
-
-    // This component gets mounted in a number of different places where the autoFocus attribute doesn't
-    // work, so focus the search box manually.
-    useEffect(() => {
-        inputRef.current?.focus();
-    }, [inputRef]);
 
     const onInputKeyDown = useCallback(
         (ev: React.KeyboardEvent): void => {
@@ -70,40 +63,19 @@ export const Search: React.FC<IProps> = ({ query, onChange, onEnter, onKeyDown, 
         [onEnter, onKeyDown],
     );
 
-    let rightButton: JSX.Element;
-    if (query) {
-        rightButton = (
-            <button type="button" onClick={() => onChange("")} title={_t("emoji_picker|cancel_search_label")}>
-                <CloseIcon />
-            </button>
-        );
-    } else {
-        rightButton = (
-            <span className={styles.searchIcon}>
-                <SearchIcon />
-            </span>
-        );
-    }
-
     return (
-        <div className={styles.search}>
-            <input
-                autoFocus
-                type="text"
-                placeholder={_t("action|search")}
-                aria-label={_t("action|search")}
-                value={query}
-                onChange={(ev) => onChange(ev.target.value)}
-                onKeyDown={onInputKeyDown}
-                ref={inputRef}
-                // Setting aria-activedescendant on the input allows screen readers to identify the active emoji.
-                // Setting it when there is not a query causes screen readers to read out the first emoji when focusing the input, and it continually tells you you are in the table vs the input.
-                aria-activedescendant={query ? context.state.activeNode?.id : undefined}
-                aria-controls={controlsId}
-                aria-haspopup="grid"
-                aria-autocomplete="list"
-            />
-            {rightButton}
-        </div>
+        <SearchFieldView
+            className={styles.search}
+            value={query}
+            onChange={onChange}
+            onKeyDown={onInputKeyDown}
+            ref={inputRef}
+            // Setting aria-activedescendant on the input allows screen readers to identify the active emoji.
+            // Setting it when there is not a query causes screen readers to read out the first emoji when focusing the input, and it continually tells you you are in the table vs the input.
+            aria-activedescendant={query ? context.state.activeNode?.id : undefined}
+            aria-controls={controlsId}
+            aria-haspopup="grid"
+            aria-autocomplete="list"
+        />
     );
 };

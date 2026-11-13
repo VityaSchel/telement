@@ -6,44 +6,80 @@ SPDX-License-Identifier: AGPL-3.0-only OR GPL-3.0-only OR LicenseRef-Element-Com
 Please see LICENSE files in the repository root for full details.
 */
 
+/* A flat bar at the top of the composer, as in Telegram. The quote line lines up with the attach button's icon and the
+   cancel icon with the icons on the right: all of them sit 16px in from the composer's sides. */
 .mx_ReplyPreview {
-    border: 1px solid $primary-hairline-color;
-    border-bottom: none;
-    background: $background;
     max-height: 50vh;
     overflow: auto;
+    padding: var(--cpd-space-2x) var(--cpd-space-1x) 0 var(--cpd-space-2x);
 
+    /* The line and spacing of the reply quote inside messages (mx_ReplyChain), in the sender's colour, which the
+       mx_Username_color class sets as the text colour. */
     .mx_ReplyPreview_section {
-        border-bottom: 1px solid $primary-hairline-color;
-        display: flex;
-        flex-flow: column;
-        row-gap: var(--cpd-space-2x);
-        padding: var(--cpd-space-2x) var(--cpd-space-2x) 0 0;
+        border-inline-start: 2px solid currentcolor;
+        border-radius: 2px;
+        padding-inline-start: 10px;
 
+        /* Spaced like the quote's sender row, 2px below the line's top. */
         .mx_ReplyPreview_header {
             display: flex;
-            justify-content: space-between;
-            column-gap: 8px;
+            align-items: center;
+            column-gap: var(--cpd-space-2x);
+            padding-block-start: 2px;
 
-            color: $primary-content;
-            font-weight: 400;
-            opacity: 0.4;
+            .mx_ReplyPreview_title {
+                flex: 1;
+                min-width: 0;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+                font: var(--cpd-font-body-md-semibold);
 
-            .mx_ReplyPreview_header_cancel svg {
-                color: $primary-content;
-                width: 20px;
-                height: 20px;
+                .mx_ReplyPreview_mxid {
+                    font: var(--cpd-font-body-sm-regular);
+                    color: var(--cpd-color-text-secondary);
+                }
+            }
+
+            .mx_ReplyPreview_header_cancel {
                 flex-shrink: 0;
+                display: flex;
+                padding: var(--cpd-space-1x);
+                /* A 28px target that leaves the row as high as the title's line, so the icon sits on its centre line. */
+                margin-block: -3px;
+                border-radius: 50%;
+                color: var(--cpd-color-icon-secondary);
+
+                svg {
+                    width: 20px;
+                    height: 20px;
+                }
+
+                &:hover,
+                &:focus-visible {
+                    color: var(--cpd-color-icon-primary);
+                    background-color: var(--cpd-color-bg-subtle-primary);
+                }
             }
         }
     }
-}
 
-.mx_RoomView_body {
-    .mx_ReplyPreview {
-        /* Add box-shadow to the reply preview on the main (left) panel only. */
-        /* It is not added to the preview on the (right) panel for threads and a chat with a maximized widget. */
-        box-shadow: 0px -16px 32px $composer-shadow-color;
-        border-radius: 8px 8px 0 0;
+    /* Maps get the 44px-high thumbnail of pictures and videos, in the timeline map's 3:2 shape, without the controls,
+       status and full-size marker that don't fit it. They are set here, as the shared reply view's styles sit in a
+       lower cascade layer than the app's map styles. */
+    .mx_MLocationBody .mx_MLocationBody_map,
+    .mx_MBeaconBody {
+        width: 66px;
+        height: 44px;
+    }
+
+    .maplibregl-control-container,
+    .mx_MBeaconBody_chin {
+        display: none;
+    }
+
+    .mx_Marker_border {
+        transform: scale(0.5);
+        transform-origin: bottom;
     }
 }

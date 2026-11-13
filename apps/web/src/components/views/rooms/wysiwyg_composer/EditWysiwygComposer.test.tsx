@@ -20,11 +20,8 @@ import defaultDispatcher from "../../../../dispatcher/dispatcher";
 import { Action } from "../../../../dispatcher/actions";
 import { EditWysiwygComposer } from ".";
 import EditorStateTransfer from "../../../../utils/EditorStateTransfer";
-import { Emoji } from "./components/Emoji";
-import { ChevronFace } from "../../../structures/ContextMenu";
 import { type ComposerInsertPayload, ComposerType } from "../../../../dispatcher/payloads/ComposerInsertPayload";
 import { type ActionPayload } from "../../../../dispatcher/payloads";
-import * as EmojiButton from "../EmojiButton";
 import { createMocks } from "./__mocks__";
 import { ScopedRoomContextProvider } from "../../../../contexts/ScopedRoomContext.tsx";
 import { RoomUploadContextProvider } from "../../../../viewmodels/room/RoomUploadViewModel.tsx";
@@ -354,34 +351,14 @@ describe("EditWysiwygComposer", () => {
 
     it("Should add emoji", async () => {
         // When
-
-        // We are not testing here the emoji button (open modal, select emoji ...)
-        // Instead we are directly firing an emoji to make the test easier to write
-        vi.spyOn(EmojiButton, "EmojiButton").mockImplementation(
-            ({ addEmoji }: { addEmoji: (emoji: string) => void }) => {
-                return (
-                    <button aria-label="Emoji" type="button" onClick={() => addEmoji("🦫")}>
-                        Emoji
-                    </button>
-                );
-            },
-        );
-        render(
-            <MatrixClientContext.Provider value={mockClient}>
-                <ScopedRoomContextProvider {...defaultRoomContext}>
-                    <RoomUploadContextProvider>
-                        <EditWysiwygComposer editorStateTransfer={editorStateTransfer} />
-                    </RoomUploadContextProvider>
-                    <Emoji menuPosition={{ chevronFace: ChevronFace.Top }} />
-                </ScopedRoomContextProvider>
-            </MatrixClientContext.Provider>,
-        );
+        customRender();
         // Same behavior as in RoomView.tsx
         // RoomView is re-dispatching the composer messages.
         // It adds the composerType fields where the value refers if the composer is in editing or not
         // The listeners in the RTE ignore the message if the composerType is missing in the payload
         const dispatcherRef = defaultDispatcher.register((payload: ActionPayload) => {
             const insertPayload = payload as ComposerInsertPayload;
+            if (insertPayload.action !== Action.ComposerInsert || insertPayload.composerType) return;
             defaultDispatcher.dispatch<ComposerInsertPayload>({
                 ...insertPayload,
                 timelineRenderingType: insertPayload.timelineRenderingType!,
@@ -389,7 +366,12 @@ describe("EditWysiwygComposer", () => {
             });
         });
 
-        screen.getByLabelText("Emoji").click();
+        // The composer's emoji drawer inserts the chosen emoji with this action
+        defaultDispatcher.dispatch<ComposerInsertPayload>({
+            action: Action.ComposerInsert,
+            text: "🦫",
+            timelineRenderingType: defaultRoomContext.timelineRenderingType,
+        });
 
         // Then
         await waitFor(() => expect(screen.getByRole("textbox")).toHaveTextContent(/🦫/));

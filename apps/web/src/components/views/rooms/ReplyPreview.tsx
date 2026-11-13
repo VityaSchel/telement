@@ -7,6 +7,7 @@ Please see LICENSE files in the repository root for full details.
 */
 
 import React, { useEffect, type JSX } from "react";
+import classNames from "classnames";
 import { type MatrixEvent } from "matrix-js-sdk/src/matrix";
 import { CloseIcon } from "@vector-im/compound-design-tokens/assets/web/icons";
 import { ReplyTileView, useCreateAutoDisposedViewModel } from "@element-hq/web-shared-components";
@@ -19,6 +20,7 @@ import AccessibleButton from "../elements/AccessibleButton";
 import { useMatrixClientContext } from "../../../contexts/MatrixClientContext";
 import { ReplyTileViewModel } from "../../../viewmodels/room/timeline/event-tile/ReplyTileViewModel";
 import { useUserStatus } from "../../../hooks/useUserStatus";
+import { getUserNameColorClass } from "../../../utils/FormattingUtils";
 
 function cancelQuoting(context: TimelineRenderingType): void {
     dis.dispatch({
@@ -60,7 +62,7 @@ function ReplyTile({ mxEvent, permalinkCreator }: ReplyTileProps): JSX.Element {
         });
     }, [cli, mxEvent, permalinkCreator, userStatus, vm]);
 
-    return <ReplyTileView vm={vm} />;
+    return <ReplyTileView vm={vm} excerpt />;
 }
 
 export default class ReplyPreview extends React.Component<IProps> {
@@ -68,21 +70,38 @@ export default class ReplyPreview extends React.Component<IProps> {
     declare public context: React.ContextType<typeof RoomContext>;
 
     public render(): JSX.Element | null {
-        if (!this.props.replyToEvent) return null;
+        const { replyToEvent } = this.props;
+        if (!replyToEvent) return null;
+
+        // As the quote's sender row: a member who shares their name with another is told apart by their Matrix ID.
+        const sender = replyToEvent.sender;
+        const senderId = replyToEvent.getSender() ?? "";
+        const name = (
+            <>
+                <bdi>{sender?.rawDisplayName || senderId}</bdi>
+                {sender?.disambiguate ? (
+                    <>
+                        {" "}
+                        <bdi className="mx_ReplyPreview_mxid">{senderId}</bdi>
+                    </>
+                ) : null}
+            </>
+        );
 
         return (
             <div className="mx_ReplyPreview">
-                <div className="mx_ReplyPreview_section">
+                <div className={classNames("mx_ReplyPreview_section", getUserNameColorClass(senderId))}>
                     <div className="mx_ReplyPreview_header">
-                        <span>{_t("composer|replying_title")}</span>
+                        <span className="mx_ReplyPreview_title">{_t("telement|composer|reply_to", { name })}</span>
                         <AccessibleButton
                             className="mx_ReplyPreview_header_cancel"
+                            aria-label={_t("telement|composer|cancel_reply")}
                             onClick={() => cancelQuoting(this.context.timelineRenderingType)}
                         >
                             <CloseIcon />
                         </AccessibleButton>
                     </div>
-                    <ReplyTile mxEvent={this.props.replyToEvent} permalinkCreator={this.props.permalinkCreator} />
+                    <ReplyTile mxEvent={replyToEvent} permalinkCreator={this.props.permalinkCreator} />
                 </div>
             </div>
         );

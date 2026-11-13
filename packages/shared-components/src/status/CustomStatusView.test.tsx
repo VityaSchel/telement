@@ -158,6 +158,35 @@ describe("CustomStatusView", () => {
         expect(onSave).toHaveBeenCalledWith({ emoji: "😇", text: "Angelic" });
     });
 
+    it("lets the user pick an emoji with the keyboard", async () => {
+        render(<CustomStatusView onSave={vi.fn()} onCancel={vi.fn()} />);
+        const trigger = screen.getByRole("button", { name: "Choose Emoji" });
+        trigger.focus();
+
+        await userEvent.keyboard("[Enter]");
+
+        // The picker focuses its selected category, as its menu only focuses itself
+        await waitFor(() => expect(screen.getByRole("tab", { name: "😀" })).toHaveFocus());
+        expect(screen.getByRole("textbox", { name: "Search" })).not.toHaveFocus();
+
+        // Up reaches the search field, which Tab can't in a menu
+        await userEvent.keyboard("[ArrowUp]");
+        expect(screen.getByRole("textbox", { name: "Search" })).toHaveFocus();
+        await userEvent.keyboard("[Escape]");
+        await waitFor(() => expect(screen.queryByLabelText("Emoji picker")).toBeNull());
+
+        await userEvent.keyboard("[Enter]");
+        await waitFor(() => expect(screen.getByRole("tab", { name: "😀" })).toHaveFocus());
+        await waitFor(() => expect(screen.getAllByRole("gridcell").length).toBeGreaterThan(0));
+        await userEvent.keyboard("[ArrowDown]");
+        expect(document.activeElement).toHaveTextContent("😀");
+        await userEvent.keyboard("[ArrowRight]");
+        await userEvent.keyboard("[Enter]");
+
+        await waitFor(() => expect(screen.queryByLabelText("Emoji picker")).toBeNull());
+        expect(trigger).toHaveTextContent("😃");
+    });
+
     it("offers the recently used emoji in the picker", async () => {
         render(<CustomStatusView onSave={vi.fn()} onCancel={vi.fn()} recentEmojis={["😇"]} />);
 

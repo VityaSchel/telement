@@ -589,7 +589,7 @@ exports[`RoomView > for a local room > in state NEW > should match the snapshot 
             >
               <div
                 aria-label="Emoji"
-                class="mx_AccessibleButton mx_EmojiButton mx_MessageComposer_button"
+                class="mx_AccessibleButton mx_MessageComposer_button"
                 role="button"
                 tabindex="0"
               >
@@ -970,7 +970,7 @@ exports[`RoomView > for a local room > in state NEW > that is encrypted > should
             >
               <div
                 aria-label="Emoji"
-                class="mx_AccessibleButton mx_EmojiButton mx_MessageComposer_button"
+                class="mx_AccessibleButton mx_MessageComposer_button"
                 role="button"
                 tabindex="0"
               >
@@ -1597,7 +1597,7 @@ exports[`RoomView > should hide the header when hideHeader=true 1`] = `
               >
                 <div
                   aria-label="Emoji"
-                  class="mx_AccessibleButton mx_EmojiButton mx_MessageComposer_button"
+                  class="mx_AccessibleButton mx_MessageComposer_button"
                   role="button"
                   tabindex="0"
                 >
@@ -2082,7 +2082,7 @@ exports[`RoomView > should hide the pinned message banner when hidePinnedMessage
               >
                 <div
                   aria-label="Emoji"
-                  class="mx_AccessibleButton mx_EmojiButton mx_MessageComposer_button"
+                  class="mx_AccessibleButton mx_MessageComposer_button"
                   role="button"
                   tabindex="0"
                 >
@@ -2567,7 +2567,7 @@ exports[`RoomView > should hide the right panel when hideRightPanel=true 1`] = `
               >
                 <div
                   aria-label="Emoji"
-                  class="mx_AccessibleButton mx_EmojiButton mx_MessageComposer_button"
+                  class="mx_AccessibleButton mx_MessageComposer_button"
                   role="button"
                   tabindex="0"
                 >
@@ -3301,7 +3301,7 @@ exports[`RoomView > should not display the timeline when the room encryption is 
               >
                 <div
                   aria-label="Emoji"
-                  class="mx_AccessibleButton mx_EmojiButton mx_MessageComposer_button"
+                  class="mx_AccessibleButton mx_MessageComposer_button"
                   role="button"
                   tabindex="0"
                 >
@@ -3868,7 +3868,7 @@ exports[`RoomView > video rooms > should render joined video room view 1`] = `
                   >
                     <div
                       aria-label="Emoji"
-                      class="mx_AccessibleButton mx_EmojiButton mx_MessageComposer_button"
+                      class="mx_AccessibleButton mx_MessageComposer_button"
                       role="button"
                       tabindex="0"
                     >

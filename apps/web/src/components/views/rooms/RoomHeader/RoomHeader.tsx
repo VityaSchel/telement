@@ -56,6 +56,7 @@ import { LocalRoom } from "../../../../models/LocalRoom.ts";
 import { useIsEncrypted } from "../../../../hooks/useIsEncrypted.ts";
 import { useUserStatus } from "../../../../hooks/useUserStatus.ts";
 import { SDKContext } from "../../../../contexts/SDKContext.ts";
+import { RoomEncryptionStatusIcon } from "../../../../telement/room/RoomEncryptionStatusIcon";
 
 function RoomHeaderButtons({ room, extraButtons }: { room: Room; extraButtons?: JSX.Element }): JSX.Element {
     const sdkContext = useContext(SDKContext);
@@ -508,6 +509,11 @@ export default function RoomHeader({
                             )}
 
                             {isRoomEncrypted && historyVisibilityIcon(historyVisibility)}
+                            <RoomEncryptionStatusIcon
+                                isRoomEncrypted={isRoomEncrypted}
+                                isDirectMessage={isDirectMessage}
+                                e2eStatus={e2eStatus}
+                            />
                         </Text>
                     </Box>
                 </button>

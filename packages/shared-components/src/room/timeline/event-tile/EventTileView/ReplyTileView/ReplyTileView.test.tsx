@@ -113,6 +113,114 @@ describe("ReplyTileView", () => {
         expect(getComputedStyle(previewContent).webkitLineClamp).toBe("2");
     });
 
+    it("shows one line of the body without the sender as an excerpt", () => {
+        const vm = new TestReplyTileViewModel({
+            href: "/room/event",
+            body: <p>Long reply content</p>,
+            sender: { avatarViewModel, profileViewModel },
+        }) as ReplyTileViewModel;
+        render(<ReplyTileView vm={vm} excerpt />);
+
+        expect(screen.getByTestId("reply-tile")).toHaveClass(styles.root, styles.excerpt);
+        expect(screen.queryByTestId("reply-tile-sender")).not.toBeInTheDocument();
+        expect(screen.queryByText("Alice")).not.toBeInTheDocument();
+        expect(screen.getByRole("link")).toHaveAttribute("href", "/room/event");
+        expect(getComputedStyle(screen.getByTestId("reply-tile-body")).webkitLineClamp).toBe("1");
+        expect(getComputedStyle(screen.getByText("Long reply content")).webkitLineClamp).toBe("1");
+    });
+
+    it("keeps an emote excerpt on its own line under the host's title", () => {
+        const vm = new TestReplyTileViewModel({
+            href: "#",
+            body: "Alice waves",
+            inline: true,
+            sender: { avatarViewModel },
+        }) as ReplyTileViewModel;
+        render(<ReplyTileView vm={vm} excerpt />);
+
+        expect(getComputedStyle(screen.getByRole("link")).display).toBe("block");
+        expect(screen.queryByTestId("reply-tile-sender")).not.toBeInTheDocument();
+    });
+
+    it("shows a video in an excerpt as a thumbnail as high as a picture's", () => {
+        const vm = new TestReplyTileViewModel({
+            href: "#",
+            body: (
+                <span className="mx_MVideoBody">
+                    <div
+                        className="mx_MVideoBody_container"
+                        data-testid="video-frame"
+                        style={{ width: "320px", maxWidth: "100%", maxHeight: 180, aspectRatio: "16/9" }}
+                    >
+                        <img alt="" />
+                        <span>Play</span>
+                        <span>0:42</span>
+                    </div>
+                </span>
+            ),
+        }) as ReplyTileViewModel;
+        render(
+            <div style={{ width: 600 }}>
+                <ReplyTileView vm={vm} excerpt />
+            </div>,
+        );
+
+        const frame = screen.getByTestId("video-frame").getBoundingClientRect();
+        expect(frame.height).toBe(44);
+        expect(frame.width).toBeCloseTo((44 * 16) / 9, 0);
+        expect(getComputedStyle(screen.getByText("Play")).display).toBe("none");
+        expect(getComputedStyle(screen.getByText("0:42")).display).toBe("none");
+    });
+
+    it("keeps a half-size play button on an excerpt video without a picture", () => {
+        const vm = new TestReplyTileViewModel({
+            href: "#",
+            body: (
+                <span className="mx_MVideoBody">
+                    <div
+                        className="mx_MVideoBody_container"
+                        data-testid="video-frame"
+                        style={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            width: "320px",
+                            aspectRatio: "16/9",
+                        }}
+                    >
+                        <span data-testid="play-button" style={{ display: "flex", width: 48, height: 48 }} />
+                        <span>0:42</span>
+                    </div>
+                </span>
+            ),
+        }) as ReplyTileViewModel;
+        render(<ReplyTileView vm={vm} excerpt />);
+
+        const frame = screen.getByTestId("video-frame").getBoundingClientRect();
+        const playButton = screen.getByTestId("play-button").getBoundingClientRect();
+        expect(frame.height).toBe(44);
+        expect(playButton.width).toBe(24);
+        expect(playButton.height).toBe(24);
+        expect(playButton.top - frame.top).toBe(10);
+        expect(getComputedStyle(screen.getByText("0:42")).display).toBe("none");
+    });
+
+    it("leaves videos at their size outside an excerpt", () => {
+        renderReplyTile({
+            body: (
+                <span className="mx_MVideoBody">
+                    <div
+                        className="mx_MVideoBody_container"
+                        data-testid="video-frame"
+                        style={{ width: "320px", maxWidth: "100%", maxHeight: 180, aspectRatio: "16/9" }}
+                    />
+                </span>
+            ),
+        });
+
+        expect(screen.getByTestId("video-frame").getBoundingClientRect().width).toBe(320);
+    });
+
     it("hides edited markers inside the local body preview", () => {
         renderReplyTile({
             body: (

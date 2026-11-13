@@ -336,31 +336,6 @@ test.describe("Threads", () => {
             });
         });
 
-        test("can send voice messages", { tag: ["@no-firefox", "@no-webkit"] }, async ({ page, app, user }) => {
-            // Increase right-panel size, so that voice messages fit
-            await page.evaluate(() => {
-                window.localStorage.setItem("mx_rhs_size", "700");
-            });
-
-            const roomId = await app.client.createRoom({});
-            await page.goto("/#/room/" + roomId);
-
-            // Send message
-            const locator = page.locator(".mx_RoomView_body");
-            await locator.getByRole("textbox", { name: "Send an unencrypted message…" }).fill("Hello Mr. Bot");
-            await locator.getByRole("textbox", { name: "Send an unencrypted message…" }).press("Enter");
-            // Create thread
-            const locator2 = locator.locator(".mx_EventTile[data-scroll-tokens]").filter({ hasText: "Hello Mr. Bot" });
-            await locator2.hover();
-            await locator2.getByRole("button", { name: "Reply in thread" }).click();
-
-            await expect(page.locator(".mx_ThreadView_timelinePanelWrapper")).toHaveCount(1);
-
-            await (await app.openMessageComposerOptions(true)).getByRole("menuitem", { name: "Voice Message" }).click();
-            await page.waitForTimeout(3000);
-            await app.getComposer(true).getByRole("button", { name: "Send voice message" }).click();
-            await expect(page.locator(".mx_ThreadView .mx_MVoiceMessageBody")).toHaveCount(1);
-        });
         test("can send files", async ({ page, app, user }) => {
             // Increase right-panel size, so that files fit
             await page.evaluate(() => {

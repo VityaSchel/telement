@@ -75,8 +75,9 @@ function getWidgetHtml(contentUri: string, mimetype: string) {
 `;
 }
 async function openStickerPicker(app: ElementAppPage) {
-    const options = await app.openMessageComposerOptions();
-    await options.getByRole("menuitem", { name: "Sticker" }).click();
+    await app.getComposer().getByRole("button", { name: "Emoji" }).click();
+    await app.page.getByRole("tab", { name: "Stickers" }).click();
+    await app.page.getByRole("button", { name: "Open sticker packs" }).click();
 }
 
 async function sendStickerFromPicker(page: Page) {

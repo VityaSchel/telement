@@ -1,0 +1,68 @@
+/*
+Copyright 2026 Viktor Shchelochkov
+
+SPDX-License-Identifier: AGPL-3.0-only OR GPL-3.0-only
+Please see LICENSE files in the repository root for full details.
+*/
+
+.drawer {
+    --composer-drawer-inset: var(--cpd-space-2x);
+    --composer-drawer-tab-height: var(--cpd-space-8x);
+
+    display: flex;
+    flex-direction: column;
+    /*
+     * The corners are concentric with the pills inset from the drawer's edges: the search field that a tab's content
+     * starts with at the top, and the tabs at the bottom. Each radius is the pill's radius plus its inset. The menu
+     * the drawer opens in rounds its corners to match.
+     */
+    border-radius: calc(var(--cpd-space-9x) / 2 + var(--composer-drawer-inset))
+        calc(var(--cpd-space-9x) / 2 + var(--composer-drawer-inset))
+        calc(var(--composer-drawer-tab-height) / 2 + var(--composer-drawer-inset))
+        calc(var(--composer-drawer-tab-height) / 2 + var(--composer-drawer-inset));
+    overflow: clip;
+    /* Emoji, stickers and tab labels aren't text to copy; search inputs stay selectable */
+    user-select: none;
+}
+
+/* Telegram for macOS keeps the drawer's tabs at the bottom, below the content */
+.tabs {
+    display: flex;
+    gap: var(--cpd-space-1x);
+    padding: var(--composer-drawer-inset);
+    border-top: var(--cpd-border-width-1) solid var(--cpd-color-separator-primary);
+}
+
+.tab {
+    flex: 1;
+    min-block-size: var(--composer-drawer-tab-height);
+    padding: 0 var(--cpd-space-3x);
+    border: none;
+    border-radius: 999px;
+    background: none;
+    color: var(--cpd-color-text-secondary);
+    font: var(--cpd-font-body-sm-semibold);
+    cursor: pointer;
+}
+
+.tab:hover {
+    background-color: var(--cpd-color-bg-subtle-primary);
+}
+
+.tab:focus-visible {
+    outline: 2px solid var(--cpd-color-border-focused);
+    outline-offset: -2px;
+}
+
+.selected {
+    background-color: var(--cpd-color-bg-subtle-secondary);
+    color: var(--cpd-color-text-primary);
+}
+
+/* A flex column, so the active tab's content can fill the panel and scroll inside it */
+.panel {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-height: 0;
+}

@@ -11,6 +11,8 @@ import { DATA_BY_CATEGORY } from "@matrix-org/emojibase-bindings";
 import userEvent from "@testing-library/user-event";
 import { render, waitFor, screen } from "@test-utils";
 import { describe, expect, it, vi } from "vitest";
+// The layout assertions need the real spacing tokens
+import "@vector-im/compound-design-tokens/assets/web/css/compound-design-tokens.css";
 
 import { EmojiPicker, filterEmojis } from "./EmojiPicker";
 
@@ -139,7 +141,7 @@ describe("EmojiPicker", function () {
         const { container } = render(<EmojiPicker onChoose={onChoose} onFinished={onFinished} />);
 
         const input = container.querySelector("input")!;
-        await waitFor(() => expect(input).toHaveFocus());
+        await userEvent.click(input);
 
         function getEmoji(): string {
             return getActiveEmojiText(container);
@@ -179,7 +181,7 @@ describe("EmojiPicker", function () {
         const { container } = render(<EmojiPicker onChoose={onChoose} onFinished={onFinished} />);
 
         const input = container.querySelector("input")!;
-        await waitFor(() => expect(input).toHaveFocus());
+        await userEvent.click(input);
 
         // Wait for emojis to render
         await waitFor(() => {
@@ -212,7 +214,12 @@ describe("EmojiPicker", function () {
         expect(getVirtuallyFocusedEmoji()).toEqual("🙂"); // Virtual focus moved
         expect(getEmoji()).toEqual(""); // No actual emoji has focus
 
-        // Tab to move actual focus to the emoji
+        // Tab past the clear button and the category bar, which sit between the search field and the grid, to move
+        // actual focus to the emoji
+        await userEvent.keyboard("[Tab]");
+        expect(screen.getByRole("button", { name: "Clear search" })).toHaveFocus();
+        await userEvent.keyboard("[Tab]");
+        expect(screen.getByRole("tab", { name: "😀" })).toHaveFocus();
         await userEvent.keyboard("[Tab]");
         expect(input).not.toHaveFocus();
         expect(getEmoji()).toEqual("🙂"); // Now emoji has actual focus
@@ -237,7 +244,7 @@ describe("EmojiPicker", function () {
         const { container } = render(<EmojiPicker onChoose={onChoose} onFinished={onFinished} />);
 
         const input = container.querySelector("input")!;
-        await waitFor(() => expect(input).toHaveFocus());
+        await userEvent.click(input);
 
         // Wait for emojis to render
         await waitFor(() => {
@@ -268,7 +275,7 @@ describe("EmojiPicker", function () {
         const { container } = render(<EmojiPicker onChoose={onChoose} onFinished={onFinished} />);
 
         const input = container.querySelector("input")!;
-        await waitFor(() => expect(input).toHaveFocus());
+        await userEvent.click(input);
 
         function getEmoji(): string {
             return getActiveEmojiText(container);
@@ -315,7 +322,7 @@ describe("EmojiPicker", function () {
         const { container } = render(<EmojiPicker onChoose={vi.fn()} onFinished={vi.fn()} />);
 
         const input = container.querySelector("input")!;
-        await waitFor(() => expect(input).toHaveFocus());
+        await userEvent.click(input);
 
         function getActiveEmoji(): HTMLElement {
             return container.querySelector<HTMLElement>('[role="gridcell"] [tabindex="0"]')!;
@@ -341,6 +348,265 @@ describe("EmojiPicker", function () {
         await waitFor(() => expect(getActiveEmoji().textContent).toEqual("🧪"));
         expect(input).toHaveAttribute("aria-activedescendant", getActiveEmoji().id);
         expect(getActiveEmoji().id).not.toEqual(activeId);
+    });
+
+    describe("when it opens", () => {
+        const renderAndWait = async (recentEmojis?: string[]): Promise<HTMLElement> => {
+            const { container } = render(
+                <EmojiPicker onChoose={vi.fn()} onFinished={vi.fn()} recentEmojis={recentEmojis} />,
+            );
+            await waitFor(() => expect(screen.getAllByRole("gridcell").length).toBeGreaterThan(0));
+            return container;
+        };
+
+        const getAutofocusedTabs = (): HTMLElement[] =>
+            screen.getAllByRole("tab").filter((tab) => tab.hasAttribute("data-autofocus"));
+
+        it("leaves the search field at rest", async () => {
+            await renderAndWait();
+
+            expect(screen.getByRole("textbox", { name: "Search" })).not.toHaveFocus();
+            expect(screen.queryByRole("button", { name: "Clear search" })).toBeNull();
+            // Focusing is left to the menu it opens in, unless the host asks for it
+            expect(document.body).toHaveFocus();
+        });
+
+        it("focuses the selected category itself when the host asks for it", async () => {
+            render(<EmojiPicker onChoose={vi.fn()} onFinished={vi.fn()} recentEmojis={RECENT_EMOJIS} autoFocus />);
+
+            await waitFor(() => expect(screen.getByRole("tab", { name: "🕒" })).toHaveFocus());
+            expect(screen.getByRole("textbox", { name: "Search" })).not.toHaveFocus();
+
+            // Only when it opens: selecting another category leaves focus where the user put it
+            const search = screen.getByRole("textbox", { name: "Search" });
+            await userEvent.click(search);
+            screen.getByRole("tab", { name: "🐕" }).click();
+            await waitFor(() =>
+                expect(screen.getByRole("tab", { name: "🐕" })).toHaveAttribute("aria-selected", "true"),
+            );
+            expect(search).toHaveFocus();
+        });
+
+        it("asks the focus lock of the menu it opens in to focus the selected category", async () => {
+            await renderAndWait(RECENT_EMOJIS);
+
+            expect(getAutofocusedTabs()).toEqual([screen.getByRole("tab", { name: "🕒" })]);
+            expect(screen.getByRole("tab", { name: "🕒" })).toHaveAttribute("data-autofocus", "true");
+
+            await userEvent.click(screen.getByRole("tab", { name: "🐕" }));
+            await waitFor(() => expect(getAutofocusedTabs()).toEqual([screen.getByRole("tab", { name: "🐕" })]));
+        });
+
+        it("moves from the selected category to the first emoji with the down arrow", async () => {
+            const onChoose = vi.fn();
+            const onFinished = vi.fn();
+            const { container } = render(<EmojiPicker onChoose={onChoose} onFinished={onFinished} />);
+            await waitFor(() => expect(screen.getAllByRole("gridcell").length).toBeGreaterThan(0));
+            screen.getByRole("tab", { name: "😀" }).focus();
+
+            await userEvent.keyboard("[ArrowDown]");
+            expect(document.activeElement).toBe(container.querySelector('[role="gridcell"] [tabindex="0"]'));
+            expect(document.activeElement).toHaveTextContent("😀");
+
+            await userEvent.keyboard("[ArrowDown]");
+            expect(document.activeElement).toHaveTextContent("🙂");
+            await userEvent.keyboard("[Enter]");
+            expect(onChoose).toHaveBeenCalledWith("🙂");
+            expect(onFinished).toHaveBeenCalled();
+        });
+
+        it("still moves between categories with the left and right arrows", async () => {
+            await renderAndWait();
+            screen.getByRole("tab", { name: "😀" }).focus();
+
+            await userEvent.keyboard("[ArrowRight]");
+
+            expect(screen.getByRole("tab", { name: "🐕" })).toHaveFocus();
+        });
+
+        it("moves down into the category whose tab has focus", async () => {
+            await renderAndWait();
+            const firstAnimal = DATA_BY_CATEGORY.nature[0].unicode;
+            screen.getByRole("tab", { name: "😀" }).focus();
+
+            await userEvent.keyboard("[ArrowRight]");
+            await waitFor(() => expect(screen.getByRole("gridcell", { name: firstAnimal })).toBeVisible());
+            await userEvent.keyboard("[ArrowDown]");
+
+            expect(document.activeElement).toHaveTextContent(firstAnimal);
+            expect(document.activeElement).toHaveAttribute("tabindex", "0");
+        });
+
+        it("moves down to the emoji the user left in that category", async () => {
+            await renderAndWait();
+            const [firstSmiley, secondSmiley] = DATA_BY_CATEGORY.people.map((emoji) => emoji.unicode);
+            screen.getByRole("tab", { name: "😀" }).focus();
+
+            await userEvent.keyboard("[ArrowDown]");
+            expect(document.activeElement).toHaveTextContent(firstSmiley);
+            await userEvent.keyboard("[ArrowRight]");
+            expect(document.activeElement).toHaveTextContent(secondSmiley);
+
+            await userEvent.tab({ shift: true });
+            expect(screen.getByRole("tab", { name: "😀" })).toHaveFocus();
+            await userEvent.keyboard("[ArrowDown]");
+
+            expect(document.activeElement).toHaveTextContent(secondSmiley);
+        });
+
+        it("moves down to an emoji the user can't choose, as the arrows in the grid do", async () => {
+            const firstSmiley = DATA_BY_CATEGORY.people[0].unicode;
+            render(
+                <EmojiPicker
+                    onChoose={vi.fn()}
+                    onFinished={vi.fn()}
+                    isEmojiDisabled={(unicode) => unicode === firstSmiley}
+                />,
+            );
+            await waitFor(() => expect(screen.getAllByRole("gridcell").length).toBeGreaterThan(0));
+            screen.getByRole("tab", { name: "😀" }).focus();
+
+            await userEvent.keyboard("[ArrowDown]");
+
+            expect(document.activeElement).toHaveTextContent(firstSmiley);
+            expect(document.activeElement).toHaveAttribute("aria-disabled", "true");
+        });
+
+        it("moves up from the category bar to the search field", async () => {
+            await renderAndWait();
+            screen.getByRole("tab", { name: "😀" }).focus();
+
+            await userEvent.keyboard("[ArrowUp]");
+
+            expect(screen.getByRole("textbox", { name: "Search" })).toHaveFocus();
+        });
+    });
+
+    describe("layout", () => {
+        const renderAndWait = async (
+            recentEmojis?: string[],
+        ): Promise<{
+            scroller: HTMLElement;
+            input: HTMLElement;
+            tablist: HTMLElement;
+        }> => {
+            render(<EmojiPicker onChoose={vi.fn()} onFinished={vi.fn()} recentEmojis={recentEmojis} />);
+            const input = screen.getByRole("textbox", { name: "Search" });
+            await waitFor(() => expect(screen.getAllByRole("gridcell").length).toBeGreaterThan(0));
+            const tablist = screen.getByRole("tablist");
+            // The scroll container holds the search field, the category bar and the emoji
+            const scroller = input.closest<HTMLElement>("section > div")!;
+            return { scroller, input, tablist };
+        };
+
+        it("scrolls the search field away with the emoji while the category bar sticks to the top", async () => {
+            const { scroller, input, tablist } = await renderAndWait();
+            expect(scroller).toContainElement(input);
+            expect(scroller).toContainElement(tablist);
+            expect(input.compareDocumentPosition(tablist) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+
+            scroller.scrollTop = 500;
+            await waitFor(() => expect(scroller.scrollTop).toBe(500));
+
+            const scrollerTop = scroller.getBoundingClientRect().top;
+            expect(input.getBoundingClientRect().bottom).toBeLessThanOrEqual(scrollerTop);
+            expect(Math.round(tablist.parentElement!.getBoundingClientRect().top)).toBe(Math.round(scrollerTop));
+        });
+
+        it("spans the search field and the category bar evenly across the picker", async () => {
+            const { scroller, input, tablist } = await renderAndWait();
+            const scrollerBox = scroller.getBoundingClientRect();
+            // Leave out the scrollbar, whose width depends on the platform
+            const contentRight = scrollerBox.left + scroller.clientWidth;
+
+            const fieldBox = input.parentElement!.getBoundingClientRect();
+            expect(fieldBox.left - scrollerBox.left).toBeCloseTo(contentRight - fieldBox.right, 0);
+            const barBox = tablist.getBoundingClientRect();
+            expect(barBox.left).toBeCloseTo(scrollerBox.left, 0);
+            expect(barBox.right).toBeCloseTo(contentRight, 0);
+            // The rows of emoji keep their place
+            expect(screen.getAllByRole("row")[1].getBoundingClientRect().left - scrollerBox.left).toBe(18);
+        });
+
+        it("rounds its top corners to match the search field, clipping the sticky category bar", async () => {
+            const { input } = await renderAndWait();
+
+            const picker = screen.getByRole("region", { name: "Emoji picker" });
+            const pickerBox = picker.getBoundingClientRect();
+            const fieldBox = input.parentElement!.getBoundingClientRect();
+            const pickerStyle = getComputedStyle(picker);
+            expect(pickerStyle.overflow).toBe("clip");
+            // Concentric: the field's radius plus its inset from the picker's edges
+            const inset = fieldBox.top - pickerBox.top;
+            expect(fieldBox.left - pickerBox.left).toBe(inset);
+            expect(parseFloat(pickerStyle.borderTopLeftRadius)).toBe(fieldBox.height / 2 + inset);
+            expect(pickerStyle.borderTopLeftRadius).toBe("26px");
+            expect(pickerStyle.borderTopRightRadius).toBe("26px");
+        });
+
+        it("selects the category whose emoji show below the category bar", async () => {
+            await renderAndWait();
+
+            await userEvent.click(screen.getByRole("tab", { name: "🐕" }));
+
+            await waitFor(() =>
+                expect(screen.getByRole("tab", { name: "🐕" })).toHaveAttribute("aria-selected", "true"),
+            );
+            expect(screen.getByRole("tab", { name: "😀" })).toHaveAttribute("aria-selected", "false");
+        });
+
+        it("scrolls back to the search field and the best matches when the query changes", async () => {
+            const { scroller, input } = await renderAndWait();
+            scroller.scrollTop = 500;
+            await waitFor(() => expect(scroller.scrollTop).toBe(500));
+
+            await userEvent.type(input, "cat");
+
+            await waitFor(() => expect(scroller.scrollTop).toBe(0));
+            expect(screen.getByRole("tab", { name: "😀" })).toHaveAttribute("aria-selected", "true");
+        });
+
+        it("selects the first category left by a query that doesn't scroll the picker", async () => {
+            const { scroller, input } = await renderAndWait(RECENT_EMOJIS);
+            expect(scroller.scrollTop).toBe(0);
+            expect(screen.getByRole("tab", { name: "🕒" })).toHaveAttribute("aria-selected", "true");
+
+            await userEvent.click(input);
+            await userEvent.keyboard("cat");
+
+            // No recently used emoji match, so the first category left is Smileys & People
+            await waitFor(() =>
+                expect(screen.getByRole("tab", { name: "😀" })).toHaveAttribute("aria-selected", "true"),
+            );
+            expect(screen.getByRole("tab", { name: "😀" })).toBeEnabled();
+            expect(screen.getByRole("tab", { name: "🕒" })).toBeDisabled();
+
+            // The selected category stays reachable with Tab, after the clear button
+            await userEvent.tab();
+            expect(screen.getByRole("button", { name: "Clear search" })).toHaveFocus();
+            await userEvent.tab();
+            expect(screen.getByRole("tab", { name: "😀" })).toHaveFocus();
+        });
+
+        it("clears the query with the clear button and keeps typing in the search field", async () => {
+            const { input } = await renderAndWait();
+            await userEvent.click(input);
+
+            await userEvent.type(input, "wave");
+            await waitFor(() => expect(screen.getByRole("gridcell", { name: "👋" })).toBeInTheDocument());
+            await userEvent.click(screen.getByRole("button", { name: "Clear search" }));
+
+            expect(input).toHaveValue("");
+            expect(input).toHaveFocus();
+            await waitFor(() => expect(screen.queryByRole("gridcell", { name: "👋" })).toBeNull());
+        });
+
+        it("only lets the user select text in the search field", async () => {
+            const { input } = await renderAndWait();
+
+            expect(getComputedStyle(screen.getByRole("region", { name: "Emoji picker" })).userSelect).toBe("none");
+            expect(getComputedStyle(input).userSelect).toBe("text");
+        });
     });
 
     describe("Category keyboard selection", () => {

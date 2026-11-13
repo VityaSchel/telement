@@ -7,9 +7,9 @@
  * Please see LICENSE files in the repository root for full details.
  */
 
-import React, { type Dispatch, useCallback, useId, useMemo, useRef, useState } from "react";
+import React, { type Dispatch, useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import { DATA_BY_CATEGORY, getEmojiFromUnicode, type Emoji as IEmoji } from "@matrix-org/emojibase-bindings";
-import { type ListRange, Virtuoso, type Components, type VirtuosoHandle } from "react-virtuoso";
+import { Virtuoso, type Components, type VirtuosoHandle } from "react-virtuoso";
 import { Heading } from "@vector-im/compound-web";
 import classNames from "classnames";
 
@@ -72,12 +72,14 @@ const GridList: Components<ListItem>["List"] = ({ ref, ...props }) => {
 };
 
 const GridItem: Components<ListItem>["Item"] = ({ item, ...props }) => {
+    // Each entry names its category, so the picker can tell from the rendered rows which category is at the top.
+    const category = item.type === "header" ? item.category.id : item.categoryId;
     // Headers are interleaved with emoji rows as direct children of the role="grid"
     // list, so they must also be grid rows: a grid may only own rows/rowgroups.
     if (item.type === "header") {
-        return <div {...props} role="row" />;
+        return <div {...props} role="row" data-category={category} />;
     }
-    return <div {...props} role="row" className={styles.row} />;
+    return <div {...props} role="row" className={styles.row} data-category={category} />;
 };
 
 const gridComponents = { List: GridList, Item: GridItem };
@@ -127,6 +129,11 @@ export interface EmojiPickerProps {
      * Previews of emoji are displayed in the same bar as will also be hidden when this is false.
      */
     showQuickReactions?: boolean;
+    /**
+     * Whether to focus the selected category when the picker mounts. Element's context menus don't need it: their
+     * focus lock focuses the selected category already.
+     */
+    autoFocus?: boolean;
 }
 
 /** Convert recent emoji characters to emoji data, removing unknowns and duplicates */
@@ -199,6 +206,7 @@ export function EmojiPicker({
     onRecordRecent,
     getAction,
     showQuickReactions = true,
+    autoFocus,
 }: EmojiPickerProps): React.ReactNode {
     const [filter, setFilter] = useState("");
     const [previewEmoji, setPreviewEmoji] = useState<IEmoji | undefined>(undefined);
@@ -207,6 +215,9 @@ export function EmojiPicker({
     // The scroll container of the picker body, once mounted. The Virtuoso windows
     // its rows against this shared scroll parent.
     const [scrollElement, setScrollElement] = useState<HTMLDivElement | null>(null);
+
+    // The sticky category bar, which covers the top of the list once the search has scrolled away.
+    const [stickyHeader, setStickyHeader] = useState<HTMLDivElement | null>(null);
 
     const searchRef = useRef<HTMLInputElement>(null);
     const virtuosoRef = useRef<VirtuosoHandle>(null);
@@ -254,23 +265,41 @@ export function EmojiPicker({
         return flat;
     }, [dataByCategory]);
 
-    const onRangeChanged = useCallback(
-        (range: ListRange): void => {
-            // Collect the categories that own any item within the rendered range. Each
-            // flat-list entry knows its category (headers directly, rows via categoryId),
-            // so a category is visible whenever one of its entries is in range - including
-            // when its header itself has scrolled out of view.
-            const visibleCategoryIds = new Set<CategoryKey>();
-            for (let i = range.startIndex; i <= range.endIndex; i++) {
-                const item = items[i];
-                if (!item) continue;
-                visibleCategoryIds.add(item.type === "header" ? item.category.id : item.categoryId);
-            }
+    const updateSelectedCategory = useCallback((): void => {
+        if (items.length === 0) {
+            setSelectedCategory("people");
+            return;
+        }
+        if (!scrollElement) return;
+        // Select the category of the first entry showing below the sticky category bar. Every entry names its
+        // category, so a category stays selected while its header has scrolled out of view. The rows Virtuoso
+        // renders under the bar don't count.
+        const visibleTop = stickyHeader?.getBoundingClientRect().bottom ?? scrollElement.getBoundingClientRect().top;
+        const firstVisible = Array.from(scrollElement.querySelectorAll<HTMLElement>("[data-category]")).find(
+            (node) => node.getBoundingClientRect().bottom > visibleTop,
+        );
+        const category = CATEGORY_CONFIG.find((cat) => cat.id === firstVisible?.dataset.category);
+        if (category) setSelectedCategory(category.id);
+    }, [items, scrollElement, stickyHeader]);
 
-            setSelectedCategory(CATEGORY_CONFIG.find((cat) => visibleCategoryIds.has(cat.id))?.id ?? "people");
-        },
-        [items],
-    );
+    // Virtuoso renders new rows after it reports a new range or gets new items, so look at them in the next frame.
+    const pendingCategoryUpdate = useRef(0);
+    const scheduleCategoryUpdate = useCallback((): void => {
+        cancelAnimationFrame(pendingCategoryUpdate.current);
+        pendingCategoryUpdate.current = requestAnimationFrame(updateSelectedCategory);
+    }, [updateSelectedCategory]);
+
+    // A new query changes the rows without necessarily scrolling or changing Virtuoso's range
+    useEffect(() => {
+        scheduleCategoryUpdate();
+        return () => cancelAnimationFrame(pendingCategoryUpdate.current);
+    }, [scheduleCategoryUpdate]);
+
+    // Rows can slide under the sticky category bar without changing Virtuoso's range, so follow scrolling too.
+    useEffect(() => {
+        scrollElement?.addEventListener("scroll", updateSelectedCategory, { passive: true });
+        return () => scrollElement?.removeEventListener("scroll", updateSelectedCategory);
+    }, [scrollElement, updateSelectedCategory]);
 
     // Given a roving emoji button returns the role=gridcell element containing it
     const getGridcell = useCallback((rovingNode?: Element): Element | undefined => {
@@ -291,8 +320,42 @@ export function EmojiPicker({
         return node instanceof HTMLElement ? node : undefined;
     }, []);
 
+    // Where Down from a category's tab lands. Rows Virtuoso renders under the sticky category bar are hidden, so they
+    // don't count.
+    const getCategoryEntry = useCallback(
+        (state: RovingState, category: string | undefined): HTMLElement | undefined => {
+            const visibleTop = stickyHeader?.getBoundingClientRect().bottom ?? -Infinity;
+            const isInCategory = (node: HTMLElement): boolean =>
+                getRow(node)?.getAttribute("data-category") === category;
+            const isShown = (node: HTMLElement): boolean => node.getBoundingClientRect().bottom > visibleTop;
+
+            if (state.activeNode && isInCategory(state.activeNode) && isShown(state.activeNode)) {
+                return state.activeNode;
+            }
+            return state.nodes.find((node) => isInCategory(node) && isShown(node)) ?? state.nodes.find(isInCategory);
+        },
+        [getRow, stickyHeader],
+    );
+
     const onKeyDown = useCallback(
         (ev: React.KeyboardEvent, state: RovingState, dispatch: Dispatch<RovingAction>): void => {
+            // The category bar has focus when the picker opens: Down moves from a category's tab into its emoji, and
+            // Up to the search field above the bar.
+            const categoryTab =
+                ev.target instanceof HTMLElement ? ev.target.closest<HTMLElement>("[data-category-tab]") : null;
+            if (categoryTab && (ev.key === "ArrowDown" || ev.key === "ArrowUp")) {
+                if (ev.key === "ArrowUp") {
+                    searchRef.current?.focus();
+                } else {
+                    const entry = getCategoryEntry(state, categoryTab.dataset.categoryTab);
+                    if (entry) setShowHighlight(true);
+                    entry?.focus();
+                }
+                ev.preventDefault();
+                ev.stopPropagation();
+                return;
+            }
+
             if (state.activeNode && ["ArrowDown", "ArrowRight", "ArrowLeft", "ArrowUp"].includes(ev.key)) {
                 // If highlight is not shown yet, show it and reset to first emoji
                 if (!showHighlight) {
@@ -310,7 +373,7 @@ export function EmojiPicker({
                 }
             }
         },
-        [showHighlight],
+        [getCategoryEntry, showHighlight],
     );
 
     const shouldMoveFocus = useCallback((): boolean => {
@@ -336,21 +399,31 @@ export function EmojiPicker({
 
     const scrollToCategory = useCallback(
         (category: string): void => {
-            // Find the flat index of the category's header and scroll it to the top.
+            // Find the flat index of the category's header and scroll it to the top, just below the sticky
+            // category bar.
             const index = items.findIndex((item) => item.type === "header" && item.category.id === category);
             if (index >= 0) {
-                virtuosoRef.current?.scrollToIndex({ index, align: "start" });
+                virtuosoRef.current?.scrollToIndex({
+                    index,
+                    align: "start",
+                    offset: -(stickyHeader?.offsetHeight ?? 0),
+                });
             }
         },
-        [items],
+        [items, stickyHeader],
     );
 
-    const onChangeFilter = useCallback((newFilter: string): void => {
-        setFilter(newFilter);
-        // User has typed a query, show highlight.
-        // If the filter is cleared, hide the highlight again.
-        setShowHighlight(newFilter.trim() !== "");
-    }, []);
+    const onChangeFilter = useCallback(
+        (newFilter: string): void => {
+            setFilter(newFilter);
+            // User has typed a query, show highlight.
+            // If the filter is cleared, hide the highlight again.
+            setShowHighlight(newFilter.trim() !== "");
+            // The search field scrolls with the emoji: bring it and the best matches back into view.
+            scrollElement?.scrollTo({ top: 0 });
+        },
+        [scrollElement],
+    );
 
     const onEnterFilter = useCallback((): void => {
         // Only select emoji if highlight is shown
@@ -394,7 +467,7 @@ export function EmojiPicker({
             if (item.type === "header") {
                 const category = item.category;
                 return (
-                    <div className={styles.category} data-category-id={category.id} role="gridcell">
+                    <div className={styles.categoryHeader} data-category-id={category.id} role="gridcell">
                         <Heading as="h2" className={styles.categoryLabel}>
                             {_t(category.untranslatedName)}
                         </Heading>
@@ -439,40 +512,45 @@ export function EmojiPicker({
                     onKeyDown={onKeyDownHandler}
                     aria-label={_t("emoji_picker|emoji_picker")}
                 >
-                    <Tabs
-                        categories={CATEGORY_CONFIG}
-                        enabledCategories={enabledCategories}
-                        selectedCategory={selectedCategory}
-                        onAnchorClick={scrollToCategory}
-                        pickerBodyId={pickerBodyId}
-                        getAction={getAction}
-                    />
-                    <Search
-                        query={filter}
-                        onChange={onChangeFilter}
-                        onEnter={onEnterFilter}
-                        onKeyDown={onKeyDownHandler}
-                        inputRef={searchRef}
-                        controlsId={pickerBodyId}
-                    />
+                    {/* As in Telegram, the search scrolls away with the emoji while the category bar sticks to the top */}
                     <AutoHideScrollbar
-                        id={pickerBodyId}
                         className={classNames(styles.body, {
                             [styles.bodyShowHighlight]: showHighlight,
                         })}
                         wrappedRef={collectScrollElement}
                     >
-                        {scrollElement && (
-                            <Virtuoso
-                                ref={virtuosoRef}
-                                customScrollParent={scrollElement}
-                                data={items}
-                                defaultItemHeight={EMOJI_HEIGHT}
-                                components={gridComponents}
-                                itemContent={renderItem}
-                                rangeChanged={onRangeChanged}
+                        <Search
+                            query={filter}
+                            onChange={onChangeFilter}
+                            onEnter={onEnterFilter}
+                            onKeyDown={onKeyDownHandler}
+                            inputRef={searchRef}
+                            controlsId={pickerBodyId}
+                        />
+                        <div ref={setStickyHeader} className={styles.stickyHeader}>
+                            <Tabs
+                                categories={CATEGORY_CONFIG}
+                                enabledCategories={enabledCategories}
+                                selectedCategory={selectedCategory}
+                                onAnchorClick={scrollToCategory}
+                                pickerBodyId={pickerBodyId}
+                                getAction={getAction}
+                                autoFocus={autoFocus}
                             />
-                        )}
+                        </div>
+                        <div id={pickerBodyId} className={styles.groups}>
+                            {scrollElement && (
+                                <Virtuoso
+                                    ref={virtuosoRef}
+                                    customScrollParent={scrollElement}
+                                    data={items}
+                                    defaultItemHeight={EMOJI_HEIGHT}
+                                    components={gridComponents}
+                                    itemContent={renderItem}
+                                    rangeChanged={scheduleCategoryUpdate}
+                                />
+                            )}
+                        </div>
                     </AutoHideScrollbar>
                     {showQuickReactions &&
                         (previewEmoji ? (

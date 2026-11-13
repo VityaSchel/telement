@@ -119,6 +119,8 @@ export function CustomStatusView({
                     onRecordRecent={onRecordRecentEmoji}
                     onFinished={() => setPickerOpen(false)}
                     showQuickReactions={false}
+                    // Compound's menu only focuses itself, which leaves the picker out of reach of the keyboard
+                    autoFocus
                 />
             </Menu>
             <Field name="custom-status" className={styles.textField}>

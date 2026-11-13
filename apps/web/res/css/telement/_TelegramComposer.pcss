@@ -1,0 +1,28 @@
+/*
+Copyright 2026 Viktor Shchelochkov
+
+SPDX-License-Identifier: AGPL-3.0-only OR GPL-3.0-only
+Please see LICENSE files in the repository root for full details.
+*/
+
+.mx_TelementAttachButton {
+    flex-shrink: 0;
+    /* Together with the row's gap, matches the space between the text field and the buttons on its right. */
+    margin-inline-end: var(--cpd-space-1-5x);
+    /* Centered on the last line of text, like the buttons on the right. The composer row sets the line's height and */
+    /* Compound's IconButton sets its own size, which stylelint can't see from here. */
+    /* stylelint-disable-next-line csstools/value-no-unknown-custom-properties */
+    margin-block-end: calc((var(--MessageComposer-oneLineHeight) - var(--cpd-icon-button-size)) / 2);
+    /* A 20px icon, like the other composer buttons */
+    padding: var(--cpd-space-2x);
+}
+
+/*
+ * The formatting glyph fills less of its box than the paperclip and emoji glyphs do, so it keeps Compound's 24px icon
+ * size to look as big as they do, on the same 36px target.
+ */
+.mx_MessageComposer_button.mx_TelementFormattingButton {
+    padding: var(--cpd-space-1-5x);
+    width: 24px;
+    height: 24px;
+}

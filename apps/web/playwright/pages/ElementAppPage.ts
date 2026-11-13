@@ -136,22 +136,16 @@ export class ElementAppPage {
     }
 
     /**
-     * Expands the Invites section in the room list and opens the given invited room.
+     * Opens the given invited room from the room list, which lists invites alongside the other rooms.
      *
      * @param name The exact room name of the invite to find and click on/open.
      */
     public async viewInvitedRoomByName(name: string): Promise<void> {
-        const header = this.page.getByRole("button", { name: "Toggle Invites section" });
-        // Open the section if not already opened
-        if ((await header.getAttribute("aria-expanded")) !== "true") {
-            await header.click();
-        }
-
         await this.viewRoomByName(name);
     }
 
     /**
-     * Expands the Invites section in the room list, opens the given invited room and accepts the invite.
+     * Opens the given invited room from the room list and accepts the invite.
      *
      * @param name The exact room name of the invite to accept.
      */
@@ -182,12 +176,12 @@ export class ElementAppPage {
     }
 
     /**
-     * Open the message composer kebab menu
+     * Open the message composer attachment menu, which lists uploads, polls and location sharing
      * @param isRightPanel whether to select the right panel composer, otherwise the main timeline composer
      */
     public async openMessageComposerOptions(isRightPanel?: boolean): Promise<Locator> {
         const composer = this.getComposer(isRightPanel);
-        await composer.getByRole("button", { name: "More options", exact: true }).click();
+        await composer.getByRole("button", { name: "Attachment", exact: true }).click();
         return this.page.getByRole("menu");
     }
 

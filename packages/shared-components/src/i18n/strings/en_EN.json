@@ -92,7 +92,6 @@
         "quick_reactions": "Quick Reactions"
     },
     "emoji_picker": {
-        "cancel_search_label": "Cancel search",
         "emoji_picker": "Emoji picker"
     },
     "error": {
@@ -279,6 +278,11 @@
             "in_a_meeting": "In a meeting",
             "on_the_road": "On the road",
             "set_status_prompt": "What's your status?"
+        }
+    },
+    "telement": {
+        "search_field": {
+            "clear": "Clear search"
         }
     },
     "terms": {
