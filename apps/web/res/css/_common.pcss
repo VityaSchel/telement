@@ -12,6 +12,24 @@ Please see LICENSE files in the repository root for full details.
 @import "./_font-sizes.pcss";
 @import "./_animations.pcss";
 
+/* Formatted text's quote line, drawn like the reply quote's (_ReplyChain.pcss): on its own, so both ends round, and as
+   a border, which forced colors keep. github-markdown-css draws its own line as a left border. */
+@define-mixin quoteLine {
+    position: relative;
+    border-left: none;
+    padding: 0 var(--cpd-space-3x);
+
+    &::before {
+        content: "";
+        position: absolute;
+        inset-block: 0;
+        inset-inline-start: 0;
+        inline-size: 0;
+        border-inline-start: 2px solid $blockquote-bar-color;
+        border-radius: var(--tl-radius-control);
+    }
+}
+
 :root {
     --container-border-width: 8px;
     --container-gap-width: 8px; /* only even numbers should be used because otherwise we get 0.5px margin values. */
@@ -408,10 +426,8 @@ summary {
         }
 
         blockquote {
-            border-left: 2px solid $blockquote-bar-color;
+            @mixin quoteLine;
             color: $secondary-content;
-            border-radius: 2px;
-            padding: 0 10px;
         }
     }
 }

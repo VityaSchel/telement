@@ -38,6 +38,10 @@ import {
     GroupIcon,
     CloseIcon,
     LinkIcon,
+    ArrowDownIcon,
+    ArrowUpIcon,
+    ArrowLeftIcon,
+    ArrowRightIcon,
 } from "@vector-im/compound-design-tokens/assets/web/icons";
 
 import { KeyBindingAction } from "../../../../accessibility/KeyboardShortcuts";
@@ -1249,12 +1253,30 @@ const SpotlightDialog: React.FC<IProps> = ({ initialText = "", initialFilter = n
                     "spotlight_dialog|keyboard_scroll_hint",
                     {},
                     {
+                        // The keys show icons, which are centered whatever the font; the arrows stay as text for
+                        // the search field's description
                         arrows: () => (
                             <>
-                                <kbd>↓</kbd>
-                                <kbd>↑</kbd>
-                                {filter === null && !query && <kbd>←</kbd>}
-                                {filter === null && !query && <kbd>→</kbd>}
+                                <kbd>
+                                    <ArrowDownIcon aria-hidden={true} />
+                                    <span>↓</span>
+                                </kbd>
+                                <kbd>
+                                    <ArrowUpIcon aria-hidden={true} />
+                                    <span>↑</span>
+                                </kbd>
+                                {filter === null && !query && (
+                                    <kbd>
+                                        <ArrowLeftIcon aria-hidden={true} />
+                                        <span>←</span>
+                                    </kbd>
+                                )}
+                                {filter === null && !query && (
+                                    <kbd>
+                                        <ArrowRightIcon aria-hidden={true} />
+                                        <span>→</span>
+                                    </kbd>
+                                )}
                             </>
                         ),
                     },

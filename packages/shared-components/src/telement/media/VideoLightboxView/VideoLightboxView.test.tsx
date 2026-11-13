@@ -10,8 +10,10 @@ import { composeStories } from "@storybook/react-vite";
 import { act, fireEvent, render, screen } from "@test-utils";
 import { describe, expect, it, vi } from "vitest";
 import { userEvent } from "vitest/browser";
-// The layout assertions need the real spacing tokens.
+// The layout assertions need the real spacing tokens, Compound's pill radius and Telement's radius tokens.
 import "@vector-im/compound-design-tokens/assets/web/css/compound-design-tokens.css";
+import "@vector-im/compound-web/dist/style.css";
+import "../../tokens.css";
 
 import { BaseViewModel } from "../../../core/viewmodel/BaseViewModel";
 import { MockViewModel } from "../../../core/viewmodel/MockViewModel";
@@ -625,21 +627,43 @@ describe("VideoLightboxView", () => {
         expect(menu.right).toBeCloseTo(button.right, 0);
     });
 
+    it("rounds the speed menu around its items, inset 4px from its outer edge like Telement's other menus", () => {
+        renderView({ speedMenuOpen: true });
+
+        const menu = screen.getByRole("menu", { name: "Playback speed" });
+        const items = screen.getAllByRole("menuitemradio");
+        const menuBox = menu.getBoundingClientRect();
+        const first = items[0].getBoundingClientRect();
+        const last = items[items.length - 1].getBoundingClientRect();
+        expect(first.left - menuBox.left).toBeCloseTo(4, 1);
+        expect(first.top - menuBox.top).toBeCloseTo(4, 1);
+        expect(menuBox.right - first.right).toBeCloseTo(4, 1);
+        expect(menuBox.bottom - last.bottom).toBeCloseTo(4, 1);
+        for (const item of items) expect(getComputedStyle(item).borderRadius).toBe("8px");
+        // Concentric: the items' radius plus their inset
+        expect(getComputedStyle(menu).borderRadius).toBe("12px");
+    });
+
     it("draws focus rings on the controls' edges, inside the bar's padding", async () => {
         renderView();
 
         // Compound rounds the icon buttons; the slider and the speed button are round-ended like them.
-        for (const [control, radius] of [
-            [screen.getByRole("button", { name: "Play" }), undefined],
-            [screen.getByRole("slider", { name: "Playback position" }), "12px"],
-            [screen.getByRole("button", { name: "Playback speed: 1×" }), "18px"],
-            [screen.getByRole("button", { name: "Full screen" }), undefined],
-        ] as const) {
+        for (const control of [
+            screen.getByRole("button", { name: "Play" }),
+            screen.getByRole("slider", { name: "Playback position" }),
+            screen.getByRole("button", { name: "Playback speed: 1×" }),
+            screen.getByRole("button", { name: "Full screen" }),
+        ]) {
             for (let i = 0; i < 20 && document.activeElement !== control; i++) await userEvent.keyboard("{Tab}");
             expect(control).toHaveFocus();
             const style = getComputedStyle(control);
             expect([style.outlineStyle, style.outlineWidth, style.outlineOffset]).toEqual(["solid", "2px", "0px"]);
-            if (radius) expect(style.borderRadius).toBe(radius);
+            // Compound gives its icon buttons a percentage of their box
+            const box = control.getBoundingClientRect();
+            const radius = style.borderTopLeftRadius.endsWith("%")
+                ? (parseFloat(style.borderTopLeftRadius) / 100) * box.width
+                : parseFloat(style.borderTopLeftRadius);
+            expect(radius).toBeGreaterThanOrEqual(box.height / 2);
         }
     });
 

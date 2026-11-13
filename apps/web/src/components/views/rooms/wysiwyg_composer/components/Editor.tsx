@@ -7,29 +7,22 @@ Please see LICENSE files in the repository root for full details.
 */
 
 import classNames from "classnames";
-import React, { type CSSProperties, memo, type RefObject, type ReactNode } from "react";
+import React, { type CSSProperties, memo, type RefObject } from "react";
 
-import { useIsExpanded } from "../hooks/useIsExpanded";
 import { useSelection } from "../hooks/useSelection";
 import { _t } from "../../../../../i18n";
-
-const HEIGHT_BREAKING_POINT = 24;
 
 interface EditorProps {
     disabled: boolean;
     placeholder?: string;
-    leftComponent?: ReactNode;
-    rightComponent?: ReactNode;
     ref?: RefObject<HTMLDivElement | null>;
 }
 
-export const Editor = memo(function Editor({ disabled, placeholder, leftComponent, rightComponent, ref }: EditorProps) {
-    const isExpanded = useIsExpanded(ref, HEIGHT_BREAKING_POINT);
+export const Editor = memo(function Editor({ disabled, placeholder, ref }: EditorProps) {
     const { onFocus, onBlur, onInput } = useSelection();
 
     return (
-        <div data-testid="WysiwygComposerEditor" className="mx_WysiwygComposer_Editor" data-is-expanded={isExpanded}>
-            {leftComponent}
+        <div data-testid="WysiwygComposerEditor" className="mx_WysiwygComposer_Editor">
             <div className="mx_WysiwygComposer_Editor_container">
                 <div
                     className={classNames("mx_WysiwygComposer_Editor_content", {
@@ -50,7 +43,6 @@ export const Editor = memo(function Editor({ disabled, placeholder, leftComponen
                     onInput={onInput}
                 />
             </div>
-            {rightComponent}
         </div>
     );
 });

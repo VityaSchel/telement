@@ -34,8 +34,6 @@ interface WysiwygComposerProps {
     placeholder?: string;
     initialContent?: string;
     className?: string;
-    leftComponent?: ReactNode;
-    rightComponent?: ReactNode;
     children?: (ref: RefObject<HTMLDivElement | null>, wysiwyg: FormattingFunctions) => ReactNode;
     eventRelation?: IEventRelation;
 }
@@ -52,8 +50,6 @@ export const WysiwygComposer = memo(function WysiwygComposer({
     placeholder,
     initialContent,
     className,
-    leftComponent,
-    rightComponent,
     children,
     eventRelation,
 }: WysiwygComposerProps) {
@@ -130,13 +126,7 @@ export const WysiwygComposer = memo(function WysiwygComposer({
                 handleEmoji={wysiwyg.emoji}
             />
             <FormattingButtons composer={wysiwyg} actionStates={actionStates} disabled={disableFormatting} />
-            <Editor
-                ref={ref}
-                disabled={!isReady}
-                leftComponent={leftComponent}
-                rightComponent={rightComponent}
-                placeholder={computedPlaceholder}
-            />
+            <Editor ref={ref} disabled={!isReady} placeholder={computedPlaceholder} />
             {children?.(ref, wysiwyg)}
         </div>
     );

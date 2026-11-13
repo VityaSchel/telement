@@ -9,8 +9,8 @@ Please see LICENSE files in the repository root for full details.
    the image viewer's: 32px from the start edge and 16px from the end edge. */
 .root {
     /* The size of the playback controls, which the view also gives the icon buttons. */
-    --control-size: 36px;
-    --bar-padding: var(--cpd-space-1x);
+    --control-size: var(--tl-control-size);
+    --bar-padding: var(--tl-inset-menu);
     /* How far the controls float above the bottom edge, which is also where the video's space ends. */
     --bar-inset: var(--cpd-space-6x);
     --slider-height: var(--cpd-space-6x);
@@ -233,8 +233,8 @@ Please see LICENSE files in the repository root for full details.
 /* Sliders: a thin track filled up to the value, set in --fill, with a round handle. */
 .range {
     --fill: 0%;
-    --track-height: 4px;
-    --thumb-size: 12px;
+    --track-height: var(--cpd-space-1x);
+    --thumb-size: var(--cpd-space-3x);
 
     appearance: none;
     height: var(--slider-height);
@@ -244,7 +244,7 @@ Please see LICENSE files in the repository root for full details.
 
 .range::-webkit-slider-runnable-track {
     height: var(--track-height);
-    border-radius: var(--track-height);
+    border-radius: var(--tl-radius-control);
     background: linear-gradient(
         to right,
         var(--cpd-color-icon-primary) var(--fill),
@@ -254,7 +254,7 @@ Please see LICENSE files in the repository root for full details.
 
 .range::-moz-range-track {
     height: var(--track-height);
-    border-radius: var(--track-height);
+    border-radius: var(--tl-radius-control);
     background: linear-gradient(
         to right,
         var(--cpd-color-icon-primary) var(--fill),
@@ -268,7 +268,7 @@ Please see LICENSE files in the repository root for full details.
     height: var(--thumb-size);
     margin-top: calc((var(--track-height) - var(--thumb-size)) / 2);
     border: none;
-    border-radius: 50%;
+    border-radius: var(--tl-radius-control);
     background-color: var(--cpd-color-icon-primary);
 }
 
@@ -276,14 +276,14 @@ Please see LICENSE files in the repository root for full details.
     width: var(--thumb-size);
     height: var(--thumb-size);
     border: none;
-    border-radius: 50%;
+    border-radius: var(--tl-radius-control);
     background-color: var(--cpd-color-icon-primary);
 }
 
 .range:focus-visible {
     outline: 2px solid var(--cpd-color-border-focused);
     outline-offset: 0;
-    border-radius: calc(var(--slider-height) / 2);
+    border-radius: var(--tl-radius-control);
 }
 
 .range:disabled {
@@ -311,7 +311,7 @@ Please see LICENSE files in the repository root for full details.
     height: var(--control-size);
     padding: 0 var(--cpd-space-2x);
     border: none;
-    border-radius: calc(var(--control-size) / 2);
+    border-radius: var(--tl-radius-control);
     background: none;
     color: var(--cpd-color-icon-primary);
     font: var(--cpd-font-body-sm-semibold);
@@ -328,7 +328,8 @@ Please see LICENSE files in the repository root for full details.
     outline-offset: 0;
 }
 
-/* The menu opens 8px above the bar, lined up with the end of the speed button. */
+/* The menu opens 8px above the bar, lined up with the end of the speed button. Like Telement's other menus, its
+   items sit 4px inside its outer edge, border included, so its corners are concentric with theirs. */
 .speedMenu {
     --bar-above-speed: var(--bar-padding);
 
@@ -338,9 +339,9 @@ Please see LICENSE files in the repository root for full details.
     display: flex;
     flex-direction: column;
     min-width: 120px;
-    padding: var(--cpd-space-2x) 0;
-    border: 1px solid var(--cpd-color-border-interactive-secondary);
-    border-radius: var(--cpd-space-3x);
+    padding: calc(var(--tl-inset-menu) - var(--cpd-border-width-1));
+    border: var(--cpd-border-width-1) solid var(--cpd-color-border-interactive-secondary);
+    border-radius: var(--tl-radius-menu);
     background-color: var(--cpd-color-bg-canvas-default);
     box-shadow: 0 4px 24px rgb(0 0 0 / 40%);
 }
@@ -352,6 +353,7 @@ Please see LICENSE files in the repository root for full details.
     gap: var(--cpd-space-4x);
     padding: var(--cpd-space-2x) var(--cpd-space-4x);
     border: none;
+    border-radius: var(--tl-radius-row);
     background: none;
     color: var(--cpd-color-text-primary);
     font: var(--cpd-font-body-md-regular);

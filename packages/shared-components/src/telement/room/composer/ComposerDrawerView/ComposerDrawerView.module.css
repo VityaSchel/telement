@@ -12,12 +12,12 @@ Please see LICENSE files in the repository root for full details.
     display: flex;
     flex-direction: column;
     /*
-     * The corners are concentric with the pills inset from the drawer's edges: the search field that a tab's content
-     * starts with at the top, and the tabs at the bottom. Each radius is the pill's radius plus its inset. The menu
-     * the drawer opens in rounds its corners to match.
+     * The corners are concentric with the pills inset from the drawer's edges: the 36px pills a tab's content starts
+     * with at the top, such as the emoji picker's category tabs or a search field, and the tabs at the bottom. Each
+     * radius is the pill's radius plus its inset. The menu the drawer opens in rounds its corners to match.
      */
-    border-radius: calc(var(--cpd-space-9x) / 2 + var(--composer-drawer-inset))
-        calc(var(--cpd-space-9x) / 2 + var(--composer-drawer-inset))
+    border-radius: calc(var(--tl-control-size) / 2 + var(--composer-drawer-inset))
+        calc(var(--tl-control-size) / 2 + var(--composer-drawer-inset))
         calc(var(--composer-drawer-tab-height) / 2 + var(--composer-drawer-inset))
         calc(var(--composer-drawer-tab-height) / 2 + var(--composer-drawer-inset));
     overflow: clip;
@@ -38,7 +38,7 @@ Please see LICENSE files in the repository root for full details.
     min-block-size: var(--composer-drawer-tab-height);
     padding: 0 var(--cpd-space-3x);
     border: none;
-    border-radius: 999px;
+    border-radius: var(--tl-radius-control);
     background: none;
     color: var(--cpd-color-text-secondary);
     font: var(--cpd-font-body-sm-semibold);

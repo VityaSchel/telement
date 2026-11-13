@@ -10,8 +10,10 @@ import { composeStories } from "@storybook/react-vite";
 import userEvent from "@testing-library/user-event";
 import { render, screen } from "@test-utils";
 import { describe, expect, it, vi } from "vitest";
-// The layout assertions need the real spacing tokens
+// The layout assertions need the real spacing tokens, Compound's pill radius and Telement's radius tokens
 import "@vector-im/compound-design-tokens/assets/web/css/compound-design-tokens.css";
+import "@vector-im/compound-web/dist/style.css";
+import "../../tokens.css";
 
 import * as stories from "./SearchFieldView.stories";
 import * as buttonStories from "./SearchFieldButtonView.stories";
@@ -97,6 +99,22 @@ describe("SearchFieldView", () => {
 
         const input = screen.getByRole("textbox", { name: "Search KLIPY" });
         expect(input).toHaveAttribute("placeholder", "Search KLIPY");
+    });
+
+    it("is a 36px pill with the round clear button concentric inside it", () => {
+        render(<ControlledField initialValue="cat" />);
+        const field = getField();
+        const clear = screen.getByRole("button", { name: "Clear search" });
+        const fieldBox = field.getBoundingClientRect();
+        const clearBox = clear.getBoundingClientRect();
+
+        expect(fieldBox.height).toBe(36);
+        expect(parseFloat(getComputedStyle(field).borderTopLeftRadius)).toBeGreaterThanOrEqual(fieldBox.height / 2);
+        expect(parseFloat(getComputedStyle(clear).borderTopLeftRadius)).toBeGreaterThanOrEqual(clearBox.height / 2);
+        const inset = clearBox.top - fieldBox.top;
+        expect(fieldBox.right - clearBox.right).toBe(inset);
+        expect(fieldBox.bottom - clearBox.bottom).toBe(inset);
+        expect(clearBox.height / 2 + inset).toBe(fieldBox.height / 2);
     });
 
     it("rests with the clear button hidden until the user focuses the field", async () => {

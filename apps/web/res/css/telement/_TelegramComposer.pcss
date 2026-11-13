@@ -8,7 +8,7 @@ Please see LICENSE files in the repository root for full details.
 .mx_TelementAttachButton {
     flex-shrink: 0;
     /* Together with the row's gap, matches the space between the text field and the buttons on its right. */
-    margin-inline-end: var(--cpd-space-1-5x);
+    margin-inline-end: var(--cpd-space-1x);
     /* Centered on the last line of text, like the buttons on the right. The composer row sets the line's height and */
     /* Compound's IconButton sets its own size, which stylelint can't see from here. */
     /* stylelint-disable-next-line csstools/value-no-unknown-custom-properties */
@@ -22,7 +22,7 @@ Please see LICENSE files in the repository root for full details.
  * size to look as big as they do, on the same 36px target.
  */
 .mx_MessageComposer_button.mx_TelementFormattingButton {
-    padding: var(--cpd-space-1-5x);
-    width: 24px;
-    height: 24px;
+    padding: calc((var(--tl-control-size) - var(--cpd-space-6x)) / 2);
+    width: var(--cpd-space-6x);
+    height: var(--cpd-space-6x);
 }

@@ -10,7 +10,7 @@ Please see LICENSE files in the repository root for full details.
 
 import { describe, it, expect, beforeAll, beforeEach, afterEach, vi, type MockInstance } from "vitest";
 import React from "react";
-import { act, render, screen } from "test-utils-rtl";
+import { render, screen } from "test-utils-rtl";
 import userEvent from "@testing-library/user-event";
 import { initOnce } from "@vector-im/matrix-wysiwyg";
 
@@ -231,45 +231,6 @@ describe("PlainTextComposer", () => {
 
         // Then
         expect(screen.getByRole("textbox").innerHTML).toBeFalsy();
-    });
-
-    it("Should have data-is-expanded when it has two lines", async () => {
-        let resizeHandler: ResizeObserverCallback = vi.fn();
-        let editor: Element | null = null;
-        vi.spyOn(global, "ResizeObserver").mockImplementation(function (handler) {
-            resizeHandler = handler;
-            return {
-                observe: (element: Element) => {
-                    editor = element;
-                },
-                unobserve: vi.fn(),
-                disconnect: vi.fn(),
-            } as unknown as ResizeObserver;
-        });
-        vi.useFakeTimers();
-
-        //When
-        render(<PlainTextComposer onChange={vi.fn()} onSend={vi.fn()} />);
-
-        // Then
-        expect(screen.getByTestId("WysiwygComposerEditor").dataset["isExpanded"]).toBe("false");
-        expect(editor).toBe(screen.getByRole("textbox"));
-
-        // When
-        resizeHandler(
-            [{ contentBoxSize: [{ blockSize: 100 }] } as unknown as ResizeObserverEntry],
-            {} as ResizeObserver,
-        );
-
-        act(() => {
-            vi.runAllTimers();
-        });
-
-        // Then
-        expect(screen.getByTestId("WysiwygComposerEditor").dataset["isExpanded"]).toBe("true");
-
-        vi.useRealTimers();
-        (global.ResizeObserver as unknown as MockInstance).mockRestore();
     });
 
     it("Should not render <Autocomplete /> if not wrapped in room context", () => {

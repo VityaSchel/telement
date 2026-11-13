@@ -144,7 +144,7 @@
         left: 0;
         width: 4px;
         background-color: var(--cpd-color-bg-accent-rest);
-        border-radius: 0 8px 8px 0;
+        border-radius: var(--tl-radius-control);
     }
 }
 
@@ -177,18 +177,18 @@
  * are concentric.
  */
 [role="menu"]:has(> [role="none"] > .menuContent) {
-    border-radius: calc(var(--cpd-space-2x) + var(--cpd-space-1x));
+    border-radius: var(--tl-radius-menu);
 }
 
 [role="none"]:has(> .menuContent) {
-    padding: var(--cpd-space-1x);
+    padding: var(--tl-inset-menu);
 
-    --cpd-menu-padding-block-end: var(--cpd-space-1x);
+    --cpd-menu-padding-block-end: var(--tl-inset-menu);
 }
 
 /* Compound offsets a submenu by its own 20px top padding to line its first item up with the item that opened it */
 [role="menu"]:has(> [role="none"] > .subMenuContent) {
-    margin-block-start: calc(var(--cpd-space-5x) - var(--cpd-space-1x));
+    margin-block-start: calc(var(--cpd-space-5x) - var(--tl-inset-menu));
 }
 
 /*
@@ -197,22 +197,22 @@
  * Radix opened it.
  */
 [role="menu"][data-side="right"]:has(> [role="none"] > .contextSubMenuContent) {
-    margin-left: var(--cpd-space-1x);
+    margin-left: var(--tl-inset-menu);
 }
 
 [role="menu"][data-side="left"]:has(> [role="none"] > .contextSubMenuContent) {
-    margin-right: var(--cpd-space-1x);
+    margin-right: var(--tl-inset-menu);
 }
 
 .menuContent {
     /* Like the message menu's, separators span the menu with the menu padding above and below */
     --cpd-separator-inset: 0;
-    --cpd-separator-spacing: var(--cpd-space-1x);
+    --cpd-separator-spacing: var(--tl-inset-menu);
 
     > [role^="menuitem"] {
         padding-block: var(--cpd-space-2x);
         padding-inline: var(--cpd-space-2x) var(--cpd-space-3x);
-        border-radius: var(--cpd-space-2x);
+        border-radius: var(--tl-radius-row);
         /* The message menu's minimum width (146px inside its padding), instead of Compound's 200px */
         min-inline-size: 146px;
 
@@ -226,7 +226,7 @@
         > svg:first-child {
             inline-size: 16px;
             block-size: 16px;
-            margin-inline-end: 14px;
+            margin-inline-end: var(--cpd-space-3x);
         }
 
         > span {

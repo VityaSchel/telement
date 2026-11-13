@@ -9,9 +9,20 @@ Please see LICENSE files in the repository root for full details.
 .mx_ReplyChain {
     margin-block: 0 var(--cpd-space-2x);
     margin-inline: 0;
-    padding-left: 10px;
-    border-left: 2px solid var(--username-color);
-    border-radius: 2px;
+    position: relative;
+    padding-inline-start: var(--cpd-space-3x);
+
+    /* Drawn on its own like the composer's reply preview, so both ends round, and as a border, which forced colors
+       keep. A quote without a sender's color (one that failed to load) has no line. */
+    &::before {
+        content: "";
+        position: absolute;
+        inset-block: 0;
+        inset-inline-start: 0;
+        inline-size: 0;
+        border-inline-start: 2px solid var(--username-color);
+        border-radius: var(--tl-radius-control);
+    }
 
     .mx_ReplyChain_compact & {
         margin-block-end: var(--cpd-space-1x);

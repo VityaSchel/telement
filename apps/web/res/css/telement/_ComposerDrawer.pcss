@@ -11,12 +11,13 @@ Please see LICENSE files in the repository root for full details.
 }
 
 /*
- * The drawer's corners are concentric with the search field at the top of its content and its tabs at the bottom: the
- * pill's radius plus its inset (see ComposerDrawerView). The menu's corners add the menu's border to them.
+ * The drawer's corners are concentric with the pills at the top of its content, such as the emoji picker's category
+ * tabs, and its tabs at the bottom: the pill's radius plus its inset (see ComposerDrawerView). The menu's corners add
+ * the menu's border to them.
  */
 .mx_ContextualMenu.mx_TelementComposerDrawer_menu {
-    border-radius: calc(var(--cpd-space-9x) / 2 + var(--cpd-space-2x) + var(--cpd-border-width-1))
-        calc(var(--cpd-space-9x) / 2 + var(--cpd-space-2x) + var(--cpd-border-width-1))
+    border-radius: calc(var(--tl-control-size) / 2 + var(--cpd-space-2x) + var(--cpd-border-width-1))
+        calc(var(--tl-control-size) / 2 + var(--cpd-space-2x) + var(--cpd-border-width-1))
         calc(var(--cpd-space-8x) / 2 + var(--cpd-space-2x) + var(--cpd-border-width-1))
         calc(var(--cpd-space-8x) / 2 + var(--cpd-space-2x) + var(--cpd-border-width-1));
 }

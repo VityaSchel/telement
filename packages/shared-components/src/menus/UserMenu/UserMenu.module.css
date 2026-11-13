@@ -13,9 +13,9 @@
 }
 
 .container {
-    /* As per design, seperator should span whole width. */
+    /* Spans the item highlights, as in the other menus */
     div[role="separator"] {
-        margin-inline: 0;
+        margin-inline: var(--tl-inset-menu);
     }
     max-width: 300px;
     /*
@@ -66,16 +66,64 @@
     .profileSecondary {
         margin-bottom: var(--cpd-space-4x);
     }
+    /*
+     * The items have the geometry of the other menus (_CompoundOverrides.pcss in the app): highlights inset 4px from
+     * the menu's edge and rounded by 8, concentric with its 12px corners, following each other as 40px rows with
+     * 16px icons and regular text, 4px below the separator (the gap Compound puts between a menu's children) and 4px
+     * from the menu's bottom. What an item holds sits 16px from the menu's edge.
+     */
     section.actions {
-        margin: var(--cpd-space-2x) 0;
-        margin-bottom: var(--cpd-space-3x);
+        margin: 0 var(--tl-inset-menu) var(--tl-inset-menu);
         padding-top: 0;
         display: flex;
         flex-direction: column;
-        gap: var(--cpd-space-1x);
+        gap: 0;
         font: var(--cpd-font-body-md-medium);
         > button[data-kind="primary"] > svg {
             color: var(--cpd-color-icon-secondary);
+        }
+
+        > [role="menuitem"] {
+            min-block-size: var(--cpd-space-10x);
+            padding-inline: var(--cpd-space-3x);
+            border-radius: var(--tl-radius-row);
+            /* The first row, which holds the icon and the chevron, is as tall as the label's first line, so that they
+               center on it; the rows stay together in the middle of the item */
+            grid-template-rows:
+                minmax(calc(var(--cpd-font-size-body-md) * var(--cpd-font-line-height-regular)), auto)
+                auto;
+            align-content: center;
+
+            > svg:first-child {
+                inline-size: 16px;
+                block-size: 16px;
+            }
+
+            > span {
+                font: var(--cpd-font-body-md-regular);
+            }
+
+            /* The chevron shown on hover, cropped to its width like Compound's and as tall as the icons. The crop
+               leaves one of its 24 units after the stroke: pulled out by it, the chevron ends 16px from the edge */
+            > [class*="_nav-hint_"] {
+                inline-size: auto;
+                block-size: 16px;
+                margin-inline-end: calc(-16px / 24);
+            }
+
+            /* Highlighted as on hover, with the ring inside the highlight, so that it keeps clear of the menu's edge */
+            &:focus-visible {
+                outline: var(--cpd-border-width-2) solid var(--cpd-color-border-focused);
+                outline-offset: calc(-1 * var(--cpd-border-width-2));
+            }
+
+            &[data-kind="primary"]:focus-visible {
+                background: var(--cpd-color-bg-action-secondary-hovered);
+            }
+
+            &[data-kind="critical"]:focus-visible {
+                background: var(--cpd-color-bg-critical-subtle);
+            }
         }
     }
 }

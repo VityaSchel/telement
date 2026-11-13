@@ -11,15 +11,15 @@ Please see LICENSE files in the repository root for full details.
  */
 .field {
     --search-field-padding: var(--cpd-space-3x);
-    --search-field-icon-size: 20px;
+    --search-field-icon-size: var(--cpd-space-5x);
     --search-field-gap: var(--cpd-space-2x);
     --search-field-clear-size: var(--cpd-space-7x);
     --search-field-transition: 0.2s ease-out;
 
     position: relative;
     box-sizing: border-box;
-    block-size: var(--cpd-space-9x);
-    border-radius: var(--cpd-radius-pill-effect);
+    block-size: var(--tl-control-size);
+    border-radius: var(--tl-radius-control);
     background-color: var(--cpd-color-bg-subtle-secondary);
     color: var(--cpd-color-text-secondary);
     font: var(--cpd-font-body-md-regular);
@@ -100,7 +100,7 @@ Please see LICENSE files in the repository root for full details.
     block-size: var(--search-field-clear-size);
     margin: 0;
     border: none;
-    border-radius: 50%;
+    border-radius: var(--tl-radius-control);
     padding: 0;
     background: none;
     color: var(--cpd-color-icon-on-solid-primary);

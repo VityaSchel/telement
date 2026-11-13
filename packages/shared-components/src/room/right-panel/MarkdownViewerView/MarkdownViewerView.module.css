@@ -15,7 +15,7 @@ Please see LICENSE in the repository root for full details.
     position: absolute;
     inset: 0;
     overflow: auto;
-    padding: var(--cpd-space-4x);
+    padding: var(--cpd-space-4x) var(--cpd-space-3x);
     background: var(--cpd-color-bg-canvas-default);
     font: var(--cpd-font-body-md-regular);
     /* Long URLs and identifiers must not force the panel wider. */
@@ -92,7 +92,7 @@ Please see LICENSE in the repository root for full details.
     padding: var(--cpd-space-3x);
     overflow-x: auto;
     background: var(--cpd-color-bg-subtle-secondary);
-    border-radius: var(--cpd-space-2x);
+    border-radius: var(--tl-radius-inline);
 }
 
 .content pre code {
@@ -103,9 +103,20 @@ Please see LICENSE in the repository root for full details.
 }
 
 .content blockquote {
-    padding: 0 0 0 var(--cpd-space-3x);
+    position: relative;
+    padding-inline-start: var(--cpd-space-3x);
     color: var(--cpd-color-text-secondary);
-    border-left: var(--cpd-border-width-4) solid var(--cpd-color-border-interactive-secondary);
+}
+
+/* The same line as a quote in a message: a 2px pill, drawn as a border so forced colors keep it. */
+.content blockquote::before {
+    content: "";
+    position: absolute;
+    inset-block: 0;
+    inset-inline-start: 0;
+    inline-size: 0;
+    border-inline-start: var(--cpd-border-width-2) solid var(--cpd-color-border-interactive-primary);
+    border-radius: var(--tl-radius-control);
 }
 
 .content table {

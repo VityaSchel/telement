@@ -6,7 +6,9 @@ Please see LICENSE files in the repository root for full details.
 */
 
 import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
+import { userEvent } from "vitest/browser";
 import compoundTokens from "@vector-im/compound-design-tokens/assets/web/css/cpd-common-base.css?raw";
+import sharedComponentsStyles from "@element-hq/web-shared-components/dist/element-web-shared-components.css?raw";
 
 import contextualMenuStyles from "../../../../res/css/structures/_ContextualMenu.pcss?raw";
 import iconizedContextMenuStyles from "../../../../res/css/views/context_menus/_IconizedContextMenu.pcss?raw";
@@ -16,8 +18,11 @@ let stylesheet: HTMLStyleElement;
 
 const ICON = `<svg viewBox="0 0 24 24"><rect width="24" height="24" /></svg>`;
 
-function option(id: string, label: string): string {
-    return `<li class="mx_IconizedContextMenu_item" role="menuitem" id="${id}">${ICON}<span class="mx_IconizedContextMenu_label">${label}</span></li>`;
+function option(id: string, label: string, checked = false): string {
+    const check = checked
+        ? `<svg class="mx_IconizedContextMenu_checked" id="${id}-check" viewBox="0 0 24 24"></svg>`
+        : "";
+    return `<li class="mx_IconizedContextMenu_item" role="menuitem" tabindex="-1" id="${id}">${ICON}<span class="mx_IconizedContextMenu_label">${label}</span>${check}</li>`;
 }
 
 /** The DOM of the message menu, as MessageContextMenu renders it, with two lists of options. */
@@ -30,7 +35,7 @@ function render(compact: boolean): void {
                     ${option("quote", "Quote")}
                 </div>
                 <div class="mx_IconizedContextMenu_optionList" id="secondList">
-                    ${option("reply", "Reply")}
+                    ${option("reply", "Reply", true)}
                 </div>
             </ul>
         </div>
@@ -62,9 +67,11 @@ describe("IconizedContextMenu", () => {
         // border needs a valid colour to be drawn.
         stylesheet.textContent = `
             ${compoundTokens}
+            ${sharedComponentsStyles}
             :root {
                 --cpd-color-border-interactive-secondary: gray;
                 --cpd-color-gray-400: gray;
+                --cpd-color-border-focused: blue;
             }
             ${contextualMenuStyles}
             ${iconizedContextMenuStyles}
@@ -109,37 +116,73 @@ describe("IconizedContextMenu", () => {
         expect(rectOf("reply").top - rectOf("secondList").top).toBe(4 + 1);
     });
 
-    it("gives the compact items the room menus' size: 16px icons and 15px text with 8px above and below", () => {
+    it("gives the compact items the room menus' size: 40px rows, their 16px icons as far from the sides as from the top", () => {
         render(true);
         const item = rectOf("copy");
         const icon = document.querySelector("#copy svg")!.getBoundingClientRect();
-        const labelText = document.createRange();
-        labelText.selectNodeContents(document.querySelector("#copy .mx_IconizedContextMenu_label")!);
-        const label = labelText.getBoundingClientRect();
+        const label = document.querySelector("#copy .mx_IconizedContextMenu_label")!.getBoundingClientRect();
 
-        expect(item.height).toBe(38.5);
+        expect(item.height).toBe(40);
         expect(rectOf("quote").top).toBe(item.bottom);
         expect(icon.width).toBe(16);
-        expect(icon.left - item.left).toBe(8);
-        expect(label.left - icon.right).toBe(14);
+        expect(icon.top - item.top).toBe(12);
+        expect(item.bottom - icon.bottom).toBe(12);
+        expect(icon.left - item.left).toBe(12);
+        // The label's padding puts it 12px after the icon; its line is centered on the row
+        expect(label.left - icon.right).toBe(0);
+        expect(
+            parseFloat(getComputedStyle(document.querySelector("#copy .mx_IconizedContextMenu_label")!).paddingLeft),
+        ).toBe(12);
+        expect(label.top + label.height / 2).toBe(item.top + item.height / 2);
     });
 
-    it("puts the text of the items 12px from the menu's edge in compact menus and 20px in others", () => {
+    it.each([true, false])("puts what the items hold 16px from the menu's edge, compact: %s", (compact) => {
+        render(compact);
+        const menu = rectOf("menu");
+
+        expect(document.querySelector("#copy svg")!.getBoundingClientRect().left - menu.left).toBe(16);
+        // The check of an active option ends there too, its drawing pulled out of its box's padding
+        const check = rectOf("reply-check");
+        expect(menu.right - check.right).toBeCloseTo(16 - (16 * 4.275) / 24, 1);
+        expect(rectOf("reply").right - check.right).toBeCloseTo(12 - (16 * 4.275) / 24, 1);
+    });
+
+    it("ends the check of an active option 16px from the menu's edge in right-to-left text too", () => {
         render(true);
-        expect(document.querySelector("#copy svg")!.getBoundingClientRect().left - rectOf("menu").left).toBe(12);
+        document.getElementById("menu")!.dir = "rtl";
+        const menu = rectOf("menu");
+        const check = rectOf("reply-check");
 
-        render(false);
-        expect(document.querySelector("#copy svg")!.getBoundingClientRect().left - rectOf("menu").left).toBe(20);
+        // At the left end of the item, its drawing pulled out of its box's padding
+        expect(check.left - menu.left).toBeCloseTo(16 - (16 * 4.275) / 24, 1);
+        expect(check.left - rectOf("reply").left).toBeCloseTo(12 - (16 * 4.275) / 24, 1);
     });
 
-    it("lines the space menu's header up with the icons of its items, 12px from the menu's edge and the separator", () => {
+    it("draws the keyboard focus ring inside the item's highlight, clear of the menu's border", async () => {
+        render(true);
+        const item = document.getElementById("quote")!;
+        // Focus moved after a key press, as the menu's arrow keys move it, matches :focus-visible
+        await userEvent.keyboard("{Shift}");
+        item.focus();
+
+        expect(item.matches(":focus-visible")).toBe(true);
+        const style = getComputedStyle(item);
+        expect(style.outlineStyle).toBe("solid");
+        expect(style.outlineWidth).toBe("2px");
+        expect(style.outlineOffset).toBe("-2px");
+        expect(style.outlineColor).toBe("rgb(0, 0, 255)");
+        // The ring's outer edge is the highlight's, 4px from the menu's edge and 3px from its 1px border
+        expect(item.getBoundingClientRect().left - rectOf("menu").left).toBe(4);
+    });
+
+    it("lines the space menu's header up with the icons of its items, 12px from the menu's top and the separator", () => {
         renderSpaceMenu();
         const menu = rectOf("menu");
         const header = rectOf("header");
         const separator = rectOf("options");
 
-        expect(header.left - menu.left).toBe(12);
-        expect(document.querySelector("#home svg")!.getBoundingClientRect().left - menu.left).toBe(12);
+        expect(header.left - menu.left).toBe(16);
+        expect(document.querySelector("#home svg")!.getBoundingClientRect().left - menu.left).toBe(16);
         expect(header.top - menu.top).toBe(12);
         expect(getComputedStyle(document.getElementById("options")!).borderTopWidth).toBe("1px");
         expect(separator.top - header.bottom).toBe(12);

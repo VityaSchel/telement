@@ -5,6 +5,9 @@
  * Please see LICENSE files in the repository root for full details.
  */
 
+import "@vector-im/compound-design-tokens/assets/web/css/compound-design-tokens.css";
+import "@vector-im/compound-web/dist/style.css";
+import "../../../../telement/tokens.css";
 import React from "react";
 import { render, screen, waitFor } from "@test-utils";
 import userEvent from "@testing-library/user-event";
@@ -44,6 +47,23 @@ describe("<RoomListItemView />", () => {
     it("renders Selected story", () => {
         const { container } = render(<Selected />);
         expect(container).toMatchSnapshot();
+    });
+
+    it("should round the selected room's marker at both ends and the row's highlight as a row", () => {
+        render(<Selected />);
+        const container = screen.getByRole("option").querySelector(`.${styles.container}`)!;
+        const marker = getComputedStyle(container, "::before");
+
+        expect(marker.width).toBe("4px");
+        for (const radius of [
+            marker.borderTopLeftRadius,
+            marker.borderTopRightRadius,
+            marker.borderBottomRightRadius,
+            marker.borderBottomLeftRadius,
+        ]) {
+            expect(parseFloat(radius)).toBeGreaterThanOrEqual(parseFloat(marker.width) / 2);
+        }
+        expect(getComputedStyle(container).borderRadius).toBe("8px");
     });
 
     it("renders Bold story", () => {

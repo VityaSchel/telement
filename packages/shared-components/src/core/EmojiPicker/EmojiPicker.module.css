@@ -11,13 +11,13 @@
     height: min(450px, 80vh);
     max-height: 80vh;
 
-    border-radius: 4px;
+    border-radius: var(--tl-radius-inline);
     /*
-     * The top corners are concentric with the search field: its radius plus its inset (see .search). The sticky category
-     * bar and the scrollbar reach them, so they're clipped.
+     * The top corners are concentric with the category tabs: their radius plus their inset (see .header). The scrollbar
+     * reaches the bottom corners, so they're clipped.
      */
-    border-start-start-radius: calc(var(--cpd-space-9x) / 2 + var(--cpd-space-2x));
-    border-start-end-radius: calc(var(--cpd-space-9x) / 2 + var(--cpd-space-2x));
+    border-start-start-radius: calc(var(--tl-control-size) / 2 + var(--cpd-space-2x));
+    border-start-end-radius: calc(var(--tl-control-size) / 2 + var(--cpd-space-2x));
     overflow: clip;
 
     display: flex;
@@ -30,48 +30,40 @@
 .body {
     flex: 1;
     overflow-y: scroll;
-    /* Keep emoji focused with the keyboard clear of the sticky category bar */
-    scroll-padding-top: calc(var(--cpd-space-9x) + var(--cpd-space-1x) + var(--cpd-border-width-1));
-}
-
-/* The category bar stays at the top once the search field above it has scrolled away */
-.stickyHeader {
-    position: sticky;
-    top: 0;
-    z-index: 1;
-    background-color: var(--cpd-color-bg-canvas-default);
 }
 
 /*
- * Room below the last row of emoji, which otherwise sits on the picker's bottom edge. The left padding centers the
- * fixed-width rows, while the search field and the category bar above span the whole width.
+ * The emoji share the inset of the search field and the category bar, and get room below the last row, which otherwise
+ * sits on the picker's bottom edge.
  */
 .groups {
-    padding-left: var(--cpd-space-1-5x);
-    padding-bottom: var(--cpd-space-2x);
+    padding: 0 var(--cpd-space-2x) var(--cpd-space-2x);
 }
 
-/* The anchors share the width left beside the scrollbar, so they stay on one line */
+/*
+ * The anchors share the picker's width, so they stay on one line. They sit as far from the top as from the sides, so
+ * the picker's corners are concentric with them; the selected one's indicator takes the space below.
+ */
 .header {
     display: flex;
-    padding: var(--cpd-space-1x) var(--cpd-space-2x) 0;
+    padding: var(--cpd-space-2x) var(--cpd-space-2x) var(--cpd-space-1x);
     border-bottom: 1px solid var(--cpd-color-gray-400);
 }
 
 .anchor {
+    position: relative;
     border: none;
     padding: var(--cpd-space-1x) 0;
     /* We have to explicitly inherit the font as button browser styles are implicitly ignorant */
     font: inherit;
     font-size: var(--cpd-font-size-heading-sm);
     line-height: 1;
-    border-bottom: 2px solid transparent;
     background-color: transparent;
-    border-radius: 4px 4px 0 0;
+    border-radius: var(--tl-radius-control);
 
     flex: 1 1 0;
     min-width: 0;
-    height: 36px;
+    height: var(--tl-control-size);
 
     color: var(--cpd-color-text-primary);
     display: inline-block;
@@ -92,28 +84,40 @@
 
     &:not(:disabled):hover {
         background-color: var(--cpd-color-bg-subtle-primary);
-        border-bottom: 2px solid var(--cpd-color-text-action-accent);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--cpd-color-border-focused);
+        outline-offset: -2px;
     }
 }
 
-.anchorSelected {
-    border-bottom: 2px solid var(--cpd-color-text-action-accent);
+/*
+ * A line with round ends under the selected anchor, as wide as its emoji, resting on the bar's border. It's drawn as a
+ * border so that forced colors keep it.
+ */
+.anchorSelected::after {
+    content: "";
+    position: absolute;
+    inset-inline: var(--cpd-space-2x);
+    bottom: calc(-1 * var(--cpd-space-1x));
+    border-top: 2px solid var(--cpd-color-text-action-accent);
+    border-radius: var(--tl-radius-control);
 }
 
 .search {
-    margin: var(--cpd-space-2x);
+    margin: var(--cpd-space-2x) var(--cpd-space-2x) 0;
 }
 
 .category {
-    padding: 0 var(--cpd-space-3x);
+    padding: 0 var(--cpd-space-2x);
 }
 
 .categoryHeader {
-    padding: var(--cpd-space-2x) var(--cpd-space-3x) var(--cpd-space-1x);
+    padding: var(--cpd-space-2x) 0 var(--cpd-space-1x);
 }
 
 .categoryLabel {
-    width: 304px;
     font: var(--cpd-font-heading-sm-semibold);
 }
 
@@ -122,11 +126,15 @@
     margin: 0;
 }
 
-/* A single row of emoji within the grid. Fixed to the width of EMOJIS_PER_ROW
-   cells so the row never wraps, offset to align with the category headers. */
-.row {
-    width: 304px;
-    margin: 0 var(--cpd-space-3x);
+/*
+ * A single row of emoji within the grid, and the quick reactions: EMOJIS_PER_ROW columns spread across the width, so
+ * the first and last emoji line up with the search field and the category bar.
+ */
+.row,
+.quick .list {
+    display: grid;
+    grid-template-columns: repeat(8, 38px);
+    justify-content: space-between;
 }
 
 .itemWrapper {
@@ -134,9 +142,18 @@
     list-style: none;
     width: 38px;
     cursor: pointer;
+    border-radius: var(--tl-radius-inline);
 
     &:focus-within {
         background-color: var(--cpd-color-bg-subtle-primary);
+    }
+
+    /* The roving button is the cell itself in the quick reactions and inside it in the grid */
+    &:focus-visible,
+    & > :focus-visible {
+        outline: 2px solid var(--cpd-color-border-focused);
+        outline-offset: -2px;
+        border-radius: var(--tl-radius-inline);
     }
 }
 
@@ -147,12 +164,12 @@
 .item {
     display: inline-block;
     font-size: var(--cpd-font-size-heading-sm);
-    padding: 5px;
+    padding: var(--cpd-space-1x);
     width: 100%;
     height: 100%;
     box-sizing: border-box;
     text-align: center;
-    border-radius: 4px;
+    border-radius: var(--tl-radius-inline);
 
     &:hover {
         background-color: var(--cpd-color-bg-subtle-primary);
@@ -162,7 +179,8 @@
 .itemSelected {
     color: rgb(0, 0, 0, 0.5);
     border: 1px solid var(--cpd-color-text-action-accent);
-    padding: var(--cpd-space-1x);
+    /* The border takes its place in the padding, so the selected emoji stays the same size */
+    padding: calc(var(--cpd-space-1x) - var(--cpd-border-width-1));
 }
 
 .categoryLabel,
@@ -172,10 +190,19 @@
     margin: 0;
 }
 
+/*
+ * Both footers share the quick reactions' height, so the picker doesn't jump when the preview replaces them. It's the
+ * label's line and a line of emoji in the app's body line height, plus 8px above and below, 4px between them and the
+ * emoji's 4px padding, so it follows the font size.
+ */
 .footer {
+    --emoji-picker-footer-height: calc(
+        1rem * var(--cpd-font-line-height-tight) + var(--cpd-font-size-heading-sm) *
+            var(--cpd-font-line-height-regular) + 2 * var(--cpd-space-2x) + 3 * var(--cpd-space-1x)
+    );
     border-top: 1px solid var(--cpd-color-gray-400);
-    min-height: 72px;
-    max-height: 72px;
+    min-height: var(--emoji-picker-footer-height);
+    max-height: var(--emoji-picker-footer-height);
 
     display: flex;
     align-items: center;
@@ -210,11 +237,26 @@
     }
 }
 
+/* The label and the emoji sit as far from the edges as the list's (see .categoryHeader and .groups) */
 .quick {
     flex-direction: column;
-    justify-content: space-around;
+    justify-content: center;
+    align-items: stretch;
+    gap: var(--cpd-space-1x);
+}
+
+/* The label stays one line, even with a long name at a large font size, so the emoji below don't move */
+.quickHeader {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .quickHeader .name {
     margin-right: var(--cpd-space-1x);
+}
+
+/* The shortcode shown on hover stays within the label's line, sharing its baseline */
+.quickHeader .shortcode {
+    line-height: 1;
 }

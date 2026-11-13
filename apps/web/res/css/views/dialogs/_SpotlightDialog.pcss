@@ -13,14 +13,10 @@ Please see LICENSE files in the repository root for full details.
     }
 
     .mx_Dialog {
-        /* Concentric corners: the dialog's radius is its options' radius plus the padding around them */
-        --mx_SpotlightDialog_option_radius: 8px;
-        --mx_SpotlightDialog_padding: var(--cpd-space-4x);
-        --mx_SpotlightDialog_radius: calc(var(--mx_SpotlightDialog_option_radius) + var(--mx_SpotlightDialog_padding));
-
         /* !important because it's overriding compound  */
         width: fit-content !important;
-        border-radius: var(--mx_SpotlightDialog_radius) !important;
+        /* Concentric corners: the options' radius plus the padding around them */
+        border-radius: var(--tl-radius-surface) !important;
         height: 60% !important;
         overflow-y: initial;
         position: relative;
@@ -34,18 +30,29 @@ Please see LICENSE files in the repository root for full details.
             align-items: center;
             gap: var(--cpd-space-1-5x);
             padding: var(--cpd-space-2x);
-            border-radius: 8px;
+            /* A pill: half its line plus the padding around it */
+            border-radius: calc(0.5lh + var(--cpd-space-2x));
             background-color: $background;
             top: -60px; /* relative to the top of the modal */
             left: 50%;
             transform: translateX(-50%);
             font-size: $font-12px;
-            line-height: $font-15px;
+            /* Whole pixels at every font size, so that the keys and their icons below stay on whole pixels too */
+            line-height: round($font-15px, 1px);
             color: $secondary-content;
 
             kbd {
-                padding: 2px var(--cpd-space-1x);
-                border-radius: 6px;
+                /* Square keys as tall as the line and 2px above and below it, with the arrow's icon in the middle.
+                   The 2px stay outside the line, so that the keys don't make the box taller */
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                vertical-align: top;
+                box-sizing: border-box;
+                inline-size: calc(1lh + 2 * var(--cpd-space-0-5x));
+                block-size: calc(1lh + 2 * var(--cpd-space-0-5x));
+                margin-block: calc(-1 * var(--cpd-space-0-5x));
+                border-radius: var(--tl-radius-inline);
                 background-color: $quinary-content;
                 color: $tertiary-content;
                 /* To avoid any styling inherent with <kbd> elements */
@@ -55,6 +62,23 @@ Please see LICENSE files in the repository root for full details.
 
                 & + kbd {
                     margin-inline-start: var(--cpd-space-0-5x);
+                }
+
+                /* As tall as the line, so it sits a whole 2px inside the key on every side. Browsers round an icon
+                   that is half a pixel in to a whole pixel, which pushed the arrows right and down */
+                > svg {
+                    inline-size: 1lh;
+                    block-size: 1lh;
+                }
+
+                /* The arrow as text, only for the search field's description */
+                > span {
+                    position: absolute;
+                    inline-size: 1px;
+                    block-size: 1px;
+                    overflow: hidden;
+                    clip-path: inset(50%);
+                    white-space: nowrap;
                 }
             }
         }
@@ -73,17 +97,17 @@ Please see LICENSE files in the repository root for full details.
     .mx_SpotlightDialog_searchBox {
         margin: 0;
         border: none;
-        border-radius: var(--mx_SpotlightDialog_radius) var(--mx_SpotlightDialog_radius) 0 0;
-        padding: var(--cpd-space-3x) var(--mx_SpotlightDialog_padding);
+        border-radius: var(--tl-radius-surface) var(--tl-radius-surface) 0 0;
+        padding: var(--cpd-space-3x) var(--tl-inset-surface);
         border-bottom: 1px solid $system;
 
         > .mx_SpotlightDialog_filter {
             display: flex;
             align-content: center;
             align-items: center;
-            /* Inset from the dialog's corner by the same padding as the options */
-            border-radius: var(--mx_SpotlightDialog_option_radius);
-            margin-right: var(--cpd-space-2x);
+            /* A pill, as chips are, inset from the dialog's edge as the options' highlights are, with its icon where
+               their content starts */
+            border-radius: var(--tl-radius-control);
             background-color: $quinary-content;
             vertical-align: middle;
             color: $primary-content;
@@ -128,7 +152,8 @@ Please see LICENSE files in the repository root for full details.
             background-color: transparent;
             width: 100%;
             height: 32px;
-            padding: 0;
+            /* The text starts where the options' content does, 8px inside the edge of their highlights */
+            padding: 0 var(--cpd-space-2x);
             color: $tertiary-content;
             font-weight: normal;
             font-size: $font-15px;
@@ -156,9 +181,9 @@ Please see LICENSE files in the repository root for full details.
     #mx_SpotlightDialog_content {
         height: 100%;
         overflow-y: auto;
-        padding: var(--mx_SpotlightDialog_padding);
+        padding: var(--tl-inset-surface);
         /* Clips the scrolled options and the scroll bar to the dialog's corners */
-        border-radius: 0 0 var(--mx_SpotlightDialog_radius) var(--mx_SpotlightDialog_radius);
+        border-radius: 0 0 var(--tl-radius-surface) var(--tl-radius-surface);
 
         ul {
             padding: 0;
@@ -175,6 +200,12 @@ Please see LICENSE files in the repository root for full details.
                 margin: 0;
             }
 
+            /* Headers and hints line up with the options' content, as the search text does */
+            > h4,
+            .mx_SpotlightDialog_otherSearches_messageSearchText {
+                padding-inline: var(--cpd-space-2x);
+            }
+
             > h4 {
                 margin-bottom: var(--cpd-space-2x);
             }
@@ -183,6 +214,7 @@ Please see LICENSE files in the repository root for full details.
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
+                padding-inline: var(--cpd-space-2x);
                 margin-bottom: var(--cpd-space-2x);
 
                 .mx_SpotlightDialog_options {
@@ -197,7 +229,7 @@ Please see LICENSE files in the repository root for full details.
         }
 
         .mx_SpotlightDialog_option {
-            border-radius: var(--mx_SpotlightDialog_option_radius);
+            border-radius: var(--tl-radius-row);
             overflow: hidden;
             text-overflow: ellipsis;
 
@@ -215,14 +247,15 @@ Please see LICENSE files in the repository root for full details.
                 margin-right: 1px; /* occlude the 1px visible of the very next tile to prevent it looking broken */
             }
 
+            /* The avatar 8px from the tile's top, as in the other options, and the name 8px from its bottom */
             .mx_SpotlightDialog_option {
-                padding: var(--cpd-space-1x);
+                padding: var(--cpd-space-2x) var(--cpd-space-1x);
                 color: $primary-content;
                 font-size: $font-12px;
                 line-height: $font-15px;
                 display: inline-block;
                 width: 58px;
-                height: 58px;
+                height: auto;
                 min-width: 58px;
                 box-sizing: border-box;
                 text-align: center;
@@ -244,7 +277,8 @@ Please see LICENSE files in the repository root for full details.
             .mx_SpotlightDialog_option {
                 --mx_SpotlightDialog_option_selectedBgColor: $system;
 
-                padding: 6px var(--cpd-space-1x);
+                /* As far from the sides as a 24px avatar is from the top and bottom of the 40px row */
+                padding: var(--cpd-space-2x);
                 font-size: $font-15px;
                 line-height: $font-24px;
                 color: $primary-content;
@@ -265,7 +299,8 @@ Please see LICENSE files in the repository root for full details.
 
                     .mx_AccessibleButton {
                         padding: var(--cpd-space-1x) var(--cpd-space-5x);
-                        margin: 2px var(--cpd-space-1x);
+                        /* Ends where the other options' last key or button does, at the option's padding */
+                        margin: 2px 0 2px var(--cpd-space-1x);
                     }
 
                     .mx_SpotlightDialog_enterPrompt {
@@ -409,7 +444,8 @@ Please see LICENSE files in the repository root for full details.
 
         .mx_SpotlightDialog_otherSearches {
             .mx_SpotlightDialog_option {
-                padding-left: var(--cpd-space-8x);
+                /* The icon where the other options' avatars are, with as much space after it */
+                padding-left: var(--cpd-space-10x);
                 position: relative;
 
                 svg {
@@ -417,7 +453,7 @@ Please see LICENSE files in the repository root for full details.
                     width: 24px;
                     height: 24px;
                     position: absolute;
-                    left: var(--cpd-space-1x);
+                    left: var(--cpd-space-2x);
                     top: 50%;
                     transform: translateY(-50%);
                 }
@@ -456,10 +492,15 @@ Please see LICENSE files in the repository root for full details.
             font-size: $font-12px;
             line-height: $font-15px;
             color: $tertiary-content;
-            border-radius: 6px;
+            border-radius: var(--tl-radius-inline);
             background-color: $quinary-content;
             margin-right: var(--cpd-space-1x);
             display: none;
+
+            /* Without buttons after it, it ends at the option's padding, as they do */
+            &:last-child {
+                margin-right: 0;
+            }
         }
 
         .mx_SpotlightDialog_metaspaceResult svg {

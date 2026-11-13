@@ -7,6 +7,7 @@
 
 import "@vector-im/compound-design-tokens/assets/web/css/compound-design-tokens.css";
 import "@vector-im/compound-web/dist/style.css";
+import "../../../../telement/tokens.css";
 import React, { type JSX } from "react";
 import { render, screen, waitFor } from "@test-utils";
 import userEvent from "@testing-library/user-event";

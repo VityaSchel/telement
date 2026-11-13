@@ -5,13 +5,19 @@ SPDX-License-Identifier: AGPL-3.0-only OR GPL-3.0-only
 Please see LICENSE files in the repository root for full details.
 */
 
+// The Playwright provider's types give the CDP session its `send` method
+/// <reference types="@vitest/browser-playwright" />
+
 import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
+import { cdp } from "vitest/browser";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { CloseIcon } from "@vector-im/compound-design-tokens/assets/web/icons";
 import compoundBase from "@vector-im/compound-design-tokens/assets/web/css/cpd-common-base.css?raw";
 import compoundSemantic from "@vector-im/compound-design-tokens/assets/web/css/cpd-common-semantic.css?raw";
 import compoundLightTheme from "@vector-im/compound-design-tokens/assets/web/css/cpd-theme-light-base.css?raw";
+import compoundStyles from "@vector-im/compound-web/dist/style.css?raw";
+import sharedComponentsStyles from "@element-hq/web-shared-components/dist/element-web-shared-components.css?raw";
 
 import accessibleButtonStyles from "../../../../res/css/views/elements/_AccessibleButton.pcss?raw";
 import markerStyles from "../../../../res/css/components/views/location/_Marker.pcss?raw";
@@ -68,6 +74,10 @@ function rect(selector: string): DOMRect {
     return element(selector).getBoundingClientRect();
 }
 
+function quoteLine(): CSSStyleDeclaration {
+    return getComputedStyle(element(".mx_ReplyPreview_section"), "::before");
+}
+
 function centre(box: DOMRect): number {
     return box.top + box.height / 2;
 }
@@ -78,8 +88,10 @@ describe("ReplyPreview styles", () => {
     beforeAll(() => {
         stylesheet = document.createElement("style");
         stylesheet.textContent = `
-            @layer compound-tokens, app-web;
+            @layer compound-tokens, compound-web, shared-components, app-web;
             @layer compound-tokens { ${compoundBase} ${compoundSemantic} ${compoundLightTheme} }
+            @layer compound-web { ${compoundStyles} }
+            ${sharedComponentsStyles}
             @layer app-web {
                 .mx_Username_color3 { color: ${SENDER_COLOUR}; }
                 ${accessibleButtonStyles}
@@ -118,19 +130,70 @@ describe("ReplyPreview styles", () => {
     it("draws the quote line and the title in the sender's colour", () => {
         render(replyPreview(TITLES["a short name"]));
 
-        const section = getComputedStyle(element(".mx_ReplyPreview_section"));
-        expect(section.borderInlineStartWidth).toBe("2px");
-        expect(section.borderInlineStartColor).toBe(SENDER_COLOUR);
+        expect(quoteLine().borderInlineStartColor).toBe(SENDER_COLOUR);
         expect(getComputedStyle(element(".mx_ReplyPreview_title")).color).toBe(SENDER_COLOUR);
+    });
+
+    it("draws the quote line as a 2px pill along the quote, 12px from the title", () => {
+        render(replyPreview(TITLES["a short name"]));
+
+        const line = quoteLine();
+        const section = rect(".mx_ReplyPreview_section");
+        // A border on an empty box, rather than a background, which forced colors would paint over
+        expect(line.borderInlineStartStyle).toBe("solid");
+        expect(line.borderInlineStartWidth).toBe("2px");
+        expect(line.width).toBe("0px");
+        expect(parseFloat(line.height)).toBe(section.height);
+        expect(line.left).toBe("0px");
+        // Both ends are round, on the side of the title as on the outer side
+        for (const radius of [
+            line.borderTopLeftRadius,
+            line.borderTopRightRadius,
+            line.borderBottomRightRadius,
+            line.borderBottomLeftRadius,
+        ]) {
+            expect(parseFloat(radius)).toBeGreaterThanOrEqual(parseFloat(line.borderInlineStartWidth) / 2);
+        }
+        expect(rect(".mx_ReplyPreview_title").left - section.left).toBe(12);
     });
 
     it("puts the quote line at the right and the cancel button at the left in right-to-left text", () => {
         render(replyPreview("Reply to <bdi>אליס</bdi>"), "rtl");
 
-        const section = getComputedStyle(element(".mx_ReplyPreview_section"));
-        expect(section.borderRightWidth).toBe("2px");
-        expect(section.borderLeftWidth).toBe("0px");
+        expect(quoteLine().right).toBe("0px");
+        expect(quoteLine().borderRightWidth).toBe("2px");
+        expect(rect(".mx_ReplyPreview_section").right - rect(".mx_ReplyPreview_title").right).toBe(12);
         expect(rect(".mx_ReplyPreview_header_cancel").right).toBeLessThanOrEqual(rect(".mx_ReplyPreview_title").left);
+    });
+
+    it("keeps the quote line in forced colors", async () => {
+        render(replyPreview(TITLES["a short name"]));
+        const probe = document.createElement("div");
+        probe.style.color = "CanvasText";
+        document.body.append(probe);
+
+        await cdp().send("Emulation.setEmulatedMedia", { features: [{ name: "forced-colors", value: "active" }] });
+        try {
+            expect(matchMedia("(forced-colors: active)").matches).toBe(true);
+            expect(quoteLine().borderInlineStartWidth).toBe("2px");
+            expect(quoteLine().borderInlineStartColor).toBe(getComputedStyle(probe).color);
+        } finally {
+            await cdp().send("Emulation.setEmulatedMedia", { features: [] });
+        }
+    });
+
+    it("rounds the cancel button as a control", () => {
+        render(replyPreview(TITLES["a short name"]));
+
+        const probe = document.createElement("div");
+        probe.style.borderRadius = "var(--tl-radius-control)";
+        document.body.append(probe);
+        const cancel = rect(".mx_ReplyPreview_header_cancel");
+        expect(cancel.width).toBe(cancel.height);
+        expect(getComputedStyle(element(".mx_ReplyPreview_header_cancel")).borderRadius).toBe(
+            getComputedStyle(probe).borderRadius,
+        );
+        expect(parseFloat(getComputedStyle(probe).borderRadius)).toBeGreaterThanOrEqual(cancel.width / 2);
     });
 
     it("sets a shared name's Matrix ID in smaller, regular, secondary text", () => {

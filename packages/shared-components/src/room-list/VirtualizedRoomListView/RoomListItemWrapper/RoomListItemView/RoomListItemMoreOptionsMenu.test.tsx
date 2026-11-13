@@ -7,6 +7,7 @@
 
 import "@vector-im/compound-design-tokens/assets/web/css/compound-design-tokens.css";
 import "@vector-im/compound-web/dist/style.css";
+import "../../../../telement/tokens.css";
 import React, { type JSX } from "react";
 import { render, screen, waitFor } from "@test-utils";
 import userEvent from "@testing-library/user-event";
@@ -269,7 +270,7 @@ describe("<RoomListItemMoreOptionsMenu />", () => {
         expect(icon.getBoundingClientRect().width).toBe(16);
         expect(icon.getBoundingClientRect().height).toBe(16);
         expect(icon.getBoundingClientRect().left - markAsRead.getBoundingClientRect().left).toBe(8);
-        expect(label.getBoundingClientRect().left - icon.getBoundingClientRect().right).toBe(14);
+        expect(label.getBoundingClientRect().left - icon.getBoundingClientRect().right).toBe(12);
         expect(getComputedStyle(label).fontSize).toBe("15px");
         expect(getComputedStyle(label).fontWeight).toBe("400");
 

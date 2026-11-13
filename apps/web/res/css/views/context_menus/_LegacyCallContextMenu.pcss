@@ -5,10 +5,28 @@ SPDX-License-Identifier: AGPL-3.0-only OR GPL-3.0-only OR LicenseRef-Element-Com
 Please see LICENSE files in the repository root for full details.
 */
 
+/* The geometry of the other menus (_IconizedContextMenu.pcss): highlights inset 4px from the menu's edge and rounded
+   by 8, concentric with its 12px corners, and the text 16px from its edge */
+.mx_ContextualMenu:has(> .mx_LegacyCallContextMenu_item) {
+    padding: calc(var(--tl-inset-menu) - var(--cpd-border-width-1));
+}
+
 .mx_LegacyCallContextMenu_item {
     width: 205px;
     height: 40px;
-    padding-left: 16px;
+    padding-left: var(--cpd-space-3x);
     line-height: 40px;
     vertical-align: center;
+    border-radius: var(--tl-radius-row);
+
+    &:hover,
+    &:focus-visible {
+        background-color: var(--cpd-color-bg-action-secondary-hovered);
+    }
+
+    /* Inside the highlight, so that the ring keeps clear of the menu's border, as far as the highlight does */
+    &:focus-visible {
+        outline: var(--cpd-border-width-2) solid var(--cpd-color-border-focused);
+        outline-offset: calc(-1 * var(--cpd-border-width-2));
+    }
 }

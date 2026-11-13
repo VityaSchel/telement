@@ -14,13 +14,13 @@ Please see LICENSE files in the repository root for full details.
     margin: 0;
     /* Inset the items by 4px from the menu's edge, counting its 1px border: the menu's radius (_ContextualMenu.pcss) is
        an item highlight's radius plus this inset, so the corners are concentric */
-    padding: calc(var(--cpd-space-1x) - var(--cpd-border-width-1));
+    padding: calc(var(--tl-inset-menu) - var(--cpd-border-width-1));
 
     .mx_IconizedContextMenu_optionList {
-        /* Less the inset, so that the text sits 20px from the menu's edge, 12px in compact menus as in the room menus */
+        /* Less the inset, so that the content sits 16px from the menu's edge, as in the room menus and Compound's */
         & > * {
-            padding-left: var(--cpd-space-4x);
-            padding-right: var(--cpd-space-4x);
+            padding-left: var(--cpd-space-3x);
+            padding-right: var(--cpd-space-3x);
         }
 
         .mx_IconizedContextMenu_optionList_label {
@@ -33,15 +33,18 @@ Please see LICENSE files in the repository root for full details.
         .mx_IconizedContextMenu_optionList_notFirst {
             border-top: var(--cpd-border-width-1) solid var(--cpd-color-gray-400);
             /* Keep the item highlights the menu padding away from the separator, as from the menu's edge */
-            margin-top: var(--cpd-space-1x);
-            padding-top: var(--cpd-space-1x);
+            margin-top: var(--tl-inset-menu);
+            padding-top: var(--tl-inset-menu);
         }
 
         .mx_IconizedContextMenu_item {
             /* pad the inside of the button so that the hover background is padded too */
             padding-top: 12px;
             padding-bottom: 12px;
-            border-radius: var(--cpd-space-2x);
+            border-radius: var(--tl-radius-row);
+            /* Compact items are 40px rows, as in the room menus and Compound's, with their content centered */
+            box-sizing: border-box;
+            min-height: var(--cpd-space-10x);
             text-decoration: none;
             color: $primary-content;
             font: var(--cpd-font-body-md-regular);
@@ -53,6 +56,12 @@ Please see LICENSE files in the repository root for full details.
             &:hover,
             &:focus-visible {
                 background-color: var(--cpd-color-bg-action-secondary-hovered);
+            }
+
+            /* Inside the highlight, so that the ring keeps clear of the menu's border, as far as the highlight does */
+            &:focus-visible {
+                outline: var(--cpd-border-width-2) solid var(--cpd-color-border-focused);
+                outline-offset: calc(-1 * var(--cpd-border-width-2));
             }
 
             &.mx_AccessibleButton_disabled {
@@ -78,7 +87,7 @@ Please see LICENSE files in the repository root for full details.
                 flex-shrink: 0;
 
                 & + .mx_IconizedContextMenu_label {
-                    padding-left: 14px;
+                    padding-left: var(--cpd-space-3x);
                 }
             }
 
@@ -119,13 +128,15 @@ Please see LICENSE files in the repository root for full details.
 
     &.mx_IconizedContextMenu_compact {
         .mx_IconizedContextMenu_optionList > * {
-            padding: var(--cpd-space-2x) var(--cpd-space-3x) var(--cpd-space-2x) var(--cpd-space-2x);
+            padding: var(--cpd-space-2x) var(--cpd-space-3x);
         }
     }
 
+    /* The check is drawn 4.275 of its 24 units inside its box: pulled out by them, it ends where the content of the
+       item ends, 16px from the menu's edge */
     svg.mx_IconizedContextMenu_checked {
-        margin-left: 16px;
-        margin-right: -5px;
+        margin-inline-start: 16px;
+        margin-inline-end: calc(-16px * 4.275 / 24);
     }
 
     .mx_IconizedContextMenu_sublabel {

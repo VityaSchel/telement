@@ -28,8 +28,6 @@ interface PlainTextComposerProps {
     placeholder?: string;
     initialContent?: string;
     className?: string;
-    leftComponent?: ReactNode;
-    rightComponent?: ReactNode;
     children?: (this: void, ref: RefObject<HTMLDivElement | null>, composerFunctions: ComposerFunctions) => ReactNode;
     eventRelation?: IEventRelation;
 }
@@ -42,8 +40,6 @@ export function PlainTextComposer({
     children,
     placeholder,
     initialContent,
-    leftComponent,
-    rightComponent,
     eventRelation,
 }: PlainTextComposerProps): JSX.Element {
     const isAutoReplaceEmojiEnabled = useSettingValue("MessageComposerInput.autoReplaceEmoji");
@@ -89,13 +85,7 @@ export function PlainTextComposer({
                 handleAtRoomMention={handleAtRoomMention}
                 handleEmoji={handleEmoji}
             />
-            <Editor
-                ref={editorRef}
-                disabled={disabled}
-                leftComponent={leftComponent}
-                rightComponent={rightComponent}
-                placeholder={computedPlaceholder}
-            />
+            <Editor ref={editorRef} disabled={disabled} placeholder={computedPlaceholder} />
             {children?.(editorRef, composerFunctions)}
         </div>
     );

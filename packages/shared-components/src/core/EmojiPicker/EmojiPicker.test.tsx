@@ -9,14 +9,26 @@
 import React from "react";
 import { DATA_BY_CATEGORY } from "@matrix-org/emojibase-bindings";
 import userEvent from "@testing-library/user-event";
-import { render, waitFor, screen } from "@test-utils";
-import { describe, expect, it, vi } from "vitest";
-// The layout assertions need the real spacing tokens
+import type { CDPSession } from "@vitest/browser-playwright";
+import { cdp } from "vitest/browser";
+import { render, waitFor, screen, within } from "@test-utils";
+import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
+// The layout assertions need the real spacing tokens and Compound's pill radius
 import "@vector-im/compound-design-tokens/assets/web/css/compound-design-tokens.css";
+import compoundWebStyles from "@vector-im/compound-web/dist/style.css?inline";
+import "../../telement/tokens.css";
 
-import { EmojiPicker, filterEmojis } from "./EmojiPicker";
+import { EMOJIS_PER_ROW, EmojiPicker, filterEmojis } from "./EmojiPicker";
 
 describe("EmojiPicker", function () {
+    // As in the app, Compound's component styles sit in a layer below the picker's, so its headings keep their size
+    const compoundWebLayer = document.createElement("style");
+    beforeAll(() => {
+        compoundWebLayer.textContent = `@layer compound-web { ${compoundWebStyles} }`;
+        document.head.append(compoundWebLayer);
+    });
+    afterAll(() => compoundWebLayer.remove());
+
     // Recent emojis as they would be provided by the app, most used first
     const RECENT_EMOJIS = ["😀", "🎉", "❤️"];
 
@@ -214,12 +226,10 @@ describe("EmojiPicker", function () {
         expect(getVirtuallyFocusedEmoji()).toEqual("🙂"); // Virtual focus moved
         expect(getEmoji()).toEqual(""); // No actual emoji has focus
 
-        // Tab past the clear button and the category bar, which sit between the search field and the grid, to move
-        // actual focus to the emoji
+        // Tab past the clear button, which sits between the search field and the grid, to move actual focus to the
+        // emoji
         await userEvent.keyboard("[Tab]");
         expect(screen.getByRole("button", { name: "Clear search" })).toHaveFocus();
-        await userEvent.keyboard("[Tab]");
-        expect(screen.getByRole("tab", { name: "😀" })).toHaveFocus();
         await userEvent.keyboard("[Tab]");
         expect(input).not.toHaveFocus();
         expect(getEmoji()).toEqual("🙂"); // Now emoji has actual focus
@@ -447,6 +457,9 @@ describe("EmojiPicker", function () {
             await userEvent.keyboard("[ArrowRight]");
             expect(document.activeElement).toHaveTextContent(secondSmiley);
 
+            // Back past the search field, which sits between the category bar and the emoji
+            await userEvent.tab({ shift: true });
+            expect(screen.getByRole("textbox", { name: "Search" })).toHaveFocus();
             await userEvent.tab({ shift: true });
             expect(screen.getByRole("tab", { name: "😀" })).toHaveFocus();
             await userEvent.keyboard("[ArrowDown]");
@@ -472,13 +485,26 @@ describe("EmojiPicker", function () {
             expect(document.activeElement).toHaveAttribute("aria-disabled", "true");
         });
 
-        it("moves up from the category bar to the search field", async () => {
-            await renderAndWait();
+        it("takes the up arrow from the category bar to the search field, which Tab can't reach in a menu", async () => {
+            const container = await renderAndWait();
             screen.getByRole("tab", { name: "😀" }).focus();
+            const activeEmoji = container.querySelector('[role="gridcell"] [tabindex="0"]');
 
             await userEvent.keyboard("[ArrowUp]");
 
             expect(screen.getByRole("textbox", { name: "Search" })).toHaveFocus();
+            expect(container.querySelector('[role="gridcell"] [tabindex="0"]')).toBe(activeEmoji);
+        });
+
+        it("reaches the search field below the category bar with Tab, and goes back with Shift+Tab", async () => {
+            await renderAndWait();
+            screen.getByRole("tab", { name: "😀" }).focus();
+
+            await userEvent.tab();
+            expect(screen.getByRole("textbox", { name: "Search" })).toHaveFocus();
+
+            await userEvent.tab({ shift: true });
+            expect(screen.getByRole("tab", { name: "😀" })).toHaveFocus();
         });
     });
 
@@ -494,54 +520,346 @@ describe("EmojiPicker", function () {
             const input = screen.getByRole("textbox", { name: "Search" });
             await waitFor(() => expect(screen.getAllByRole("gridcell").length).toBeGreaterThan(0));
             const tablist = screen.getByRole("tablist");
-            // The scroll container holds the search field, the category bar and the emoji
+            // The scroll container holds the search field and the emoji
             const scroller = input.closest<HTMLElement>("section > div")!;
             return { scroller, input, tablist };
         };
 
-        it("scrolls the search field away with the emoji while the category bar sticks to the top", async () => {
+        // The color a CSS color value resolves to here, such as a token or a system color in forced colors
+        const colorOf = (value: string): string => {
+            const probe = document.createElement("div");
+            probe.style.color = value;
+            document.body.append(probe);
+            const color = getComputedStyle(probe).color;
+            probe.remove();
+            return color;
+        };
+
+        // How thick a line drawn as a box with a top border, or a background, is
+        const lineThickness = (style: CSSStyleDeclaration): number =>
+            style.boxSizing === "border-box"
+                ? parseFloat(style.height)
+                : parseFloat(style.height) + parseFloat(style.borderTopWidth) + parseFloat(style.borderBottomWidth);
+
+        // Where the baseline of an inline element's text sits on the page
+        const baselineOf = (element: Element): number => {
+            const probe = document.createElement("span");
+            probe.style.cssText = "display: inline-block; width: 0; height: 0; vertical-align: baseline";
+            element.append(probe);
+            const top = probe.getBoundingClientRect().top;
+            probe.remove();
+            return top;
+        };
+
+        it("keeps the category bar above the search field, which scrolls away with the emoji", async () => {
             const { scroller, input, tablist } = await renderAndWait();
             expect(scroller).toContainElement(input);
-            expect(scroller).toContainElement(tablist);
-            expect(input.compareDocumentPosition(tablist) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+            expect(scroller).not.toContainElement(tablist);
+            expect(tablist.compareDocumentPosition(input) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+            const scrollerTop = scroller.getBoundingClientRect().top;
+            expect(tablist.getBoundingClientRect().bottom).toBeLessThanOrEqual(scrollerTop);
+            expect(input.getBoundingClientRect().top).toBeGreaterThanOrEqual(scrollerTop);
 
             scroller.scrollTop = 500;
             await waitFor(() => expect(scroller.scrollTop).toBe(500));
 
-            const scrollerTop = scroller.getBoundingClientRect().top;
             expect(input.getBoundingClientRect().bottom).toBeLessThanOrEqual(scrollerTop);
-            expect(Math.round(tablist.parentElement!.getBoundingClientRect().top)).toBe(Math.round(scrollerTop));
+            expect(tablist.getBoundingClientRect().bottom).toBeLessThanOrEqual(scrollerTop);
         });
 
-        it("spans the search field and the category bar evenly across the picker", async () => {
-            const { scroller, input, tablist } = await renderAndWait();
+        it("lines the category tabs, the search field, the headers and the emoji up 8px from the edges", async () => {
+            // A full row of recently used emoji and a short one below it
+            const { scroller, input, tablist } = await renderAndWait([
+                "👍",
+                "❤️",
+                "😂",
+                "😮",
+                "😢",
+                "🎉",
+                "🙏",
+                "👀",
+                "🔥",
+                "✅",
+            ]);
             const scrollerBox = scroller.getBoundingClientRect();
             // Leave out the scrollbar, whose width depends on the platform
             const contentRight = scrollerBox.left + scroller.clientWidth;
-
-            const fieldBox = input.parentElement!.getBoundingClientRect();
-            expect(fieldBox.left - scrollerBox.left).toBeCloseTo(contentRight - fieldBox.right, 0);
+            const tabs = screen.getAllByRole("tab");
             const barBox = tablist.getBoundingClientRect();
-            expect(barBox.left).toBeCloseTo(scrollerBox.left, 0);
-            expect(barBox.right).toBeCloseTo(contentRight, 0);
-            // The rows of emoji keep their place
-            expect(screen.getAllByRole("row")[1].getBoundingClientRect().left - scrollerBox.left).toBe(18);
+
+            expect(tabs[0].getBoundingClientRect().left - barBox.left).toBe(8);
+            expect(barBox.right - tabs[tabs.length - 1].getBoundingClientRect().right).toBe(8);
+            const fieldBox = input.parentElement!.getBoundingClientRect();
+            expect([fieldBox.left - scrollerBox.left, contentRight - fieldBox.right]).toEqual([8, 8]);
+            const heading = screen.getByRole("heading", { name: "Frequently Used" });
+            expect(heading.getBoundingClientRect().left - scrollerBox.left).toBe(8);
+            const cells = Array.from(screen.getAllByRole("row")[1].querySelectorAll('[role="gridcell"]'));
+            expect(cells).toHaveLength(EMOJIS_PER_ROW);
+            expect(cells[0].getBoundingClientRect().left - scrollerBox.left).toBe(8);
+            expect(contentRight - cells[cells.length - 1].getBoundingClientRect().right).toBeCloseTo(8, 0);
+            // A short row keeps its emoji in the columns of the full rows above it
+            const shortRow = screen.getAllByRole("row")[2].querySelectorAll('[role="gridcell"]');
+            expect(shortRow[0].getBoundingClientRect().left).toBe(cells[0].getBoundingClientRect().left);
+            expect(shortRow[1].getBoundingClientRect().left).toBe(cells[1].getBoundingClientRect().left);
         });
 
-        it("rounds its top corners to match the search field, clipping the sticky category bar", async () => {
-            const { input } = await renderAndWait();
+        it("rounds its top corners concentric with the category tabs", async () => {
+            const { tablist } = await renderAndWait();
 
             const picker = screen.getByRole("region", { name: "Emoji picker" });
             const pickerBox = picker.getBoundingClientRect();
-            const fieldBox = input.parentElement!.getBoundingClientRect();
+            const tabBox = within(tablist).getAllByRole("tab")[0].getBoundingClientRect();
             const pickerStyle = getComputedStyle(picker);
             expect(pickerStyle.overflow).toBe("clip");
-            // Concentric: the field's radius plus its inset from the picker's edges
-            const inset = fieldBox.top - pickerBox.top;
-            expect(fieldBox.left - pickerBox.left).toBe(inset);
-            expect(parseFloat(pickerStyle.borderTopLeftRadius)).toBe(fieldBox.height / 2 + inset);
+            // Concentric: a tab's radius plus its inset from the picker's edges
+            const inset = tabBox.top - pickerBox.top;
+            expect(tabBox.left - pickerBox.left).toBe(inset);
+            expect(parseFloat(pickerStyle.borderTopLeftRadius)).toBe(tabBox.height / 2 + inset);
             expect(pickerStyle.borderTopLeftRadius).toBe("26px");
             expect(pickerStyle.borderTopRightRadius).toBe("26px");
+        });
+
+        it("highlights a category tab as a circle on hover and keyboard focus", async () => {
+            await renderAndWait();
+            const tab = screen.getByRole("tab", { name: "😀" });
+            const tabBox = tab.getBoundingClientRect();
+            expect([tabBox.width, tabBox.height]).toEqual([36, 36]);
+            expect(parseFloat(getComputedStyle(tab).borderTopLeftRadius)).toBeGreaterThanOrEqual(tabBox.height / 2);
+            // The emoji sits in the middle of the circle
+            const glyph = document.createRange();
+            glyph.selectNodeContents(tab);
+            const glyphBox = glyph.getBoundingClientRect();
+            expect(Math.abs(glyphBox.top - tabBox.top - (tabBox.bottom - glyphBox.bottom))).toBeLessThanOrEqual(0.5);
+            expect(Math.abs(glyphBox.left - tabBox.left - (tabBox.right - glyphBox.right))).toBeLessThanOrEqual(0.5);
+
+            tab.focus();
+            await userEvent.keyboard("[ArrowRight]");
+            const focused = screen.getByRole("tab", { name: "🐕" });
+            expect(focused).toHaveFocus();
+            const focusStyle = getComputedStyle(focused);
+            // A ring just inside the circle, which follows its radius
+            expect([focusStyle.outlineStyle, focusStyle.outlineWidth, focusStyle.outlineOffset]).toEqual([
+                "solid",
+                "2px",
+                "-2px",
+            ]);
+        });
+
+        it("marks the selected category with a line with round ends, as wide as its emoji, on the bar's border", async () => {
+            const { tablist } = await renderAndWait();
+            const selected = screen.getByRole("tab", { name: "😀" });
+            const indicator = getComputedStyle(selected, "::after");
+            const tabBox = selected.getBoundingClientRect();
+
+            expect(indicator.content).toBe('""');
+            expect([lineThickness(indicator), indicator.width]).toEqual([2, "20px"]);
+            expect(indicator.borderTopColor).toBe(colorOf("var(--cpd-color-text-action-accent)"));
+            expect(parseFloat(indicator.borderTopLeftRadius)).toBeGreaterThanOrEqual(1);
+            // Below the circle and resting on the bar's bottom border
+            const barStyle = getComputedStyle(tablist);
+            const barInnerBottom = tablist.getBoundingClientRect().bottom - parseFloat(barStyle.borderBottomWidth);
+            expect(tabBox.bottom + -parseFloat(indicator.bottom)).toBe(barInnerBottom);
+            expect(getComputedStyle(screen.getByRole("tab", { name: "🐕" }), "::after").content).toBe("none");
+        });
+
+        it("keeps the selected category's line in forced colors", async () => {
+            await renderAndWait();
+            const selected = screen.getByRole("tab", { name: "😀" });
+            const session = cdp() as CDPSession;
+            await session.send("Emulation.setEmulatedMedia", {
+                features: [{ name: "forced-colors", value: "active" }],
+            });
+
+            try {
+                expect(matchMedia("(forced-colors: active)").matches).toBe(true);
+                const indicator = getComputedStyle(selected, "::after");
+                expect(lineThickness(indicator)).toBe(2);
+                expect(indicator.borderTopWidth).toBe("2px");
+                expect(indicator.borderTopColor).toBe(colorOf("CanvasText"));
+            } finally {
+                await session.send("Emulation.setEmulatedMedia", { features: [] });
+            }
+        });
+
+        it("pads the quick reactions as evenly as the list's sections, and keeps them in place on hover", async () => {
+            render(<EmojiPicker onChoose={vi.fn()} onFinished={vi.fn()} />);
+            await waitFor(() => expect(screen.getAllByRole("gridcell").length).toBeGreaterThan(0));
+            const picker = screen.getByRole("region", { name: "Emoji picker" });
+            const toolbar = screen.getByRole("toolbar", { name: "Quick Reactions" });
+            const section = toolbar.parentElement!;
+            const label = screen.getByRole("heading", { name: "Quick Reactions" });
+            const cells = Array.from(toolbar.querySelectorAll<HTMLElement>("[class*='item']")).filter(
+                (cell) => cell.parentElement === toolbar,
+            );
+            const sectionTop =
+                section.getBoundingClientRect().top + parseFloat(getComputedStyle(section).borderTopWidth);
+            const labelBox = label.getBoundingClientRect();
+            const cellBox = toolbar.getBoundingClientRect();
+
+            expect(labelBox.top - sectionTop).toBe(8);
+            expect(cellBox.top - labelBox.bottom).toBe(4);
+            expect(picker.getBoundingClientRect().bottom - cellBox.bottom).toBe(8);
+            // The same inset as the list's emoji
+            const pickerBox = picker.getBoundingClientRect();
+            expect(cells).toHaveLength(EMOJIS_PER_ROW);
+            expect(labelBox.left - pickerBox.left).toBe(8);
+            expect(cells[0].getBoundingClientRect().left - pickerBox.left).toBe(8);
+            expect(pickerBox.right - cells[cells.length - 1].getBoundingClientRect().right).toBeCloseTo(8, 0);
+
+            // Hovering one shows its name and shortcode in the label
+            await userEvent.hover(within(toolbar).getAllByRole("button")[3]);
+            await waitFor(() => expect(label).toHaveTextContent("party poppertada"));
+            expect(toolbar.getBoundingClientRect().top).toBe(cellBox.top);
+            const [name, shortcode] = Array.from(label.querySelectorAll("span"));
+            expect(baselineOf(shortcode)).toBe(baselineOf(name));
+
+            // Hovering the list swaps them for a preview of the same height
+            const sectionHeight = section.getBoundingClientRect().height;
+            await userEvent.hover(screen.getAllByRole("button", { name: "😀" })[0]);
+            await waitFor(() => expect(screen.queryByRole("toolbar", { name: "Quick Reactions" })).toBeNull());
+            const preview = picker.lastElementChild!;
+            expect(preview.getBoundingClientRect().height).toBe(sectionHeight);
+        });
+
+        it("keeps the quick reactions' padding at a larger font size, with the preview as tall", async () => {
+            const root = document.documentElement;
+            const fontSize = root.style.fontSize;
+            root.style.fontSize = "20px";
+            try {
+                render(
+                    // The app's body font, whose line height sets the height of the emoji
+                    <div style={{ font: "var(--cpd-font-body-md-regular)" }}>
+                        <EmojiPicker onChoose={vi.fn()} onFinished={vi.fn()} />
+                    </div>,
+                );
+                await waitFor(() => expect(screen.getAllByRole("gridcell").length).toBeGreaterThan(0));
+                const picker = screen.getByRole("region", { name: "Emoji picker" });
+                const toolbar = screen.getByRole("toolbar", { name: "Quick Reactions" });
+                const section = toolbar.parentElement!;
+                const labelBox = screen.getByRole("heading", { name: "Quick Reactions" }).getBoundingClientRect();
+                const cellBox = toolbar.getBoundingClientRect();
+                const sectionTop =
+                    section.getBoundingClientRect().top + parseFloat(getComputedStyle(section).borderTopWidth);
+
+                expect(labelBox.height).toBe(25);
+                expect([
+                    labelBox.top - sectionTop,
+                    cellBox.top - labelBox.bottom,
+                    picker.getBoundingClientRect().bottom - cellBox.bottom,
+                ]).toEqual([8, 4, 8]);
+
+                // The longest name stays on the label's line instead of pushing the emoji down
+                await userEvent.hover(within(toolbar).getAllByRole("button")[2]);
+                const label = screen.getByRole("heading", { name: /grinning face with smiling eyes/i });
+                expect(label.getBoundingClientRect().height).toBe(25);
+                expect(toolbar.getBoundingClientRect().top).toBe(cellBox.top);
+
+                const sectionHeight = section.getBoundingClientRect().height;
+                await userEvent.hover(screen.getAllByRole("button", { name: "😀" })[0]);
+                await waitFor(() => expect(screen.queryByRole("toolbar", { name: "Quick Reactions" })).toBeNull());
+                expect(picker.lastElementChild!.getBoundingClientRect().height).toBe(sectionHeight);
+            } finally {
+                root.style.fontSize = fontSize;
+            }
+        });
+
+        it("rings an emoji focused with the keyboard inside its rounded cell, like the category tabs", async () => {
+            render(<EmojiPicker onChoose={vi.fn()} onFinished={vi.fn()} />);
+            await waitFor(() => expect(screen.getAllByRole("gridcell").length).toBeGreaterThan(0));
+            const expectRing = (focused: Element): void => {
+                const style = getComputedStyle(focused);
+                expect([style.outlineStyle, style.outlineWidth, style.outlineOffset, style.borderRadius]).toEqual([
+                    "solid",
+                    "2px",
+                    "-2px",
+                    "4px",
+                ]);
+            };
+
+            screen.getByRole("tab", { name: "😀" }).focus();
+            await userEvent.keyboard("[ArrowDown]");
+            const inGrid = document.activeElement!;
+            expect(inGrid).toHaveTextContent("😀");
+            expectRing(inGrid);
+            // The cell's highlight behind it is rounded like the emoji's own
+            const cell = inGrid.closest('[role="gridcell"]')!;
+            expect(getComputedStyle(cell).backgroundColor).toBe(colorOf("var(--cpd-color-bg-subtle-primary)"));
+            expect(getComputedStyle(cell).borderRadius).toBe("4px");
+
+            const quick = within(screen.getByRole("toolbar", { name: "Quick Reactions" })).getAllByRole("button")[0];
+            quick.focus();
+            expect(quick).toHaveFocus();
+            expectRing(quick);
+            expect(getComputedStyle(quick).backgroundColor).toBe(colorOf("var(--cpd-color-bg-subtle-primary)"));
+        });
+
+        it("takes the tabs' size and the radii from Telement's tokens", async () => {
+            render(
+                <div
+                    style={
+                        {
+                            "--tl-control-size": "40px",
+                            "--tl-radius-inline": "6px",
+                            "--tl-radius-control": "7px",
+                        } as React.CSSProperties
+                    }
+                >
+                    <EmojiPicker onChoose={vi.fn()} onFinished={vi.fn()} />
+                </div>,
+            );
+            const input = screen.getByRole("textbox", { name: "Search" });
+            await waitFor(() => expect(screen.getAllByRole("gridcell").length).toBeGreaterThan(0));
+
+            const picker = screen.getByRole("region", { name: "Emoji picker" });
+            const pickerStyle = getComputedStyle(picker);
+            const tab = screen.getByRole("tab", { name: "😀" });
+            const tabBox = tab.getBoundingClientRect();
+            const inset = tabBox.top - picker.getBoundingClientRect().top;
+            expect(tabBox.height).toBe(40);
+            expect(input.parentElement!.getBoundingClientRect().height).toBe(40);
+            expect(parseFloat(pickerStyle.borderTopLeftRadius)).toBe(tabBox.height / 2 + inset);
+            expect(pickerStyle.borderBottomLeftRadius).toBe("6px");
+
+            expect(getComputedStyle(tab).borderRadius).toBe("7px");
+            expect(getComputedStyle(tab, "::after").borderRadius).toBe("7px");
+            const cell = screen.getAllByRole("button", { name: "😀" })[0].firstElementChild!;
+            expect(getComputedStyle(cell).borderRadius).toBe("6px");
+        });
+
+        it("draws each emoji in a 38px square rounded by 4px, keeping a selected one's border inside it", async () => {
+            render(
+                // The app's body font, whose line height sets the height of the emoji
+                <div style={{ font: "var(--cpd-font-body-md-regular)" }}>
+                    <EmojiPicker
+                        onChoose={vi.fn()}
+                        onFinished={vi.fn()}
+                        recentEmojis={RECENT_EMOJIS}
+                        selectedEmojis={new Set(["🎉"])}
+                    />
+                </div>,
+            );
+            await waitFor(() => expect(screen.getAllByRole("gridcell").length).toBeGreaterThan(0));
+            const cell = (name: string): HTMLElement =>
+                screen.getAllByRole("checkbox", { name })[0].firstElementChild as HTMLElement;
+            const glyphOffset = (item: HTMLElement): number[] => {
+                const glyph = document.createRange();
+                glyph.selectNodeContents(item);
+                const glyphBox = glyph.getBoundingClientRect();
+                const itemBox = item.getBoundingClientRect();
+                return [glyphBox.left - itemBox.left, glyphBox.top - itemBox.top];
+            };
+            const plain = cell("😀");
+            const selected = cell("🎉");
+            expect(selected).toHaveAttribute("class", expect.stringContaining("itemSelected"));
+
+            for (const item of [plain, selected]) {
+                const box = item.getBoundingClientRect();
+                expect([box.width, box.height]).toEqual([38, 38]);
+                expect(getComputedStyle(item).borderRadius).toBe("4px");
+            }
+            expect(getComputedStyle(selected).borderTopWidth).toBe("1px");
+            expect(glyphOffset(selected)).toEqual(glyphOffset(plain));
+            expect(plain.closest('[role="row"]')!.getBoundingClientRect().height).toBe(38);
         });
 
         it("selects the category whose emoji show below the category bar", async () => {
@@ -581,10 +899,8 @@ describe("EmojiPicker", function () {
             expect(screen.getByRole("tab", { name: "😀" })).toBeEnabled();
             expect(screen.getByRole("tab", { name: "🕒" })).toBeDisabled();
 
-            // The selected category stays reachable with Tab, after the clear button
-            await userEvent.tab();
-            expect(screen.getByRole("button", { name: "Clear search" })).toHaveFocus();
-            await userEvent.tab();
+            // The selected category stays reachable with Shift+Tab, before the search field
+            await userEvent.tab({ shift: true });
             expect(screen.getByRole("tab", { name: "😀" })).toHaveFocus();
         });
 

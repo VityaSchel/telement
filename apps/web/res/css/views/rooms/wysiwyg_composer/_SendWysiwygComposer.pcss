@@ -14,46 +14,24 @@ Please see LICENSE files in the repository root for full details.
     /* fixed line height to prevent emoji from being taller than text */
     line-height: $font-18px;
     justify-content: center;
-    margin-right: 13px;
+    margin-inline-end: var(--cpd-space-1x);
     gap: 8px;
-
-    .mx_FormattingButtons {
-        margin-left: 12px;
-    }
 
     .mx_WysiwygComposer_Editor {
         border: 1px solid;
         border-color: $quinary-content;
-        padding: 6px 11px 6px 12px;
+        /* One line is 36px tall, like the composer's buttons */
+        padding: var(--cpd-space-1-5x) var(--cpd-space-3x);
+        /* A pill around one line, and the same corners as the text grows, so every line keeps its distance from them */
+        border-radius: calc(var(--cpd-space-1-5x) + 1px + $font-22px / 2);
         display: flex;
         align-items: flex-end;
-        gap: 10px;
-
-        .mx_E2EIcon {
-            margin: 0 0 7px 0;
-            width: 12px;
-            height: 12px;
-        }
-
-        &[data-is-expanded="true"] {
-            border-radius: 14px;
-
-            .mx_WysiwygComposer_Editor_container {
-                margin-top: 3px;
-                margin-bottom: 3px;
-            }
-        }
-
-        &[data-is-expanded="false"] {
-            border-radius: 40px;
-        }
 
         .mx_WysiwygComposer_Editor_container {
             flex: 1;
             display: flex;
             flex-direction: column;
             min-height: 22px;
-            margin-bottom: 2px;
             /* don't grow wider than available space */
             width: 0;
 

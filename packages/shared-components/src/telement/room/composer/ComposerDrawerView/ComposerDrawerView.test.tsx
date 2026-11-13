@@ -9,10 +9,13 @@ import React from "react";
 import { composeStories } from "@storybook/react-vite";
 import { act, fireEvent, render, screen } from "@test-utils";
 import { describe, expect, it, vi } from "vitest";
-// The layout assertions need the real spacing tokens
+// The layout assertions need the real spacing tokens, Compound's pill radius and Telement's radius tokens
 import "@vector-im/compound-design-tokens/assets/web/css/compound-design-tokens.css";
+import "@vector-im/compound-web/dist/style.css";
+import "../../../tokens.css";
 
 import * as stories from "./ComposerDrawerView.stories";
+import { EmojiPicker } from "../../../../core/EmojiPicker";
 import {
     ComposerDrawerView,
     type ComposerDrawerViewActions,
@@ -101,11 +104,15 @@ describe("ComposerDrawerView", () => {
 
         const tab = screen.getByRole("tab", { name: "Emoji" });
         const drawer = tab.parentElement!.parentElement!;
-        const field = screen.getByRole("textbox", { name: "Search" }).parentElement!.getBoundingClientRect();
+        const fieldElement = screen.getByRole("textbox", { name: "Search" }).parentElement!;
+        const field = fieldElement.getBoundingClientRect();
         const tabBox = tab.getBoundingClientRect();
         const drawerBox = drawer.getBoundingClientRect();
         const style = getComputedStyle(drawer);
 
+        // The search field and the tabs are pills, so their corners are half their height
+        expect(parseFloat(getComputedStyle(fieldElement).borderTopLeftRadius)).toBeGreaterThanOrEqual(field.height / 2);
+        expect(parseFloat(getComputedStyle(tab).borderBottomLeftRadius)).toBeGreaterThanOrEqual(tabBox.height / 2);
         // Concentric: each corner's radius is the pill's radius plus the pill's inset from the drawer's edges
         expect(field.left - drawerBox.left).toBe(field.top - drawerBox.top);
         expect(parseFloat(style.borderTopLeftRadius)).toBe(field.height / 2 + field.top - drawerBox.top);
@@ -116,6 +123,26 @@ describe("ComposerDrawerView", () => {
         expect(style.borderTopLeftRadius).toBe("26px");
         expect(style.borderBottomLeftRadius).toBe("24px");
         expect(style.overflow).toBe("clip");
+    });
+
+    it("rounds its top corners concentric with the emoji picker's category tabs too", async () => {
+        render(
+            <ComposerDrawerView vm={createVm()}>
+                <EmojiPicker onChoose={vi.fn()} onFinished={vi.fn()} showQuickReactions={false} />
+            </ComposerDrawerView>,
+        );
+        // The first category, in the corner
+        const category = await screen.findByRole("tab", { name: "🕒" });
+
+        const drawer = screen.getByRole("tab", { name: "Emoji" }).parentElement!.parentElement!;
+        const categoryBox = category.getBoundingClientRect();
+        const drawerBox = drawer.getBoundingClientRect();
+        const inset = categoryBox.top - drawerBox.top;
+        expect(categoryBox.left - drawerBox.left).toBe(inset);
+        expect(parseFloat(getComputedStyle(category).borderTopLeftRadius)).toBeGreaterThanOrEqual(
+            categoryBox.height / 2,
+        );
+        expect(parseFloat(getComputedStyle(drawer).borderTopLeftRadius)).toBe(categoryBox.height / 2 + inset);
     });
 
     it("asks a focus lock to focus the selected tab unless the content marks an element first", () => {

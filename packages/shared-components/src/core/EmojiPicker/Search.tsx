@@ -45,7 +45,7 @@ interface IProps {
 }
 
 /**
- * The search field at the top of the emoji picker, which scrolls away with the emoji.
+ * The search field below the emoji picker's category bar, which scrolls away with the emoji.
  */
 export const Search: React.FC<IProps> = ({ query, onChange, onEnter, onKeyDown, inputRef, controlsId }) => {
     const context = useContext(RovingTabIndexContext);
