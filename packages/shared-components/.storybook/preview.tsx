@@ -14,6 +14,7 @@ import "@fontsource/inter/700.css";
 import "./compound.css";
 import "./app-web-root.css";
 import "./preview.css";
+import "../src/telement/tokens.css";
 import React, { useLayoutEffect } from "react";
 import { TooltipProvider } from "@vector-im/compound-web";
 

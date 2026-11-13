@@ -1,0 +1,26 @@
+/*
+Copyright 2026 Viktor Shchelochkov
+
+SPDX-License-Identifier: AGPL-3.0-only OR GPL-3.0-only
+Please see LICENSE files in the repository root for full details.
+*/
+
+/*
+ * Telement's radius and spacing roles (TELEMENT.md, "Radius and spacing"). Leaf elements take a fixed radius;
+ * containers add the padding between them and their children to the children's radius, so corners stay concentric.
+ * The derived tokens resolve here, so a container that changes a leaf token locally writes its own calc().
+ */
+:root {
+    --tl-radius-none: 0;
+    --tl-radius-inline: var(--cpd-space-1x);
+    --tl-radius-row: var(--cpd-space-2x);
+    --tl-radius-bubble: var(--cpd-space-3x);
+    --tl-radius-control: var(--cpd-radius-pill-effect);
+
+    --tl-inset-menu: var(--cpd-space-1x);
+    --tl-inset-surface: var(--cpd-space-4x);
+    --tl-control-size: var(--cpd-space-9x);
+
+    --tl-radius-menu: calc(var(--tl-radius-row) + var(--tl-inset-menu));
+    --tl-radius-surface: calc(var(--tl-radius-row) + var(--tl-inset-surface));
+}
