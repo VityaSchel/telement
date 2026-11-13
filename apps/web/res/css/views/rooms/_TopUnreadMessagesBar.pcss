@@ -11,14 +11,14 @@ Please see LICENSE files in the repository root for full details.
     position: absolute;
     top: 24px;
     right: 24px;
-    width: 38px;
+    width: var(--tl-control-size);
 }
 
 .mx_TopUnreadMessagesBar::after {
     content: "";
     position: absolute;
     top: -8px;
-    left: 11px;
+    left: calc((var(--tl-control-size) - 16px) / 2);
     width: 4px;
     height: 4px;
     border-radius: 16px;
@@ -28,9 +28,9 @@ Please see LICENSE files in the repository root for full details.
 }
 
 .mx_TopUnreadMessagesBar_scrollUp {
-    height: 38px;
-    width: 38px;
-    border-radius: 19px;
+    height: var(--tl-control-size);
+    width: var(--tl-control-size);
+    border-radius: var(--tl-radius-control);
     box-sizing: border-box;
     background: $background;
     border: 1.3px solid var(--cpd-color-icon-tertiary);
@@ -39,7 +39,7 @@ Please see LICENSE files in the repository root for full details.
     svg {
         width: 24px;
         height: 24px;
-        padding: 6px;
+        padding: 5px;
         color: var(--cpd-color-icon-tertiary);
     }
 }

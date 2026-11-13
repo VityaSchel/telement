@@ -11,20 +11,68 @@ Please see LICENSE files in the repository root for full details.
     min-width: 0;
     min-height: 36px; /* to avoid jumping when the X to clear shows/hides */
 
+    /* Same specificity as the 4px of `.mx_Dialog .mx_textinput` and `.mx_MatrixChat_wrapper .mx_textinput` in
+       _common.pcss; this wins because it loads later */
+    &.mx_textinput {
+        border-radius: var(--tl-radius-control);
+        /* Laid out like Telement's search field (SearchFieldView): the input fills the pill, so a click anywhere but
+           the clear button focuses it, and the magnifier and the clear button sit over its padding */
+        position: relative;
+
+        /* A mask rather than the input's background image, which can only be black. 12px from the start of the pill,
+           counting its 1px border, and centered by the flex container */
+        &::before {
+            content: "";
+            position: absolute;
+            inset-inline-start: calc(var(--cpd-space-3x) - 1px);
+            width: var(--cpd-space-5x);
+            height: var(--cpd-space-5x);
+            background-color: var(--cpd-color-icon-secondary);
+            mask: url("@vector-im/compound-design-tokens/icons/search.svg") center / contain no-repeat;
+            pointer-events: none;
+
+            /* Forced colors would paint the background, and so the icon, in the page's background color */
+            @media (forced-colors: active) {
+                forced-color-adjust: none;
+                background-color: CanvasText;
+            }
+        }
+
+        /* The text starts 8px after the magnifier and ends 8px before the clear button */
+        > input.mx_textinput_icon.mx_textinput_search {
+            align-self: stretch;
+            padding-inline: calc(var(--cpd-space-3x) - 1px + var(--cpd-space-5x) + var(--cpd-space-2x))
+                calc(var(--cpd-space-1x) - 1px + var(--cpd-space-7x) + var(--cpd-space-2x));
+        }
+    }
+
     &.mx_SearchBox_blurred:not(:hover) {
         background-color: transparent;
     }
 
+    /* A 16px filled circle in a 28px click target 4px from the end of the pill, as in SearchFieldView. The cross
+       takes the button's color, which forced colors replace with one that shows on the page's background */
     .mx_SearchBox_closeButton {
         cursor: pointer;
         height: 16px;
         width: 16px;
-        padding: 9px;
+        padding: var(--cpd-space-1-5x);
+        position: absolute;
+        inset-inline-end: calc(var(--cpd-space-1x) - 1px);
+        border-radius: var(--tl-radius-control);
+        background-color: var(--cpd-color-icon-tertiary);
+        background-clip: content-box;
+        color: var(--cpd-color-icon-on-solid-primary);
 
         svg {
             height: inherit;
             width: inherit;
-            color: var(--cpd-color-icon-secondary);
+        }
+    }
+
+    @media (hover) {
+        .mx_SearchBox_closeButton:hover {
+            background-color: var(--cpd-color-icon-secondary);
         }
     }
 }

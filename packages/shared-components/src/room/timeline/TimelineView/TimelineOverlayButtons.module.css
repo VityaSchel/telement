@@ -23,7 +23,7 @@
     position: absolute;
     top: var(--cpd-space-6x);
     right: var(--cpd-space-6x);
-    width: 38px;
+    width: var(--tl-control-size);
     pointer-events: all;
 }
 
@@ -31,7 +31,7 @@
     content: "";
     position: absolute;
     top: -8px;
-    left: 11px;
+    left: calc((var(--tl-control-size) - 16px) / 2);
     width: 4px;
     height: 4px;
     border-radius: 16px;
@@ -44,9 +44,9 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 38px;
-    width: 38px;
-    border-radius: 19px;
+    height: var(--tl-control-size);
+    width: var(--tl-control-size);
+    border-radius: var(--tl-radius-control);
     box-sizing: border-box;
     background: var(--cpd-color-bg-canvas-default);
     border: 1.3px solid var(--cpd-color-icon-tertiary);
@@ -86,16 +86,16 @@
     position: absolute;
     top: var(--cpd-space-6x);
     right: var(--cpd-space-6x);
-    width: 38px;
+    width: var(--tl-control-size);
     pointer-events: all;
 }
 
-/* Green dot just below the chevron button (bottom edge at 38px), hinting the marker is downward */
+/* Green dot centered on the chevron button's bottom edge, hinting the marker is downward */
 .belowUnreadBar::after {
     content: "";
     position: absolute;
-    top: 30px;
-    left: 11px;
+    top: calc(var(--tl-control-size) - 8px);
+    left: calc((var(--tl-control-size) - 16px) / 2);
     width: 4px;
     height: 4px;
     border-radius: 16px;
@@ -108,9 +108,9 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 38px;
-    width: 38px;
-    border-radius: 19px;
+    height: var(--tl-control-size);
+    width: var(--tl-control-size);
+    border-radius: var(--tl-radius-control);
     box-sizing: border-box;
     background: var(--cpd-color-bg-canvas-default);
     border: 1.3px solid var(--cpd-color-icon-tertiary);
@@ -133,7 +133,7 @@
     background: var(--cpd-color-bg-canvas-default);
     border: 1.3px solid var(--cpd-color-icon-tertiary);
     border-radius: 10px;
-    /* dot centre is at top: 38px, radius 8px → extends to 46px; add 4px visual gap → 50px - 38px = 12px margin */
+    /* the dot is centered on the button's bottom edge and extends 8px below it; add a 4px visual gap → 12px margin */
     margin: var(--cpd-space-3x) auto 0;
     cursor: pointer;
 }
@@ -149,13 +149,13 @@
 
 .jumpToBottom {
     position: absolute;
-    /* 12 because height is 50 but button is only 38 = 12+(50-38) = 24 */
+    /* 12 because height is 48 but button is only 36 = 12+(48-36) = 24 */
     bottom: var(--cpd-space-3x);
     right: var(--cpd-space-6x);
-    width: 38px;
+    width: var(--tl-control-size);
     /* give it a fixed height so the badge doesn't make */
     /* it taller and pop upwards when visible */
-    height: 50px;
+    height: calc(var(--tl-control-size) + var(--cpd-space-3x));
     text-align: center;
     pointer-events: none;
 }
@@ -183,8 +183,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 38px;
-    height: 38px;
+    width: var(--tl-control-size);
+    height: var(--tl-control-size);
     border-radius: 50%;
     box-sizing: border-box;
     background: var(--cpd-color-bg-canvas-default);

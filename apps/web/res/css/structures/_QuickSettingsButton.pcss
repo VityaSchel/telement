@@ -7,12 +7,18 @@ Please see LICENSE files in the repository root for full details.
 */
 
 .mx_QuickSettingsButton {
-    /* !important override compound */
-    border-radius: 8px !important;
     margin: 12px auto 12px;
 
     svg {
         fill: $secondary-content;
+    }
+
+    &:not(.expanded) {
+        /* Sized like the Threads button above it, and 8px from it as the space buttons are from each other */
+        inline-size: var(--cpd-space-10x);
+        block-size: var(--cpd-space-10x);
+        padding: var(--cpd-space-2x);
+        margin-top: var(--cpd-space-2x);
     }
 
     &:not(.expanded):hover {
@@ -35,10 +41,23 @@ Please see LICENSE files in the repository root for full details.
          */
         background-color: transparent !important;
 
-        /* align with settings icon */
-        margin-left: 21px;
-        margin-right: 8px;
-        width: 100%;
+        /* A row like the Threads one above it and the space buttons' highlight: 40px tall, 8px below the Threads row, in
+           the panel's gutter and 4px from its end, with the icon centered on the space avatars, 8px from the row's start
+           as from its top and bottom. Stretched across the panel rather than as wide as it, so that the row, and its
+           focus ring inside, end within the panel. */
+        margin-top: var(--cpd-space-2x);
+        margin-left: var(--gutterSize);
+        margin-right: var(--cpd-space-1x);
+        width: auto;
+        aspect-ratio: auto;
+        block-size: var(--cpd-space-10x);
+        padding: var(--cpd-space-2x);
+        border-radius: var(--tl-radius-row);
+
+        &:focus-visible {
+            outline: var(--cpd-border-width-2) solid var(--cpd-color-border-focused);
+            outline-offset: calc(-1 * var(--cpd-border-width-2));
+        }
 
         /**
          * modify internal css of the compound component
@@ -50,8 +69,8 @@ Please see LICENSE files in the repository root for full details.
         }
 
         svg {
-            /* align with settings label */
-            margin-right: 14px;
+            /* The label on the edge of the space names */
+            margin-right: var(--cpd-space-3x);
             /* required to set the icon width when into a flex container */
             width: 24px;
             flex-shrink: 0;

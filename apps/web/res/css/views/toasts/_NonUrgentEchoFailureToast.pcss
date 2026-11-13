@@ -7,16 +7,17 @@ Please see LICENSE files in the repository root for full details.
 */
 
 .mx_NonUrgentEchoFailureToast {
+    /* The text wraps beside the icon rather than under it */
+    display: flex;
+    align-items: flex-start;
+
     svg {
-        display: inline-block;
+        flex-shrink: 0;
         width: $font-18px;
         height: $font-18px;
         color: #fff; /* we know that non-urgent toasts are always styled the same */
         margin-right: 8px;
-    }
-
-    span {
-        /* includes the i18n block */
-        vertical-align: middle;
+        /* Centered on the first line of text */
+        margin-block: calc((1lh - $font-18px) / 2);
     }
 }

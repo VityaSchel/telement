@@ -11,8 +11,6 @@
 }
 
 .mx_ThreadsActivityCentreButton {
-    /* !important override compound */
-    border-radius: 8px !important;
     margin: 18px auto auto auto;
 
     &.expanded {
@@ -22,10 +20,20 @@
          */
         background-color: transparent !important;
 
-        /* align with settings icon */
-        margin-left: 21px;
-        margin-right: 8px;
+        /* A row like the space buttons' highlight: 40px tall, in the panel's gutter and 4px from its end, with the icon
+           centered on the space avatars, 8px from the row's start as from its top and bottom. The focus ring is inside
+           the row, so inside the panel. */
+        margin-left: var(--gutterSize);
+        margin-right: var(--cpd-space-1x);
         width: 100%;
+        block-size: var(--cpd-space-10x);
+        padding: var(--cpd-space-2x);
+        border-radius: var(--tl-radius-row);
+
+        &:focus-visible {
+            outline: var(--cpd-border-width-2) solid var(--cpd-color-border-focused);
+            outline-offset: calc(-1 * var(--cpd-border-width-2));
+        }
 
         /**
          * modify internal css of the compound component
@@ -43,8 +51,8 @@
         }
 
         & .mx_ThreadsActivityCentreButton_Icon {
-            /* align with settings label */
-            margin-right: 14px;
+            /* The label on the edge of the space names */
+            margin-right: var(--cpd-space-3x);
             /* required to set the icon width when into a flex container */
             width: 24px;
             flex-shrink: 0;
@@ -57,10 +65,18 @@
     }
 
     &:not(.expanded) {
-        &:hover,
-        &:hover .mx_ThreadsActivityCentreButton_Icon {
+        /* The 40px of the space buttons' selection ring: padding grows the circle around the 24px icon and its dot */
+        inline-size: var(--cpd-space-10x);
+        block-size: var(--cpd-space-10x);
+        padding: var(--cpd-space-2x);
+
+        &:hover {
             /* !important override compound */
             background-color: $quaternary-content !important;
+        }
+
+        &:hover,
+        &:hover .mx_ThreadsActivityCentreButton_Icon {
             fill: $primary-content;
         }
     }
@@ -100,6 +116,9 @@
            scale, so this stays in px. */
         height: 432px;
         min-height: 432px;
+        /* The last row's highlight keeps 4px from the menu's bottom edge, as menu items do. The menu's 4px gap after the
+           tabs does the same above the first. */
+        padding-block-end: var(--tl-inset-menu);
 
         .mx_ThreadsActivityCentreThreadRow {
             /* Floor for rows without a message preview, which would otherwise be ~48px */
@@ -110,7 +129,20 @@
             display: flex;
             align-items: center;
             gap: var(--cpd-space-3x);
-            padding: var(--cpd-space-3x) var(--cpd-space-4x);
+            /* Inset rows, as in the other menus: the highlight 4px from the menu's edge, rounded concentrically with its
+               corners, and the avatar 12px inside it, on the tabs' 16px content edge. A row focused with the keyboard
+               is highlighted as on hover, with the focus ring inside the highlight. A button doesn't stretch to its
+               container's width by itself. */
+            inline-size: calc(100% - 2 * var(--tl-inset-menu));
+            margin-inline: var(--tl-inset-menu);
+            padding: var(--cpd-space-3x);
+            border-radius: var(--tl-radius-row);
+
+            &:focus-visible {
+                outline: var(--cpd-border-width-2) solid var(--cpd-color-border-focused);
+                outline-offset: calc(-1 * var(--cpd-border-width-2));
+                background: var(--cpd-color-bg-action-secondary-hovered);
+            }
 
             /* Compound's .icon class adds margin-inline-end; zero it since gap handles spacing */
             & > .mx_DecoratedRoomAvatar {

@@ -13,10 +13,13 @@ Please see LICENSE files in the repository root for full details.
     z-index: 101; /* same level as other toasts */
 
     .mx_NonUrgentToastContainer_toast {
-        padding: 10px 12px;
-        border-radius: 8px;
+        padding: var(--cpd-space-2x) var(--cpd-space-3x);
+        border-radius: var(--tl-radius-bubble);
         width: 320px;
         font-size: $font-13px;
+        /* Not 1.5: 19.5px leaves the browser half a pixel of leading to round, which lifts the text off the middle of
+           the line the icon is centered on. One line makes a 36px toast. */
+        line-height: $font-20px;
         margin-top: 8px;
 
         /* We don't use variables on the colours because we want it to be the same */

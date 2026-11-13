@@ -7,9 +7,14 @@
 
 import React from "react";
 import { composeStories } from "@storybook/react-vite";
-import { fireEvent, render, screen } from "@test-utils";
+import { fireEvent, render, screen, within } from "@test-utils";
 import userEvent from "@testing-library/user-event";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, onTestFinished, vi } from "vitest";
+import "@vector-im/compound-design-tokens/assets/web/css/compound-design-tokens.css";
+import "@vector-im/compound-web/dist/style.css";
+import interUrl from "@fontsource/inter/files/inter-latin-400-normal.woff2?url";
+
+import "../../../../../telement/tokens.css";
 
 import * as stories from "./ActionBarView.stories.tsx";
 import {
@@ -22,8 +27,22 @@ import { MockViewModel } from "../../../../../core/viewmodel/MockViewModel.ts";
 
 const composedStories = composeStories(stories);
 
-const { DownloadingAttachment, DecryptingAttachment, PinnedMessage, ExpandedReplyChain, DisabledThreadReply } =
-    composedStories;
+const {
+    AllIconActions,
+    AllLabelActions,
+    DownloadingAttachment,
+    DecryptingAttachment,
+    PinnedMessage,
+    ExpandedReplyChain,
+    DisabledThreadReply,
+} = composedStories;
+
+/** Asserts that the element's corners are fully rounded, rather than a fixed radius or an ellipse. */
+function expectPill(element: HTMLElement): void {
+    const radius = getComputedStyle(element).borderTopLeftRadius;
+    expect(radius).not.toContain("%");
+    expect(parseFloat(radius)).toBeGreaterThanOrEqual(element.getBoundingClientRect().height / 2);
+}
 
 describe("ActionBarView", () => {
     afterEach(() => {
@@ -347,5 +366,36 @@ describe("ActionBarView", () => {
 
         fireEvent.contextMenu(viewSourceButton);
         expect(onViewSourceClick).toHaveBeenCalledWith(viewSourceButton);
+    });
+
+    it.each([
+        ["icon", AllIconActions],
+        ["label", AllLabelActions],
+    ])("draws %s buttons and the bar around them as pills", (_, Story) => {
+        render(<Story />);
+
+        const toolbar = screen.getByRole("toolbar");
+        expectPill(toolbar);
+        for (const button of within(toolbar).getAllByRole("button")) {
+            expectPill(button);
+        }
+    });
+
+    it("centers the labels of label buttons vertically, to the half pixel", async () => {
+        // Text is measured to the half pixel, so with the app's font rather than whatever the system falls back to
+        const inter = await new FontFace("Inter", `url(${interUrl})`).load();
+        document.fonts.add(inter);
+        onTestFinished(() => {
+            document.fonts.delete(inter);
+        });
+        render(<AllLabelActions />);
+
+        for (const button of within(screen.getByRole("toolbar")).getAllByRole("button")) {
+            const box = button.getBoundingClientRect();
+            const range = document.createRange();
+            range.selectNodeContents(button);
+            const text = range.getBoundingClientRect();
+            expect(Math.abs(text.top + text.height / 2 - (box.top + box.height / 2))).toBeLessThanOrEqual(0.25);
+        }
     });
 });

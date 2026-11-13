@@ -7,7 +7,7 @@
 
 .toolbar {
     gap: var(--cpd-space-0-5x);
-    border-radius: 8px;
+    border-radius: var(--tl-radius-control);
     background-color: var(--cpd-color-bg-canvas-default);
     border: var(--cpd-border-width-1) solid var(--cpd-color-border-disabled);
 
@@ -18,7 +18,7 @@
         min-block-size: 0;
 
         margin: 3px;
-        border-radius: 6px;
+        border-radius: var(--tl-radius-control);
 
         &:hover {
             background-color: var(--cpd-color-bg-subtle-secondary);
@@ -34,10 +34,15 @@
     }
 
     .toolbar_item[data-presentation="label"] {
+        /* As tall as the icon items, so both bars are 36px */
+        block-size: 28px;
         padding-inline-start: var(--cpd-space-2x);
         padding-inline-end: var(--cpd-space-2x);
 
         font: var(--cpd-font-body-md-regular);
+        /* No leading: the browser rounds the leading above the text down to a whole pixel, which lifts a label with
+           an odd amount of it half a pixel or more above the middle of the pill */
+        line-height: normal;
         text-decoration: none;
         white-space: nowrap;
     }

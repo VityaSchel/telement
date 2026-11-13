@@ -11,6 +11,7 @@ import { composeStories } from "@storybook/react-vite";
 import userEvent from "@testing-library/user-event";
 import { describe, it, expect } from "vitest";
 import { fn } from "storybook/test";
+import "@vector-im/compound-design-tokens/assets/web/css/compound-design-tokens.css";
 
 import * as stories from "./GenericToast.stories.tsx";
 
@@ -32,6 +33,13 @@ describe("GenericToast", () => {
         const { container, getByText } = render(<Destructive />);
         expect(getByText("You have unverified sessions.")).toBeInTheDocument();
         expect(container).toMatchSnapshot();
+    });
+
+    it("leaves a 12px gap between the description and the buttons", () => {
+        const { getByText, getByTestId } = render(<Default />);
+        const description = getByText("You have unverified sessions.").getBoundingClientRect();
+        const buttons = getByTestId("toast-buttons").getBoundingClientRect();
+        expect(buttons.top - description.bottom).toBe(12);
     });
 
     it("omits the secondary button when no secondary action is given", () => {

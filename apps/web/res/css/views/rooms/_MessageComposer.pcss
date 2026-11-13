@@ -161,7 +161,7 @@ Please see LICENSE files in the repository root for full details.
     }
 
     .mx_MessageComposer_button {
-        @mixin composerButton 5px, $tertiary-content, $panels;
+        @mixin composerButton var(--tl-radius-control), $tertiary-content, $panels;
 
         &.mx_MessageComposer_closeButtonMenu {
             &::after {

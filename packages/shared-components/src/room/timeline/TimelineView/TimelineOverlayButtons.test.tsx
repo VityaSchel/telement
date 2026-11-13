@@ -9,7 +9,10 @@ import React from "react";
 import { render, screen } from "@test-utils";
 import userEvent from "@testing-library/user-event";
 import { describe, it, expect, vi } from "vitest";
+import "@vector-im/compound-design-tokens/assets/web/css/compound-design-tokens.css";
+import "@vector-im/compound-web/dist/style.css";
 
+import "../../../telement/tokens.css";
 import { TimelineOverlayButtons } from "./TimelineOverlayButtons";
 import type { TimelineViewActions, TimelineViewSnapshot } from "./types";
 
@@ -174,6 +177,67 @@ describe("<TimelineOverlayButtons />", () => {
 
             await user.click(button(MARK_ALL_READ));
             expect(actions.onMarkAllAsRead).toHaveBeenCalledTimes(1);
+        });
+    });
+
+    describe("layout", () => {
+        const TIMELINE_SIZE = 400;
+
+        /** Renders the overlay over a square the size of {@link TIMELINE_SIZE}, standing in for the timeline. */
+        function renderOverTimeline(snapshot: Partial<TimelineViewSnapshot>): DOMRect {
+            const { container } = render(
+                <div style={{ position: "relative", width: TIMELINE_SIZE, height: TIMELINE_SIZE }}>
+                    <TimelineOverlayButtons
+                        snapshot={{ ...baseSnapshot, ...snapshot }}
+                        vm={makeActions()}
+                        scrollNow={vi.fn()}
+                    />
+                </div>,
+            );
+            return container.firstElementChild!.getBoundingClientRect();
+        }
+
+        /** The center of the unread dot, which the bar draws as its `::after`, relative to the bar. */
+        function dotCenter(bar: HTMLElement): { x: number; y: number } {
+            const dot = getComputedStyle(bar, "::after");
+            const size = parseFloat(dot.width) + parseFloat(dot.borderLeftWidth) + parseFloat(dot.borderRightWidth);
+            return { x: parseFloat(dot.left) + size / 2, y: parseFloat(dot.top) + size / 2 };
+        }
+
+        function expectRoundControl(element: HTMLElement): DOMRect {
+            const box = element.getBoundingClientRect();
+            expect(box.width).toBe(36);
+            expect(box.height).toBe(36);
+            const radius = getComputedStyle(element).borderTopLeftRadius;
+            expect(radius === "50%" || parseFloat(radius) >= box.height / 2).toBe(true);
+            return box;
+        }
+
+        it("centers the unread dot on the top edge of the scroll-up button", () => {
+            renderOverTimeline({ canJumpToReadMarker: "above" });
+
+            const scrollUp = button(JUMP_READ_MARKER);
+            const box = expectRoundControl(scrollUp);
+            expect(dotCenter(scrollUp.parentElement!)).toEqual({ x: box.width / 2, y: 0 });
+        });
+
+        it("centers the unread dot on the bottom edge of the scroll-down button", () => {
+            renderOverTimeline({ canJumpToReadMarker: "below" });
+
+            const scrollDown = button(JUMP_READ_MARKER);
+            const box = expectRoundControl(scrollDown);
+            expect(dotCenter(scrollDown.parentElement!)).toEqual({ x: box.width / 2, y: box.height });
+        });
+
+        it("keeps the jump-to-bottom button 24px from the corner with its badge centered under it", () => {
+            const timeline = renderOverTimeline({ isAtBottom: false, numUnreadMessages: 7 });
+
+            const box = expectRoundControl(button(JUMP_TO_BOTTOM));
+            expect(timeline.right - box.right).toBe(24);
+            expect(timeline.bottom - box.bottom).toBe(24);
+            const badge = screen.getByText("7").getBoundingClientRect();
+            expect(badge.left + badge.width / 2).toBeCloseTo(box.left + box.width / 2, 1);
+            expect(badge.top).toBeLessThan(box.bottom);
         });
     });
 });

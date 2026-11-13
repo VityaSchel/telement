@@ -8,28 +8,39 @@ Please see LICENSE files in the repository root for full details.
 .mx_JumpToBottomButton {
     z-index: 1000;
     position: absolute;
-    /* 12 because height is 50 but button is only 38 = 12+(50-38) = 24 */
+    /* 12 because height is 48 but button is only 36 = 12+(48-36) = 24 */
     bottom: 12px;
     right: 24px;
-    width: 38px;
+    width: var(--tl-control-size);
     /* give it a fixed height so the badge doesn't make */
     /* it taller and pop upwards when visible */
-    height: 50px;
+    height: calc(var(--tl-control-size) + var(--cpd-space-3x));
     text-align: center;
 }
 
+/*
+ * Like the room list's unread counter: 20px tall at the default font size, with the digits trimmed to their cap height
+ * and padded by a whole number of pixels on every side, so that they sit in its middle, one digit makes a circle and
+ * more make a pill. Its middle is on the middle of the button's bottom edge.
+ */
 .mx_JumpToBottomButton_badge {
-    position: relative;
-    top: -12px;
-    border-radius: 16px;
-    font-weight: bold;
-    font-size: $font-12px;
-    line-height: $font-14px;
+    --badge-inset: round(calc((1.25rem - 1cap) / 2), 1px);
+
+    position: absolute;
+    inset-block-start: var(--tl-control-size);
+    inset-inline: 0;
+    translate: 0 -50%;
+    box-sizing: content-box;
+    inline-size: fit-content;
+    min-inline-size: 1cap;
+    block-size: 1cap;
+    margin-inline: auto;
+    padding: var(--badge-inset);
+    border-radius: var(--tl-radius-control);
+    font: var(--cpd-font-body-xs-semibold);
+    line-height: 1cap;
+    text-box: trim-both cap alphabetic;
     text-align: center;
-    /* to be able to get it centered */
-    /* with text-align in parent */
-    display: inline-block;
-    padding: 0 4px;
     color: var(--cpd-color-text-on-solid-primary);
     background-color: var(--cpd-color-icon-secondary);
 }
@@ -40,8 +51,11 @@ Please see LICENSE files in the repository root for full details.
 
 .mx_JumpToBottomButton_scrollDown {
     position: relative;
-    display: block;
-    height: 38px;
+    /* Centers the chevron inside the border, which a padded icon as large as the button can't */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: var(--tl-control-size);
     border-radius: 50%;
     box-sizing: border-box;
     background: $background;
@@ -49,10 +63,8 @@ Please see LICENSE files in the repository root for full details.
     cursor: pointer;
 
     svg {
-        height: inherit;
-        width: inherit;
-        box-sizing: border-box;
-        padding: 7px 8px 7px 6px;
+        height: 24px;
+        width: 24px;
         color: var(--cpd-color-icon-tertiary);
     }
 }
