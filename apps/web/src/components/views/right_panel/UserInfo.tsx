@@ -16,14 +16,12 @@ import { type UserVerificationStatus, type VerificationRequest, CryptoEvent } fr
 
 import Modal from "../../../Modal";
 import { _t } from "../../../languageHandler";
-import { type ButtonEvent } from "../elements/AccessibleButton";
 import MatrixClientContext from "../../../contexts/MatrixClientContext";
 import { RightPanelPhases } from "../../../stores/right-panel/RightPanelStorePhases";
 import EncryptionPanel from "./EncryptionPanel";
 import { useIsEncrypted } from "../../../hooks/useIsEncrypted";
 import BaseCard from "./BaseCard";
 import QuestionDialog from "../dialogs/QuestionDialog";
-import PosthogTrackers from "../../../PosthogTrackers";
 import { UserInfoHeaderView } from "./user_info/UserInfoHeaderView";
 import { UserInfoBasicView } from "./user_info/UserInfoBasicView";
 import { SDKContext } from "../../../contexts/SDKContext.ts";
@@ -228,17 +226,7 @@ const UserInfo: React.FC<IProps> = ({ user, room, onClose, phase = RightPanelPha
     );
 
     return (
-        <BaseCard
-            className={classes.join(" ")}
-            header={_t("common|profile")}
-            onClose={onClose}
-            closeLabel={closeLabel}
-            onBack={(ev: ButtonEvent) => {
-                if (sdkContext.rightPanelStore.previousCard.phase === RightPanelPhases.MemberList) {
-                    PosthogTrackers.trackInteraction("WebRightPanelRoomUserInfoBackButton", ev);
-                }
-            }}
-        >
+        <BaseCard className={classes.join(" ")} header={_t("common|profile")} onClose={onClose} closeLabel={closeLabel}>
             {header}
             {content}
         </BaseCard>

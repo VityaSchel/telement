@@ -116,7 +116,6 @@ describe("BreadcrumbsStore", () => {
             {
                 action: Action.JoinRoom,
                 roomId,
-                metricsTrigger: null,
             },
             true, // synchronous dispatch
         );

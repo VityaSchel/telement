@@ -39,7 +39,6 @@ export async function startDm(client: MatrixClient, targets: Member[], showSpinn
             room_id: existingRoom.roomId,
             should_peek: false,
             joining: false,
-            metricsTrigger: "MessageUser",
         });
         return Promise.resolve(existingRoom.roomId);
     }

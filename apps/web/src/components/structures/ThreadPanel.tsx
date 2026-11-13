@@ -24,7 +24,6 @@ import TimelinePanel from "./TimelinePanel";
 import { Layout } from "../../settings/enums/Layout";
 import { type RoomPermalinkCreator } from "../../utils/permalinks/Permalinks";
 import Measured from "../views/elements/Measured";
-import PosthogTrackers from "../../PosthogTrackers";
 import { type ButtonEvent } from "../views/elements/AccessibleButton";
 import Spinner from "../views/elements/Spinner";
 import { clearRoomNotification } from "../../utils/notifications";
@@ -112,7 +111,6 @@ export const ThreadPanelHeader: React.FC<{
 
     const onMarkAllThreadsReadClick = React.useCallback(
         (e: React.MouseEvent) => {
-            PosthogTrackers.trackInteraction("WebThreadsMarkAllReadButton", e);
             if (!roomContext.room) {
                 logger.error("No room in context to mark all threads read");
                 return;
@@ -143,7 +141,6 @@ export const ThreadPanelHeader: React.FC<{
                 isExpanded={menuDisplayed}
                 onClick={(ev: ButtonEvent) => {
                     openMenu();
-                    PosthogTrackers.trackInteraction("WebRightPanelThreadPanelFilterDropdown", ev);
                 }}
             >
                 {`${_t("threads|show_thread_filter")} ${value?.label}`}

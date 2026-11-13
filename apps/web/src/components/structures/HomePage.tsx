@@ -17,26 +17,22 @@ import dis from "../../dispatcher/dispatcher";
 import { Action } from "../../dispatcher/actions";
 import BaseAvatar from "../views/avatars/BaseAvatar";
 import { OwnProfileStore } from "../../stores/OwnProfileStore";
-import AccessibleButton, { type ButtonEvent } from "../views/elements/AccessibleButton";
+import AccessibleButton from "../views/elements/AccessibleButton";
 import { UPDATE_EVENT } from "../../stores/AsyncStore";
 import { useEventEmitter } from "../../hooks/useEventEmitter";
 import MatrixClientContext, { useMatrixClientContext } from "../../contexts/MatrixClientContext";
 import MiniAvatarUploader, { AVATAR_SIZE } from "../views/elements/MiniAvatarUploader";
-import PosthogTrackers from "../../PosthogTrackers";
 import EmbeddedPage from "./EmbeddedPage";
 
-const onClickSendDm = (ev: ButtonEvent): void => {
-    PosthogTrackers.trackInteraction("WebHomeCreateChatButton", ev);
+const onClickSendDm = (): void => {
     dis.dispatch({ action: Action.CreateChat });
 };
 
-const onClickExplore = (ev: ButtonEvent): void => {
-    PosthogTrackers.trackInteraction("WebHomeExploreRoomsButton", ev);
+const onClickExplore = (): void => {
     dis.fire(Action.ViewRoomDirectory);
 };
 
-const onClickNewRoom = (ev: ButtonEvent): void => {
-    PosthogTrackers.trackInteraction("WebHomeCreateRoomButton", ev);
+const onClickNewRoom = (): void => {
     dis.dispatch({ action: Action.CreateRoom });
 };
 
@@ -70,7 +66,6 @@ const UserWelcomeTop: React.FC = () => {
                 noAvatarLabel={_t("onboarding|no_avatar_label")}
                 setAvatarUrl={(url) => cli.setAvatarUrl(url)}
                 isUserAvatar
-                onClick={(ev) => PosthogTrackers.trackInteraction("WebHomeMiniAvatarUploadButton", ev)}
             >
                 <BaseAvatar
                     idName={userId}

@@ -25,7 +25,6 @@ import type BaseEventIndexManager from "../../indexing/BaseEventIndexManager";
 import dis from "../../dispatcher/dispatcher";
 import SdkConfig from "../../SdkConfig";
 import { type IConfigOptions } from "../../IConfigOptions";
-import * as rageshake from "../../rageshake/rageshake";
 import Modal from "../../Modal";
 import InfoDialog from "../../components/views/dialogs/InfoDialog";
 import Spinner from "../../components/views/elements/Spinner";
@@ -138,10 +137,8 @@ export default class ElectronPlatform extends BasePlatform {
             this.electron.send("serverSupportedVersions", await MatrixClientPeg.get()?.getVersions());
         });
 
-        // try to flush the rageshake logs to indexeddb before quit.
         this.electron.on("before-quit", function () {
             logger.log("element-desktop closing");
-            rageshake.flush();
         });
 
         this.electron.on("update-downloaded", this.onUpdateDownloaded);
@@ -265,7 +262,7 @@ export default class ElectronPlatform extends BasePlatform {
     };
 
     public getHumanReadableName(): string {
-        return "Electron Platform"; // no translation required: only used for analytics
+        return "Electron Platform"; // no translation required: only used internally
     }
 
     /**

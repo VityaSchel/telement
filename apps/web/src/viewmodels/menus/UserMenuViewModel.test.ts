@@ -23,8 +23,6 @@ import { SDKContextClass } from "../../contexts/SDKContextClass";
 import SdkConfig from "../../SdkConfig";
 import { Action } from "../../dispatcher/actions";
 import { UserTab } from "../../components/views/dialogs/UserTab";
-import Modal from "../../Modal";
-import FeedbackDialog from "../../components/views/dialogs/FeedbackDialog";
 import { type OwnProfileStore } from "../../stores/OwnProfileStore";
 
 describe("UserMenuViewModel", () => {
@@ -85,13 +83,6 @@ describe("UserMenuViewModel", () => {
         expect(vm.getSnapshot().displayName).toEqual("Sally Sanderson");
         expect(vm.getSnapshot().showAvatar).toEqual(false);
         expect(vm.getSnapshot().showUserStatus).toEqual(false);
-    });
-
-    it("should generate a menu options that include feedback", () => {
-        SdkConfig.put({ bug_report_endpoint_url: "https://example.org" });
-        const vm = new UserMenuViewModel({ ownProfileStore: mockOwnProfileStore }, dispatcher, client, true);
-        vm.setOpen(true);
-        expect(vm.getSnapshot().actions.openFeedback).toEqual(true);
     });
 
     it("should generate a menu options that includes a home page", () => {
@@ -158,17 +149,6 @@ describe("UserMenuViewModel", () => {
                 initialTabId: UserTab.Security,
             }),
         );
-    });
-
-    it("can open the 'feedback' settings menu", async () => {
-        vi.spyOn(Modal, "createDialog");
-        SdkConfig.put({ bug_report_endpoint_url: "https://example.org" });
-        const vm = new UserMenuViewModel({ ownProfileStore: mockOwnProfileStore }, dispatcher, client, true);
-        const dispatcherSpy = vi.fn();
-        dispatcher.register(dispatcherSpy);
-        vm.setOpen(true);
-        vm.openFeedback();
-        expect(Modal.createDialog).toHaveBeenCalledWith(FeedbackDialog);
     });
 
     it("can open the settings menu", async () => {

@@ -53,7 +53,6 @@ const ThreadListContextMenu: React.FC<ThreadListContextMenuProps> = ({
                 event_id: mxEvent.getId(),
                 highlighted: true,
                 room_id: mxEvent.getRoomId(),
-                metricsTrigger: undefined, // room doesn't change
             });
             closeThreadOptions();
         },

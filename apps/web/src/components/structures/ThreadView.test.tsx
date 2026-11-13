@@ -213,7 +213,6 @@ describe("ThreadView", () => {
         expect(mock).toHaveBeenCalledWith({
             action: Action.ViewRoom,
             room_id: room.roomId,
-            metricsTrigger: undefined,
         });
     });
 

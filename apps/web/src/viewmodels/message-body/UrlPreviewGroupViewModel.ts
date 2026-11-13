@@ -8,9 +8,7 @@
 import { MsgType, type MatrixClient, type MatrixEvent } from "matrix-js-sdk/src/matrix";
 import { BaseViewModel } from "@element-hq/web-shared-components";
 import { type UrlPreview, type UrlPreviewGroupViewActions, type UrlPreviewGroupViewSnapshot } from "shared-types";
-import { type UrlPreviewVisibilityChanged } from "@matrix-org/analytics-events/types/typescript/UrlPreviewVisibilityChanged";
 
-import { PosthogAnalytics } from "../../PosthogAnalytics";
 import { isPermalinkHost } from "../../utils/permalinks/Permalinks";
 import { UrlPreviewFetcher } from "../../utils/UrlPreviewFetcher";
 import { type RoomMessageEventContent } from "../../../@types/url-preview";
@@ -298,13 +296,6 @@ export class UrlPreviewGroupViewModel
         // FIXME: persist this somewhere smarter than local storage
         globalThis.localStorage?.setItem(this.storageKey, "1");
         this.urlPreviewEnabledByUser = false;
-        PosthogAnalytics.instance.trackEvent<UrlPreviewVisibilityChanged>({
-            eventName: "UrlPreviewVisibilityChanged",
-            previewKind: "LegacyCard",
-            hasThumbnail: this.snapshot.current.previews.some((p) => !!p.image),
-            previewCount: this.snapshot.current.previews.length,
-            visible: this.urlPreviewEnabledByUser,
-        });
         return this.computeSnapshot();
     };
 

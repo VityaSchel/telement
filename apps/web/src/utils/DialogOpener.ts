@@ -22,7 +22,6 @@ import SpaceSettingsDialog from "../components/views/dialogs/SpaceSettingsDialog
 import InviteDialog from "../components/views/dialogs/InviteDialog";
 import AddExistingToSpaceDialog from "../components/views/dialogs/AddExistingToSpaceDialog";
 import { type ButtonEvent } from "../components/views/elements/AccessibleButton";
-import PosthogTrackers from "../PosthogTrackers";
 import { showAddExistingSubspace, showCreateNewRoom } from "./space";
 import { SDKContextClass } from "../contexts/SDKContextClass";
 
@@ -125,7 +124,6 @@ export class DialogOpener {
                     {
                         onCreateRoomClick: (ev: ButtonEvent) => {
                             void showCreateNewRoom(space);
-                            PosthogTrackers.trackInteraction("WebAddExistingToSpaceDialogCreateRoomButton", ev);
                         },
                         onAddSubspaceClick: () => showAddExistingSubspace(space),
                         space,

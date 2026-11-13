@@ -154,7 +154,6 @@ describe("direct-messages", () => {
                     room_id: room1.roomId,
                     should_peek: false,
                     joining: false,
-                    metricsTrigger: "MessageUser",
                 });
             });
         });

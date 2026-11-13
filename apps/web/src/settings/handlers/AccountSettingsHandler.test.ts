@@ -39,10 +39,10 @@ describe("AccountSettingsHandler", () => {
     });
 
     it("should write value to account data correctly", async () => {
-        void handler.setValue("pseudonymousAnalyticsOptIn", null, true);
+        void handler.setValue("integrationProvisioning", null, true);
 
-        expect(handler.client.setAccountData).toHaveBeenCalledWith("im.vector.analytics", {
-            pseudonymousAnalyticsOptIn: true,
+        expect(handler.client.setAccountData).toHaveBeenCalledWith("im.vector.setting.integration_provisioning", {
+            enabled: true,
         });
     });
 });

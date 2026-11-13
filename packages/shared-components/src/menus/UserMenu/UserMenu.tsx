@@ -7,13 +7,7 @@
 
 import React, { type JSX } from "react";
 import { Avatar, Button, Link, Menu, MenuItem, Separator, Text } from "@vector-im/compound-web";
-import {
-    ChatProblemIcon,
-    DevicesIcon,
-    HomeIcon,
-    LockIcon,
-    SettingsIcon,
-} from "@vector-im/compound-design-tokens/assets/web/icons";
+import { DevicesIcon, HomeIcon, LockIcon, SettingsIcon } from "@vector-im/compound-design-tokens/assets/web/icons";
 import classNames from "classnames";
 
 import styles from "./UserMenu.module.css";
@@ -70,7 +64,6 @@ export interface UserMenuViewSnapshot {
         openHomePage: boolean;
         linkNewDevice: boolean;
         openSecurity: boolean;
-        openFeedback: boolean;
         openSettings: boolean;
     }>;
 }
@@ -100,10 +93,6 @@ export declare interface UserMenuViewActions {
      * Called to open the security tab of the settings dialog.
      */
     openSecurity: () => void;
-    /**
-     * Called to open the feedback dialog.
-     */
-    openFeedback: () => void;
     /**
      * Called to open the settings dialog.
      */
@@ -227,13 +216,6 @@ export function UserMenuView({ vm, className }: UserMenuViewProps): JSX.Element 
                     )}
                     {actions.openSecurity && (
                         <MenuItem Icon={LockIcon} label={_t("user_menu|open_security")} onSelect={vm.openSecurity} />
-                    )}
-                    {actions.openFeedback && (
-                        <MenuItem
-                            Icon={ChatProblemIcon}
-                            label={_t("user_menu|open_feedback")}
-                            onSelect={vm.openFeedback}
-                        />
                     )}
                     {actions.openSettings && (
                         <MenuItem

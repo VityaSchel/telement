@@ -76,7 +76,6 @@ describe("WidgetPipViewModel", () => {
         expect(dispatchSpy).toHaveBeenCalledWith({
             action: Action.ViewRoom,
             room_id: room.roomId,
-            metricsTrigger: "WebFloatingCallWindow",
         });
         dispatchSpy.mockClear();
 
@@ -88,7 +87,6 @@ describe("WidgetPipViewModel", () => {
             action: Action.ViewRoom,
             room_id: room.roomId,
             view_call: true,
-            metricsTrigger: "WebFloatingCallWindow",
         });
     });
 
@@ -106,7 +104,6 @@ describe("WidgetPipViewModel", () => {
         expect(dispatchSpy).toHaveBeenCalledWith({
             action: Action.ViewRoom,
             room_id: room.roomId,
-            metricsTrigger: "WebFloatingCallWindow",
         });
         expect(moveSpy).not.toHaveBeenCalled();
     });

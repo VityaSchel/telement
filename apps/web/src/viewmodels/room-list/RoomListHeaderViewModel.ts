@@ -14,7 +14,6 @@ import {
 } from "@element-hq/web-shared-components";
 
 import defaultDispatcher from "../../dispatcher/dispatcher";
-import PosthogTrackers from "../../PosthogTrackers";
 import { Action } from "../../dispatcher/actions";
 import { getMetaSpaceName, type MetaSpace, UPDATE_HOME_BEHAVIOUR, UPDATE_SELECTED_SPACE } from "../../stores/spaces";
 import type SpaceStore from "../../stores/spaces/SpaceStore";
@@ -122,12 +121,10 @@ export class RoomListHeaderViewModel
 
     public createChatRoom = (e: Event): void => {
         defaultDispatcher.fire(Action.CreateChat);
-        PosthogTrackers.trackInteraction("WebRoomListHeaderPlusMenuCreateChatItem", e);
     };
 
     public createRoom = (e: Event): void => {
         void createRoom(this.activeSpace);
-        PosthogTrackers.trackInteraction("WebRoomListHeaderPlusMenuCreateRoomItem", e);
     };
 
     public createVideoRoom = (): void => {
@@ -149,7 +146,6 @@ export class RoomListHeaderViewModel
         defaultDispatcher.dispatch<ViewRoomPayload>({
             action: Action.ViewRoom,
             room_id: this.activeSpace.roomId,
-            metricsTrigger: undefined,
         });
     };
 
@@ -169,7 +165,6 @@ export class RoomListHeaderViewModel
     };
 
     public sort = (option: SortOption): void => {
-        const oldSortingAlgorithm = RoomListStoreV3.instance.activeSortAlgorithm;
         let newSortingAlgorithm: SortingAlgorithm;
         switch (option) {
             case "alphabetical":
@@ -184,11 +179,6 @@ export class RoomListHeaderViewModel
         }
         RoomListStoreV3.instance.resort(newSortingAlgorithm);
         this.snapshot.merge({ activeSortOption: option });
-
-        // Record analytics for this action
-        if (oldSortingAlgorithm) {
-            PosthogTrackers.trackRoomListSortingAlgorithmChange(oldSortingAlgorithm, newSortingAlgorithm);
-        }
     };
 }
 

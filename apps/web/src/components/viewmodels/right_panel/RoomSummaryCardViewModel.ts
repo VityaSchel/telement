@@ -30,7 +30,6 @@ import { DefaultTagID } from "../../../stores/room-list-v3/skip-list/tag";
 import { useEventEmitterState } from "../../../hooks/useEventEmitter";
 import RightPanelStore from "../../../stores/right-panel/RightPanelStore";
 import { RightPanelPhases } from "../../../stores/right-panel/RightPanelStorePhases";
-import PosthogTrackers from "../../../PosthogTrackers";
 import { PollHistoryDialog } from "../../views/dialogs/PollHistoryDialog";
 import Modal from "../../../Modal";
 import ExportDialog from "../../views/dialogs/ExportDialog";
@@ -210,13 +209,11 @@ export function useRoomSummaryCardViewModel(
     };
 
     const onRoomPinsClick = (): void => {
-        PosthogTrackers.trackInteraction("PinnedMessageRoomInfoButton");
         RightPanelStore.instance.pushCard({ phase: RightPanelPhases.PinnedMessages }, true);
     };
 
     const onRoomSettingsClick = (ev: Event): void => {
         defaultDispatcher.dispatch({ action: "open_room_settings" });
-        PosthogTrackers.trackInteraction("WebRightPanelRoomInfoSettingsButton", ev);
     };
 
     const onShareRoomClick = (): void => {

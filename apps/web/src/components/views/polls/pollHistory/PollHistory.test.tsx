@@ -347,7 +347,6 @@ describe("<PollHistory />", () => {
                 action: Action.ViewRoom,
                 event_id: pollStart1.getId()!,
                 highlighted: true,
-                metricsTrigger: undefined,
                 room_id: pollStart1.getRoomId()!,
             });
 

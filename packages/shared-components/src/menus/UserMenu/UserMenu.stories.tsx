@@ -26,7 +26,6 @@ const UserMenuWrapperImpl = (snapshot: UserMenuViewSnapshot): JSX.Element => {
         createAccount: fn(),
         signIn: fn(),
         linkNewDevice: fn(),
-        openFeedback: fn(),
         openHomePage: fn(),
         openSecurity: fn(),
         openSettings: fn(),
@@ -51,7 +50,6 @@ const meta = {
         actions: {
             linkNewDevice: true,
             openSecurity: true,
-            openFeedback: true,
             openSettings: true,
         },
     },
@@ -172,7 +170,6 @@ export const Guest: Story = {
             createAccount: true,
             signIn: true,
             openHomePage: true,
-            openFeedback: true,
             openSettings: true,
         },
     },

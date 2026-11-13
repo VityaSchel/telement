@@ -35,7 +35,6 @@ import { _t } from "../../../../languageHandler";
 import defaultDispatcher from "../../../../dispatcher/dispatcher";
 import { Action } from "../../../../dispatcher/actions";
 import { type ShowThreadPayload } from "../../../../dispatcher/payloads/ShowThreadPayload";
-import PosthogTrackers from "../../../../PosthogTrackers";
 import { determineUnreadState } from "../../../../RoomNotifs";
 import { notificationLevelToIndicator } from "../../../../utils/notifications";
 import { mediaFromMxc } from "../../../../customisations/Media";
@@ -505,7 +504,6 @@ export class ThreadSummaryViewModel
             rootEvent: this.props.mxEvent,
             push: this.props.isCard,
         });
-        PosthogTrackers.trackInteraction("WebRoomTimelineThreadSummaryButton", event);
     };
 
     private setupListeners(): void {

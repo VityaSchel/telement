@@ -31,8 +31,6 @@ import encrypt from "matrix-encrypt-attachment";
 import extractPngChunks from "png-chunks-extract";
 import { logger } from "matrix-js-sdk/src/logger";
 import { removeElement } from "matrix-js-sdk/src/utils";
-import type { AttachmentSend } from "@matrix-org/analytics-events/types/typescript/AttachmentSend";
-import type { AttachmentCancel } from "@matrix-org/analytics-events/types/typescript/AttachmentCancel";
 
 import dis from "./dispatcher/dispatcher";
 import { _t } from "./languageHandler";
@@ -47,8 +45,6 @@ import {
     type UploadStartedPayload,
 } from "./dispatcher/payloads/UploadPayload";
 import { RoomUpload } from "./models/RoomUpload";
-import SettingsStore from "./settings/SettingsStore";
-import { decorateStartSendingTime, sendRoundTripMetric } from "./sendTimePerformanceMetrics";
 import { TimelineRenderingType } from "./contexts/RoomContext";
 import { addReplyToMessageContent } from "./utils/Reply";
 import ErrorDialog from "./components/views/dialogs/ErrorDialog";
@@ -58,7 +54,6 @@ import { createThumbnail } from "./utils/image-media";
 import { attachMentions, attachRelation } from "./utils/messages.ts";
 import { doMaybeLocalRoomAction } from "./utils/local-room";
 import { blobIsAnimated } from "./utils/Image.ts";
-import { PosthogAnalytics } from "./PosthogAnalytics.ts";
 import { cacheUploadedMedia } from "./utils/UploadedMediaCache";
 
 // scraped out of a macOS hidpi (5660ppm) screenshot png
@@ -494,7 +489,6 @@ export default class ContentMessages {
         // Promise to complete before sending next file into room, used for synchronisation of file-sending
         // to match the order the files were specified in
         let promBefore: Promise<any> = Promise.resolve();
-        const sentFileTypes: string[] = [];
         for (let i = 0; i < okFiles.length; ++i) {
             const file = okFiles[i];
             const loopPromiseBefore = promBefore;
@@ -511,7 +505,6 @@ export default class ContentMessages {
                     uploadAll = true;
                 }
             }
-            sentFileTypes.push(file.type.split("/")[0]);
 
             promBefore = doMaybeLocalRoomAction(
                 roomId,
@@ -527,29 +520,6 @@ export default class ContentMessages {
                 matrixClient,
             );
         }
-        if (sentFileTypes.length) {
-            // Find the most common type.
-            const [type] = sentFileTypes.sort(
-                (a, b) => sentFileTypes.filter((v) => v === b).length - sentFileTypes.filter((v) => v === a).length,
-            );
-            PosthogAnalytics.instance.trackEvent<AttachmentSend>({
-                eventName: "AttachmentSend",
-                isReply: !!replyToEvent,
-                inThread: relation?.rel_type === "m.thread",
-                count: okFiles.length,
-                kind: "local",
-                type,
-            });
-        } else {
-            PosthogAnalytics.instance.trackEvent<AttachmentCancel>({
-                eventName: "AttachmentCancel",
-                isReply: !!replyToEvent,
-                inThread: relation?.rel_type === "m.thread",
-                kind: "local",
-                stage: "Confirmation",
-            });
-        }
-
         if (replyToEvent) {
             // Clear event being replied to
             dis.dispatch({
@@ -606,10 +576,6 @@ export default class ContentMessages {
         attachRelation(content, relation);
         if (replyToEvent) {
             addReplyToMessageContent(content, replyToEvent);
-        }
-
-        if (SettingsStore.getValue("Performance.addSendMessageTimingMetadata")) {
-            decorateStartSendingTime(content);
         }
 
         // if we have a mime type for the file, add it to the message metadata
@@ -677,11 +643,7 @@ export default class ContentMessages {
             if (upload.cancelled) throw new UploadCanceledError();
             const threadId = relation?.rel_type === THREAD_RELATION_TYPE.name ? relation.event_id : null;
 
-            const response = await matrixClient.sendMessage(roomId, threadId ?? null, content as MediaEventContent);
-
-            if (SettingsStore.getValue("Performance.addSendMessageTimingMetadata")) {
-                sendRoundTripMetric(matrixClient, roomId, response.event_id);
-            }
+            await matrixClient.sendMessage(roomId, threadId ?? null, content as MediaEventContent);
 
             dis.dispatch<UploadFinishedPayload>({ action: Action.UploadFinished, upload });
             dis.dispatch({ action: "message_sent" });

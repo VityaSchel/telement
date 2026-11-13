@@ -621,7 +621,6 @@ describe("WidgetMessaging action handling", () => {
             expect(messaging.transport.reply).toHaveBeenCalledWith(ev.detail, {});
             expect(dispatch).toHaveBeenCalledWith({
                 action: "view_room",
-                metricsTrigger: "Widget",
                 room_id: "!foo:example.org",
             });
         });

@@ -215,7 +215,6 @@ describe("DateSeparatorViewModel", () => {
             event_id: eventId,
             highlighted: true,
             room_id: roomId,
-            metricsTrigger: undefined,
         });
     });
 
@@ -232,7 +231,7 @@ describe("DateSeparatorViewModel", () => {
         expect(dispatcher.dispatch).not.toHaveBeenCalled();
     });
 
-    it("shows submit debug logs option for generic errors", async () => {
+    it("shows an error dialog for generic errors", async () => {
         mockTimestampToEvent.mockRejectedValue(new Error("Boom"));
         const vm = createViewModel();
 
@@ -240,10 +239,10 @@ describe("DateSeparatorViewModel", () => {
 
         expect(Modal.createDialog).toHaveBeenCalled();
         const [, params] = vi.mocked(Modal.createDialog).mock.calls.at(-1)!;
-        expect(hasTestId((params as any).description, "jump-to-date-error-submit-debug-logs-button")).toBe(true);
+        expect(hasTestId((params as any).description, "jump-to-date-error-content")).toBe(true);
     });
 
-    it("does not show submit debug logs option for connection errors", async () => {
+    it("shows an error dialog for connection errors", async () => {
         mockTimestampToEvent.mockRejectedValue(new ConnectionError("offline"));
         const vm = createViewModel();
 
@@ -251,7 +250,7 @@ describe("DateSeparatorViewModel", () => {
 
         expect(Modal.createDialog).toHaveBeenCalled();
         const [, params] = vi.mocked(Modal.createDialog).mock.calls.at(-1)!;
-        expect(hasTestId((params as any).description, "jump-to-date-error-submit-debug-logs-button")).toBe(false);
+        expect(hasTestId((params as any).description, "jump-to-date-error-content")).toBe(true);
     });
 
     describe("snapshot labels", () => {
@@ -324,7 +323,6 @@ describe("DateSeparatorViewModel", () => {
                     event_id: returnedEventId,
                     highlighted: true,
                     room_id: roomId,
-                    metricsTrigger: undefined,
                 });
             });
         });
@@ -354,7 +352,7 @@ describe("DateSeparatorViewModel", () => {
             expect(Modal.createDialog).not.toHaveBeenCalled();
         });
 
-        it("shows error dialog with submit debug logs option when non-networking error occurs", async () => {
+        it("shows error dialog when non-networking error occurs", async () => {
             mockTimestampToEvent.mockRejectedValue(new Error("Fake error in test"));
             const vm = createViewModel();
 
@@ -363,10 +361,10 @@ describe("DateSeparatorViewModel", () => {
 
             expect(Modal.createDialog).toHaveBeenCalled();
             const [, params] = vi.mocked(Modal.createDialog).mock.calls.at(-1)!;
-            expect(hasTestId((params as any).description, "jump-to-date-error-submit-debug-logs-button")).toBe(true);
+            expect(hasTestId((params as any).description, "jump-to-date-error-content")).toBe(true);
         });
 
-        it("shows error dialog without submit debug logs option when networking error occurs", async () => {
+        it("shows error dialog when networking error occurs", async () => {
             mockTimestampToEvent.mockRejectedValue(new ConnectionError("Fake connection error in test"));
             const vm = createViewModel();
 
@@ -375,7 +373,7 @@ describe("DateSeparatorViewModel", () => {
 
             expect(Modal.createDialog).toHaveBeenCalled();
             const [, params] = vi.mocked(Modal.createDialog).mock.calls.at(-1)!;
-            expect(hasTestId((params as any).description, "jump-to-date-error-submit-debug-logs-button")).toBe(false);
+            expect(hasTestId((params as any).description, "jump-to-date-error-content")).toBe(true);
         });
     });
 });

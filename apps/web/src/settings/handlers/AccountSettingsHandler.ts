@@ -24,7 +24,6 @@ const BREADCRUMBS_EVENT_TYPES = [BREADCRUMBS_LEGACY_EVENT_TYPE, BREADCRUMBS_EVEN
 const LEGACY_RECENT_EMOJI_EVENT_TYPE = "io.element.recent_emoji";
 const RECENT_EMOJI_EVENT_TYPE = "m.recent_emoji";
 const INTEG_PROVISIONING_EVENT_TYPE = "im.vector.setting.integration_provisioning";
-const ANALYTICS_EVENT_TYPE = "im.vector.analytics";
 const DEFAULT_SETTINGS_EVENT_TYPE = "im.vector.web.settings";
 
 /**
@@ -55,7 +54,7 @@ export default class AccountSettingsHandler extends MatrixClientBackedSettingsHa
             }
 
             this.watchers.notifyUpdate("urlPreviewsEnabled", null, SettingLevel.ACCOUNT, val);
-        } else if (event.getType() === DEFAULT_SETTINGS_EVENT_TYPE || event.getType() === ANALYTICS_EVENT_TYPE) {
+        } else if (event.getType() === DEFAULT_SETTINGS_EVENT_TYPE) {
             // Figure out what changed and fire those updates
             const prevContent = prevEvent?.getContent() ?? {};
             const changedSettings = objectKeyChanges<Record<string, any>>(prevContent, event.getContent());
@@ -112,13 +111,6 @@ export default class AccountSettingsHandler extends MatrixClientBackedSettingsHa
         if (settingName === "integrationProvisioning") {
             const content = this.getSettings(INTEG_PROVISIONING_EVENT_TYPE);
             return content ? content["enabled"] : null;
-        }
-
-        if (settingName === "pseudonymousAnalyticsOptIn") {
-            const content = this.getSettings(ANALYTICS_EVENT_TYPE);
-            // Check to make sure that we actually got a boolean
-            if (typeof content?.[settingName] !== "boolean") return null;
-            return content[settingName];
         }
 
         if (settingName === "MessageComposerInput.insertTrailingColon") {
@@ -216,13 +208,6 @@ export default class AccountSettingsHandler extends MatrixClientBackedSettingsHa
                     <Settings["integrationProvisioning"]["default"]>newValue,
                 );
 
-            // Special case analytics
-            case "pseudonymousAnalyticsOptIn":
-                return this.setAccountData(
-                    ANALYTICS_EVENT_TYPE,
-                    "pseudonymousAnalyticsOptIn",
-                    <Settings["pseudonymousAnalyticsOptIn"]["default"]>newValue ?? undefined,
-                );
             case "mediaPreviewConfig":
                 // Handled in MediaPreviewConfigController.
                 return;

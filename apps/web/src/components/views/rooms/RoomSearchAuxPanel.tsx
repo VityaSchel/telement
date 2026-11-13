@@ -12,7 +12,6 @@ import CloseIcon from "@vector-im/compound-design-tokens/assets/web/icons/close"
 import { IconButton, Link } from "@vector-im/compound-web";
 
 import { _t } from "../../../languageHandler";
-import { PosthogScreenTracker } from "../../../PosthogTrackers";
 import SearchWarning, { WarningKind } from "../elements/SearchWarning";
 import { type SearchInfo, SearchScope } from "../../../Searching";
 import InlineSpinner from "../elements/InlineSpinner";
@@ -28,54 +27,49 @@ const RoomSearchAuxPanel: React.FC<Props> = ({ searchInfo, isRoomEncrypted, onSe
     const scope = searchInfo?.scope ?? SearchScope.Room;
 
     return (
-        <>
-            <PosthogScreenTracker screenName="RoomSearch" />
-            <div className="mx_RoomSearchAuxPanel">
-                <div className="mx_RoomSearchAuxPanel_summary">
-                    <SearchIcon width="24px" height="24px" />
-                    <div className="mx_RoomSearchAuxPanel_summary_text">
-                        {searchInfo?.count !== undefined ? (
-                            _t(
-                                "room|search|summary",
-                                { count: searchInfo.count },
-                                { query: () => <strong>{searchInfo.term}</strong> },
-                            )
-                        ) : searchInfo?.error !== undefined ? (
-                            searchInfo?.error.message
-                        ) : (
-                            <InlineSpinner />
-                        )}
-                        <SearchWarning
-                            kind={WarningKind.Search}
-                            isRoomEncrypted={isRoomEncrypted}
-                            showLogo={false}
-                            scope={scope}
-                            roomId={searchInfo?.roomId}
-                        />
-                    </div>
-                </div>
-                <div className="mx_RoomSearchAuxPanel_buttons">
-                    <Link
-                        onClick={() =>
-                            onSearchScopeChange(scope === SearchScope.Room ? SearchScope.All : SearchScope.Room)
-                        }
-                        kind="primary"
-                    >
-                        {scope === SearchScope.All
-                            ? _t("room|search|this_room_button")
-                            : _t("room|search|all_rooms_button")}
-                    </Link>
-                    <IconButton
-                        onClick={onCancelClick}
-                        destructive
-                        tooltip={_t("action|cancel")}
-                        aria-label={_t("action|cancel")}
-                    >
-                        <CloseIcon width="20px" height="20px" />
-                    </IconButton>
+        <div className="mx_RoomSearchAuxPanel">
+            <div className="mx_RoomSearchAuxPanel_summary">
+                <SearchIcon width="24px" height="24px" />
+                <div className="mx_RoomSearchAuxPanel_summary_text">
+                    {searchInfo?.count !== undefined ? (
+                        _t(
+                            "room|search|summary",
+                            { count: searchInfo.count },
+                            { query: () => <strong>{searchInfo.term}</strong> },
+                        )
+                    ) : searchInfo?.error !== undefined ? (
+                        searchInfo?.error.message
+                    ) : (
+                        <InlineSpinner />
+                    )}
+                    <SearchWarning
+                        kind={WarningKind.Search}
+                        isRoomEncrypted={isRoomEncrypted}
+                        showLogo={false}
+                        scope={scope}
+                        roomId={searchInfo?.roomId}
+                    />
                 </div>
             </div>
-        </>
+            <div className="mx_RoomSearchAuxPanel_buttons">
+                <Link
+                    onClick={() => onSearchScopeChange(scope === SearchScope.Room ? SearchScope.All : SearchScope.Room)}
+                    kind="primary"
+                >
+                    {scope === SearchScope.All
+                        ? _t("room|search|this_room_button")
+                        : _t("room|search|all_rooms_button")}
+                </Link>
+                <IconButton
+                    onClick={onCancelClick}
+                    destructive
+                    tooltip={_t("action|cancel")}
+                    aria-label={_t("action|cancel")}
+                >
+                    <CloseIcon width="20px" height="20px" />
+                </IconButton>
+            </div>
+        </div>
     );
 };
 

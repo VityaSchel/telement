@@ -60,7 +60,6 @@ describe("MultiRoomViewStore", () => {
             expect(mockRoomViewStore.viewRoom).toHaveBeenCalledWith({
                 action: Action.ViewRoom,
                 room_id: roomId,
-                metricsTrigger: undefined,
             });
             expect(result).toBe(mockRoomViewStore);
         });
@@ -80,7 +79,6 @@ describe("MultiRoomViewStore", () => {
             expect(mockRoomViewStore.viewRoom).toHaveBeenCalledWith({
                 action: Action.ViewRoom,
                 room_id: roomId,
-                metricsTrigger: undefined,
             });
             expect(secondResult).toBe(firstResult);
             expect(secondResult).toBe(mockRoomViewStore);

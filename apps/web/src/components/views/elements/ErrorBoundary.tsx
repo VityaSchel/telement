@@ -12,9 +12,7 @@ import { logger } from "matrix-js-sdk/src/logger";
 import { _t } from "../../../languageHandler";
 import { MatrixClientPeg } from "../../../MatrixClientPeg";
 import PlatformPeg from "../../../PlatformPeg";
-import SdkConfig from "../../../SdkConfig";
 import AccessibleButton from "./AccessibleButton";
-import { BugReportDialogButton } from "./BugReportDialogButton";
 
 interface Props {
     children: ReactNode;
@@ -61,37 +59,6 @@ export default class ErrorBoundary extends React.PureComponent<Props, IState> {
 
     public render(): ReactNode {
         if (this.state.error) {
-            const newIssueUrl = SdkConfig.get().feedback.new_issue_url;
-
-            let bugReportSection;
-            if (SdkConfig.get().bug_report_endpoint_url) {
-                bugReportSection = (
-                    <React.Fragment>
-                        <p>
-                            {_t(
-                                "bug_reporting|create_new_issue",
-                                {},
-                                {
-                                    newIssueLink: (sub) => {
-                                        return (
-                                            <a target="_blank" rel="noreferrer noopener" href={newIssueUrl}>
-                                                {sub}
-                                            </a>
-                                        );
-                                    },
-                                },
-                            )}
-                        </p>
-                        <p>
-                            {_t("bug_reporting|introduction")}
-                            &nbsp;
-                            {_t("bug_reporting|description")}
-                        </p>
-                        <BugReportDialogButton error={this.state.error} label="react-soft-crash" />
-                    </React.Fragment>
-                );
-            }
-
             let clearCacheButton: JSX.Element | undefined;
             // we only show this button if there is an initialised MatrixClient otherwise we can't clear the cache
             if (MatrixClientPeg.get()) {
@@ -106,7 +73,6 @@ export default class ErrorBoundary extends React.PureComponent<Props, IState> {
                 <div className="mx_ErrorBoundary">
                     <div className="mx_ErrorBoundary_body">
                         <h1>{_t("error|something_went_wrong")}</h1>
-                        {bugReportSection}
                         {clearCacheButton}
                     </div>
                 </div>

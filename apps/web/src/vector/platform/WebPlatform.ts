@@ -108,7 +108,7 @@ export default class WebPlatform extends BasePlatform {
     };
 
     public getHumanReadableName(): string {
-        return "Web Platform"; // no translation required: only used for analytics
+        return "Web Platform"; // no translation required: only used internally
     }
 
     /**

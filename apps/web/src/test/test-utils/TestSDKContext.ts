@@ -9,7 +9,6 @@ Please see LICENSE files in the repository root for full details.
 import { type MatrixClient } from "matrix-js-sdk/src/matrix";
 
 import { SDKContextClass } from "../../contexts/SDKContextClass";
-import { type PosthogAnalytics } from "../../PosthogAnalytics";
 import { type SlidingSyncManager } from "../../SlidingSyncManager";
 import { type RoomNotificationStateStore } from "../../stores/notifications/RoomNotificationStateStore";
 import type RightPanelStore from "../../stores/right-panel/RightPanelStore";
@@ -32,7 +31,6 @@ export class TestSDKContext extends SDKContextClass {
     declare public _WidgetPermissionStore?: WidgetPermissionStore;
     declare public _WidgetLayoutStore?: WidgetLayoutStore;
     declare public _WidgetStore?: WidgetStore;
-    declare public _PosthogAnalytics?: PosthogAnalytics;
     declare public _SlidingSyncManager?: SlidingSyncManager;
     declare public _SpaceStore?: SpaceStore;
     declare public _LegacyCallHandler?: LegacyCallHandler;

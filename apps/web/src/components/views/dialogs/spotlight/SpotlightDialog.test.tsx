@@ -40,8 +40,6 @@ import { SDKContextClass } from "../../../../contexts/SDKContextClass";
 
 vi.useFakeTimers({ shouldAdvanceTime: true });
 
-vi.mock("../../../../utils/Feedback");
-
 vi.mock("../../../../utils/direct-messages", async () => ({
     // @ts-ignore
     ...(await vi.importActual("../../../../utils/direct-messages")),
@@ -648,8 +646,6 @@ describe("Spotlight Dialog", () => {
 
         const viewRoomParams = {
             action: Action.ViewRoom,
-            metricsTrigger: "WebUnifiedSearch",
-            metricsViaKeyboard: false,
             room_alias: undefined,
             room_id: knockRoom.room_id,
             should_peek: false,

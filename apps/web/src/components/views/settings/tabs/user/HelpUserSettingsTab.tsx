@@ -21,7 +21,6 @@ import { SettingsSection } from "../../shared/SettingsSection";
 import { SettingsSubsection, SettingsSubsectionText } from "../../shared/SettingsSubsection";
 import ExternalLink from "../../../elements/ExternalLink";
 import MatrixClientContext from "../../../../../contexts/MatrixClientContext";
-import { BugReportDialogButton } from "../../../elements/BugReportDialogButton";
 
 interface IState {
     appVersion: string | null;
@@ -216,42 +215,11 @@ export default class HelpUserSettingsTab extends React.Component<EmptyObject, IS
             updateButton = <UpdateCheckButton />;
         }
 
-        let bugReportingSection;
-        if (SdkConfig.get().bug_report_endpoint_url) {
-            bugReportingSection = (
-                <SettingsSubsection
-                    heading={_t("bug_reporting|title")}
-                    description={
-                        <>
-                            <SettingsSubsectionText>{_t("bug_reporting|introduction")}</SettingsSubsectionText>
-                            {_t("bug_reporting|description")}
-                        </>
-                    }
-                >
-                    <BugReportDialogButton />
-                    <SettingsSubsectionText>
-                        {_t(
-                            "bug_reporting|matrix_security_issue",
-                            {},
-                            {
-                                a: (sub) => (
-                                    <ExternalLink href="https://matrix.org/security-disclosure-policy/">
-                                        {sub}
-                                    </ExternalLink>
-                                ),
-                            },
-                        )}
-                    </SettingsSubsectionText>
-                </SettingsSubsection>
-            );
-        }
-
         const { appVersion, cryptoVersion } = this.getVersionInfo();
 
         return (
             <SettingsTab>
                 <SettingsSection>
-                    {bugReportingSection}
                     <SettingsSubsection heading={_t("common|faq")} description={faqText} />
                     <SettingsSubsection heading={_t("setting|help_about|versions")}>
                         <SettingsSubsectionText>

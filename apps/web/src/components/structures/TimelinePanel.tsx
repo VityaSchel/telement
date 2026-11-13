@@ -1523,7 +1523,6 @@ class TimelinePanel extends React.Component<IProps, IState> {
                     dis.dispatch<ViewRoomPayload>({
                         action: Action.ViewRoom,
                         room_id: this.props.timelineSet.room!.roomId,
-                        metricsTrigger: undefined, // room doesn't change
                     });
                 };
             }

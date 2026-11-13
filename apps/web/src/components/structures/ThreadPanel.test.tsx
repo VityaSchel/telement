@@ -39,8 +39,6 @@ import { ScopedRoomContextProvider } from "../../contexts/ScopedRoomContext.tsx"
 import type { RoomContextType } from "../../contexts/RoomContext.ts";
 import { SDKContextClass } from "../../contexts/SDKContextClass.ts";
 
-vi.mock("../../utils/Feedback");
-
 describe("ThreadPanel", () => {
     describe("Header", () => {
         it("expect that All filter for ThreadPanelHeader properly renders Show: All threads", () => {

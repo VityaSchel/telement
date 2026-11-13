@@ -76,10 +76,7 @@ describe("Telement desktop variant", () => {
         expect(branding?.logo_link_url).toBe(config.oidc_metadata.client_uri);
     });
 
-    it.each(["update_base_url", "bug_report_endpoint_url", "uisi_autorageshake_app", "posthog", "map_style_url"])(
-        "does not use Element's %s",
-        (key) => {
-            expect(config[key]).toBeUndefined();
-        },
-    );
+    it.each(["update_base_url", "map_style_url"])("does not use Element's %s", (key) => {
+        expect(config[key]).toBeUndefined();
+    });
 });

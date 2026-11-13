@@ -31,7 +31,7 @@ function error(msg: string, ...args: any[]): void {
 }
 
 /**
- * Warn (in the logs, captured by rageshakes) that the browser refused to make our storage
+ * Warn (in the logs) that the browser refused to make our storage
  * persistent. Without durable storage the browser may evict IndexedDB — which holds the
  * end-to-end encryption crypto store — under storage pressure, forcing a re-login and
  * recovery-key re-entry. See https://github.com/element-hq/element-web/issues/32198.

@@ -30,7 +30,6 @@ import { TextualBodyViewModel } from "../../../viewmodels/room/timeline/event-ti
 import { EventContentBodyViewModel } from "../../../viewmodels/message-body/EventContentBodyViewModel";
 import { getParentEventId } from "../../../utils/Reply";
 import Modal from "../../../Modal";
-import PosthogTrackers from "../../../PosthogTrackers";
 import ImageView from "../elements/ImageView";
 import {
     UrlPreviewGroupViewModel,
@@ -296,14 +295,6 @@ export function TextualBodyFactory(props: Readonly<IBodyProps>): JSX.Element {
             collapse,
         });
     }, [previews, collapse, mediaPreviewVm]);
-
-    useEffect(() => {
-        if (previews.length === 0) {
-            return;
-        }
-
-        PosthogTrackers.instance.trackUrlPreview(props.mxEvent.getId()!, props.mxEvent.isEncrypted(), previews);
-    }, [props.mxEvent, previews]);
 
     if (props.editState) {
         return (

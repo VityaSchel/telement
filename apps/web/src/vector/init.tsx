@@ -25,11 +25,8 @@ import type MatrixChat from "../components/structures/MatrixChat";
 import ElectronPlatform from "./platform/ElectronPlatform";
 import PWAPlatform from "./platform/PWAPlatform";
 import WebPlatform from "./platform/WebPlatform";
-import { initRageshake, initRageshakeStore } from "./rageshakesetup";
 import { ModuleApi } from "../modules/Api.ts";
 import { type URLParams } from "./url_utils.ts";
-
-export const rageshakePromise = initRageshake();
 
 let root: Root | undefined;
 let rootContainer: Element | undefined;
@@ -67,10 +64,7 @@ export function preparePlatform(): void {
 }
 
 /**
- * Log the version of the app, so that each rageshake log file starts with the version that produced it.
- *
- * The rageshake store keeps one log file per app instance, so logging this at startup means an upgrade or
- * downgrade between sessions is visible when reading a report.
+ * Log the version of the app at startup, so that the logs show which version produced them.
  */
 export async function logAppVersion(): Promise<void> {
     try {
@@ -78,14 +72,6 @@ export async function logAppVersion(): Promise<void> {
     } catch (e) {
         logger.warn("Unable to determine app version for logging", e);
     }
-}
-
-export function setupLogStorage(): Promise<void> {
-    if (SdkConfig.get().bug_report_endpoint_url) {
-        return initRageshakeStore();
-    }
-    logger.warn("No bug report endpoint set - logs will not be persisted");
-    return Promise.resolve();
 }
 
 export async function loadConfig(): Promise<void> {

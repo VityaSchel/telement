@@ -36,11 +36,9 @@ import { abbreviateUrl } from "../utils/UrlUtils";
 import { getDefaultIdentityServerUrl, setToDefaultIdentityServer } from "../utils/IdentityServerUtils";
 import { WidgetType } from "../widgets/WidgetType";
 import { Jitsi } from "../widgets/Jitsi";
-import BugReportDialog from "../components/views/dialogs/BugReportDialog";
 import { ensureDMExists } from "../createRoom";
 import { type ViewUserPayload } from "../dispatcher/payloads/ViewUserPayload";
 import { Action } from "../dispatcher/actions";
-import SdkConfig from "../SdkConfig";
 import SettingsStore from "../settings/SettingsStore";
 import { UIComponent, UIFeature } from "../settings/UIFeature";
 import { CHAT_EFFECTS } from "../effects";
@@ -136,8 +134,6 @@ export const Commands = [
                             event_id: eventId,
                             highlighted: true,
                             room_id: roomId,
-                            metricsTrigger: "SlashCommand",
-                            metricsViaKeyboard: true,
                         });
                     })(),
                 );
@@ -306,7 +302,6 @@ export const Commands = [
         command: "invite",
         args: "<user-id> [<reason>]",
         description: _td("slash_command|invite"),
-        analyticsName: "Invite",
         isEnabled: (cli) => !isCurrentLocalRoom(cli) && shouldShowComponent(UIComponent.InviteUsers),
         runFn: function (cli, roomId, threadId, args) {
             if (args) {
@@ -378,7 +373,6 @@ export const Commands = [
         command: "part",
         args: "[<room-address>]",
         description: _td("action|leave_room"),
-        analyticsName: "Part",
         isEnabled: (cli) => !isCurrentLocalRoom(cli),
         runFn: function (cli, roomId, threadId, args) {
             let targetRoomId: string | undefined;
@@ -689,21 +683,6 @@ export const Commands = [
         category: CommandCategories.advanced,
     }),
     new Command({
-        command: "rageshake",
-        aliases: ["bugreport"],
-        description: _td("slash_command|rageshake"),
-        isEnabled: () => !!SdkConfig.get().bug_report_endpoint_url,
-        args: "<description>",
-        runFn: function (cli, roomId, threadId, args) {
-            return success(
-                Modal.createDialog(BugReportDialog, {
-                    initialText: args,
-                }).finished,
-            );
-        },
-        category: CommandCategories.advanced,
-    }),
-    new Command({
         command: "query",
         description: _td("slash_command|query"),
         args: "<user-id>",
@@ -734,8 +713,6 @@ export const Commands = [
                     dis.dispatch<ViewRoomPayload>({
                         action: Action.ViewRoom,
                         room_id: roomId,
-                        metricsTrigger: "SlashCommand",
-                        metricsViaKeyboard: true,
                     });
                 })(),
             );
@@ -760,8 +737,6 @@ export const Commands = [
                                 dis.dispatch<ViewRoomPayload>({
                                     action: Action.ViewRoom,
                                     room_id: roomId,
-                                    metricsTrigger: "SlashCommand",
-                                    metricsViaKeyboard: true,
                                 });
                                 if (msg) {
                                     void cli.sendTextMessage(roomId, msg);

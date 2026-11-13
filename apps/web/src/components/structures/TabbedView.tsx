@@ -13,7 +13,6 @@ import classNames from "classnames";
 import { AutoHideScrollbar } from "@element-hq/web-shared-components";
 
 import { _t } from "../../languageHandler";
-import { PosthogScreenTracker, type ScreenName } from "../../PosthogTrackers";
 import { type NonEmptyArray } from "../../@types/common";
 import { RovingAccessibleButton, RovingTabIndexProvider } from "../../accessibility/RovingTabIndex";
 import { useWindowWidth } from "../../hooks/useWindowWidth";
@@ -28,7 +27,6 @@ export class Tab<T extends string> {
      * @param {string} label The untranslated tab label.
      * @param {string|JSX.Element} icon An SVG element to use for the tab icon.
      * @param {JSX.Element} body The JSX for the tab container.
-     * @param {string} screenName The screen name to report to Posthog.
      * @param {string} labelClassName Additional class to add to the tab label.
      */
     public constructor(
@@ -36,7 +34,6 @@ export class Tab<T extends string> {
         public readonly label: TranslationKey,
         public readonly icon: JSX.Element | null,
         public readonly body: JSX.Element,
-        public readonly screenName?: ScreenName,
         public readonly labelClassName?: string,
     ) {}
 }
@@ -130,8 +127,6 @@ interface IProps<T extends string> {
     tabLocation?: TabLocation;
     // A callback that is called when the active tab should change
     onChange: (tabId: T) => void;
-    // The screen name to report to Posthog.
-    screenName?: ScreenName;
     /**
      * If true, the layout of the tabbed view will be responsive to the viewport size (eg, just showing icons
      * instead of names of tabs).
@@ -174,11 +169,8 @@ export default function TabbedView<T extends string>(props: IProps<T>): JSX.Elem
         mx_TabbedView_responsive: props.responsive,
     });
 
-    const screenName = tab?.screenName ?? props.screenName;
-
     return (
         <div className={tabbedViewClasses}>
-            {screenName && <PosthogScreenTracker screenName={screenName} />}
             <RovingTabIndexProvider
                 handleLoop
                 handleHomeEnd

@@ -38,7 +38,6 @@ export async function startDmOnFirstMessage(client: MatrixClient, targets: Membe
             room_id: existingRoom.roomId,
             should_peek: false,
             joining: false,
-            metricsTrigger: "MessageUser",
         });
         return existingRoom.roomId;
     }

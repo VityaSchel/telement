@@ -22,7 +22,6 @@ import { type ThreadData, type UnreadThreadRooms, useUnreadThreadRooms } from ".
 import { NotificationLevel } from "../../../../stores/notifications/NotificationLevel";
 import { MessagePreviewStore } from "../../../../stores/message-preview/MessagePreviewStore";
 import { getSenderName } from "../../../../stores/message-preview/previews/utils";
-import PosthogTrackers from "../../../../PosthogTrackers";
 import { getKeyBindingsManager } from "../../../../KeyBindingsManager";
 import { KeyBindingAction } from "../../../../accessibility/KeyboardShortcuts";
 
@@ -94,12 +93,7 @@ export function ThreadsActivityCentre({ displayButtonLabel }: ThreadsActivityCen
                 align="start"
                 side="top"
                 open={open}
-                onOpenChange={(newOpen) => {
-                    // Track only when the Threads Activity Centre is opened
-                    if (newOpen) PosthogTrackers.trackInteraction("WebThreadsActivityCentreButton");
-
-                    setOpen(newOpen);
-                }}
+                onOpenChange={setOpen}
                 title={_t("threads_activity_centre|header")}
                 showTitle={false}
                 trigger={
@@ -269,15 +263,11 @@ function ThreadsActivityCentreThreadRow({ threadData, onClick }: ThreadsActivity
                     );
                 }
 
-                // Track the click
-                PosthogTrackers.trackInteraction("WebThreadsActivityCentreRoomItem", event);
-
                 // Navigate to the room
                 defaultDispatcher.dispatch<ViewRoomPayload>({
                     action: Action.ViewRoom,
                     show_room_tile: true,
                     room_id: room.roomId,
-                    metricsTrigger: "WebThreadsActivityCentre",
                     focusNext: "threadsPanel",
                 });
             }}

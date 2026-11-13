@@ -15,12 +15,7 @@ import {
 
 import { _t } from "../../languageHandler";
 import Modal from "../../Modal";
-import SdkConfig from "../../SdkConfig";
-import { BugReportEndpointURLLocal } from "../../IConfigOptions";
 import ViewSource from "../../components/structures/ViewSource";
-import BugReportDialog from "../../components/views/dialogs/BugReportDialog";
-
-const TILE_ERROR_BUG_REPORT_LABEL = "react-tile-soft-crash";
 
 export interface TileErrorViewModelProps {
     /**
@@ -28,25 +23,9 @@ export interface TileErrorViewModelProps {
      */
     mxEvent: MatrixEvent;
     /**
-     * Render error captured by the boundary.
-     */
-    error: Error;
-    /**
      * Whether developer mode is enabled, which controls the view-source action.
      */
     developerMode: boolean;
-}
-
-function getBugReportCtaLabel(): string | undefined {
-    const bugReportUrl = SdkConfig.get().bug_report_endpoint_url;
-
-    if (!bugReportUrl) {
-        return undefined;
-    }
-
-    return bugReportUrl === BugReportEndpointURLLocal
-        ? _t("bug_reporting|download_logs")
-        : _t("bug_reporting|submit_debug_logs");
 }
 
 /**
@@ -59,9 +38,9 @@ function getViewSourceCtaLabel(developerMode: boolean): string | undefined {
 /**
  * ViewModel for the tile error fallback, providing the snapshot shown when a tile fails to render.
  *
- * The snapshot includes the fallback message, event type, and optional bug-report and
- * view-source action labels. The view model also exposes click handlers for those
- * actions, opening the bug-report or view-source dialog when available.
+ * The snapshot includes the fallback message, event type, and optional view-source action label.
+ * The view model also exposes a click handler for that action, opening the view-source dialog
+ * when available.
  */
 export class TileErrorViewModel
     extends BaseViewModel<TileErrorViewSnapshotInterface, TileErrorViewModelProps>
@@ -70,16 +49,11 @@ export class TileErrorViewModel
     private static readonly computeSnapshot = (props: TileErrorViewModelProps): TileErrorViewSnapshotInterface => ({
         message: _t("timeline|error_rendering_message"),
         eventType: props.mxEvent.getType(),
-        bugReportCtaLabel: getBugReportCtaLabel(),
         viewSourceCtaLabel: getViewSourceCtaLabel(props.developerMode),
     });
 
     public constructor(props: TileErrorViewModelProps) {
         super(props, TileErrorViewModel.computeSnapshot(props));
-    }
-
-    public setError(error: Error): void {
-        this.props.error = error;
     }
 
     public setDeveloperMode(developerMode: boolean): void {
@@ -88,17 +62,6 @@ export class TileErrorViewModel
         const nextViewSourceCtaLabel = getViewSourceCtaLabel(developerMode);
         this.snapshot.merge({ viewSourceCtaLabel: nextViewSourceCtaLabel });
     }
-
-    public onBugReportClick: MouseEventHandler<HTMLButtonElement> = () => {
-        if (!this.snapshot.current.bugReportCtaLabel) {
-            return;
-        }
-
-        Modal.createDialog(BugReportDialog, {
-            label: TILE_ERROR_BUG_REPORT_LABEL,
-            error: this.props.error,
-        });
-    };
 
     public onViewSourceClick: MouseEventHandler<HTMLButtonElement> = () => {
         if (!this.snapshot.current.viewSourceCtaLabel) {

@@ -477,7 +477,6 @@ describe("RoomListItemViewModel", () => {
             expect(dispatchSpy).toHaveBeenCalledWith({
                 action: Action.ViewRoom,
                 room_id: "!room:server",
-                metricsTrigger: "RoomList",
             });
         });
 

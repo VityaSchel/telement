@@ -34,7 +34,6 @@ import { Action } from "../../dispatcher/actions";
 import { CallStore, CallStoreEvent } from "../../stores/CallStore";
 import { isVideoRoom } from "../../utils/video-rooms";
 import { UIFeature } from "../../settings/UIFeature";
-import { type InteractionName } from "../../PosthogTrackers";
 import { ElementCallMemberEventType } from "../../call-types";
 import { LocalRoom, LocalRoomState } from "../../models/LocalRoom";
 import { useScopedRoomContext } from "../../contexts/ScopedRoomContext";
@@ -55,23 +54,19 @@ export const getPlatformCallTypeProps = (
 ): {
     label: string;
     children?: ReactNode;
-    analyticsName: InteractionName;
 } => {
     switch (platformCallType) {
         case PlatformCallType.ElementCall:
             return {
                 label: _t("voip|element_call"),
-                analyticsName: "WebVoipOptionElementCall",
             };
         case PlatformCallType.JitsiCall:
             return {
                 label: _t("voip|jitsi_call"),
-                analyticsName: "WebVoipOptionJitsi",
             };
         case PlatformCallType.LegacyCall:
             return {
                 label: _t("voip|legacy_call"),
-                analyticsName: "WebVoipOptionLegacy",
             };
         default:
             throw Error(`Unexpected PlatformCallType ${platformCallType}`);
@@ -358,7 +353,6 @@ export const useRoomCall = (
         defaultDispatcher.dispatch<ViewRoomPayload>({
             action: Action.ViewRoom,
             room_id: room.roomId,
-            metricsTrigger: undefined,
             view_call: !isViewingCall,
         });
     }, [isViewingCall, room.roomId]);

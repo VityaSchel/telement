@@ -59,8 +59,6 @@ export const RoomPredecessorTile: React.FC<IProps> = ({ mxEvent, timestamp }) =>
                 event_id: predecessor?.eventId,
                 highlighted: true,
                 room_id: predecessor?.roomId,
-                metricsTrigger: "Predecessor",
-                metricsViaKeyboard: e.type !== "click",
             });
         },
         [predecessor?.eventId, predecessor?.roomId],

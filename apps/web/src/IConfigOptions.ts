@@ -12,12 +12,6 @@ import { type ResolveDefaults, type WebConfigJson } from "shared-types";
 import { type ValidatedServerConfig } from "./utils/ValidatedServerConfig";
 import { type DEFAULTS } from "./SdkConfig.ts";
 
-/**
- * Bug reports are enabled but must only be locally
- * downloadable.
- */
-export const BugReportEndpointURLLocal = "local";
-
 export interface ConfigOptions extends WebConfigJson {
     /**
      * This is not a real config field, we're just abusing the config structure to pass around a validated server config

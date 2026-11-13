@@ -26,8 +26,6 @@ import Modal from "../../../Modal";
 import SettingsStore from "../../../settings/SettingsStore";
 import { UIFeature } from "../../../settings/UIFeature";
 import ErrorDialog from "../../../components/views/dialogs/ErrorDialog";
-import BugReportDialog from "../../../components/views/dialogs/BugReportDialog";
-import AccessibleButton from "../../../components/views/elements/AccessibleButton";
 import { type RoomViewStore } from "../../../stores/RoomViewStore.tsx";
 
 export interface DateSeparatorViewModelProps {
@@ -170,7 +168,6 @@ export class DateSeparatorViewModel
                     event_id: eventId,
                     highlighted: true,
                     room_id: roomIdForJumpRequest,
-                    metricsTrigger: undefined, // room doesn't change
                 });
             } else {
                 logger.debug(
@@ -192,7 +189,6 @@ export class DateSeparatorViewModel
             const currentRoomId = this.props.roomViewStore.getRoomId();
             if (currentRoomId === roomIdForJumpRequest) {
                 let friendlyErrorMessage = "An error occured while trying to find and jump to the given date.";
-                let submitDebugLogsContent: React.ReactElement = <></>;
 
                 if (err instanceof ConnectionError) {
                     friendlyErrorMessage = _t("room|error_jump_to_date_connection");
@@ -209,31 +205,6 @@ export class DateSeparatorViewModel
                     }
                 } else if (err instanceof HTTPError) {
                     friendlyErrorMessage = err.message;
-                } else {
-                    // We only give the option to submit logs for actual errors, not network problems.
-                    submitDebugLogsContent = (
-                        <p>
-                            {_t(
-                                "room|error_jump_to_date_send_logs_prompt",
-                                {},
-                                {
-                                    debugLogsLink: (sub) => (
-                                        // This is by default a `<div>` which we
-                                        // can't nest within a `<p>` here so update
-                                        // this to a be a inline anchor element.
-                                        <AccessibleButton
-                                            element="a"
-                                            kind="link"
-                                            onClick={() => this.onBugReport(err instanceof Error ? err : undefined)}
-                                            data-testid="jump-to-date-error-submit-debug-logs-button"
-                                        >
-                                            {sub}
-                                        </AccessibleButton>
-                                    ),
-                                },
-                            )}
-                        </p>
-                    );
                 }
 
                 Modal.createDialog(ErrorDialog, {
@@ -241,7 +212,6 @@ export class DateSeparatorViewModel
                     description: (
                         <div data-testid="jump-to-date-error-content">
                             <p>{friendlyErrorMessage}</p>
-                            {submitDebugLogsContent}
                             <details>
                                 <summary>{_t("room|error_jump_to_date_details")}</summary>
                                 <p>{String(err)}</p>
@@ -251,13 +221,6 @@ export class DateSeparatorViewModel
                 });
             }
         }
-    };
-
-    public onBugReport = (err?: Error): void => {
-        Modal.createDialog(BugReportDialog, {
-            error: err,
-            initialText: "Error occured while using jump to date #jump-to-date",
-        });
     };
 
     public onLastWeekPicked = (): Promise<void> => {

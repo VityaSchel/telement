@@ -98,16 +98,6 @@ export interface WebConfigJson {
     show_labs_settings?: boolean;
     features?: Record<string, boolean>; // <FeatureName, EnabledBool>
 
-    /**
-     * Bug report endpoint URL. "local" means the logs should not be uploaded.
-     * Omission disables bug reporting
-     */
-    bug_report_endpoint_url?: string;
-    sentry?: {
-        dsn?: string;
-        environment?: string; // "production", etc
-    };
-
     widget_build_url?: string; // url called to replace jitsi/call widget creation
     widget_build_url_ignore_dm?: boolean;
     audio_stream_url?: string;
@@ -145,11 +135,6 @@ export interface WebConfigJson {
         servers?: string[];
     };
 
-    posthog?: {
-        project_api_key?: string;
-        api_host?: string; // hostname
-    };
-    analytics_owner?: string; // defaults to `brand`
     privacy_policy_url?: string; // location for cookie policy
 
     enable_presence_by_hs_url?: Record<string, boolean>; // <HomeserverName, Enabled>

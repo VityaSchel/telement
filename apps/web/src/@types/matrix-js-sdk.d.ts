@@ -52,21 +52,7 @@ declare module "matrix-js-sdk/src/types" {
         "m.room.bot.options": IContent;
     }
 
-    export interface TimelineEvents {
-        "io.element.performance_metric": {
-            "io.element.performance_metrics": {
-                forEventId: string;
-                responseTs: number;
-                kind: "send_time";
-            };
-        };
-    }
     export interface AccountDataEvents {
-        // Analytics account data event
-        "im.vector.analytics": {
-            id: string;
-            pseudonymousAnalyticsOptIn?: boolean;
-        };
         // Device client information account data event
         [key: `io.element.matrix_client_information.${string}`]: DeviceClientInformation;
         // Element settings account data events

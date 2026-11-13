@@ -32,7 +32,6 @@ import { NotificationLevel } from "../../../../stores/notifications/Notification
 import { TimelineRenderingType } from "../../../../contexts/RoomContext";
 import { MessagePreviewStore } from "../../../../stores/message-preview";
 import defaultDispatcher from "../../../../dispatcher/dispatcher";
-import PosthogTrackers from "../../../../PosthogTrackers";
 import { determineUnreadState } from "../../../../RoomNotifs";
 import {
     ThreadMessagePreviewViewModel,
@@ -47,13 +46,6 @@ vi.mock("../../../../dispatcher/dispatcher", () => ({
         dispatch: vi.fn(),
         register: vi.fn(),
         unregister: vi.fn(),
-    },
-}));
-
-vi.mock("../../../../PosthogTrackers", () => ({
-    __esModule: true,
-    default: {
-        trackInteraction: vi.fn(),
     },
 }));
 
@@ -389,7 +381,7 @@ describe("ThreadSummaryViewModel", () => {
         expect(nextRoom.listenerCount(RoomEvent.Receipt)).toBe(0);
     });
 
-    it("dispatches ShowThread and tracks interaction on click", () => {
+    it("dispatches ShowThread on click", () => {
         const { vm, rootEvent } = makeSummaryVm({ isCard: true });
         const event = { type: "click" } as MouseEvent<HTMLButtonElement>;
 
@@ -400,7 +392,6 @@ describe("ThreadSummaryViewModel", () => {
             rootEvent,
             push: true,
         });
-        expect(PosthogTrackers.trackInteraction).toHaveBeenCalledWith("WebRoomTimelineThreadSummaryButton", event);
     });
 
     it("uses the latest root event and card mode from setters when opening the thread", () => {

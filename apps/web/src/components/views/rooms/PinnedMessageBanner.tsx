@@ -23,7 +23,6 @@ import dis from "../../../dispatcher/dispatcher";
 import { type ViewRoomPayload } from "../../../dispatcher/payloads/ViewRoomPayload";
 import { Action } from "../../../dispatcher/actions";
 import MessageEvent from "../messages/MessageEvent";
-import PosthogTrackers from "../../../PosthogTrackers.ts";
 import { SDKContext } from "../../../contexts/SDKContext.ts";
 import MatrixClientContext from "../../../contexts/MatrixClientContext";
 import { EventPreviewViewModel } from "../../../viewmodels/room/timeline/event-tile/EventPreviewViewModel";
@@ -69,15 +68,12 @@ export function PinnedMessageBanner({ room, permalinkCreator }: PinnedMessageBan
     const shouldUseMessageEvent = pinnedEvent.isRedacted() || pinnedEvent.isDecryptionFailure();
 
     const onBannerClick = (): void => {
-        PosthogTrackers.trackInteraction("PinnedMessageBannerClick");
-
         // Scroll to the pinned message
         dis.dispatch<ViewRoomPayload>({
             action: Action.ViewRoom,
             event_id: pinnedEvent.getId(),
             highlighted: true,
             room_id: room.roomId,
-            metricsTrigger: undefined, // room doesn't change
         });
 
         // Cycle through the pinned messages
@@ -287,9 +283,6 @@ function BannerButton({ room }: BannerButtonProps): JSX.Element {
             className="mx_PinnedMessageBanner_actions"
             kind="tertiary"
             onClick={() => {
-                if (isPinnedMessagesPhase) PosthogTrackers.trackInteraction("PinnedMessageBannerCloseListButton");
-                else PosthogTrackers.trackInteraction("PinnedMessageBannerViewAllButton");
-
                 sdkContext.rightPanelStore.showOrHidePhase(RightPanelPhases.PinnedMessages);
             }}
         >

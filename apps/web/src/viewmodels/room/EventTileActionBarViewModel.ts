@@ -33,7 +33,6 @@ import { canCancel, canEditContent, editEvent, isContentActionable } from "../..
 import { TimelineRenderingType } from "../../contexts/RoomContext";
 import Resend from "../../Resend";
 import PinningUtils from "../../utils/PinningUtils";
-import PosthogTrackers from "../../PosthogTrackers";
 import { shouldDisplayReply } from "../../utils/Reply";
 import { MediaEventHelper } from "../../utils/MediaEventHelper";
 import SettingsStore from "../../settings/SettingsStore";
@@ -422,9 +421,7 @@ export class EventTileActionBarViewModel
 
     /** Pins or unpins the current event. */
     public onPinClick = async (_anchor: HTMLElement | null): Promise<void> => {
-        const isPinned = PinningUtils.isPinned(MatrixClientPeg.safeGet(), this.props.mxEvent);
         await PinningUtils.pinOrUnpinEvent(MatrixClientPeg.safeGet(), this.props.mxEvent);
-        PosthogTrackers.trackPinUnpinMessage(isPinned ? "Pin" : "Unpin", "Timeline");
     };
 
     /** Downloads the media content for the current event when available. */

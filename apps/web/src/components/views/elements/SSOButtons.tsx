@@ -17,14 +17,12 @@ import {
     type IIdentityProvider,
     OAUTH_AWARE_PREFERRED_FLOW_FIELD,
 } from "matrix-js-sdk/src/matrix";
-import { type Signup } from "@matrix-org/analytics-events/types/typescript/Signup";
 import { Button, Tooltip } from "@vector-im/compound-web";
 import { MacIcon } from "@vector-im/compound-design-tokens/assets/web/icons";
 
 import PlatformPeg from "../../../PlatformPeg";
 import { _t } from "../../../languageHandler";
 import { mediaFromMxc } from "../../../customisations/Media";
-import { PosthogAnalytics } from "../../../PosthogAnalytics";
 import FacebookIcon from "../../../../res/img/element-icons/brands/facebook.svg?react";
 import GithubIcon from "../../../../res/img/element-icons/brands/github.svg?react";
 import GitlabIcon from "../../../../res/img/element-icons/brands/gitlab.svg?react";
@@ -56,26 +54,6 @@ const getIcon = (brand: IdentityProviderBrand | string): typeof FacebookIcon | n
     }
 };
 
-const getAuthenticationType = (brand: IdentityProviderBrand | string): Signup["authenticationType"] => {
-    switch (brand) {
-        case IdentityProviderBrand.Apple:
-            return "Apple";
-        case IdentityProviderBrand.Facebook:
-            return "Facebook";
-        case IdentityProviderBrand.Github:
-            return "GitHub";
-        case IdentityProviderBrand.Gitlab:
-            return "GitLab";
-        case IdentityProviderBrand.Google:
-            return "Google";
-        // Not supported on the analytics SDK at the moment.
-        // case IdentityProviderBrand.Twitter:
-        //     return "Twitter";
-        default:
-            return "SSO";
-    }
-};
-
 const SSOButton: React.FC<ISSOButtonProps> = ({
     matrixClient,
     loginType,
@@ -97,8 +75,6 @@ const SSOButton: React.FC<ISSOButtonProps> = ({
     }
 
     const onClick = (): void => {
-        const authenticationType = getAuthenticationType(idp?.brand ?? "");
-        PosthogAnalytics.instance.setAuthenticationType(authenticationType);
         PlatformPeg.get()?.startSingleSignOn(matrixClient, loginType, fragmentAfterLogin, idp?.id, action);
     };
 

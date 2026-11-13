@@ -88,7 +88,6 @@ export class WidgetPipViewModel
                 action: Action.ViewRoom,
                 room_id: this.props.room.roomId,
                 view_call: true,
-                metricsTrigger: "WebFloatingCallWindow",
             });
         } else if (this.viewingRoom) {
             WidgetLayoutStore.instance.moveToContainer(this.props.room, this.widget, "center");
@@ -96,7 +95,6 @@ export class WidgetPipViewModel
             defaultDispatcher.dispatch<ViewRoomPayload>({
                 action: Action.ViewRoom,
                 room_id: this.props.room.roomId,
-                metricsTrigger: "WebFloatingCallWindow",
             });
         }
     }

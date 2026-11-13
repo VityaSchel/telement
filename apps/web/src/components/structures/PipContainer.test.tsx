@@ -135,7 +135,6 @@ describe("PipContainer", () => {
                 action: Action.ViewRoom,
                 room_id: roomId,
                 view_call: false, // We're testing PiP functionality, so view the timeline
-                metricsTrigger: undefined,
             },
             true,
         );
@@ -209,7 +208,6 @@ describe("PipContainer", () => {
                 action: Action.ViewRoom,
                 room_id: room.roomId,
                 view_call: true,
-                metricsTrigger: expect.any(String),
             });
             defaultDispatcher.unregister(dispatcherRef);
         });
@@ -261,7 +259,6 @@ describe("PipContainer", () => {
             expect(dispatcherSpy).toHaveBeenCalledWith({
                 action: Action.ViewRoom,
                 room_id: room.roomId,
-                metricsTrigger: expect.any(String),
             });
             defaultDispatcher.unregister(dispatcherRef);
         });

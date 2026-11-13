@@ -43,8 +43,6 @@ import FileDropTarget from "./FileDropTarget";
 import { getKeyBindingsManager } from "../../KeyBindingsManager";
 import { KeyBindingAction } from "../../accessibility/KeyboardShortcuts";
 import Measured from "../views/elements/Measured";
-import PosthogTrackers from "../../PosthogTrackers";
-import { type ButtonEvent } from "../views/elements/AccessibleButton";
 import Spinner from "../views/elements/Spinner";
 import { type ComposerInsertPayload, ComposerType } from "../../dispatcher/payloads/ComposerInsertPayload";
 import Heading from "../views/typography/Heading";
@@ -129,7 +127,6 @@ export default class ThreadView extends React.Component<IProps, IState> {
             dis.dispatch<ViewRoomPayload>({
                 action: Action.ViewRoom,
                 room_id: this.props.room.roomId,
-                metricsTrigger: undefined, // room doesn't change
             });
         }
 
@@ -296,7 +293,6 @@ export default class ThreadView extends React.Component<IProps, IState> {
                 highlighted: this.props.isInitialEventHighlighted,
                 scroll_into_view: false,
                 replyingToEvent: this.state.replyToEvent,
-                metricsTrigger: undefined, // room doesn't change
             });
         }
     };
@@ -431,9 +427,6 @@ export default class ThreadView extends React.Component<IProps, IState> {
                         header={this.renderThreadViewHeader()}
                         ref={this.card}
                         onKeyDown={this.onKeyDown}
-                        onBack={(ev: ButtonEvent) => {
-                            PosthogTrackers.trackInteraction("WebThreadViewBackButton", ev);
-                        }}
                     >
                         <Measured breakpoint={400} sensor={this.card} onMeasurement={this.onMeasurement} />
                         <div className="mx_ThreadView_timelinePanelWrapper">{timeline}</div>

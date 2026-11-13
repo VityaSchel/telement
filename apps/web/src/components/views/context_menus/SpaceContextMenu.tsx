@@ -39,7 +39,6 @@ import { useFeatureEnabled } from "../../../hooks/useSettings";
 import { Action } from "../../../dispatcher/actions";
 import { shouldShowComponent } from "../../../customisations/helpers/UIComponents";
 import { UIComponent } from "../../../settings/UIFeature";
-import PosthogTrackers from "../../../PosthogTrackers";
 import { type ViewRoomPayload } from "../../../dispatcher/payloads/ViewRoomPayload";
 
 interface IProps extends IContextMenuProps {
@@ -125,7 +124,6 @@ const SpaceContextMenu: React.FC<IProps> = ({ space, hideHeader, onFinished, ...
                 action: Action.ViewRoom,
                 room_id: space.roomId,
                 forceTimeline: true,
-                metricsTrigger: undefined, // room doesn't change
             });
             onFinished();
         };
@@ -150,7 +148,6 @@ const SpaceContextMenu: React.FC<IProps> = ({ space, hideHeader, onFinished, ...
             ev.preventDefault();
             ev.stopPropagation();
 
-            PosthogTrackers.trackInteraction("WebSpaceContextMenuNewRoomItem", ev);
             void showCreateNewRoom(space);
             onFinished();
         };
@@ -223,18 +220,15 @@ const SpaceContextMenu: React.FC<IProps> = ({ space, hideHeader, onFinished, ...
         defaultDispatcher.dispatch<ViewRoomPayload>({
             action: Action.ViewRoom,
             room_id: space.roomId,
-            metricsTrigger: undefined, // other
         });
         onFinished();
     };
 
     const onExploreRoomsClick = (ev: ButtonEvent): void => {
-        PosthogTrackers.trackInteraction("WebSpaceContextMenuExploreRoomsItem", ev);
         openSpace(ev);
     };
 
     const onHomeClick = (ev: ButtonEvent): void => {
-        PosthogTrackers.trackInteraction("WebSpaceContextMenuHomeItem", ev);
         openSpace(ev);
     };
 

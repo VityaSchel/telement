@@ -170,7 +170,6 @@ const JoinRuleSettings: React.FC<JoinRuleSettingsProps> = ({
                 dis.dispatch<ViewRoomPayload>({
                     action: Action.ViewRoom,
                     room_id: roomId,
-                    metricsTrigger: undefined, // other
                 });
 
                 // open new settings on this tab

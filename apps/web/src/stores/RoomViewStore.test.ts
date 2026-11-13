@@ -29,7 +29,6 @@ import { RoomViewStore } from "./RoomViewStore";
 import { Action } from "../dispatcher/actions";
 import SettingsStore from "../settings/SettingsStore";
 import { SlidingSyncManager } from "../SlidingSyncManager";
-import { PosthogAnalytics } from "../PosthogAnalytics";
 import { TimelineRenderingType } from "../contexts/RoomContext";
 import { MatrixDispatcher } from "../dispatcher/dispatcher";
 import { UPDATE_EVENT } from "./AsyncStore";
@@ -54,8 +53,6 @@ import { type JoinRoomPayload } from "../dispatcher/payloads/JoinRoomPayload.ts"
 vi.mock("../Modal");
 
 // mock out the injected classes
-vi.mock("../PosthogAnalytics");
-const MockPosthogAnalytics = PosthogAnalytics as unknown as MockedClass<typeof PosthogAnalytics>;
 vi.mock("../SlidingSyncManager");
 const MockSlidingSyncManager = SlidingSyncManager as unknown as MockedClass<typeof SlidingSyncManager>;
 vi.mock("./spaces/SpaceStore");
@@ -194,10 +191,6 @@ describe("RoomViewStore", function () {
         stores = new TestSDKContext();
         stores._client = mockClient;
         stores._SlidingSyncManager = slidingSyncManager;
-        stores._PosthogAnalytics = new MockPosthogAnalytics(
-            undefined as unknown as ConstructorParameters<typeof PosthogAnalytics>[0],
-        );
-        vi.spyOn(MockPosthogAnalytics, "instance", "get").mockReturnValue(stores._PosthogAnalytics);
         stores._SpaceStore = new MockSpaceStore(
             undefined as unknown as ConstructorParameters<typeof SpaceStore>[0],
             undefined as unknown as ConstructorParameters<typeof SpaceStore>[1],
@@ -385,7 +378,6 @@ describe("RoomViewStore", function () {
             action: Action.ViewRoom,
             room_id: roomId2,
             replyingToEvent: replyToEvent,
-            metricsTrigger: undefined,
         });
     });
 
@@ -433,7 +425,6 @@ describe("RoomViewStore", function () {
             action: Action.ViewRoom,
             room_id: roomId,
             view_call: true,
-            metricsTrigger: undefined,
         });
         await untilDispatch(Action.ViewRoom, dis);
 
@@ -451,7 +442,6 @@ describe("RoomViewStore", function () {
         dis.dispatch<ViewRoomPayload>({
             action: Action.ViewRoom,
             room_id: roomId,
-            metricsTrigger: undefined,
         });
         await untilDispatch(Action.ViewRoom, dis);
 
@@ -475,7 +465,6 @@ describe("RoomViewStore", function () {
             room_id: roomId,
             view_call: true,
             voiceOnly: true,
-            metricsTrigger: undefined,
         });
         await untilDispatch(Action.ViewRoom, dis);
 
@@ -504,7 +493,6 @@ describe("RoomViewStore", function () {
             room_id: roomId,
             view_call: true,
             voiceOnly: true,
-            metricsTrigger: undefined,
         });
         await untilDispatch(Action.ViewRoom, dis);
 
@@ -532,7 +520,6 @@ describe("RoomViewStore", function () {
             view_call: true,
             skipLobby: true,
             voiceOnly: true,
-            metricsTrigger: undefined,
         });
         await untilDispatch(Action.ViewRoom, dis);
 
@@ -557,7 +544,6 @@ describe("RoomViewStore", function () {
             room_id: roomId,
             view_call: true,
             voiceOnly: false,
-            metricsTrigger: undefined,
         });
         await untilDispatch(Action.ViewRoom, dis);
 
@@ -691,14 +677,12 @@ describe("RoomViewStore", function () {
                 action: Action.JoinRoom,
                 canAskToJoin: true,
                 roomId,
-                metricsTrigger: "RoomPreview",
             });
             await untilDispatch(Action.PromptAskToJoin, dis);
 
             expect(vi.mocked(dis.dispatch).mock.calls[0][0]).toEqual({
                 action: Action.JoinRoom,
                 canAskToJoin: true,
-                metricsTrigger: "RoomPreview",
                 roomId,
             });
             expect(vi.mocked(dis.dispatch).mock.calls[1][0]).toEqual({
@@ -711,8 +695,8 @@ describe("RoomViewStore", function () {
         });
 
         it("sets 'acceptSharedHistory'", async () => {
-            dis.dispatch<ViewRoomPayload>({ action: Action.ViewRoom, room_id: roomId, metricsTrigger: "RoomList" });
-            dis.dispatch<JoinRoomPayload>({ action: Action.JoinRoom, roomId: roomId, metricsTrigger: "RoomPreview" });
+            dis.dispatch<ViewRoomPayload>({ action: Action.ViewRoom, room_id: roomId });
+            dis.dispatch<JoinRoomPayload>({ action: Action.JoinRoom, roomId: roomId });
             await untilDispatch(Action.JoinRoomReady, dis);
             expect(mockClient.joinRoom).toHaveBeenCalledWith(roomId, { acceptSharedHistory: true, viaServers: [] });
         });

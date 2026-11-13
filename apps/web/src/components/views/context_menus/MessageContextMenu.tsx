@@ -75,7 +75,6 @@ import { getShareableLocationEvent } from "../../../events/location/getShareable
 import { type ShowThreadPayload } from "../../../dispatcher/payloads/ShowThreadPayload";
 import { CardContext } from "../right_panel/context";
 import PinningUtils from "../../../utils/PinningUtils";
-import PosthogTrackers from "../../../PosthogTrackers.ts";
 
 interface IReplyInThreadButton {
     mxEvent: MatrixEvent;
@@ -280,7 +279,6 @@ export default class MessageContextMenu extends React.Component<IProps, IState> 
     private onPinClick = (isPinned: boolean): void => {
         // Pin or unpin in background
         void PinningUtils.pinOrUnpinEvent(MatrixClientPeg.safeGet(), this.props.mxEvent);
-        PosthogTrackers.trackPinUnpinMessage(isPinned ? "Pin" : "Unpin", "Timeline");
 
         this.closeMenu();
     };
@@ -401,7 +399,6 @@ export default class MessageContextMenu extends React.Component<IProps, IState> 
             event_id: this.props.mxEvent.getId(),
             highlighted: true,
             room_id: this.props.mxEvent.getRoomId(),
-            metricsTrigger: undefined, // room doesn't change
         });
         this.closeMenu();
     };

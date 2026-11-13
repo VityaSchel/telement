@@ -109,7 +109,7 @@ function urlForColor(color: string): string {
 const colorToDataURLCache = new Map<string, string>();
 
 export function defaultAvatarUrlForString(s: string): string {
-    if (!s) return ""; // XXX: should never happen but empirically does by evidence of a rageshake
+    if (!s) return ""; // XXX: should never happen but empirically does
     // eslint-disable-next-line react-hooks/rules-of-hooks
     const colorIndex = useIdColorHash(s);
     // overwritten color value in custom themes

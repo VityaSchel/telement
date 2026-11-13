@@ -414,30 +414,10 @@ The VoIP and Jitsi options are:
 
 ## Bug reporting
 
-If you run your own rageshake server to collect bug reports, the following options may be of interest:
+The following options under `feedback` may be of interest:
 
-1. `bug_report_endpoint_url`: URL for where to submit rageshake logs to. Rageshakes include feedback submissions and bug reports. When
-   not present in the config, the app will disable all rageshake functionality. Set to `https://rageshakes.element.io/api/submit` to submit
-   rageshakes to us, or use your own rageshake server.
-   You may also set the value to `"local"` if you wish to only store logs locally, in order to download them for debugging.
-2. `existing_issues_url`: URL for where to find existing issues.
-3. `new_issue_url`: URL for where to submit new issues.
-
-If you would like to use [Sentry](https://sentry.io/) for rageshake data, add a `sentry` object to your config with the following values:
-
-1. `dsn`: The Sentry [DSN](https://docs.sentry.io/product/sentry-basics/dsn-explainer/).
-2. `environment`: Optional [environment](https://docs.sentry.io/product/sentry-basics/environments/) to pass to Sentry.
-
-For example:
-
-```json
-{
-    "sentry": {
-        "dsn": "dsn-goes-here",
-        "environment": "production"
-    }
-}
-```
+1. `existing_issues_url`: URL for where to find existing issues.
+2. `new_issue_url`: URL for where to submit new issues.
 
 ## Integration managers
 
@@ -489,21 +469,8 @@ To add additional "terms and conditions" links throughout the app, use the follo
 }
 ```
 
-## Analytics
-
-To configure [Posthog](https://posthog.com/), add the following under `posthog` in your config:
-
-1. `api_host`: The hostname of the posthog server.
-2. `project_api_key`: The API key from posthog.
-
-When these configuration options are not present,
-analytics are deemed impossible and the user won't be asked to opt in to the system.
-
-There are additional root-level options which can be specified:
-
-1. `analytics_owner`: the company name used in dialogs talking about analytics - this defaults to `brand`,
-   and is useful when the provider of analytics is different from the provider of the Element instance.
-2. `privacy_policy_url`: URL to the privacy policy including the analytics collection policy.
+To link a privacy policy, set `privacy_policy_url`. It is used as the `policy_uri` when registering with an OIDC
+provider, unless `oidc_metadata.policy_uri` is set.
 
 ## Miscellaneous
 
@@ -562,7 +529,6 @@ preferences.
 Currently, the following UI feature flags are supported:
 
 - `UIFeature.urlPreviews` - Whether URL previews are enabled across the entire application.
-- `UIFeature.feedback` - Whether prompts to supply feedback are shown.
 - `UIFeature.voip` - Whether or not VoIP is shown readily to the user. When disabled,
   Jitsi widgets will still work though they cannot easily be added.
 - `UIFeature.widgets` - Whether or not widgets will be shown.

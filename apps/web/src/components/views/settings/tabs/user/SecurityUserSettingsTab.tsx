@@ -25,8 +25,6 @@ import { type ActionPayload } from "../../../../../dispatcher/payloads";
 import SettingsFlag from "../../../elements/SettingsFlag";
 import EventIndexPanel from "../../EventIndexPanel";
 import InlineSpinner from "../../../elements/InlineSpinner";
-import { PosthogAnalytics } from "../../../../../PosthogAnalytics";
-import { showDialog as showAnalyticsLearnMoreDialog } from "../../../dialogs/AnalyticsLearnMoreDialog";
 import { privateShouldBeEncrypted } from "../../../../../utils/rooms";
 import SettingsTab from "../SettingsTab";
 import { SettingsSection } from "../../shared/SettingsSection";
@@ -305,39 +303,19 @@ export default class SecurityUserSettingsTab extends React.Component<EmptyObject
             );
         }
 
-        let posthogSection;
-        if (PosthogAnalytics.instance.isEnabled()) {
-            const onClickAnalyticsLearnMore = (): void => {
-                showAnalyticsLearnMoreDialog({
-                    primaryButton: _t("action|ok"),
-                    hasCancel: false,
-                });
-            };
-            posthogSection = (
-                <Form.Root
-                    onSubmit={(evt) => {
-                        evt.preventDefault();
-                        evt.stopPropagation();
-                    }}
-                    className="mx_SecurityUserSettingsTab_posthogSection"
-                >
-                    <SettingsSubsection
-                        heading={_t("common|analytics")}
-                        description={_t("settings|security|analytics_description")}
-                    >
-                        <AccessibleButton kind="link" onClick={onClickAnalyticsLearnMore}>
-                            {_t("action|learn_more")}
-                        </AccessibleButton>
-                        {PosthogAnalytics.instance.isEnabled() && (
-                            <SettingsFlag name="pseudonymousAnalyticsOptIn" level={SettingLevel.ACCOUNT} />
-                        )}
-                    </SettingsSubsection>
-                    <SettingsSubsection heading={_t("settings|sessions|title")}>
-                        <SettingsFlag name="deviceClientInformationOptIn" level={SettingLevel.ACCOUNT} />
-                    </SettingsSubsection>
-                </Form.Root>
-            );
-        }
+        const sessionsSection = (
+            <Form.Root
+                onSubmit={(evt) => {
+                    evt.preventDefault();
+                    evt.stopPropagation();
+                }}
+                className="mx_SecurityUserSettingsTab_sessionsSection"
+            >
+                <SettingsSubsection heading={_t("settings|sessions|title")}>
+                    <SettingsFlag name="deviceClientInformationOptIn" level={SettingLevel.ACCOUNT} />
+                </SettingsSubsection>
+            </Form.Root>
+        );
 
         let advancedSection;
         if (SettingsStore.getValue(UIFeature.AdvancedSettings)) {
@@ -359,15 +337,12 @@ export default class SecurityUserSettingsTab extends React.Component<EmptyObject
             discoverySection = <DiscoverySettings />;
         }
 
-        let privacySection;
-        if (discoverySection || posthogSection) {
-            privacySection = (
-                <SettingsSection heading={_t("common|privacy")}>
-                    {discoverySection}
-                    {posthogSection}
-                </SettingsSection>
-            );
-        }
+        const privacySection = (
+            <SettingsSection heading={_t("common|privacy")}>
+                {discoverySection}
+                {sessionsSection}
+            </SettingsSection>
+        );
 
         return (
             <SettingsTab>

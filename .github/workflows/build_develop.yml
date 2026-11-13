@@ -40,15 +40,10 @@ jobs:
             - name: Install Dependencies
               run: "./scripts/layered.sh"
 
-            - name: Build, Package & Upload sourcemaps
+            - name: Build & Package
               working-directory: apps/web
               run: "./scripts/ci_package.sh"
               env:
-                  SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
-                  SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
-                  SENTRY_URL: ${{ secrets.SENTRY_URL }}
-                  SENTRY_ORG: element
-                  SENTRY_PROJECT: riot-web
                   # We only deploy the latest bundles to Cloudflare Pages and use _redirects to fallback to R2 for
                   # older ones. This redirect means that 'self' is insufficient in the CSP,
                   # and we have to add the R2 URL.

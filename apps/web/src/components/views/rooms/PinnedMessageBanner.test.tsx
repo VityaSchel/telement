@@ -180,7 +180,6 @@ describe("<PinnedMessageBanner />", () => {
             event_id: event2.getId(),
             highlighted: true,
             room_id: room.roomId,
-            metricsTrigger: undefined, // room doesn't change
         });
 
         await userEvent.click(
@@ -195,7 +194,6 @@ describe("<PinnedMessageBanner />", () => {
             event_id: event1.getId(),
             highlighted: true,
             room_id: room.roomId,
-            metricsTrigger: undefined, // room doesn't change
         });
     });
 

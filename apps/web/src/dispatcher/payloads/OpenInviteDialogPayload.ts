@@ -21,6 +21,5 @@ export interface OpenInviteDialogPayload extends ActionPayload {
     call?: MatrixCall;
     roomId?: string;
 
-    analyticsName: string;
     className: string;
 }

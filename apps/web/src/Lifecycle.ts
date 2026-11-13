@@ -37,12 +37,10 @@ import { DeviceListener } from "./device-listener";
 import { Jitsi } from "./widgets/Jitsi";
 import { SSO_HOMESERVER_URL_KEY, SSO_ID_SERVER_URL_KEY, SSO_IDP_ID_KEY } from "./BasePlatform";
 import ThreepidInviteStore from "./stores/ThreepidInviteStore";
-import { PosthogAnalytics } from "./PosthogAnalytics";
 import ErrorDialog from "./components/views/dialogs/ErrorDialog";
 import { _t } from "./languageHandler";
 import SessionRestoreErrorDialog from "./components/views/dialogs/SessionRestoreErrorDialog";
 import StorageEvictedDialog from "./components/views/dialogs/StorageEvictedDialog";
-import { setSentryUser } from "./sentry";
 import SdkConfig from "./SdkConfig";
 import { DialogOpener } from "./utils/DialogOpener";
 import { Action } from "./dispatcher/actions";
@@ -680,7 +678,7 @@ async function processStoredToken(
 
     if (!pickleKey) {
         // The token is encrypted and we have no way to read it. Keep this message stable: it is the
-        // signature support uses to identify this failure in rageshake logs.
+        // signature support uses to identify this failure in logs.
         throw new Error(`Error decrypting secret ${tokenName}: no pickle key found.`);
     }
 
@@ -770,9 +768,7 @@ export async function restoreSessionFromStorage(opts?: { ignoreGuest?: boolean }
 async function handleLoadSessionFailure(e: unknown, loadSessionOpts?: ILoadSessionOpts): Promise<boolean> {
     logger.error("Unable to load session", e);
 
-    const modal = Modal.createDialog(SessionRestoreErrorDialog, {
-        error: e,
-    });
+    const modal = Modal.createDialog(SessionRestoreErrorDialog);
 
     const [success] = await modal.finished;
     if (success) {
@@ -917,12 +913,6 @@ async function doSetLoggedIn(
     MatrixClientPeg.set(createClientWithCreds(credentials, oauthClientId));
     const client = MatrixClientPeg.safeGet();
 
-    setSentryUser(credentials.userId);
-
-    if (PosthogAnalytics.instance.isEnabled()) {
-        PosthogAnalytics.instance.startListeningToSettingsChanges(client);
-    }
-
     if (localStorage) {
         try {
             await persistCredentials(credentials);
@@ -1020,8 +1010,6 @@ let _isLoggingOut = false;
 export async function logout(): Promise<void> {
     const client = MatrixClientPeg.get();
     if (!client) return;
-
-    PosthogAnalytics.instance.logout();
 
     if (client.isGuest()) {
         // logout doesn't work for guest sessions

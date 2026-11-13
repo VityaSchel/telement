@@ -15,9 +15,7 @@ import SessionRestoreErrorDialog from "./SessionRestoreErrorDialog";
 
 describe("<SessionRestoreErrorDialog />", () => {
     it("should render", () => {
-        const { asFragment } = render(
-            <SessionRestoreErrorDialog error={new Error("it broke")} onFinished={() => {}} />,
-        );
+        const { asFragment } = render(<SessionRestoreErrorDialog onFinished={() => {}} />);
         expect(asFragment()).toMatchSnapshot();
     });
 });

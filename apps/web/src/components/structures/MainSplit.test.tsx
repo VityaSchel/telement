@@ -8,12 +8,11 @@ Please see LICENSE files in the repository root for full details.
 
 // @vitest-environment happy-dom
 
-import { describe, it, beforeEach, expect, vi } from "vitest";
+import { describe, it, beforeEach, expect } from "vitest";
 import React from "react";
 import { render, fireEvent } from "test-utils-rtl";
 
 import MainSplit from "./MainSplit";
-import { PosthogAnalytics } from "../../PosthogAnalytics.ts";
 import { SDKContext } from "../../contexts/SDKContext.ts";
 import { SDKContextClass } from "../../contexts/SDKContextClass";
 
@@ -32,18 +31,14 @@ describe("<MainSplit/>", () => {
     });
 
     it("renders", () => {
-        const { asFragment, container } = render(
-            <MainSplit children={children} panel={panel} analyticsRoomType="other_room" />,
-        );
+        const { asFragment, container } = render(<MainSplit children={children} panel={panel} />);
         expect(asFragment()).toMatchSnapshot();
         // Assert it matches the default width of 320
         expect(container.querySelector<HTMLElement>(".mx_RightPanel_ResizeWrapper")!.style.width).toBe("320px");
     });
 
     it("respects defaultSize prop", () => {
-        const { asFragment, container } = render(
-            <MainSplit children={children} panel={panel} defaultSize={500} analyticsRoomType="other_room" />,
-        );
+        const { asFragment, container } = render(<MainSplit children={children} panel={panel} defaultSize={500} />);
         expect(asFragment()).toMatchSnapshot();
         // Assert it matches the default width of 350
         expect(container.querySelector<HTMLElement>(".mx_RightPanel_ResizeWrapper")!.style.width).toBe("500px");
@@ -52,30 +47,16 @@ describe("<MainSplit/>", () => {
     it("prefers size stashed in LocalStorage to the defaultSize prop", () => {
         localStorage.setItem("mx_rhs_size_thread", "333");
         const { container } = render(
-            <MainSplit
-                children={children}
-                panel={panel}
-                sizeKey="thread"
-                defaultSize={400}
-                analyticsRoomType="other_room"
-            />,
+            <MainSplit children={children} panel={panel} sizeKey="thread" defaultSize={400} />,
         );
         expect(container.querySelector<HTMLElement>(".mx_RightPanel_ResizeWrapper")!.style.width).toBe("333px");
     });
 
-    it("should report to analytics on resize stop", () => {
+    it("persists the size on resize stop", () => {
         const { container } = render(
-            <MainSplit
-                children={children}
-                panel={panel}
-                sizeKey="thread"
-                defaultSize={400}
-                analyticsRoomType="other_room"
-            />,
+            <MainSplit children={children} panel={panel} sizeKey="thread" defaultSize={400} />,
             { wrapper: ({ children }) => <SDKContext.Provider value={sdkContext}>{children}</SDKContext.Provider> },
         );
-
-        const spy = vi.spyOn(PosthogAnalytics.instance, "trackEvent");
 
         const handle = container.querySelector(".mx_ResizeHandle--horizontal")!;
         expect(handle).toBeInTheDocument();
@@ -83,11 +64,6 @@ describe("<MainSplit/>", () => {
         fireEvent.resize(handle, { clientX: 0 });
         fireEvent.mouseUp(handle);
 
-        expect(spy).toHaveBeenCalledWith({
-            eventName: "WebPanelResize",
-            panel: "right",
-            roomType: "other_room",
-            size: 400,
-        });
+        expect(localStorage.getItem("mx_rhs_size_thread")).toBe("400");
     });
 });

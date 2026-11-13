@@ -16,7 +16,7 @@ import {
     RoomEvent,
 } from "matrix-js-sdk/src/matrix";
 import { render } from "test-utils-rtl";
-import { vi, describe, it, expect, beforeEach, afterEach, afterAll, type MockedObject } from "vitest";
+import { vi, describe, it, expect, beforeEach, afterAll, type MockedObject } from "vitest";
 import { getRoomContext, mkEvent, mkStubRoom, stubClient } from "test-utils";
 
 import { RoomUploadContextProvider, RoomUploadViewModel } from "./RoomUploadViewModel";
@@ -28,7 +28,6 @@ import type { ComposerInsertFilesPayload } from "../../dispatcher/payloads/Compo
 import { ScopedRoomContextProvider } from "../../contexts/ScopedRoomContext";
 import { Action } from "../../dispatcher/actions";
 import MatrixClientContext from "../../contexts/MatrixClientContext";
-import { PosthogAnalytics } from "../../PosthogAnalytics";
 
 const sendContentListToRoomSpy = vi.spyOn(ContentMessages.sharedInstance(), "sendContentListToRoom");
 
@@ -266,17 +265,7 @@ describe("RoomUploadViewModel", () => {
         });
     });
 
-    describe("analytics", () => {
-        let trackEvent: ReturnType<typeof vi.spyOn>;
-
-        beforeEach(() => {
-            trackEvent = vi.spyOn(PosthogAnalytics.instance, "trackEvent").mockImplementation(() => {});
-        });
-
-        afterEach(() => {
-            trackEvent.mockRestore();
-        });
-
+    describe("onUploadOptionSelected", () => {
         function createVm(
             openUploadDialog: () => void,
             replyToEvent?: MatrixEvent,
@@ -294,45 +283,22 @@ describe("RoomUploadViewModel", () => {
             );
         }
 
-        it("tracks AttachmentOpen and invokes the upload function when 'local' is selected", () => {
+        it("invokes the upload function when 'local' is selected", () => {
             const openUploadDialog = vi.fn();
             const vm = createVm(openUploadDialog);
             vm.onUploadOptionSelected("local");
 
-            expect(trackEvent).toHaveBeenCalledWith({
-                eventName: "AttachmentOpen",
-                isReply: false,
-                inThread: false,
-                kind: "local",
-            });
             expect(openUploadDialog).toHaveBeenCalled();
         });
 
-        it("marks the attachment as a reply and in-thread when applicable", () => {
-            const replyToEvent = mkEvent({ event: true, type: "anything", user: "anyone", content: {} });
-            const vm = createVm(vi.fn(), replyToEvent, { rel_type: "m.thread" });
-
-            vm.onUploadOptionSelected("local");
-
-            expect(trackEvent).toHaveBeenCalledWith(
-                expect.objectContaining({
-                    eventName: "AttachmentOpen",
-                    isReply: true,
-                    inThread: true,
-                }),
-            );
-        });
-
-        it("throws for unknown upload types and does not track anything", () => {
+        it("throws for unknown upload types", () => {
             const vm = createVm(vi.fn());
             expect(() => vm.onUploadOptionSelected("unknown-module-type")).toThrow();
-            expect(trackEvent).not.toHaveBeenCalled();
         });
 
         it("throws when the timeline rendering type is not Room or Thread", () => {
             const vm = createVm(vi.fn(), undefined, undefined, TimelineRenderingType.File);
             expect(() => vm.onUploadOptionSelected("local")).toThrow("TimelineRenderingType must be Room or Thread");
-            expect(trackEvent).not.toHaveBeenCalled();
         });
     });
 });

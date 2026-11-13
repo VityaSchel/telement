@@ -6,7 +6,6 @@ SPDX-License-Identifier: AGPL-3.0-only OR GPL-3.0-only OR LicenseRef-Element-Com
 Please see LICENSE files in the repository root for full details.
 */
 
-import { type Composer as ComposerEvent } from "@matrix-org/analytics-events/types/typescript/Composer";
 import {
     type IEventRelation,
     type MatrixEvent,
@@ -17,9 +16,7 @@ import {
 import { type RoomMessageEventContent } from "matrix-js-sdk/src/types";
 import { type MessageComposerUrlPreviewSnapshot } from "@element-hq/web-shared-components";
 
-import { PosthogAnalytics } from "../../../../../PosthogAnalytics";
 import SettingsStore from "../../../../../settings/SettingsStore";
-import { decorateStartSendingTime, sendRoundTripMetric } from "../../../../../sendTimePerformanceMetrics";
 import { doMaybeLocalRoomAction } from "../../../../../utils/local-room";
 import { CHAT_EFFECTS } from "../../../../../effects";
 import { containsEmoji } from "../../../../../effects/utils";
@@ -57,22 +54,6 @@ export async function sendMessage(
     if (!roomId) {
         return;
     }
-
-    const posthogEvent: ComposerEvent = {
-        eventName: "Composer",
-        isEditing: false,
-        messageType: "Text",
-        isReply: Boolean(replyToEvent),
-        // TODO thread
-        inThread: relation?.rel_type === THREAD_RELATION_TYPE.name,
-    };
-
-    // TODO thread
-    /*if (posthogEvent.inThread) {
-        const threadRoot = room.findEventById(relation?.event_id);
-        posthogEvent.startsThread = threadRoot?.getThread()?.events.length === 1;
-    }*/
-    PosthogAnalytics.instance.trackEvent<ComposerEvent>(posthogEvent);
 
     let content: RoomMessageEventContent | null = null;
 
@@ -128,10 +109,6 @@ export async function sendMessage(
         return;
     }
 
-    if (SettingsStore.getValue("Performance.addSendMessageTimingMetadata")) {
-        decorateStartSendingTime(content);
-    }
-
     const threadId = relation?.event_id && relation?.rel_type === THREAD_RELATION_TYPE.name ? relation.event_id : null;
 
     const prom = doMaybeLocalRoomAction(
@@ -161,11 +138,6 @@ export async function sendMessage(
             }
         }
     });
-    if (SettingsStore.getValue("Performance.addSendMessageTimingMetadata")) {
-        void prom.then((resp) => {
-            sendRoundTripMetric(mxClient, roomId, resp.event_id);
-        });
-    }
 
     // TODO save history
     // TODO save local state
@@ -200,14 +172,6 @@ export async function editMessage(
     { roomContext, mxClient, editorStateTransfer, attachBundles, isUrlPreviewsModified }: EditMessageParams,
 ): Promise<ISendEventResponse | undefined> {
     const editedEvent = editorStateTransfer.getEvent();
-
-    PosthogAnalytics.instance.trackEvent<ComposerEvent>({
-        eventName: "Composer",
-        isEditing: true,
-        messageType: "Text",
-        inThread: Boolean(editedEvent?.getThread()),
-        isReply: Boolean(editedEvent.replyEventId),
-    });
 
     // TODO emoji
     // Replace emoticon at the end of the message

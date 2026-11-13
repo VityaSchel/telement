@@ -48,7 +48,6 @@ describe("PreviewRoomListItemViewModel", () => {
         expect(dispatchSpy).toHaveBeenCalledWith({
             action: Action.ViewRoom,
             room_id: props.roomId,
-            metricsTrigger: "RoomList",
         });
     });
 

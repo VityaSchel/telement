@@ -10,9 +10,7 @@ Please see LICENSE files in the repository root for full details.
 import React, { type JSX, type ReactNode } from "react";
 import { type NumberSize, Resizable } from "re-resizable";
 import { type Direction } from "re-resizable/lib/resizer";
-import { type WebPanelResize } from "@matrix-org/analytics-events/types/typescript/WebPanelResize";
 
-import { PosthogAnalytics } from "../../PosthogAnalytics.ts";
 import { SDKContext } from "../../contexts/SDKContext.ts";
 
 interface IProps {
@@ -30,8 +28,6 @@ interface IProps {
      * The size to use for the panel component if one isn't persisted in storage. Defaults to 320.
      */
     defaultSize: number;
-
-    analyticsRoomType: WebPanelResize["roomType"];
 }
 
 export default class MainSplit extends React.Component<IProps> {
@@ -71,13 +67,6 @@ export default class MainSplit extends React.Component<IProps> {
         const newSize = this.loadSidePanelSize().width + delta.width;
         this.context.resizeNotifier.stopResizing();
         window.localStorage.setItem(this.sizeSettingStorageKey, newSize.toString());
-
-        PosthogAnalytics.instance.trackEvent<WebPanelResize>({
-            eventName: "WebPanelResize",
-            panel: "right",
-            roomType: this.props.analyticsRoomType,
-            size: newSize,
-        });
     };
 
     private loadSidePanelSize(): { height: string | number; width: number } {

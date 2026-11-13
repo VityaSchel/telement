@@ -135,7 +135,6 @@ class RoomSettingsDialog extends React.Component<IProps, IState> {
                 _td("common|general"),
                 <SettingsIcon />,
                 <GeneralRoomSettingsTab room={this.state.room} />,
-                "RoomSettingsGeneral",
             ),
         );
         if (SettingsStore.getValue("feature_ask_to_join") && this.state.room.getJoinRule() === "knock") {
@@ -164,7 +163,6 @@ class RoomSettingsDialog extends React.Component<IProps, IState> {
                 _td("room_settings|security|title"),
                 <LockIcon />,
                 <SecurityRoomSettingsTab room={this.state.room} closeSettingsFn={() => this.props.onFinished(true)} />,
-                "RoomSettingsSecurityPrivacy",
             ),
         );
         tabs.push(
@@ -173,7 +171,6 @@ class RoomSettingsDialog extends React.Component<IProps, IState> {
                 _td("room_settings|permissions|title"),
                 <AdminIcon />,
                 <RolesRoomSettingsTab room={this.state.room} />,
-                "RoomSettingsRolesPermissions",
             ),
         );
         tabs.push(
@@ -185,7 +182,6 @@ class RoomSettingsDialog extends React.Component<IProps, IState> {
                     roomId={this.state.room.roomId}
                     closeSettingsFn={() => this.props.onFinished(true)}
                 />,
-                "RoomSettingsNotifications",
             ),
         );
 
@@ -196,7 +192,6 @@ class RoomSettingsDialog extends React.Component<IProps, IState> {
                     _td("room_settings|bridges|title"),
                     <TreeIcon />,
                     <BridgeSettingsTab room={this.state.room} />,
-                    "RoomSettingsBridges",
                 ),
             );
         }
@@ -220,7 +215,6 @@ class RoomSettingsDialog extends React.Component<IProps, IState> {
                         room={this.state.room}
                         closeSettingsFn={() => this.props.onFinished(true)}
                     />,
-                    "RoomSettingsAdvanced",
                 ),
             );
         }
@@ -242,7 +236,6 @@ class RoomSettingsDialog extends React.Component<IProps, IState> {
                         <TabbedView
                             tabs={this.getTabs()}
                             activeTabId={this.state.activeTabId}
-                            screenName="RoomSettings"
                             onChange={this.onTabChange}
                         />
                     </div>

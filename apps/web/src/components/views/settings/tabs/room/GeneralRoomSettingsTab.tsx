@@ -15,7 +15,6 @@ import AccessibleButton, { type ButtonEvent } from "../../../elements/Accessible
 import dis from "../../../../../dispatcher/dispatcher";
 import MatrixClientContext from "../../../../../contexts/MatrixClientContext";
 import AliasSettings from "../../../room_settings/AliasSettings";
-import PosthogTrackers from "../../../../../PosthogTrackers";
 import { SettingsSubsection } from "../../shared/SettingsSubsection";
 import SettingsTab from "../SettingsTab";
 import { SettingsSection } from "../../shared/SettingsSection";
@@ -46,8 +45,6 @@ export default class GeneralRoomSettingsTab extends React.Component<IProps, ISta
             action: "leave_room",
             room_id: this.props.room.roomId,
         });
-
-        PosthogTrackers.trackInteraction("WebRoomSettingsLeaveButton", ev);
     };
 
     public render(): React.ReactNode {

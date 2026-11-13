@@ -152,7 +152,6 @@ describe("RoomView", () => {
                 defaultDispatcher.dispatch<ViewRoomPayload>({
                     action: Action.ViewRoom,
                     room_id: room.roomId,
-                    metricsTrigger: undefined,
                 }),
             );
 
@@ -195,7 +194,6 @@ describe("RoomView", () => {
             defaultDispatcher.dispatch<ViewRoomPayload>({
                 action: Action.ViewRoom,
                 room_id: room.roomId,
-                metricsTrigger: undefined,
             });
 
             await switchedRoom;
@@ -646,7 +644,6 @@ describe("RoomView", () => {
                 action: Action.ViewRoom,
                 room_id: stores.roomViewStore.getRoomId()!,
                 event_id: "$eventId",
-                metricsTrigger: undefined,
             });
 
             expect(stores.rightPanelStore.isOpen).toEqual(true);
@@ -669,7 +666,6 @@ describe("RoomView", () => {
                     action: Action.ViewRoom,
                     room_id: stores.roomViewStore.getRoomId()!,
                     event_id: "$eventId",
-                    metricsTrigger: undefined,
                     view_call: true,
                 }),
             );
@@ -684,7 +680,6 @@ describe("RoomView", () => {
                     action: Action.ViewRoom,
                     room_id: stores.roomViewStore.getRoomId()!,
                     event_id: "$eventId",
-                    metricsTrigger: undefined,
                     view_call: false,
                 }),
             );
@@ -706,7 +701,6 @@ describe("RoomView", () => {
                     action: Action.ViewRoom,
                     room_id: room.roomId,
                     event_id: "$eventId",
-                    metricsTrigger: undefined,
                     view_call: true,
                 }),
             );
@@ -721,7 +715,6 @@ describe("RoomView", () => {
                     action: Action.ViewRoom,
                     room_id: room2.roomId,
                     event_id: "$eventId",
-                    metricsTrigger: undefined,
                 }),
             );
             // Navigate back to the original room
@@ -730,7 +723,6 @@ describe("RoomView", () => {
                     action: Action.ViewRoom,
                     room_id: room.roomId,
                     event_id: "$eventId",
-                    metricsTrigger: undefined,
                 }),
             );
             // Right panel should be gone

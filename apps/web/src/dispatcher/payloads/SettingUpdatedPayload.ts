@@ -20,15 +20,3 @@ export interface SettingUpdatedPayload<S extends SettingKey = SettingKey> extend
     newValueAtLevel: Settings[S]["default"];
     newValue: Settings[S]["default"];
 }
-
-/**
- * Type guard to check if a payload is a SettingUpdatedPayload for a specific setting.
- * @param payload the payload to assert
- * @param settingName the setting name to check for
- */
-export function isSettingUpdatedPayload<S extends SettingKey>(
-    payload: SettingUpdatedPayload<any>,
-    settingName: S,
-): payload is SettingUpdatedPayload<S> {
-    return payload.settingName === settingName;
-}

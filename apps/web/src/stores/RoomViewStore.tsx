@@ -12,7 +12,6 @@ import React, { type ReactNode } from "react";
 import * as utils from "matrix-js-sdk/src/utils";
 import {
     MatrixError,
-    JoinRule,
     type Room,
     type MatrixEvent,
     type IJoinRoomOpts,
@@ -20,8 +19,6 @@ import {
 } from "matrix-js-sdk/src/matrix";
 import { KnownMembership } from "matrix-js-sdk/src/types";
 import { logger } from "matrix-js-sdk/src/logger";
-import { type ViewRoom as ViewRoomEvent } from "@matrix-org/analytics-events/types/typescript/ViewRoom";
-import { type JoinedRoom as JoinedRoomEvent } from "@matrix-org/analytics-events/types/typescript/JoinedRoom";
 // oxlint-disable-next-line no-restricted-imports
 import EventEmitter from "events";
 
@@ -34,8 +31,6 @@ import { Action } from "../dispatcher/actions";
 import { retry } from "../utils/promise";
 import { TimelineRenderingType } from "../contexts/RoomContext";
 import { type ViewRoomPayload } from "../dispatcher/payloads/ViewRoomPayload";
-import DMRoomMap from "../utils/DMRoomMap";
-import { isMetaSpace, MetaSpace } from "./spaces";
 import { type JoinRoomPayload } from "../dispatcher/payloads/JoinRoomPayload";
 import { type JoinRoomReadyPayload } from "../dispatcher/payloads/JoinRoomReadyPayload";
 import { type JoinRoomErrorPayload } from "../dispatcher/payloads/JoinRoomErrorPayload";
@@ -43,7 +38,6 @@ import { type ViewRoomErrorPayload } from "../dispatcher/payloads/ViewRoomErrorP
 import ErrorDialog from "../components/views/dialogs/ErrorDialog";
 import { type ActiveRoomChangedPayload } from "../dispatcher/payloads/ActiveRoomChangedPayload";
 import SettingsStore from "../settings/SettingsStore";
-import { awaitRoomDownSync } from "../utils/RoomUpgrade";
 import { UPDATE_EVENT } from "./AsyncStore";
 import { type SDKContextClass } from "../contexts/SDKContextClass";
 import { CallStore } from "./CallStore";
@@ -266,31 +260,6 @@ export class RoomViewStore extends EventEmitter {
                 if (this.state.roomId === payload.roomId) {
                     this.setState({ shouldPeek: false });
                 }
-
-                void awaitRoomDownSync(MatrixClientPeg.safeGet(), payload.roomId).then((room) => {
-                    const numMembers = room.getJoinedMemberCount();
-                    const roomSize =
-                        numMembers > 1000
-                            ? "MoreThanAThousand"
-                            : numMembers > 100
-                              ? "OneHundredAndOneToAThousand"
-                              : numMembers > 10
-                                ? "ElevenToOneHundred"
-                                : numMembers > 2
-                                  ? "ThreeToTen"
-                                  : numMembers > 1
-                                    ? "Two"
-                                    : "One";
-
-                    this.stores.posthogAnalytics.trackEvent<JoinedRoomEvent>({
-                        eventName: "JoinedRoom",
-                        trigger: payload.metricsTrigger,
-                        roomSize,
-                        isDM: !!DMRoomMap.shared().getUserIdForRoomId(room.roomId),
-                        isSpace: room.isSpaceRoom(),
-                    });
-                });
-
                 break;
             }
             case Action.ClientNotViable:
@@ -313,7 +282,6 @@ export class RoomViewStore extends EventEmitter {
                             action: Action.ViewRoom,
                             room_id: payload.event.getRoomId(),
                             replyingToEvent: payload.event,
-                            metricsTrigger: undefined, // room doesn't change
                         });
                     } else {
                         this.setState({
@@ -340,29 +308,6 @@ export class RoomViewStore extends EventEmitter {
     public async viewRoom(payload: ViewRoomPayload): Promise<void> {
         if (payload.room_id) {
             const room = MatrixClientPeg.safeGet().getRoom(payload.room_id);
-
-            if (payload.metricsTrigger !== null && payload.room_id !== this.state.roomId) {
-                let activeSpace: ViewRoomEvent["activeSpace"];
-                if (this.stores.spaceStore.activeSpace === MetaSpace.Home) {
-                    activeSpace = "Home";
-                } else if (isMetaSpace(this.stores.spaceStore.activeSpace)) {
-                    activeSpace = "Meta";
-                } else {
-                    activeSpace =
-                        this.stores.spaceStore.activeSpaceRoom?.getJoinRule() === JoinRule.Public
-                            ? "Public"
-                            : "Private";
-                }
-
-                this.stores.posthogAnalytics.trackEvent<ViewRoomEvent>({
-                    eventName: "ViewRoom",
-                    trigger: payload.metricsTrigger,
-                    viaKeyboard: payload.metricsViaKeyboard,
-                    isDM: !!DMRoomMap.shared().getUserIdForRoomId(payload.room_id),
-                    isSpace: room?.isSpaceRoom(),
-                    activeSpace,
-                });
-            }
 
             let viewingCall = payload.view_call;
             if (viewingCall === undefined) {
@@ -461,7 +406,6 @@ export class RoomViewStore extends EventEmitter {
                     ...payload,
                     action: Action.JoinRoom,
                     roomId: payload.room_id,
-                    metricsTrigger: payload.metricsTrigger as JoinRoomPayload["metricsTrigger"],
                     canAskToJoin: SettingsStore.getValue("feature_ask_to_join"),
                 };
                 // Explicitly pass viaServers in case state doesn't contain the same due to
@@ -591,7 +535,6 @@ export class RoomViewStore extends EventEmitter {
             this.dis.dispatch<JoinRoomReadyPayload>({
                 action: Action.JoinRoomReady,
                 roomId,
-                metricsTrigger: payload.metricsTrigger,
             });
         } catch (err) {
             logger.error("Error thrown while handling joinRoom", err);

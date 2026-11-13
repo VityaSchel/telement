@@ -13,7 +13,6 @@ import ErrorDialog from "../../../views/dialogs/ErrorDialog";
 import { _t, UserFriendlyError } from "../../../../languageHandler";
 import MatrixClientContext from "../../../../contexts/MatrixClientContext";
 import dis from "../../../../dispatcher/dispatcher";
-import PosthogTrackers from "../../../../PosthogTrackers";
 import { ShareDialog } from "../../../views/dialogs/ShareDialog";
 import { type ComposerInsertPayload } from "../../../../dispatcher/payloads/ComposerInsertPayload";
 import { Action } from "../../../../dispatcher/actions";
@@ -78,7 +77,6 @@ export const useUserInfoBasicOptionsViewModel = (room: Room, member: User | Room
             // this could return null, the default prevents a type error
             event_id: room.getEventReadUpTo(member.userId) || undefined,
             room_id: room.roomId,
-            metricsTrigger: undefined, // room doesn't change
         });
     };
 
@@ -118,8 +116,6 @@ export const useUserInfoBasicOptionsViewModel = (room: Room, member: User | Room
                 description,
             });
         }
-
-        PosthogTrackers.trackInteraction("WebRightPanelRoomUserInfoInviteButton", ev);
     };
 
     const onShareUserClick = (): void => {

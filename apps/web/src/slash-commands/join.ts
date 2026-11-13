@@ -51,8 +51,6 @@ function openRoom(cli: MatrixClient, args: string | undefined, autoJoin: boolean
             action: Action.ViewRoom,
             room_alias: roomAlias,
             auto_join: autoJoin,
-            metricsTrigger: "SlashCommand",
-            metricsViaKeyboard: true,
         });
         return success();
     }
@@ -65,8 +63,6 @@ function openRoom(cli: MatrixClient, args: string | undefined, autoJoin: boolean
             room_id: roomId,
             via_servers: viaServers, // for the rejoin button
             auto_join: autoJoin,
-            metricsTrigger: "SlashCommand",
-            metricsViaKeyboard: true,
         });
         return success();
     }
@@ -93,8 +89,6 @@ function openRoom(cli: MatrixClient, args: string | undefined, autoJoin: boolean
         const dispatch: ViewRoomPayload = {
             action: Action.ViewRoom,
             auto_join: autoJoin,
-            metricsTrigger: "SlashCommand",
-            metricsViaKeyboard: true,
         };
 
         if (entity[0] === "!") dispatch["room_id"] = entity;

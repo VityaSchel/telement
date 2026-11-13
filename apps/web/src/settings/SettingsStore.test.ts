@@ -212,16 +212,6 @@ describe("SettingsStore", () => {
         });
     });
 
-    describe("exportForRageshake", () => {
-        it("should not export settings marked as non-exportable", async () => {
-            await SettingsStore.setValue("userTimezone", null, SettingLevel.DEVICE, "Europe/London");
-            const values = JSON.parse(SettingsStore.exportForRageshake()) as Record<SettingKey, unknown>;
-            for (const exportedKey of Object.keys(values) as SettingKey[]) {
-                expect(SETTINGS[exportedKey].shouldExportToRageshake).not.toEqual(false);
-            }
-        });
-    });
-
     describe("runMigrations", () => {
         let client: MatrixClient;
         let room: Room;

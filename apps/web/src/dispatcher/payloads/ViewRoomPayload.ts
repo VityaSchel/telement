@@ -7,7 +7,6 @@ Please see LICENSE files in the repository root for full details.
 */
 
 import { type MatrixEvent } from "matrix-js-sdk/src/matrix";
-import { type ViewRoom as ViewRoomEvent } from "@matrix-org/analytics-events/types/typescript/ViewRoom";
 
 import { type ActionPayload } from "../payloads";
 import { type Action } from "../actions";
@@ -42,10 +41,6 @@ interface BaseViewRoomPayload extends Pick<ActionPayload, "action"> {
     opts?: JoinRoomPayload["opts"];
 
     deferred_action?: ActionPayload; // Action to fire after MatrixChat handles this ViewRoom action
-
-    // additional parameters for the purpose of metrics & instrumentation
-    metricsTrigger: ViewRoomEvent["trigger"];
-    metricsViaKeyboard?: ViewRoomEvent["viaKeyboard"];
 }
 
 export type ViewRoomPayload = BaseViewRoomPayload &

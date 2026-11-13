@@ -125,9 +125,9 @@ describe("ElementCallMock", () => {
     });
 
     it("records what initializeElementCall was given", async () => {
-        await initializeElementCall({ rageshake: { submit_url: "https://rageshake.example.org" } });
+        await initializeElementCall({ livekit: { livekit_service_url: "https://livekit.example.org" } });
         renderCall();
-        expect(screen.getByText(/initializeElementCall: .*rageshake\.example\.org/)).toBeInTheDocument();
+        expect(screen.getByText(/initializeElementCall: .*livekit\.example\.org/)).toBeInTheDocument();
     });
 
     it("drives every EC → host bridge method from its buttons", async () => {

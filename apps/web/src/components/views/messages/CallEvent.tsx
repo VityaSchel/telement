@@ -105,7 +105,6 @@ const ActiveLoadedCallEvent = ({ mxEvent, call, ref }: ActiveLoadedCallEventProp
                 action: Action.ViewRoom,
                 room_id: mxEvent.getRoomId()!,
                 view_call: true,
-                metricsTrigger: undefined,
             });
         },
         [mxEvent],

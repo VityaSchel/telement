@@ -42,7 +42,6 @@ import { FontWatcher } from "./watchers/FontWatcher";
 import ServerSupportUnstableFeatureController from "./controllers/ServerSupportUnstableFeatureController";
 import { WatchManager } from "./WatchManager";
 import { type CustomTheme } from "../theme";
-import AnalyticsController from "./controllers/AnalyticsController";
 import FallbackIceServerController from "./controllers/FallbackIceServerController";
 import { type IRightPanelForRoomStored } from "../stores/right-panel/RightPanelStoreIPanelState.ts";
 import { type ILayoutSettings } from "../stores/widgets/WidgetLayoutStore.ts";
@@ -170,19 +169,12 @@ export interface IBaseSetting<T extends SettingValueType = SettingValueType> {
         caption: () => ReactNode;
         faq?: (enabled: boolean) => ReactNode;
         image?: string; // require(...)
-        feedbackSubheading?: TranslationKey;
-        feedbackLabel?: string;
         extraSettings?: BooleanSettingKey[];
         requiresRefresh?: boolean;
     };
 
     // Whether the setting should have a warning sign in the microcopy
     shouldWarn?: boolean;
-
-    /**
-     * Whether the setting should be exported in a rageshake report.
-     */
-    shouldExportToRageshake?: boolean;
 
     /**
      * Options array for a setting controlled by a dropdown.
@@ -299,8 +291,6 @@ export interface Settings {
     "room_directory_servers": IBaseSetting<string[]>;
     "integrationProvisioning": IBaseSetting<boolean>;
     "allowedWidgets": IBaseSetting<{ [eventId: string]: boolean }>;
-    "analyticsOptIn": IBaseSetting<boolean>;
-    "pseudonymousAnalyticsOptIn": IBaseSetting<boolean | null>;
     "deviceClientInformationOptIn": IBaseSetting<boolean>;
     "Registration.mobileRegistrationHelper": IBaseSetting<boolean>;
     "autocompleteDelay": IBaseSetting<number>;
@@ -341,7 +331,6 @@ export interface Settings {
     "layout": IBaseSetting<Layout>;
     "Images.size": IBaseSetting<ImageSize>;
     "showChatEffects": IBaseSetting<boolean>;
-    "Performance.addSendMessageTimingMetadata": IBaseSetting<boolean>;
     "Widgets.pinned": IBaseSetting<{ [widgetId: string]: boolean }>;
     "Widgets.layout": IBaseSetting<ILayoutSettings | null>;
     "Spaces.allRoomsInHome": IBaseSetting<boolean>;
@@ -415,8 +404,6 @@ export const SETTINGS: Settings = {
                     <p>{_t("labs|video_rooms_faq2_answer")}</p>
                 </>
             ),
-            feedbackLabel: "video-room-feedback",
-            feedbackSubheading: _td("labs|video_rooms_feedbackSubheading"),
             image: VideoRoomsBetaImage,
             requiresRefresh: true,
         },
@@ -457,8 +444,6 @@ export const SETTINGS: Settings = {
         controller: new InviteRulesConfigController(),
         supportedLevels: [SettingLevel.ACCOUNT],
         default: InviteRulesConfigController.default,
-        // Contains server names
-        shouldExportToRageshake: false,
     },
     "blockInvites": {
         controller: new BlockInvitesConfigController("blockInvites", defaultWatchManager),
@@ -512,14 +497,10 @@ export const SETTINGS: Settings = {
     "mjolnirRooms": {
         supportedLevels: [SettingLevel.ACCOUNT],
         default: [],
-        // Contains room IDs
-        shouldExportToRageshake: false,
     },
     "mjolnirPersonalRoom": {
         supportedLevels: [SettingLevel.ACCOUNT],
         default: null,
-        // Contains room ID
-        shouldExportToRageshake: false,
     },
     "feature_bridge_state": {
         isFeature: true,
@@ -714,22 +695,17 @@ export const SETTINGS: Settings = {
         displayName: _td("settings|showbold"),
         default: false,
         invertedSettingName: "feature_hidebold",
-        controller: new AnalyticsController("WebSettingsNotificationsShowBoldToggle"),
     },
     "Notifications.activityIsUnread": {
         supportedLevels: LEVELS_DEVICE_ONLY_SETTINGS_WITH_CONFIG,
         displayName: _td("settings|activityIsUnread"),
         default: false,
-        controller: [
-            new AnalyticsController("WebSettingsActivityIsUnreadToggle"),
-            new RequiresSettingsController(["Notifications.showbold"]),
-        ],
+        controller: new RequiresSettingsController(["Notifications.showbold"]),
     },
     "Notifications.tac_only_notifications": {
         supportedLevels: LEVELS_DEVICE_ONLY_SETTINGS_WITH_CONFIG,
         displayName: _td("settings|tac_only_notifications"),
         default: true,
-        controller: new AnalyticsController("WebSettingsNotificationsTACOnlyNotificationsToggle"),
     },
     "feature_ask_to_join": {
         isFeature: true,
@@ -848,8 +824,6 @@ export const SETTINGS: Settings = {
         supportedLevels: LEVELS_DEVICE_ONLY_SETTINGS,
         displayName: _td("settings|preferences|user_timezone"),
         default: "",
-        // Location leak
-        shouldExportToRageshake: false,
     },
     "userTimezonePublish": {
         // This is per-device so you can avoid having devices overwrite each other.
@@ -958,8 +932,6 @@ export const SETTINGS: Settings = {
     "custom_themes": {
         supportedLevels: LEVELS_ACCOUNT_SETTINGS,
         default: [],
-        // Potential privacy leak via theme origin
-        shouldExportToRageshake: false,
     },
     "use_system_theme": {
         supportedLevels: LEVELS_DEVICE_ONLY_SETTINGS,
@@ -1031,43 +1003,31 @@ export const SETTINGS: Settings = {
     "language": {
         supportedLevels: LEVELS_DEVICE_ONLY_SETTINGS_WITH_CONFIG,
         default: "en",
-        // For privacy
-        shouldExportToRageshake: false,
     },
     "breadcrumb_rooms": {
         // not really a setting
         supportedLevels: [SettingLevel.ACCOUNT],
         default: [],
-        // Contains joined rooms
-        shouldExportToRageshake: false,
     },
     "recent_emoji": {
         // not really a setting
         supportedLevels: [SettingLevel.ACCOUNT],
         default: [],
-        // For privacy
-        shouldExportToRageshake: false,
     },
     "SpotlightSearch.recentSearches": {
         // not really a setting
         supportedLevels: [SettingLevel.ACCOUNT],
         default: [], // list of room IDs, most recent first
-        // For privacy
-        shouldExportToRageshake: false,
     },
     "showMediaEventIds": {
         // not really a setting
         supportedLevels: [SettingLevel.DEVICE],
         default: {}, // List of events => is visible
-        // Exports event IDs
-        shouldExportToRageshake: false,
     },
     "pdfViewerState": {
         // not really a setting
         supportedLevels: [SettingLevel.DEVICE],
         default: {}, // MXC URI => where the reader had got to in that PDF
-        // Exports MXC URIs
-        shouldExportToRageshake: false,
     },
     "SpotlightSearch.showNsfwPublicRooms": {
         supportedLevels: LEVELS_ACCOUNT_SETTINGS,
@@ -1077,8 +1037,6 @@ export const SETTINGS: Settings = {
     "room_directory_servers": {
         supportedLevels: [SettingLevel.ACCOUNT],
         default: [],
-        // Contains connected servers for user
-        shouldExportToRageshake: false,
     },
     "integrationProvisioning": {
         supportedLevels: [SettingLevel.ACCOUNT],
@@ -1088,17 +1046,6 @@ export const SETTINGS: Settings = {
         supportedLevels: [SettingLevel.ROOM_ACCOUNT, SettingLevel.ROOM_DEVICE],
         supportedLevelsAreOrdered: true,
         default: {}, // none allowed
-        shouldExportToRageshake: false,
-    },
-    // Legacy, kept around for transitionary purposes
-    "analyticsOptIn": {
-        supportedLevels: LEVELS_DEVICE_ONLY_SETTINGS_WITH_CONFIG,
-        default: false,
-    },
-    "pseudonymousAnalyticsOptIn": {
-        supportedLevels: [SettingLevel.ACCOUNT],
-        displayName: _td("settings|security|send_analytics"),
-        default: null,
     },
     "deviceClientInformationOptIn": {
         supportedLevels: [SettingLevel.ACCOUNT],
@@ -1186,8 +1133,6 @@ export const SETTINGS: Settings = {
     "notificationSound": {
         supportedLevels: LEVELS_ROOM_OR_ACCOUNT,
         default: false,
-        // Contains personal information in file name
-        shouldExportToRageshake: false,
     },
     "notificationBodyEnabled": {
         supportedLevels: LEVELS_DEVICE_ONLY_SETTINGS,
@@ -1216,8 +1161,6 @@ export const SETTINGS: Settings = {
             allow: [],
             deny: [],
         },
-        // Expses widget information
-        shouldExportToRageshake: false,
     },
     "breadcrumbs": {
         supportedLevels: LEVELS_ACCOUNT_SETTINGS,
@@ -1304,16 +1247,10 @@ export const SETTINGS: Settings = {
         default: true,
         controller: new ReducedMotionController(),
     },
-    "Performance.addSendMessageTimingMetadata": {
-        supportedLevels: [SettingLevel.CONFIG],
-        default: false,
-    },
     "Widgets.pinned": {
         // deprecated
         supportedLevels: LEVELS_ROOM_OR_ACCOUNT,
         default: {},
-        // Sensitive information in widget ID
-        shouldExportToRageshake: false,
     },
     "Widgets.layout": {
         supportedLevels: LEVELS_ROOM_OR_ACCOUNT,
@@ -1367,8 +1304,6 @@ export const SETTINGS: Settings = {
     "activeCallRoomIds": {
         supportedLevels: LEVELS_DEVICE_ONLY_SETTINGS,
         default: [],
-        // Contains room IDs
-        shouldExportToRageshake: false,
     },
     /**
      * Managed by the {@link ReleaseAnnouncementStore}
@@ -1399,10 +1334,6 @@ export const SETTINGS: Settings = {
         default: true,
     },
     [UIFeature.Voip]: {
-        supportedLevels: LEVELS_UI_FEATURE,
-        default: true,
-    },
-    [UIFeature.Feedback]: {
         supportedLevels: LEVELS_UI_FEATURE,
         default: true,
     },

@@ -6,19 +6,16 @@ SPDX-License-Identifier: AGPL-3.0-only OR GPL-3.0-only OR LicenseRef-Element-Com
 Please see LICENSE files in the repository root for full details.
 */
 
-import React, { type ChangeEventHandler, type JSX, type ReactNode, type SyntheticEvent } from "react";
+import React, { type ChangeEventHandler, type JSX, type ReactNode } from "react";
 import { EventType, JoinRule } from "matrix-js-sdk/src/matrix";
 import { Form, SettingsToggleInput } from "@vector-im/compound-web";
 
 import { _t } from "../../../languageHandler";
 import SdkConfig from "../../../SdkConfig";
 import { MatrixClientPeg } from "../../../MatrixClientPeg";
-import Modal from "../../../Modal";
-import BugReportDialog from "./BugReportDialog";
 import BaseDialog from "./BaseDialog";
 import DialogButtons from "../elements/DialogButtons";
 import ProgressBar from "../elements/ProgressBar";
-import AccessibleButton from "../elements/AccessibleButton";
 
 export interface IFinishedOpts {
     continue: boolean;
@@ -91,13 +88,6 @@ export default class RoomUpgradeWarningDialog extends React.Component<IProps, IS
         this.setState({ inviteUsersToNewRoom: evt.target.checked });
     };
 
-    private openBugReportDialog = (e: SyntheticEvent): void => {
-        e.preventDefault();
-        e.stopPropagation();
-
-        Modal.createDialog(BugReportDialog, {});
-    };
-
     public render(): React.ReactNode {
         const brand = SdkConfig.get().brand;
 
@@ -130,29 +120,6 @@ export default class RoomUpgradeWarningDialog extends React.Component<IProps, IS
                 break;
             default:
                 title = _t("room_settings|advanced|upgrade_warning_dialog_title");
-        }
-
-        let bugReports = <p>{_t("room_settings|advanced|upgrade_warning_dialog_report_bug_prompt", { brand })}</p>;
-        if (SdkConfig.get().bug_report_endpoint_url) {
-            bugReports = (
-                <p>
-                    {_t(
-                        "room_settings|advanced|upgrade_warning_dialog_report_bug_prompt_link",
-                        {
-                            brand,
-                        },
-                        {
-                            a: (sub) => {
-                                return (
-                                    <AccessibleButton kind="link_inline" onClick={this.openBugReportDialog}>
-                                        {sub}
-                                    </AccessibleButton>
-                                );
-                            },
-                        },
-                    )}
-                </p>
-            );
         }
 
         let footer: JSX.Element;
@@ -193,7 +160,7 @@ export default class RoomUpgradeWarningDialog extends React.Component<IProps, IS
                             },
                         )}
                     </p>
-                    {bugReports}
+                    <p>{_t("room_settings|advanced|upgrade_warning_dialog_report_bug_prompt", { brand })}</p>
                     <p>
                         {_t(
                             "room_settings|advanced|upgrade_warning_dialog_footer",

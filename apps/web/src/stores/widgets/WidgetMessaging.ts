@@ -349,7 +349,6 @@ export class WidgetMessaging extends TypedEventEmitter<WidgetMessagingEvent, Wid
             defaultDispatcher.dispatch<ViewRoomPayload>({
                 action: Action.ViewRoom,
                 room_id: targetRoomId,
-                metricsTrigger: "Widget",
             });
 
             // acknowledge so the widget doesn't freak out

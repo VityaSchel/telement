@@ -12,7 +12,6 @@ import { Button, PageHeader } from "@vector-im/compound-web";
 import { InviteKind } from "../InviteDialogTypes.ts";
 import { type Member } from "../../../../utils/direct-messages.ts";
 import BaseDialog from "../BaseDialog.tsx";
-import { type ScreenName } from "../../../../PosthogTrackers.ts";
 import { DMRoomTile } from "./DMRoomTile.tsx";
 import { _t } from "../../../../languageHandler";
 
@@ -25,9 +24,6 @@ interface Props {
 
     /** Callback that will be called when the 'Remove' button is clicked. Unused unless {@link kind} is {@link InviteKind.Invite}. */
     onRemove: () => void;
-
-    /** Optional Posthog ScreenName to supply during the lifetime of this dialog. */
-    screenName: ScreenName | undefined;
 
     /** The type of invite dialog: whether we are starting a new DM, or inviting users to an existing room */
     kind: InviteKind.Dm | InviteKind.Invite;
@@ -72,11 +68,7 @@ const UnknownIdentityUsersWarningDialog: React.FC<Props> = (props) => {
     }
 
     return (
-        <BaseDialog
-            onFinished={props.onCancel}
-            className="mx_UnknownIdentityUsersWarningDialog"
-            screenName={props.screenName}
-        >
+        <BaseDialog onFinished={props.onCancel} className="mx_UnknownIdentityUsersWarningDialog">
             <div className="mx_UnknownIdentityUsersWarningDialog_headerContainer">
                 <PageHeader Icon={UserAddSolidIcon} heading={title}>
                     <p>{headerText}</p>

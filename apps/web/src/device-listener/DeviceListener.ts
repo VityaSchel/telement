@@ -9,10 +9,8 @@ Please see LICENSE files in the repository root for full details.
 
 import { type MatrixClient, ClientStoppedError } from "matrix-js-sdk/src/matrix";
 import { logger as baseLogger, LogSpan } from "matrix-js-sdk/src/logger";
-import { type CryptoSessionStateChange } from "@matrix-org/analytics-events/types/typescript/CryptoSessionStateChange";
 import { secureRandomString } from "matrix-js-sdk/src/randomstring";
 
-import { PosthogAnalytics } from "../PosthogAnalytics";
 import dis from "../dispatcher/dispatcher";
 import { type ActionPayload } from "../dispatcher/payloads";
 import { Action } from "../dispatcher/actions";
@@ -75,10 +73,6 @@ export class DeviceListener {
     private client?: MatrixClient;
     private shouldRecordClientInformation = false;
     private deviceClientInformationSettingWatcherRef: string | undefined;
-
-    // Remember the current analytics state to avoid sending the same event multiple times.
-    private analyticsVerificationState?: string;
-    private analyticsRecoveryState?: string;
 
     public static sharedInstance(): DeviceListener {
         if (!window.mxDeviceListener) window.mxDeviceListener = new DeviceListener();
@@ -281,8 +275,6 @@ export class DeviceListener {
 
         await this.currentDevice?.recheck(logSpan);
         await this.otherDevices?.recheck(logSpan);
-
-        await this.reportCryptoSessionStateToAnalytics(cli);
     }
 
     /**
@@ -292,71 +284,6 @@ export class DeviceListener {
      */
     public getDeviceState(): DeviceState {
         return this.currentDevice?.getDeviceState() ?? "ok";
-    }
-
-    /**
-     * Reports current recovery state to analytics.
-     * Checks if the session is verified and if the recovery is correctly set up (i.e all secrets known locally and in 4S).
-     * @param cli - the matrix client
-     * @private
-     */
-    private async reportCryptoSessionStateToAnalytics(cli: MatrixClient): Promise<void> {
-        const crypto = cli.getCrypto()!;
-        const secretStorageStatus = await crypto.getSecretStorageStatus();
-        const secretStorageReady = secretStorageStatus.ready;
-        const crossSigningStatus = await crypto.getCrossSigningStatus();
-        const backupInfo = await this.currentDevice?.getKeyBackupInfo();
-        const is4SEnabled = secretStorageStatus.defaultKeyId != null;
-        const deviceVerificationStatus = await crypto.getDeviceVerificationStatus(cli.getUserId()!, cli.getDeviceId()!);
-
-        const verificationState =
-            deviceVerificationStatus?.signedByOwner && deviceVerificationStatus?.crossSigningVerified
-                ? "Verified"
-                : "NotVerified";
-
-        let recoveryState: "Disabled" | "Enabled" | "Incomplete";
-        if (!is4SEnabled) {
-            recoveryState = "Disabled";
-        } else {
-            const allCrossSigningSecretsCached =
-                crossSigningStatus.privateKeysCachedLocally.masterKey &&
-                crossSigningStatus.privateKeysCachedLocally.selfSigningKey &&
-                crossSigningStatus.privateKeysCachedLocally.userSigningKey;
-            if (backupInfo != null) {
-                // There is a backup. Check that all secrets are stored in 4S and known locally.
-                // If they are not, recovery is incomplete.
-                const backupPrivateKeyIsInCache = (await crypto.getSessionBackupPrivateKey()) != null;
-                if (secretStorageReady && allCrossSigningSecretsCached && backupPrivateKeyIsInCache) {
-                    recoveryState = "Enabled";
-                } else {
-                    recoveryState = "Incomplete";
-                }
-            } else {
-                // No backup. Just consider cross-signing secrets.
-                if (secretStorageReady && allCrossSigningSecretsCached) {
-                    recoveryState = "Enabled";
-                } else {
-                    recoveryState = "Incomplete";
-                }
-            }
-        }
-
-        if (this.analyticsVerificationState === verificationState && this.analyticsRecoveryState === recoveryState) {
-            // No changes, no need to send the event nor update the user properties
-            return;
-        }
-        this.analyticsRecoveryState = recoveryState;
-        this.analyticsVerificationState = verificationState;
-
-        // Update user properties
-        PosthogAnalytics.instance.setProperty("recoveryState", recoveryState);
-        PosthogAnalytics.instance.setProperty("verificationState", verificationState);
-
-        PosthogAnalytics.instance.trackEvent<CryptoSessionStateChange>({
-            eventName: "CryptoSessionState",
-            verificationState: verificationState,
-            recoveryState: recoveryState,
-        });
     }
 
     private onRecordClientInformationSettingChange: CallbackFn<"deviceClientInformationOptIn"> = (

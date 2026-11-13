@@ -29,7 +29,6 @@ import { UIComponent } from "../../../settings/UIFeature";
 import { type PresenceState } from "../../../models/rooms/PresenceState";
 import { useMatrixClientContext } from "../../../contexts/MatrixClientContext";
 import { SDKContext } from "../../../contexts/SDKContext";
-import PosthogTrackers from "../../../PosthogTrackers";
 import { type ButtonEvent } from "../../views/elements/AccessibleButton";
 import { inviteToRoom } from "../../../utils/room/inviteToRoom";
 import { canInviteTo } from "../../../utils/room/canInviteTo";
@@ -202,7 +201,6 @@ export function useMemberListViewModel(roomId: string): MemberListViewState {
     const [shouldShowInvite, setShouldShowInvite] = useState<boolean>(getShouldShowInvite());
 
     const onInviteButtonClick = (ev: ButtonEvent): void => {
-        PosthogTrackers.trackInteraction("WebRightPanelMemberListInviteButton", ev);
         ev.preventDefault();
         inviteToRoom(room);
     };

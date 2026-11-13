@@ -182,7 +182,6 @@ describe("<UserOptionsSection />", () => {
             action: "view_room",
             event_id: eventId,
             highlighted: true,
-            metricsTrigger: undefined,
             room_id: defaultRoomId,
         });
     });

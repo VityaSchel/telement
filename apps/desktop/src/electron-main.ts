@@ -22,7 +22,6 @@ import {
     protocol,
     desktopCapturer,
 } from "electron";
-import * as Sentry from "@sentry/electron/main";
 import path from "node:path";
 import windowStateKeeper from "electron-window-state";
 import { URL, fileURLToPath } from "node:url";
@@ -63,21 +62,6 @@ app.setPath("userData", args.userDataPath);
 // capped recovery rather than reloading inline (which would re-arm an already-given-up crash loop).
 let rendererRecovery: RendererRecovery | undefined;
 
-// Configure Electron Sentry and crashReporter using sentry.dsn in config.json if one is present.
-async function configureSentry(): Promise<void> {
-    const config = await loadConfig(args.localConfigPath);
-    const { dsn, environment } = config.sentry || {};
-    if (dsn) {
-        console.log(`Enabling Sentry with dsn=${dsn} environment=${environment}`);
-        Sentry.init({
-            dsn,
-            environment,
-            // We don't actually use this IPC, but we do not want Sentry injecting preloads
-            ipcMode: Sentry.IPCMode.Classic,
-        });
-    }
-}
-
 global.appQuitting = false;
 
 const exitShortcuts: Array<(input: Input, platform: string) => boolean> = [
@@ -86,8 +70,6 @@ const exitShortcuts: Array<(input: Input, platform: string) => boolean> = [
     (input, platform): boolean =>
         platform === "darwin" && input.meta && !input.control && input.key.toUpperCase() === "Q",
 ];
-
-void configureSentry();
 
 // handle uncaught errors otherwise it displays
 // stack traces in popup dialogs, which is terrible (which

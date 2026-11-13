@@ -42,8 +42,6 @@ describe("/msg", () => {
         expect(dispatcher.dispatch).toHaveBeenCalledWith(
             expect.objectContaining({
                 action: "view_room",
-                metricsTrigger: "SlashCommand",
-                metricsViaKeyboard: true,
                 room_id: "!1:example.org",
             }),
         );

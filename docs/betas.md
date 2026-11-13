@@ -21,9 +21,6 @@ A beta feature SHOULD have a rollback path for users to opt-out. If a feature is
 could corrupt a user's session or account, it should not be in beta. If this is not possible, it
 MUST be discussed with the team first to devise an alternative strategy.
 
-A beta feature SHOULD have analytics so that the team can understand how many users
-are using it.
-
 ## Current Betas
 
 This is the current set of betas enabled in Element Web.

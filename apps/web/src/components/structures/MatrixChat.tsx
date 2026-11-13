@@ -39,8 +39,6 @@ import {
 } from "@element-hq/web-shared-components";
 import { LockSolidIcon } from "@vector-im/compound-design-tokens/assets/web/icons";
 
-import PosthogTrackers from "../../PosthogTrackers";
-import { DecryptionFailureTracker } from "../../DecryptionFailureTracker";
 import { type IMatrixClientCreds } from "../../utils/createMatrixClient";
 import { MatrixClientPeg } from "../../MatrixClientPeg";
 import PlatformPeg from "../../PlatformPeg";
@@ -67,7 +65,6 @@ import * as StorageManager from "../../utils/StorageManager";
 import type LoggedInViewType from "./LoggedInView";
 import LoggedInView from "./LoggedInView";
 import { Action } from "../../dispatcher/actions";
-import { hideToast as hideAnalyticsToast, showToast as showAnalyticsToast } from "../../toasts/AnalyticsToast";
 import { showToast as showNotificationsToast } from "../../toasts/DesktopNotificationsToast";
 import { type OpenToTabPayload } from "../../dispatcher/payloads/OpenToTabPayload";
 import ErrorDialog from "../views/dialogs/ErrorDialog";
@@ -100,7 +97,6 @@ import VerificationRequestToast from "../views/toasts/VerificationRequestToast";
 import PerformanceMonitor, { PerformanceEntryNames } from "../../performance";
 import UIStore, { UI_EVENTS } from "../../stores/UIStore";
 import SoftLogout from "./auth/SoftLogout";
-import { initSentry } from "../../sentry";
 import { showSpaceInvite } from "../../utils/space";
 import { type ButtonEvent } from "../views/elements/AccessibleButton";
 import { type ActionPayload } from "../../dispatcher/payloads";
@@ -467,9 +463,6 @@ export default class MatrixChat extends React.PureComponent<IProps, IState> {
         if (state && "view" in state) {
             logger.debug(`MatrixChat: Queuing change of view from ${Views[this.state.view]} to ${Views[state.view]}`);
         }
-        if (this.shouldTrackPageChange(this.state, { ...this.state, ...state })) {
-            this.startPageChangeTimer();
-        }
         super.setState<K>(state, callback);
     }
 
@@ -491,7 +484,6 @@ export default class MatrixChat extends React.PureComponent<IProps, IState> {
         this.themeWatcher.on(ThemeWatcherEvent.Change, setTheme);
         void this.fontWatcher.start();
 
-        void initSentry(SdkConfig.get("sentry"));
         window.addEventListener("resize", this.onWindowResized);
 
         // Once we start loading the MatrixClient, we can't stop, even if MatrixChat gets unmounted (as it does
@@ -509,13 +501,7 @@ export default class MatrixChat extends React.PureComponent<IProps, IState> {
         }
     }
 
-    public componentDidUpdate(prevProps: IProps, prevState: IState): void {
-        if (this.shouldTrackPageChange(prevState, this.state)) {
-            const durationMs = this.stopPageChangeTimer();
-            if (durationMs != null) {
-                PosthogTrackers.instance.trackPageChange(this.state.view, this.state.page_type, durationMs);
-            }
-        }
+    public componentDidUpdate(): void {
         if (this.focusNext === "composer") {
             dis.fire(Action.FocusSendMessageComposer);
             this.focusNext = undefined;
@@ -538,7 +524,6 @@ export default class MatrixChat extends React.PureComponent<IProps, IState> {
         if (this.blacklistUnverifiedDevicesWatcherRef) {
             SettingsStore.unwatchSetting(this.blacklistUnverifiedDevicesWatcherRef);
         }
-        DecryptionFailureTracker.instance.stop();
     }
 
     private onWindowResized = (): void => {
@@ -554,8 +539,7 @@ export default class MatrixChat extends React.PureComponent<IProps, IState> {
         const scamText = _t("console_scam_warning");
         const devText = _t("console_dev_note");
 
-        global.mx_rage_logger.bypassRageshake(
-            "log",
+        console.log(
             `%c${waitText}\n%c${scamText}\n%c${devText}`,
             `font-size:${largeFontSize}; color:blue;`,
             `font-size:${normalFontSize}; color:red;`,
@@ -605,31 +589,6 @@ export default class MatrixChat extends React.PureComponent<IProps, IState> {
         // Note we don't catch errors from this: we catch everything within
         // loadSession as there's logic there to ask the user if they want
         // to try logging out.
-    }
-
-    private startPageChangeTimer(): void {
-        PerformanceMonitor.instance.start(PerformanceEntryNames.PAGE_CHANGE);
-    }
-
-    private stopPageChangeTimer(): number | null {
-        const perfMonitor = PerformanceMonitor.instance;
-
-        perfMonitor.stop(PerformanceEntryNames.PAGE_CHANGE);
-
-        const entries = perfMonitor.getEntries({
-            name: PerformanceEntryNames.PAGE_CHANGE,
-        });
-        const measurement = entries.pop();
-
-        return measurement ? measurement.duration : null;
-    }
-
-    private shouldTrackPageChange(prevState: IState, state: IState): boolean {
-        return (
-            prevState.currentRoomId !== state.currentRoomId ||
-            prevState.view !== state.view ||
-            prevState.page_type !== state.page_type
-        );
     }
 
     private isLoggedInViewPageDisplayed(): boolean {
@@ -763,7 +722,6 @@ export default class MatrixChat extends React.PureComponent<IProps, IState> {
                     void this.viewRoom({
                         action: Action.ViewRoom,
                         room_id: this.state.currentRoomId,
-                        metricsTrigger: undefined, // room doesn't change
                     });
                 }
                 break;
@@ -910,14 +868,6 @@ export default class MatrixChat extends React.PureComponent<IProps, IState> {
                 this.setState({
                     hideToSRUsers: false,
                 });
-                break;
-            case Action.PseudonymousAnalyticsAccept:
-                hideAnalyticsToast();
-                void SettingsStore.setValue("pseudonymousAnalyticsOptIn", null, SettingLevel.ACCOUNT, true);
-                break;
-            case Action.PseudonymousAnalyticsReject:
-                hideAnalyticsToast();
-                void SettingsStore.setValue("pseudonymousAnalyticsOptIn", null, SettingLevel.ACCOUNT, false);
                 break;
             case Action.ShowThread: {
                 const { rootEvent, initialEvent, highlighted, scrollIntoView, push } = payload as ShowThreadPayload;
@@ -1230,7 +1180,6 @@ export default class MatrixChat extends React.PureComponent<IProps, IState> {
             dis.dispatch<ViewRoomPayload>({
                 action: Action.ViewRoom,
                 room_id: dmRoom.roomId,
-                metricsTrigger: "MessageUser",
             });
         } else {
             dis.dispatch({
@@ -1463,38 +1412,11 @@ export default class MatrixChat extends React.PureComponent<IProps, IState> {
                         },
                     },
                     component: GenericToast,
-                    className: "mx_AnalyticsToast",
+                    className: "mx_UserNoticeToast",
                     priority: 100,
                 });
             }
         }
-    }
-
-    private initPosthogAnalyticsToast(): void {
-        // Show the analytics toast if necessary
-        if (SettingsStore.getValue("pseudonymousAnalyticsOptIn") === null) {
-            showAnalyticsToast();
-        }
-
-        // Listen to changes in settings and show the toast if appropriate - this is necessary because account
-        // settings can still be changing at this point in app init (due to the initial sync being cached, then
-        // subsequent syncs being received from the server)
-        SettingsStore.watchSetting(
-            "pseudonymousAnalyticsOptIn",
-            null,
-            (originalSettingName, changedInRoomId, atLevel, newValueAtLevel, newValue) => {
-                if (newValue === null) {
-                    showAnalyticsToast();
-                } else {
-                    // It's possible for the value to change if a cached sync loads at page load, but then network
-                    // sync contains a new value of the flag with it set to false (e.g. another device set it since last
-                    // loading the page); so hide the toast.
-                    // (this flipping usually happens before first render so the user won't notice it; anyway flicker
-                    // on/off is probably better than showing the toast again when the user already dismissed it)
-                    hideAnalyticsToast();
-                }
-            },
-        );
     }
 
     private showScreenAfterLogin(): void {
@@ -1523,7 +1445,6 @@ export default class MatrixChat extends React.PureComponent<IProps, IState> {
         dis.dispatch<ViewRoomPayload>({
             action: Action.ViewRoom,
             room_id: localStorage.getItem("mx_last_room_id") ?? undefined,
-            metricsTrigger: undefined, // other
         });
     }
 
@@ -1718,10 +1639,6 @@ export default class MatrixChat extends React.PureComponent<IProps, IState> {
             });
         });
 
-        DecryptionFailureTracker.instance
-            .start(cli)
-            .catch((e) => logger.error("Unable to start DecryptionFailureTracker", e));
-
         cli.on(ClientEvent.Room, (room) => {
             if (cli.getCrypto()) {
                 const blacklistEnabled = SettingsStore.getValueAt(
@@ -1822,12 +1739,6 @@ export default class MatrixChat extends React.PureComponent<IProps, IState> {
         }
 
         const shouldForceVerification = await this.shouldForceVerification();
-
-        // Cannot be done in OnLoggedIn as at that point the AccountSettingsHandler doesn't yet have a client
-        // Will be moved to a pre-login flow as well
-        if (this.stores.posthogAnalytics.isEnabled() && SettingsStore.isLevelSupported(SettingLevel.ACCOUNT)) {
-            this.initPosthogAnalyticsToast();
-        }
 
         this.setState({
             ready: true,
@@ -2015,7 +1926,6 @@ export default class MatrixChat extends React.PureComponent<IProps, IState> {
                 },
                 room_alias: undefined,
                 room_id: undefined,
-                metricsTrigger: undefined, // unknown or external trigger
             };
             if (roomString[0] === "#") {
                 payload.room_alias = roomString;

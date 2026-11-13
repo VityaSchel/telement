@@ -117,7 +117,6 @@ const LeftPanelLiveShareWarning: React.FC<Props> = ({ isMinimized }) => {
               dispatcher.dispatch<ViewRoomPayload>({
                   action: Action.ViewRoom,
                   room_id: relevantBeacon.roomId,
-                  metricsTrigger: undefined,
                   event_id: relevantBeacon.beaconInfoId,
                   scroll_into_view: true,
                   highlighted: true,

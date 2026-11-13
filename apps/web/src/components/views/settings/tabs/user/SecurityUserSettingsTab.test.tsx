@@ -93,13 +93,14 @@ describe("<SecurityUserSettingsTab />", () => {
         expect(getByText("You have no ignored users.")).toBeVisible();
     });
 
-    it("does not render privacy header if 3pid features are disabled", async () => {
+    it("does not render the discovery settings if 3pid features are disabled", async () => {
         vi.spyOn(SettingsStore, "getValue").mockImplementation((key: any): any => {
             if (key === UIFeature.ThirdPartyID) return false;
         });
 
         render(getComponent());
 
-        expect(screen.queryByRole("heading", { name: "Privacy" })).toBeNull();
+        expect(screen.getByRole("heading", { name: "Privacy" })).toBeInTheDocument();
+        expect(screen.queryByTestId("discoverySection")).toBeNull();
     });
 });

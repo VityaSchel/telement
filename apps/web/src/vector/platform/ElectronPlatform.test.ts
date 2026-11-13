@@ -18,16 +18,11 @@ import "vitest-canvas-mock";
 import { UpdateCheckStatus } from "../../BasePlatform";
 import { Action } from "../../dispatcher/actions";
 import dispatcher from "../../dispatcher/dispatcher";
-import * as rageshake from "../../rageshake/rageshake";
 import { BreadcrumbsStore } from "../../stores/BreadcrumbsStore";
 import Modal from "../../Modal";
 import DesktopCapturerSourcePicker from "../../components/views/elements/DesktopCapturerSourcePicker";
 import ElectronPlatform from "./ElectronPlatform";
 import ToastStore from "../../stores/ToastStore.ts";
-
-vi.mock("../../rageshake/rageshake", () => ({
-    flush: vi.fn(),
-}));
 
 describe("ElectronPlatform", () => {
     const initialiseValues = vi.fn().mockReturnValue({
@@ -66,7 +61,7 @@ describe("ElectronPlatform", () => {
     ): [type: string, handler: (...args: any) => void] | undefined =>
         mockElectron.on.mock.calls.find(([type]) => type === eventType);
 
-    it("flushes rageshake before quitting", () => {
+    it("logs before quitting", () => {
         new ElectronPlatform();
         const [event, handler] = getElectronEventHandlerCall("before-quit")!;
         // correct event bound
@@ -75,7 +70,6 @@ describe("ElectronPlatform", () => {
         handler();
 
         expect(logSpy).toHaveBeenCalled();
-        expect(rageshake.flush).toHaveBeenCalled();
     });
 
     it("should load config", async () => {

@@ -125,8 +125,6 @@ describe("AdvancedRoomSettingsTab", () => {
             action: Action.ViewRoom,
             event_id: "tombstone_event_id",
             room_id: "old_room_id",
-            metricsTrigger: "WebPredecessorSettings",
-            metricsViaKeyboard: false,
         });
     });
 
@@ -147,8 +145,6 @@ describe("AdvancedRoomSettingsTab", () => {
                 event_id: undefined,
                 room_id: "old_room_id_via_predecessor",
                 via_servers: ["one.example.com", "two.example.com"],
-                metricsTrigger: "WebPredecessorSettings",
-                metricsViaKeyboard: false,
             });
         });
 

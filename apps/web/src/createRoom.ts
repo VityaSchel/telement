@@ -417,7 +417,6 @@ export default async function createRoom(client: MatrixClient, opts: IOpts): Pro
                         // stream, if it hasn't already.
                         joining: true,
                         justCreatedOpts: opts,
-                        metricsTrigger: "Created",
                     });
                 }
                 return roomId;

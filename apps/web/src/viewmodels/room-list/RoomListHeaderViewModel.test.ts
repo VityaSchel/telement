@@ -26,15 +26,6 @@ import {
     showSpaceSettings,
 } from "../../utils/space";
 import { createRoom, hasCreateRoomRights } from "./utils";
-import PosthogTrackers from "../../PosthogTrackers";
-
-vi.mock("../../PosthogTrackers", () => ({
-    default: {
-        trackInteraction: vi.fn(),
-        trackSectionCreation: vi.fn(),
-        trackCollapseOrExpandSection: vi.fn(),
-    },
-}));
 
 vi.mock("../../utils/space", () => ({
     shouldShowSpaceSettings: vi.fn(),
@@ -231,7 +222,6 @@ describe("RoomListHeaderViewModel", () => {
             expect(dispatchSpy).toHaveBeenCalledWith({
                 action: Action.ViewRoom,
                 room_id: "!space:server",
-                metricsTrigger: undefined,
             });
         });
 
@@ -265,22 +255,6 @@ describe("RoomListHeaderViewModel", () => {
             vm = new RoomListHeaderViewModel({ matrixClient, spaceStore: sdkContext.spaceStore });
             vm.sort(option);
             expect(resortSpy).toHaveBeenCalledWith(expectedAlgorithm);
-        });
-
-        it("should track analytics on resort", () => {
-            vi.spyOn(RoomListStoreV3.instance, "activeSortAlgorithm", "get").mockReturnValue(
-                SortingAlgorithm.Alphabetic,
-            );
-            PosthogTrackers.trackRoomListSortingAlgorithmChange = vi.fn();
-
-            vm = new RoomListHeaderViewModel({ matrixClient, spaceStore: sdkContext.spaceStore });
-            vi.spyOn(RoomListStoreV3.instance, "resort").mockImplementation(vi.fn());
-            vm.sort("unread-first");
-
-            expect(PosthogTrackers.trackRoomListSortingAlgorithmChange).toHaveBeenCalledWith(
-                SortingAlgorithm.Alphabetic,
-                SortingAlgorithm.Unread,
-            );
         });
     });
 });

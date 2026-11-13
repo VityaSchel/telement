@@ -435,12 +435,7 @@ export default class CreateRoomDialog extends React.Component<IProps, IState> {
         }
 
         return (
-            <BaseDialog
-                className="mx_CreateRoomDialog"
-                onFinished={this.props.onFinished}
-                title={title}
-                screenName="CreateRoom"
-            >
+            <BaseDialog className="mx_CreateRoomDialog" onFinished={this.props.onFinished} title={title}>
                 <div className="mx_Dialog_content">
                     <Form.Root onSubmit={this.onOk} onKeyDown={this.onKeyDown}>
                         <Field

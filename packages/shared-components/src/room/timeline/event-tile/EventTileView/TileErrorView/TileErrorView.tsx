@@ -7,7 +7,6 @@
 
 import React, { type JSX, type MouseEventHandler } from "react";
 import classNames from "classnames";
-import { Button } from "@vector-im/compound-web";
 
 import { type ViewModel, useViewModel } from "../../../../../core/viewmodel";
 import styles from "./TileErrorView.module.css";
@@ -19,16 +18,12 @@ export interface TileErrorViewSnapshot {
     message: string;
     /** Optional event type appended to the fallback text. */
     eventType?: string;
-    /** Optional label for the bug-report action button. */
-    bugReportCtaLabel?: string;
     /** Optional label for the view-source action. */
     viewSourceCtaLabel?: string;
 }
 
 /** User actions emitted by the tile error fallback. */
 export interface TileErrorViewActions {
-    /** Invoked when the bug-report button is clicked. */
-    onBugReportClick?: MouseEventHandler<HTMLButtonElement>;
     /** Invoked when the view-source action is clicked. */
     onViewSourceClick?: MouseEventHandler<HTMLButtonElement>;
 }
@@ -51,12 +46,12 @@ interface TileErrorViewProps {
  * Renders a timeline tile fallback when message content cannot be displayed.
  *
  * The component shows the fallback error message from the view model, optionally
- * appends the event type in parentheses, and can render bug-report and view-source
- * actions when their labels are provided.
+ * appends the event type in parentheses, and can render a view-source action when
+ * its label is provided.
  */
 export function TileErrorView({ vm, className }: Readonly<TileErrorViewProps>): JSX.Element {
     const eventPresentationAttributes = useEventPresentationAttributes();
-    const { message, eventType, bugReportCtaLabel, viewSourceCtaLabel } = useViewModel(vm);
+    const { message, eventType, viewSourceCtaLabel } = useViewModel(vm);
 
     return (
         <li className={classNames(styles.tileErrorView, className)} {...eventPresentationAttributes}>
@@ -65,11 +60,6 @@ export function TileErrorView({ vm, className }: Readonly<TileErrorViewProps>): 
                     {message}
                     {eventType && ` (${eventType})`}
                 </span>
-                {bugReportCtaLabel && (
-                    <Button kind="secondary" size="md" onClick={vm.onBugReportClick}>
-                        {bugReportCtaLabel}
-                    </Button>
-                )}
                 {viewSourceCtaLabel && (
                     <button type="button" className={styles.viewSourceButton} onClick={vm.onViewSourceClick}>
                         {viewSourceCtaLabel}

@@ -31,7 +31,6 @@ import defaultDispatcher from "../../dispatcher/dispatcher";
 import { Action } from "../../dispatcher/actions";
 import Resend from "../../Resend";
 import PinningUtils from "../../utils/PinningUtils";
-import PosthogTrackers from "../../PosthogTrackers";
 import Modal from "../../Modal";
 import ErrorDialog from "../../components/views/dialogs/ErrorDialog";
 import SettingsStore from "../../settings/SettingsStore";
@@ -55,13 +54,6 @@ vi.mock("../../Resend", () => ({
     default: {
         resend: vi.fn(),
         removeFromQueue: vi.fn(),
-    },
-}));
-
-vi.mock("../../PosthogTrackers", () => ({
-    __esModule: true,
-    default: {
-        trackPinUnpinMessage: vi.fn(),
     },
 }));
 
@@ -516,7 +508,6 @@ describe("EventTileActionBarViewModel", () => {
         });
         expect(editEvent).toHaveBeenCalledWith(client, threadReply, TimelineRenderingType.Room, undefined);
         expect(PinningUtils.pinOrUnpinEvent).toHaveBeenCalledWith(client, threadReply);
-        expect(PosthogTrackers.trackPinUnpinMessage).toHaveBeenCalledWith(expect.any(String), "Timeline");
         expect(setMediaVisibility).toHaveBeenCalledWith(threadReply, false);
         expect(onOptionsClick).toHaveBeenCalledWith(null);
         expect(onReactionsClick).toHaveBeenCalledWith(null);

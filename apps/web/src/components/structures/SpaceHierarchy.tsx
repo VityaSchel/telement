@@ -404,7 +404,6 @@ export const showRoom = (cli: MatrixClient, hierarchy: RoomHierarchy, roomId: st
             name: room?.name || roomAlias || _t("common|unnamed_room"),
             roomType,
         },
-        metricsTrigger: "RoomDirectory",
     });
 };
 
@@ -453,7 +452,6 @@ export const joinRoom = async (
     defaultDispatcher.dispatch<JoinRoomReadyPayload>({
         action: Action.JoinRoomReady,
         roomId,
-        metricsTrigger: "SpaceHierarchy",
     });
 };
 

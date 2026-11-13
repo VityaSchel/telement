@@ -87,7 +87,7 @@ export default class UserView extends React.Component<IProps, IState> {
                 />
             );
             return (
-                <MainSplit panel={panel} defaultSize={420} analyticsRoomType="user_profile">
+                <MainSplit panel={panel} defaultSize={420}>
                     <HomePage />
                 </MainSplit>
             );

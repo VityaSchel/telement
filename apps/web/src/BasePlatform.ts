@@ -95,7 +95,6 @@ export default abstract class BasePlatform {
         }
     }
 
-    // Used primarily for Analytics
     public abstract getHumanReadableName(): string;
 
     public setNotificationCount(count: number): void {
@@ -219,7 +218,6 @@ export default abstract class BasePlatform {
             const payload: ViewRoomPayload = {
                 action: Action.ViewRoom,
                 room_id: room.roomId,
-                metricsTrigger: "Notification",
             };
 
             if (ev?.getThread()) {

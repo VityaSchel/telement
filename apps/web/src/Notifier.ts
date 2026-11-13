@@ -25,7 +25,6 @@ import {
 } from "matrix-js-sdk/src/matrix";
 import { logger } from "matrix-js-sdk/src/logger";
 import { KnownMembership } from "matrix-js-sdk/src/types";
-import { type PermissionChanged as PermissionChangedEvent } from "@matrix-org/analytics-events/types/typescript/PermissionChanged";
 import { type SessionMembershipData, type IRTCNotificationContent } from "matrix-js-sdk/src/matrixrtc";
 
 import SdkConfig from "./SdkConfig";
@@ -407,22 +406,12 @@ export default class Notifier extends TypedEventEmitter<keyof EmittedEvents, Emi
                 // oxlint-disable-next-line promise/no-callback-in-promise
                 if (callback) callback();
 
-                this.sdkContext.posthogAnalytics.trackEvent<PermissionChangedEvent>({
-                    eventName: "PermissionChanged",
-                    permission: "Notification",
-                    granted: true,
-                });
                 this.dispatcher.dispatch({
                     action: "notifier_enabled",
                     value: true,
                 });
             });
         } else {
-            this.sdkContext.posthogAnalytics.trackEvent<PermissionChangedEvent>({
-                eventName: "PermissionChanged",
-                permission: "Notification",
-                granted: false,
-            });
             this.dispatcher.dispatch({
                 action: "notifier_enabled",
                 value: false,

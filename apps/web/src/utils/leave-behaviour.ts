@@ -173,7 +173,6 @@ export async function leaveRoomBehaviour(
                 dis.dispatch<ViewRoomPayload>({
                     action: Action.ViewRoom,
                     room_id: parent.roomId,
-                    metricsTrigger: undefined, // other
                 });
             } else {
                 dis.dispatch<ViewHomePagePayload>({ action: Action.ViewHomePage });
@@ -182,7 +181,6 @@ export async function leaveRoomBehaviour(
             dis.dispatch<ViewRoomPayload>({
                 action: Action.ViewRoom,
                 room_id: SDKContextClass.instance.spaceStore.activeSpace,
-                metricsTrigger: undefined, // other
             });
         }
     }

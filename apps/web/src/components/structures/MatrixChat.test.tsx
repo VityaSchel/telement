@@ -57,7 +57,6 @@ import * as leaveRoomUtils from "../../utils/leave-behaviour";
 import { OAuthClientError } from "../../utils/oauth/error";
 import { CallStore } from "../../stores/CallStore";
 import { type Call } from "../../models/Call";
-import { PosthogAnalytics } from "../../PosthogAnalytics";
 import PlatformPeg from "../../PlatformPeg";
 import EventIndexPeg from "../../indexing/EventIndexPeg";
 import MediaDeviceHandler from "../../MediaDeviceHandler";
@@ -1235,7 +1234,6 @@ describe("<MatrixChat />", () => {
                     vi.spyOn(SDKContextClass.instance.legacyCallHandler, "hangupAllCalls")
                         .mockClear()
                         .mockImplementation(() => {});
-                    vi.spyOn(PosthogAnalytics.instance, "logout").mockImplementation(() => {});
                     vi.spyOn(EventIndexPeg, "deleteEventIndex").mockImplementation(async () => {});
 
                     vi.spyOn(CallStore.instance, "connectedCalls", "get").mockReturnValue(new Set([call1, call2]));
@@ -1265,13 +1263,6 @@ describe("<MatrixChat />", () => {
                     await dispatchLogoutAndWait();
                     expect(call1.disconnect).toHaveBeenCalled();
                     expect(call2.disconnect).toHaveBeenCalled();
-                });
-
-                it("should logout of posthog", async () => {
-                    await getComponentAndWaitForReady();
-                    await dispatchLogoutAndWait();
-
-                    expect(PosthogAnalytics.instance.logout).toHaveBeenCalled();
                 });
 
                 it("should destroy pickle key", async () => {

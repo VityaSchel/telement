@@ -7,7 +7,7 @@ SPDX-License-Identifier: AGPL-3.0-only OR GPL-3.0-only OR LicenseRef-Element-Com
 Please see LICENSE files in the repository root for full details.
 */
 
-import { type CryptoApi, CryptoEvent, type KeyBackupInfo } from "matrix-js-sdk/src/crypto-api";
+import { type CryptoApi, CryptoEvent } from "matrix-js-sdk/src/crypto-api";
 import { LogSpan, type BaseLogger, type Logger } from "matrix-js-sdk/src/logger";
 import {
     type MatrixEvent,
@@ -25,8 +25,6 @@ import {
     showToast as showSetupEncryptionToast,
 } from "../toasts/SetupEncryptionToast";
 import { isSecretStorageBeingAccessed } from "../SecurityManager";
-
-const KEY_BACKUP_POLL_INTERVAL = 5 * 60 * 1000;
 
 /**
  * Account data key used to indicate that the user has chosen to enable or
@@ -71,16 +69,6 @@ export class DeviceListenerCurrentDevice {
     private dismissedThisDeviceToast = false;
 
     /**
-     * Cache of the info about the current key backup on the server.
-     */
-    private keyBackupInfo: KeyBackupInfo | null = null;
-
-    /**
-     * When `keyBackupInfo` was last updated (in ms since the epoch).
-     */
-    private keyBackupFetchedAt: number | null = null;
-
-    /**
      * What is the current state of the device: is its crypto OK?
      */
     private deviceState: DeviceState = "ok";
@@ -110,8 +98,6 @@ export class DeviceListenerCurrentDevice {
      */
     public stop(): void {
         this.dismissedThisDeviceToast = false;
-        this.keyBackupInfo = null;
-        this.keyBackupFetchedAt = null;
         this.cachedKeyBackupUploadActive = undefined;
 
         this.client.removeListener(CryptoEvent.UserTrustStatusChanged, this.onUserTrustStatusChanged);
@@ -493,30 +479,6 @@ export class DeviceListenerCurrentDevice {
             this.deviceListener.recheck();
         }
     };
-
-    /**
-     * Fetch the key backup information from the server.
-     *
-     * The result is cached for `KEY_BACKUP_POLL_INTERVAL` ms to avoid repeated API calls.
-     *
-     * @returns The key backup info from the server, or `null` if there is no key backup.
-     */
-    public async getKeyBackupInfo(): Promise<KeyBackupInfo | null> {
-        const now = new Date().getTime();
-        const crypto = this.client.getCrypto();
-        if (!crypto) return null;
-
-        if (
-            !this.keyBackupInfo ||
-            !this.keyBackupFetchedAt ||
-            this.keyBackupFetchedAt < now - KEY_BACKUP_POLL_INTERVAL
-        ) {
-            this.keyBackupInfo = await crypto.getKeyBackupInfo();
-            this.keyBackupFetchedAt = now;
-        }
-
-        return this.keyBackupInfo;
-    }
 
     /**
      * Is key backup enabled? Use a cached answer if we have one.

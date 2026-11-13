@@ -38,7 +38,6 @@ import AccessibleButton from "./components/views/elements/AccessibleButton";
 import RightPanelStore from "./stores/right-panel/RightPanelStore";
 import { highlightEvent, isLocationEvent } from "./utils/EventUtils";
 import { getSenderName } from "./utils/event/getSenderName";
-import PosthogTrackers from "./PosthogTrackers.ts";
 import { ElementCallEventType } from "./call-types.ts";
 import Spoiler from "./components/views/elements/Spoiler.tsx";
 
@@ -594,7 +593,6 @@ function textForPowerEvent(event: MatrixEvent, client: MatrixClient): (() => str
 }
 
 const onPinnedMessagesClick = (): void => {
-    PosthogTrackers.trackInteraction("PinnedMessageStateEventClick");
     RightPanelStore.instance.setCard({ phase: RightPanelPhases.PinnedMessages }, false);
 };
 
@@ -625,7 +623,6 @@ function textForPinnedEvent(event: MatrixEvent, client: MatrixClient, allowJSX: 
                                 <AccessibleButton
                                     kind="link_inline"
                                     onClick={() => {
-                                        PosthogTrackers.trackInteraction("PinnedMessageStateEventClick");
                                         highlightEvent(roomId, messageId);
                                     }}
                                 >
@@ -661,7 +658,6 @@ function textForPinnedEvent(event: MatrixEvent, client: MatrixClient, allowJSX: 
                                 <AccessibleButton
                                     kind="link_inline"
                                     onClick={() => {
-                                        PosthogTrackers.trackInteraction("PinnedMessageStateEventClick");
                                         highlightEvent(roomId, messageId);
                                     }}
                                 >

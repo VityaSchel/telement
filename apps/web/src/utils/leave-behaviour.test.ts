@@ -68,7 +68,6 @@ describe("leaveRoomBehaviour", () => {
             {
                 action: Action.ViewRoom,
                 room_id: room.roomId,
-                metricsTrigger: undefined,
             },
             true,
         );
@@ -123,7 +122,6 @@ describe("leaveRoomBehaviour", () => {
         await expectDispatch({
             action: Action.ViewRoom,
             room_id: space.roomId,
-            metricsTrigger: undefined,
         });
     });
 
@@ -147,7 +145,6 @@ describe("leaveRoomBehaviour", () => {
         await expectDispatch({
             action: Action.ViewRoom,
             room_id: space.roomId,
-            metricsTrigger: undefined,
         });
     });
 

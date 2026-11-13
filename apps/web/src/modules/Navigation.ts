@@ -42,7 +42,6 @@ export class NavigationApi implements INavigationApi {
             [key]: roomIdOrAlias,
             via_servers: opts.viaServers,
             auto_join: opts.autoJoin,
-            metricsTrigger: undefined,
         });
     }
 }

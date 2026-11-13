@@ -18,7 +18,6 @@ import { NotificationStateEvents } from "./NotificationState";
 import { RoomNotificationState } from "./RoomNotificationState";
 import { SummarizedNotificationState } from "./SummarizedNotificationState";
 import { isRoomVisible } from "../room-list-v3/isRoomVisible";
-import { PosthogAnalytics } from "../../PosthogAnalytics";
 import SettingsStore from "../../settings/SettingsStore";
 
 export const UPDATE_STATUS_INDICATOR = Symbol("update-status-indicator");
@@ -135,7 +134,6 @@ export class RoomNotificationStateStore extends AsyncStoreWithClient<EmptyObject
         const globalState = new SummarizedNotificationState();
         const visibleRooms = this.matrixClient.getVisibleRooms(msc3946ProcessDynamicPredecessor);
 
-        let numFavourites = 0;
         for (const room of visibleRooms) {
             if (isRoomVisible(room)) {
                 const state = this.getRoomState(room);
@@ -143,12 +141,8 @@ export class RoomNotificationStateStore extends AsyncStoreWithClient<EmptyObject
                 // too — otherwise Home and the tab badge light up for a room that no space badge
                 // admits to (https://github.com/vector-im/element-web/issues/20372).
                 if (!state.isLowPriorityActivity) globalState.add(state);
-
-                if (room.tags[DefaultTagID.Favourite] && !room.getType()) numFavourites++;
             }
         }
-
-        PosthogAnalytics.instance.setProperty("numFavouriteRooms", numFavourites);
 
         if (
             this.globalState.symbol !== globalState.symbol ||

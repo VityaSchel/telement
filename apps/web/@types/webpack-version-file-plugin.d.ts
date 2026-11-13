@@ -6,6 +6,8 @@ Please see LICENSE files in the repository root for full details.
 */
 
 declare module "webpack-version-file-plugin" {
+    import { type Compiler } from "webpack";
+
     interface Opts {
         outputFile: string;
         template?: string;
@@ -13,8 +15,8 @@ declare module "webpack-version-file-plugin" {
         extras?: Record<string, string>;
     }
 
-    // oxlint-disable-next-line typescript/no-extraneous-class
     export default class VersionFilePlugin {
         public constructor(opts: Opts);
+        public apply(compiler: Compiler): void;
     }
 }

@@ -207,7 +207,6 @@ class PipContainerInner extends React.Component<IProps, IState> {
             dis.dispatch<ViewRoomPayload>({
                 action: Action.ViewRoom,
                 room_id: callRoomId ?? this.state.persistentRoomId ?? undefined,
-                metricsTrigger: "WebFloatingCallWindow",
             });
         }
     };

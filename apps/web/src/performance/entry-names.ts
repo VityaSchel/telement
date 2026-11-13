@@ -8,12 +8,6 @@ Please see LICENSE files in the repository root for full details.
 
 export enum PerformanceEntryNames {
     /**
-     * Application wide
-     */
-
-    PAGE_CHANGE = "mx_PageChange",
-
-    /**
      * User
      */
 

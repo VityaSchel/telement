@@ -28,23 +28,11 @@ import postcssNested from "postcss-nested";
 
 import pkgJson from "./package.json" with { type: "json" };
 import { I18nWebpackPlugin } from "./I18nWebpackPlugin.ts";
-import type { sentryWebpackPlugin as sentryWebpackPluginType } from "@sentry/webpack-plugin/webpack5";
 
 // Environment variables
 // RIOT_OG_IMAGE_URL: specifies the URL to the image which should be used for the opengraph logo.
 // CSP_EXTRA_SOURCE: specifies a URL which should be appended to each CSP directive which uses 'self',
 //   this can be helpful if your deployment has redirects for old bundles, such as develop.element.io.
-
-let sentryWebpackPlugin: typeof sentryWebpackPluginType | undefined;
-// This plugin throws an error on import on some platforms like ppc64le & s390x even if the plugin isn't called,
-// so we import it conditionally.
-if (process.env.SENTRY_DSN) {
-    try {
-        ({ sentryWebpackPlugin } = await import("@sentry/webpack-plugin/webpack5"));
-    } catch (e) {
-        console.warn("Failed to load sentry plugin", e);
-    }
-}
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -96,8 +84,7 @@ export default (env: string, argv: Record<string, any>): webpack.Configuration =
         development["devtool"] = "inline-source-map";
     } else {
         // High quality source maps in separate .map files which include the source. This doesn't bulk up the .js
-        // payload file size, which is nice for performance but also necessary to get the bundle to a small enough
-        // size that sentry will accept the upload.
+        // payload file size, which is nice for performance.
         development["devtool"] = "source-map";
     }
 
@@ -236,7 +223,7 @@ export default (env: string, argv: Record<string, any>): webpack.Configuration =
 
                 // Polyfill needed by counterpart
                 "util": import.meta.resolve("util/"),
-                // Polyfill needed by sentry
+                // Polyfill for the `process` global provided below
                 "process/browser": import.meta.resolve("process/browser"),
             },
 
@@ -684,21 +671,6 @@ export default (env: string, argv: Record<string, any>): webpack.Configuration =
 
             new HtmlWebpackInjectPreload({
                 files: [{ match: /.*Inter.*\.woff2$/, attributes: {} }],
-            }),
-
-            // Upload to sentry if sentry env is present
-            sentryWebpackPlugin?.({
-                release: {
-                    name: VERSION,
-                    inject: false,
-                },
-                sourcemaps: {
-                    assets: "./webapp/bundles/**",
-                },
-                errorHandler: (err) => {
-                    console.warn("Sentry CLI Plugin: " + err.message);
-                    console.log(`::warning title=Sentry error::${err.message}`);
-                },
             }),
 
             new CopyWebpackPlugin({

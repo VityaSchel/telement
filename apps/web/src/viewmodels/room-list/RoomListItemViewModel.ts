@@ -37,7 +37,6 @@ import { keepIfSame } from "../../utils/keepIfSame";
 import dispatcher from "../../dispatcher/dispatcher";
 import { Action } from "../../dispatcher/actions";
 import type { ViewRoomPayload } from "../../dispatcher/payloads/ViewRoomPayload";
-import PosthogTrackers from "../../PosthogTrackers";
 import { type Call, CallEvent } from "../../models/Call";
 import { fetchUserStatus } from "../../utils/userStatus";
 
@@ -339,23 +338,19 @@ export class RoomListItemViewModel
         dispatcher.dispatch<ViewRoomPayload>({
             action: Action.ViewRoom,
             room_id: this.props.room.roomId,
-            metricsTrigger: "RoomList",
         });
     };
 
     public onMarkAsRead = async (): Promise<void> => {
         await clearRoomNotification(this.props.room, this.props.client);
-        PosthogTrackers.trackInteraction("WebRoomListRoomTileContextMenuMarkRead");
     };
 
     public onMarkAsUnread = async (): Promise<void> => {
         await setMarkedUnreadState(this.props.room, this.props.client, true);
-        PosthogTrackers.trackInteraction("WebRoomListRoomTileContextMenuMarkUnread");
     };
 
     public onToggleFavorite = (): void => {
         tagRoom(this.props.room, DefaultTagID.Favourite);
-        PosthogTrackers.trackInteraction("WebRoomListRoomTileContextMenuFavouriteToggle");
     };
 
     public onToggleLowPriority = (): void => {
@@ -367,7 +362,6 @@ export class RoomListItemViewModel
             action: "view_invite",
             roomId: this.props.room.roomId,
         });
-        PosthogTrackers.trackInteraction("WebRoomListRoomTileContextMenuInviteItem");
     };
 
     public onCopyRoomLink = (): void => {
@@ -383,7 +377,6 @@ export class RoomListItemViewModel
             action: isArchived ? "forget_room" : "leave_room",
             room_id: this.props.room.roomId,
         });
-        PosthogTrackers.trackInteraction("WebRoomListRoomTileContextMenuLeaveItem");
     };
 
     public onSetRoomNotifState = (notifState: RoomNotifState): void => {

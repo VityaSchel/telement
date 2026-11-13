@@ -40,7 +40,6 @@ export class MultiRoomViewStore {
         void store.viewRoom({
             action: Action.ViewRoom,
             room_id: roomId,
-            metricsTrigger: undefined,
         });
 
         // Cache the store, okay to do even if the store is already in the map

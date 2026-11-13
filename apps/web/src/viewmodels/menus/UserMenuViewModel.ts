@@ -11,11 +11,8 @@ import { logger } from "matrix-js-sdk/src/logger";
 import { type OwnProfileStore } from "../../stores/OwnProfileStore";
 import { UPDATE_EVENT } from "../../stores/AsyncStore";
 import type { MatrixDispatcher } from "../../dispatcher/dispatcher";
-import Modal from "../../Modal";
 import { Action } from "../../dispatcher/actions";
 import { UserTab } from "../../components/views/dialogs/UserTab";
-import FeedbackDialog from "../../components/views/dialogs/FeedbackDialog";
-import { shouldShowFeedback } from "../../utils/Feedback";
 import { getHomePageUrl } from "../../utils/pages";
 import SdkConfig from "../../SdkConfig";
 import type { MatrixClient } from "matrix-js-sdk/src/matrix";
@@ -67,7 +64,6 @@ export class UserMenuViewModel
                 openHomePage: hasHomePage,
                 linkNewDevice: isAuthenticated,
                 openSecurity: isAuthenticated,
-                openFeedback: shouldShowFeedback(),
                 openSettings: true,
             },
         };
@@ -118,11 +114,6 @@ export class UserMenuViewModel
     public readonly openHomePage = (): void => {
         this.setOpen(false);
         this.dispatcher.dispatch({ action: Action.ViewHomePage });
-    };
-
-    public readonly openFeedback = (): void => {
-        this.setOpen(false);
-        Modal.createDialog(FeedbackDialog);
     };
 
     public readonly linkNewDevice = (): void => {

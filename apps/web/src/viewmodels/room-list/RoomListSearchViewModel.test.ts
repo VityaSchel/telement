@@ -21,12 +21,6 @@ vi.mock("../../customisations/helpers/UIComponents", () => ({
     shouldShowComponent: vi.fn(),
 }));
 
-vi.mock("../../PosthogTrackers", () => ({
-    default: {
-        trackInteraction: vi.fn(),
-    },
-}));
-
 describe("RoomListSearchViewModel", () => {
     const context = new TestSDKContext();
 

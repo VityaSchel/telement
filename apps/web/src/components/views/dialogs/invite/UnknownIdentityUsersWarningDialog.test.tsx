@@ -98,7 +98,6 @@ function renderComponent(props: Partial<ComponentProps<typeof UnknownIdentityUse
         onContinue: () => {},
         onCancel: () => {},
         onRemove: () => {},
-        screenName: undefined,
         kind: InviteKind.Dm,
         users: [],
         ...props,

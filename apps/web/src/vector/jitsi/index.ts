@@ -21,7 +21,6 @@ import type {
     JitsiMeetExternalAPIConstructor,
     ExternalAPIEventCallbacks,
     JitsiMeetExternalAPI as _JitsiMeetExternalAPI,
-    LogEvent,
     VideoMuteStatusChangedEvent,
     ExternalAPIOptions as _ExternalAPIOptions,
     Config as _Config,
@@ -432,12 +431,6 @@ async function joinConference(audioInput?: string | null, videoInput?: string | 
             startAudioOnly,
             startWithAudioMuted: audioInput === null ? true : startWithAudioMuted,
             startWithVideoMuted: videoInput === null ? true : startWithVideoMuted,
-            // Request some log levels for inclusion in rageshakes
-            // Ideally we would capture all possible log levels, but this can
-            // cause Jitsi Meet to try to post various circular data structures
-            // back over the iframe API, and therefore end up crashing
-            // https://github.com/jitsi/jitsi-meet/issues/11585
-            apiLogLevels: ["warn", "error"],
         },
         jwt: jwt,
         lang: mapLanguage(normalizeLanguage(language)),
@@ -476,9 +469,6 @@ async function joinConference(audioInput?: string | null, videoInput?: string | 
     (["videoConferenceJoined", "participantJoined", "participantLeft"] as const).forEach((event) => {
         meetApi!.on(event, updateParticipants);
     });
-
-    // Patch logs into rageshakes
-    meetApi.on("log", onLog);
 }
 
 const onVideoConferenceJoined = (): void => {
@@ -545,6 +535,3 @@ const updateParticipants = (): void => {
         participants: meetApi?.getParticipantsInfo(),
     });
 };
-
-const onLog = ({ logLevel, args }: LogEvent): void =>
-    (parent as unknown as typeof global).mx_rage_logger?.log(logLevel, ...args);

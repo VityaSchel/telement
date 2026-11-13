@@ -138,7 +138,6 @@ export default function UserSettingsDialog(props: IProps): JSX.Element {
                 _td("settings|account|title"),
                 <UserProfileIcon />,
                 <AccountUserSettingsTab closeSettingsFn={props.onFinished} startCustomStatus={startCustomStatus} />,
-                "UserSettingsGeneral",
             ),
         );
         tabs.push(
@@ -147,17 +146,10 @@ export default function UserSettingsDialog(props: IProps): JSX.Element {
                 _td("settings|sessions|title"),
                 <DevicesIcon />,
                 <SessionManagerTab showMsc4108QrCode={showMsc4108QrCode} />,
-                undefined,
             ),
         );
         tabs.push(
-            new Tab(
-                UserTab.Appearance,
-                _td("common|appearance"),
-                <VisibilityOnIcon />,
-                <AppearanceUserSettingsTab />,
-                "UserSettingsAppearance",
-            ),
+            new Tab(UserTab.Appearance, _td("common|appearance"), <VisibilityOnIcon />, <AppearanceUserSettingsTab />),
         );
         tabs.push(
             new Tab(
@@ -165,7 +157,6 @@ export default function UserSettingsDialog(props: IProps): JSX.Element {
                 _td("notifications|enable_prompt_toast_title"),
                 <NotificationsIcon />,
                 <NotificationUserSettingsTab />,
-                "UserSettingsNotifications",
             ),
         );
         tabs.push(
@@ -174,48 +165,19 @@ export default function UserSettingsDialog(props: IProps): JSX.Element {
                 _td("common|preferences"),
                 <PreferencesIcon />,
                 <PreferencesUserSettingsTab />,
-                "UserSettingsPreferences",
             ),
         );
         tabs.push(
-            new Tab(
-                UserTab.Keyboard,
-                _td("settings|keyboard|title"),
-                <KeyboardIcon />,
-                <KeyboardUserSettingsTab />,
-                "UserSettingsKeyboard",
-            ),
+            new Tab(UserTab.Keyboard, _td("settings|keyboard|title"), <KeyboardIcon />, <KeyboardUserSettingsTab />),
         );
-        tabs.push(
-            new Tab(
-                UserTab.Sidebar,
-                _td("settings|sidebar|title"),
-                <SidebarIcon />,
-                <SidebarUserSettingsTab />,
-                "UserSettingsSidebar",
-            ),
-        );
+        tabs.push(new Tab(UserTab.Sidebar, _td("settings|sidebar|title"), <SidebarIcon />, <SidebarUserSettingsTab />));
 
         if (voipEnabled) {
-            tabs.push(
-                new Tab(
-                    UserTab.Voice,
-                    _td("settings|voip|title"),
-                    <MicOnIcon />,
-                    <VoiceUserSettingsTab />,
-                    "UserSettingsVoiceVideo",
-                ),
-            );
+            tabs.push(new Tab(UserTab.Voice, _td("settings|voip|title"), <MicOnIcon />, <VoiceUserSettingsTab />));
         }
 
         tabs.push(
-            new Tab(
-                UserTab.Security,
-                _td("room_settings|security|title"),
-                <LockIcon />,
-                <SecurityUserSettingsTab />,
-                "UserSettingsSecurityPrivacy",
-            ),
+            new Tab(UserTab.Security, _td("room_settings|security|title"), <LockIcon />, <SecurityUserSettingsTab />),
         );
 
         tabs.push(
@@ -224,36 +186,17 @@ export default function UserSettingsDialog(props: IProps): JSX.Element {
                 _td("settings|encryption|title"),
                 <KeyIcon />,
                 <EncryptionUserSettingsTab initialState={initialEncryptionState} />,
-                "UserSettingsEncryption",
                 showSetupRecoveryIndicator ? "mx_SettingsDialog_tabLabelsAlert" : undefined,
             ),
         );
 
         if (showLabsFlags() || SettingsStore.getFeatureSettingNames().some((k) => SettingsStore.getBetaInfo(k))) {
-            tabs.push(
-                new Tab(UserTab.Labs, _td("common|labs"), <LabsIcon />, <LabsUserSettingsTab />, "UserSettingsLabs"),
-            );
+            tabs.push(new Tab(UserTab.Labs, _td("common|labs"), <LabsIcon />, <LabsUserSettingsTab />));
         }
         if (mjolnirEnabled) {
-            tabs.push(
-                new Tab(
-                    UserTab.Mjolnir,
-                    _td("labs_mjolnir|title"),
-                    <BlockIcon />,
-                    <MjolnirUserSettingsTab />,
-                    "UserSettingMjolnir",
-                ),
-            );
+            tabs.push(new Tab(UserTab.Mjolnir, _td("labs_mjolnir|title"), <BlockIcon />, <MjolnirUserSettingsTab />));
         }
-        tabs.push(
-            new Tab(
-                UserTab.Help,
-                _td("setting|help_about|title"),
-                <HelpIcon />,
-                <HelpUserSettingsTab />,
-                "UserSettingsHelpAbout",
-            ),
-        );
+        tabs.push(new Tab(UserTab.Help, _td("setting|help_about|title"), <HelpIcon />, <HelpUserSettingsTab />));
 
         return tabs as NonEmptyArray<Tab<UserTab>>;
     };
@@ -286,7 +229,6 @@ export default function UserSettingsDialog(props: IProps): JSX.Element {
                         <TabbedView
                             tabs={getTabs()}
                             activeTabId={activeTabId}
-                            screenName="UserSettings"
                             onChange={setActiveTabId}
                             responsive={true}
                         />

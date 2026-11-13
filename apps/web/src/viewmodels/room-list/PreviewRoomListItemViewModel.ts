@@ -90,7 +90,6 @@ export class PreviewRoomListItemViewModel
         dispatcher.dispatch<ViewRoomPayload>({
             action: Action.ViewRoom,
             room_id: this.props.roomId,
-            metricsTrigger: "RoomList",
         });
     };
 

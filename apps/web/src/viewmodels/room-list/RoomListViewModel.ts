@@ -523,8 +523,6 @@ export class RoomListViewModel
             action: Action.ViewRoom,
             room_id: newRoom.roomId,
             show_room_tile: true, // to make sure the room gets scrolled into view
-            metricsTrigger: "WebKeyboardShortcut",
-            metricsViaKeyboard: true,
         });
     }
 

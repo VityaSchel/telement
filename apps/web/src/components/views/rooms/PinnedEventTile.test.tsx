@@ -171,7 +171,6 @@ describe("<PinnedEventTile />", () => {
             event_id: pinEvent.getId(),
             highlighted: true,
             room_id: pinEvent.getRoomId(),
-            metricsTrigger: undefined, // room doesn't change
         });
     });
 

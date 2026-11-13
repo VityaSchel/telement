@@ -19,15 +19,6 @@ exports[`TileErrorView > renders the bubble layout variant 1`] = `
            (m.room.message)
         </span>
         <button
-          class="_button_1nw83_8"
-          data-kind="secondary"
-          data-size="md"
-          role="button"
-          tabindex="0"
-        >
-          Submit debug logs
-        </button>
-        <button
           class="TileErrorView-module_viewSourceButton"
           type="button"
         >
@@ -57,15 +48,6 @@ exports[`TileErrorView > renders the default tile error state 1`] = `
           Can't load this message
            (m.room.message)
         </span>
-        <button
-          class="_button_1nw83_8"
-          data-kind="secondary"
-          data-size="md"
-          role="button"
-          tabindex="0"
-        >
-          Submit debug logs
-        </button>
         <button
           class="TileErrorView-module_viewSourceButton"
           type="button"

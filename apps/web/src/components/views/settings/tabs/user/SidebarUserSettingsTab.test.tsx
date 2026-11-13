@@ -14,7 +14,6 @@ import { fireEvent, render, screen } from "test-utils-rtl";
 import { flushPromises } from "test-utils";
 
 import SidebarUserSettingsTab from "./SidebarUserSettingsTab";
-import PosthogTrackers from "../../../../../PosthogTrackers";
 import SettingsStore from "../../../../../settings/SettingsStore";
 import { MetaSpace } from "../../../../../stores/spaces";
 import { SettingLevel } from "../../../../../settings/SettingLevel";
@@ -22,7 +21,6 @@ import SdkConfig from "../../../../../SdkConfig";
 
 describe("<SidebarUserSettingsTab />", () => {
     beforeEach(() => {
-        vi.spyOn(PosthogTrackers, "trackInteraction").mockClear();
         vi.spyOn(SettingsStore, "getValue").mockRestore();
         vi.spyOn(SettingsStore, "setValue").mockResolvedValue(undefined);
     });
@@ -64,13 +62,6 @@ describe("<SidebarUserSettingsTab />", () => {
 
         await flushPromises();
         expect(SettingsStore.setValue).toHaveBeenCalledWith("Spaces.allRoomsInHome", null, SettingLevel.ACCOUNT, true);
-
-        expect(PosthogTrackers.trackInteraction).toHaveBeenCalledWith(
-            "WebSettingsSidebarTabSpacesCheckbox",
-            // synthetic event from checkbox
-            expect.objectContaining({ type: "change" }),
-            1,
-        );
     });
 
     it("disables all rooms in home setting when home space is disabled", () => {

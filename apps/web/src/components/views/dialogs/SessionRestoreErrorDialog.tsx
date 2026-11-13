@@ -14,22 +14,14 @@ import SdkConfig from "../../../SdkConfig";
 import Modal from "../../../Modal";
 import { _t } from "../../../languageHandler";
 import QuestionDialog from "./QuestionDialog";
-import BugReportDialog from "./BugReportDialog";
 import BaseDialog from "./BaseDialog";
 import DialogButtons from "../elements/DialogButtons";
 
 interface IProps {
-    error: unknown;
     onFinished(clear?: boolean): void;
 }
 
 export default class SessionRestoreErrorDialog extends React.Component<IProps> {
-    private sendBugReport = (): void => {
-        Modal.createDialog(BugReportDialog, {
-            error: this.props.error,
-        });
-    };
-
     private onClearStorageClick = (): void => {
         const { finished } = Modal.createDialog(QuestionDialog, {
             title: _t("action|sign_out"),
@@ -55,31 +47,6 @@ export default class SessionRestoreErrorDialog extends React.Component<IProps> {
             </button>
         );
 
-        let dialogButtons;
-        if (SdkConfig.get().bug_report_endpoint_url) {
-            dialogButtons = (
-                <DialogButtons
-                    primaryButton={_t("bug_reporting|send_logs")}
-                    onPrimaryButtonClick={this.sendBugReport}
-                    focus={true}
-                    hasCancel={false}
-                >
-                    {clearStorageButton}
-                </DialogButtons>
-            );
-        } else {
-            dialogButtons = (
-                <DialogButtons
-                    primaryButton={_t("action|refresh")}
-                    onPrimaryButtonClick={this.onRefreshClick}
-                    focus={true}
-                    hasCancel={false}
-                >
-                    {clearStorageButton}
-                </DialogButtons>
-            );
-        }
-
         return (
             <BaseDialog
                 className="mx_ErrorDialog"
@@ -95,7 +62,14 @@ export default class SessionRestoreErrorDialog extends React.Component<IProps> {
 
                     <p>{_t("error|session_restore|description_3")}</p>
                 </div>
-                {dialogButtons}
+                <DialogButtons
+                    primaryButton={_t("action|refresh")}
+                    onPrimaryButtonClick={this.onRefreshClick}
+                    focus={true}
+                    hasCancel={false}
+                >
+                    {clearStorageButton}
+                </DialogButtons>
             </BaseDialog>
         );
     }

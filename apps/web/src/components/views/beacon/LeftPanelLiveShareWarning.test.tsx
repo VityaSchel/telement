@@ -110,7 +110,6 @@ describe("<LeftPanelLiveShareWarning />", () => {
 
             expect(dispatchSpy).toHaveBeenCalledWith({
                 action: Action.ViewRoom,
-                metricsTrigger: undefined,
                 // latest beacon's room
                 room_id: roomId2,
                 event_id: beacon2.beaconInfoId,
@@ -143,7 +142,6 @@ describe("<LeftPanelLiveShareWarning />", () => {
 
             expect(dispatchSpy).toHaveBeenCalledWith({
                 action: Action.ViewRoom,
-                metricsTrigger: undefined,
                 // error beacon's room
                 room_id: roomId1,
                 event_id: beacon1.beaconInfoId,
@@ -251,7 +249,6 @@ describe("<LeftPanelLiveShareWarning />", () => {
 
                 expect(dispatchSpy).toHaveBeenCalledWith({
                     action: Action.ViewRoom,
-                    metricsTrigger: undefined,
                     // stopping error beacon's room
                     room_id: beacon2.roomId,
                     event_id: beacon2.beaconInfoId,

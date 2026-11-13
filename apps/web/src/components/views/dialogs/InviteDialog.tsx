@@ -39,7 +39,6 @@ import QuestionDialog from "./QuestionDialog";
 import BaseDialog from "./BaseDialog";
 import DialPadBackspaceButton from "../elements/DialPadBackspaceButton";
 import CopyableText from "../elements/CopyableText";
-import { type ScreenName } from "../../../PosthogTrackers";
 import { KeyBindingAction } from "../../../accessibility/KeyboardShortcuts";
 import { getKeyBindingsManager } from "../../../KeyBindingsManager";
 import {
@@ -1030,15 +1029,6 @@ export default class InviteDialog extends React.PureComponent<Props, IInviteDial
         selectText(e.currentTarget);
     }
 
-    private get screenName(): ScreenName | undefined {
-        switch (this.props.kind) {
-            case InviteKind.Dm:
-                return "StartChat";
-            default:
-                return undefined;
-        }
-    }
-
     /**
      * If encryption by default is enabled, third-party invites should be encrypted as well.
      * For encryption to work, the other side requires a device.
@@ -1324,7 +1314,6 @@ export default class InviteDialog extends React.PureComponent<Props, IInviteDial
                         );
                     }}
                     onRemove={this.onRemoveUnknownIdentityUsersClicked}
-                    screenName={this.screenName}
                     kind={this.props.kind}
                     users={this.state.unknownIdentityUsers}
                 />
@@ -1353,7 +1342,6 @@ export default class InviteDialog extends React.PureComponent<Props, IInviteDial
                 hasCancel={true}
                 onFinished={this.props.onFinished}
                 title={title}
-                screenName={this.screenName}
             >
                 <div className="mx_InviteDialog_content">{this.renderMainTab()}</div>
             </BaseDialog>
@@ -1460,7 +1448,6 @@ export default class InviteDialog extends React.PureComponent<Props, IInviteDial
                 hasCancel={true}
                 onFinished={this.props.onFinished}
                 title={_t("action|transfer")}
-                screenName={this.screenName}
             >
                 <div className="mx_InviteDialog_content">{dialogContent}</div>
             </BaseDialog>

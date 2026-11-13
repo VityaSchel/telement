@@ -352,7 +352,6 @@ describe("RoomListViewModel", () => {
                     action: Action.ViewRoom,
                     room_id: "!room2:server",
                     show_room_tile: true,
-                    metricsTrigger: undefined,
                 });
                 await waitFor(() => expect(scrollSpy).toHaveBeenCalledWith(2));
 
@@ -1100,7 +1099,7 @@ describe("RoomListViewModel", () => {
         it.each([
             [
                 "a ViewRoom dispatch asking for the tile",
-                { action: Action.ViewRoom, room_id: "!room2:server", show_room_tile: true, metricsTrigger: undefined },
+                { action: Action.ViewRoom, room_id: "!room2:server", show_room_tile: true },
             ],
             ["the active room changing", { action: Action.ActiveRoomChanged, newRoomId: "!room2:server" }],
         ])("should scroll a room into view on %s", async (_trigger, payload) => {
@@ -1130,7 +1129,6 @@ describe("RoomListViewModel", () => {
                 action: Action.ViewRoom,
                 room_id: "!nope:server",
                 show_room_tile: true,
-                metricsTrigger: undefined,
             });
 
             await flushPromises();

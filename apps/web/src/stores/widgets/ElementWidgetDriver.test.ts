@@ -96,8 +96,6 @@ describe("ElementWidgetDriver", () => {
             "org.matrix.msc2762.timeline:!1:example.org",
             "org.matrix.msc2762.send.event:org.matrix.msc4075.call.notify",
             "org.matrix.msc2762.send.event:org.matrix.msc4075.rtc.notification",
-            "org.matrix.msc2762.send.event:org.matrix.rageshake_request",
-            "org.matrix.msc2762.receive.event:org.matrix.rageshake_request",
             "org.matrix.msc2762.send.event:m.reaction",
             "org.matrix.msc2762.receive.event:m.reaction",
             "org.matrix.msc2762.send.event:m.room.redaction",

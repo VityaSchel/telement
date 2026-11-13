@@ -64,7 +64,6 @@ describe("SpaceHierarchy", () => {
                     name: "canonical-alias",
                 },
                 roomType: undefined,
-                metricsTrigger: "RoomDirectory",
             });
         });
     });

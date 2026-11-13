@@ -11,7 +11,6 @@ import React from "react";
 import { KeyIcon, ErrorSolidIcon, SettingsSolidIcon } from "@vector-im/compound-design-tokens/assets/web/icons";
 import { Link } from "@vector-im/compound-web";
 import { type ComponentType } from "react";
-import { type Interaction as InteractionEvent } from "@matrix-org/analytics-events/types/typescript/Interaction";
 import { logger } from "matrix-js-sdk/src/logger";
 import { DecryptionKeyDoesNotMatchError } from "matrix-js-sdk/src/crypto-api";
 
@@ -30,7 +29,6 @@ import defaultDispatcher from "../dispatcher/dispatcher";
 import ConfirmKeyStorageOffDialog from "../components/views/dialogs/ConfirmKeyStorageOffDialog";
 import { MatrixClientPeg } from "../MatrixClientPeg";
 import { resetKeyBackupAndWait } from "../utils/crypto/resetKeyBackup";
-import { PosthogAnalytics } from "../PosthogAnalytics";
 import { encryptionSettingsStateForKeyStorageOutOfSyncForgotRecovery } from "../components/views/settings/tabs/user/EncryptionUserSettingsTab.tsx";
 
 const TOAST_KEY = "setupencryption";
@@ -161,11 +159,6 @@ export const showToast = (state: DeviceStateForToast): void => {
         switch (state) {
             case "set_up_recovery":
             case "turn_on_key_storage": {
-                PosthogAnalytics.instance.trackEvent<InteractionEvent>({
-                    eventName: "Interaction",
-                    interactionType: "Pointer",
-                    name: state === "set_up_recovery" ? "ToastSetUpRecoveryClick" : "ToastTurnOnKeyStorageClick",
-                });
                 myLogger.debug("Primary button clicked: opening encryption settings dialog");
                 // Open the user settings dialog to the encryption tab
                 const payload: OpenToTabPayload = {
@@ -251,11 +244,6 @@ export const showToast = (state: DeviceStateForToast): void => {
     const onSecondaryClick = async (): Promise<void> => {
         switch (state) {
             case "set_up_recovery": {
-                PosthogAnalytics.instance.trackEvent<InteractionEvent>({
-                    eventName: "Interaction",
-                    interactionType: "Pointer",
-                    name: "ToastSetUpRecoveryDismiss",
-                });
                 myLogger.debug("Secondary button clicked: disabling recovery");
                 // Record that the user doesn't want to set up recovery
                 const deviceListener = DeviceListener.sharedInstance();
@@ -277,11 +265,6 @@ export const showToast = (state: DeviceStateForToast): void => {
                 break;
             }
             case "turn_on_key_storage": {
-                PosthogAnalytics.instance.trackEvent<InteractionEvent>({
-                    eventName: "Interaction",
-                    interactionType: "Pointer",
-                    name: "ToastTurnOnKeyStorageDismiss",
-                });
                 // The user clicked "Dismiss": offer them "Are you sure?"
                 const modal = Modal.createDialog(
                     ConfirmKeyStorageOffDialog,

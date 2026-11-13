@@ -39,17 +39,14 @@ describe("TileErrorView", () => {
         render(<WithoutActions />);
 
         expect(screen.getByText("Can't load this message (m.room.message)")).toBeInTheDocument();
-        expect(screen.queryByRole("button", { name: "Submit debug logs" })).not.toBeInTheDocument();
         expect(screen.queryByRole("button", { name: "View source" })).not.toBeInTheDocument();
     });
 
-    it("invokes bug-report and view-source actions", async () => {
+    it("invokes the view-source action", async () => {
         const user = userEvent.setup();
-        const onBugReportClick = vi.fn();
         const onViewSourceClick = vi.fn();
 
         class TestTileErrorViewModel extends MockViewModel<TileErrorViewSnapshot> implements TileErrorViewActions {
-            public onBugReportClick?: MouseEventHandler<HTMLButtonElement>;
             public onViewSourceClick?: MouseEventHandler<HTMLButtonElement>;
 
             public constructor(snapshot: TileErrorViewSnapshot, actions: TileErrorViewActions) {
@@ -62,21 +59,17 @@ describe("TileErrorView", () => {
             {
                 message: "Can't load this message",
                 eventType: "m.room.message",
-                bugReportCtaLabel: "Submit debug logs",
                 viewSourceCtaLabel: "View source",
             },
             {
-                onBugReportClick,
                 onViewSourceClick,
             },
         ) as TileErrorViewModel;
 
         render(<TileErrorView vm={vm} />);
 
-        await user.click(screen.getByRole("button", { name: "Submit debug logs" }));
         await user.click(screen.getByRole("button", { name: "View source" }));
 
-        expect(onBugReportClick).toHaveBeenCalledTimes(1);
         expect(onViewSourceClick).toHaveBeenCalledTimes(1);
     });
 

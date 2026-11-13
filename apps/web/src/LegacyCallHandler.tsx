@@ -843,7 +843,6 @@ export default class LegacyCallHandler extends TypedEventEmitter<LegacyCallHandl
         dis.dispatch<ViewRoomPayload>({
             action: Action.ViewRoom,
             room_id: roomId,
-            metricsTrigger: "WebAcceptCall",
         });
     }
 
@@ -872,7 +871,6 @@ export default class LegacyCallHandler extends TypedEventEmitter<LegacyCallHandl
         dis.dispatch<ViewRoomPayload>({
             action: Action.ViewRoom,
             room_id: roomId,
-            metricsTrigger: "WebDialPad",
         });
 
         await this.placeMatrixCall(roomId, CallType.Voice, transferee);
@@ -920,7 +918,6 @@ export default class LegacyCallHandler extends TypedEventEmitter<LegacyCallHandl
                 room_id: dmRoomId,
                 should_peek: false,
                 joining: false,
-                metricsTrigger: undefined, // other
             });
         } else {
             try {
@@ -1018,7 +1015,6 @@ export default class LegacyCallHandler extends TypedEventEmitter<LegacyCallHandl
             action: Action.OpenInviteDialog,
             kind: InviteKind.CallTransfer,
             call,
-            analyticsName: "Transfer Call",
             className: "mx_InviteDialog_transferWrapper",
             onFinishedCallback: (results) => {
                 if (results.length === 0 || results[0] === false) {

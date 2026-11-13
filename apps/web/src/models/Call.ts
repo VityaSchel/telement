@@ -39,14 +39,11 @@ import WidgetStore from "../stores/WidgetStore";
 import { WidgetMessagingStore, WidgetMessagingStoreEvent } from "../stores/widgets/WidgetMessagingStore";
 import ActiveWidgetStore, { ActiveWidgetStoreEvent } from "../stores/ActiveWidgetStore";
 import { getCurrentLanguage } from "../languageHandler";
-import { Anonymity, PosthogAnalytics } from "../PosthogAnalytics";
 import { isVideoRoom } from "../utils/video-rooms";
 import { FontWatcher } from "../settings/watchers/FontWatcher";
 import { type JitsiCallMemberContent, JitsiCallMemberEventType } from "../call-types";
-import SdkConfig from "../SdkConfig.ts";
 import DMRoomMap from "../utils/DMRoomMap.ts";
 import { type WidgetMessaging, WidgetMessagingEvent } from "../stores/widgets/WidgetMessaging.ts";
-import { BugReportEndpointURLLocal } from "../IConfigOptions.ts";
 // From the component package's `api` entry point, which carries the types and enums without the
 // component: `BackgroundStyle` is needed as a value here, on the widget path, where the component
 // itself must not be loaded.
@@ -790,9 +787,7 @@ export class ElementCall extends Call {
     }
 
     /**
-     * Deployment-wide configuration for Element Call's React component (`initializeElementCall`): the
-     * React-component counterpart of `appendAnalyticsParams` and the `rageshakeSubmitUrl` URL param,
-     * with the same consent gating.
+     * Deployment-wide configuration for Element Call's React component (`initializeElementCall`).
      *
      * @param transports - The MatrixRTC transports Element Web knows about
      *   (`CallStore.getConfiguredRTCTransports()`). The component itself only looks at the
@@ -809,64 +804,7 @@ export class ElementCall extends Call {
         if (livekitTransport) {
             options.livekit = { livekit_service_url: livekitTransport.livekit_service_url };
         }
-
-        const rageshakeSubmitUrl = SdkConfig.get("bug_report_endpoint_url");
-        if (rageshakeSubmitUrl && rageshakeSubmitUrl !== BugReportEndpointURLLocal) {
-            options.rageshake = { submit_url: rageshakeSubmitUrl };
-        }
-
-        const posthogConfig = SdkConfig.get("posthog");
-        if (
-            posthogConfig?.project_api_key &&
-            posthogConfig?.api_host &&
-            PosthogAnalytics.instance.getAnonymity() !== Anonymity.Disabled
-        ) {
-            options.posthog = { api_key: posthogConfig.project_api_key, api_host: posthogConfig.api_host };
-            // We gate passing sentry behind analytics consent as EC shares data automatically without user-consent,
-            // unlike EW where data is shared upon an intentional user action (rageshake).
-            const sentryConfig = SdkConfig.get("sentry");
-            if (sentryConfig?.dsn) {
-                options.sentry = { DSN: sentryConfig.dsn, environment: sentryConfig.environment ?? "" };
-            }
-        }
         return options;
-    }
-
-    /**
-     * Calculate the correct analytics parameters for an Element Call room. Paarameters
-     * will be applied to the `params` instance.
-     *
-     * @param params Existing URL parameters
-     * @param client The current client.
-     */
-    private static appendAnalyticsParams(params: URLSearchParams, client: MatrixClient): void {
-        const posthogConfig = SdkConfig.get("posthog");
-        if (
-            !posthogConfig?.project_api_key ||
-            !posthogConfig?.api_host ||
-            PosthogAnalytics.instance.getAnonymity() === Anonymity.Disabled
-        ) {
-            return;
-        }
-
-        const accountAnalyticsData = client.getAccountData(PosthogAnalytics.ANALYTICS_EVENT_TYPE)?.getContent();
-        // The analyticsID is passed directly to element call (EC) since this codepath is only for EC and no other widget.
-        // We really don't want the same analyticID's for the EC and EW posthog instances (Data on posthog should be limited/anonymized as much as possible).
-        // This is prohibited in EC where a hashed version of the analyticsID is used for the actual posthog identification.
-        // We can pass the raw EW analyticsID here since we need to trust EC with not sending sensitive data to posthog (EC has access to more sensible data than the analyticsID e.g. the username)
-        const analyticsID: string = accountAnalyticsData?.pseudonymousAnalyticsOptIn ? accountAnalyticsData?.id : "";
-
-        params.append("posthogUserId", analyticsID);
-        params.append("posthogApiHost", posthogConfig.api_host);
-        params.append("posthogApiKey", posthogConfig.project_api_key);
-
-        // We gate passing sentry behind analytics consent as EC shares data automatically without user-consent,
-        // unlike EW where data is shared upon an intentional user action (rageshake).
-        const sentryConfig = SdkConfig.get("sentry");
-        if (sentryConfig?.dsn) {
-            params.append("sentryDsn", sentryConfig.dsn);
-            params.append("sentryEnvironment", sentryConfig.environment ?? "");
-        }
     }
 
     /**
@@ -909,11 +847,6 @@ export class ElementCall extends Call {
         if (config.returnToLobby !== undefined) params.append("returnToLobby", config.returnToLobby.toString());
         if (config.skipLobby !== undefined) params.append("skipLobby", config.skipLobby.toString());
 
-        const rageshakeSubmitUrl = SdkConfig.get("bug_report_endpoint_url");
-        if (rageshakeSubmitUrl && rageshakeSubmitUrl !== BugReportEndpointURLLocal) {
-            params.append("rageshakeSubmitUrl", rageshakeSubmitUrl);
-        }
-
         if (config.allowIceFallback) {
             params.append("allowIceFallback", "true");
         }
@@ -924,7 +857,6 @@ export class ElementCall extends Call {
 
         // Set custom fonts
         fonts.forEach((font) => params.append("font", font));
-        this.appendAnalyticsParams(params, client);
 
         const replacedUrl = params.toString().replace(/%24/g, "$");
         url.hash = `#?${replacedUrl}`;

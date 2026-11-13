@@ -24,7 +24,6 @@ import {
 } from "matrix-js-sdk/src/matrix";
 import { type DebouncedFunc, throttle } from "lodash";
 import { logger } from "matrix-js-sdk/src/logger";
-import { type Composer as ComposerEvent } from "@matrix-org/analytics-events/types/typescript/Composer";
 
 import { type RoomMessageEventContent } from "../../../../@types/url-preview";
 import dis from "../../../dispatcher/dispatcher";
@@ -52,13 +51,11 @@ import { getKeyBindingsManager } from "../../../KeyBindingsManager";
 import SettingsStore from "../../../settings/SettingsStore";
 import { UIFeature } from "../../../settings/UIFeature";
 import { type ActionPayload } from "../../../dispatcher/payloads";
-import { decorateStartSendingTime, sendRoundTripMetric } from "../../../sendTimePerformanceMetrics";
 import RoomContext, { TimelineRenderingType } from "../../../contexts/RoomContext";
 import DocumentPosition from "../../../editor/position";
 import { ComposerType } from "../../../dispatcher/payloads/ComposerInsertPayload";
 import { getSlashCommand, isSlashCommand, runSlashCommand, shouldSendAnyway } from "../../../editor/commands";
 import { KeyBindingAction } from "../../../accessibility/KeyboardShortcuts";
-import { PosthogAnalytics } from "../../../PosthogAnalytics";
 import { addReplyToMessageContent } from "../../../utils/Reply";
 import { doMaybeLocalRoomAction } from "../../../utils/local-room";
 import { type Caret } from "../../../editor/caret";
@@ -357,19 +354,6 @@ export class SendMessageComposer extends React.Component<ISendMessageComposerPro
             return;
         }
 
-        const posthogEvent: ComposerEvent = {
-            eventName: "Composer",
-            isEditing: false,
-            messageType: "Text",
-            isReply: !!this.props.replyToEvent,
-            inThread: this.props.relation?.rel_type === THREAD_RELATION_TYPE.name,
-        };
-        if (posthogEvent.inThread && this.props.relation!.event_id) {
-            const threadRoot = this.props.room.findEventById(this.props.relation!.event_id);
-            posthogEvent.startsThread = threadRoot?.getThread()?.events.length === 1;
-        }
-        PosthogAnalytics.instance.trackEvent<ComposerEvent>(posthogEvent);
-
         // Replace emoticon at the end of the message
         if (SettingsStore.getValue("MessageComposerInput.autoReplaceEmoji")) {
             const indexOfLastPart = model.parts.length - 1;
@@ -478,14 +462,10 @@ export class SendMessageComposer extends React.Component<ISendMessageComposerPro
                 return;
             }
 
-            if (SettingsStore.getValue("Performance.addSendMessageTimingMetadata")) {
-                decorateStartSendingTime(content);
-            }
-
             const threadId =
                 this.props.relation?.rel_type === THREAD_RELATION_TYPE.name ? this.props.relation.event_id : null;
 
-            const prom = doMaybeLocalRoomAction(
+            void doMaybeLocalRoomAction(
                 roomId,
                 (actualRoomId: string) => this.props.mxClient.sendMessage(actualRoomId, threadId ?? null, content!),
                 this.props.mxClient,
@@ -510,11 +490,6 @@ export class SendMessageComposer extends React.Component<ISendMessageComposerPro
                     }
                 }
             });
-            if (SettingsStore.getValue("Performance.addSendMessageTimingMetadata")) {
-                void prom.then((resp) => {
-                    sendRoundTripMetric(this.props.mxClient, roomId, resp.event_id);
-                });
-            }
         } else {
             clearComposerAndPushHistory();
         }

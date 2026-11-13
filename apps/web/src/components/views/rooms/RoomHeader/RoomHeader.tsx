@@ -37,7 +37,6 @@ import FacePile from "../../elements/FacePile.tsx";
 import { useRoomState } from "../../../../hooks/useRoomState.ts";
 import RoomAvatar from "../../avatars/RoomAvatar";
 import { formatCount } from "../../../../utils/FormattingUtils.ts";
-import PosthogTrackers from "../../../../PosthogTrackers.ts";
 import { VideoRoomChatButton } from "./VideoRoomChatButton.tsx";
 import { RoomKnocksBar } from "../RoomKnocksBar.tsx";
 import { isVideoRoom as calcIsVideoRoom } from "../../../../utils/video-rooms.ts";
@@ -313,7 +312,6 @@ function RoomHeaderButtons({ room, extraButtons }: { room: Room; extraButtons?: 
                     onClick={(evt) => {
                         evt.stopPropagation();
                         sdkContext.rightPanelStore.showOrHidePhase(RightPanelPhases.ThreadPanel);
-                        PosthogTrackers.trackInteraction("WebRoomHeaderButtonsThreadsButton", evt);
                     }}
                     aria-label={_t("common|threads")}
                 >

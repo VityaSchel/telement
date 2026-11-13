@@ -9,15 +9,7 @@ SPDX-License-Identifier: AGPL-3.0-only OR GPL-3.0-only OR LicenseRef-Element-Com
 Please see LICENSE files in the repository root for full details.
 */
 
-import React, {
-    type ComponentProps,
-    createRef,
-    type ReactElement,
-    type ReactNode,
-    type RefObject,
-    type JSX,
-    useEffect,
-} from "react";
+import React, { createRef, type ReactElement, type ReactNode, type RefObject, type JSX, useEffect } from "react";
 import classNames from "classnames";
 import {
     type IRecommendedVersion,
@@ -823,7 +815,6 @@ export class RoomView extends React.Component<IRoomProps, IRoomState> {
                 action: Action.ViewRoom,
                 room_id: this.state.roomId,
                 view_call: false,
-                metricsTrigger: undefined,
             },
             true,
         ); // Synchronous so that CallView disappears immediately
@@ -1280,7 +1271,6 @@ export class RoomView extends React.Component<IRoomProps, IRoomState> {
                     defaultDispatcher.dispatch<ViewRoomPayload>({
                         action: Action.ViewRoom,
                         room_id: payload.event.getRoomId(),
-                        metricsTrigger: undefined,
                         deferred_action: payload,
                     });
                     return;
@@ -1725,7 +1715,6 @@ export class RoomView extends React.Component<IRoomProps, IRoomState> {
                 deferred_action: {
                     action: Action.ViewRoom,
                     room_id: this.getRoomId(),
-                    metricsTrigger: undefined,
                 },
             });
             defaultDispatcher.dispatch({ action: "require_registration" });
@@ -1738,8 +1727,6 @@ export class RoomView extends React.Component<IRoomProps, IRoomState> {
                         action: Action.JoinRoom,
                         roomId,
                         opts: { inviteSignUrl: signUrl },
-                        metricsTrigger:
-                            this.state.room?.getMyMembership() === KnownMembership.Invite ? "Invite" : "RoomPreview",
                         canAskToJoin: this.canAskToJoin,
                     });
                 }
@@ -1777,7 +1764,6 @@ export class RoomView extends React.Component<IRoomProps, IRoomState> {
                 highlighted: this.state.isInitialEventHighlighted,
                 scroll_into_view: false,
                 replyingToEvent: this.state.replyToEvent,
-                metricsTrigger: undefined, // room doesn't change
             });
         }
     };
@@ -1981,7 +1967,6 @@ export class RoomView extends React.Component<IRoomProps, IRoomState> {
             defaultDispatcher.dispatch<ViewRoomPayload>({
                 action: Action.ViewRoom,
                 room_id: this.getRoomId(),
-                metricsTrigger: undefined, // room doesn't change
             });
         } else {
             // Otherwise we have to jump manually
@@ -2113,7 +2098,6 @@ export class RoomView extends React.Component<IRoomProps, IRoomState> {
         defaultDispatcher.dispatch<ViewRoomPayload>({
             action: Action.ViewRoom,
             room_id: oldRoom.roomId,
-            metricsTrigger: "Predecessor",
         });
     };
 
@@ -2725,13 +2709,10 @@ export class RoomView extends React.Component<IRoomProps, IRoomState> {
 
         let sizeKey: string | undefined;
         let defaultSize: number | undefined;
-        let analyticsRoomType: ComponentProps<typeof MainSplit>["analyticsRoomType"] = "other_room";
         if (this.state.mainSplitContentType !== MainSplitContentType.Timeline) {
             // Override defaults for video rooms where more space is needed for the chat timeline
             sizeKey = "wide";
             defaultSize = 420;
-            analyticsRoomType =
-                this.state.mainSplitContentType === MainSplitContentType.Call ? "video_room" : "maximised_widget";
         }
 
         const extraButtons: JSX.Element[] = [];
@@ -2753,12 +2734,7 @@ export class RoomView extends React.Component<IRoomProps, IRoomState> {
                         <EffectsOverlay roomWidth={this.roomView.current.offsetWidth} />
                     )}
                     <ErrorBoundary>
-                        <MainSplit
-                            panel={rightPanel}
-                            sizeKey={sizeKey}
-                            defaultSize={defaultSize}
-                            analyticsRoomType={analyticsRoomType}
-                        >
+                        <MainSplit panel={rightPanel} sizeKey={sizeKey} defaultSize={defaultSize}>
                             <div
                                 className={mainSplitContentClasses}
                                 ref={this.roomViewBody}

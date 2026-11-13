@@ -44,7 +44,6 @@ export const PollDetail: React.FC<Props> = ({ poll, permalinkCreator, requestMod
             event_id: eventIdToLinkTo,
             highlighted: true,
             room_id: poll.roomId,
-            metricsTrigger: undefined, // room doesn't change
         });
 
         requestModalClose();

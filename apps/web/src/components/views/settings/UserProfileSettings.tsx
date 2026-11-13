@@ -21,7 +21,6 @@ import {
 import { _t } from "../../../languageHandler";
 import { OwnProfileStore } from "../../../stores/OwnProfileStore";
 import AvatarSetting from "./AvatarSetting";
-import PosthogTrackers from "../../../PosthogTrackers";
 import { formatBytes } from "../../../utils/FormattingUtils";
 import InlineSpinner from "../elements/InlineSpinner";
 import CopyableText from "../elements/CopyableText";
@@ -159,7 +158,6 @@ const UserProfileSettings: React.FC<UserProfileSettingsProps> = ({
 
     const onAvatarChange = useCallback(
         async (avatarFile: File) => {
-            PosthogTrackers.trackInteraction("WebProfileSettingsAvatarUploadButton");
             logger.log(
                 `Uploading new avatar, ${avatarFile.name} of type ${avatarFile.type}, (${avatarFile.size}) bytes`,
             );

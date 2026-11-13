@@ -456,7 +456,6 @@ describe("EventUtils", () => {
                 event_id: eventId,
                 highlighted: true,
                 room_id: roomId,
-                metricsTrigger: undefined,
             });
         });
     });

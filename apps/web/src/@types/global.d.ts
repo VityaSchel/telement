@@ -27,7 +27,6 @@ import type PerformanceMonitor from "../performance";
 import type UIStore from "../stores/UIStore";
 import { type SetupEncryptionStore } from "../stores/SetupEncryptionStore";
 import { type RoomScrollStateStore } from "../stores/RoomScrollStateStore";
-import { type ConsoleLogger, type IndexedDBLogStore } from "../rageshake/rageshake";
 import type ActiveWidgetStore from "../stores/ActiveWidgetStore";
 import type { CallStatusListener } from "../CallStatusListener";
 import { type IConfigOptions } from "../IConfigOptions";
@@ -69,10 +68,8 @@ declare global {
     function setTimeout(handler: TimerHandler, timeout: number, ...args: any[]): number;
 
     interface Window {
-        mxSendRageshake: (text: string, withLogs?: boolean) => Promise<void>;
         matrixLogger: typeof logger;
         matrixChat?: MatrixChat;
-        mxSendSentryReport: (userText: string, issueUrl: string, error: Error) => Promise<void>;
         mxLoginWithAccessToken: (hsUrl: string, accessToken: string) => Promise<void>;
         mxDispatcher: MatrixDispatcher;
         mxMatrixClientPeg: IMatrixClientPeg;
@@ -192,9 +189,4 @@ declare global {
               ) => string;
               isReady: () => boolean;
           };
-
-    var mx_rage_logger: ConsoleLogger;
-    var mx_rage_initPromise: Promise<void>;
-    var mx_rage_initStoragePromise: Promise<void>;
-    var mx_rage_store: IndexedDBLogStore;
 }

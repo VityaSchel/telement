@@ -55,7 +55,6 @@ import {
     type SpaceDescendantMap,
     flattenSpaceHierarchy,
 } from "./flattenSpaceHierarchy";
-import { PosthogAnalytics } from "../../PosthogAnalytics";
 import { type ViewRoomPayload } from "../../dispatcher/payloads/ViewRoomPayload";
 import { type ViewHomePagePayload } from "../../dispatcher/payloads/ViewHomePagePayload";
 import { type SwitchSpacePayload } from "../../dispatcher/payloads/SwitchSpacePayload";
@@ -210,7 +209,6 @@ export default class SpaceStore extends AsyncStoreWithClient<EmptyObject> {
                 action: Action.ViewRoom,
                 room_id: roomId,
                 context_switch: true,
-                metricsTrigger: "WebSpacePanelNotificationBadge",
             });
         }
     }
@@ -254,14 +252,12 @@ export default class SpaceStore extends AsyncStoreWithClient<EmptyObject> {
                     action: Action.ViewRoom,
                     room_id: roomId,
                     context_switch: true,
-                    metricsTrigger: "WebSpaceContextSwitch",
                 });
             } else if (cliSpace) {
                 this.dispatcher.dispatch<ViewRoomPayload>({
                     action: Action.ViewRoom,
                     room_id: space,
                     context_switch: true,
-                    metricsTrigger: "WebSpaceContextSwitch",
                 });
             } else if (ModuleApi.instance.extras.spacePanelItems.has(space)) {
                 // module will handle this
@@ -612,8 +608,6 @@ export default class SpaceStore extends AsyncStoreWithClient<EmptyObject> {
                 this.parentMap.getOrCreate(child.roomId, new Set()).add(space.roomId);
             });
         });
-
-        PosthogAnalytics.instance.setProperty("numSpaces", joinedSpaces.length);
     };
 
     private rebuildHomeSpace = (): void => {
@@ -1125,7 +1119,6 @@ export default class SpaceStore extends AsyncStoreWithClient<EmptyObject> {
         this._enabledMetaSpaces = metaSpaceOrder.filter((k) => enabledMetaSpaces[k]);
 
         this._allRoomsInHome = SettingsStore.getValue("Spaces.allRoomsInHome");
-        this.sendUserProperties();
 
         this.rebuildSpaceHierarchy(); // trigger an initial update
         // rebuildSpaceHierarchy will only send an update if the spaces have changed.
@@ -1147,13 +1140,6 @@ export default class SpaceStore extends AsyncStoreWithClient<EmptyObject> {
             this.switchSpaceIfNeeded();
         }
         this._storeReadyDeferred.resolve();
-    }
-
-    private sendUserProperties(): void {
-        const enabled = new Set(this.enabledMetaSpaces);
-        PosthogAnalytics.instance.setProperty("WebMetaSpaceHomeEnabled", enabled.has(MetaSpace.Home));
-        PosthogAnalytics.instance.setProperty("WebMetaSpaceHomeAllRooms", this.allRoomsInHome);
-        PosthogAnalytics.instance.setProperty("WebMetaSpaceOrphansEnabled", enabled.has(MetaSpace.Orphans));
     }
 
     private goToFirstSpace(contextSwitch = false): void {
@@ -1229,7 +1215,6 @@ export default class SpaceStore extends AsyncStoreWithClient<EmptyObject> {
                             if (this.enabledMetaSpaces.includes(MetaSpace.Home)) {
                                 this.rebuildHomeSpace();
                             }
-                            this.sendUserProperties();
                             this.emit(UPDATE_HOME_BEHAVIOUR, this.allRoomsInHome);
                         }
                         break;
@@ -1257,7 +1242,6 @@ export default class SpaceStore extends AsyncStoreWithClient<EmptyObject> {
                             }
 
                             this.emit(UPDATE_TOP_LEVEL_SPACES, this.spacePanelSpaces, this.enabledMetaSpaces);
-                            this.sendUserProperties();
                         }
                         break;
                     }

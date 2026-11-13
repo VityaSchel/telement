@@ -32,7 +32,6 @@ import { useMyRoomMembership } from "../../hooks/useRoomMembers";
 import { useFeatureEnabled } from "../../hooks/useSettings";
 import { useStateArray } from "../../hooks/useStateArray";
 import { _t } from "../../languageHandler";
-import PosthogTrackers from "../../PosthogTrackers";
 import { showRoomInviteDialog } from "../../RoomInvite";
 import { UIComponent } from "../../settings/UIFeature";
 import { UPDATE_EVENT } from "../../stores/AsyncStore";
@@ -133,7 +132,6 @@ const SpaceLandingAddButton: React.FC<{ space: Room }> = ({ space }) => {
                                     e.stopPropagation();
                                     closeMenu();
 
-                                    PosthogTrackers.trackInteraction("WebSpaceHomeCreateRoomButton", e);
                                     if (await showCreateNewRoom(space)) {
                                         defaultDispatcher.fire(Action.UpdateSpaceHierarchy);
                                     }
@@ -665,7 +663,6 @@ export default class SpaceRoomView extends React.PureComponent<IProps, IState> {
             defaultDispatcher.dispatch<ViewRoomPayload>({
                 action: Action.ViewRoom,
                 room_id: this.state.firstRoomId,
-                metricsTrigger: undefined, // other
             });
             return;
         }
@@ -769,9 +766,7 @@ export default class SpaceRoomView extends React.PureComponent<IProps, IState> {
         return (
             <main className="mx_SpaceRoomView">
                 <ErrorBoundary>
-                    <MainSplit panel={rightPanel} analyticsRoomType="space">
-                        {this.renderBody()}
-                    </MainSplit>
+                    <MainSplit panel={rightPanel}>{this.renderBody()}</MainSplit>
                 </ErrorBoundary>
             </main>
         );

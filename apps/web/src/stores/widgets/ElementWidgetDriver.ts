@@ -202,7 +202,6 @@ export class ElementWidgetDriver extends WidgetDriver {
             const sendRoomEvents = [EventType.CallNotify, EventType.RTCNotification];
             const sendRecvRoomEvents = [
                 "io.element.call.encryption_keys",
-                "org.matrix.rageshake_request",
                 EventType.Reaction,
                 EventType.RoomRedaction,
                 "io.element.call.reaction",

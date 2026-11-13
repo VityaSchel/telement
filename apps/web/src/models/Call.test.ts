@@ -9,7 +9,7 @@ Please see LICENSE files in the repository root for full details.
 // @vitest-environment happy-dom
 
 import EventEmitter from "node:events";
-import { RoomType, type Room, RoomEvent, MatrixEvent, type IMyDevice, type RoomMember } from "matrix-js-sdk/src/matrix";
+import { RoomType, type Room, RoomEvent, type IMyDevice, type RoomMember } from "matrix-js-sdk/src/matrix";
 import { KnownMembership } from "matrix-js-sdk/src/types";
 import { Widget } from "matrix-widget-api";
 import {
@@ -38,12 +38,10 @@ import ActiveWidgetStore, { ActiveWidgetStoreEvent } from "../stores/ActiveWidge
 import { ElementWidgetActions } from "../stores/widgets/ElementWidgetActions";
 import SettingsStore from "../settings/SettingsStore";
 import { type ElementCallHandle } from "@element-hq/element-call-component/api";
-import { Anonymity, PosthogAnalytics } from "../PosthogAnalytics";
 import { type SettingKey } from "../settings/Settings.tsx";
 import SdkConfig from "../SdkConfig.ts";
 import DMRoomMap from "../utils/DMRoomMap.ts";
 import { WidgetMessagingEvent, type WidgetMessaging } from "../stores/widgets/WidgetMessaging.ts";
-import { BugReportEndpointURLLocal } from "../IConfigOptions.ts";
 
 const { enabledSettings } = enableCalls();
 
@@ -692,80 +690,6 @@ describe("ElementCall", () => {
             expect(urlParams2.has("allowIceFallback")).toBe(true);
 
             SettingsStore.getValue = originalGetValue;
-        });
-
-        it.each([
-            [undefined, null],
-            [BugReportEndpointURLLocal, null],
-            ["other-value", "other-value"],
-        ])("passes rageshake URL through widget URL", async (configSetting, expectedValue) => {
-            // Test with the preference set to false
-            SdkConfig.put({
-                bug_report_endpoint_url: configSetting,
-            });
-            ElementCall.create(room);
-            const call1 = Call.get(room);
-            if (!(call1 instanceof ElementCall)) throw new Error("Failed to create call");
-
-            const urlParams1 = new URLSearchParams(new URL(call1.widget.url).hash.slice(1));
-            expect(urlParams1.get("rageshakeSubmitUrl")).toBe(expectedValue);
-            call1.destroy();
-        });
-
-        it("passes analyticsID and posthog params through widget URL", async () => {
-            SdkConfig.put({
-                posthog: {
-                    api_host: "https://posthog",
-                    project_api_key: "DEADBEEF",
-                },
-            });
-            vi.spyOn(PosthogAnalytics.instance, "getAnonymity").mockReturnValue(Anonymity.Pseudonymous);
-            client.getAccountData.mockImplementation((eventType: string) => {
-                if (eventType === PosthogAnalytics.ANALYTICS_EVENT_TYPE) {
-                    return new MatrixEvent({ content: { id: "123456789987654321", pseudonymousAnalyticsOptIn: true } });
-                }
-                return undefined;
-            });
-            ElementCall.create(room);
-            const call = Call.get(room);
-            if (!(call instanceof ElementCall)) throw new Error("Failed to create call");
-
-            const urlParams = new URLSearchParams(new URL(call.widget.url).hash.slice(1));
-            expect(urlParams.get("posthogUserId")).toBe("123456789987654321");
-            expect(urlParams.get("posthogApiHost")).toBe("https://posthog");
-            expect(urlParams.get("posthogApiKey")).toBe("DEADBEEF");
-        });
-
-        it("does not pass analyticsID if `pseudonymousAnalyticsOptIn` set to false", async () => {
-            client.getAccountData.mockImplementation((eventType: string) => {
-                if (eventType === PosthogAnalytics.ANALYTICS_EVENT_TYPE) {
-                    return new MatrixEvent({
-                        content: { id: "123456789987654321", pseudonymousAnalyticsOptIn: false },
-                    });
-                }
-                return undefined;
-            });
-            ElementCall.create(room);
-            const call = Call.get(room);
-            if (!(call instanceof ElementCall)) throw new Error("Failed to create call");
-
-            const urlParams = new URLSearchParams(new URL(call.widget.url).hash.slice(1));
-            expect(urlParams.get("analyticsID")).toBeFalsy();
-        });
-
-        it("passes empty analyticsID if the id is not in the account data", async () => {
-            client.getAccountData.mockImplementation((eventType: string) => {
-                if (eventType === PosthogAnalytics.ANALYTICS_EVENT_TYPE) {
-                    return new MatrixEvent({ content: {} });
-                }
-                return undefined;
-            });
-            ElementCall.create(room);
-            const call = Call.get(room);
-            if (!(call instanceof ElementCall)) throw new Error("Failed to create call");
-
-            const urlParams = new URLSearchParams(new URL(call.widget.url).hash.slice(1));
-            expect(urlParams.get("analyticsID")).toBeFalsy();
         });
 
         it("requests correct intent in DMs", async () => {

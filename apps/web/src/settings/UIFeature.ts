@@ -13,7 +13,6 @@ export const enum UIFeature {
     Widgets = "UIFeature.widgets",
     LocationSharing = "UIFeature.locationSharing",
     Voip = "UIFeature.voip",
-    Feedback = "UIFeature.feedback",
     Registration = "UIFeature.registration",
     PasswordReset = "UIFeature.passwordReset",
     Deactivate = "UIFeature.deactivate",

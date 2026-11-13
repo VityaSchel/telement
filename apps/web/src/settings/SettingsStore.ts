@@ -752,8 +752,7 @@ export default class SettingsStore {
         logger.log(`--- DEBUG ${realSettingName}`);
 
         // Note: we intentionally use JSON.stringify here to avoid the console masking the
-        // problem if there's a type representation issue. Also, this way it is guaranteed
-        // to show up in a rageshake if required.
+        // problem if there's a type representation issue.
 
         const def = SETTINGS[realSettingName];
         logger.log(`--- definition: ${def ? JSON.stringify(def) : "<NOT_FOUND>"}`);
@@ -856,26 +855,6 @@ export default class SettingsStore {
         }
 
         logger.log(`--- END DEBUG`);
-    }
-
-    /**
-     * Export all settings as a JSON object, except for settings
-     * blocked from being exported by `shouldExportToRageshake`.
-     * @returns Settings as a JSON object string.
-     */
-    public static exportForRageshake(): string {
-        const settingMap: Record<string, unknown> = {};
-        for (const settingKey of (Object.keys(SETTINGS) as SettingKey[]).filter(
-            (s) => SETTINGS[s].shouldExportToRageshake !== false,
-        )) {
-            try {
-                settingMap[settingKey] = SettingsStore.getValue(settingKey);
-            } catch (e) {
-                logger.warn("Failed to read setting", settingKey, e);
-                settingMap[settingKey] = "Failed to read setting!";
-            }
-        }
-        return JSON.stringify(settingMap);
     }
 
     private static getHandler(settingName: SettingKey, level: SettingLevel): SettingsHandler | null {

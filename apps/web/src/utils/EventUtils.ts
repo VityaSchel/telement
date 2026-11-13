@@ -288,6 +288,5 @@ export const highlightEvent = (roomId: string, eventId: string): void => {
         event_id: eventId,
         highlighted: true,
         room_id: roomId,
-        metricsTrigger: undefined, // room doesn't change
     });
 };

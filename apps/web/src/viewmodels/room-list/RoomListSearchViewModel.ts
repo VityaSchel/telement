@@ -19,7 +19,6 @@ import { shouldShowComponent } from "../../customisations/helpers/UIComponents";
 import { UIComponent } from "../../settings/UIFeature";
 import { MetaSpace } from "../../stores/spaces";
 import { Action } from "../../dispatcher/actions";
-import PosthogTrackers from "../../PosthogTrackers";
 import defaultDispatcher from "../../dispatcher/dispatcher";
 import type LegacyCallHandler from "../../LegacyCallHandler";
 import { LegacyCallHandlerEvent } from "../../LegacyCallHandler";
@@ -103,11 +102,10 @@ export class RoomListSearchViewModel
 
     /**
      * Handles the explore button click event.
-     * Opens the room directory and tracks the interaction.
+     * Opens the room directory.
      */
     public onExploreClick = (ev: MouseEvent<HTMLButtonElement>): void => {
         defaultDispatcher.fire(Action.ViewRoomDirectory);
-        PosthogTrackers.trackInteraction("WebLeftPanelExploreRoomsButton", ev);
     };
 
     /**

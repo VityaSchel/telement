@@ -10,12 +10,10 @@ Please see LICENSE files in the repository root for full details.
 */
 
 import { type MatrixClient } from "matrix-js-sdk/src/matrix";
-import { type SlashCommand as SlashCommandEvent } from "@matrix-org/analytics-events/types/typescript/SlashCommand";
 
 import { TimelineRenderingType } from "../contexts/RoomContext";
 import { reject } from "./utils";
 import { _t, UserFriendlyError } from "../languageHandler";
-import { PosthogAnalytics } from "../PosthogAnalytics";
 import { CommandCategories, type RunResult } from "./interface";
 
 /**
@@ -40,7 +38,6 @@ type RunFn = (
  * @param aliases - Alternative names for the command
  * @param args - The arguments for the command, e.g. "<message>" for the /me command
  * @param description - A translation key describing the command
- * @param analyticsName - The name to use for analytics tracking
  * @param runFn - The function to execute when the command is run
  * @param category - The category of the command, e.g. CommandCategories.emoji
  * @param hideCompletionAfterSpace - Whether to hide autocomplete after a space is typed
@@ -52,7 +49,6 @@ interface ICommandOpts {
     aliases?: string[];
     args?: string;
     description: TranslationKey;
-    analyticsName?: SlashCommandEvent["command"];
     runFn?: RunFn;
     category: string;
     hideCompletionAfterSpace?: boolean;
@@ -69,7 +65,6 @@ export class Command {
     public readonly category: string;
     public readonly hideCompletionAfterSpace: boolean;
     public readonly renderingTypes?: TimelineRenderingType[];
-    public readonly analyticsName?: SlashCommandEvent["command"];
     private readonly _isEnabled?: (matrixClient: MatrixClient | null, roomId: string | null) => boolean;
 
     public constructor(opts: ICommandOpts) {
@@ -82,7 +77,6 @@ export class Command {
         this.hideCompletionAfterSpace = opts.hideCompletionAfterSpace || false;
         this._isEnabled = opts.isEnabled;
         this.renderingTypes = opts.renderingTypes;
-        this.analyticsName = opts.analyticsName;
     }
 
     public getCommand(): string {
@@ -107,13 +101,6 @@ export class Command {
                     cause: undefined,
                 }),
             );
-        }
-
-        if (this.analyticsName) {
-            PosthogAnalytics.instance.trackEvent<SlashCommandEvent>({
-                eventName: "SlashCommand",
-                command: this.analyticsName,
-            });
         }
 
         return this.runFn(matrixClient, roomId, threadId, args);

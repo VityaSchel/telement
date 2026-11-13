@@ -57,9 +57,7 @@ import PlatformPeg from "../../../PlatformPeg";
 import { type IReadReceiptPosition } from "./ReadReceiptMarker";
 import RoomContext, { TimelineRenderingType } from "../../../contexts/RoomContext";
 import { MediaEventHelper } from "../../../utils/MediaEventHelper";
-import { DecryptionFailureTracker } from "../../../DecryptionFailureTracker";
 import { type ViewRoomPayload } from "../../../dispatcher/payloads/ViewRoomPayload";
-import PosthogTrackers from "../../../PosthogTrackers";
 import { isMessageEvent, renderTile, type EventTileTypeProps } from "../../../events/EventTileFactory";
 import { type ShowThreadPayload } from "../../../dispatcher/payloads/ShowThreadPayload";
 import { getLateEventInfo } from "../../structures/grouper/LateEventGrouper";
@@ -392,7 +390,6 @@ export class UnwrappedEventTile extends React.Component<EventTileProps, IState> 
         if (!this.props.forExport) {
             this.props.mxEvent.on(MatrixEventEvent.Decrypted, this.onDecrypted);
             this.props.mxEvent.on(MatrixEventEvent.Replaced, this.onReplaced);
-            DecryptionFailureTracker.instance.addVisibleEvent(this.props.mxEvent);
             if (this.props.showReactions) {
                 this.props.mxEvent.on(MatrixEventEvent.RelationsCreated, this.onReactionsCreated);
             }
@@ -521,14 +518,10 @@ export class UnwrappedEventTile extends React.Component<EventTileProps, IState> 
             event_id: this.props.mxEvent.getId(),
             highlighted: true,
             room_id: this.props.mxEvent.getRoomId(),
-            metricsTrigger: undefined, // room doesn't change
         });
     };
 
     private readonly onPreviewTileClick = (ev: MouseEvent<HTMLElement>): void => {
-        const target = ev.currentTarget;
-        const index = target.parentElement ? Array.from(target.parentElement.children).indexOf(target) : -1;
-
         if (this.context.timelineRenderingType === TimelineRenderingType.Notification) {
             this.onViewInRoomClick(null);
             return;
@@ -540,7 +533,6 @@ export class UnwrappedEventTile extends React.Component<EventTileProps, IState> 
                 rootEvent: this.props.mxEvent,
                 push: true,
             });
-            PosthogTrackers.trackInteraction("WebThreadsPanelThreadItem", ev, index);
         }
     };
 
@@ -649,8 +641,6 @@ export class UnwrappedEventTile extends React.Component<EventTileProps, IState> 
             event_id: this.props.mxEvent.getId(),
             highlighted: true,
             room_id: this.props.mxEvent.getRoomId(),
-            metricsTrigger:
-                this.context.timelineRenderingType === TimelineRenderingType.Search ? "MessageSearch" : undefined,
         });
     };
 
@@ -1225,17 +1215,12 @@ export class UnwrappedEventTile extends React.Component<EventTileProps, IState> 
  * Props for the event-tile fallback rendered after the tile error boundary catches a render failure.
  */
 interface EventTileErrorFallbackProps {
-    error: Error;
     mxEvent: MatrixEvent;
 }
 
-function EventTileErrorFallback({ error, mxEvent }: Readonly<EventTileErrorFallbackProps>): JSX.Element {
+function EventTileErrorFallback({ mxEvent }: Readonly<EventTileErrorFallbackProps>): JSX.Element {
     const developerMode = useSettingValue("developerMode");
-    const vm = useCreateAutoDisposedViewModel(() => new TileErrorViewModel({ error, mxEvent, developerMode }));
-
-    useEffect(() => {
-        vm.setError(error);
-    }, [error, vm]);
+    const vm = useCreateAutoDisposedViewModel(() => new TileErrorViewModel({ mxEvent, developerMode }));
 
     useEffect(() => {
         vm.setDeveloperMode(developerMode);
@@ -1265,7 +1250,7 @@ class EventTileErrorBoundary extends React.Component<EventTileErrorBoundaryProps
 
     public render(): ReactNode {
         if (this.state.error) {
-            return <EventTileErrorFallback error={this.state.error} mxEvent={this.props.mxEvent} />;
+            return <EventTileErrorFallback mxEvent={this.props.mxEvent} />;
         }
 
         return this.props.children;

@@ -23,8 +23,7 @@ export interface ErrorOptions {
  *
  * The error message will display as English in the console and logs so Element
  * developers can easily understand the error and find the source in the code. It also
- * helps tools like Sentry deduplicate the error, or just generally searching in
- * rageshakes to find all instances regardless of the users locale.
+ * helps searching the logs to find all instances regardless of the users locale.
  *
  * @param message - The untranslated error message text, e.g "Something went wrong with %(foo)s".
  * @param substitutionVariablesAndCause - Variable substitutions for the translation and

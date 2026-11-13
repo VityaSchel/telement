@@ -137,8 +137,6 @@ describe("<RoomPredecessorTile />", () => {
                 event_id: "$tombstone_event_id",
                 highlighted: true,
                 room_id: "old_room_id",
-                metricsTrigger: "Predecessor",
-                metricsViaKeyboard: false,
             }),
         );
     });

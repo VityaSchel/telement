@@ -93,8 +93,6 @@ export default class AdvancedRoomSettingsTab extends React.Component<IProps, ISt
             room_id: this.state.oldRoomId,
             event_id: this.state.oldEventId,
             via_servers: this.state.oldViaServers,
-            metricsTrigger: "WebPredecessorSettings",
-            metricsViaKeyboard: e.type !== "click",
         });
         this.props.closeSettingsFn();
     };

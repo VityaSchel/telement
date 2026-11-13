@@ -268,7 +268,6 @@ export function IncomingCallToast({ notificationEvent, toastKey }: Props): JSX.E
                 view_call: true,
                 skipLobby,
                 voiceOnly: isVoice || !videoToggle,
-                metricsTrigger: undefined,
             });
         },
         [room, isVoice, videoToggle],

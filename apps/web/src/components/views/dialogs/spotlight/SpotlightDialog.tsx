@@ -6,8 +6,7 @@ SPDX-License-Identifier: AGPL-3.0-only OR GPL-3.0-only OR LicenseRef-Element-Com
 Please see LICENSE files in the repository root for full details.
 */
 
-import { type WebSearch as WebSearchEvent } from "@matrix-org/analytics-events/types/typescript/WebSearch";
-import { capitalize, sum } from "lodash";
+import { capitalize } from "lodash";
 import {
     type HierarchyRoom,
     type IPublicRoomsChunkRoom,
@@ -61,7 +60,6 @@ import { useUserDirectory } from "../../../../hooks/useUserDirectory";
 import { getKeyBindingsManager } from "../../../../KeyBindingsManager";
 import { _t } from "../../../../languageHandler";
 import { MatrixClientPeg } from "../../../../MatrixClientPeg";
-import { PosthogAnalytics } from "../../../../PosthogAnalytics";
 import { getCachedRoomIdForAlias } from "../../../../RoomAliasCache";
 import { showStartChatInviteDialog } from "../../../../RoomInvite";
 import { SettingLevel } from "../../../../settings/SettingLevel";
@@ -244,26 +242,6 @@ const toMemberResult = (member: Member | RoomMember, alreadyFiltered: boolean): 
     filter: [Filter.People],
     query: [member.userId.toLowerCase(), member.name.toLowerCase()].filter(Boolean),
 });
-
-export const useWebSearchMetrics = (numResults: number, queryLength: number, viaSpotlight: boolean): void => {
-    useEffect(() => {
-        if (!queryLength) return;
-
-        // send metrics after a 1s debounce
-        const timeoutId = window.setTimeout(() => {
-            PosthogAnalytics.instance.trackEvent<WebSearchEvent>({
-                eventName: "WebSearch",
-                viaSpotlight,
-                numResults,
-                queryLength,
-            });
-        }, 1000);
-
-        return () => {
-            clearTimeout(timeoutId);
-        };
-    }, [numResults, queryLength, viaSpotlight]);
-};
 
 const findVisibleRooms = (cli: MatrixClient, msc3946ProcessDynamicPredecessor: boolean): Room[] => {
     return cli.getVisibleRooms(msc3946ProcessDynamicPredecessor).filter((room) => {
@@ -513,9 +491,6 @@ const SpotlightDialog: React.FC<IProps> = ({ initialText = "", initialFilter = n
         return results;
     }, [cli, trimmedQuery, filter, possibleResults, userDirectorySearchResults, memberComparator]);
 
-    const numResults = sum(Object.values(results).map((it) => it.length));
-    useWebSearchMetrics(numResults, query.length, true);
-
     const activeSpace = SDKContextClass.instance.spaceStore.activeSpaceRoom;
     const [spaceResults, spaceResultsLoading] = useSpaceResults(activeSpace ?? undefined, query);
 
@@ -552,7 +527,6 @@ const SpotlightDialog: React.FC<IProps> = ({ initialText = "", initialFilter = n
             joinRule?: IPublicRoomsChunkRoom["join_rule"];
         },
         persist = false,
-        viaKeyboard = false,
     ): void => {
         if (persist) {
             const recents = new Set(SettingsStore.getValue("SpotlightSearch.recentSearches", null).reverse());
@@ -570,8 +544,6 @@ const SpotlightDialog: React.FC<IProps> = ({ initialText = "", initialFilter = n
 
         defaultDispatcher.dispatch<ViewRoomPayload>({
             action: Action.ViewRoom,
-            metricsTrigger: "WebUnifiedSearch",
-            metricsViaKeyboard: viaKeyboard,
             room_id: room.roomId,
             room_alias: room.roomAlias,
             auto_join: room.autoJoin && !canAskToJoin(room.joinRule),
@@ -658,8 +630,8 @@ const SpotlightDialog: React.FC<IProps> = ({ initialText = "", initialFilter = n
                     <Option
                         id={`mx_SpotlightDialog_button_result_${result.room.roomId}`}
                         key={`${Section[result.section]}-${result.room.roomId}`}
-                        onClick={(ev) => {
-                            viewRoom({ roomId: result.room.roomId }, true, ev?.type !== "click");
+                        onClick={() => {
+                            viewRoom({ roomId: result.room.roomId }, true);
                         }}
                         endAdornment={<RoomResultContextMenus room={result.room} />}
                         {...ariaProperties}
@@ -738,7 +710,6 @@ const SpotlightDialog: React.FC<IProps> = ({ initialText = "", initialFilter = n
                             joinRule,
                         },
                         true,
-                        ev.type !== "click",
                     );
                 };
 
@@ -906,8 +877,8 @@ const SpotlightDialog: React.FC<IProps> = ({ initialText = "", initialFilter = n
                             <Option
                                 id={`mx_SpotlightDialog_button_result_${room.room_id}`}
                                 key={room.room_id}
-                                onClick={(ev) => {
-                                    viewRoom({ roomId: room.room_id }, true, ev?.type !== "click");
+                                onClick={() => {
+                                    viewRoom({ roomId: room.room_id }, true);
                                 }}
                             >
                                 <BaseAvatar
@@ -945,13 +916,11 @@ const SpotlightDialog: React.FC<IProps> = ({ initialText = "", initialFilter = n
                     <div>
                         <Option
                             id="mx_SpotlightDialog_button_joinRoomAlias"
-                            onClick={(ev) => {
+                            onClick={() => {
                                 defaultDispatcher.dispatch<ViewRoomPayload>({
                                     action: Action.ViewRoom,
                                     room_alias: trimmedQuery,
                                     auto_join: true,
-                                    metricsTrigger: "WebUnifiedSearch",
-                                    metricsViaKeyboard: ev?.type !== "click",
                                 });
                                 onFinished();
                             }}
@@ -1110,8 +1079,8 @@ const SpotlightDialog: React.FC<IProps> = ({ initialText = "", initialFilter = n
                                 <Option
                                     id={`mx_SpotlightDialog_button_recentSearch_${room.roomId}`}
                                     key={room.roomId}
-                                    onClick={(ev) => {
-                                        viewRoom({ roomId: room.roomId }, true, ev?.type !== "click");
+                                    onClick={() => {
+                                        viewRoom({ roomId: room.roomId }, true);
                                     }}
                                     endAdornment={<RoomResultContextMenus room={room} />}
                                     {...ariaProperties}
@@ -1157,8 +1126,8 @@ const SpotlightDialog: React.FC<IProps> = ({ initialText = "", initialFilter = n
                                     id={`mx_SpotlightDialog_button_recentlyViewed_${room.roomId}`}
                                     title={room.name}
                                     key={room.roomId}
-                                    onClick={(ev) => {
-                                        viewRoom({ roomId: room.roomId }, false, ev.type !== "click");
+                                    onClick={() => {
+                                        viewRoom({ roomId: room.roomId }, false);
                                     }}
                                 >
                                     <DecoratedRoomAvatar room={room} size="32px" tooltipProps={{ tabIndex: -1 }} />
@@ -1297,7 +1266,6 @@ const SpotlightDialog: React.FC<IProps> = ({ initialText = "", initialFilter = n
                 onFinished={onFinished}
                 hasCancel={false}
                 onKeyDown={onDialogKeyDown}
-                screenName="UnifiedSearch"
                 aria-label={_t("spotlight_dialog|search_dialog")}
             >
                 <div className="mx_SpotlightDialog_searchBox mx_textinput">

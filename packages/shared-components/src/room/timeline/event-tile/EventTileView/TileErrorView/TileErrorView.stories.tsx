@@ -19,12 +19,10 @@ type WrapperProps = TileErrorViewSnapshot &
 
 const TileErrorViewWrapperImpl = ({
     className,
-    onBugReportClick = fn(),
     onViewSourceClick = fn(),
     ...snapshotProps
 }: WrapperProps): JSX.Element => {
     const vm = useMockedViewModel(snapshotProps, {
-        onBugReportClick,
         onViewSourceClick,
     });
 
@@ -47,7 +45,6 @@ const meta = {
     args: {
         message: "Can't load this message",
         eventType: "m.room.message",
-        bugReportCtaLabel: "Submit debug logs",
         viewSourceCtaLabel: "View source",
     },
 } satisfies Meta<typeof TileErrorViewWrapper>;
@@ -65,7 +62,6 @@ export const BubbleLayout: Story = {
 
 export const WithoutActions: Story = {
     args: {
-        bugReportCtaLabel: undefined,
         viewSourceCtaLabel: undefined,
     },
 };
