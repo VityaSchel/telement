@@ -7,15 +7,22 @@
 
 .timelineSeparator {
     clear: both;
-    margin: var(--cpd-space-1x) 0;
-    font: var(--cpd-font-body-md-regular);
-    letter-spacing: var(--cpd-font-letter-spacing-body-md);
+    margin: var(--cpd-space-2x) 0;
+    font: var(--cpd-font-body-sm-medium);
+    letter-spacing: var(--cpd-font-letter-spacing-body-sm);
     color: var(--cpd-color-text-primary);
 }
 
-.timelineSeparator > hr {
-    flex: 1 1 0;
-    height: 0;
-    border: none;
-    border-bottom: 1px solid var(--cpd-color-gray-400);
+.pill {
+    box-sizing: border-box;
+    min-block-size: var(--cpd-space-6x);
+    padding: var(--cpd-space-1x) var(--cpd-space-2x);
+    /* Half the height of one line, not full: a long text that wraps becomes a rounded box rather than a stadium */
+    border-radius: calc(var(--cpd-space-6x) / 2);
+    /* Opaque, so it reads on the plain timeline and on a wallpaper alike */
+    background-color: var(--cpd-color-bg-badge-secondary);
+    /* No leading: the browser rounds the leading above the text down to a whole pixel, which lifts the text off the
+       middle of the pill */
+    line-height: normal;
+    text-align: center;
 }

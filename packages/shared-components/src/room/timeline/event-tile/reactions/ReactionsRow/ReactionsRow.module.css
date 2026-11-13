@@ -38,7 +38,7 @@
     height: 16px;
     padding: var(--cpd-space-1x);
     margin-inline: var(--cpd-space-1x);
-    border-radius: var(--cpd-space-1x);
+    border-radius: var(--tl-radius-control);
     color: var(--cpd-color-icon-secondary);
     /* Hidden until the host says the event is hovered. Standalone hosts that
        set nothing keep the row-scoped fallback below. */
@@ -67,6 +67,12 @@
 .addReactionButton:focus-visible,
 .addReactionButtonActive {
     color: var(--cpd-color-icon-primary);
+}
+
+/* all: unset drops the browser's focus ring */
+.addReactionButton:focus-visible {
+    outline: 2px solid var(--cpd-color-border-focused);
+    outline-offset: 1px;
 }
 
 .addReactionButton svg {

@@ -362,6 +362,11 @@ describe("EventTileViewModel", () => {
         { name: "a caption", content: { body: "Look at this", filename: "cat.png" }, over: false },
         { name: "no caption", content: { body: "cat.png", filename: "cat.png" }, over: true },
         { name: "no file name", content: { body: "cat.png" }, over: true },
+        {
+            name: "an animated GIF, which shows the time in a badge too",
+            content: { body: "party.gif", filename: "party.gif", info: { mimetype: "image/gif" } },
+            over: true,
+        },
     ])("reads whether a picture event has $name", ({ content, over }) => {
         const event = mkEvent({
             event: true,

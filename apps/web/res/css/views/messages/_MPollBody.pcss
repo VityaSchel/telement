@@ -26,11 +26,13 @@ $poll-max-width: 550px;
         margin-bottom: var(--cpd-space-2x);
         letter-spacing: var(--cpd-font-letter-spacing-heading-lg);
         display: flex;
-        align-items: center;
+        /* The icon is centered on the question's first line, so it stays beside it when the question wraps */
+        align-items: start;
         gap: var(--cpd-space-3x);
 
         svg {
             flex-shrink: 0;
+            margin-block: calc((1lh - 20px) / 2);
             color: var(--cpd-color-icon-primary);
         }
 
@@ -54,13 +56,27 @@ $poll-max-width: 550px;
         }
     }
 
+    /* The poll is drawn in a bubble, as in Telegram: the question starts at the bubble's padding, and the bubble is
+       the options' card */
     &.mx_MPollBody_bubble {
         width: 550px; /* to prevent timestamp overlapping summary text */
         max-width: 100%; /* prevent overflowing a reply tile */
+        margin-top: 0;
 
+        .mx_PollOption {
+            padding: 0;
+            border: none;
+            background-color: transparent;
+        }
+
+        /* Translucent, so the bars' track shows on the other's and the own bubble's color alike */
+        .mx_PollOption_popularityBackground {
+            background-color: var(--cpd-color-alpha-gray-400);
+        }
+
+        /* The summary is the bubble's last line, with the timestamp at its end, as on a text bubble */
         .mx_MPollBody_totalVotes {
-            /* align summary text with corner timestamp */
-            padding: 4px 0;
+            padding-block: 0;
         }
     }
 }

@@ -103,9 +103,9 @@ export function getEventDisplayInfo(
         renderInfo?.hints.renderAsInfoMessage === true;
     const hideSender = renderInfo?.hints.renderSenderProfile === false;
     // Some non-info messages want to be rendered in the appropriate bubble column but without the bubble background
+    // (a poll is drawn in a bubble, as in Telegram)
     const noBubbleEvent =
         (eventType === EventType.RoomMessage && msgtype === MsgType.Emote) ||
-        M_POLL_START.matches(eventType) ||
         M_BEACON_INFO.matches(eventType) ||
         isLocationEvent(mxEvent);
 

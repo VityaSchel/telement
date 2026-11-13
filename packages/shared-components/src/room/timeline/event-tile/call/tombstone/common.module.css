@@ -6,15 +6,15 @@
  */
 
 .container {
-    /* This is the height of the tile as per design */
-    min-height: 39px;
+    /* With the 1px border, the 20px icon is 12px from the top, the bottom and the start */
+    min-height: 44px;
     width: 100%;
     border: 1px solid var(--cpd-color-border-interactive-secondary);
-    border-radius: var(--cpd-space-2x);
-    padding: var(--cpd-space-2x) var(--cpd-space-3x);
+    border-radius: var(--MBody-border-radius, var(--tl-radius-row));
+    padding: var(--cpd-space-2x) calc(var(--cpd-space-3x) - 1px);
     box-sizing: border-box;
-    /* All call tiles have a 10px margin at the top and bottom */
-    margin: 10px 0;
+    /* All call tiles have an 8px margin at the top and bottom */
+    margin: var(--cpd-space-2x) 0;
 }
 
 .title {

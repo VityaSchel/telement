@@ -109,14 +109,16 @@ export default class LegacyCallEvent extends React.PureComponent<IProps, IState>
 
     private renderCallBackButton(text: string): JSX.Element {
         return (
-            <AccessibleButton
-                className="mx_LegacyCallEvent_content_button"
-                onClick={this.props.callEventGrouper.callBack}
-                kind="primary"
-            >
-                {this.props.callEventGrouper.isVoice ? <VoiceCallSolidIcon /> : <VideoCallSolidIcon />}
-                {text}
-            </AccessibleButton>
+            <div className="mx_LegacyCallEvent_content_actions">
+                <AccessibleButton
+                    className="mx_LegacyCallEvent_content_button"
+                    onClick={this.props.callEventGrouper.callBack}
+                    kind="primary"
+                >
+                    {this.props.callEventGrouper.isVoice ? <VoiceCallSolidIcon /> : <VideoCallSolidIcon />}
+                    {text}
+                </AccessibleButton>
+            </div>
         );
     }
 
@@ -142,22 +144,24 @@ export default class LegacyCallEvent extends React.PureComponent<IProps, IState>
             return (
                 <div className="mx_LegacyCallEvent_content">
                     {silenceIcon}
-                    <AccessibleButton
-                        className="mx_LegacyCallEvent_content_button"
-                        onClick={this.props.callEventGrouper.rejectCall}
-                        kind="danger"
-                    >
-                        <EndCallIcon />
-                        {_t("action|decline")}
-                    </AccessibleButton>
-                    <AccessibleButton
-                        className="mx_LegacyCallEvent_content_button"
-                        onClick={this.props.callEventGrouper.answerCall}
-                        kind="primary"
-                    >
-                        {this.props.callEventGrouper.isVoice ? <VoiceCallSolidIcon /> : <VideoCallSolidIcon />}
-                        {_t("action|accept")}
-                    </AccessibleButton>
+                    <div className="mx_LegacyCallEvent_content_actions">
+                        <AccessibleButton
+                            className="mx_LegacyCallEvent_content_button"
+                            onClick={this.props.callEventGrouper.rejectCall}
+                            kind="danger"
+                        >
+                            <EndCallIcon />
+                            {_t("action|decline")}
+                        </AccessibleButton>
+                        <AccessibleButton
+                            className="mx_LegacyCallEvent_content_button"
+                            onClick={this.props.callEventGrouper.answerCall}
+                            kind="primary"
+                        >
+                            {this.props.callEventGrouper.isVoice ? <VoiceCallSolidIcon /> : <VideoCallSolidIcon />}
+                            {_t("action|accept")}
+                        </AccessibleButton>
+                    </div>
                     {this.props.timestamp}
                 </div>
             );

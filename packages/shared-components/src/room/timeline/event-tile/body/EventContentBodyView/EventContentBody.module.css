@@ -78,7 +78,7 @@
 .EventTile_searchHighlight {
     background-color: var(--cpd-color-text-action-accent);
     color: var(--cpd-color-text-on-solid-primary);
-    border-radius: 5px; /* no compund for 5px */
+    border-radius: var(--tl-radius-inline);
     padding-inline: var(--cpd-space-0-5x);
 
     a {

@@ -6,12 +6,12 @@
  */
 
 .container {
-    min-height: 70px;
-    padding: var(--cpd-space-3x);
+    /* With the 1px border, the call icon and the join button are 12px from every edge of a 60px card */
+    padding: calc(var(--cpd-space-3x) - 1px);
     border: solid 1px var(--cpd-color-border-interactive-primary);
-    border-radius: var(--cpd-space-2x);
+    border-radius: var(--MBody-border-radius, var(--tl-radius-row));
     box-sizing: border-box;
     width: 100%;
-    /* All call tiles have a 10px margin at the top and bottom */
-    margin: 10px 0;
+    /* All call tiles have an 8px margin at the top and bottom */
+    margin: var(--cpd-space-2x) 0;
 }

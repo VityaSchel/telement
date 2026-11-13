@@ -9,7 +9,7 @@
     --event-tile-body-padding: var(--cpd-space-3x);
     background-color: var(--cpd-color-bg-subtle-secondary);
     padding: var(--event-tile-body-padding);
-    border-radius: 8px;
+    border-radius: var(--MBody-border-radius, var(--tl-radius-row));
     /* Reserve space for external timestamps by default. EventTileView can
        provide a wider shared value for bubble-container events. */
     max-width: var(--event-tile-bubble-max-width, min(calc(100% - 2 * 46px), 600px));
@@ -20,7 +20,7 @@
     svg {
         position: relative;
         grid-column: 1;
-        grid-row: 1 / 3;
+        grid-row: 1;
         width: 16px;
         height: 16px;
         content: "";
@@ -28,7 +28,9 @@
         mask-repeat: no-repeat;
         mask-position: center;
         mask-size: contain;
-        margin-top: var(--cpd-space-1x);
+        /* Centered on the title's first line: with the title's font size, 1lh is that line's height */
+        font-size: var(--cpd-font-size-body-md);
+        margin-top: calc((1lh - 16px) / 2);
     }
 
     .title,

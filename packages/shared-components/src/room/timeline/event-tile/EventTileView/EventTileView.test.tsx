@@ -9,6 +9,7 @@ import React, { createRef } from "react";
 import { describe, expect, it, vi } from "vitest";
 import { userEvent } from "vitest/browser";
 import "@vector-im/compound-design-tokens/assets/web/css/compound-design-tokens.css";
+import "../../../../telement/tokens.css";
 
 import { fireEvent, render, screen } from "@test-utils";
 import type { EventLayout } from "../../EventPresentation";
@@ -25,6 +26,8 @@ import { ReactionsRowView, type ReactionsRowViewSnapshot } from "../reactions/Re
 import reactionStyles from "../reactions/ReactionsRow/ReactionsRow.module.css";
 import { ImageBodyView, ImageBodyViewState, type ImageBodyViewSnapshot } from "../body/MImageBodyView";
 import imageBodyStyles from "../body/MImageBodyView/ImageBodyView.module.css";
+import { VideoBodyView, VideoBodyViewState, type VideoBodyViewSnapshot } from "../body/MVideoBodyView";
+import videoBodyStyles from "../body/MVideoBodyView/VideoBodyView.module.css";
 
 const renderState: EventTileViewProps["root"] = {
     id: "event-line-1",
@@ -1042,5 +1045,178 @@ describe("EventTileView placement", () => {
 
         expect(receipt.left).toBeGreaterThanOrEqual(message.right);
         expect(receipt.right).toBeLessThanOrEqual(timestampRect().left);
+    });
+
+    describe("bubble geometry", () => {
+        const picture = "data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACwAAAAAAQABAAACAkQBADs=";
+        const imageBody = (): React.ReactElement => (
+            <ImageBodyView
+                vm={
+                    new MockViewModel<ImageBodyViewSnapshot>({
+                        state: ImageBodyViewState.READY,
+                        alt: "Office",
+                        src: picture,
+                        thumbnailSrc: picture,
+                        maxWidth: 160,
+                        maxHeight: 120,
+                        aspectRatio: "4 / 3",
+                    })
+                }
+            />
+        );
+        const videoBody = (): React.ReactElement => (
+            <VideoBodyView
+                vm={
+                    new MockViewModel<VideoBodyViewSnapshot>({
+                        state: VideoBodyViewState.READY,
+                        playLabel: "Play video",
+                        maxWidth: 160,
+                        maxHeight: 90,
+                        aspectRatio: "16 / 9",
+                        durationLabel: "0:42",
+                        playable: true,
+                    })
+                }
+            />
+        );
+        const captionedImageBody = (): React.ReactElement => (
+            <div className="mx_EventTile_content">
+                {imageBody()}
+                <div className="mx_EventTile_caption">
+                    <div className="mx_EventTile_body">My desk</div>
+                </div>
+            </div>
+        );
+        const mediaLine = { media: true, timestampOverMedia: true };
+        const radiusOf = (element: Element): string => getComputedStyle(element).borderRadius;
+        const pictureFrames = (): Element[] =>
+            Array.from(document.querySelectorAll(`.${imageBodyStyles.thumbnailContainer}`));
+        const videoFrame = (): Element => document.querySelector(`.${videoBodyStyles.container}`)!;
+
+        it("pads a text bubble 8px by 12px and puts its timestamp in the padding's corner", () => {
+            renderTiles("bubble", { state: { lastInSection: true }, slots: { body: textBody("Hello") } });
+            const line = screen.getByTestId("event-tile-line");
+            const style = getComputedStyle(line);
+            const box = line.getBoundingClientRect();
+            const time = timestampRect();
+
+            expect(style.borderRadius).toBe("12px");
+            expect([style.paddingTop, style.paddingRight, style.paddingBottom, style.paddingLeft]).toEqual([
+                "8px",
+                "12px",
+                "8px",
+                "12px",
+            ]);
+            expect(box.right - time.right).toBeCloseTo(12, 1);
+            expect(box.bottom - time.bottom).toBeCloseTo(8, 1);
+        });
+
+        it("draws a selected row's band a gray step darker than another person's bubble, which stays visible in it", () => {
+            renderTiles("bubble", { state: { selected: true }, slots: { body: textBody("Hello") } });
+            const band = getComputedStyle(screen.getByTestId("event-tile"), "::before").backgroundColor;
+            const darkerGray = document.createElement("div");
+            darkerGray.style.backgroundColor = "var(--cpd-color-bg-subtle-primary)";
+            document.body.append(darkerGray);
+
+            expect(band).toBe(getComputedStyle(darkerGray).backgroundColor);
+            expect(band).not.toBe(getComputedStyle(screen.getByTestId("event-tile-line")).backgroundColor);
+            darkerGray.remove();
+        });
+
+        it("separates a quoted reply from the text below it by 4px", () => {
+            renderTiles("bubble", {
+                state: { hasReply: true },
+                slots: {
+                    replyChain: <div data-testid="quoted" style={{ height: 20 }} />,
+                    body: textBody("Hello"),
+                },
+            });
+            const quote = screen.getByTestId("quoted").getBoundingClientRect();
+            const text = document.querySelector(".mx_EventTile_content")!.getBoundingClientRect();
+
+            expect(text.top - quote.bottom).toBeCloseTo(4, 1);
+        });
+
+        it("keeps the sender's name level with the bubble's text", () => {
+            renderTiles("bubble", {
+                slots: { sender: <span data-testid="sender">Alice</span>, body: textBody("Hello") },
+            });
+            const text = lastLineOf(document.querySelector(".mx_EventTile_body")!);
+
+            expect(screen.getByTestId("sender").getBoundingClientRect().left).toBeCloseTo(text.left, 1);
+        });
+
+        it.each([
+            ["bubble", "12px"],
+            ["group", "8px"],
+            ["irc", "8px"],
+        ] as const)("rounds %s layout pictures, captioned pictures and videos to %s", (layout, radius) => {
+            renderTiles(
+                layout,
+                { line: mediaLine, slots: { body: imageBody() } },
+                { line: { media: true }, slots: { body: captionedImageBody() } },
+                { line: mediaLine, slots: { body: videoBody() } },
+            );
+
+            expect(pictureFrames().map(radiusOf)).toEqual([radius, radius]);
+            expect(radiusOf(videoFrame())).toBe(radius);
+        });
+
+        it("leaves media quoted in a media bubble's reply chain at its own radius", () => {
+            renderTiles("bubble", {
+                state: { hasReply: true },
+                line: mediaLine,
+                slots: {
+                    replyChain: (
+                        <div
+                            data-testid="quoted"
+                            style={{ width: 40, height: 40, borderRadius: "var(--MBody-border-radius, 8px)" }}
+                        />
+                    ),
+                    body: imageBody(),
+                },
+            });
+
+            expect(radiusOf(screen.getByTestId("quoted"))).toBe("8px");
+            expect(pictureFrames().map(radiusOf)).toEqual(["12px"]);
+        });
+
+        it("takes the radius of bubbles and of the media standing as one from --tl-radius-bubble", () => {
+            document.documentElement.style.setProperty("--tl-radius-bubble", "20px");
+            try {
+                renderTiles(
+                    "bubble",
+                    { state: { lastInSection: true }, slots: { body: textBody("Hello") } },
+                    { line: mediaLine, slots: { body: videoBody() } },
+                );
+
+                expect(radiusOf(screen.getAllByTestId("event-tile-line")[0])).toBe("20px");
+                expect(radiusOf(videoFrame())).toBe("20px");
+            } finally {
+                document.documentElement.style.removeProperty("--tl-radius-bubble");
+            }
+        });
+
+        it("draws the time and the length over a video as --tl-radius-control pills 8px in from its corners", () => {
+            // Compound's pill radius is defined by compound-web, which this page doesn't load.
+            document.documentElement.style.setProperty("--tl-radius-control", "99px");
+            try {
+                renderTiles("bubble", { line: mediaLine, slots: { body: videoBody() } });
+                const frame = videoFrame().getBoundingClientRect();
+                const time = screen.getByTestId("event-tile-slot-timestamp");
+                const duration = document.querySelector(`.${videoBodyStyles.duration}`)!;
+                const timeBox = time.getBoundingClientRect();
+                const durationBox = duration.getBoundingClientRect();
+
+                expect(radiusOf(time)).toBe("99px");
+                expect(radiusOf(duration)).toBe("99px");
+                expect(frame.right - timeBox.right).toBeCloseTo(8, 1);
+                expect(frame.bottom - timeBox.bottom).toBeCloseTo(8, 1);
+                expect(durationBox.left - frame.left).toBeCloseTo(8, 1);
+                expect(durationBox.top - frame.top).toBeCloseTo(8, 1);
+            } finally {
+                document.documentElement.style.removeProperty("--tl-radius-control");
+            }
+        });
     });
 });

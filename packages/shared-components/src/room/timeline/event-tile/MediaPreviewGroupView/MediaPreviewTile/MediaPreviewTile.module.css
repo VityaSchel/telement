@@ -1,6 +1,6 @@
 .tile {
     border: 1px solid var(--cpd-color-border-interactive-secondary);
-    border-radius: 14px;
+    border-radius: var(--MBody-border-radius, var(--tl-radius-bubble));
 
     max-width: 100%;
     overflow: clip;

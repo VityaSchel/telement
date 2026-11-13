@@ -10,7 +10,11 @@ import { composeStories } from "@storybook/react-vite";
 import { render, screen, waitFor } from "@test-utils";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
+import "@vector-im/compound-design-tokens/assets/web/css/compound-design-tokens.css";
+import "../../../../../telement/tokens.css";
 
+import styles from "./MediaPreviewTile.module.css";
+import componentStyles from "../MediaPreviewComponents/MediaPreviewComponents.module.css";
 import {
     AudioPreviewTile,
     ImagePreviewTile,
@@ -111,6 +115,22 @@ describe("MediaPreviewTile", () => {
 
         expect(screen.queryByRole("button")).not.toBeInTheDocument();
     });
+
+    it("rounds the card with the bubble radius outside the timeline", () => {
+        const { container } = render(<MediaPreviewTile {...baseProps} />);
+
+        expect(getComputedStyle(container.querySelector(`.${styles.tile}`)!).borderRadius).toBe("12px");
+    });
+
+    it("rounds the card with the timeline layout's card radius", () => {
+        const { container } = render(
+            <div style={{ ["--MBody-border-radius" as string]: "8px" }}>
+                <MediaPreviewTile {...baseProps} />
+            </div>,
+        );
+
+        expect(getComputedStyle(container.querySelector(`.${styles.tile}`)!).borderRadius).toBe("8px");
+    });
 });
 
 describe("TextPreviewTile", () => {
@@ -137,6 +157,21 @@ describe("TextPreviewTile", () => {
         const { container } = render(<TextPreviewTile {...textProps} buttons={[]} />);
 
         expect(container.querySelector("img, video, audio")).toBeNull();
+    });
+
+    it("keeps the file's icon a square as tall as its row, centered in the card and rounded concentrically", () => {
+        const { container } = render(<DefaultText />);
+        const tile = container.querySelector(`.${styles.tile}`)!.getBoundingClientRect();
+        const row = container.querySelector(`.${componentStyles.leftGroup}`)!.getBoundingClientRect();
+        const icon = container.querySelector<HTMLElement>(`.${componentStyles.icon}`)!;
+        const square = icon.getBoundingClientRect();
+
+        // Overflowing the row by its border, the icon was clipped in bubbles, where the card's padding is gone
+        expect(square.height).toBe(row.height);
+        expect(square.width).toBe(square.height);
+        expect(square.top - tile.top).toBe(tile.bottom - square.bottom);
+        expect(getComputedStyle(icon).borderRadius).toBe("4px");
+        expect(getComputedStyle(icon.querySelector("button")!).borderRadius).toBe("4px");
     });
 });
 

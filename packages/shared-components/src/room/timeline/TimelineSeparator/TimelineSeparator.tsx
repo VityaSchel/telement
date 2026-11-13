@@ -36,23 +36,23 @@ export interface TimelineSeparatorProps {
 }
 
 /**
- * Generic timeline separator component to render within a MessagePanel
+ * Generic timeline separator component to render within a MessagePanel. Like Telegram, it draws its children in a
+ * pill centered on the timeline, with no lines beside it.
  *
  * @param label the accessible label string describing the separator
  * @param children the children to draw within the timeline separator
  */
 const TimelineSeparator: React.FC<TimelineSeparatorProps> = ({ label, className, children, role = "separator" }) => {
-    // ARIA treats <hr/>s as separators, here we abuse them slightly so manually treat this entire thing as one
     return (
         <Flex
             className={classNames(className, styles.timelineSeparator)}
             role={role}
             aria-label={role === "separator" ? label : undefined}
-            align="center"
+            justify="center"
         >
-            <hr role="none" />
-            {children}
-            <hr role="none" />
+            <Flex className={styles.pill} align="center">
+                {children}
+            </Flex>
         </Flex>
     );
 };

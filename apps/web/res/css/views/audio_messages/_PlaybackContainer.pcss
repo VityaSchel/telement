@@ -103,3 +103,10 @@ Please see LICENSE files in the repository root for full details.
         }
     }
 }
+
+/* In the timeline the player is a 48px row: with the 1px border, the 32px play button is 8px from its top, bottom
+   and start. */
+.mx_MVoiceMessageBody .mx_VoiceMessagePrimaryContainer {
+    padding-block: calc(var(--cpd-space-2x) - 1px);
+    padding-inline-start: calc(var(--cpd-space-2x) - 1px);
+}

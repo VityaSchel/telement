@@ -22,6 +22,7 @@ import {
     M_BEACON,
     type Room,
 } from "matrix-js-sdk/src/matrix";
+import { EventPresentationProvider } from "@element-hq/web-shared-components";
 import {
     getMockClientWithEventEmitter,
     makeBeaconEvent,
@@ -184,6 +185,21 @@ describe("<MBeaconBody />", () => {
     };
 
     testBeaconStatuses();
+
+    it("marks the body for the bubble layout's sizing only in that layout", () => {
+        makeRoomWithStateEvents([defaultEvent], { roomId, mockClient });
+        const inBubbles = render(
+            <MatrixClientContext.Provider value={mockClient}>
+                <EventPresentationProvider value={{ layout: "bubble", density: "default" }}>
+                    <MBeaconBody {...defaultProps} />
+                </EventPresentationProvider>
+            </MatrixClientContext.Provider>,
+        );
+        expect(inBubbles.container.querySelector(".mx_MBeaconBody")).toHaveClass("mx_MBeaconBody_bubble");
+
+        const inGroup = getComponent();
+        expect(inGroup.container.querySelector(".mx_MBeaconBody")).not.toHaveClass("mx_MBeaconBody_bubble");
+    });
 
     describe("on liveness change", () => {
         it("renders stopped UI when a beacon stops being live", () => {

@@ -19,7 +19,7 @@ Please see LICENSE files in the repository root for full details.
         margin-top: 28px;
         display: flex;
         flex-flow: wrap;
-        gap: 14px 12px;
+        gap: var(--cpd-space-3x);
 
         .mx_AccessibleButton {
             line-height: $font-24px;
@@ -30,7 +30,7 @@ Please see LICENSE files in the repository root for full details.
                 color: $button-fg-color;
                 width: 20px;
                 height: 20px;
-                margin-right: 5px;
+                margin-right: var(--cpd-space-2x);
                 vertical-align: text-bottom;
             }
         }
@@ -46,4 +46,18 @@ Please see LICENSE files in the repository root for full details.
         font-size: $font-15px;
         color: $secondary-content;
     }
+}
+
+/* The intro starts where the text of a message does. In bubbles that is the row's 49px margin, less the bubble's 9px
+   overhang, plus its 12px padding and the body's 1px. Its warning card rounds like the cards in the bubbles. */
+.mx_RoomView_body[data-layout="bubble"] .mx_NewRoomIntro {
+    --MBody-border-radius: var(--tl-radius-bubble);
+
+    margin-inline-start: calc(49px - 9px + var(--cpd-space-3x) + 1px);
+}
+
+.mx_IRCLayout .mx_NewRoomIntro {
+    margin-inline-start: calc(
+        var(--MessageTimestamp-width) + var(--icon-width) + var(--name-width) + 2 * var(--right-padding)
+    );
 }

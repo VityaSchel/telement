@@ -21,6 +21,7 @@ import messageTimestampViewStyles from "../../../../../../packages/shared-compon
 // eslint-disable-next-line no-restricted-imports
 import telementTokens from "../../../../../../packages/shared-components/src/telement/tokens.css?raw";
 import fontSizes from "../../../../res/css/_font-sizes.pcss?raw";
+import richTextStyles from "../../../../res/css/views/elements/_RichText.pcss?raw";
 import eventTileStyles from "../../../../res/css/views/rooms/_EventTile.pcss?raw";
 import lightTheme from "../../../../res/themes/light/css/_light.pcss?raw";
 import { toBrowserCss } from "../../../test/telement/browserCss";
@@ -32,14 +33,20 @@ const formatted = (html: string): string =>
 const codeBlock = (code: string): string =>
     `<div class="mx_EventTile_pre_container"><pre class="mx_EventTile_collapsedCodeBlock"><code>${code}\n</code></pre></div>`;
 
+/** An emoji as the body renders it, in its own span. */
+const emoji = (character: string): string => `<span class="mx_Emoji" title=":tada:">${character}</span>`;
+
+/** An audio player in MAudioBody's span: its bubble holds the caption under it. */
+const AUDIO = '<span class="mx_MAudioBody"><div class="mx_MediaBody" style="width: 240px; height: 120px"></div></span>';
+
 /** A bubble as EventTileView renders it in the room timeline, with TextualBody's content as its body. */
-function bubble(body: string, { media = "" } = {}): string {
+function bubble(body: string, { media = "", own = false } = {}): string {
     const line = media ? "line mx_EventTile_line lineMedia" : "line mx_EventTile_line";
     const content = media
         ? `<div class="mx_EventTile_content">${media}<div class="mx_MTextBody mx_EventTile_caption">${body}</div></div>`
         : `<div class="mx_MTextBody mx_EventTile_content">${body}</div>`;
     return `
-        <li class="root mx_EventTile stateLastInSection layoutBubble" data-testid="event-tile">
+        <li class="root mx_EventTile stateLastInSection layoutBubble${own ? " stateOwnEvent" : ""}" data-testid="event-tile">
             <div data-testid="event-tile-line" class="${line}">
                 <div data-testid="event-tile-slot-timestamp" class="slotTimestamp">
                     <a class="mx_MessageTimestamp content">12:55</a>
@@ -84,6 +91,21 @@ function tiles(): Element[] {
     return Array.from(document.querySelectorAll('[data-testid="event-tile"]'));
 }
 
+/** One-line bodies, each in both directions of text where it makes a difference. */
+const ONE_LINE_BODIES: Array<[string, string]> = [
+    ["formatted text with inline code", formatted("Thanks, <code>pnpm i18n</code> did it.")],
+    ["formatted text ending in inline code", formatted("Run <code>pnpm i18n</code>")],
+    ["formatted text", formatted("Use <strong>bold</strong>")],
+    ["formatted text with a link", formatted('See <a href="https://element.io/blog/">the blog</a>')],
+    ["formatted text with an emoji", formatted(`Nice ${emoji("🎉")} work`)],
+    ["a formatted paragraph with inline code", formatted("<p>Thanks, <code>pnpm i18n</code> did it.</p>\n")],
+    ["right-to-left formatted text with inline code", formatted("תודה, <code>pnpm i18n</code> עבד.")],
+    ["right-to-left formatted text", formatted("השתמש ב<strong>מודגש</strong> כאן")],
+    ["right-to-left formatted text with a link", formatted('ראה <a href="https://element.io/blog/">הבלוג</a>')],
+    ["right-to-left formatted text with an emoji", formatted(`יפה ${emoji("🎉")} מאוד`)],
+    ["plain text", plain("Thanks, pnpm i18n did it.")],
+];
+
 let stylesheet: HTMLStyleElement;
 
 describe("EventTile bubble timestamps", () => {
@@ -101,6 +123,7 @@ describe("EventTile bubble timestamps", () => {
             @layer app-web {
                 ${githubMarkdown}
                 ${toBrowserCss(eventTileStyles, fontSizes, lightTheme)}
+                ${toBrowserCss(richTextStyles, fontSizes, lightTheme)}
             }
         `;
         document.head.append(stylesheet);
@@ -114,12 +137,13 @@ describe("EventTile bubble timestamps", () => {
         document.body.innerHTML = "";
     });
 
-    it.each([
-        ["formatted text with inline code", formatted("Thanks, <code>pnpm i18n</code> did it.")],
-        ["formatted text", formatted("Use <strong>bold</strong>")],
-        ["plain text", plain("Thanks, pnpm i18n did it.")],
-    ])("puts the timestamp of a one-line bubble of %s beside the text", (_name, body) => {
-        render(bubble(body));
+    it.each(
+        ONE_LINE_BODIES.flatMap(([name, body]): Array<[string, string, string, boolean]> => [
+            ["another's", name, body, false],
+            ["an own", name, body, true],
+        ]),
+    )("puts the timestamp of %s one-line bubble of %s beside the text", (_whose, _name, body, own) => {
+        render(bubble(body, { own }));
         const [tile] = tiles();
         const text = textBoxes(tile);
         const time = timestamp(tile);
@@ -198,12 +222,11 @@ describe("EventTile bubble timestamps", () => {
     });
 
     it("keeps the timestamp clear of a formatted caption whose last line is full", () => {
-        const picture = '<div style="width: 240px; height: 120px"></div>';
         // A box as wide as the caption stands in for a line of text that leaves no room beside it
         const fullLine = '<span class="fullLine" style="display: inline-block; width: 100%; height: 1em"></span>';
         render(
-            bubble(formatted(`The <em>view</em> ${fullLine}`), { media: picture }),
-            bubble(plain(`The view ${fullLine}`), { media: picture }),
+            bubble(formatted(`The <em>view</em> ${fullLine}`), { media: AUDIO }),
+            bubble(plain(`The view ${fullLine}`), { media: AUDIO }),
         );
         const [formattedTile, plainTile] = tiles();
         const fullLineOf = (tile: Element): DOMRect => tile.querySelector(".fullLine")!.getBoundingClientRect();
@@ -215,14 +238,13 @@ describe("EventTile bubble timestamps", () => {
     it("keeps the timestamp on the last line of a formatted caption that ends in a paragraph", () => {
         render(
             bubble(formatted("<p>The <em>view</em> from the office.</p>\n<p>Monday.</p>\n"), {
-                media: '<div style="width: 240px; height: 120px"></div>',
+                media: AUDIO,
             }),
         );
         const [tile] = tiles();
         const text = textBoxes(tile);
         const time = timestamp(tile);
         const lastLine = text.reduce((last, box) => (box.bottom > last.bottom ? box : last));
-        // A caption has no padding below, so a time on a row of its own still reaches into the last line's box
         const timeMiddle = (time.top + time.bottom) / 2;
 
         expect(text.some((box) => overlaps(box, time))).toBe(false);
@@ -230,10 +252,10 @@ describe("EventTile bubble timestamps", () => {
         expect(timeMiddle).toBeLessThan(lastLine.bottom);
     });
 
-    it("puts the timestamp below a code block that ends a caption, which has no padding to hold it", () => {
+    it("puts the timestamp of a caption that ends in a code block in the block's bottom margin", () => {
         render(
             bubble(formatted(`<p>Run:</p>\n${codeBlock("pnpm i18n")}\n`), {
-                media: '<div style="width: 240px; height: 120px"></div>',
+                media: AUDIO,
             }),
         );
         const [tile] = tiles();

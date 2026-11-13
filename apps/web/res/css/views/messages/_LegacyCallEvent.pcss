@@ -20,11 +20,14 @@ Please see LICENSE files in the repository root for full details.
 
         position: relative;
         margin: var(--cpd-space-1x) 0;
-        padding: var(--cpd-space-3x) var(--cpd-space-6x);
+        padding: var(--cpd-space-3x);
+        /* The bubble layout keeps a column free for the timestamp (EventTileView) */
+        padding-inline-end: var(--LegacyCallEvent-padding-inline-end, var(--cpd-space-3x));
         box-sizing: border-box;
         background-color: $dark-panel-bg-color;
-        border-radius: 8px;
-        width: 65%;
+        border-radius: var(--MBody-border-radius);
+        /* The bubble layout sizes the card to what it holds (EventTileView) */
+        width: var(--LegacyCallEvent-width, 65%);
         height: fit-content;
 
         .mx_LegacyCallEvent_iconButton {
@@ -48,7 +51,7 @@ Please see LICENSE files in the repository root for full details.
                 display: flex;
                 flex-direction: column;
                 gap: var(--cpd-space-1x);
-                margin-left: 10px; /* To match mx_LegacyCallEvent */
+                margin-inline-start: var(--cpd-space-3x);
                 margin-right: 10px;
                 min-width: 0;
 
@@ -75,9 +78,16 @@ Please see LICENSE files in the repository root for full details.
             color: $secondary-content;
             font-size: $font-12px;
             gap: var(--cpd-space-3x); /* See mx_IncomingLegacyCallToast_buttons */
-            margin-inline-start: 42px; /* avatar (32px) + mx_LegacyCallEvent_info_basic margin (10px) */
+            /* Under the sender's name: the avatar (32px) and mx_LegacyCallEvent_info_basic's margin */
+            margin-inline-start: calc(32px + var(--cpd-space-3x));
             word-break: break-word;
             max-width: fit-content;
+
+            .mx_LegacyCallEvent_content_actions {
+                display: flex;
+                flex-wrap: wrap;
+                gap: var(--cpd-space-3x);
+            }
 
             .mx_LegacyCallEvent_content_button {
                 @mixin LegacyCallButton;
@@ -109,6 +119,20 @@ Please see LICENSE files in the repository root for full details.
 
             .mx_LegacyCallEvent_info {
                 align-items: center;
+            }
+
+            /* The call's state on one row, after a failure's warning, and what you can do about it on the next, as in
+               a stacked card, which is only as wide as the wider of the two */
+            .mx_LegacyCallEvent_content {
+                display: grid;
+                grid-template-columns: auto 1fr;
+                align-items: center;
+                justify-items: start;
+                gap: var(--cpd-space-2x) 0;
+            }
+
+            .mx_LegacyCallEvent_content_actions {
+                grid-column: 1 / -1;
             }
         }
     }
@@ -143,6 +167,17 @@ Please see LICENSE files in the repository root for full details.
     .mx_LegacyCallEvent_wrapper {
         .mx_LegacyCallEvent {
             margin-inline-start: var(--cpd-space-1x); /* display green line */
+
+            /* The row already starts with the caller's avatar and name */
+            .mx_LegacyCallEvent_info > .mx_BaseAvatar,
+            .mx_LegacyCallEvent_sender {
+                display: none;
+            }
+
+            .mx_LegacyCallEvent_info_basic,
+            .mx_LegacyCallEvent_content {
+                margin-inline-start: 0;
+            }
         }
     }
 }

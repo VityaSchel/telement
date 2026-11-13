@@ -12,7 +12,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import * as stories from "./TimelineSeparator.stories.tsx";
 
-const { Default, WithHtmlChild, WithoutChildren, WithDateEvent, WithLateEvent } = composeStories(stories);
+const { Default, WithHtmlChild, WithDateEvent, WithLateEvent } = composeStories(stories);
 
 describe("TimelineSeparator", () => {
     afterEach(() => {
@@ -37,11 +37,6 @@ describe("TimelineSeparator", () => {
 
         it("renders the timeline separator with late event", () => {
             const { container } = render(<WithLateEvent />);
-            expect(container).toMatchSnapshot();
-        });
-
-        it("renders the timeline separator without children", () => {
-            const { container } = render(<WithoutChildren />);
             expect(container).toMatchSnapshot();
         });
     });

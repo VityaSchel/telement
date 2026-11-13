@@ -70,7 +70,9 @@ Please see LICENSE files in the repository root for full details.
     opacity: 0.85;
 }
 
-.mx_EventTile[data-layout="bubble"] .mx_EventTile_line .mx_MBeaconBody {
+/* Bubble lines are as wide as their content, against which the width above resolves to nothing, so the body
+   asks for its own width as the location map does. */
+.mx_EventTile_line .mx_MBeaconBody_bubble {
     max-width: 100%;
     width: 450px;
 }

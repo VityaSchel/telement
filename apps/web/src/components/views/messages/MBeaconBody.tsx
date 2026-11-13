@@ -20,6 +20,7 @@ import {
 } from "matrix-js-sdk/src/matrix";
 import { secureRandomString } from "matrix-js-sdk/src/randomstring";
 import classNames from "classnames";
+import { useEventPresentation } from "@element-hq/web-shared-components";
 
 import MatrixClientContext from "../../../contexts/MatrixClientContext";
 import { useEventEmitterState } from "../../../hooks/useEventEmitter";
@@ -125,6 +126,7 @@ const useHandleBeaconRedaction = (
 const MBeaconBody = ({ mxEvent, getRelationsForEvent, ref }: IBodyProps): JSX.Element => {
     const { beacon, isLive, latestLocationState, waitingToStart } = useBeaconState(mxEvent);
     const mapId = useUniqueId(mxEvent.getId()!);
+    const { layout } = useEventPresentation();
 
     const matrixClient = useContext(MatrixClientContext);
     const [error, setError] = useState<Error>();
@@ -205,7 +207,7 @@ const MBeaconBody = ({ mxEvent, getRelationsForEvent, ref }: IBodyProps): JSX.El
     }
 
     return (
-        <div className="mx_MBeaconBody" ref={ref}>
+        <div className={classNames("mx_MBeaconBody", { mx_MBeaconBody_bubble: layout === "bubble" })} ref={ref}>
             {map}
             {isOwnBeacon ? (
                 <OwnBeaconStatus

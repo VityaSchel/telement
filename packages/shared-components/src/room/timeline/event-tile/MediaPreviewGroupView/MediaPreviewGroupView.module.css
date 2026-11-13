@@ -1,10 +1,5 @@
 .container {
-    /* A definite width, not just a cap. Bubble layout sizes the event line with
-       `width: fit-content`, so a container with only a `max-width` is sized
-       intrinsically -- and the icon beside the filename is a `height: 100%`
-       square, which contributes no width while an intrinsic width is being
-       computed. The tile would come out one icon too narrow and the filename
-       would be squeezed into an ellipsis. */
+    /* The card's designed width; the bubble layout sizes file cards to their name instead (EventTileView). */
     width: var(--MediaPreview-width);
     max-width: 100%;
 

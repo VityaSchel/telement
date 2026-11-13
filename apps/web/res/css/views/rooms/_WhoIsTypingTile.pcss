@@ -62,3 +62,40 @@ Please see LICENSE files in the repository root for full details.
         padding-top: 4px;
     }
 }
+
+/* In bubbles the label starts where the text in a bubble does, as the intro does (see _NewRoomIntro.pcss). The last
+   avatar is centered on the message avatars: the row's 49px margin, less their 36px offset, plus their 4px ring and
+   half their 30px. More avatars stack towards the start. */
+.mx_RoomView_body[data-layout="bubble"] {
+    .mx_WhoIsTypingTile {
+        margin-left: 0;
+    }
+
+    .mx_WhoIsTypingTile_avatars {
+        --WhoIsTypingTile_bubble-label-inset: calc(49px - 9px + var(--cpd-space-3x) + 1px);
+        --WhoIsTypingTile_bubble-avatar-center: calc(49px - 36px + 4px + 30px / 2);
+
+        box-sizing: border-box;
+        flex-basis: var(--WhoIsTypingTile_bubble-label-inset);
+        padding-inline-end: calc(
+            var(--WhoIsTypingTile_bubble-label-inset) - var(--WhoIsTypingTile_bubble-avatar-center) - 24px / 2
+        );
+        text-align: end;
+    }
+}
+
+/* In IRC the label starts where a message's text does, and the avatars where its sender's name does. */
+.mx_IRCLayout {
+    .mx_WhoIsTypingTile_avatars {
+        box-sizing: border-box;
+        flex-basis: calc(
+            var(--RoomView_MessageList-padding) + var(--MessageTimestamp-width) + var(--icon-width) +
+                var(--name-width) + 2 * var(--right-padding)
+        );
+        padding-inline-start: calc(
+            var(--RoomView_MessageList-padding) + var(--MessageTimestamp-width) + var(--icon-width) + 2 *
+                var(--right-padding)
+        );
+        text-align: start;
+    }
+}

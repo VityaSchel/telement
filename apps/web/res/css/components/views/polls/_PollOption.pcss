@@ -8,19 +8,32 @@ Please see LICENSE files in the repository root for full details.
 
 .mx_PollOption {
     border: 1px solid $quinary-content;
-    border-radius: 8px;
-    padding: 6px 12px;
+    border-radius: var(--MBody-border-radius);
+    /* With the 1px border and the label's 2px top padding below, the label's line starts 13px from the top and the bar
+       ends 13px from the bottom, as far as both are from the sides */
+    padding: calc(var(--cpd-space-3x) - 2px) var(--cpd-space-3x) var(--cpd-space-3x);
     background-color: $background;
     cursor: default;
 
-    .mx_StyledRadioButton_content,
+    /* The vote count ends where the bar does. The radio button's own end margin comes later in the cascade. */
+    .mx_StyledRadioButton > .mx_StyledRadioButton_content,
     .mx_PollOption_endedOption {
         padding-top: 2px;
-        margin-right: 0px;
+        margin-inline-end: 0;
     }
 
     .mx_StyledRadioButton_spacer {
         display: none;
+    }
+
+    /* The radio is centered on the label's first line, below the label's 2px top padding, rather than set on its
+       baseline */
+    .mx_StyledRadioButton {
+        align-items: start;
+    }
+
+    input[type="radio"] + div {
+        margin-block-start: calc(2px + (1lh - $font-16px) / 2);
     }
 }
 
@@ -96,7 +109,6 @@ Please see LICENSE files in the repository root for full details.
 .mx_PollOption_popularityBackground {
     width: 100%;
     height: 8px;
-    margin-right: 12px;
     border-radius: 8px;
     background-color: $system;
     margin-top: var(--cpd-space-2x);

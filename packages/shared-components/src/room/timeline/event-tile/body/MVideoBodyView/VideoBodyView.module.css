@@ -4,7 +4,7 @@
 
 .container {
     overflow: hidden;
-    border-radius: 8px;
+    border-radius: var(--MBody-border-radius, 8px);
 }
 
 /* The poster, its play button and its badges. The colors are fixed rather than theme tokens: like the time badge
@@ -63,9 +63,11 @@
     inset-block-start: var(--cpd-space-2x);
     inset-inline-start: var(--cpd-space-2x);
     padding: var(--cpd-space-0-5x) var(--cpd-space-2x);
-    border-radius: 999px;
+    border-radius: var(--tl-radius-control);
     background-color: rgb(0 0 0 / 55%);
     font: var(--cpd-font-body-xs-medium);
+    /* A 16px line, so the badge is 20px tall, on the grid */
+    line-height: var(--cpd-space-4x);
     font-variant-numeric: tabular-nums;
     pointer-events: none;
 }

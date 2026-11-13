@@ -30,7 +30,7 @@
     position: relative;
     overflow: hidden;
     contain: paint;
-    border-radius: 8px;
+    border-radius: var(--MBody-border-radius, 8px);
     min-width: var(--image-body-min-width, 0px);
     min-height: var(--image-body-min-height, 0px);
 }
@@ -72,19 +72,20 @@
     height: 100%;
 }
 
+/* The same badge as a video's duration */
 .gifLabel {
     position: absolute;
     display: block;
-    top: var(--cpd-space-0x);
-    left: 14px;
-    /* Preserve the original GIF badge offset from _MImageBody.pcss. */
-    padding: 5px;
-    /* Preserve the original GIF badge padding from _MImageBody.pcss. */
-    border-radius: 5px;
-    /* Preserve the original GIF badge corner radius from _MImageBody.pcss. */
-    background: rgba(0, 0, 0, 0.7);
-    border: 2px solid rgba(0, 0, 0, 0.2);
+    inset-block-start: var(--cpd-space-2x);
+    inset-inline-start: var(--cpd-space-2x);
+    margin: 0;
+    padding: var(--cpd-space-0-5x) var(--cpd-space-2x);
+    border-radius: var(--tl-radius-control);
+    background: rgb(0 0 0 / 55%);
     color: rgba(255, 255, 255, 1);
+    font: var(--cpd-font-body-xs-medium);
+    /* A 16px line, so the badge is 20px tall, on the grid */
+    line-height: var(--cpd-space-4x);
     pointer-events: none;
 }
 

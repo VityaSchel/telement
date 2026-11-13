@@ -97,4 +97,25 @@ describe("LegacyCallEvent", () => {
 
         expect(screen.getByText("00:00")).toBeVisible();
     });
+
+    it("puts the call-back button in a row of its own after the call's state, which a stacked card lays out under it", () => {
+        callEventGrouper.state = CallState.Ended;
+        callEventGrouper.gotRejected = vi.fn().mockReturnValue(true);
+
+        renderEvent();
+
+        const actions = screen.getByRole("button", { name: "Call back" }).parentElement!;
+        expect(actions).toHaveClass("mx_LegacyCallEvent_content_actions");
+        expect(actions.previousSibling?.textContent).toBe("Call declined");
+    });
+
+    it("puts the decline and accept buttons of a ringing call in one row", () => {
+        callEventGrouper.state = CallState.Ringing;
+
+        renderEvent();
+
+        const actions = screen.getByRole("button", { name: "Decline" }).parentElement!;
+        expect(actions).toHaveClass("mx_LegacyCallEvent_content_actions");
+        expect(screen.getByRole("button", { name: "Accept" }).parentElement).toBe(actions);
+    });
 });

@@ -15,7 +15,8 @@ $left-gutter: 64px;
     --event-tile-state-highlight-background: $event-highlight-bg-color;
     --event-tile-state-hover-background: $event-selected-color;
     --event-tile-state-selected-background: $event-selected-color;
-    --event-tile-bubble-hover-background: $eventbubble-bg-hover;
+    /* A gray step darker than other people's bubbles, so they stay visible in the band behind a selected one */
+    --event-tile-bubble-hover-background: var(--cpd-color-bg-subtle-primary);
     --event-tile-bubble-other-background: $eventbubble-others-bg;
     --event-tile-bubble-self-background: $eventbubble-self-bg;
     --event-tile-preview-hover-background: $panels;
@@ -53,7 +54,7 @@ $left-gutter: 64px;
     .mx_EventTile_searchHighlight {
         background-color: $accent;
         color: $accent-fg-color;
-        border-radius: 5px;
+        border-radius: var(--tl-radius-inline);
         padding-inline: 2px;
 
         a {
@@ -156,11 +157,13 @@ $left-gutter: 64px;
         code:not(pre *) {
             background-color: $inlinecode-background-color;
             border: 1px solid $inlinecode-border-color;
-            border-radius: 4px;
-            /* The horizontal padding is added by github-markdown-css .markdown-body */
-            padding: var(--cpd-space-0-5x) 0;
-            /* Avoid inline code blocks to be sticked when on multiple lines */
-            line-height: $font-22px;
+            border-radius: var(--tl-radius-inline);
+            /* The font's ascent and descent already leave as much room above and below the text as this leaves at
+               its sides. */
+            padding: 0 var(--cpd-space-1x);
+            /* The chip, the font's height plus the border, fits inside the line with 1px to spare above and below, so
+               chips on consecutive lines don't touch. */
+            line-height: $font-24px;
             /* Avoid the border to be glued to the other words */
             margin-right: var(--cpd-space-0-5x);
         }
@@ -181,6 +184,9 @@ $left-gutter: 64px;
             }
 
             border: 1px solid $quinary-content;
+            border-radius: var(--tl-radius-inline);
+            /* The text, the line numbers and the buttons' icons sit 12px inside the block's edge, border included. */
+            padding: calc(var(--cpd-space-3x) - 1px);
 
             code {
                 white-space: pre; /* we want code blocks to be scrollable and not wrap */
@@ -340,8 +346,6 @@ $left-gutter: 64px;
 
         .mx_EventTile_collapsedCodeBlock {
             max-height: 30vh;
-            padding-top: var(--cpd-space-3x);
-            padding-bottom: var(--cpd-space-3x);
         }
 
         /* Inserted adjacent to <pre> blocks, (See TextualBody) */
@@ -351,8 +355,17 @@ $left-gutter: 64px;
             right: var(--cpd-space-2x);
             visibility: hidden;
 
+            /* The expand button is the copy button's size, a 20px icon in a 28px box, so their icons line up. */
+            &.mx_AccessibleButton {
+                box-sizing: content-box;
+                width: var(--cpd-space-5x);
+                height: var(--cpd-space-5x);
+                padding: var(--cpd-space-1x);
+            }
+
+            /* Right below the expand button */
             &.mx_EventTile_buttonBottom {
-                top: 33px;
+                top: calc(var(--cpd-space-2x) + var(--cpd-space-7x));
             }
 
             svg {
@@ -366,15 +379,32 @@ $left-gutter: 64px;
 }
 
 .mx_EventTile_lineNumbers {
-    float: left;
-    margin: 0 0.5em 0 -1.5em;
+    /* The numbers start at the block's padding, like its text */
+    margin-inline-end: var(--cpd-space-2x);
     color: gray;
 
     & span {
         text-align: right;
         display: block;
-        padding-left: 1em;
     }
+}
+
+/* The numbers and the code sit side by side, so a block that shrinks to fit, as in a bubble, makes room for the numbers
+   on every line and not only the first, and a block that scrolls keeps its padding after its longest line. A reply's
+   quote clamps the code to its first lines, which this would stop, and shows no numbers. */
+pre:not(:is(.mx_ReplyChain, .mx_ReplyPreview) *):has(> .mx_EventTile_lineNumbers) {
+    display: flex;
+}
+
+/* The block's padding would show the top of the first line the quote leaves out. */
+:is(.mx_ReplyChain:not(.mx_ReplyChain--expanded), .mx_ReplyPreview) .mx_EventTile_content .markdown-body pre {
+    overflow: clip;
+    overflow-clip-margin: content-box;
+}
+
+/* The reply tile's 4px below a quoted block, which github-markdown-css's 16px would override from this later layer */
+:is(.mx_ReplyChain, .mx_ReplyPreview) .mx_EventTile_content .markdown-body pre {
+    margin-block-end: var(--cpd-space-1x);
 }
 
 .mx_EventTile_button {

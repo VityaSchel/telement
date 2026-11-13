@@ -18,11 +18,12 @@
     height: 40px;
     position: relative;
     background-color: var(--cpd-color-bg-subtle-secondary);
-    padding-inline: var(--cpd-space-3x) var(--cpd-space-4x);
+    /* With the 1px border, the 24px icon is 8px from the start, as from the top and bottom of the 40px row. */
+    padding-inline: calc(var(--cpd-space-2x) - 1px) var(--cpd-space-4x);
     display: flex;
     align-items: center;
     justify-content: flex-start;
-    border-radius: 8px;
+    border-radius: var(--tl-radius-row);
     box-sizing: border-box;
     clear: both;
     overflow: hidden;

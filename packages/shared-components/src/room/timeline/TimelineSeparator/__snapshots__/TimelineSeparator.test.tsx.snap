@@ -6,15 +6,14 @@ exports[`TimelineSeparator > Snapshot tests > renders the timeline separator in 
     aria-label="Label Separator"
     class="Flex-module_flex TimelineSeparator-module_timelineSeparator"
     role="separator"
-    style="--mx-flex-display: flex; --mx-flex-direction: row; --mx-flex-align: center; --mx-flex-justify: start; --mx-flex-gap: 0; --mx-flex-wrap: nowrap;"
+    style="--mx-flex-display: flex; --mx-flex-direction: row; --mx-flex-align: start; --mx-flex-justify: center; --mx-flex-gap: 0; --mx-flex-wrap: nowrap;"
   >
-    <hr
-      role="none"
-    />
-    Timeline Separator
-    <hr
-      role="none"
-    />
+    <div
+      class="Flex-module_flex TimelineSeparator-module_pill"
+      style="--mx-flex-display: flex; --mx-flex-direction: row; --mx-flex-align: center; --mx-flex-justify: start; --mx-flex-gap: 0; --mx-flex-wrap: nowrap;"
+    >
+      Timeline Separator
+    </div>
   </div>
 </div>
 `;
@@ -25,20 +24,18 @@ exports[`TimelineSeparator > Snapshot tests > renders the timeline separator wit
     aria-label="Custom Label"
     class="Flex-module_flex TimelineSeparator-module_timelineSeparator"
     role="separator"
-    style="--mx-flex-display: flex; --mx-flex-direction: row; --mx-flex-align: center; --mx-flex-justify: start; --mx-flex-gap: 0; --mx-flex-wrap: nowrap;"
+    style="--mx-flex-display: flex; --mx-flex-direction: row; --mx-flex-align: start; --mx-flex-justify: center; --mx-flex-gap: 0; --mx-flex-wrap: nowrap;"
   >
-    <hr
-      role="none"
-    />
-    <h2
-      aria-hidden="true"
-      class="TimelineSeparator-module_timelineSeparator"
+    <div
+      class="Flex-module_flex TimelineSeparator-module_pill"
+      style="--mx-flex-display: flex; --mx-flex-direction: row; --mx-flex-align: center; --mx-flex-justify: start; --mx-flex-gap: 0; --mx-flex-wrap: nowrap;"
     >
-      Thursday
-    </h2>
-    <hr
-      role="none"
-    />
+      <strong
+        aria-hidden="true"
+      >
+        Thursday
+      </strong>
+    </div>
   </div>
 </div>
 `;
@@ -49,15 +46,14 @@ exports[`TimelineSeparator > Snapshot tests > renders the timeline separator wit
     aria-label="Date Event Separator"
     class="Flex-module_flex TimelineSeparator-module_timelineSeparator"
     role="separator"
-    style="--mx-flex-display: flex; --mx-flex-direction: row; --mx-flex-align: center; --mx-flex-justify: start; --mx-flex-gap: 0; --mx-flex-wrap: nowrap;"
+    style="--mx-flex-display: flex; --mx-flex-direction: row; --mx-flex-align: start; --mx-flex-justify: center; --mx-flex-gap: 0; --mx-flex-wrap: nowrap;"
   >
-    <hr
-      role="none"
-    />
-    Wednesday
-    <hr
-      role="none"
-    />
+    <div
+      class="Flex-module_flex TimelineSeparator-module_pill"
+      style="--mx-flex-display: flex; --mx-flex-direction: row; --mx-flex-align: center; --mx-flex-justify: start; --mx-flex-gap: 0; --mx-flex-wrap: nowrap;"
+    >
+      Wednesday
+    </div>
   </div>
 </div>
 `;
@@ -68,33 +64,14 @@ exports[`TimelineSeparator > Snapshot tests > renders the timeline separator wit
     aria-label="Late Event Separator"
     class="Flex-module_flex TimelineSeparator-module_timelineSeparator"
     role="separator"
-    style="--mx-flex-display: flex; --mx-flex-direction: row; --mx-flex-align: center; --mx-flex-justify: start; --mx-flex-gap: 0; --mx-flex-wrap: nowrap;"
+    style="--mx-flex-display: flex; --mx-flex-direction: row; --mx-flex-align: start; --mx-flex-justify: center; --mx-flex-gap: 0; --mx-flex-wrap: nowrap;"
   >
-    <hr
-      role="none"
-    />
-    Fri, Jan 9, 2026
-    <hr
-      role="none"
-    />
-  </div>
-</div>
-`;
-
-exports[`TimelineSeparator > Snapshot tests > renders the timeline separator without children 1`] = `
-<div>
-  <div
-    aria-label="Separator without children"
-    class="Flex-module_flex TimelineSeparator-module_timelineSeparator"
-    role="separator"
-    style="--mx-flex-display: flex; --mx-flex-direction: row; --mx-flex-align: center; --mx-flex-justify: start; --mx-flex-gap: 0; --mx-flex-wrap: nowrap;"
-  >
-    <hr
-      role="none"
-    />
-    <hr
-      role="none"
-    />
+    <div
+      class="Flex-module_flex TimelineSeparator-module_pill"
+      style="--mx-flex-display: flex; --mx-flex-direction: row; --mx-flex-align: center; --mx-flex-justify: start; --mx-flex-gap: 0; --mx-flex-wrap: nowrap;"
+    >
+      Fri, Jan 9, 2026
+    </div>
   </div>
 </div>
 `;

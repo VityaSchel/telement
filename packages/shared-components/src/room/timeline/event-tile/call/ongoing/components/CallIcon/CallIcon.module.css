@@ -8,7 +8,8 @@
 .container {
     min-width: 36px;
     height: 36px;
-    border-radius: var(--cpd-space-2x);
+    /* Concentric with the call card, 12px in: max(card radius - 12px, 4px) */
+    border-radius: var(--tl-radius-inline);
     background-color: var(--cpd-color-bg-subtle-secondary);
 }
 

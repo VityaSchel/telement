@@ -5,20 +5,31 @@
  * Please see LICENSE files in the repository root for full details.
  */
 
-.content {
-    padding: 0 25px;
+/* The date, in the separator pill's text style rather than a heading's */
+.dateSeparator h2 {
+    flex: 0 1 auto;
+    margin: 0;
+    font: inherit;
+    letter-spacing: inherit;
+    text-transform: capitalize;
+}
 
-    h2 {
-        flex: 0 0 auto;
-        margin: 0;
-        font-size: inherit;
-        text-transform: capitalize;
-    }
+/* The jump-to-date menu's trigger is the whole pill, over its padding, with its chevron 4px from the pill's end, as
+   from its top and bottom */
+.jumpTo {
+    margin: calc(-1 * var(--cpd-space-1x)) calc(-1 * var(--cpd-space-2x));
+    padding-block: var(--cpd-space-1x);
+    padding-inline: var(--cpd-space-2x) var(--cpd-space-1x);
+    border-radius: inherit;
 
     svg {
-        align-self: center;
+        flex-shrink: 0;
         width: 16px;
         height: 16px;
         color: var(--cpd-color-icon-secondary);
+        /* On the middle of the lowercase letters, as vertical-align: middle would put it, rather than on the line's
+           middle, which is the capitals' and left the chevron looking high */
+        position: relative;
+        inset-block-start: calc((1cap - 1ex) / 2);
     }
 }

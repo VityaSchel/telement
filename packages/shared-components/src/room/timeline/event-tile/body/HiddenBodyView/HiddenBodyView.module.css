@@ -11,7 +11,12 @@
     vertical-align: middle;
     display: inline-flex;
     align-items: center;
-    gap: var(--cpd-space-1-5x);
+    gap: var(--cpd-space-2x);
+}
+
+/* The label is a Compound Text, whose own line height would make the line taller than the message's. */
+.content > span {
+    line-height: inherit;
 }
 
 .icon {

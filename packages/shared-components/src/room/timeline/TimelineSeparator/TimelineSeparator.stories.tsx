@@ -9,7 +9,6 @@ import React from "react";
 
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import TimelineSeparator from "./TimelineSeparator";
-import styles from "./TimelineSeparator.module.css";
 
 const meta = {
     title: "Timeline/Timeline Meta/TimelineSeparator",
@@ -29,11 +28,7 @@ export const Default: Story = {};
 export const WithHtmlChild: Story = {
     args: {
         label: "Custom Label",
-        children: (
-            <h2 className={styles.timelineSeparator} aria-hidden="true">
-                Thursday
-            </h2>
-        ),
+        children: <strong aria-hidden="true">Thursday</strong>,
     },
 };
 
@@ -48,12 +43,5 @@ export const WithLateEvent: Story = {
     args: {
         label: "Late Event Separator",
         children: "Fri, Jan 9, 2026",
-    },
-};
-
-export const WithoutChildren: Story = {
-    args: {
-        children: undefined,
-        label: "Separator without children",
     },
 };

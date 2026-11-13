@@ -7,8 +7,6 @@ Please see LICENSE files in the repository root for full details.
 */
 
 .mx_ReadReceiptGroup {
-    --ReadReceiptGroup_EventBubbleTile-spacing-end: 78px;
-
     position: relative;
     inset-inline-end: var(--event-tile-read-receipt-inset-inline-end, auto);
     display: inline-block;
@@ -20,7 +18,7 @@ Please see LICENSE files in the repository root for full details.
         flex-direction: row;
         height: 16px;
         padding: 4px;
-        border-radius: 6px;
+        border-radius: var(--tl-radius-control);
 
         &.mx_AccessibleButton {
             &:hover {

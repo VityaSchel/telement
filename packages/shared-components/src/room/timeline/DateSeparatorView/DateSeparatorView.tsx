@@ -12,7 +12,6 @@ import { Heading } from "@vector-im/compound-web";
 import { type ViewModel } from "../../../core/viewmodel/ViewModel";
 import { useViewModel } from "../../../core/viewmodel/useViewModel";
 import styles from "./DateSeparatorView.module.css";
-import { Flex } from "../../../core/utils/Flex";
 import { TimelineSeparator } from "../TimelineSeparator";
 import { DateSeparatorContextMenuView } from "./DateSeparatorContextMenuView";
 import { DateSeparatorButton } from "./DateSeparatorButton";
@@ -84,7 +83,7 @@ export function DateSeparatorView({ vm, className }: Readonly<DateSeparatorViewP
 
     if (jumpToEnabled) {
         return (
-            <TimelineSeparator label={label} className={classNames(className)} role="none">
+            <TimelineSeparator label={label} className={classNames(className, styles.dateSeparator)} role="none">
                 <DateSeparatorContextMenuView
                     vm={vm}
                     open={isMenuOpen}
@@ -93,7 +92,7 @@ export function DateSeparatorView({ vm, className }: Readonly<DateSeparatorViewP
                         <DateSeparatorButton
                             label={label}
                             tooltipOpen={!isMenuOpen && (isTriggerHovered || isTriggerFocused)}
-                            className={styles.content}
+                            className={styles.jumpTo}
                             onMouseEnter={() => setIsTriggerHovered(true)}
                             onMouseLeave={() => setIsTriggerHovered(false)}
                             onFocus={(event) => setIsTriggerFocused(event.currentTarget.matches(":focus-visible"))}
@@ -106,12 +105,10 @@ export function DateSeparatorView({ vm, className }: Readonly<DateSeparatorViewP
     }
 
     return (
-        <TimelineSeparator label={label} className={classNames(className)}>
-            <Flex className={styles.content}>
-                <Heading as="h2" size="lg" aria-hidden="true">
-                    {label}
-                </Heading>
-            </Flex>
+        <TimelineSeparator label={label} className={classNames(className, styles.dateSeparator)}>
+            <Heading as="h2" size="lg" aria-hidden="true">
+                {label}
+            </Heading>
         </TimelineSeparator>
     );
 }
