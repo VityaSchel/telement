@@ -433,7 +433,9 @@ pre:not(:is(.mx_ReplyChain, .mx_ReplyPreview) *):has(> .mx_EventTile_lineNumbers
     }
 }
 
-.mx_EventTile:hover .mx_ThreadActionBar,
+/* Telement: in the thread list only for keyboard focus, as the thread's right-click menu has its actions. The edit
+   history dialog, which shares the class, has no such menu and keeps it on hover. */
+.mx_EventTile:hover .mx_HistoryActionBar,
 [data-whatinput="keyboard"] .mx_EventTile:focus-within .mx_ThreadActionBar,
 .mx_EventTile:focus-visible:focus-within .mx_ThreadActionBar {
     visibility: visible;

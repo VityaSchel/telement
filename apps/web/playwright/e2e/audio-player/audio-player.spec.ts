@@ -20,8 +20,8 @@ import { getSampleFilePath } from "../../sample-files";
 // Find and click "Reply" button
 const clickButtonReply = async (tile: Locator) => {
     await expect(async () => {
-        await tile.hover();
-        await tile.getByRole("button", { name: "Reply", exact: true }).click();
+        await tile.click({ button: "right" });
+        await tile.page().getByRole("menuitem", { name: "Reply", exact: true }).click();
     }).toPass();
     await expect(tile.page().getByText("Reply to Hanako", { exact: true })).toBeVisible();
 };
@@ -258,10 +258,11 @@ test.describe("Audio player", { tag: ["@no-firefox", "@no-webkit"] }, () => {
 
         const downloadPromise = page.waitForEvent("download");
 
-        // Find and click "Download" button on MessageActionBar
+        // "Save as…" in the message's menu saves through the browser's download without the browser's save dialog
+        await page.evaluate(() => delete (window as { showSaveFilePicker?: unknown }).showSaveFilePicker);
         const tile = page.locator(".mx_EventTile").last();
-        await tile.hover();
-        await tile.getByRole("button", { name: "Download" }).click();
+        await tile.locator(".mx_EventTile_line").click({ button: "right", position: { x: 4, y: 4 } });
+        await page.getByRole("menuitem", { name: "Save as…" }).click();
 
         // Assert that the file was downloaded
         const download = await downloadPromise;
@@ -352,8 +353,8 @@ test.describe("Audio player", { tag: ["@no-firefox", "@no-webkit"] }, () => {
             messageList.locator(".mx_EventTile").last().getByRole("region", { name: "Audio player" }),
         ).toBeVisible();
         // Find and click "Reply in thread" button
-        await messageList.locator(".mx_EventTile").last().hover();
-        await messageList.locator(".mx_EventTile").last().getByRole("button", { name: "Reply in thread" }).click();
+        await messageList.locator(".mx_EventTile").last().click({ button: "right" });
+        await page.getByRole("menuitem", { name: "Reply in thread" }).click();
 
         // On a thread
         const thread = page.locator(".mx_ThreadView");
@@ -377,8 +378,8 @@ test.describe("Audio player", { tag: ["@no-firefox", "@no-webkit"] }, () => {
         await expect(audioPlayer.getByRole("button", { name: "Play" })).not.toBeDisabled();
 
         // Find and click "Reply" button
-        await threadTile.hover();
-        await threadTile.getByRole("button", { name: "Reply", exact: true }).click();
+        await threadTile.click({ button: "right" });
+        await page.getByRole("menuitem", { name: "Reply", exact: true }).click();
 
         const composer = thread.locator(".mx_MessageComposer--compact");
         // Assert that the reply preview contains audio ReplyTile the file info button

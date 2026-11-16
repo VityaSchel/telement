@@ -557,8 +557,11 @@ describe("EventTileViewModel", () => {
         expect(snapshot.sender.forceHistoricalAvatar).toBe(true);
     });
 
-    it("derives action bar visibility from interaction state", () => {
+    it("derives action bar visibility from interaction state, showing it for keyboard focus but not on hover", () => {
         const hoverSnapshot = EventTileViewModel.createSnapshot(makeProps({ interaction: { hover: true } }));
+        const focusSnapshot = EventTileViewModel.createSnapshot(
+            makeProps({ interaction: { showActionBarFromFocus: true } }),
+        );
         const contextMenuSnapshot = EventTileViewModel.createSnapshot(
             makeProps({
                 interaction: {
@@ -568,7 +571,8 @@ describe("EventTileViewModel", () => {
             }),
         );
 
-        expect(hoverSnapshot.actionBar.show).toBe(true);
+        expect(hoverSnapshot.actionBar.show).toBe(false);
+        expect(focusSnapshot.actionBar.show).toBe(true);
         expect(contextMenuSnapshot.actionBar.show).toBe(false);
     });
 

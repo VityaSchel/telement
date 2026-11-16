@@ -273,13 +273,13 @@ test.describe("Timeline", () => {
                     },
                 );
 
-                // Click "collapse" link button on the first hovered info event line
+                // Click "collapse" link button on the first hovered info event line, which shows no action bar
                 const firstTile = gels
                     .locator(".mx_GenericEventListSummary_unstyledList")
                     .getByTestId("event-tile")
                     .first();
                 await firstTile.hover();
-                await expect(firstTile.getByRole("toolbar", { name: "Message Actions" })).toBeVisible();
+                await expect(firstTile.getByRole("toolbar", { name: "Message Actions" })).toHaveCount(0);
                 await gels.getByRole("button", { name: "Collapse" }).click();
 
                 // Assert that "collapse" link button worked
@@ -341,8 +341,8 @@ test.describe("Timeline", () => {
     test.describe("message displaying", () => {
         const messageEdit = async (page: Page) => {
             const line = page.locator(".mx_EventTile .mx_EventTile_line", { hasText: "Message" });
-            await line.hover();
-            await line.getByRole("toolbar", { name: "Message Actions" }).getByRole("button", { name: "Edit" }).click();
+            await line.click({ button: "right" });
+            await page.getByRole("menuitem", { name: "Edit" }).click();
             await page.getByRole("textbox", { name: "Edit message" }).pressSequentially("Edit");
             await page.getByRole("textbox", { name: "Edit message" }).press("Enter");
 
@@ -420,8 +420,7 @@ test.describe("Timeline", () => {
                 // 3. Alignment of expanded GELS and placeholder of deleted message
                 // Delete the second (last) message
                 const lastTile = page.locator(".mx_RoomView_MessageList > .mx_EventTile").last();
-                await lastTile.hover();
-                await lastTile.getByRole("button", { name: "Options" }).click();
+                await lastTile.click({ button: "right" });
                 await page.getByRole("menuitem", { name: "Remove" }).click();
                 // Confirm deletion
                 await page.locator(".mx_Dialog_buttons").getByRole("button", { name: "Remove" }).click();
@@ -811,8 +810,8 @@ test.describe("Timeline", () => {
             });
 
             // Edit a code block and assert the edited code block has been correctly rendered
-            await tile.hover();
-            await page.getByRole("toolbar", { name: "Message Actions" }).getByRole("button", { name: "Edit" }).click();
+            await tile.click({ button: "right" });
+            await page.getByRole("menuitem", { name: "Edit" }).click();
             await page
                 .getByRole("textbox", { name: "Edit message" })
                 .fill("```\nconsole.log('Edited: Hello, world!');\n```");
@@ -870,8 +869,8 @@ test.describe("Timeline", () => {
                 await app.timeline.scrollToBottom();
                 const imgTile = page.locator(".mx_ImageBody").first();
                 await expect(imgTile).toBeVisible();
-                await imgTile.hover();
-                await page.getByRole("button", { name: "Hide" }).click();
+                await imgTile.click({ button: "right" });
+                await page.getByRole("menuitem", { name: "Hide" }).click();
 
                 // Check that the image is now hidden.
                 await expect(page.getByRole("button", { name: "Show image" })).toBeVisible();
@@ -895,8 +894,8 @@ test.describe("Timeline", () => {
             await app.timeline.scrollToBottom();
             const imgTile = page.locator(".mx_MVideoBody").first();
             await expect(imgTile).toBeVisible();
-            await imgTile.hover();
-            await page.getByRole("button", { name: "Hide" }).click();
+            await imgTile.click({ button: "right" });
+            await page.getByRole("menuitem", { name: "Hide" }).click();
 
             // Check that the video is now hidden.
             await expect(page.getByRole("button", { name: "Show video" })).toBeVisible();
@@ -987,10 +986,8 @@ test.describe("Timeline", () => {
             // Reply to the message
             const lastTile = getEventTilesWithBodies(page).last();
             await expect(lastTile.getByText(MESSAGE)).toBeVisible();
-            await lastTile.getByTestId("event-tile-slot-body").hover();
-            const replyButton = lastTile.getByRole("button", { name: "Reply", exact: true });
-            await expect(replyButton).toBeVisible();
-            await replyButton.click();
+            await lastTile.getByTestId("event-tile-slot-body").click({ button: "right" });
+            await page.getByRole("menuitem", { name: "Reply", exact: true }).click();
         };
 
         // For clicking the reply button on the last line
@@ -1001,11 +998,8 @@ test.describe("Timeline", () => {
                 await expect(status).toHaveAccessibleName("Your message was sent");
             }
 
-            const replyButton = lastTile.getByRole("button", { name: "Reply", exact: true });
-            await page.mouse.move(0, 0);
-            await lastTile.getByTestId("event-tile-slot-body").hover();
-            await expect(replyButton).toBeVisible();
-            await replyButton.click();
+            await lastTile.getByTestId("event-tile-slot-body").click({ button: "right" });
+            await page.getByRole("menuitem", { name: "Reply", exact: true }).click();
         };
 
         test("can reply with a text message", async ({ page, app, room }) => {

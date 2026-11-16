@@ -311,8 +311,8 @@ test.describe("Sliding Sync", () => {
 
         // click reply-to on the Hello World message
         const locator = page.locator(".mx_EventTile").last();
-        await locator.getByText("Hello world").hover();
-        await locator.getByRole("button", { name: "Reply", exact: true }).click({});
+        await locator.getByText("Hello world").click({ button: "right" });
+        await page.getByRole("menuitem", { name: "Reply", exact: true }).click();
 
         // check it's visible
         await expect(page.locator(".mx_ReplyPreview")).toBeVisible();
@@ -343,8 +343,8 @@ test.describe("Sliding Sync", () => {
 
         // click reply-to on the Reply to me message
         const locator = page.locator(".mx_EventTile").last();
-        await locator.getByText("Reply to me").hover();
-        await locator.getByRole("button", { name: "Reply", exact: true }).click();
+        await locator.getByText("Reply to me").click({ button: "right" });
+        await page.getByRole("menuitem", { name: "Reply", exact: true }).click();
 
         // check it's visible
         await expect(page.locator(".mx_ReplyPreview")).toBeVisible();

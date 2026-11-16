@@ -78,8 +78,9 @@ test.describe("EventTileView application coverage", () => {
                 .getByTestId("event-tile-slot-actionBar")
                 .getByRole("toolbar", { name: "Message Actions" });
 
+            // Like Telegram, hovering shows no action bar: the right-click menu has every action
             await line.hover();
-            await expect(actionBar).toBeVisible();
+            await expect(actionBar).not.toBeVisible();
             await expect(tile.locator(".mx_MessageTimestamp")).toBeVisible();
             await expect(tile).toMatchScreenshot("event-tile-hovered.png", {
                 css: ".mx_MessageTimestamp { visibility: hidden; }",
@@ -140,12 +141,11 @@ test.describe("EventTileView application coverage", () => {
                 hideJumpToBottomButton: true,
             });
 
-            // The action bar is mounted only while the tile is hovered, and the timeline keeps
-            // re-rendering after the permalink navigation, so a single hover -> click can catch the
-            // Edit button mid-unmount and hang until the test times out. Retry the pair as a unit.
+            // The timeline keeps re-rendering after the permalink navigation, which can close the menu before
+            // the click, so retry the pair as a unit.
             await expect(async () => {
-                await selectedTile.locator(".mx_EventTile_line").hover({ timeout: 2000 });
-                await selectedTile.getByRole("button", { name: "Edit", exact: true }).click({ timeout: 2000 });
+                await selectedTile.locator(".mx_EventTile_line").click({ button: "right", timeout: 2000 });
+                await page.getByRole("menuitem", { name: "Edit", exact: true }).click({ timeout: 2000 });
             }).toPass({ timeout: 15000 });
             await expect(selectedTile).toMatchScreenshot("event-tile-editing.png", {
                 css: ".mx_MessageTimestamp { visibility: hidden; }",

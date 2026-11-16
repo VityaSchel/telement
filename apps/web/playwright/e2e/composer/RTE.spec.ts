@@ -267,8 +267,8 @@ test.describe("Composer", () => {
 
             // Click reply
             const tile = page.locator(".mx_EventTile").last();
-            await tile.hover();
-            await tile.getByRole("button", { name: "Reply in thread" }).click();
+            await tile.click({ button: "right" });
+            await page.getByRole("menuitem", { name: "Reply in thread" }).click();
 
             await app.composerDragAndPasteFile("thread", getSampleFilePath("riot.png"), "image/png");
             await expect(page.locator(".mx_ImageBody")).toBeVisible();
@@ -394,8 +394,8 @@ test.describe("Composer", () => {
 
                 // Click reply
                 const tile = page.locator(".mx_EventTile").last();
-                await tile.hover();
-                await tile.getByRole("button", { name: "Reply", exact: true }).click();
+                await tile.click({ button: "right" });
+                await page.getByRole("menuitem", { name: "Reply", exact: true }).click();
 
                 // Type reply text
                 await composer.pressSequentially("my reply");
@@ -425,8 +425,8 @@ test.describe("Composer", () => {
 
                 // Click reply
                 const tile = page.locator(".mx_EventTile").last();
-                await tile.hover();
-                await tile.getByRole("button", { name: "Reply in thread" }).click();
+                await tile.click({ button: "right" });
+                await page.getByRole("menuitem", { name: "Reply in thread" }).click();
 
                 const thread = page.locator(".mx_ThreadView");
                 const threadComposer = thread.locator("div[contenteditable=true]");

@@ -614,14 +614,14 @@ describe("EventTile", () => {
             expect(container.querySelector(".mx_MessageActionBar")).toBeNull();
         });
 
-        it("renders the message action bar when the tile is hovered", async () => {
+        it("doesn't render the message action bar on hover, as the right-click menu has its actions", async () => {
             const { container } = getComponent();
             const tile = getTile(container);
             stubHoverMatches(tile);
 
             await userEvent.hover(tile);
 
-            expect(container.querySelector(".mx_MessageActionBar")).not.toBeNull();
+            expect(container.querySelector(".mx_MessageActionBar")).toBeNull();
         });
 
         it("renders the message action bar when the tile receives keyboard focus", () => {
@@ -661,10 +661,15 @@ describe("EventTile", () => {
         });
 
         it("opens the reaction picker from the action bar in a menu rounded like the picker", async () => {
+            const matches = HTMLElement.prototype.matches;
+            vi.spyOn(HTMLElement.prototype, "matches").mockImplementation(function (this: HTMLElement, selector) {
+                if (selector === ":focus-visible") return true;
+                return matches.call(this, selector);
+            });
             const { container } = getComponent({}, TimelineRenderingType.Room, { canReact: true });
-            const tile = getTile(container);
-            stubHoverMatches(tile);
-            await userEvent.hover(tile);
+            act(() => {
+                getTile(container).focus();
+            });
 
             await userEvent.click(screen.getByRole("button", { name: "React" }));
 
@@ -690,6 +695,15 @@ describe("EventTile", () => {
     });
 
     describe("context menu", () => {
+        it("opens the thread's own menu when a thread in the thread list is right-clicked", async () => {
+            const { container } = getComponent({}, TimelineRenderingType.ThreadsList);
+
+            fireEvent.contextMenu(getTile(container), { clientX: 1, clientY: 2 });
+
+            expect(await screen.findByRole("menuitem", { name: "View in room" })).toBeInTheDocument();
+            expect(screen.queryByRole("menuitem", { name: "Reply" })).toBeNull();
+        });
+
         it("renders the message context menu when the event line is right-clicked", async () => {
             const { container } = getComponent();
 

@@ -85,10 +85,9 @@ test.describe("Custom Component API", () => {
         test("should disallow editing when the allowEditingEvent hint is set to false", async ({ page, room, app }) => {
             await app.viewRoomById(room.roomId);
             await app.client.sendMessage(room.roomId, "Do not show edits");
-            await page.getByText("Do not show edits").hover();
-            await expect(
-                page.getByRole("toolbar", { name: "Message Actions" }).getByRole("button", { name: "Edit" }),
-            ).not.toBeVisible();
+            await page.getByText("Do not show edits").click({ button: "right" });
+            await expect(page.getByRole("menuitem", { name: "Reply", exact: true })).toBeVisible();
+            await expect(page.getByRole("menuitem", { name: "Edit" })).not.toBeVisible();
         });
         test("should disallow downloading media when the allowDownloading hint is set to false", async ({
             page,
@@ -109,8 +108,10 @@ test.describe("Custom Component API", () => {
             await expect(imgTile).toBeVisible();
             const image = imgTile.getByRole("img", { name: "bad.png" });
             await expect(image).toBeVisible();
-            await imgTile.hover();
-            await expect(page.getByRole("button", { name: "Download" })).not.toBeVisible();
+            await imgTile.click({ button: "right" });
+            await expect(page.getByRole("menuitem", { name: "Reply", exact: true })).toBeVisible();
+            await expect(page.getByRole("menuitem", { name: "Save as…" })).not.toBeVisible();
+            await page.keyboard.press("Escape");
             await image.click();
             const imageView = page.getByLabel("Image view");
             await expect(imageView).toBeVisible();
@@ -135,8 +136,9 @@ test.describe("Custom Component API", () => {
             await expect(imgTile).toBeVisible();
             const image = imgTile.getByRole("img", { name: "good.png" });
             await expect(image).toBeVisible();
-            await imgTile.hover();
-            await expect(page.getByRole("button", { name: "Download" })).toBeVisible();
+            await imgTile.click({ button: "right" });
+            await expect(page.getByRole("menuitem", { name: "Save as…" })).toBeVisible();
+            await page.keyboard.press("Escape");
             await image.click();
             const imageView = page.getByLabel("Image view");
             await expect(imageView).toBeVisible();

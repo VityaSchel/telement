@@ -185,8 +185,6 @@ export interface ShouldShowMessageActionBarInput {
     isEditing: boolean;
     /** Whether the tile is rendering for export. */
     forExport?: boolean;
-    /** Whether the tile is currently hovered. */
-    hover: boolean;
     /** Whether focus should force the action bar visible. */
     showActionBarFromFocus: boolean;
     /** Whether the action bar currently has focus. */
@@ -195,16 +193,18 @@ export interface ShouldShowMessageActionBarInput {
     hasContextMenu: boolean;
 }
 
-/** Whether EventTile should render the message action bar. */
+/**
+ * Whether EventTile should render the message action bar. Telement shows it only for keyboard focus: with a mouse, as
+ * in Telegram, the right-click menu has every action and nothing appears on hover.
+ */
 export function getShouldShowMessageActionBar({
     isEditing,
     forExport,
-    hover,
     showActionBarFromFocus,
     actionBarFocused,
     hasContextMenu,
 }: ShouldShowMessageActionBarInput): boolean {
-    return !isEditing && !forExport && (hover || showActionBarFromFocus || (actionBarFocused && !hasContextMenu));
+    return !isEditing && !forExport && (showActionBarFromFocus || (actionBarFocused && !hasContextMenu));
 }
 
 /** Inputs for EventTile timestamp visibility derivation. */

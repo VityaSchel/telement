@@ -37,8 +37,8 @@ test.describe("Editing", () => {
     // Edit "Message"
     const editLastMessage = async (page: Page, edit: string) => {
         const eventTile = page.locator(".mx_RoomView_MessageList .mx_EventTile").last();
-        await eventTile.hover();
-        await eventTile.getByRole("button", { name: "Edit", exact: true }).click();
+        await eventTile.click({ button: "right" });
+        await page.getByRole("menuitem", { name: "Edit", exact: true }).click();
 
         const textbox = page.getByRole("textbox", { name: "Edit message" });
         await textbox.fill(edit);
@@ -76,6 +76,7 @@ test.describe("Editing", () => {
             // Click the "Remove" button on the message edit history dialog
             const clickButtonRemove = async (locator: Locator) => {
                 const eventTileLine = locator.locator(".mx_EventTile_line");
+                // The edit history dialog keeps its toolbar on hover, as it has no right-click menu
                 await eventTileLine.hover();
                 await eventTileLine.getByRole("button", { name: "Remove" }).click();
             };
@@ -287,8 +288,8 @@ test.describe("Editing", () => {
             const tile = page.locator(".mx_RoomView_body .mx_EventTile").last();
             await expect(tile.getByText("Message", { exact: true })).toBeVisible();
             const line = tile.locator(".mx_EventTile_line");
-            await line.hover();
-            await line.getByRole("button", { name: "Edit", exact: true }).click();
+            await line.click({ button: "right" });
+            await page.getByRole("menuitem", { name: "Edit", exact: true }).click();
             await expect(axe).toHaveNoViolations();
             const editComposer = page.getByRole("textbox", { name: "Edit message" });
             await editComposer.pressSequentially("Foo");
@@ -315,8 +316,8 @@ test.describe("Editing", () => {
         const tile = page.locator(".mx_RoomView_body .mx_EventTile").last();
         await expect(tile.getByText("Message", { exact: true })).toBeVisible();
         const line = tile.locator(".mx_EventTile_line");
-        await line.hover();
-        await line.getByRole("button", { name: "Edit", exact: true }).click();
+        await line.click({ button: "right" });
+        await page.getByRole("menuitem", { name: "Edit", exact: true }).click();
 
         const editComposer = page.getByRole("textbox", { name: "Edit message" });
         await editComposer.press("End");

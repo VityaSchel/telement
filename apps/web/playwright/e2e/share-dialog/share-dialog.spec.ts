@@ -51,8 +51,7 @@ test.describe("Share dialog", () => {
         await app.client.sendMessage(room.roomId, { body: "hello", msgtype: "m.text" });
 
         const timelineMessage = page.locator(".mx_MTextBody", { hasText: "hello" });
-        await timelineMessage.hover();
-        await page.getByRole("button", { name: "Options", exact: true }).click();
+        await timelineMessage.click({ button: "right" });
         await page.getByRole("menuitem", { name: "Share" }).click();
 
         const dialog = page.getByRole("dialog", { name: "Share Room Message" });

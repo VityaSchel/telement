@@ -236,11 +236,8 @@ async function viewSourceOnRoomNameEvent(page: Page) {
         .getByRole("button", { name: "expand" })
         .click();
 
-    await page
-        .getByRole("listitem")
-        .filter({ hasText: "changed the room name to" })
-        .getByRole("button", { name: "Options" })
-        .click();
+    // The innermost item is the event itself rather than the summary around it
+    await page.getByRole("listitem").filter({ hasText: "changed the room name to" }).last().click({ button: "right" });
 
     await page.getByRole("menuitem", { name: "View source" }).click();
 }

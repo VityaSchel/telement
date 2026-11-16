@@ -215,8 +215,8 @@ export class Helpers {
      */
     async openThread(rootMessage: string) {
         const tile = this.page.locator(".mx_RoomView_body .mx_EventTile[data-scroll-tokens]", { hasText: rootMessage });
-        await tile.hover();
-        await tile.getByRole("button", { name: "Reply in thread" }).click();
+        await tile.click({ button: "right" });
+        await this.page.getByRole("menuitem", { name: "Reply in thread" }).click();
         await expect(this.page.locator(".mx_ThreadView_timelinePanelWrapper")).toBeVisible();
     }
 

@@ -23,6 +23,10 @@ import {
 import {
     CheckIcon,
     ChevronUpIcon,
+    CloseIcon,
+    CollapseIcon,
+    ExpandIcon,
+    VisibilityOffIcon,
     EditIcon,
     ErrorSolidIcon,
     InlineCodeIcon,
@@ -53,7 +57,7 @@ import Modal from "../../../Modal";
 import Resend from "../../../Resend";
 import SettingsStore from "../../../settings/SettingsStore";
 import { isUrlPermitted } from "../../../HtmlUtils";
-import { canEditContent, editEvent, isContentActionable } from "../../../utils/EventUtils";
+import { canCancel, canEditContent, editEvent, isContentActionable } from "../../../utils/EventUtils";
 import IconizedContextMenu, { IconizedContextMenuOption, IconizedContextMenuOptionList } from "./IconizedContextMenu";
 import { Action } from "../../../dispatcher/actions";
 import { type RoomPermalinkCreator } from "../../../utils/permalinks/Permalinks";
@@ -82,6 +86,8 @@ import {
     copyImageToClipboard,
 } from "../../../telement/message-context-menu/copyImageToClipboard";
 import { MediaEventHelper } from "../../../utils/MediaEventHelper";
+import { getMediaVisibility, setMediaVisibility } from "../../../utils/media/mediaVisibility";
+import { shouldDisplayReply } from "../../../utils/Reply";
 import { checkMediaSavingAllowed, saveMediaAs } from "../../../telement/media/saveMediaAs";
 
 interface IReplyInThreadButton {
@@ -128,6 +134,10 @@ interface IProps extends MenuProps {
     permalinkCreator?: RoomPermalinkCreator;
     /* an optional function to be called when the user clicks collapse thread, if not provided hide button */
     collapseReplyChain?(): void;
+    /* whether the message's quotes are expanded, shown with onToggleQuoteExpanded */
+    isQuoteExpanded?: boolean;
+    /* expands or collapses the message's quotes; without it the menu doesn't offer to */
+    onToggleQuoteExpanded?(): void;
     /* callback called when the menu is dismissed */
     onFinished(): void;
     // If the menu is inside a dialog, we sometimes need to close that dialog after click (forwarding)
@@ -336,6 +346,38 @@ export default class MessageContextMenu extends React.Component<IProps, IState> 
         this.closeMenu();
     };
 
+    /** Runs the action on the first of the message's removal, edit and itself that passes the check. */
+    private runOnPendingEvent(action: (event: MatrixEvent) => void, check: (event: MatrixEvent) => boolean): void {
+        const { mxEvent } = this.props;
+        const event = [mxEvent.localRedactionEvent(), mxEvent.replacingEvent(), mxEvent].find((ev) => ev && check(ev));
+        if (event) action(event);
+        this.closeMenu();
+    }
+
+    private onResendClick = (): void => {
+        this.runOnPendingEvent(
+            (event) => void Resend.resend(MatrixClientPeg.safeGet(), event),
+            () => true,
+        );
+    };
+
+    private onCancelSendClick = (): void => {
+        this.runOnPendingEvent(
+            (event) => Resend.removeFromQueue(MatrixClientPeg.safeGet(), event),
+            (event) => canCancel(event.status),
+        );
+    };
+
+    private onHideMediaClick = (): void => {
+        void setMediaVisibility(this.props.mxEvent, false);
+        this.closeMenu();
+    };
+
+    private onToggleQuoteExpandedClick = (): void => {
+        this.props.onToggleQuoteExpanded?.();
+        this.closeMenu();
+    };
+
     private onCollapseReplyChainClick = (): void => {
         this.props.collapseReplyChain?.();
         this.closeMenu();
@@ -435,6 +477,8 @@ export default class MessageContextMenu extends React.Component<IProps, IState> 
         const cli = MatrixClientPeg.safeGet();
         const me = cli.getUserId();
         const { mxEvent, rightClick, link, eventTileOps, reactions, collapseReplyChain, ...other } = this.props;
+        delete other.isQuoteExpanded;
+        delete other.onToggleQuoteExpanded;
         delete other.getRelationsForEvent;
         delete other.permalinkCreator;
         delete other.loadImage;
@@ -458,6 +502,63 @@ export default class MessageContextMenu extends React.Component<IProps, IState> 
                     icon={<RestartIcon />}
                     label={_t("timeline|context_menu|resent_unsent_reactions", { unsentCount: unsentReactionsCount })}
                     onClick={this.onResendReactionsClick}
+                />
+            );
+        }
+
+        // A message, its edit or its removal that is still sending or failed to send, which Telegram's menu offers to
+        // send again or cancel instead of the hover toolbar Element had
+        const editStatus = mxEvent.replacingEvent()?.status;
+        const redactStatus = mxEvent.localRedactionEvent()?.status;
+        let resendButton: JSX.Element | undefined;
+        if ([eventStatus, editStatus, redactStatus].includes(EventStatus.NOT_SENT)) {
+            resendButton = (
+                <IconizedContextMenuOption
+                    icon={<RestartIcon />}
+                    label={_t("action|retry")}
+                    onClick={this.onResendClick}
+                />
+            );
+        }
+        let cancelSendButton: JSX.Element | undefined;
+        if (canCancel(eventStatus) || canCancel(editStatus) || canCancel(redactStatus)) {
+            cancelSendButton = (
+                <IconizedContextMenuOption
+                    icon={<CloseIcon />}
+                    label={_t("action|cancel")}
+                    onClick={this.onCancelSendClick}
+                />
+            );
+        }
+
+        let hideMediaButton: JSX.Element | undefined;
+        if (contentActionable && MediaEventHelper.canHide(mxEvent) && getMediaVisibility(mxEvent, cli)) {
+            hideMediaButton = (
+                <IconizedContextMenuOption
+                    icon={<VisibilityOffIcon />}
+                    label={_t("telement|timeline|context_menu|hide_media")}
+                    onClick={this.onHideMediaClick}
+                />
+            );
+        }
+
+        let toggleQuoteExpandedButton: JSX.Element | undefined;
+        // The tile only knows whether its quotes are expanded once they are long enough to collapse
+        if (
+            this.props.onToggleQuoteExpanded &&
+            this.props.isQuoteExpanded !== undefined &&
+            shouldDisplayReply(mxEvent)
+        ) {
+            const expanded = this.props.isQuoteExpanded;
+            toggleQuoteExpandedButton = (
+                <IconizedContextMenuOption
+                    icon={expanded ? <CollapseIcon /> : <ExpandIcon />}
+                    label={
+                        expanded
+                            ? _t("telement|timeline|context_menu|collapse_quotes")
+                            : _t("telement|timeline|context_menu|expand_quotes")
+                    }
+                    onClick={this.onToggleQuoteExpandedClick}
                 />
             );
         }
@@ -699,13 +800,17 @@ export default class MessageContextMenu extends React.Component<IProps, IState> 
             );
         }
 
+        // A removed message's thread stays reachable, as from the hover toolbar Element had
+        const threadOfRemovedMessage =
+            !contentActionable && timelineRenderingType === TimelineRenderingType.Room && !!mxEvent.getThread();
         let replyInThreadButton: JSX.Element | undefined;
         if (
             rightClick &&
-            contentActionable &&
-            canSendMessages &&
-            Thread.hasServerSideSupport &&
-            timelineRenderingType !== TimelineRenderingType.Thread
+            ((contentActionable &&
+                canSendMessages &&
+                Thread.hasServerSideSupport &&
+                timelineRenderingType !== TimelineRenderingType.Thread) ||
+                threadOfRemovedMessage)
         ) {
             replyInThreadButton = <ReplyInThreadButton mxEvent={mxEvent} closeMenu={this.closeMenu} />;
         }
@@ -758,8 +863,18 @@ export default class MessageContextMenu extends React.Component<IProps, IState> 
             );
         }
 
+        let sendItemsList: JSX.Element | undefined;
+        if (resendButton || cancelSendButton) {
+            sendItemsList = (
+                <IconizedContextMenuOptionList>
+                    {resendButton}
+                    {cancelSendButton}
+                </IconizedContextMenuOptionList>
+            );
+        }
+
         let quickItemsList: JSX.Element | undefined;
-        if (editButton || replyButton || reactButton || pinButton) {
+        if (editButton || replyButton || replyInThreadButton || reactButton || pinButton) {
             quickItemsList = (
                 <IconizedContextMenuOptionList>
                     {reactButton}
@@ -782,8 +897,10 @@ export default class MessageContextMenu extends React.Component<IProps, IState> 
                 {externalURLButton}
                 {jumpToRelatedEventButton}
                 {unhidePreviewButton}
+                {hideMediaButton}
                 {viewSourceButton}
                 {resendReactionsButton}
+                {toggleQuoteExpandedButton}
                 {collapseReplyChainButton}
             </IconizedContextMenuOptionList>
         );
@@ -819,6 +936,7 @@ export default class MessageContextMenu extends React.Component<IProps, IState> 
                     compact={true}
                     data-testid="mx_MessageContextMenu"
                 >
+                    {sendItemsList}
                     {nativeItemsList}
                     {quickItemsList}
                     {commonItemsList}

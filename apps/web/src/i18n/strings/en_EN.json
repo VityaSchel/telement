@@ -3200,7 +3200,10 @@
         },
         "timeline": {
             "context_menu": {
-                "copy_image": "Copy image"
+                "collapse_quotes": "Collapse quotes",
+                "copy_image": "Copy image",
+                "expand_quotes": "Expand quotes",
+                "hide_media": "Hide"
             }
         },
         "video_note": {

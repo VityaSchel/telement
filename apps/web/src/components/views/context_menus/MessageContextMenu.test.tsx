@@ -46,6 +46,9 @@ import {
     copyImageToClipboard,
 } from "../../../telement/message-context-menu/copyImageToClipboard";
 import { checkMediaSavingAllowed, saveMediaAs } from "../../../telement/media/saveMediaAs";
+import Resend from "../../../Resend";
+import { setMediaVisibility } from "../../../utils/media/mediaVisibility";
+import { MediaPreviewValue } from "../../../@types/media_preview";
 
 vi.mock("../../../utils/strings", () => ({
     getSelectedText: vi.fn(),
@@ -62,6 +65,13 @@ vi.mock("../../../dispatcher/dispatcher");
 vi.mock("../../../telement/message-context-menu/copyImageToClipboard", () => ({
     canCopyImageToClipboard: vi.fn(),
     copyImageToClipboard: vi.fn(),
+}));
+vi.mock("../../../Resend", () => ({
+    default: { resend: vi.fn(), removeFromQueue: vi.fn() },
+}));
+vi.mock("../../../utils/media/mediaVisibility", async () => ({
+    ...(await vi.importActual("../../../utils/media/mediaVisibility")),
+    setMediaVisibility: vi.fn(),
 }));
 vi.mock("../../../telement/media/saveMediaAs", () => ({
     checkMediaSavingAllowed: vi.fn(),
@@ -682,6 +692,100 @@ describe("MessageContextMenu", () => {
 
             const result = (contextMenuInstance as any).isSelectionWithinSingleTextBody();
             expect(result).toBe(true);
+        });
+    });
+
+    describe("actions of the hover toolbar Element had", () => {
+        it("offers to send a failed message again, or cancel it", () => {
+            const mxEvent = new MatrixEvent({ type: EventType.RoomMessage, content: createMessageEventContent("hi") });
+            createMenu(mxEvent, { rightClick: true });
+            act(() => mxEvent.setStatus(EventStatus.NOT_SENT));
+            // The menu reads the status when it renders
+            const { unmount } = render(<MessageContextMenu mxEvent={mxEvent} onFinished={vi.fn()} rightClick={true} />);
+
+            fireEvent.click(screen.getAllByRole("menuitem", { name: "Retry" }).at(-1)!);
+            expect(Resend.resend).toHaveBeenCalledWith(MatrixClientPeg.safeGet(), mxEvent);
+            fireEvent.click(screen.getAllByRole("menuitem", { name: "Cancel" }).at(-1)!);
+            expect(Resend.removeFromQueue).toHaveBeenCalledWith(MatrixClientPeg.safeGet(), mxEvent);
+            unmount();
+        });
+
+        it("offers to cancel a message that is still being sent, but not to send it again", () => {
+            const mxEvent = new MatrixEvent({ type: EventType.RoomMessage, content: createMessageEventContent("hi") });
+            mxEvent.setStatus(EventStatus.QUEUED);
+            render(<MessageContextMenu mxEvent={mxEvent} onFinished={vi.fn()} rightClick={true} />);
+
+            expect(screen.getByRole("menuitem", { name: "Cancel" })).toBeInTheDocument();
+            expect(screen.queryByRole("menuitem", { name: "Retry" })).toBeNull();
+        });
+
+        it("offers neither for a sent message", () => {
+            createRightClickMenuWithContent(createMessageEventContent("hi"));
+
+            expect(screen.queryByRole("menuitem", { name: "Retry" })).toBeNull();
+            expect(screen.queryByRole("menuitem", { name: "Cancel" })).toBeNull();
+        });
+
+        it("hides a picture that is shown", () => {
+            const onFinished = vi.fn();
+            vi.spyOn(SettingsStore, "getValue").mockImplementation((name) =>
+                name === "mediaPreviewConfig"
+                    ? ({ media_previews: MediaPreviewValue.On, invite_avatars: MediaPreviewValue.On } as never)
+                    : null,
+            );
+            const mxEvent = new MatrixEvent({
+                type: EventType.RoomMessage,
+                room_id: roomId,
+                content: { msgtype: "m.image", body: "cat.png", url: "mxc://server/cat" },
+            });
+            createMenu(mxEvent, { onFinished });
+
+            fireEvent.click(screen.getByRole("menuitem", { name: "Hide" }));
+
+            expect(setMediaVisibility).toHaveBeenCalledWith(mxEvent, false);
+            expect(onFinished).toHaveBeenCalled();
+        });
+
+        it("expands and collapses quotes the tile can expand", () => {
+            const onToggleQuoteExpanded = vi.fn();
+            const reply = new MatrixEvent({
+                type: EventType.RoomMessage,
+                content: { "body": "hi", "msgtype": "m.text", "m.relates_to": { "m.in_reply_to": { event_id: "$q" } } },
+            });
+            const { unmount } = createMenu(reply, { isQuoteExpanded: false, onToggleQuoteExpanded });
+            fireEvent.click(screen.getByRole("menuitem", { name: "Expand quotes" }));
+            expect(onToggleQuoteExpanded).toHaveBeenCalledTimes(1);
+            unmount();
+
+            createMenu(reply, { isQuoteExpanded: true, onToggleQuoteExpanded });
+            expect(screen.getByRole("menuitem", { name: "Collapse quotes" })).toBeInTheDocument();
+        });
+
+        it("doesn't offer to expand quotes that are short enough to show whole", () => {
+            const reply = new MatrixEvent({
+                type: EventType.RoomMessage,
+                content: { "body": "hi", "msgtype": "m.text", "m.relates_to": { "m.in_reply_to": { event_id: "$q" } } },
+            });
+            createMenu(reply, { onToggleQuoteExpanded: vi.fn() });
+
+            expect(screen.queryByRole("menuitem", { name: "Expand quotes" })).toBeNull();
+        });
+
+        it("opens the thread of a removed message", () => {
+            Thread.hasServerSideSupport = FeatureSupport.Stable;
+            const rootEvent = new MatrixEvent({ type: EventType.RoomMessage, event_id: "$root", unsigned: {} });
+            vi.spyOn(rootEvent, "isRedacted").mockReturnValue(true);
+            vi.spyOn(rootEvent, "getThread").mockReturnValue({ rootEvent } as unknown as Thread);
+            createRightClickMenu(rootEvent, {
+                timelineRenderingType: TimelineRenderingType.Room,
+                canSendMessages: true,
+            });
+
+            fireEvent.click(screen.getByRole("menuitem", { name: "Reply in thread" }));
+
+            expect(dispatcher.dispatch).toHaveBeenCalledWith(
+                expect.objectContaining({ action: Action.ShowThread, rootEvent }),
+            );
         });
     });
 

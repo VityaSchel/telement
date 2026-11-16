@@ -810,8 +810,13 @@ cancel a failed or pending send, download media, hide media, expand or collapse 
 deleted message that has a thread. The thread list and notification tiles have no message menu, so "View in room"
 and "Copy link to thread" exist only in their toolbar. Before removing the toolbar, add these to the menu.
 
-Decided (2026-11-16): the toolbar goes. Its actions move into the message menu, and the thread list and notification
-tiles get a message menu of their own.
+Decided (2026-11-16): hovering a message shows no toolbar, as in Telegram, and the right-click menu has all its
+actions. Keyboard focus on a message still shows it, since that is how keyboard users reach the actions (macOS keyboards
+have no context menu key). The message menu gained Retry and Cancel for a message, edit or removal that is sending or
+failed, Hide for shown media, Expand and Collapse quotes, and Reply in thread on a removed message with a thread. A
+thread in the thread list opens its own right-click menu with "View in room" and "Copy link to thread". "Save as…"
+already covered the toolbar's Download. Upstream's Playwright specs that hovered a message to click its toolbar now
+right-click it and choose from the menu.
 
 ### Emoji artwork
 
@@ -940,7 +945,7 @@ Deferred work:
 | 2026-11-16 | One-to-one chats keep Element's typing text; narrow media keeps the plain fill.                                                                 | [Open questions](#open-questions)                                                    |
 | 2026-11-16 | The search dialog's bell moves into "…"; the video viewer gets the image viewer's "…" menu.                                                     | [Open questions](#open-questions)                                                    |
 | 2026-11-16 | Room list read checks: ✓✓ once any other member has read your last message.                                                                     | [Open questions](#open-questions)                                                    |
-| 2026-11-16 | The hover toolbar goes; its actions move into the message menu.                                                                                 | [Floating toolbar](#floating-toolbar)                                                |
+| 2026-11-16 | Hovering shows no toolbar, keyboard focus still does; its actions are in the right-click menu.                                                  | [Floating toolbar](#floating-toolbar)                                                |
 | 2026-11-16 | GIFs come from GIPHY with the maintainer's key, up to R, uploaded to the homeserver when sent, without pingbacks.                               | [GIFs](#gifs)                                                                        |
 
 ## Upstream merge log

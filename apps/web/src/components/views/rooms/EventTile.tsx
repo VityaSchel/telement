@@ -114,6 +114,7 @@ import { shouldHighlightEventTile } from "../../../viewmodels/room/timeline/even
 import { shouldHideEventTile } from "../../../viewmodels/room/timeline/event-tile/EventTileVisibilityState";
 import { UnreadNotificationBadgeViewModel } from "../../../viewmodels/room/notification-badge/UnreadNotificationBadgeViewModel";
 import { getMessageContextMenuTarget } from "../../../telement/message-context-menu/getMessageContextMenuTarget";
+import { ThreadListTileContextMenu } from "../../../telement/message-context-menu/ThreadListTileContextMenu";
 
 /** Relation lookup type retained for EventTile consumers. */
 export type { GetRelationsForEvent } from "../../../viewmodels/room/timeline/event-tile/reactions/EventTileReactionState";
@@ -961,6 +962,17 @@ export class UnwrappedEventTile extends React.Component<EventTileProps, IState> 
         const collapseReplyChain = replyChain?.canCollapse() ? replyChain.collapse : undefined;
         const { imageSrc } = this.state.interaction.contextMenu;
 
+        if (this.context.timelineRenderingType === TimelineRenderingType.ThreadsList) {
+            return (
+                <ThreadListTileContextMenu
+                    {...aboveRightOf(this.state.interaction.contextMenu.position)}
+                    onViewInRoom={() => this.onViewInRoomClick(null)}
+                    onCopyLink={this.props.permalinkCreator ? () => this.onCopyLinkToThreadClick(null) : undefined}
+                    onFinished={this.onCloseMenu}
+                />
+            );
+        }
+
         return (
             <MessageContextMenu
                 {...aboveRightOf(this.state.interaction.contextMenu.position)}
@@ -968,6 +980,8 @@ export class UnwrappedEventTile extends React.Component<EventTileProps, IState> 
                 permalinkCreator={this.props.permalinkCreator}
                 eventTileOps={eventTileOps}
                 collapseReplyChain={collapseReplyChain}
+                isQuoteExpanded={this.state.isQuoteExpanded}
+                onToggleQuoteExpanded={() => this.setQuoteExpanded(!this.state.isQuoteExpanded)}
                 onFinished={this.onCloseMenu}
                 rightClick={true}
                 reactions={this.state.reactions}

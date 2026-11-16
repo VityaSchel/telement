@@ -139,8 +139,8 @@ test.describe("Threads", () => {
             .locator(".mx_ThreadView")
             .locator(".mx_EventTile .mx_EventTile_line")
             .filter({ hasText: "Hello there" });
-        await locator.hover();
-        await locator.getByRole("toolbar", { name: "Message Actions" }).getByRole("button", { name: "React" }).click();
+        await locator.click({ button: "right" });
+        await page.getByRole("menuitem", { name: "React" }).click();
 
         locator = page.getByLabel("Emoji picker");
         await locator.getByRole("textbox").fill("wave");
@@ -202,8 +202,7 @@ test.describe("Threads", () => {
 
         // User redacts their prior response
         locator = page.locator(".mx_ThreadView .mx_EventTile .mx_EventTile_line").filter({ hasText: "Test" });
-        await locator.hover();
-        await locator.getByRole("button", { name: "Options" }).click();
+        await locator.click({ button: "right" });
 
         await page.locator(".mx_IconizedContextMenu").getByRole("menuitem", { name: "Remove" }).click();
         locator = page.locator(".mx_TextInputDialog").getByRole("button", { name: "Remove" });
@@ -285,8 +284,8 @@ test.describe("Threads", () => {
         // User edits & asserts
         locator = page.locator(".mx_ThreadView .mx_EventTile").last();
         await expect(locator.getByText("Great!")).toBeAttached();
-        await locator.locator(".mx_EventTile_line").hover();
-        await locator.locator(".mx_EventTile_line").getByRole("button", { name: "Edit" }).click();
+        await locator.locator(".mx_EventTile_line").click({ button: "right" });
+        await page.getByRole("menuitem", { name: "Edit" }).click();
         await locator.getByRole("textbox").pressSequentially(" How about yourself?"); // fill would overwrite the original text
         await locator.getByRole("textbox").press("Enter");
 
@@ -351,8 +350,8 @@ test.describe("Threads", () => {
             await locator.getByRole("textbox", { name: "Send an unencrypted message…" }).press("Enter");
             // Create thread
             const locator2 = locator.locator(".mx_EventTile[data-scroll-tokens]").filter({ hasText: "Hello Mr. Bot" });
-            await locator2.hover();
-            await locator2.getByRole("button", { name: "Reply in thread" }).click();
+            await locator2.click({ button: "right" });
+            await page.getByRole("menuitem", { name: "Reply in thread" }).click();
 
             await expect(page.locator(".mx_ThreadView_timelinePanelWrapper")).toHaveCount(1);
             await app.composerUploadFiles("thread", getSampleFilePath("riot.png"));
@@ -373,8 +372,8 @@ test.describe("Threads", () => {
             await locator.getByRole("textbox", { name: "Send an unencrypted message…" }).press("Enter");
             // Create thread
             const locator2 = locator.locator(".mx_EventTile[data-scroll-tokens]").filter({ hasText: "Hello Mr. Bot" });
-            await locator2.hover();
-            await locator2.getByRole("button", { name: "Reply in thread" }).click();
+            await locator2.click({ button: "right" });
+            await page.getByRole("menuitem", { name: "Reply in thread" }).click();
 
             await expect(page.locator(".mx_ThreadView_timelinePanelWrapper")).toHaveCount(1);
             await app.composerDragAndUploadFiles("thread", getSampleFilePath("riot.png"), "image/png");
@@ -395,8 +394,8 @@ test.describe("Threads", () => {
             await locator.getByRole("textbox", { name: "Send an unencrypted message…" }).press("Enter");
             // Create thread
             const locator2 = locator.locator(".mx_EventTile[data-scroll-tokens]").filter({ hasText: "Hello Mr. Bot" });
-            await locator2.hover();
-            await locator2.getByRole("button", { name: "Reply in thread" }).click();
+            await locator2.click({ button: "right" });
+            await page.getByRole("menuitem", { name: "Reply in thread" }).click();
 
             await expect(page.locator(".mx_ThreadView_timelinePanelWrapper")).toHaveCount(1);
             await app.composerDragAndPasteFile("thread", getSampleFilePath("riot.png"), "image/png");
@@ -452,8 +451,8 @@ test.describe("Threads", () => {
 
             // User replies to the location
             locator = page.locator(".mx_ThreadView");
-            await locator.locator(".mx_EventTile").last().hover();
-            await locator.locator(".mx_EventTile").last().getByRole("button", { name: "Reply" }).click();
+            await locator.locator(".mx_EventTile").last().click({ button: "right" });
+            await page.getByRole("menuitem", { name: "Reply" }).click();
             textbox = locator.getByRole("textbox", { name: "Reply to unencrypted thread…" });
             await textbox.fill("Please come here");
             await textbox.press("Enter");
@@ -480,8 +479,8 @@ test.describe("Threads", () => {
         await textbox.press("Enter");
         // Create thread
         const locator2 = locator.locator(".mx_EventTile[data-scroll-tokens]").filter({ hasText: "Hello Mr. Bot" });
-        await locator2.hover();
-        await locator2.getByRole("button", { name: "Reply in thread" }).click();
+        await locator2.click({ button: "right" });
+        await page.getByRole("menuitem", { name: "Reply in thread" }).click();
         await expect(page.locator(".mx_ThreadView_timelinePanelWrapper")).toHaveCount(1);
 
         // Send message to thread
@@ -497,8 +496,8 @@ test.describe("Threads", () => {
         locator = page
             .locator(".mx_RoomView_body .mx_EventTile[data-scroll-tokens]")
             .filter({ hasText: "Hello Mr. Bot" });
-        await locator.hover();
-        await locator.getByRole("button", { name: "Reply in thread" }).click();
+        await locator.click({ button: "right" });
+        await page.getByRole("menuitem", { name: "Reply in thread" }).click();
         await expect(page.locator(".mx_ThreadView_timelinePanelWrapper")).toHaveCount(1);
 
         locator = page.locator(".mx_BaseCard");
@@ -533,8 +532,8 @@ test.describe("Threads", () => {
             const messageTile = roomViewBody
                 .locator(".mx_EventTile[data-scroll-tokens]")
                 .filter({ hasText: rootMessage });
-            await messageTile.hover();
-            await messageTile.getByRole("button", { name: "Reply in thread" }).click();
+            await messageTile.click({ button: "right" });
+            await page.getByRole("menuitem", { name: "Reply in thread" }).click();
             await expect(page.locator(".mx_ThreadView_timelinePanelWrapper")).toHaveCount(1);
 
             // Send a message in the thread
@@ -597,8 +596,8 @@ test.describe("Threads", () => {
         const messageTile = roomViewBody
             .locator(".mx_EventTile[data-scroll-tokens]")
             .filter({ hasText: "Hello Mr. Bot" });
-        await messageTile.hover();
-        await messageTile.getByRole("button", { name: "Reply in thread" }).click();
+        await messageTile.click({ button: "right" });
+        await page.getByRole("menuitem", { name: "Reply in thread" }).click();
         await expect(page.locator(".mx_ThreadView_timelinePanelWrapper")).toHaveCount(1);
 
         const threadPanel = page.locator(".mx_ThreadPanel");

@@ -207,13 +207,14 @@ export function EventTileView({
                 </div>
                 {renderSlot("avatar")}
                 <div id={root.id} data-testid="event-tile-line" className={lineClassName}>
-                    {renderSlots("body", "threadInfo")}
+                    {renderSlots("contextMenu", "body", "threadInfo")}
                 </div>
                 {renderSlot("actionBar")}
                 {renderSlot("receipt")}
             </>,
             onClick,
             -1,
+            onContextMenu,
         );
     }
 

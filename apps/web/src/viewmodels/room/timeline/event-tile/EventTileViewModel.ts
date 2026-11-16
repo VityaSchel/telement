@@ -703,7 +703,6 @@ export class EventTileViewModel extends BaseViewModel<EventTileViewModelRenderSt
                 show: getShouldShowMessageActionBar({
                     isEditing: event.isEditing,
                     forExport: event.forExport,
-                    hover: interaction.hover,
                     showActionBarFromFocus: interaction.showActionBarFromFocus,
                     actionBarFocused: interaction.isActionBarFocused,
                     hasContextMenu: interaction.hasContextMenu,

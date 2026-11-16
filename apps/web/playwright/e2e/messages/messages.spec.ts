@@ -45,8 +45,8 @@ async function sendMultilineMessages(page: Page, messages: string[]) {
 
 async function replyMessage(page: Page, message: Locator, replyMessage: string): Promise<Locator> {
     const line = message.locator(".mx_EventTile_line");
-    await line.hover();
-    await line.getByRole("button", { name: "Reply", exact: true }).click();
+    await line.click({ button: "right" });
+    await page.getByRole("menuitem", { name: "Reply", exact: true }).click();
 
     await page.getByRole("textbox", { name: "Send an unencrypted reply…" }).fill(replyMessage);
     await page.getByRole("button", { name: "Send message" }).click();
@@ -58,8 +58,8 @@ async function replyMessage(page: Page, message: Locator, replyMessage: string):
 
 async function editMessage(page: Page, message: Locator, newMsg: string): Promise<void> {
     const line = message.locator(".mx_EventTile_line");
-    await line.hover();
-    await line.getByRole("button", { name: "Edit" }).click();
+    await line.click({ button: "right" });
+    await page.getByRole("menuitem", { name: "Edit" }).click();
     const editComposer = page.getByRole("textbox", { name: "Edit message" });
     await page.getByLabel("User menu").hover(); // Just to un-hover the message line
     await editComposer.fill(newMsg);
