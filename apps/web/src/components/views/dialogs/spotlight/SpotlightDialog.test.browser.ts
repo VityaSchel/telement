@@ -85,14 +85,10 @@ function spotlightDialog(arrows: string[], options = ["Home"], theme = "cpd-them
     `;
 }
 
-/** The "…" and bell buttons of a room's result, 16px icons padded by 2px. */
-const ROOM_RESULT_BUTTONS = ["menu", "notifications"]
-    .map(
-        (kind) =>
-            `<div class="mx_AccessibleButton mx_SpotlightDialog_option--${kind}" role="button">` +
-            `<svg viewBox="0 0 24 24"><rect width="24" height="24" /></svg></div>`,
-    )
-    .join("");
+/** The "…" button of a room's result, a 16px icon padded by 2px. */
+const ROOM_RESULT_BUTTONS =
+    `<button class="mx_SpotlightDialog_option--menu" aria-label="Room options">` +
+    `<svg viewBox="0 0 24 24"><rect width="24" height="24" /></svg></button>`;
 
 function element(selector: string): Element {
     return document.querySelector(selector)!;
@@ -317,9 +313,9 @@ describe("SpotlightDialog styles", () => {
         expect(avatar.top - option.top).toBe(8);
         expect(option.bottom - avatar.bottom).toBe(8);
         expect(avatar.left - option.left).toBe(8);
-        // The bell of the selected room's result, and the enter key of a result without buttons once selected
-        const bell = room.querySelector(".mx_SpotlightDialog_option--notifications")!.getBoundingClientRect();
-        expect(option.right - bell.right).toBe(8);
+        // The "…" of the selected room's result, and the enter key of a result without buttons once selected
+        const menu = room.querySelector(".mx_SpotlightDialog_option--menu")!.getBoundingClientRect();
+        expect(option.right - menu.right).toBe(8);
         person.setAttribute("aria-selected", "true");
         const enter = person.querySelector(".mx_SpotlightDialog_enterPrompt")!.getBoundingClientRect();
         expect(person.getBoundingClientRect().right - enter.right).toBe(8);

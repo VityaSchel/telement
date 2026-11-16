@@ -7,24 +7,20 @@ Please see LICENSE files in the repository root for full details.
 */
 
 import { type Room } from "matrix-js-sdk/src/matrix";
-import React, { Fragment, type JSX, type ReactNode, useState } from "react";
-import {
-    NotificationsOffSolidIcon,
-    OverflowHorizontalIcon,
-    NotificationsSolidIcon,
-} from "@vector-im/compound-design-tokens/assets/web/icons";
+import React, { Fragment, type JSX, useState } from "react";
+import { IconButton, Menu } from "@vector-im/compound-web";
+import { OverflowHorizontalIcon } from "@vector-im/compound-design-tokens/assets/web/icons";
+import { MoreOptionContent, useCreateAutoDisposedViewModel } from "@element-hq/web-shared-components";
 
 import { ContextMenuTooltipButton } from "../../../../accessibility/context_menu/ContextMenuTooltipButton";
-import { useNotificationState } from "../../../../hooks/useRoomNotificationState";
+import { useMatrixClientContext } from "../../../../contexts/MatrixClientContext";
 import { _t } from "../../../../languageHandler";
-import { RoomNotifState } from "../../../../RoomNotifs";
-import { RoomGeneralContextMenu } from "../../context_menus/RoomGeneralContextMenu";
-import { RoomNotificationContextMenu } from "../../context_menus/RoomNotificationContextMenu";
 import SpaceContextMenu from "../../context_menus/SpaceContextMenu";
 import { type ButtonEvent } from "../../elements/AccessibleButton";
 import { ChevronFace, type MenuProps } from "../../../structures/ContextMenu";
 import { shouldShowComponent } from "../../../../customisations/helpers/UIComponents";
 import { UIComponent } from "../../../../settings/UIFeature";
+import { RoomListItemViewModel } from "../../../../viewmodels/room-list/RoomListItemViewModel";
 
 interface Props {
     room: Room;
@@ -38,89 +34,77 @@ const contextMenuBelow = (elementRect: DOMRect): MenuProps => {
     return { left, top, chevronFace };
 };
 
-export function getNotificationIcon(state: RoomNotifState): ReactNode {
-    switch (state) {
-        case RoomNotifState.Mute:
-            return <NotificationsOffSolidIcon />;
-        default:
-            return <NotificationsSolidIcon />;
-    }
+/**
+ * The "…" button of a room or space in the search dialog's results. A room's menu is the room list's, notifications
+ * submenu included.
+ */
+export function RoomResultContextMenus({ room }: Props): JSX.Element | null {
+    if (!shouldShowComponent(UIComponent.RoomOptionsMenu)) return null;
+    return room.isSpaceRoom() ? <SpaceOptionsMenu room={room} /> : <RoomOptionsMenu room={room} />;
 }
 
-export function RoomResultContextMenus({ room }: Props): JSX.Element {
-    const [notificationState] = useNotificationState(room);
-
-    const [generalMenuPosition, setGeneralMenuPosition] = useState<DOMRect | null>(null);
-    const [notificationMenuPosition, setNotificationMenuPosition] = useState<DOMRect | null>(null);
-
-    let generalMenu: JSX.Element | undefined;
-    if (generalMenuPosition !== null) {
-        if (room.isSpaceRoom()) {
-            generalMenu = (
-                <SpaceContextMenu
-                    {...contextMenuBelow(generalMenuPosition)}
-                    space={room}
-                    onFinished={() => setGeneralMenuPosition(null)}
-                />
-            );
-        } else {
-            generalMenu = (
-                <RoomGeneralContextMenu
-                    {...contextMenuBelow(generalMenuPosition)}
-                    room={room}
-                    onFinished={() => setGeneralMenuPosition(null)}
-                />
-            );
-        }
-    }
-
-    let notificationMenu: JSX.Element | undefined;
-    if (notificationMenuPosition !== null) {
-        notificationMenu = (
-            <RoomNotificationContextMenu
-                {...contextMenuBelow(notificationMenuPosition)}
-                room={room}
-                onFinished={() => setNotificationMenuPosition(null)}
-            />
-        );
-    }
+function SpaceOptionsMenu({ room }: Props): JSX.Element {
+    const [menuPosition, setMenuPosition] = useState<DOMRect | null>(null);
 
     return (
         <Fragment>
-            {shouldShowComponent(UIComponent.RoomOptionsMenu) && (
-                <ContextMenuTooltipButton
-                    className="mx_SpotlightDialog_option--menu"
-                    onClick={(ev: ButtonEvent) => {
-                        ev.preventDefault();
-                        ev.stopPropagation();
+            <ContextMenuTooltipButton
+                className="mx_SpotlightDialog_option--menu"
+                onClick={(ev: ButtonEvent) => {
+                    ev.preventDefault();
+                    ev.stopPropagation();
 
-                        const target = ev.target as HTMLElement;
-                        setGeneralMenuPosition(target.getBoundingClientRect());
-                    }}
-                    title={room.isSpaceRoom() ? _t("space|context_menu|options") : _t("room|context_menu|title")}
-                    isExpanded={generalMenuPosition !== null}
-                >
-                    <OverflowHorizontalIcon />
-                </ContextMenuTooltipButton>
+                    const target = ev.target as HTMLElement;
+                    setMenuPosition(target.getBoundingClientRect());
+                }}
+                title={_t("space|context_menu|options")}
+                isExpanded={menuPosition !== null}
+            >
+                <OverflowHorizontalIcon />
+            </ContextMenuTooltipButton>
+            {menuPosition !== null && (
+                <SpaceContextMenu
+                    {...contextMenuBelow(menuPosition)}
+                    space={room}
+                    onFinished={() => setMenuPosition(null)}
+                />
             )}
-            {!room.isSpaceRoom() && (
-                <ContextMenuTooltipButton
-                    className="mx_SpotlightDialog_option--notifications"
-                    onClick={(ev: ButtonEvent) => {
-                        ev.preventDefault();
-                        ev.stopPropagation();
-
-                        const target = ev.target as HTMLElement;
-                        setNotificationMenuPosition(target.getBoundingClientRect());
-                    }}
-                    title={_t("room_list|notification_options")}
-                    isExpanded={notificationMenuPosition !== null}
-                >
-                    {getNotificationIcon(notificationState!)}
-                </ContextMenuTooltipButton>
-            )}
-            {generalMenu}
-            {notificationMenu}
         </Fragment>
     );
+}
+
+function RoomOptionsMenu({ room }: Props): JSX.Element {
+    const [open, setOpen] = useState(false);
+    const title = _t("room|context_menu|title");
+
+    return (
+        <Menu
+            open={open}
+            onOpenChange={setOpen}
+            title={title}
+            showTitle={false}
+            align="start"
+            trigger={
+                <IconButton
+                    className="mx_SpotlightDialog_option--menu"
+                    tooltip={title}
+                    aria-label={title}
+                    size="20px"
+                    // The result itself opens the room when clicked
+                    onClick={(ev) => ev.stopPropagation()}
+                >
+                    <OverflowHorizontalIcon />
+                </IconButton>
+            }
+        >
+            <RoomOptionsMenuContent room={room} />
+        </Menu>
+    );
+}
+
+/** The menu's items. The room's view model only exists while the menu is open, as the dialog lists many rooms. */
+function RoomOptionsMenuContent({ room }: Props): JSX.Element {
+    const client = useMatrixClientContext();
+    const vm = useCreateAutoDisposedViewModel(() => new RoomListItemViewModel({ room, client }));
+    return <MoreOptionContent vm={vm} />;
 }

@@ -378,8 +378,7 @@ Please see LICENSE files in the repository root for full details.
                     margin-left: var(--cpd-space-2x);
                 }
 
-                .mx_SpotlightDialog_option--menu,
-                .mx_SpotlightDialog_option--notifications {
+                .mx_SpotlightDialog_option--menu {
                     width: 16px;
                     height: 16px;
                     padding: var(--cpd-space-0-5x);
@@ -400,12 +399,16 @@ Please see LICENSE files in the repository root for full details.
                     &:focus-visible svg {
                         color: $secondary-content;
                     }
+
+                    /* The open menu stays with its button when the pointer leaves the result */
+                    &[aria-expanded="true"] {
+                        display: block;
+                    }
                 }
 
                 &:hover,
                 &[aria-selected="true"] {
-                    .mx_SpotlightDialog_option--menu,
-                    .mx_SpotlightDialog_option--notifications {
+                    .mx_SpotlightDialog_option--menu {
                         display: block;
                     }
 

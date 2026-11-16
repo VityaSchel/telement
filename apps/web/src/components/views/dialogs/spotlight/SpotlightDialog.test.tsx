@@ -387,6 +387,9 @@ describe("Spotlight Dialog", () => {
         let options: NodeListOf<Element>;
 
         beforeAll(async () => {
+            // The "Public spaces" option shows until the server is known to lack space filtering, which could
+            // otherwise be found out before the options are counted or not
+            vi.spyOn(mockedClient, "isVersionSupported").mockResolvedValue(true);
             render(<SpotlightDialog initialText="test23" onFinished={() => null} />);
             // search is debounced
             vi.advanceTimersByTime(200);
