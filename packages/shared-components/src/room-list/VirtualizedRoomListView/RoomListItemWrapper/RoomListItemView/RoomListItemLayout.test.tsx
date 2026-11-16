@@ -282,6 +282,38 @@ describe("Room list item layout", () => {
         expect(plate.right - time.right).toBe(8);
     });
 
+    it("puts the check 2px before the time, centered on its line, in the accent color", () => {
+        const row = renderRow({ lastMessageState: "read", messagePreviewSender: "You" });
+        const plate = rect(part(row, styles.container));
+        const check = screen.getByTestId("last-message-read");
+        const time = rect(screen.getByText("12:41"));
+
+        expect(rect(check).width).toBe(16);
+        expect(time.left - rect(check).right).toBe(2);
+        expect(plate.right - time.right).toBe(8);
+        expect(center(check)).toBeCloseTo(center(part(row, styles.titleRow)), 5);
+        expect(getComputedStyle(check).color).toBe(colorOf("--cpd-color-icon-accent-primary"));
+    });
+
+    it("hides the check with the time when the more options button takes its place", async () => {
+        const row = renderRow({ lastMessageState: "sent", messagePreviewSender: "You" });
+
+        await userEvent.hover(row);
+
+        expect(getComputedStyle(screen.getByTestId("last-message-sent")).visibility).toBe("hidden");
+    });
+
+    it("shows the draft label in red, and on the selected plate in the on-solid color", () => {
+        const { unmount } = render(<Row draft="See you at nine" />);
+        expect(getComputedStyle(screen.getByText("Draft:")).color).toBe(colorOf("--cpd-color-text-critical-primary"));
+        unmount();
+
+        render(<Row isSelected={true} lastMessageState="read" messagePreviewSender="You" />);
+        expect(getComputedStyle(screen.getByTestId("last-message-read")).color).toBe(
+            colorOf("--cpd-color-text-on-solid-primary"),
+        );
+    });
+
     it("fills the selected plate with the accent and puts everything on it in the on-solid color", () => {
         const row = renderRow({
             isSelected: true,

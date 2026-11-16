@@ -7,14 +7,20 @@
 
 import React, { type JSX, memo, type ReactNode } from "react";
 import { Text, Tooltip } from "@vector-im/compound-web";
-import { NotificationsOffSolidIcon, PinSolidIcon } from "@vector-im/compound-design-tokens/assets/web/icons";
+import {
+    CheckIcon,
+    NotificationsOffSolidIcon,
+    PinSolidIcon,
+    TimeIcon,
+} from "@vector-im/compound-design-tokens/assets/web/icons";
 import classNames from "classnames";
 
 import { useViewModel } from "../../../../core/viewmodel";
 import { _t } from "../../../../core/i18n/i18n";
 import { NotificationDecoration } from "./NotificationDecoration";
 import { RoomListItemHoverMenu } from "./RoomListItemHoverMenu";
-import { type Room, type RoomListItemViewModel } from "./RoomListItemView";
+import { type Room, type RoomListItemLastMessageState, type RoomListItemViewModel } from "./RoomListItemView";
+import { DoubleCheckIcon } from "../../../../telement/core/icons/DoubleCheckIcon";
 import styles from "./RoomListItemView.module.css";
 
 /**
@@ -25,24 +31,52 @@ export interface RoomListItemContentProps {
     vm: RoomListItemViewModel;
     /** Function to render the room avatar */
     renderAvatar: (room: Room) => ReactNode;
+    /** Whether the room is the one open, whose draft is in its composer rather than shown in the list */
+    isSelected?: boolean;
+}
+
+/** The check or clock before the time, as Telegram shows for the user's own last message */
+function LastMessageStateIcon({ state }: { state: RoomListItemLastMessageState }): JSX.Element {
+    const Icon = { sending: TimeIcon, sent: CheckIcon, read: DoubleCheckIcon }[state];
+    return (
+        <Icon
+            className={classNames(styles.lastMessageState, { [styles.sending]: state === "sending" })}
+            width="16px"
+            height="16px"
+            aria-hidden={true}
+            data-testid={`last-message-${state}`}
+        />
+    );
 }
 
 /**
  * The plate of a room list item, laid out like a Telegram chat: the avatar, the room name with a bell when the room is
- * muted and the time, then two lines of message preview (or who is typing) with the notification decoration, or a pin
- * for a pinned room without one, at the end of the second line. On hover the "…" button takes the time's place.
+ * muted and the time, after a check when the last message is the user's own, then two lines of message preview (or
+ * who is typing, or the user's draft) with the notification decoration, or a pin for a pinned room without one, at the
+ * end of the second line. On hover the "…" button takes the time's place.
  */
 export const RoomListItemContent = memo(function RoomListItemContent({
     vm,
     renderAvatar,
+    isSelected,
 }: RoomListItemContentProps): JSX.Element {
     const item = useViewModel(vm);
     // Like Telegram, a pinned room shows a pin where its unread badge would be, unless it has one
     const showPin = item.isFavourite && !item.notification.hasAnyNotificationOrActivity && !item.notification.callType;
 
+    const draft = isSelected ? undefined : item.draft;
     let preview: ReactNode;
+    let previewTitle = item.messagePreview;
     if (item.typing) {
         preview = <span className={styles.typing}>{item.typing}</span>;
+        previewTitle = undefined;
+    } else if (draft) {
+        preview = _t(
+            "telement|room_list|draft_preview",
+            { draft },
+            { label: (sub) => <span className={styles.draftLabel}>{sub}</span> },
+        );
+        previewTitle = draft;
     } else if (item.messagePreview && item.messagePreviewSender) {
         preview = _t(
             "telement|room_list|message_preview",
@@ -83,20 +117,23 @@ export const RoomListItemContent = memo(function RoomListItemContent({
                     <div className={styles.timeSlot}>
                         {/* A class that the app's screenshot tests can hide, as the time changes from run to run */}
                         {item.timestamp && (
-                            <time
-                                className={classNames(styles.time, "mx_RoomListItemView_time")}
-                                dateTime={item.timestampIso}
-                                title={item.timestampFull}
-                            >
-                                {item.timestamp}
-                            </time>
+                            <span className={styles.timestamp}>
+                                {item.lastMessageState && <LastMessageStateIcon state={item.lastMessageState} />}
+                                <time
+                                    className={classNames(styles.time, "mx_RoomListItemView_time")}
+                                    dateTime={item.timestampIso}
+                                    title={item.timestampFull}
+                                >
+                                    {item.timestamp}
+                                </time>
+                            </span>
                         )}
                         {item.showMoreOptionsMenu && <RoomListItemHoverMenu vm={vm} />}
                     </div>
                 </div>
                 <div className={styles.previewRow}>
                     {preview && (
-                        <div className={styles.preview} title={item.typing ? undefined : item.messagePreview}>
+                        <div className={styles.preview} title={previewTitle}>
                             {preview}
                         </div>
                     )}

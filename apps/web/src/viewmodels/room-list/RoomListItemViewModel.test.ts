@@ -46,6 +46,7 @@ import { countUnreadMessages } from "../../telement/room-list/countUnreadMessage
 import { MARKED_UNREAD_TYPE_STABLE } from "../../utils/notifications";
 import { MatrixClientPeg } from "../../MatrixClientPeg";
 import { usersTypingApartFromMeAndIgnored } from "../../WhoIsTyping";
+import { notifyDraftChanged } from "../../telement/room-list/roomDrafts";
 
 vi.mock("./utils", () => ({
     hasAccessToOptionsMenu: vi.fn().mockReturnValue(true),
@@ -435,6 +436,91 @@ describe("RoomListItemViewModel", () => {
             notificationState.emit(NotificationStateEvents.Update);
 
             expect(viewModel.getSnapshot().messagePreviewSender).toBe("You");
+        });
+    });
+
+    describe("Draft", () => {
+        const saveDraft = (text: string): void => {
+            localStorage.setItem(`mx_cider_state_${room.roomId}`, JSON.stringify({ parts: [{ type: "plain", text }] }));
+            notifyDraftChanged(room.roomId);
+        };
+
+        afterEach(() => {
+            localStorage.clear();
+        });
+
+        it("should show the draft saved before the room list", () => {
+            localStorage.setItem(
+                `mx_cider_state_${room.roomId}`,
+                JSON.stringify({ parts: [{ type: "plain", text: "Half a thought" }] }),
+            );
+            viewModel = new RoomListItemViewModel({ room, client: matrixClient });
+
+            expect(viewModel.getSnapshot().draft).toBe("Half a thought");
+        });
+
+        it("should follow the composer saving and clearing the draft", () => {
+            viewModel = new RoomListItemViewModel({ room, client: matrixClient });
+            expect(viewModel.getSnapshot().draft).toBeUndefined();
+
+            saveDraft("See you at nine");
+            expect(viewModel.getSnapshot().draft).toBe("See you at nine");
+
+            localStorage.removeItem(`mx_cider_state_${room.roomId}`);
+            notifyDraftChanged(room.roomId);
+            expect(viewModel.getSnapshot().draft).toBeUndefined();
+        });
+
+        it("should keep the draft when the room's notifications change, and stop following it once disposed", () => {
+            viewModel = new RoomListItemViewModel({ room, client: matrixClient });
+            saveDraft("See you at nine");
+            notificationState.emit(NotificationStateEvents.Update);
+            expect(viewModel.getSnapshot().draft).toBe("See you at nine");
+
+            viewModel.dispose();
+            saveDraft("Changed");
+            expect(viewModel.getSnapshot().draft).toBe("See you at nine");
+        });
+    });
+
+    describe("Read checks", () => {
+        it("should show one check for the user's own last message, and two once another member reads it", async () => {
+            const preview = previewOf("Pushed the spec");
+            vi.spyOn(MessagePreviewStore.instance, "getPreviewForRoom").mockResolvedValue(preview);
+            const readUpTo = vi.spyOn(room, "getUsersReadUpTo").mockReturnValue([matrixClient.getSafeUserId()]);
+            viewModel = new RoomListItemViewModel({ room, client: matrixClient });
+            await flushPromises();
+            expect(viewModel.getSnapshot().lastMessageState).toBe("sent");
+
+            readUpTo.mockReturnValue([matrixClient.getSafeUserId(), "@bob:server"]);
+            room.emit(RoomEvent.Receipt, new MatrixEvent({ type: "m.receipt" }), room);
+
+            expect(readUpTo).toHaveBeenCalledWith(preview.event);
+            expect(viewModel.getSnapshot().lastMessageState).toBe("read");
+        });
+
+        it("should show no check for someone else's last message", async () => {
+            const event = mkMessage({ event: true, room: room.roomId, user: "@bob:server", msg: "Hi" });
+            vi.spyOn(MessagePreviewStore.instance, "getPreviewForRoom").mockResolvedValue({
+                event,
+                text: "Bob: Hi",
+                isThreadReply: false,
+            });
+            viewModel = new RoomListItemViewModel({ room, client: matrixClient });
+            await flushPromises();
+
+            expect(viewModel.getSnapshot().lastMessageState).toBeUndefined();
+        });
+
+        it("should keep the check when the room's notifications change", async () => {
+            vi.spyOn(MessagePreviewStore.instance, "getPreviewForRoom").mockResolvedValue(previewOf("Hi"));
+            vi.spyOn(room, "getUsersReadUpTo").mockReturnValue(["@bob:server"]);
+            viewModel = new RoomListItemViewModel({ room, client: matrixClient });
+            await flushPromises();
+
+            notificationState.emit(NotificationStateEvents.Update);
+
+            expect(viewModel.getSnapshot().lastMessageState).toBe("read");
         });
     });
 

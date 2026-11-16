@@ -110,6 +110,23 @@
     }
 }
 
+/* The time with the check before it */
+.timestamp {
+    display: flex;
+    align-items: center;
+    gap: var(--cpd-space-0-5x);
+}
+
+/* Like Telegram, the checks take the accent color and the clock is gray */
+.lastMessageState {
+    flex-shrink: 0;
+    color: var(--cpd-color-icon-accent-primary);
+}
+
+.lastMessageState.sending {
+    color: var(--cpd-color-icon-tertiary);
+}
+
 .time {
     font: var(--cpd-font-body-sm-regular);
     line-height: var(--cpd-font-line-height-tight);
@@ -160,6 +177,11 @@
     color: var(--cpd-color-text-action-accent);
 }
 
+/* Like Telegram, "Draft:" is red before the draft's text */
+.draftLabel {
+    color: var(--cpd-color-text-critical-primary);
+}
+
 /* One preview line tall, so the badges, the pin and the icons are centered on that line */
 .notificationDecoration {
     flex-shrink: 0;
@@ -200,7 +222,7 @@
     }
 
     /* The time gives way to the "…" button; the badges stay */
-    .timeSlot:has(.hoverMenu) .time {
+    .timeSlot:has(.hoverMenu) .timestamp {
         visibility: hidden;
     }
 
@@ -228,7 +250,7 @@
         color: var(--cpd-color-text-on-solid-primary);
     }
 
-    :is(.roomName, .sender, .typing) {
+    :is(.roomName, .sender, .typing, .draftLabel, .lastMessageState) {
         color: inherit;
     }
 

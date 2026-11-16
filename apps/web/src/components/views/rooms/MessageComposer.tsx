@@ -64,6 +64,7 @@ import PlatformPeg from "../../../PlatformPeg";
 import { ModuleApi } from "../../../modules/Api";
 import { AttachButton } from "../../../telement/composer/AttachButton";
 import { TelegramComposerActions } from "../../../telement/composer/TelegramComposerActions";
+import { notifyDraftChanged } from "../../../telement/room-list/roomDrafts";
 
 // The prefix used when persisting editor drafts to localstorage.
 export const WYSIWYG_EDITOR_STATE_STORAGE_PREFIX = "mx_wysiwyg_state_";
@@ -196,6 +197,7 @@ export class MessageComposer extends React.Component<IProps, IState> {
                 replyEventId: replyEventId,
             };
             localStorage.setItem(this.editorStateKey, JSON.stringify(item));
+            notifyDraftChanged(this.props.room.roomId);
         } else {
             this.clearStoredEditorState();
         }
@@ -209,6 +211,7 @@ export class MessageComposer extends React.Component<IProps, IState> {
 
     private clearStoredEditorState(): void {
         localStorage.removeItem(this.editorStateKey);
+        notifyDraftChanged(this.props.room.roomId);
     }
 
     private get voiceRecording(): VoiceMessageRecording | undefined {

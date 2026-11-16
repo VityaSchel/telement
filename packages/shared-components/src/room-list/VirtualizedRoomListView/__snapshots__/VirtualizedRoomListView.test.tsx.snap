@@ -70,11 +70,15 @@ exports[`<VirtualizedRoomListView /> > renders Default story 1`] = `
                       <div
                         class="RoomListItemView-module_timeSlot"
                       >
-                        <time
-                          class="RoomListItemView-module_time mx_RoomListItemView_time"
+                        <span
+                          class="RoomListItemView-module_timestamp"
                         >
-                          12:00
-                        </time>
+                          <time
+                            class="RoomListItemView-module_time mx_RoomListItemView_time"
+                          >
+                            12:00
+                          </time>
+                        </span>
                         <div
                           class="Flex-module_flex RoomListItemView-module_hoverMenu"
                           style="--mx-flex-display: flex; --mx-flex-direction: row; --mx-flex-align: center; --mx-flex-justify: start; --mx-flex-gap: var(--cpd-space-1x); --mx-flex-wrap: nowrap;"
@@ -211,11 +215,15 @@ exports[`<VirtualizedRoomListView /> > renders Default story 1`] = `
                       <div
                         class="RoomListItemView-module_timeSlot"
                       >
-                        <time
-                          class="RoomListItemView-module_time mx_RoomListItemView_time"
+                        <span
+                          class="RoomListItemView-module_timestamp"
                         >
-                          11:07
-                        </time>
+                          <time
+                            class="RoomListItemView-module_time mx_RoomListItemView_time"
+                          >
+                            11:07
+                          </time>
+                        </span>
                         <div
                           class="Flex-module_flex RoomListItemView-module_hoverMenu"
                           style="--mx-flex-display: flex; --mx-flex-direction: row; --mx-flex-align: center; --mx-flex-justify: start; --mx-flex-gap: var(--cpd-space-1x); --mx-flex-wrap: nowrap;"
@@ -312,11 +320,15 @@ exports[`<VirtualizedRoomListView /> > renders Default story 1`] = `
                       <div
                         class="RoomListItemView-module_timeSlot"
                       >
-                        <time
-                          class="RoomListItemView-module_time mx_RoomListItemView_time"
+                        <span
+                          class="RoomListItemView-module_timestamp"
                         >
-                          10:14
-                        </time>
+                          <time
+                            class="RoomListItemView-module_time mx_RoomListItemView_time"
+                          >
+                            10:14
+                          </time>
+                        </span>
                         <div
                           class="Flex-module_flex RoomListItemView-module_hoverMenu"
                           style="--mx-flex-display: flex; --mx-flex-direction: row; --mx-flex-align: center; --mx-flex-justify: start; --mx-flex-gap: var(--cpd-space-1x); --mx-flex-wrap: nowrap;"
@@ -419,11 +431,15 @@ exports[`<VirtualizedRoomListView /> > renders Default story 1`] = `
                       <div
                         class="RoomListItemView-module_timeSlot"
                       >
-                        <time
-                          class="RoomListItemView-module_time mx_RoomListItemView_time"
+                        <span
+                          class="RoomListItemView-module_timestamp"
                         >
-                          9:21
-                        </time>
+                          <time
+                            class="RoomListItemView-module_time mx_RoomListItemView_time"
+                          >
+                            9:21
+                          </time>
+                        </span>
                         <div
                           class="Flex-module_flex RoomListItemView-module_hoverMenu"
                           style="--mx-flex-display: flex; --mx-flex-direction: row; --mx-flex-align: center; --mx-flex-justify: start; --mx-flex-gap: var(--cpd-space-1x); --mx-flex-wrap: nowrap;"
@@ -520,11 +536,15 @@ exports[`<VirtualizedRoomListView /> > renders Default story 1`] = `
                       <div
                         class="RoomListItemView-module_timeSlot"
                       >
-                        <time
-                          class="RoomListItemView-module_time mx_RoomListItemView_time"
+                        <span
+                          class="RoomListItemView-module_timestamp"
                         >
-                          8:28
-                        </time>
+                          <time
+                            class="RoomListItemView-module_time mx_RoomListItemView_time"
+                          >
+                            8:28
+                          </time>
+                        </span>
                         <div
                           class="Flex-module_flex RoomListItemView-module_hoverMenu"
                           style="--mx-flex-display: flex; --mx-flex-direction: row; --mx-flex-align: center; --mx-flex-justify: start; --mx-flex-gap: var(--cpd-space-1x); --mx-flex-wrap: nowrap;"
@@ -634,11 +654,15 @@ exports[`<VirtualizedRoomListView /> > renders Default story 1`] = `
                       <div
                         class="RoomListItemView-module_timeSlot"
                       >
-                        <time
-                          class="RoomListItemView-module_time mx_RoomListItemView_time"
+                        <span
+                          class="RoomListItemView-module_timestamp"
                         >
-                          7:35
-                        </time>
+                          <time
+                            class="RoomListItemView-module_time mx_RoomListItemView_time"
+                          >
+                            7:35
+                          </time>
+                        </span>
                         <div
                           class="Flex-module_flex RoomListItemView-module_hoverMenu"
                           style="--mx-flex-display: flex; --mx-flex-direction: row; --mx-flex-align: center; --mx-flex-justify: start; --mx-flex-gap: var(--cpd-space-1x); --mx-flex-wrap: nowrap;"
@@ -764,11 +788,15 @@ exports[`<VirtualizedRoomListView /> > renders Default story 1`] = `
                       <div
                         class="RoomListItemView-module_timeSlot"
                       >
-                        <time
-                          class="RoomListItemView-module_time mx_RoomListItemView_time"
+                        <span
+                          class="RoomListItemView-module_timestamp"
                         >
-                          6:42
-                        </time>
+                          <time
+                            class="RoomListItemView-module_time mx_RoomListItemView_time"
+                          >
+                            6:42
+                          </time>
+                        </span>
                         <div
                           class="Flex-module_flex RoomListItemView-module_hoverMenu"
                           style="--mx-flex-display: flex; --mx-flex-direction: row; --mx-flex-align: center; --mx-flex-justify: start; --mx-flex-gap: var(--cpd-space-1x); --mx-flex-wrap: nowrap;"
@@ -871,11 +899,15 @@ exports[`<VirtualizedRoomListView /> > renders Default story 1`] = `
                       <div
                         class="RoomListItemView-module_timeSlot"
                       >
-                        <time
-                          class="RoomListItemView-module_time mx_RoomListItemView_time"
+                        <span
+                          class="RoomListItemView-module_timestamp"
                         >
-                          5:49
-                        </time>
+                          <time
+                            class="RoomListItemView-module_time mx_RoomListItemView_time"
+                          >
+                            5:49
+                          </time>
+                        </span>
                         <div
                           class="Flex-module_flex RoomListItemView-module_hoverMenu"
                           style="--mx-flex-display: flex; --mx-flex-direction: row; --mx-flex-align: center; --mx-flex-justify: start; --mx-flex-gap: var(--cpd-space-1x); --mx-flex-wrap: nowrap;"
@@ -972,11 +1004,15 @@ exports[`<VirtualizedRoomListView /> > renders Default story 1`] = `
                       <div
                         class="RoomListItemView-module_timeSlot"
                       >
-                        <time
-                          class="RoomListItemView-module_time mx_RoomListItemView_time"
+                        <span
+                          class="RoomListItemView-module_timestamp"
                         >
-                          4:56
-                        </time>
+                          <time
+                            class="RoomListItemView-module_time mx_RoomListItemView_time"
+                          >
+                            4:56
+                          </time>
+                        </span>
                         <div
                           class="Flex-module_flex RoomListItemView-module_hoverMenu"
                           style="--mx-flex-display: flex; --mx-flex-direction: row; --mx-flex-align: center; --mx-flex-justify: start; --mx-flex-gap: var(--cpd-space-1x); --mx-flex-wrap: nowrap;"
@@ -1086,11 +1122,15 @@ exports[`<VirtualizedRoomListView /> > renders Default story 1`] = `
                       <div
                         class="RoomListItemView-module_timeSlot"
                       >
-                        <time
-                          class="RoomListItemView-module_time mx_RoomListItemView_time"
+                        <span
+                          class="RoomListItemView-module_timestamp"
                         >
-                          3:03
-                        </time>
+                          <time
+                            class="RoomListItemView-module_time mx_RoomListItemView_time"
+                          >
+                            3:03
+                          </time>
+                        </span>
                         <div
                           class="Flex-module_flex RoomListItemView-module_hoverMenu"
                           style="--mx-flex-display: flex; --mx-flex-direction: row; --mx-flex-align: center; --mx-flex-justify: start; --mx-flex-gap: var(--cpd-space-1x); --mx-flex-wrap: nowrap;"

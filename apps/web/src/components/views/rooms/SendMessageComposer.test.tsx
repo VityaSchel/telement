@@ -33,6 +33,7 @@ import { MessageComposerUrlPreviewViewModel } from "../../../viewmodels/composer
 import { SDKContext } from "../../../contexts/SDKContext.ts";
 import { UrlPreviewApi } from "../../../modules/UrlPreviewApi.ts";
 import { attachUrlPreviews } from "../../../utils/messages";
+import { getDraftPreview, onDraftChanged } from "../../../telement/room-list/roomDrafts";
 
 vi.mock("../../../utils/local-room", () => ({
     doMaybeLocalRoomAction: vi.fn(),
@@ -259,6 +260,24 @@ describe("<SendMessageComposer/>", () => {
             localStorage.removeItem(key);
             ({ container } = getComponent(props));
             expect(container.textContent).toBe("");
+        });
+
+        it("tells the room list when it saves or clears the draft", () => {
+            const onDraft = vi.fn();
+            const stop = onDraftChanged("myfakeroom", onDraft);
+            const { container, unmount: unmountFirst } = getComponent();
+            addTextToComposer(container, "Test Text");
+
+            unmountFirst();
+            expect(onDraft).toHaveBeenCalledTimes(1);
+            expect(getDraftPreview("myfakeroom")).toBe("Test Text");
+
+            // A composer left empty clears the draft
+            localStorage.removeItem("mx_cider_state_myfakeroom");
+            getComponent().unmount();
+            stop();
+            expect(onDraft).toHaveBeenCalledTimes(2);
+            expect(getDraftPreview("myfakeroom")).toBeUndefined();
         });
 
         it("restores the draft when replaced by another composer for the same room in the same render", () => {

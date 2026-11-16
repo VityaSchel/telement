@@ -66,6 +66,7 @@ import { attachMentions, attachRelation, attachUrlPreviews } from "../../../util
 import { type RoomUploadViewModel, useRoomUploadViewModel } from "../../../viewmodels/room/RoomUploadViewModel";
 import { type MessageComposerUrlPreviewViewModel } from "../../../viewmodels/composer/MessageComposerUrlPreviewViewModel";
 import { linksIn } from "../../../utils/UrlUtils";
+import { notifyDraftChanged } from "../../../telement/room-list/roomDrafts";
 import { type MessageComposerUrlPreviewSnapshot } from "@element-hq/web-shared-components";
 
 // The prefix used when persisting editor drafts to localstorage.
@@ -511,6 +512,7 @@ export class SendMessageComposer extends React.Component<ISendMessageComposerPro
 
     private clearStoredEditorState(): void {
         localStorage.removeItem(this.editorStateKey);
+        notifyDraftChanged(this.props.room.roomId);
     }
 
     private restoreStoredEditorState(partCreator: PartCreator): Part[] | null {
@@ -549,6 +551,7 @@ export class SendMessageComposer extends React.Component<ISendMessageComposerPro
         if (this.shouldSaveStoredEditorState()) {
             const item = SendHistoryManager.createItem(this.model, this.props.replyToEvent);
             localStorage.setItem(this.editorStateKey, JSON.stringify(item));
+            notifyDraftChanged(this.props.room.roomId);
         } else {
             this.clearStoredEditorState();
         }

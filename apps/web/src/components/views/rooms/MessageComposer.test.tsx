@@ -43,6 +43,7 @@ import { TimelineRenderingType, type RoomContextType } from "../../../contexts/R
 import { RoomUploadContextProvider } from "../../../viewmodels/room/RoomUploadViewModel.tsx";
 import { SDKContext } from "../../../contexts/SDKContext.ts";
 import { SDKContextClass } from "../../../contexts/SDKContextClass.ts";
+import { onDraftChanged } from "../../../telement/room-list/roomDrafts";
 
 const openStickerPicker = async (): Promise<void> => {
     await userEvent.click(screen.getByRole("button", { name: "Emoji" }));
@@ -88,6 +89,8 @@ describe("MessageComposer", () => {
         await flushPromises();
 
         const key = `mx_wysiwyg_state_${room.roomId}`;
+        const onDraft = vi.fn();
+        const stopListening = onDraftChanged(room.roomId, onDraft);
 
         await userEvent.click(await screen.findByRole("textbox"));
         fireEvent.input(screen.getByRole("textbox"), {
@@ -111,6 +114,8 @@ describe("MessageComposer", () => {
             content: messageText,
             isRichText: true,
         });
+        stopListening();
+        expect(onDraft).toHaveBeenCalledTimes(1);
 
         // ensure the correct state is re-loaded
         render(rawComponent);

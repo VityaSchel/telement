@@ -38,6 +38,11 @@ const {
     Pinned,
     PinnedWithNotification,
     PinnedAndMuted,
+    Draft,
+    SelectedWithDraft,
+    OwnMessageSending,
+    OwnMessageSent,
+    OwnMessageRead,
 } = composeStories(stories);
 
 describe("<RoomListItemView />", () => {
@@ -103,6 +108,44 @@ describe("<RoomListItemView />", () => {
         expect(typing).toHaveClass(styles.typing);
         expect(typing.parentElement).toHaveClass(styles.preview);
         expect(screen.queryByText(/Hey everyone!/)).toBeNull();
+    });
+
+    it("should show the user's draft after a red label instead of the message preview", () => {
+        render(<Draft />);
+        const label = screen.getByText("Draft:");
+        expect(label).toHaveClass(styles.draftLabel);
+        const preview = label.closest(`.${styles.preview}`);
+        expect(preview).toHaveTextContent("Draft: Let's meet at the station at nine");
+        expect(preview).toHaveAttribute("title", "Let's meet at the station at nine");
+        expect(screen.queryByText(/Hey everyone!/)).toBeNull();
+    });
+
+    it("should show the open room's last message rather than its draft", () => {
+        render(<SelectedWithDraft />);
+        expect(screen.queryByText("Draft:")).toBeNull();
+        expect(screen.getByText(/Hey everyone!/)).toBeInTheDocument();
+    });
+
+    it("should show who is typing rather than the draft", () => {
+        render(<Draft typing="Alice is typing …" />);
+        expect(screen.getByText("Alice is typing …")).toBeInTheDocument();
+        expect(screen.queryByText("Draft:")).toBeNull();
+    });
+
+    it.each([
+        ["a clock while the user's last message is being sent", OwnMessageSending, "sending"],
+        ["one check once it is sent", OwnMessageSent, "sent"],
+        ["two checks once someone has read it", OwnMessageRead, "read"],
+    ])("should show %s, before the time", (_, Story, state) => {
+        render(<Story />);
+        const icon = screen.getByTestId(`last-message-${state}`);
+        expect(icon).toHaveClass(styles.lastMessageState);
+        expect(icon.nextElementSibling).toBe(screen.getByText("12:41"));
+    });
+
+    it("should show no check for someone else's message", () => {
+        render(<Default />);
+        expect(screen.queryByTestId(/^last-message-/)).toBeNull();
     });
 
     it("should show when the room was last active at the end of its name, with the full date on hover", () => {
@@ -406,7 +449,7 @@ describe("<RoomListItemView />", () => {
 
         expect(moreButton).toBeVisible();
         expect(time).not.toBeVisible();
-        expect(time.parentElement).toBe(moreButton.closest(`.${styles.timeSlot}`));
+        expect(time.closest(`.${styles.timeSlot}`)).toBe(moreButton.closest(`.${styles.timeSlot}`));
         expect(screen.getByTestId("notification-decoration")).toBeVisible();
     });
 

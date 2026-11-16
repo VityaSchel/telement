@@ -44,13 +44,17 @@ exports[`<RoomListItemView /> > renders Default story 1`] = `
             <div
               class="RoomListItemView-module_timeSlot"
             >
-              <time
-                class="RoomListItemView-module_time mx_RoomListItemView_time"
-                datetime="2026-11-13T12:41:08.000Z"
-                title="Fri, Nov 13, 2026, 12:41:08 PM"
+              <span
+                class="RoomListItemView-module_timestamp"
               >
-                12:41
-              </time>
+                <time
+                  class="RoomListItemView-module_time mx_RoomListItemView_time"
+                  datetime="2026-11-13T12:41:08.000Z"
+                  title="Fri, Nov 13, 2026, 12:41:08 PM"
+                >
+                  12:41
+                </time>
+              </span>
               <div
                 class="Flex-module_flex RoomListItemView-module_hoverMenu"
                 style="--mx-flex-display: flex; --mx-flex-direction: row; --mx-flex-align: center; --mx-flex-justify: start; --mx-flex-gap: var(--cpd-space-1x); --mx-flex-wrap: nowrap;"
@@ -162,13 +166,17 @@ exports[`<RoomListItemView /> > renders DirectMessage story 1`] = `
             <div
               class="RoomListItemView-module_timeSlot"
             >
-              <time
-                class="RoomListItemView-module_time mx_RoomListItemView_time"
-                datetime="2026-11-13T12:41:08.000Z"
-                title="Fri, Nov 13, 2026, 12:41:08 PM"
+              <span
+                class="RoomListItemView-module_timestamp"
               >
-                12:41
-              </time>
+                <time
+                  class="RoomListItemView-module_time mx_RoomListItemView_time"
+                  datetime="2026-11-13T12:41:08.000Z"
+                  title="Fri, Nov 13, 2026, 12:41:08 PM"
+                >
+                  12:41
+                </time>
+              </span>
               <div
                 class="Flex-module_flex RoomListItemView-module_hoverMenu"
                 style="--mx-flex-display: flex; --mx-flex-direction: row; --mx-flex-align: center; --mx-flex-justify: start; --mx-flex-gap: var(--cpd-space-1x); --mx-flex-wrap: nowrap;"
@@ -273,13 +281,17 @@ exports[`<RoomListItemView /> > renders Invitation story 1`] = `
             <div
               class="RoomListItemView-module_timeSlot"
             >
-              <time
-                class="RoomListItemView-module_time mx_RoomListItemView_time"
-                datetime="2026-11-13T12:41:08.000Z"
-                title="Fri, Nov 13, 2026, 12:41:08 PM"
+              <span
+                class="RoomListItemView-module_timestamp"
               >
-                12:41
-              </time>
+                <time
+                  class="RoomListItemView-module_time mx_RoomListItemView_time"
+                  datetime="2026-11-13T12:41:08.000Z"
+                  title="Fri, Nov 13, 2026, 12:41:08 PM"
+                >
+                  12:41
+                </time>
+              </span>
               <div
                 class="Flex-module_flex RoomListItemView-module_hoverMenu"
                 style="--mx-flex-display: flex; --mx-flex-direction: row; --mx-flex-align: center; --mx-flex-justify: start; --mx-flex-gap: var(--cpd-space-1x); --mx-flex-wrap: nowrap;"
@@ -426,13 +438,17 @@ exports[`<RoomListItemView /> > renders Muted story 1`] = `
             <div
               class="RoomListItemView-module_timeSlot"
             >
-              <time
-                class="RoomListItemView-module_time mx_RoomListItemView_time"
-                datetime="2026-11-13T12:41:08.000Z"
-                title="Fri, Nov 13, 2026, 12:41:08 PM"
+              <span
+                class="RoomListItemView-module_timestamp"
               >
-                12:41
-              </time>
+                <time
+                  class="RoomListItemView-module_time mx_RoomListItemView_time"
+                  datetime="2026-11-13T12:41:08.000Z"
+                  title="Fri, Nov 13, 2026, 12:41:08 PM"
+                >
+                  12:41
+                </time>
+              </span>
               <div
                 class="Flex-module_flex RoomListItemView-module_hoverMenu"
                 style="--mx-flex-display: flex; --mx-flex-direction: row; --mx-flex-align: center; --mx-flex-justify: start; --mx-flex-gap: var(--cpd-space-1x); --mx-flex-wrap: nowrap;"
@@ -561,13 +577,17 @@ exports[`<RoomListItemView /> > renders MutedWithNotification story 1`] = `
             <div
               class="RoomListItemView-module_timeSlot"
             >
-              <time
-                class="RoomListItemView-module_time mx_RoomListItemView_time"
-                datetime="2026-11-13T12:41:08.000Z"
-                title="Fri, Nov 13, 2026, 12:41:08 PM"
+              <span
+                class="RoomListItemView-module_timestamp"
               >
-                12:41
-              </time>
+                <time
+                  class="RoomListItemView-module_time mx_RoomListItemView_time"
+                  datetime="2026-11-13T12:41:08.000Z"
+                  title="Fri, Nov 13, 2026, 12:41:08 PM"
+                >
+                  12:41
+                </time>
+              </span>
               <div
                 class="Flex-module_flex RoomListItemView-module_hoverMenu"
                 style="--mx-flex-display: flex; --mx-flex-direction: row; --mx-flex-align: center; --mx-flex-justify: start; --mx-flex-gap: var(--cpd-space-1x); --mx-flex-wrap: nowrap;"
@@ -693,13 +713,17 @@ exports[`<RoomListItemView /> > renders NoMessagePreview story 1`] = `
             <div
               class="RoomListItemView-module_timeSlot"
             >
-              <time
-                class="RoomListItemView-module_time mx_RoomListItemView_time"
-                datetime="2026-11-13T12:41:08.000Z"
-                title="Fri, Nov 13, 2026, 12:41:08 PM"
+              <span
+                class="RoomListItemView-module_timestamp"
               >
-                12:41
-              </time>
+                <time
+                  class="RoomListItemView-module_time mx_RoomListItemView_time"
+                  datetime="2026-11-13T12:41:08.000Z"
+                  title="Fri, Nov 13, 2026, 12:41:08 PM"
+                >
+                  12:41
+                </time>
+              </span>
               <div
                 class="Flex-module_flex RoomListItemView-module_hoverMenu"
                 style="--mx-flex-display: flex; --mx-flex-direction: row; --mx-flex-align: center; --mx-flex-justify: start; --mx-flex-gap: var(--cpd-space-1x); --mx-flex-wrap: nowrap;"
@@ -799,13 +823,17 @@ exports[`<RoomListItemView /> > renders Pinned story 1`] = `
             <div
               class="RoomListItemView-module_timeSlot"
             >
-              <time
-                class="RoomListItemView-module_time mx_RoomListItemView_time"
-                datetime="2026-11-13T12:41:08.000Z"
-                title="Fri, Nov 13, 2026, 12:41:08 PM"
+              <span
+                class="RoomListItemView-module_timestamp"
               >
-                12:41
-              </time>
+                <time
+                  class="RoomListItemView-module_time mx_RoomListItemView_time"
+                  datetime="2026-11-13T12:41:08.000Z"
+                  title="Fri, Nov 13, 2026, 12:41:08 PM"
+                >
+                  12:41
+                </time>
+              </span>
               <div
                 class="Flex-module_flex RoomListItemView-module_hoverMenu"
                 style="--mx-flex-display: flex; --mx-flex-direction: row; --mx-flex-align: center; --mx-flex-justify: start; --mx-flex-gap: var(--cpd-space-1x); --mx-flex-wrap: nowrap;"
@@ -937,13 +965,17 @@ exports[`<RoomListItemView /> > renders Selected story 1`] = `
             <div
               class="RoomListItemView-module_timeSlot"
             >
-              <time
-                class="RoomListItemView-module_time mx_RoomListItemView_time"
-                datetime="2026-11-13T12:41:08.000Z"
-                title="Fri, Nov 13, 2026, 12:41:08 PM"
+              <span
+                class="RoomListItemView-module_timestamp"
               >
-                12:41
-              </time>
+                <time
+                  class="RoomListItemView-module_time mx_RoomListItemView_time"
+                  datetime="2026-11-13T12:41:08.000Z"
+                  title="Fri, Nov 13, 2026, 12:41:08 PM"
+                >
+                  12:41
+                </time>
+              </span>
               <div
                 class="Flex-module_flex RoomListItemView-module_hoverMenu"
                 style="--mx-flex-display: flex; --mx-flex-direction: row; --mx-flex-align: center; --mx-flex-justify: start; --mx-flex-gap: var(--cpd-space-1x); --mx-flex-wrap: nowrap;"
@@ -1055,13 +1087,17 @@ exports[`<RoomListItemView /> > renders Typing story 1`] = `
             <div
               class="RoomListItemView-module_timeSlot"
             >
-              <time
-                class="RoomListItemView-module_time mx_RoomListItemView_time"
-                datetime="2026-11-13T12:41:08.000Z"
-                title="Fri, Nov 13, 2026, 12:41:08 PM"
+              <span
+                class="RoomListItemView-module_timestamp"
               >
-                12:41
-              </time>
+                <time
+                  class="RoomListItemView-module_time mx_RoomListItemView_time"
+                  datetime="2026-11-13T12:41:08.000Z"
+                  title="Fri, Nov 13, 2026, 12:41:08 PM"
+                >
+                  12:41
+                </time>
+              </span>
               <div
                 class="Flex-module_flex RoomListItemView-module_hoverMenu"
                 style="--mx-flex-display: flex; --mx-flex-direction: row; --mx-flex-align: center; --mx-flex-justify: start; --mx-flex-gap: var(--cpd-space-1x); --mx-flex-wrap: nowrap;"
@@ -1169,13 +1205,17 @@ exports[`<RoomListItemView /> > renders UnsentMessage story 1`] = `
             <div
               class="RoomListItemView-module_timeSlot"
             >
-              <time
-                class="RoomListItemView-module_time mx_RoomListItemView_time"
-                datetime="2026-11-13T12:41:08.000Z"
-                title="Fri, Nov 13, 2026, 12:41:08 PM"
+              <span
+                class="RoomListItemView-module_timestamp"
               >
-                12:41
-              </time>
+                <time
+                  class="RoomListItemView-module_time mx_RoomListItemView_time"
+                  datetime="2026-11-13T12:41:08.000Z"
+                  title="Fri, Nov 13, 2026, 12:41:08 PM"
+                >
+                  12:41
+                </time>
+              </span>
               <div
                 class="Flex-module_flex RoomListItemView-module_hoverMenu"
                 style="--mx-flex-display: flex; --mx-flex-direction: row; --mx-flex-align: center; --mx-flex-justify: start; --mx-flex-gap: var(--cpd-space-1x); --mx-flex-wrap: nowrap;"
@@ -1305,13 +1345,17 @@ exports[`<RoomListItemView /> > renders WithHoverMenu story 1`] = `
             <div
               class="RoomListItemView-module_timeSlot"
             >
-              <time
-                class="RoomListItemView-module_time mx_RoomListItemView_time"
-                datetime="2026-11-13T12:41:08.000Z"
-                title="Fri, Nov 13, 2026, 12:41:08 PM"
+              <span
+                class="RoomListItemView-module_timestamp"
               >
-                12:41
-              </time>
+                <time
+                  class="RoomListItemView-module_time mx_RoomListItemView_time"
+                  datetime="2026-11-13T12:41:08.000Z"
+                  title="Fri, Nov 13, 2026, 12:41:08 PM"
+                >
+                  12:41
+                </time>
+              </span>
               <div
                 class="Flex-module_flex RoomListItemView-module_hoverMenu"
                 style="--mx-flex-display: flex; --mx-flex-direction: row; --mx-flex-align: center; --mx-flex-justify: start; --mx-flex-gap: var(--cpd-space-1x); --mx-flex-wrap: nowrap;"
@@ -1423,13 +1467,17 @@ exports[`<RoomListItemView /> > renders WithMention story 1`] = `
             <div
               class="RoomListItemView-module_timeSlot"
             >
-              <time
-                class="RoomListItemView-module_time mx_RoomListItemView_time"
-                datetime="2026-11-13T12:41:08.000Z"
-                title="Fri, Nov 13, 2026, 12:41:08 PM"
+              <span
+                class="RoomListItemView-module_timestamp"
               >
-                12:41
-              </time>
+                <time
+                  class="RoomListItemView-module_time mx_RoomListItemView_time"
+                  datetime="2026-11-13T12:41:08.000Z"
+                  title="Fri, Nov 13, 2026, 12:41:08 PM"
+                >
+                  12:41
+                </time>
+              </span>
               <div
                 class="Flex-module_flex RoomListItemView-module_hoverMenu"
                 style="--mx-flex-display: flex; --mx-flex-direction: row; --mx-flex-align: center; --mx-flex-justify: start; --mx-flex-gap: var(--cpd-space-1x); --mx-flex-wrap: nowrap;"
@@ -1570,13 +1618,17 @@ exports[`<RoomListItemView /> > renders WithNotification story 1`] = `
             <div
               class="RoomListItemView-module_timeSlot"
             >
-              <time
-                class="RoomListItemView-module_time mx_RoomListItemView_time"
-                datetime="2026-11-13T12:41:08.000Z"
-                title="Fri, Nov 13, 2026, 12:41:08 PM"
+              <span
+                class="RoomListItemView-module_timestamp"
               >
-                12:41
-              </time>
+                <time
+                  class="RoomListItemView-module_time mx_RoomListItemView_time"
+                  datetime="2026-11-13T12:41:08.000Z"
+                  title="Fri, Nov 13, 2026, 12:41:08 PM"
+                >
+                  12:41
+                </time>
+              </span>
               <div
                 class="Flex-module_flex RoomListItemView-module_hoverMenu"
                 style="--mx-flex-display: flex; --mx-flex-direction: row; --mx-flex-align: center; --mx-flex-justify: start; --mx-flex-gap: var(--cpd-space-1x); --mx-flex-wrap: nowrap;"
@@ -1701,13 +1753,17 @@ exports[`<RoomListItemView /> > renders WithVideoCall story 1`] = `
             <div
               class="RoomListItemView-module_timeSlot"
             >
-              <time
-                class="RoomListItemView-module_time mx_RoomListItemView_time"
-                datetime="2026-11-13T12:41:08.000Z"
-                title="Fri, Nov 13, 2026, 12:41:08 PM"
+              <span
+                class="RoomListItemView-module_timestamp"
               >
-                12:41
-              </time>
+                <time
+                  class="RoomListItemView-module_time mx_RoomListItemView_time"
+                  datetime="2026-11-13T12:41:08.000Z"
+                  title="Fri, Nov 13, 2026, 12:41:08 PM"
+                >
+                  12:41
+                </time>
+              </span>
               <div
                 class="Flex-module_flex RoomListItemView-module_hoverMenu"
                 style="--mx-flex-display: flex; --mx-flex-direction: row; --mx-flex-align: center; --mx-flex-justify: start; --mx-flex-gap: var(--cpd-space-1x); --mx-flex-wrap: nowrap;"
@@ -1837,13 +1893,17 @@ exports[`<RoomListItemView /> > renders WithVoiceCall story 1`] = `
             <div
               class="RoomListItemView-module_timeSlot"
             >
-              <time
-                class="RoomListItemView-module_time mx_RoomListItemView_time"
-                datetime="2026-11-13T12:41:08.000Z"
-                title="Fri, Nov 13, 2026, 12:41:08 PM"
+              <span
+                class="RoomListItemView-module_timestamp"
               >
-                12:41
-              </time>
+                <time
+                  class="RoomListItemView-module_time mx_RoomListItemView_time"
+                  datetime="2026-11-13T12:41:08.000Z"
+                  title="Fri, Nov 13, 2026, 12:41:08 PM"
+                >
+                  12:41
+                </time>
+              </span>
               <div
                 class="Flex-module_flex RoomListItemView-module_hoverMenu"
                 style="--mx-flex-display: flex; --mx-flex-direction: row; --mx-flex-align: center; --mx-flex-justify: start; --mx-flex-gap: var(--cpd-space-1x); --mx-flex-wrap: nowrap;"

@@ -9,6 +9,7 @@ export { RoomListItemView } from "./RoomListItemView";
 export type {
     Room,
     RoomListItemViewSnapshot,
+    RoomListItemLastMessageState,
     RoomListItemViewModel,
     RoomListItemViewActions,
     RoomListItemViewProps,

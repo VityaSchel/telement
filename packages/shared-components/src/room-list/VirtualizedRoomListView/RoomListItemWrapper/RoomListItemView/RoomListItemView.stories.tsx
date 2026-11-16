@@ -131,6 +131,53 @@ export const Typing: Story = {
     },
 };
 
+export const Draft: Story = {
+    args: {
+        draft: "Let's meet at the station at nine",
+    },
+};
+
+/** The open room's draft is in its composer, so the row shows the last message */
+export const SelectedWithDraft: Story = {
+    args: {
+        isSelected: true,
+        draft: "Let's meet at the station at nine",
+    },
+};
+
+export const OwnMessageSending: Story = {
+    args: {
+        messagePreview: "Pushed the room list spec",
+        messagePreviewSender: "You",
+        lastMessageState: "sending",
+    },
+};
+
+export const OwnMessageSent: Story = {
+    args: {
+        messagePreview: "Pushed the room list spec",
+        messagePreviewSender: "You",
+        lastMessageState: "sent",
+    },
+};
+
+export const OwnMessageRead: Story = {
+    args: {
+        messagePreview: "Pushed the room list spec",
+        messagePreviewSender: "You",
+        lastMessageState: "read",
+    },
+};
+
+export const SelectedOwnMessageRead: Story = {
+    args: {
+        isSelected: true,
+        messagePreview: "Pushed the room list spec",
+        messagePreviewSender: "You",
+        lastMessageState: "read",
+    },
+};
+
 export const Selected: Story = {
     args: {
         isSelected: true,

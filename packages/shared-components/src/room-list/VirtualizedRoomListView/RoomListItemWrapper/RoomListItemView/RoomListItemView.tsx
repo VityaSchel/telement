@@ -46,6 +46,11 @@ function getA11yLabel(roomName: string, notification: NotificationDecorationData
 }
 
 /**
+ * The state of the user's own last message in a room: being sent, sent, or read by another member.
+ */
+export type RoomListItemLastMessageState = "sending" | "sent" | "read";
+
+/**
  * Snapshot for a room list item.
  * Contains all the data needed to render a room in the list.
  */
@@ -62,6 +67,10 @@ export interface RoomListItemViewSnapshot {
     messagePreviewSender?: string;
     /** Who is typing in the room, shown instead of the message preview */
     typing?: string;
+    /** The draft the user left in the room, as one line of plain text, shown instead of the message preview */
+    draft?: string;
+    /** The check before the time when the room's last message is the user's own */
+    lastMessageState?: RoomListItemLastMessageState;
     /**
      * When the room was last active, at the end of its name: a time today, a weekday within a week, a date before
      */
@@ -222,7 +231,7 @@ export const RoomListItemView = memo(function RoomListItemView({
                 aria-selected={props.role === "option" ? isSelected : undefined}
                 {...props}
             >
-                <RoomListItemContent vm={vm} renderAvatar={renderAvatar} />
+                <RoomListItemContent vm={vm} renderAvatar={renderAvatar} isSelected={isSelected} />
                 {item.isFavourite && (
                     <span id={pinnedDescriptionId} hidden>
                         {_t("telement|room_list|a11y|pinned")}

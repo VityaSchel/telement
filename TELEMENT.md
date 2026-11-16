@@ -204,7 +204,13 @@ What Telement changes in Element's behavior, apart from the features described f
   Someone typing replaces the preview, in the accent color. Names are always medium weight: Element's bold and gray
   names are gone, and only the badges show unread rooms. Badges, the pin and the call, invite and unsent icons always
   sit on the row's bottom line and stay while hovering. The selected room is a solid accent plate with inverted text,
-  icons and badges, in place of Element's marker at the panel's edge. Drafts and read checks are not built yet.
+  icons and badges, in place of Element's marker at the panel's edge.
+- **Drafts and read checks in the room list:** a draft left in a room replaces its preview with a red "Draft:" and the
+  draft's text, except for the open room, whose draft is in the composer. The composers save drafts in local storage
+  when the user leaves the room and now tell the room list (`telement/room-list/roomDrafts.ts`), which also hears other
+  tabs. When the last message is the user's own, a check before the time shows its state, as in Telegram: a clock while
+  it is being sent, one check once sent, two once any other member has read it. Failed messages keep Element's unsent
+  icon instead.
 - **Pinned chats:** Element's favourites are called "Pinned" (room menus say "Pin"/"Unpin", room info says "Pin to
   top") and always sit at the top of the list under every sort, ordered among themselves by the active sort; the
   `m.favourite` order value is ignored and there is no Pinned filter. A pin tilted 45° sits at the end of the row's

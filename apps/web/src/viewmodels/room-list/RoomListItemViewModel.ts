@@ -51,6 +51,8 @@ import { type MessagePreviewParts, splitMessagePreview } from "../../telement/ro
 import { formatChatListTimestamp, getChatListTimestampExpiry } from "../../telement/room-list/formatChatListTimestamp";
 import { getLastTimestamp } from "../../stores/room-list-v3/skip-list/sorters/utils/getLastTimestamp";
 import { usersTypingApartFromMeAndIgnored, whoIsTypingString } from "../../WhoIsTyping";
+import { getDraftPreview, onDraftChanged } from "../../telement/room-list/roomDrafts";
+import { getLastMessageState } from "../../telement/room-list/getLastMessageState";
 
 interface RoomItemProps {
     room: Room;
@@ -77,11 +79,20 @@ export class RoomListItemViewModel
      */
     private readonly dmUserId?: string;
 
+    /**
+     * The event of the message preview, whose sender and read receipts decide the check before the time.
+     */
+    private previewEvent?: MatrixEvent;
+
     public constructor(props: RoomItemProps) {
         // Get notification state first so we can generate a complete initial snapshot
         const notifState = RoomNotificationStateStore.instance.getRoomState(props.room);
         const initialItem = RoomListItemViewModel.generateItemSync(props.room, props.client, notifState);
-        super(props, { ...initialItem, typing: RoomListItemViewModel.getTyping(props.room) });
+        super(props, {
+            ...initialItem,
+            typing: RoomListItemViewModel.getTyping(props.room),
+            draft: getDraftPreview(props.room.roomId),
+        });
 
         this.notifState = notifState;
 
@@ -120,6 +131,10 @@ export class RoomListItemViewModel
             props.client.off(ClientEvent.AccountData, this.onClientAccountData);
             props.client.off(RoomMemberEvent.Typing, this.onTyping);
         });
+
+        // A receipt can show that another member read the user's last message
+        this.disposables.trackListener(props.room, RoomEvent.Receipt, this.refreshLastMessageState);
+        this.disposables.track(onDraftChanged(props.room.roomId, this.onDraftChanged));
 
         // Load message preview asynchronously (sync data is already complete)
         void this.loadAndSetMessagePreview();
@@ -226,6 +241,20 @@ export class RoomListItemViewModel
         }
     };
 
+    private onDraftChanged = (): void => {
+        this.snapshot.merge({ draft: getDraftPreview(this.props.room.roomId) });
+    };
+
+    private refreshLastMessageState = (): void => {
+        this.snapshot.merge({
+            lastMessageState: getLastMessageState(
+                this.props.room,
+                this.previewEvent,
+                this.props.client.getSafeUserId(),
+            ),
+        });
+    };
+
     private onTyping = (event: MatrixEvent, member: RoomMember): void => {
         if (member.roomId === this.props.room.roomId) {
             this.snapshot.merge({ typing: RoomListItemViewModel.getTyping(this.props.room) });
@@ -250,7 +279,7 @@ export class RoomListItemViewModel
 
     /**
      * Update the item snapshot with current sync data.
-     * Preserves the message preview and who is typing, which are managed separately.
+     * Preserves the message preview, who is typing, the draft and the check, which are managed separately.
      */
     private updateItem(): void {
         const newItem = RoomListItemViewModel.generateItemSync(this.props.room, this.props.client, this.notifState);
@@ -262,6 +291,8 @@ export class RoomListItemViewModel
             messagePreviewSender: this.snapshot.current.messagePreviewSender,
             // Only a typing event changes it, and finding it goes through every member of the room
             typing: this.snapshot.current.typing,
+            draft: this.snapshot.current.draft,
+            lastMessageState: this.snapshot.current.lastMessageState,
         });
     }
 
@@ -273,22 +304,24 @@ export class RoomListItemViewModel
     /**
      * Load the message preview for this room, with its sender apart. Returns undefined if it couldn't be loaded.
      */
-    private async loadMessagePreview(): Promise<MessagePreviewParts | undefined> {
+    private async loadMessagePreview(): Promise<(MessagePreviewParts & { event: MatrixEvent }) | undefined> {
         const messagePreviewTag = this.getMessagePreviewTag();
         const preview = await MessagePreviewStore.instance.getPreviewForRoom(this.props.room, messagePreviewTag);
-        return preview ? splitMessagePreview(preview, messagePreviewTag) : undefined;
+        return preview ? { ...splitMessagePreview(preview, messagePreviewTag), event: preview.event } : undefined;
     }
 
     /**
      * Load and set the message preview if it differs from current, with the time of the room's last activity, which
-     * a new message changes.
+     * a new message changes, and the check of the user's own last message.
      */
     private async loadAndSetMessagePreview(): Promise<void> {
         const preview = await this.loadMessagePreview();
         if (this.disposables.isDisposed) return;
+        this.previewEvent = preview?.event;
         this.snapshot.merge({
             messagePreview: preview?.text,
             messagePreviewSender: preview?.sender,
+            lastMessageState: getLastMessageState(this.props.room, preview?.event, this.props.client.getSafeUserId()),
             ...RoomListItemViewModel.getTimestamp(this.props.room, this.props.client),
         });
     }
