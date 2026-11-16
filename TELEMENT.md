@@ -565,20 +565,24 @@ Do not repeat:
   tools only reuse GIPHY's website key without permission. GIPHY's free key allows 100 searches per hour; Klipy's free
   test key also allows [100 requests per hour](https://docs.klipy.com/getting-started), and its free unlimited key
   needs a request in Klipy's Partner Panel.
-- Decided (2026-11-11):
-    - GIF search is always on, with no setting to turn it off. Every search sends the user's IP address and query to
-      the provider.
-    - Provider: Klipy. No legitimate keyless API exists, so each user enters their own free Klipy key for now, and
-      Telement ships Klipy's free unlimited key later. An invalid key returns HTTP 404, which lets Settings validate
-      it.
-- Klipy's rules that shape the design ([attribution](https://docs.klipy.com/attribution),
-  [integration requirements](https://docs.klipy.com/integration-requirements)):
-    - The search field's placeholder must read "Search KLIPY".
-    - Requests go straight from the user's client (CORS allows it), results stay unfiltered and in their own grid,
-      and media loads from the returned URLs.
-    - Media must not be stored, mirrored or re-hosted without Klipy's written approval. Sending a GIF in Matrix
-      normally means uploading it to the homeserver, which is re-hosting. Klipy's general terms do let users
-      "transmit a copy of the Content to recipients of your messages", but the API rules are stricter.
+- Decided (2026-11-11): GIF search is always on, with no setting to turn it off. Every search sends the user's IP
+  address and query to the provider.
+- Decided (2026-11-16), replacing the earlier choice of Klipy:
+    - Provider: [GIPHY](https://developers.giphy.com/docs/api/), with the maintainer's key in `config.json`. Users
+      can't enter their own key.
+    - Search returns everything up to the R rating (`rating=r`).
+    - A sent GIF is uploaded to the homeserver like any picture, so every Matrix client shows it. GIPHY's API rules
+      say "Do not cache API responses or media URLs or cache or store copies of GIPHY's media assets"; the maintainer
+      chose uploading anyway.
+    - No analytics pingbacks. GIPHY recommends them but doesn't require them.
+- GIPHY's rules and limits that shape the design:
+    - Every key starts as a beta key: 100 API calls per hour shared by everyone using the build, and at most 50
+      results per search. A production key lifts the limit after GIPHY reviews the app (screenshots or a video) and
+      quotes a fee. So the GIFs tab searches after a pause in typing, not on every keystroke.
+    - The "Powered By GIPHY" mark must be conspicuous wherever search is used. GIPHY's
+      [logo files](https://developers.giphy.com/docs/api/) are the only allowed marks.
+- Klipy, considered first: the search placeholder had to read "Search KLIPY", and its API rules forbid storing or
+  re-hosting media without written approval.
 
 ### One emoji / stickers / GIF drawer and the composer
 
@@ -800,6 +804,9 @@ cancel a failed or pending send, download media, hide media, expand or collapse 
 deleted message that has a thread. The thread list and notification tiles have no message menu, so "View in room"
 and "Copy link to thread" exist only in their toolbar. Before removing the toolbar, add these to the menu.
 
+Decided (2026-11-16): the toolbar goes. Its actions move into the message menu, and the thread list and notification
+tiles get a message menu of their own.
+
 ### Emoji artwork
 
 Researched 2026-11-11:
@@ -841,22 +848,13 @@ the Jitsi default `meet.element.io`.
 
 ## Open questions
 
-These need a maintainer decision:
+None. Answered on 2026-11-16 (see the decision log):
 
-1. GIFs: ask Klipy (developers@klipy.com) for written approval to upload sent GIFs to the user's homeserver, or
-   choose another way to send them.
-2. The identity server, integration manager and Jitsi defaults, which still point to Element's services.
-3. Room list drafts and read checks, the second step of the room list rows. Drafts would show "Draft:" in red in place
-   of the preview and need a way to learn about saved drafts; sent and read checks before the time need a decision on
-   what "read" means in group rooms.
-4. Typing in one-to-one chats: Telegram shows a bare "typing…", Telement shows Element's "Alice is typing …". Telegram's
-   wording needs a new string.
-5. Narrow media in bubbles is centered on the bubble's color in a 160px bubble; Telegram fills the sides with a blurred
-   copy of the picture. Keep the plain fill, or build the blur?
-6. Map attribution in the map thumbnails of reply quotes.
-7. The search dialog's room results still have Element's separate notification menu button next to "…", while room
-   menus elsewhere use a "Notifications" submenu.
-8. The video viewer has no "…" menu like the image viewer's.
+- Typing in one-to-one chats keeps Element's "Alice is typing …".
+- Narrow media in bubbles keeps the plain fill.
+- The map in reply quotes has no attribution, but Telement didn't change it, so it is an upstream bug: it goes on
+  the list of [upstream pull requests](#upstream-pull-requests), not into Telement.
+- The identity server, integration manager and Jitsi defaults keep Element's services for now.
 
 Deferred work:
 
@@ -931,6 +929,13 @@ Deferred work:
 | 2026-11-13 | The GIF badge matches the picture's time badge; the jump-to-bottom counter is a circle like the room list's.                                    | [Radius and spacing](#radius-and-spacing)                                            |
 | 2026-11-13 | Legacy fields are 16px apart and dropdown borders match theirs; legacy 1:1 call cards in bubbles are stacked.                                   | [Radius and spacing](#radius-and-spacing)                                            |
 | 2026-11-13 | Small layout fixes go upstream as about nine small PRs by component; the maintainer writes the descriptions and opens them.                     | [Upstream pull requests](#upstream-pull-requests)                                    |
+| 2026-11-16 | Upstream bugs Telement didn't cause are fixed upstream, not in Telement (the map in reply quotes).                                              | [Open questions](#open-questions)                                                    |
+| 2026-11-16 | Element's identity server, integration manager and Jitsi stay the defaults for now.                                                             | [Open questions](#open-questions)                                                    |
+| 2026-11-16 | One-to-one chats keep Element's typing text; narrow media keeps the plain fill.                                                                 | [Open questions](#open-questions)                                                    |
+| 2026-11-16 | The search dialog's bell moves into "…"; the video viewer gets the image viewer's "…" menu.                                                     | [Open questions](#open-questions)                                                    |
+| 2026-11-16 | Room list read checks: ✓✓ once any other member has read your last message.                                                                     | [Open questions](#open-questions)                                                    |
+| 2026-11-16 | The hover toolbar goes; its actions move into the message menu.                                                                                 | [Floating toolbar](#floating-toolbar)                                                |
+| 2026-11-16 | GIFs come from GIPHY with the maintainer's key, up to R, uploaded to the homeserver when sent, without pingbacks.                               | [GIFs](#gifs)                                                                        |
 
 ## Upstream merge log
 
