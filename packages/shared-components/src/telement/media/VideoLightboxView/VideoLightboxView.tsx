@@ -25,6 +25,7 @@ import {
     ExitFullScreenIcon,
     ForwardIcon,
     FullScreenIcon,
+    OverflowHorizontalIcon,
     PauseSolidIcon,
     PlaySolidIcon,
     VolumeOffSolidIcon,
@@ -155,6 +156,10 @@ export interface VideoLightboxViewSnapshot {
      */
     canForward: boolean;
     /**
+     * Whether the message's options menu is open.
+     */
+    optionsOpen: boolean;
+    /**
      * Whether the app uses a high contrast theme. The viewer is always dark.
      */
     highContrast: boolean;
@@ -171,6 +176,8 @@ export interface VideoLightboxViewActions {
     onSaveClick: () => void;
     /** Forwards the message. */
     onForwardClick: () => void;
+    /** Opens the message's options menu, the one the image viewer has, next to the given button. */
+    onOptionsClick: (button: HTMLElement) => void;
     /** Shows the sender's profile. */
     onSenderClick: () => void;
     /** Shows the message in its room. */
@@ -263,7 +270,7 @@ function useSpeedMenuFocus(
 }
 
 /**
- * A full-window video viewer, opened from a video message: the sender and date with "Save as…", forward and close
+ * A full-window video viewer, opened from a video message: the sender and date with "Save as…", forward, options and close
  * at the top, the video, and playback controls in a bar floating at the bottom. The controls are drawn by the view
  * rather than the browser, so they look the same everywhere.
  *
@@ -302,6 +309,7 @@ export function VideoLightboxView({ vm, videoRef, className }: Readonly<VideoLig
         canSave,
         saving,
         canForward,
+        optionsOpen,
         highContrast,
         controlsVisible,
     } = useViewModel(vm);
@@ -504,6 +512,18 @@ export function VideoLightboxView({ vm, videoRef, className }: Readonly<VideoLig
                             <ForwardIcon />
                         </IconButton>
                     )}
+                    <IconButton
+                        className={styles.iconButton}
+                        size="36px"
+                        aria-label={_t("common|options")}
+                        aria-haspopup="menu"
+                        aria-expanded={optionsOpen}
+                        tooltip={_t("common|options")}
+                        tooltipPlacement="bottom"
+                        onClick={(event) => vm.onOptionsClick(event.currentTarget)}
+                    >
+                        <OverflowHorizontalIcon />
+                    </IconButton>
                     <IconButton
                         className={styles.iconButton}
                         size="36px"

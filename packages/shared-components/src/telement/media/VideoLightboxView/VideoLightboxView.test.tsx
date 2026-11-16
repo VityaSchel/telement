@@ -50,6 +50,7 @@ const snapshot: VideoLightboxViewSnapshot = {
     canSave: true,
     saving: false,
     canForward: true,
+    optionsOpen: false,
     highContrast: false,
     controlsVisible: true,
 };
@@ -59,6 +60,7 @@ function createActions() {
         onClose: vi.fn<() => void>(),
         onSaveClick: vi.fn<() => void>(),
         onForwardClick: vi.fn<() => void>(),
+        onOptionsClick: vi.fn<(button: HTMLElement) => void>(),
         onSenderClick: vi.fn<() => void>(),
         // The view model shows the message in Telement instead of following the link.
         onDateClick: vi.fn((event: React.MouseEvent<HTMLAnchorElement>) => event.preventDefault()),
@@ -164,15 +166,25 @@ describe("VideoLightboxView", () => {
 
         fireEvent.click(screen.getByRole("button", { name: "Save as…" }));
         fireEvent.click(screen.getByRole("button", { name: "Forward" }));
+        fireEvent.click(screen.getByRole("button", { name: "Options" }));
         fireEvent.click(screen.getByRole("button", { name: "Close" }));
         fireEvent.click(screen.getByRole("link", { name: "Thu, Nov 12, 2026, 10:42 AM" }));
         fireEvent.click(screen.getByRole("button", { name: "View profile" }));
 
         expect(actions.onSaveClick).toHaveBeenCalledTimes(1);
         expect(actions.onForwardClick).toHaveBeenCalledTimes(1);
+        expect(actions.onOptionsClick).toHaveBeenCalledWith(screen.getByRole("button", { name: "Options" }));
         expect(actions.onClose).toHaveBeenCalledTimes(1);
         expect(actions.onDateClick).toHaveBeenCalledTimes(1);
         expect(actions.onSenderClick).toHaveBeenCalledTimes(1);
+    });
+
+    it("marks the options button while its menu is open", () => {
+        renderView({ optionsOpen: true });
+
+        const options = screen.getByRole("button", { name: "Options" });
+        expect(options).toHaveAttribute("aria-haspopup", "menu");
+        expect(options).toHaveAttribute("aria-expanded", "true");
     });
 
     it("shows an avatar that does nothing when the sender is unknown", () => {
@@ -448,6 +460,7 @@ describe("VideoLightboxView", () => {
             "View profile",
             "Save as…",
             "Forward",
+            "Options",
             "Close",
             "Pause",
             "Mute",

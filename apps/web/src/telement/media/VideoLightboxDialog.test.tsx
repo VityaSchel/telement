@@ -53,6 +53,19 @@ describe("VideoLightboxDialog", () => {
         expect(onFinished).toHaveBeenCalled();
     });
 
+    it("opens the message's options menu from its options button", async () => {
+        const onFinished = vi.fn();
+        render(<VideoLightboxDialog mxEvent={mxEvent} mediaEventHelper={mediaEventHelper} onFinished={onFinished} />);
+
+        const options = screen.getByRole("button", { name: "Options" });
+        expect(screen.queryByRole("menu")).toBeNull();
+        fireEvent.click(options);
+
+        expect(await screen.findByRole("menu")).toBeInTheDocument();
+        expect(options).toHaveAttribute("aria-expanded", "true");
+        expect(screen.getByRole("menuitem", { name: "Forward" })).toBeInTheDocument();
+    });
+
     it("opens as a lightbox", () => {
         const createDialog = vi
             .spyOn(Modal, "createDialog")

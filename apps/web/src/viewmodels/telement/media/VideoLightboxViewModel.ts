@@ -87,6 +87,7 @@ export class VideoLightboxViewModel
     private readonly infoDurationSeconds: number;
     private controlsHovered = false;
     private controlsFocused = false;
+    private optionsButtonRect?: DOMRect;
     private hideControlsTimer?: ReturnType<typeof setTimeout>;
 
     public constructor(props: VideoLightboxViewModelProps) {
@@ -152,6 +153,7 @@ export class VideoLightboxViewModel
             canSave: MediaEventHelper.isEligible(mxEvent),
             saving: false,
             canForward: isContentActionable(mxEvent) && !!getForwardableEvent(mxEvent, client),
+            optionsOpen: false,
             highContrast: isHighContrast(),
             controlsVisible: true,
         };
@@ -206,9 +208,9 @@ export class VideoLightboxViewModel
     }
 
     private hideControls = (): void => {
-        const { state, speedMenuOpen } = this.snapshot.current;
+        const { state, speedMenuOpen, optionsOpen } = this.snapshot.current;
         const playingOn = VideoLightboxViewModel.isPlayingOn(this.snapshot.current);
-        if (state !== VideoLightboxViewState.READY || !playingOn || speedMenuOpen) return;
+        if (state !== VideoLightboxViewState.READY || !playingOn || speedMenuOpen || optionsOpen) return;
         if (this.controlsHovered || this.controlsFocused) return;
         this.snapshot.merge({ controlsVisible: false });
     };
@@ -260,6 +262,22 @@ export class VideoLightboxViewModel
             event,
             permalinkCreator: this.props.permalinkCreator ?? null,
         });
+    };
+
+    /** Where the open options menu's button is, which the menu opens next to. */
+    public get optionsAnchor(): DOMRect | undefined {
+        return this.snapshot.current.optionsOpen ? this.optionsButtonRect : undefined;
+    }
+
+    public onOptionsClick = (button: HTMLElement): void => {
+        this.optionsButtonRect = button.getBoundingClientRect();
+        this.snapshot.merge({ optionsOpen: true, controlsVisible: true });
+    };
+
+    /** Called when the options menu closes. */
+    public closeOptions = (): void => {
+        this.snapshot.merge({ optionsOpen: false });
+        this.restartHideControlsTimer();
     };
 
     public onSenderClick = (): void => {

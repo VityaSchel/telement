@@ -259,6 +259,25 @@ describe("VideoLightboxViewModel", () => {
         });
     });
 
+    describe("options menu", () => {
+        it("opens next to its button and closes", () => {
+            createVm();
+            const button = document.createElement("button");
+            const rect = new DOMRect(900, 10, 36, 36);
+            vi.spyOn(button, "getBoundingClientRect").mockReturnValue(rect);
+
+            expect(vm!.getSnapshot().optionsOpen).toBe(false);
+            expect(vm!.optionsAnchor).toBeUndefined();
+            vm!.onOptionsClick(button);
+            expect(vm!.getSnapshot().optionsOpen).toBe(true);
+            expect(vm!.optionsAnchor).toBe(rect);
+
+            vm!.closeOptions();
+            expect(vm!.getSnapshot().optionsOpen).toBe(false);
+            expect(vm!.optionsAnchor).toBeUndefined();
+        });
+    });
+
     describe("loading", () => {
         it("shows the video and its thumbnail once they load", async () => {
             createVm();
@@ -620,6 +639,17 @@ describe("VideoLightboxViewModel", () => {
             vm!.toggleSpeedMenu();
             vi.advanceTimersByTime(10_000);
             expect(vm!.getSnapshot().controlsVisible).toBe(true);
+        });
+
+        it("keeps them while the options menu is open, and starts waiting again when it closes", () => {
+            startPlaying();
+            vm!.onOptionsClick(document.createElement("button"));
+            vi.advanceTimersByTime(10_000);
+            expect(vm!.getSnapshot().controlsVisible).toBe(true);
+
+            vm!.closeOptions();
+            vi.advanceTimersByTime(3000);
+            expect(vm!.getSnapshot().controlsVisible).toBe(false);
         });
 
         it("stops waiting once disposed", () => {
