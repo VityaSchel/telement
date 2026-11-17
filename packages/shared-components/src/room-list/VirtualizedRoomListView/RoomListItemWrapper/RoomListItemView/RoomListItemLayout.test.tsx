@@ -264,7 +264,12 @@ describe("Room list item layout", () => {
         expect(getComputedStyle(time).visibility).toBe("hidden");
         expect(rect(name).width).toBe(nameWidth);
         expect(rect(button).width).toBe(24);
-        expect(rect(button).right).toBe(timeEnd);
+        // Past the time's end, as far from the plate's end as from its top
+        expect(rect(button).right).toBeGreaterThan(timeEnd);
+        expect(rect(part(row, styles.container)).right - rect(button).right).toBeCloseTo(
+            rect(button).top - rect(part(row, styles.container)).top,
+            1,
+        );
         expect(center(button)).toBeCloseTo(center(part(row, styles.titleRow)), 5);
         expect(screen.getByText("3")).toBeVisible();
         expect(getComputedStyle(part(row, styles.preview)).color).toBe(colorOf("--cpd-color-text-secondary"));

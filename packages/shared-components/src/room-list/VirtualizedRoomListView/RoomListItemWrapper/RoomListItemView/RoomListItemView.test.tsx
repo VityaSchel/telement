@@ -453,6 +453,22 @@ describe("<RoomListItemView />", () => {
         expect(screen.getByTestId("notification-decoration")).toBeVisible();
     });
 
+    it.each([
+        ["WithNotification", WithNotification],
+        ["NoMessagePreview", NoMessagePreview],
+    ])(
+        "should put the more options button of the %s story as far from the plate's end as from its top, centered on the name",
+        (_, Story) => {
+            const { container } = render(<Story isFocused={true} />);
+            const plate = container.querySelector(`.${styles.container}`)!.getBoundingClientRect();
+            const button = screen.getByRole("button", { name: "More Options" }).getBoundingClientRect();
+            const name = screen.getByTestId("room-name").getBoundingClientRect();
+
+            expect(plate.right - button.right).toBeCloseTo(button.top - plate.top, 1);
+            expect(button.top + button.height / 2).toBeCloseTo(name.top + name.height / 2, 1);
+        },
+    );
+
     it("should keep the time of a room without the more options button visible", () => {
         render(<WithoutHoverMenu isFocused={true} />);
         expect(screen.getByText("12:41")).toBeVisible();
