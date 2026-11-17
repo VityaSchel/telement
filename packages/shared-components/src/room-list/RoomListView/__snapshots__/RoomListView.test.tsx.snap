@@ -167,21 +167,9 @@ exports[`<RoomListView /> > renders Default story 1`] = `
                         </div>
                       </div>
                       <div
-                        class="RoomListItemView-module_previewRow"
+                        class="RoomListItemView-module_preview"
+                        title="Last message in General"
                       >
-                        <div
-                          class="RoomListItemView-module_preview"
-                          title="Last message in General"
-                        >
-                          <span>
-                            <span
-                              class="RoomListItemView-module_sender"
-                            >
-                              Alice:
-                            </span>
-                             Last message in General
-                          </span>
-                        </div>
                         <div
                           aria-hidden="true"
                           class="RoomListItemView-module_notificationDecoration"
@@ -213,6 +201,18 @@ exports[`<RoomListView /> > renders Default story 1`] = `
                             />
                           </div>
                         </div>
+                        <span
+                          aria-hidden="true"
+                          class="RoomListItemView-module_hiddenLines"
+                        />
+                        <span>
+                          <span
+                            class="RoomListItemView-module_sender"
+                          >
+                            Alice:
+                          </span>
+                           Last message in General
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -312,11 +312,15 @@ exports[`<RoomListView /> > renders Default story 1`] = `
                         </div>
                       </div>
                       <div
-                        class="RoomListItemView-module_previewRow"
+                        class="RoomListItemView-module_preview"
                       >
                         <div
                           aria-hidden="true"
                           class="RoomListItemView-module_notificationDecoration"
+                        />
+                        <span
+                          aria-hidden="true"
+                          class="RoomListItemView-module_hiddenLines"
                         />
                       </div>
                     </div>
@@ -417,18 +421,18 @@ exports[`<RoomListView /> > renders Default story 1`] = `
                         </div>
                       </div>
                       <div
-                        class="RoomListItemView-module_previewRow"
+                        class="RoomListItemView-module_preview"
+                        title="Last message in Engineering"
                       >
-                        <div
-                          class="RoomListItemView-module_preview"
-                          title="Last message in Engineering"
-                        >
-                          Last message in Engineering
-                        </div>
                         <div
                           aria-hidden="true"
                           class="RoomListItemView-module_notificationDecoration"
                         />
+                        <span
+                          aria-hidden="true"
+                          class="RoomListItemView-module_hiddenLines"
+                        />
+                        Last message in Engineering
                       </div>
                     </div>
                   </div>
@@ -528,11 +532,15 @@ exports[`<RoomListView /> > renders Default story 1`] = `
                         </div>
                       </div>
                       <div
-                        class="RoomListItemView-module_previewRow"
+                        class="RoomListItemView-module_preview"
                       >
                         <div
                           aria-hidden="true"
                           class="RoomListItemView-module_notificationDecoration"
+                        />
+                        <span
+                          aria-hidden="true"
+                          class="RoomListItemView-module_hiddenLines"
                         />
                       </div>
                     </div>
@@ -633,25 +641,25 @@ exports[`<RoomListView /> > renders Default story 1`] = `
                         </div>
                       </div>
                       <div
-                        class="RoomListItemView-module_previewRow"
+                        class="RoomListItemView-module_preview"
+                        title="Last message in Product"
                       >
-                        <div
-                          class="RoomListItemView-module_preview"
-                          title="Last message in Product"
-                        >
-                          <span>
-                            <span
-                              class="RoomListItemView-module_sender"
-                            >
-                              Alice:
-                            </span>
-                             Last message in Product
-                          </span>
-                        </div>
                         <div
                           aria-hidden="true"
                           class="RoomListItemView-module_notificationDecoration"
                         />
+                        <span
+                          aria-hidden="true"
+                          class="RoomListItemView-module_hiddenLines"
+                        />
+                        <span>
+                          <span
+                            class="RoomListItemView-module_sender"
+                          >
+                            Alice:
+                          </span>
+                           Last message in Product
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -751,7 +759,7 @@ exports[`<RoomListView /> > renders Default story 1`] = `
                         </div>
                       </div>
                       <div
-                        class="RoomListItemView-module_previewRow"
+                        class="RoomListItemView-module_preview"
                       >
                         <div
                           aria-hidden="true"
@@ -786,6 +794,10 @@ exports[`<RoomListView /> > renders Default story 1`] = `
                             </span>
                           </div>
                         </div>
+                        <span
+                          aria-hidden="true"
+                          class="RoomListItemView-module_hiddenLines"
+                        />
                       </div>
                     </div>
                   </div>
@@ -885,18 +897,18 @@ exports[`<RoomListView /> > renders Default story 1`] = `
                         </div>
                       </div>
                       <div
-                        class="RoomListItemView-module_previewRow"
+                        class="RoomListItemView-module_preview"
+                        title="Last message in Sales"
                       >
-                        <div
-                          class="RoomListItemView-module_preview"
-                          title="Last message in Sales"
-                        >
-                          Last message in Sales
-                        </div>
                         <div
                           aria-hidden="true"
                           class="RoomListItemView-module_notificationDecoration"
                         />
+                        <span
+                          aria-hidden="true"
+                          class="RoomListItemView-module_hiddenLines"
+                        />
+                        Last message in Sales
                       </div>
                     </div>
                   </div>
@@ -996,11 +1008,15 @@ exports[`<RoomListView /> > renders Default story 1`] = `
                         </div>
                       </div>
                       <div
-                        class="RoomListItemView-module_previewRow"
+                        class="RoomListItemView-module_preview"
                       >
                         <div
                           aria-hidden="true"
                           class="RoomListItemView-module_notificationDecoration"
+                        />
+                        <span
+                          aria-hidden="true"
+                          class="RoomListItemView-module_hiddenLines"
                         />
                       </div>
                     </div>
@@ -1101,25 +1117,25 @@ exports[`<RoomListView /> > renders Default story 1`] = `
                         </div>
                       </div>
                       <div
-                        class="RoomListItemView-module_previewRow"
+                        class="RoomListItemView-module_preview"
+                        title="Last message in Announcements"
                       >
-                        <div
-                          class="RoomListItemView-module_preview"
-                          title="Last message in Announcements"
-                        >
-                          <span>
-                            <span
-                              class="RoomListItemView-module_sender"
-                            >
-                              Alice:
-                            </span>
-                             Last message in Announcements
-                          </span>
-                        </div>
                         <div
                           aria-hidden="true"
                           class="RoomListItemView-module_notificationDecoration"
                         />
+                        <span
+                          aria-hidden="true"
+                          class="RoomListItemView-module_hiddenLines"
+                        />
+                        <span>
+                          <span
+                            class="RoomListItemView-module_sender"
+                          >
+                            Alice:
+                          </span>
+                           Last message in Announcements
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -1219,11 +1235,15 @@ exports[`<RoomListView /> > renders Default story 1`] = `
                         </div>
                       </div>
                       <div
-                        class="RoomListItemView-module_previewRow"
+                        class="RoomListItemView-module_preview"
                       >
                         <div
                           aria-hidden="true"
                           class="RoomListItemView-module_notificationDecoration"
+                        />
+                        <span
+                          aria-hidden="true"
+                          class="RoomListItemView-module_hiddenLines"
                         />
                       </div>
                     </div>
@@ -1324,14 +1344,9 @@ exports[`<RoomListView /> > renders Default story 1`] = `
                         </div>
                       </div>
                       <div
-                        class="RoomListItemView-module_previewRow"
+                        class="RoomListItemView-module_preview"
+                        title="Last message in Team Alpha"
                       >
-                        <div
-                          class="RoomListItemView-module_preview"
-                          title="Last message in Team Alpha"
-                        >
-                          Last message in Team Alpha
-                        </div>
                         <div
                           aria-hidden="true"
                           class="RoomListItemView-module_notificationDecoration"
@@ -1365,6 +1380,11 @@ exports[`<RoomListView /> > renders Default story 1`] = `
                             </span>
                           </div>
                         </div>
+                        <span
+                          aria-hidden="true"
+                          class="RoomListItemView-module_hiddenLines"
+                        />
+                        Last message in Team Alpha
                       </div>
                     </div>
                   </div>
@@ -1464,11 +1484,15 @@ exports[`<RoomListView /> > renders Default story 1`] = `
                         </div>
                       </div>
                       <div
-                        class="RoomListItemView-module_previewRow"
+                        class="RoomListItemView-module_preview"
                       >
                         <div
                           aria-hidden="true"
                           class="RoomListItemView-module_notificationDecoration"
+                        />
+                        <span
+                          aria-hidden="true"
+                          class="RoomListItemView-module_hiddenLines"
                         />
                       </div>
                     </div>
@@ -1569,25 +1593,25 @@ exports[`<RoomListView /> > renders Default story 1`] = `
                         </div>
                       </div>
                       <div
-                        class="RoomListItemView-module_previewRow"
+                        class="RoomListItemView-module_preview"
+                        title="Last message in Project X"
                       >
-                        <div
-                          class="RoomListItemView-module_preview"
-                          title="Last message in Project X"
-                        >
-                          <span>
-                            <span
-                              class="RoomListItemView-module_sender"
-                            >
-                              Alice:
-                            </span>
-                             Last message in Project X
-                          </span>
-                        </div>
                         <div
                           aria-hidden="true"
                           class="RoomListItemView-module_notificationDecoration"
                         />
+                        <span
+                          aria-hidden="true"
+                          class="RoomListItemView-module_hiddenLines"
+                        />
+                        <span>
+                          <span
+                            class="RoomListItemView-module_sender"
+                          >
+                            Alice:
+                          </span>
+                           Last message in Project X
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -1687,11 +1711,15 @@ exports[`<RoomListView /> > renders Default story 1`] = `
                         </div>
                       </div>
                       <div
-                        class="RoomListItemView-module_previewRow"
+                        class="RoomListItemView-module_preview"
                       >
                         <div
                           aria-hidden="true"
                           class="RoomListItemView-module_notificationDecoration"
+                        />
+                        <span
+                          aria-hidden="true"
+                          class="RoomListItemView-module_hiddenLines"
                         />
                       </div>
                     </div>
@@ -1792,18 +1820,18 @@ exports[`<RoomListView /> > renders Default story 1`] = `
                         </div>
                       </div>
                       <div
-                        class="RoomListItemView-module_previewRow"
+                        class="RoomListItemView-module_preview"
+                        title="Last message in Water Cooler"
                       >
-                        <div
-                          class="RoomListItemView-module_preview"
-                          title="Last message in Water Cooler"
-                        >
-                          Last message in Water Cooler
-                        </div>
                         <div
                           aria-hidden="true"
                           class="RoomListItemView-module_notificationDecoration"
                         />
+                        <span
+                          aria-hidden="true"
+                          class="RoomListItemView-module_hiddenLines"
+                        />
+                        Last message in Water Cooler
                       </div>
                     </div>
                   </div>
@@ -1903,7 +1931,7 @@ exports[`<RoomListView /> > renders Default story 1`] = `
                         </div>
                       </div>
                       <div
-                        class="RoomListItemView-module_previewRow"
+                        class="RoomListItemView-module_preview"
                       >
                         <div
                           aria-hidden="true"
@@ -1938,6 +1966,10 @@ exports[`<RoomListView /> > renders Default story 1`] = `
                             </span>
                           </div>
                         </div>
+                        <span
+                          aria-hidden="true"
+                          class="RoomListItemView-module_hiddenLines"
+                        />
                       </div>
                     </div>
                   </div>
@@ -2037,25 +2069,25 @@ exports[`<RoomListView /> > renders Default story 1`] = `
                         </div>
                       </div>
                       <div
-                        class="RoomListItemView-module_previewRow"
+                        class="RoomListItemView-module_preview"
+                        title="Last message in Ideas"
                       >
-                        <div
-                          class="RoomListItemView-module_preview"
-                          title="Last message in Ideas"
-                        >
-                          <span>
-                            <span
-                              class="RoomListItemView-module_sender"
-                            >
-                              Alice:
-                            </span>
-                             Last message in Ideas
-                          </span>
-                        </div>
                         <div
                           aria-hidden="true"
                           class="RoomListItemView-module_notificationDecoration"
                         />
+                        <span
+                          aria-hidden="true"
+                          class="RoomListItemView-module_hiddenLines"
+                        />
+                        <span>
+                          <span
+                            class="RoomListItemView-module_sender"
+                          >
+                            Alice:
+                          </span>
+                           Last message in Ideas
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -2155,11 +2187,15 @@ exports[`<RoomListView /> > renders Default story 1`] = `
                         </div>
                       </div>
                       <div
-                        class="RoomListItemView-module_previewRow"
+                        class="RoomListItemView-module_preview"
                       >
                         <div
                           aria-hidden="true"
                           class="RoomListItemView-module_notificationDecoration"
+                        />
+                        <span
+                          aria-hidden="true"
+                          class="RoomListItemView-module_hiddenLines"
                         />
                       </div>
                     </div>
@@ -2260,18 +2296,18 @@ exports[`<RoomListView /> > renders Default story 1`] = `
                         </div>
                       </div>
                       <div
-                        class="RoomListItemView-module_previewRow"
+                        class="RoomListItemView-module_preview"
+                        title="Last message in Features"
                       >
-                        <div
-                          class="RoomListItemView-module_preview"
-                          title="Last message in Features"
-                        >
-                          Last message in Features
-                        </div>
                         <div
                           aria-hidden="true"
                           class="RoomListItemView-module_notificationDecoration"
                         />
+                        <span
+                          aria-hidden="true"
+                          class="RoomListItemView-module_hiddenLines"
+                        />
+                        Last message in Features
                       </div>
                     </div>
                   </div>
@@ -2371,11 +2407,15 @@ exports[`<RoomListView /> > renders Default story 1`] = `
                         </div>
                       </div>
                       <div
-                        class="RoomListItemView-module_previewRow"
+                        class="RoomListItemView-module_preview"
                       >
                         <div
                           aria-hidden="true"
                           class="RoomListItemView-module_notificationDecoration"
+                        />
+                        <span
+                          aria-hidden="true"
+                          class="RoomListItemView-module_hiddenLines"
                         />
                       </div>
                     </div>
@@ -3144,21 +3184,9 @@ exports[`<RoomListView /> > renders LargeFlatList story 1`] = `
                         </div>
                       </div>
                       <div
-                        class="RoomListItemView-module_previewRow"
+                        class="RoomListItemView-module_preview"
+                        title="Last message in General"
                       >
-                        <div
-                          class="RoomListItemView-module_preview"
-                          title="Last message in General"
-                        >
-                          <span>
-                            <span
-                              class="RoomListItemView-module_sender"
-                            >
-                              Alice:
-                            </span>
-                             Last message in General
-                          </span>
-                        </div>
                         <div
                           aria-hidden="true"
                           class="RoomListItemView-module_notificationDecoration"
@@ -3190,6 +3218,18 @@ exports[`<RoomListView /> > renders LargeFlatList story 1`] = `
                             />
                           </div>
                         </div>
+                        <span
+                          aria-hidden="true"
+                          class="RoomListItemView-module_hiddenLines"
+                        />
+                        <span>
+                          <span
+                            class="RoomListItemView-module_sender"
+                          >
+                            Alice:
+                          </span>
+                           Last message in General
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -3289,11 +3329,15 @@ exports[`<RoomListView /> > renders LargeFlatList story 1`] = `
                         </div>
                       </div>
                       <div
-                        class="RoomListItemView-module_previewRow"
+                        class="RoomListItemView-module_preview"
                       >
                         <div
                           aria-hidden="true"
                           class="RoomListItemView-module_notificationDecoration"
+                        />
+                        <span
+                          aria-hidden="true"
+                          class="RoomListItemView-module_hiddenLines"
                         />
                       </div>
                     </div>
@@ -3394,18 +3438,18 @@ exports[`<RoomListView /> > renders LargeFlatList story 1`] = `
                         </div>
                       </div>
                       <div
-                        class="RoomListItemView-module_previewRow"
+                        class="RoomListItemView-module_preview"
+                        title="Last message in Engineering"
                       >
-                        <div
-                          class="RoomListItemView-module_preview"
-                          title="Last message in Engineering"
-                        >
-                          Last message in Engineering
-                        </div>
                         <div
                           aria-hidden="true"
                           class="RoomListItemView-module_notificationDecoration"
                         />
+                        <span
+                          aria-hidden="true"
+                          class="RoomListItemView-module_hiddenLines"
+                        />
+                        Last message in Engineering
                       </div>
                     </div>
                   </div>
@@ -3505,11 +3549,15 @@ exports[`<RoomListView /> > renders LargeFlatList story 1`] = `
                         </div>
                       </div>
                       <div
-                        class="RoomListItemView-module_previewRow"
+                        class="RoomListItemView-module_preview"
                       >
                         <div
                           aria-hidden="true"
                           class="RoomListItemView-module_notificationDecoration"
+                        />
+                        <span
+                          aria-hidden="true"
+                          class="RoomListItemView-module_hiddenLines"
                         />
                       </div>
                     </div>
@@ -3610,25 +3658,25 @@ exports[`<RoomListView /> > renders LargeFlatList story 1`] = `
                         </div>
                       </div>
                       <div
-                        class="RoomListItemView-module_previewRow"
+                        class="RoomListItemView-module_preview"
+                        title="Last message in Product"
                       >
-                        <div
-                          class="RoomListItemView-module_preview"
-                          title="Last message in Product"
-                        >
-                          <span>
-                            <span
-                              class="RoomListItemView-module_sender"
-                            >
-                              Alice:
-                            </span>
-                             Last message in Product
-                          </span>
-                        </div>
                         <div
                           aria-hidden="true"
                           class="RoomListItemView-module_notificationDecoration"
                         />
+                        <span
+                          aria-hidden="true"
+                          class="RoomListItemView-module_hiddenLines"
+                        />
+                        <span>
+                          <span
+                            class="RoomListItemView-module_sender"
+                          >
+                            Alice:
+                          </span>
+                           Last message in Product
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -3728,7 +3776,7 @@ exports[`<RoomListView /> > renders LargeFlatList story 1`] = `
                         </div>
                       </div>
                       <div
-                        class="RoomListItemView-module_previewRow"
+                        class="RoomListItemView-module_preview"
                       >
                         <div
                           aria-hidden="true"
@@ -3763,6 +3811,10 @@ exports[`<RoomListView /> > renders LargeFlatList story 1`] = `
                             </span>
                           </div>
                         </div>
+                        <span
+                          aria-hidden="true"
+                          class="RoomListItemView-module_hiddenLines"
+                        />
                       </div>
                     </div>
                   </div>
@@ -3862,18 +3914,18 @@ exports[`<RoomListView /> > renders LargeFlatList story 1`] = `
                         </div>
                       </div>
                       <div
-                        class="RoomListItemView-module_previewRow"
+                        class="RoomListItemView-module_preview"
+                        title="Last message in Sales"
                       >
-                        <div
-                          class="RoomListItemView-module_preview"
-                          title="Last message in Sales"
-                        >
-                          Last message in Sales
-                        </div>
                         <div
                           aria-hidden="true"
                           class="RoomListItemView-module_notificationDecoration"
                         />
+                        <span
+                          aria-hidden="true"
+                          class="RoomListItemView-module_hiddenLines"
+                        />
+                        Last message in Sales
                       </div>
                     </div>
                   </div>
@@ -3973,11 +4025,15 @@ exports[`<RoomListView /> > renders LargeFlatList story 1`] = `
                         </div>
                       </div>
                       <div
-                        class="RoomListItemView-module_previewRow"
+                        class="RoomListItemView-module_preview"
                       >
                         <div
                           aria-hidden="true"
                           class="RoomListItemView-module_notificationDecoration"
+                        />
+                        <span
+                          aria-hidden="true"
+                          class="RoomListItemView-module_hiddenLines"
                         />
                       </div>
                     </div>
@@ -4078,25 +4134,25 @@ exports[`<RoomListView /> > renders LargeFlatList story 1`] = `
                         </div>
                       </div>
                       <div
-                        class="RoomListItemView-module_previewRow"
+                        class="RoomListItemView-module_preview"
+                        title="Last message in Announcements"
                       >
-                        <div
-                          class="RoomListItemView-module_preview"
-                          title="Last message in Announcements"
-                        >
-                          <span>
-                            <span
-                              class="RoomListItemView-module_sender"
-                            >
-                              Alice:
-                            </span>
-                             Last message in Announcements
-                          </span>
-                        </div>
                         <div
                           aria-hidden="true"
                           class="RoomListItemView-module_notificationDecoration"
                         />
+                        <span
+                          aria-hidden="true"
+                          class="RoomListItemView-module_hiddenLines"
+                        />
+                        <span>
+                          <span
+                            class="RoomListItemView-module_sender"
+                          >
+                            Alice:
+                          </span>
+                           Last message in Announcements
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -4196,11 +4252,15 @@ exports[`<RoomListView /> > renders LargeFlatList story 1`] = `
                         </div>
                       </div>
                       <div
-                        class="RoomListItemView-module_previewRow"
+                        class="RoomListItemView-module_preview"
                       >
                         <div
                           aria-hidden="true"
                           class="RoomListItemView-module_notificationDecoration"
+                        />
+                        <span
+                          aria-hidden="true"
+                          class="RoomListItemView-module_hiddenLines"
                         />
                       </div>
                     </div>
@@ -4301,14 +4361,9 @@ exports[`<RoomListView /> > renders LargeFlatList story 1`] = `
                         </div>
                       </div>
                       <div
-                        class="RoomListItemView-module_previewRow"
+                        class="RoomListItemView-module_preview"
+                        title="Last message in Team Alpha"
                       >
-                        <div
-                          class="RoomListItemView-module_preview"
-                          title="Last message in Team Alpha"
-                        >
-                          Last message in Team Alpha
-                        </div>
                         <div
                           aria-hidden="true"
                           class="RoomListItemView-module_notificationDecoration"
@@ -4342,6 +4397,11 @@ exports[`<RoomListView /> > renders LargeFlatList story 1`] = `
                             </span>
                           </div>
                         </div>
+                        <span
+                          aria-hidden="true"
+                          class="RoomListItemView-module_hiddenLines"
+                        />
+                        Last message in Team Alpha
                       </div>
                     </div>
                   </div>
@@ -4441,11 +4501,15 @@ exports[`<RoomListView /> > renders LargeFlatList story 1`] = `
                         </div>
                       </div>
                       <div
-                        class="RoomListItemView-module_previewRow"
+                        class="RoomListItemView-module_preview"
                       >
                         <div
                           aria-hidden="true"
                           class="RoomListItemView-module_notificationDecoration"
+                        />
+                        <span
+                          aria-hidden="true"
+                          class="RoomListItemView-module_hiddenLines"
                         />
                       </div>
                     </div>
@@ -4546,25 +4610,25 @@ exports[`<RoomListView /> > renders LargeFlatList story 1`] = `
                         </div>
                       </div>
                       <div
-                        class="RoomListItemView-module_previewRow"
+                        class="RoomListItemView-module_preview"
+                        title="Last message in Project X"
                       >
-                        <div
-                          class="RoomListItemView-module_preview"
-                          title="Last message in Project X"
-                        >
-                          <span>
-                            <span
-                              class="RoomListItemView-module_sender"
-                            >
-                              Alice:
-                            </span>
-                             Last message in Project X
-                          </span>
-                        </div>
                         <div
                           aria-hidden="true"
                           class="RoomListItemView-module_notificationDecoration"
                         />
+                        <span
+                          aria-hidden="true"
+                          class="RoomListItemView-module_hiddenLines"
+                        />
+                        <span>
+                          <span
+                            class="RoomListItemView-module_sender"
+                          >
+                            Alice:
+                          </span>
+                           Last message in Project X
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -4664,11 +4728,15 @@ exports[`<RoomListView /> > renders LargeFlatList story 1`] = `
                         </div>
                       </div>
                       <div
-                        class="RoomListItemView-module_previewRow"
+                        class="RoomListItemView-module_preview"
                       >
                         <div
                           aria-hidden="true"
                           class="RoomListItemView-module_notificationDecoration"
+                        />
+                        <span
+                          aria-hidden="true"
+                          class="RoomListItemView-module_hiddenLines"
                         />
                       </div>
                     </div>
@@ -4769,18 +4837,18 @@ exports[`<RoomListView /> > renders LargeFlatList story 1`] = `
                         </div>
                       </div>
                       <div
-                        class="RoomListItemView-module_previewRow"
+                        class="RoomListItemView-module_preview"
+                        title="Last message in Water Cooler"
                       >
-                        <div
-                          class="RoomListItemView-module_preview"
-                          title="Last message in Water Cooler"
-                        >
-                          Last message in Water Cooler
-                        </div>
                         <div
                           aria-hidden="true"
                           class="RoomListItemView-module_notificationDecoration"
                         />
+                        <span
+                          aria-hidden="true"
+                          class="RoomListItemView-module_hiddenLines"
+                        />
+                        Last message in Water Cooler
                       </div>
                     </div>
                   </div>
@@ -4880,7 +4948,7 @@ exports[`<RoomListView /> > renders LargeFlatList story 1`] = `
                         </div>
                       </div>
                       <div
-                        class="RoomListItemView-module_previewRow"
+                        class="RoomListItemView-module_preview"
                       >
                         <div
                           aria-hidden="true"
@@ -4915,6 +4983,10 @@ exports[`<RoomListView /> > renders LargeFlatList story 1`] = `
                             </span>
                           </div>
                         </div>
+                        <span
+                          aria-hidden="true"
+                          class="RoomListItemView-module_hiddenLines"
+                        />
                       </div>
                     </div>
                   </div>
@@ -5014,25 +5086,25 @@ exports[`<RoomListView /> > renders LargeFlatList story 1`] = `
                         </div>
                       </div>
                       <div
-                        class="RoomListItemView-module_previewRow"
+                        class="RoomListItemView-module_preview"
+                        title="Last message in Ideas"
                       >
-                        <div
-                          class="RoomListItemView-module_preview"
-                          title="Last message in Ideas"
-                        >
-                          <span>
-                            <span
-                              class="RoomListItemView-module_sender"
-                            >
-                              Alice:
-                            </span>
-                             Last message in Ideas
-                          </span>
-                        </div>
                         <div
                           aria-hidden="true"
                           class="RoomListItemView-module_notificationDecoration"
                         />
+                        <span
+                          aria-hidden="true"
+                          class="RoomListItemView-module_hiddenLines"
+                        />
+                        <span>
+                          <span
+                            class="RoomListItemView-module_sender"
+                          >
+                            Alice:
+                          </span>
+                           Last message in Ideas
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -5132,11 +5204,15 @@ exports[`<RoomListView /> > renders LargeFlatList story 1`] = `
                         </div>
                       </div>
                       <div
-                        class="RoomListItemView-module_previewRow"
+                        class="RoomListItemView-module_preview"
                       >
                         <div
                           aria-hidden="true"
                           class="RoomListItemView-module_notificationDecoration"
+                        />
+                        <span
+                          aria-hidden="true"
+                          class="RoomListItemView-module_hiddenLines"
                         />
                       </div>
                     </div>
@@ -5237,18 +5313,18 @@ exports[`<RoomListView /> > renders LargeFlatList story 1`] = `
                         </div>
                       </div>
                       <div
-                        class="RoomListItemView-module_previewRow"
+                        class="RoomListItemView-module_preview"
+                        title="Last message in Features"
                       >
-                        <div
-                          class="RoomListItemView-module_preview"
-                          title="Last message in Features"
-                        >
-                          Last message in Features
-                        </div>
                         <div
                           aria-hidden="true"
                           class="RoomListItemView-module_notificationDecoration"
                         />
+                        <span
+                          aria-hidden="true"
+                          class="RoomListItemView-module_hiddenLines"
+                        />
+                        Last message in Features
                       </div>
                     </div>
                   </div>
@@ -5348,11 +5424,15 @@ exports[`<RoomListView /> > renders LargeFlatList story 1`] = `
                         </div>
                       </div>
                       <div
-                        class="RoomListItemView-module_previewRow"
+                        class="RoomListItemView-module_preview"
                       >
                         <div
                           aria-hidden="true"
                           class="RoomListItemView-module_notificationDecoration"
+                        />
+                        <span
+                          aria-hidden="true"
+                          class="RoomListItemView-module_hiddenLines"
                         />
                       </div>
                     </div>
@@ -5453,21 +5533,9 @@ exports[`<RoomListView /> > renders LargeFlatList story 1`] = `
                         </div>
                       </div>
                       <div
-                        class="RoomListItemView-module_previewRow"
+                        class="RoomListItemView-module_preview"
+                        title="Last message in General"
                       >
-                        <div
-                          class="RoomListItemView-module_preview"
-                          title="Last message in General"
-                        >
-                          <span>
-                            <span
-                              class="RoomListItemView-module_sender"
-                            >
-                              Alice:
-                            </span>
-                             Last message in General
-                          </span>
-                        </div>
                         <div
                           aria-hidden="true"
                           class="RoomListItemView-module_notificationDecoration"
@@ -5501,6 +5569,18 @@ exports[`<RoomListView /> > renders LargeFlatList story 1`] = `
                             </span>
                           </div>
                         </div>
+                        <span
+                          aria-hidden="true"
+                          class="RoomListItemView-module_hiddenLines"
+                        />
+                        <span>
+                          <span
+                            class="RoomListItemView-module_sender"
+                          >
+                            Alice:
+                          </span>
+                           Last message in General
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -5600,11 +5680,15 @@ exports[`<RoomListView /> > renders LargeFlatList story 1`] = `
                         </div>
                       </div>
                       <div
-                        class="RoomListItemView-module_previewRow"
+                        class="RoomListItemView-module_preview"
                       >
                         <div
                           aria-hidden="true"
                           class="RoomListItemView-module_notificationDecoration"
+                        />
+                        <span
+                          aria-hidden="true"
+                          class="RoomListItemView-module_hiddenLines"
                         />
                       </div>
                     </div>
@@ -5705,18 +5789,18 @@ exports[`<RoomListView /> > renders LargeFlatList story 1`] = `
                         </div>
                       </div>
                       <div
-                        class="RoomListItemView-module_previewRow"
+                        class="RoomListItemView-module_preview"
+                        title="Last message in Engineering"
                       >
-                        <div
-                          class="RoomListItemView-module_preview"
-                          title="Last message in Engineering"
-                        >
-                          Last message in Engineering
-                        </div>
                         <div
                           aria-hidden="true"
                           class="RoomListItemView-module_notificationDecoration"
                         />
+                        <span
+                          aria-hidden="true"
+                          class="RoomListItemView-module_hiddenLines"
+                        />
+                        Last message in Engineering
                       </div>
                     </div>
                   </div>
@@ -5816,11 +5900,15 @@ exports[`<RoomListView /> > renders LargeFlatList story 1`] = `
                         </div>
                       </div>
                       <div
-                        class="RoomListItemView-module_previewRow"
+                        class="RoomListItemView-module_preview"
                       >
                         <div
                           aria-hidden="true"
                           class="RoomListItemView-module_notificationDecoration"
+                        />
+                        <span
+                          aria-hidden="true"
+                          class="RoomListItemView-module_hiddenLines"
                         />
                       </div>
                     </div>
@@ -5921,25 +6009,25 @@ exports[`<RoomListView /> > renders LargeFlatList story 1`] = `
                         </div>
                       </div>
                       <div
-                        class="RoomListItemView-module_previewRow"
+                        class="RoomListItemView-module_preview"
+                        title="Last message in Product"
                       >
-                        <div
-                          class="RoomListItemView-module_preview"
-                          title="Last message in Product"
-                        >
-                          <span>
-                            <span
-                              class="RoomListItemView-module_sender"
-                            >
-                              Alice:
-                            </span>
-                             Last message in Product
-                          </span>
-                        </div>
                         <div
                           aria-hidden="true"
                           class="RoomListItemView-module_notificationDecoration"
                         />
+                        <span
+                          aria-hidden="true"
+                          class="RoomListItemView-module_hiddenLines"
+                        />
+                        <span>
+                          <span
+                            class="RoomListItemView-module_sender"
+                          >
+                            Alice:
+                          </span>
+                           Last message in Product
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -6039,7 +6127,7 @@ exports[`<RoomListView /> > renders LargeFlatList story 1`] = `
                         </div>
                       </div>
                       <div
-                        class="RoomListItemView-module_previewRow"
+                        class="RoomListItemView-module_preview"
                       >
                         <div
                           aria-hidden="true"
@@ -6074,6 +6162,10 @@ exports[`<RoomListView /> > renders LargeFlatList story 1`] = `
                             </span>
                           </div>
                         </div>
+                        <span
+                          aria-hidden="true"
+                          class="RoomListItemView-module_hiddenLines"
+                        />
                       </div>
                     </div>
                   </div>
@@ -6173,18 +6265,18 @@ exports[`<RoomListView /> > renders LargeFlatList story 1`] = `
                         </div>
                       </div>
                       <div
-                        class="RoomListItemView-module_previewRow"
+                        class="RoomListItemView-module_preview"
+                        title="Last message in Sales"
                       >
-                        <div
-                          class="RoomListItemView-module_preview"
-                          title="Last message in Sales"
-                        >
-                          Last message in Sales
-                        </div>
                         <div
                           aria-hidden="true"
                           class="RoomListItemView-module_notificationDecoration"
                         />
+                        <span
+                          aria-hidden="true"
+                          class="RoomListItemView-module_hiddenLines"
+                        />
+                        Last message in Sales
                       </div>
                     </div>
                   </div>
@@ -6284,11 +6376,15 @@ exports[`<RoomListView /> > renders LargeFlatList story 1`] = `
                         </div>
                       </div>
                       <div
-                        class="RoomListItemView-module_previewRow"
+                        class="RoomListItemView-module_preview"
                       >
                         <div
                           aria-hidden="true"
                           class="RoomListItemView-module_notificationDecoration"
+                        />
+                        <span
+                          aria-hidden="true"
+                          class="RoomListItemView-module_hiddenLines"
                         />
                       </div>
                     </div>
@@ -6389,25 +6485,25 @@ exports[`<RoomListView /> > renders LargeFlatList story 1`] = `
                         </div>
                       </div>
                       <div
-                        class="RoomListItemView-module_previewRow"
+                        class="RoomListItemView-module_preview"
+                        title="Last message in Announcements"
                       >
-                        <div
-                          class="RoomListItemView-module_preview"
-                          title="Last message in Announcements"
-                        >
-                          <span>
-                            <span
-                              class="RoomListItemView-module_sender"
-                            >
-                              Alice:
-                            </span>
-                             Last message in Announcements
-                          </span>
-                        </div>
                         <div
                           aria-hidden="true"
                           class="RoomListItemView-module_notificationDecoration"
                         />
+                        <span
+                          aria-hidden="true"
+                          class="RoomListItemView-module_hiddenLines"
+                        />
+                        <span>
+                          <span
+                            class="RoomListItemView-module_sender"
+                          >
+                            Alice:
+                          </span>
+                           Last message in Announcements
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -6507,11 +6603,15 @@ exports[`<RoomListView /> > renders LargeFlatList story 1`] = `
                         </div>
                       </div>
                       <div
-                        class="RoomListItemView-module_previewRow"
+                        class="RoomListItemView-module_preview"
                       >
                         <div
                           aria-hidden="true"
                           class="RoomListItemView-module_notificationDecoration"
+                        />
+                        <span
+                          aria-hidden="true"
+                          class="RoomListItemView-module_hiddenLines"
                         />
                       </div>
                     </div>
@@ -6612,14 +6712,9 @@ exports[`<RoomListView /> > renders LargeFlatList story 1`] = `
                         </div>
                       </div>
                       <div
-                        class="RoomListItemView-module_previewRow"
+                        class="RoomListItemView-module_preview"
+                        title="Last message in Team Alpha"
                       >
-                        <div
-                          class="RoomListItemView-module_preview"
-                          title="Last message in Team Alpha"
-                        >
-                          Last message in Team Alpha
-                        </div>
                         <div
                           aria-hidden="true"
                           class="RoomListItemView-module_notificationDecoration"
@@ -6653,6 +6748,11 @@ exports[`<RoomListView /> > renders LargeFlatList story 1`] = `
                             </span>
                           </div>
                         </div>
+                        <span
+                          aria-hidden="true"
+                          class="RoomListItemView-module_hiddenLines"
+                        />
+                        Last message in Team Alpha
                       </div>
                     </div>
                   </div>
@@ -6752,11 +6852,15 @@ exports[`<RoomListView /> > renders LargeFlatList story 1`] = `
                         </div>
                       </div>
                       <div
-                        class="RoomListItemView-module_previewRow"
+                        class="RoomListItemView-module_preview"
                       >
                         <div
                           aria-hidden="true"
                           class="RoomListItemView-module_notificationDecoration"
+                        />
+                        <span
+                          aria-hidden="true"
+                          class="RoomListItemView-module_hiddenLines"
                         />
                       </div>
                     </div>
@@ -6857,25 +6961,25 @@ exports[`<RoomListView /> > renders LargeFlatList story 1`] = `
                         </div>
                       </div>
                       <div
-                        class="RoomListItemView-module_previewRow"
+                        class="RoomListItemView-module_preview"
+                        title="Last message in Project X"
                       >
-                        <div
-                          class="RoomListItemView-module_preview"
-                          title="Last message in Project X"
-                        >
-                          <span>
-                            <span
-                              class="RoomListItemView-module_sender"
-                            >
-                              Alice:
-                            </span>
-                             Last message in Project X
-                          </span>
-                        </div>
                         <div
                           aria-hidden="true"
                           class="RoomListItemView-module_notificationDecoration"
                         />
+                        <span
+                          aria-hidden="true"
+                          class="RoomListItemView-module_hiddenLines"
+                        />
+                        <span>
+                          <span
+                            class="RoomListItemView-module_sender"
+                          >
+                            Alice:
+                          </span>
+                           Last message in Project X
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -6975,11 +7079,15 @@ exports[`<RoomListView /> > renders LargeFlatList story 1`] = `
                         </div>
                       </div>
                       <div
-                        class="RoomListItemView-module_previewRow"
+                        class="RoomListItemView-module_preview"
                       >
                         <div
                           aria-hidden="true"
                           class="RoomListItemView-module_notificationDecoration"
+                        />
+                        <span
+                          aria-hidden="true"
+                          class="RoomListItemView-module_hiddenLines"
                         />
                       </div>
                     </div>
@@ -7080,18 +7188,18 @@ exports[`<RoomListView /> > renders LargeFlatList story 1`] = `
                         </div>
                       </div>
                       <div
-                        class="RoomListItemView-module_previewRow"
+                        class="RoomListItemView-module_preview"
+                        title="Last message in Water Cooler"
                       >
-                        <div
-                          class="RoomListItemView-module_preview"
-                          title="Last message in Water Cooler"
-                        >
-                          Last message in Water Cooler
-                        </div>
                         <div
                           aria-hidden="true"
                           class="RoomListItemView-module_notificationDecoration"
                         />
+                        <span
+                          aria-hidden="true"
+                          class="RoomListItemView-module_hiddenLines"
+                        />
+                        Last message in Water Cooler
                       </div>
                     </div>
                   </div>
@@ -7191,7 +7299,7 @@ exports[`<RoomListView /> > renders LargeFlatList story 1`] = `
                         </div>
                       </div>
                       <div
-                        class="RoomListItemView-module_previewRow"
+                        class="RoomListItemView-module_preview"
                       >
                         <div
                           aria-hidden="true"
@@ -7226,6 +7334,10 @@ exports[`<RoomListView /> > renders LargeFlatList story 1`] = `
                             </span>
                           </div>
                         </div>
+                        <span
+                          aria-hidden="true"
+                          class="RoomListItemView-module_hiddenLines"
+                        />
                       </div>
                     </div>
                   </div>
@@ -7325,25 +7437,25 @@ exports[`<RoomListView /> > renders LargeFlatList story 1`] = `
                         </div>
                       </div>
                       <div
-                        class="RoomListItemView-module_previewRow"
+                        class="RoomListItemView-module_preview"
+                        title="Last message in Ideas"
                       >
-                        <div
-                          class="RoomListItemView-module_preview"
-                          title="Last message in Ideas"
-                        >
-                          <span>
-                            <span
-                              class="RoomListItemView-module_sender"
-                            >
-                              Alice:
-                            </span>
-                             Last message in Ideas
-                          </span>
-                        </div>
                         <div
                           aria-hidden="true"
                           class="RoomListItemView-module_notificationDecoration"
                         />
+                        <span
+                          aria-hidden="true"
+                          class="RoomListItemView-module_hiddenLines"
+                        />
+                        <span>
+                          <span
+                            class="RoomListItemView-module_sender"
+                          >
+                            Alice:
+                          </span>
+                           Last message in Ideas
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -7443,11 +7555,15 @@ exports[`<RoomListView /> > renders LargeFlatList story 1`] = `
                         </div>
                       </div>
                       <div
-                        class="RoomListItemView-module_previewRow"
+                        class="RoomListItemView-module_preview"
                       >
                         <div
                           aria-hidden="true"
                           class="RoomListItemView-module_notificationDecoration"
+                        />
+                        <span
+                          aria-hidden="true"
+                          class="RoomListItemView-module_hiddenLines"
                         />
                       </div>
                     </div>
@@ -7548,18 +7664,18 @@ exports[`<RoomListView /> > renders LargeFlatList story 1`] = `
                         </div>
                       </div>
                       <div
-                        class="RoomListItemView-module_previewRow"
+                        class="RoomListItemView-module_preview"
+                        title="Last message in Features"
                       >
-                        <div
-                          class="RoomListItemView-module_preview"
-                          title="Last message in Features"
-                        >
-                          Last message in Features
-                        </div>
                         <div
                           aria-hidden="true"
                           class="RoomListItemView-module_notificationDecoration"
                         />
+                        <span
+                          aria-hidden="true"
+                          class="RoomListItemView-module_hiddenLines"
+                        />
+                        Last message in Features
                       </div>
                     </div>
                   </div>
@@ -7659,11 +7775,15 @@ exports[`<RoomListView /> > renders LargeFlatList story 1`] = `
                         </div>
                       </div>
                       <div
-                        class="RoomListItemView-module_previewRow"
+                        class="RoomListItemView-module_preview"
                       >
                         <div
                           aria-hidden="true"
                           class="RoomListItemView-module_notificationDecoration"
+                        />
+                        <span
+                          aria-hidden="true"
+                          class="RoomListItemView-module_hiddenLines"
                         />
                       </div>
                     </div>
@@ -7764,21 +7884,9 @@ exports[`<RoomListView /> > renders LargeFlatList story 1`] = `
                         </div>
                       </div>
                       <div
-                        class="RoomListItemView-module_previewRow"
+                        class="RoomListItemView-module_preview"
+                        title="Last message in General"
                       >
-                        <div
-                          class="RoomListItemView-module_preview"
-                          title="Last message in General"
-                        >
-                          <span>
-                            <span
-                              class="RoomListItemView-module_sender"
-                            >
-                              Alice:
-                            </span>
-                             Last message in General
-                          </span>
-                        </div>
                         <div
                           aria-hidden="true"
                           class="RoomListItemView-module_notificationDecoration"
@@ -7812,6 +7920,18 @@ exports[`<RoomListView /> > renders LargeFlatList story 1`] = `
                             </span>
                           </div>
                         </div>
+                        <span
+                          aria-hidden="true"
+                          class="RoomListItemView-module_hiddenLines"
+                        />
+                        <span>
+                          <span
+                            class="RoomListItemView-module_sender"
+                          >
+                            Alice:
+                          </span>
+                           Last message in General
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -7911,11 +8031,15 @@ exports[`<RoomListView /> > renders LargeFlatList story 1`] = `
                         </div>
                       </div>
                       <div
-                        class="RoomListItemView-module_previewRow"
+                        class="RoomListItemView-module_preview"
                       >
                         <div
                           aria-hidden="true"
                           class="RoomListItemView-module_notificationDecoration"
+                        />
+                        <span
+                          aria-hidden="true"
+                          class="RoomListItemView-module_hiddenLines"
                         />
                       </div>
                     </div>
@@ -8016,18 +8140,18 @@ exports[`<RoomListView /> > renders LargeFlatList story 1`] = `
                         </div>
                       </div>
                       <div
-                        class="RoomListItemView-module_previewRow"
+                        class="RoomListItemView-module_preview"
+                        title="Last message in Engineering"
                       >
-                        <div
-                          class="RoomListItemView-module_preview"
-                          title="Last message in Engineering"
-                        >
-                          Last message in Engineering
-                        </div>
                         <div
                           aria-hidden="true"
                           class="RoomListItemView-module_notificationDecoration"
                         />
+                        <span
+                          aria-hidden="true"
+                          class="RoomListItemView-module_hiddenLines"
+                        />
+                        Last message in Engineering
                       </div>
                     </div>
                   </div>
@@ -8127,11 +8251,15 @@ exports[`<RoomListView /> > renders LargeFlatList story 1`] = `
                         </div>
                       </div>
                       <div
-                        class="RoomListItemView-module_previewRow"
+                        class="RoomListItemView-module_preview"
                       >
                         <div
                           aria-hidden="true"
                           class="RoomListItemView-module_notificationDecoration"
+                        />
+                        <span
+                          aria-hidden="true"
+                          class="RoomListItemView-module_hiddenLines"
                         />
                       </div>
                     </div>
@@ -8232,25 +8360,25 @@ exports[`<RoomListView /> > renders LargeFlatList story 1`] = `
                         </div>
                       </div>
                       <div
-                        class="RoomListItemView-module_previewRow"
+                        class="RoomListItemView-module_preview"
+                        title="Last message in Product"
                       >
-                        <div
-                          class="RoomListItemView-module_preview"
-                          title="Last message in Product"
-                        >
-                          <span>
-                            <span
-                              class="RoomListItemView-module_sender"
-                            >
-                              Alice:
-                            </span>
-                             Last message in Product
-                          </span>
-                        </div>
                         <div
                           aria-hidden="true"
                           class="RoomListItemView-module_notificationDecoration"
                         />
+                        <span
+                          aria-hidden="true"
+                          class="RoomListItemView-module_hiddenLines"
+                        />
+                        <span>
+                          <span
+                            class="RoomListItemView-module_sender"
+                          >
+                            Alice:
+                          </span>
+                           Last message in Product
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -8350,7 +8478,7 @@ exports[`<RoomListView /> > renders LargeFlatList story 1`] = `
                         </div>
                       </div>
                       <div
-                        class="RoomListItemView-module_previewRow"
+                        class="RoomListItemView-module_preview"
                       >
                         <div
                           aria-hidden="true"
@@ -8385,6 +8513,10 @@ exports[`<RoomListView /> > renders LargeFlatList story 1`] = `
                             </span>
                           </div>
                         </div>
+                        <span
+                          aria-hidden="true"
+                          class="RoomListItemView-module_hiddenLines"
+                        />
                       </div>
                     </div>
                   </div>
@@ -8484,18 +8616,18 @@ exports[`<RoomListView /> > renders LargeFlatList story 1`] = `
                         </div>
                       </div>
                       <div
-                        class="RoomListItemView-module_previewRow"
+                        class="RoomListItemView-module_preview"
+                        title="Last message in Sales"
                       >
-                        <div
-                          class="RoomListItemView-module_preview"
-                          title="Last message in Sales"
-                        >
-                          Last message in Sales
-                        </div>
                         <div
                           aria-hidden="true"
                           class="RoomListItemView-module_notificationDecoration"
                         />
+                        <span
+                          aria-hidden="true"
+                          class="RoomListItemView-module_hiddenLines"
+                        />
+                        Last message in Sales
                       </div>
                     </div>
                   </div>
@@ -8742,21 +8874,9 @@ exports[`<RoomListView /> > renders SmallFlatList story 1`] = `
                         </div>
                       </div>
                       <div
-                        class="RoomListItemView-module_previewRow"
+                        class="RoomListItemView-module_preview"
+                        title="Last message in General"
                       >
-                        <div
-                          class="RoomListItemView-module_preview"
-                          title="Last message in General"
-                        >
-                          <span>
-                            <span
-                              class="RoomListItemView-module_sender"
-                            >
-                              Alice:
-                            </span>
-                             Last message in General
-                          </span>
-                        </div>
                         <div
                           aria-hidden="true"
                           class="RoomListItemView-module_notificationDecoration"
@@ -8788,6 +8908,18 @@ exports[`<RoomListView /> > renders SmallFlatList story 1`] = `
                             />
                           </div>
                         </div>
+                        <span
+                          aria-hidden="true"
+                          class="RoomListItemView-module_hiddenLines"
+                        />
+                        <span>
+                          <span
+                            class="RoomListItemView-module_sender"
+                          >
+                            Alice:
+                          </span>
+                           Last message in General
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -8887,11 +9019,15 @@ exports[`<RoomListView /> > renders SmallFlatList story 1`] = `
                         </div>
                       </div>
                       <div
-                        class="RoomListItemView-module_previewRow"
+                        class="RoomListItemView-module_preview"
                       >
                         <div
                           aria-hidden="true"
                           class="RoomListItemView-module_notificationDecoration"
+                        />
+                        <span
+                          aria-hidden="true"
+                          class="RoomListItemView-module_hiddenLines"
                         />
                       </div>
                     </div>
@@ -9074,21 +9210,9 @@ exports[`<RoomListView /> > renders WithActiveFilter story 1`] = `
                         </div>
                       </div>
                       <div
-                        class="RoomListItemView-module_previewRow"
+                        class="RoomListItemView-module_preview"
+                        title="Last message in General"
                       >
-                        <div
-                          class="RoomListItemView-module_preview"
-                          title="Last message in General"
-                        >
-                          <span>
-                            <span
-                              class="RoomListItemView-module_sender"
-                            >
-                              Alice:
-                            </span>
-                             Last message in General
-                          </span>
-                        </div>
                         <div
                           aria-hidden="true"
                           class="RoomListItemView-module_notificationDecoration"
@@ -9120,6 +9244,18 @@ exports[`<RoomListView /> > renders WithActiveFilter story 1`] = `
                             />
                           </div>
                         </div>
+                        <span
+                          aria-hidden="true"
+                          class="RoomListItemView-module_hiddenLines"
+                        />
+                        <span>
+                          <span
+                            class="RoomListItemView-module_sender"
+                          >
+                            Alice:
+                          </span>
+                           Last message in General
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -9219,11 +9355,15 @@ exports[`<RoomListView /> > renders WithActiveFilter story 1`] = `
                         </div>
                       </div>
                       <div
-                        class="RoomListItemView-module_previewRow"
+                        class="RoomListItemView-module_preview"
                       >
                         <div
                           aria-hidden="true"
                           class="RoomListItemView-module_notificationDecoration"
+                        />
+                        <span
+                          aria-hidden="true"
+                          class="RoomListItemView-module_hiddenLines"
                         />
                       </div>
                     </div>
@@ -9324,18 +9464,18 @@ exports[`<RoomListView /> > renders WithActiveFilter story 1`] = `
                         </div>
                       </div>
                       <div
-                        class="RoomListItemView-module_previewRow"
+                        class="RoomListItemView-module_preview"
+                        title="Last message in Engineering"
                       >
-                        <div
-                          class="RoomListItemView-module_preview"
-                          title="Last message in Engineering"
-                        >
-                          Last message in Engineering
-                        </div>
                         <div
                           aria-hidden="true"
                           class="RoomListItemView-module_notificationDecoration"
                         />
+                        <span
+                          aria-hidden="true"
+                          class="RoomListItemView-module_hiddenLines"
+                        />
+                        Last message in Engineering
                       </div>
                     </div>
                   </div>
@@ -9435,11 +9575,15 @@ exports[`<RoomListView /> > renders WithActiveFilter story 1`] = `
                         </div>
                       </div>
                       <div
-                        class="RoomListItemView-module_previewRow"
+                        class="RoomListItemView-module_preview"
                       >
                         <div
                           aria-hidden="true"
                           class="RoomListItemView-module_notificationDecoration"
+                        />
+                        <span
+                          aria-hidden="true"
+                          class="RoomListItemView-module_hiddenLines"
                         />
                       </div>
                     </div>
@@ -9540,25 +9684,25 @@ exports[`<RoomListView /> > renders WithActiveFilter story 1`] = `
                         </div>
                       </div>
                       <div
-                        class="RoomListItemView-module_previewRow"
+                        class="RoomListItemView-module_preview"
+                        title="Last message in Product"
                       >
-                        <div
-                          class="RoomListItemView-module_preview"
-                          title="Last message in Product"
-                        >
-                          <span>
-                            <span
-                              class="RoomListItemView-module_sender"
-                            >
-                              Alice:
-                            </span>
-                             Last message in Product
-                          </span>
-                        </div>
                         <div
                           aria-hidden="true"
                           class="RoomListItemView-module_notificationDecoration"
                         />
+                        <span
+                          aria-hidden="true"
+                          class="RoomListItemView-module_hiddenLines"
+                        />
+                        <span>
+                          <span
+                            class="RoomListItemView-module_sender"
+                          >
+                            Alice:
+                          </span>
+                           Last message in Product
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -9658,7 +9802,7 @@ exports[`<RoomListView /> > renders WithActiveFilter story 1`] = `
                         </div>
                       </div>
                       <div
-                        class="RoomListItemView-module_previewRow"
+                        class="RoomListItemView-module_preview"
                       >
                         <div
                           aria-hidden="true"
@@ -9693,6 +9837,10 @@ exports[`<RoomListView /> > renders WithActiveFilter story 1`] = `
                             </span>
                           </div>
                         </div>
+                        <span
+                          aria-hidden="true"
+                          class="RoomListItemView-module_hiddenLines"
+                        />
                       </div>
                     </div>
                   </div>
@@ -9792,18 +9940,18 @@ exports[`<RoomListView /> > renders WithActiveFilter story 1`] = `
                         </div>
                       </div>
                       <div
-                        class="RoomListItemView-module_previewRow"
+                        class="RoomListItemView-module_preview"
+                        title="Last message in Sales"
                       >
-                        <div
-                          class="RoomListItemView-module_preview"
-                          title="Last message in Sales"
-                        >
-                          Last message in Sales
-                        </div>
                         <div
                           aria-hidden="true"
                           class="RoomListItemView-module_notificationDecoration"
                         />
+                        <span
+                          aria-hidden="true"
+                          class="RoomListItemView-module_hiddenLines"
+                        />
+                        Last message in Sales
                       </div>
                     </div>
                   </div>
@@ -9903,11 +10051,15 @@ exports[`<RoomListView /> > renders WithActiveFilter story 1`] = `
                         </div>
                       </div>
                       <div
-                        class="RoomListItemView-module_previewRow"
+                        class="RoomListItemView-module_preview"
                       >
                         <div
                           aria-hidden="true"
                           class="RoomListItemView-module_notificationDecoration"
+                        />
+                        <span
+                          aria-hidden="true"
+                          class="RoomListItemView-module_hiddenLines"
                         />
                       </div>
                     </div>
@@ -10008,25 +10160,25 @@ exports[`<RoomListView /> > renders WithActiveFilter story 1`] = `
                         </div>
                       </div>
                       <div
-                        class="RoomListItemView-module_previewRow"
+                        class="RoomListItemView-module_preview"
+                        title="Last message in Announcements"
                       >
-                        <div
-                          class="RoomListItemView-module_preview"
-                          title="Last message in Announcements"
-                        >
-                          <span>
-                            <span
-                              class="RoomListItemView-module_sender"
-                            >
-                              Alice:
-                            </span>
-                             Last message in Announcements
-                          </span>
-                        </div>
                         <div
                           aria-hidden="true"
                           class="RoomListItemView-module_notificationDecoration"
                         />
+                        <span
+                          aria-hidden="true"
+                          class="RoomListItemView-module_hiddenLines"
+                        />
+                        <span>
+                          <span
+                            class="RoomListItemView-module_sender"
+                          >
+                            Alice:
+                          </span>
+                           Last message in Announcements
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -10126,11 +10278,15 @@ exports[`<RoomListView /> > renders WithActiveFilter story 1`] = `
                         </div>
                       </div>
                       <div
-                        class="RoomListItemView-module_previewRow"
+                        class="RoomListItemView-module_preview"
                       >
                         <div
                           aria-hidden="true"
                           class="RoomListItemView-module_notificationDecoration"
+                        />
+                        <span
+                          aria-hidden="true"
+                          class="RoomListItemView-module_hiddenLines"
                         />
                       </div>
                     </div>
@@ -10231,14 +10387,9 @@ exports[`<RoomListView /> > renders WithActiveFilter story 1`] = `
                         </div>
                       </div>
                       <div
-                        class="RoomListItemView-module_previewRow"
+                        class="RoomListItemView-module_preview"
+                        title="Last message in Team Alpha"
                       >
-                        <div
-                          class="RoomListItemView-module_preview"
-                          title="Last message in Team Alpha"
-                        >
-                          Last message in Team Alpha
-                        </div>
                         <div
                           aria-hidden="true"
                           class="RoomListItemView-module_notificationDecoration"
@@ -10272,6 +10423,11 @@ exports[`<RoomListView /> > renders WithActiveFilter story 1`] = `
                             </span>
                           </div>
                         </div>
+                        <span
+                          aria-hidden="true"
+                          class="RoomListItemView-module_hiddenLines"
+                        />
+                        Last message in Team Alpha
                       </div>
                     </div>
                   </div>
@@ -10371,11 +10527,15 @@ exports[`<RoomListView /> > renders WithActiveFilter story 1`] = `
                         </div>
                       </div>
                       <div
-                        class="RoomListItemView-module_previewRow"
+                        class="RoomListItemView-module_preview"
                       >
                         <div
                           aria-hidden="true"
                           class="RoomListItemView-module_notificationDecoration"
+                        />
+                        <span
+                          aria-hidden="true"
+                          class="RoomListItemView-module_hiddenLines"
                         />
                       </div>
                     </div>
@@ -10476,25 +10636,25 @@ exports[`<RoomListView /> > renders WithActiveFilter story 1`] = `
                         </div>
                       </div>
                       <div
-                        class="RoomListItemView-module_previewRow"
+                        class="RoomListItemView-module_preview"
+                        title="Last message in Project X"
                       >
-                        <div
-                          class="RoomListItemView-module_preview"
-                          title="Last message in Project X"
-                        >
-                          <span>
-                            <span
-                              class="RoomListItemView-module_sender"
-                            >
-                              Alice:
-                            </span>
-                             Last message in Project X
-                          </span>
-                        </div>
                         <div
                           aria-hidden="true"
                           class="RoomListItemView-module_notificationDecoration"
                         />
+                        <span
+                          aria-hidden="true"
+                          class="RoomListItemView-module_hiddenLines"
+                        />
+                        <span>
+                          <span
+                            class="RoomListItemView-module_sender"
+                          >
+                            Alice:
+                          </span>
+                           Last message in Project X
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -10594,11 +10754,15 @@ exports[`<RoomListView /> > renders WithActiveFilter story 1`] = `
                         </div>
                       </div>
                       <div
-                        class="RoomListItemView-module_previewRow"
+                        class="RoomListItemView-module_preview"
                       >
                         <div
                           aria-hidden="true"
                           class="RoomListItemView-module_notificationDecoration"
+                        />
+                        <span
+                          aria-hidden="true"
+                          class="RoomListItemView-module_hiddenLines"
                         />
                       </div>
                     </div>
@@ -10699,18 +10863,18 @@ exports[`<RoomListView /> > renders WithActiveFilter story 1`] = `
                         </div>
                       </div>
                       <div
-                        class="RoomListItemView-module_previewRow"
+                        class="RoomListItemView-module_preview"
+                        title="Last message in Water Cooler"
                       >
-                        <div
-                          class="RoomListItemView-module_preview"
-                          title="Last message in Water Cooler"
-                        >
-                          Last message in Water Cooler
-                        </div>
                         <div
                           aria-hidden="true"
                           class="RoomListItemView-module_notificationDecoration"
                         />
+                        <span
+                          aria-hidden="true"
+                          class="RoomListItemView-module_hiddenLines"
+                        />
+                        Last message in Water Cooler
                       </div>
                     </div>
                   </div>
@@ -10810,7 +10974,7 @@ exports[`<RoomListView /> > renders WithActiveFilter story 1`] = `
                         </div>
                       </div>
                       <div
-                        class="RoomListItemView-module_previewRow"
+                        class="RoomListItemView-module_preview"
                       >
                         <div
                           aria-hidden="true"
@@ -10845,6 +11009,10 @@ exports[`<RoomListView /> > renders WithActiveFilter story 1`] = `
                             </span>
                           </div>
                         </div>
+                        <span
+                          aria-hidden="true"
+                          class="RoomListItemView-module_hiddenLines"
+                        />
                       </div>
                     </div>
                   </div>
@@ -10944,25 +11112,25 @@ exports[`<RoomListView /> > renders WithActiveFilter story 1`] = `
                         </div>
                       </div>
                       <div
-                        class="RoomListItemView-module_previewRow"
+                        class="RoomListItemView-module_preview"
+                        title="Last message in Ideas"
                       >
-                        <div
-                          class="RoomListItemView-module_preview"
-                          title="Last message in Ideas"
-                        >
-                          <span>
-                            <span
-                              class="RoomListItemView-module_sender"
-                            >
-                              Alice:
-                            </span>
-                             Last message in Ideas
-                          </span>
-                        </div>
                         <div
                           aria-hidden="true"
                           class="RoomListItemView-module_notificationDecoration"
                         />
+                        <span
+                          aria-hidden="true"
+                          class="RoomListItemView-module_hiddenLines"
+                        />
+                        <span>
+                          <span
+                            class="RoomListItemView-module_sender"
+                          >
+                            Alice:
+                          </span>
+                           Last message in Ideas
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -11062,11 +11230,15 @@ exports[`<RoomListView /> > renders WithActiveFilter story 1`] = `
                         </div>
                       </div>
                       <div
-                        class="RoomListItemView-module_previewRow"
+                        class="RoomListItemView-module_preview"
                       >
                         <div
                           aria-hidden="true"
                           class="RoomListItemView-module_notificationDecoration"
+                        />
+                        <span
+                          aria-hidden="true"
+                          class="RoomListItemView-module_hiddenLines"
                         />
                       </div>
                     </div>
@@ -11167,18 +11339,18 @@ exports[`<RoomListView /> > renders WithActiveFilter story 1`] = `
                         </div>
                       </div>
                       <div
-                        class="RoomListItemView-module_previewRow"
+                        class="RoomListItemView-module_preview"
+                        title="Last message in Features"
                       >
-                        <div
-                          class="RoomListItemView-module_preview"
-                          title="Last message in Features"
-                        >
-                          Last message in Features
-                        </div>
                         <div
                           aria-hidden="true"
                           class="RoomListItemView-module_notificationDecoration"
                         />
+                        <span
+                          aria-hidden="true"
+                          class="RoomListItemView-module_hiddenLines"
+                        />
+                        Last message in Features
                       </div>
                     </div>
                   </div>
@@ -11278,11 +11450,15 @@ exports[`<RoomListView /> > renders WithActiveFilter story 1`] = `
                         </div>
                       </div>
                       <div
-                        class="RoomListItemView-module_previewRow"
+                        class="RoomListItemView-module_preview"
                       >
                         <div
                           aria-hidden="true"
                           class="RoomListItemView-module_notificationDecoration"
+                        />
+                        <span
+                          aria-hidden="true"
+                          class="RoomListItemView-module_hiddenLines"
                         />
                       </div>
                     </div>

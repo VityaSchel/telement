@@ -95,25 +95,25 @@ exports[`<RoomListItemView /> > renders Default story 1`] = `
             </div>
           </div>
           <div
-            class="RoomListItemView-module_previewRow"
+            class="RoomListItemView-module_preview"
+            title="Hey everyone!"
           >
-            <div
-              class="RoomListItemView-module_preview"
-              title="Hey everyone!"
-            >
-              <span>
-                <span
-                  class="RoomListItemView-module_sender"
-                >
-                  Alice:
-                </span>
-                 Hey everyone!
-              </span>
-            </div>
             <div
               aria-hidden="true"
               class="RoomListItemView-module_notificationDecoration"
             />
+            <span
+              aria-hidden="true"
+              class="RoomListItemView-module_hiddenLines"
+            />
+            <span>
+              <span
+                class="RoomListItemView-module_sender"
+              >
+                Alice:
+              </span>
+               Hey everyone!
+            </span>
           </div>
         </div>
       </div>
@@ -217,18 +217,18 @@ exports[`<RoomListItemView /> > renders DirectMessage story 1`] = `
             </div>
           </div>
           <div
-            class="RoomListItemView-module_previewRow"
+            class="RoomListItemView-module_preview"
+            title="Hey everyone!"
           >
-            <div
-              class="RoomListItemView-module_preview"
-              title="Hey everyone!"
-            >
-              Hey everyone!
-            </div>
             <div
               aria-hidden="true"
               class="RoomListItemView-module_notificationDecoration"
             />
+            <span
+              aria-hidden="true"
+              class="RoomListItemView-module_hiddenLines"
+            />
+            Hey everyone!
           </div>
         </div>
       </div>
@@ -332,21 +332,9 @@ exports[`<RoomListItemView /> > renders Invitation story 1`] = `
             </div>
           </div>
           <div
-            class="RoomListItemView-module_previewRow"
+            class="RoomListItemView-module_preview"
+            title="Bob invited you"
           >
-            <div
-              class="RoomListItemView-module_preview"
-              title="Bob invited you"
-            >
-              <span>
-                <span
-                  class="RoomListItemView-module_sender"
-                >
-                  Alice:
-                </span>
-                 Bob invited you
-              </span>
-            </div>
             <div
               aria-hidden="true"
               class="RoomListItemView-module_notificationDecoration"
@@ -369,6 +357,18 @@ exports[`<RoomListItemView /> > renders Invitation story 1`] = `
                 </svg>
               </div>
             </div>
+            <span
+              aria-hidden="true"
+              class="RoomListItemView-module_hiddenLines"
+            />
+            <span>
+              <span
+                class="RoomListItemView-module_sender"
+              >
+                Alice:
+              </span>
+               Bob invited you
+            </span>
           </div>
         </div>
       </div>
@@ -489,25 +489,25 @@ exports[`<RoomListItemView /> > renders Muted story 1`] = `
             </div>
           </div>
           <div
-            class="RoomListItemView-module_previewRow"
+            class="RoomListItemView-module_preview"
+            title="Hey everyone!"
           >
-            <div
-              class="RoomListItemView-module_preview"
-              title="Hey everyone!"
-            >
-              <span>
-                <span
-                  class="RoomListItemView-module_sender"
-                >
-                  Alice:
-                </span>
-                 Hey everyone!
-              </span>
-            </div>
             <div
               aria-hidden="true"
               class="RoomListItemView-module_notificationDecoration"
             />
+            <span
+              aria-hidden="true"
+              class="RoomListItemView-module_hiddenLines"
+            />
+            <span>
+              <span
+                class="RoomListItemView-module_sender"
+              >
+                Alice:
+              </span>
+               Hey everyone!
+            </span>
           </div>
         </div>
       </div>
@@ -628,21 +628,9 @@ exports[`<RoomListItemView /> > renders MutedWithNotification story 1`] = `
             </div>
           </div>
           <div
-            class="RoomListItemView-module_previewRow"
+            class="RoomListItemView-module_preview"
+            title="Hey everyone!"
           >
-            <div
-              class="RoomListItemView-module_preview"
-              title="Hey everyone!"
-            >
-              <span>
-                <span
-                  class="RoomListItemView-module_sender"
-                >
-                  Alice:
-                </span>
-                 Hey everyone!
-              </span>
-            </div>
             <div
               aria-hidden="true"
               class="RoomListItemView-module_notificationDecoration"
@@ -661,6 +649,18 @@ exports[`<RoomListItemView /> > renders MutedWithNotification story 1`] = `
                 </span>
               </div>
             </div>
+            <span
+              aria-hidden="true"
+              class="RoomListItemView-module_hiddenLines"
+            />
+            <span>
+              <span
+                class="RoomListItemView-module_sender"
+              >
+                Alice:
+              </span>
+               Hey everyone!
+            </span>
           </div>
         </div>
       </div>
@@ -764,11 +764,15 @@ exports[`<RoomListItemView /> > renders NoMessagePreview story 1`] = `
             </div>
           </div>
           <div
-            class="RoomListItemView-module_previewRow"
+            class="RoomListItemView-module_preview"
           >
             <div
               aria-hidden="true"
               class="RoomListItemView-module_notificationDecoration"
+            />
+            <span
+              aria-hidden="true"
+              class="RoomListItemView-module_hiddenLines"
             />
           </div>
         </div>
@@ -874,21 +878,9 @@ exports[`<RoomListItemView /> > renders Pinned story 1`] = `
             </div>
           </div>
           <div
-            class="RoomListItemView-module_previewRow"
+            class="RoomListItemView-module_preview"
+            title="Hey everyone!"
           >
-            <div
-              class="RoomListItemView-module_preview"
-              title="Hey everyone!"
-            >
-              <span>
-                <span
-                  class="RoomListItemView-module_sender"
-                >
-                  Alice:
-                </span>
-                 Hey everyone!
-              </span>
-            </div>
             <div
               aria-hidden="true"
               class="RoomListItemView-module_notificationDecoration"
@@ -907,6 +899,18 @@ exports[`<RoomListItemView /> > renders Pinned story 1`] = `
                 />
               </svg>
             </div>
+            <span
+              aria-hidden="true"
+              class="RoomListItemView-module_hiddenLines"
+            />
+            <span>
+              <span
+                class="RoomListItemView-module_sender"
+              >
+                Alice:
+              </span>
+               Hey everyone!
+            </span>
           </div>
         </div>
       </div>
@@ -1016,25 +1020,25 @@ exports[`<RoomListItemView /> > renders Selected story 1`] = `
             </div>
           </div>
           <div
-            class="RoomListItemView-module_previewRow"
+            class="RoomListItemView-module_preview"
+            title="Hey everyone!"
           >
-            <div
-              class="RoomListItemView-module_preview"
-              title="Hey everyone!"
-            >
-              <span>
-                <span
-                  class="RoomListItemView-module_sender"
-                >
-                  Alice:
-                </span>
-                 Hey everyone!
-              </span>
-            </div>
             <div
               aria-hidden="true"
               class="RoomListItemView-module_notificationDecoration"
             />
+            <span
+              aria-hidden="true"
+              class="RoomListItemView-module_hiddenLines"
+            />
+            <span>
+              <span
+                class="RoomListItemView-module_sender"
+              >
+                Alice:
+              </span>
+               Hey everyone!
+            </span>
           </div>
         </div>
       </div>
@@ -1138,21 +1142,21 @@ exports[`<RoomListItemView /> > renders Typing story 1`] = `
             </div>
           </div>
           <div
-            class="RoomListItemView-module_previewRow"
+            class="RoomListItemView-module_preview"
           >
-            <div
-              class="RoomListItemView-module_preview"
-            >
-              <span
-                class="RoomListItemView-module_typing"
-              >
-                Alice is typing …
-              </span>
-            </div>
             <div
               aria-hidden="true"
               class="RoomListItemView-module_notificationDecoration"
             />
+            <span
+              aria-hidden="true"
+              class="RoomListItemView-module_hiddenLines"
+            />
+            <span
+              class="RoomListItemView-module_typing"
+            >
+              Alice is typing …
+            </span>
           </div>
         </div>
       </div>
@@ -1256,21 +1260,9 @@ exports[`<RoomListItemView /> > renders UnsentMessage story 1`] = `
             </div>
           </div>
           <div
-            class="RoomListItemView-module_previewRow"
+            class="RoomListItemView-module_preview"
+            title="Failed to send message"
           >
-            <div
-              class="RoomListItemView-module_preview"
-              title="Failed to send message"
-            >
-              <span>
-                <span
-                  class="RoomListItemView-module_sender"
-                >
-                  Alice:
-                </span>
-                 Failed to send message
-              </span>
-            </div>
             <div
               aria-hidden="true"
               class="RoomListItemView-module_notificationDecoration"
@@ -1293,6 +1285,18 @@ exports[`<RoomListItemView /> > renders UnsentMessage story 1`] = `
                 </svg>
               </div>
             </div>
+            <span
+              aria-hidden="true"
+              class="RoomListItemView-module_hiddenLines"
+            />
+            <span>
+              <span
+                class="RoomListItemView-module_sender"
+              >
+                Alice:
+              </span>
+               Failed to send message
+            </span>
           </div>
         </div>
       </div>
@@ -1396,25 +1400,25 @@ exports[`<RoomListItemView /> > renders WithHoverMenu story 1`] = `
             </div>
           </div>
           <div
-            class="RoomListItemView-module_previewRow"
+            class="RoomListItemView-module_preview"
+            title="Hey everyone!"
           >
-            <div
-              class="RoomListItemView-module_preview"
-              title="Hey everyone!"
-            >
-              <span>
-                <span
-                  class="RoomListItemView-module_sender"
-                >
-                  Alice:
-                </span>
-                 Hey everyone!
-              </span>
-            </div>
             <div
               aria-hidden="true"
               class="RoomListItemView-module_notificationDecoration"
             />
+            <span
+              aria-hidden="true"
+              class="RoomListItemView-module_hiddenLines"
+            />
+            <span>
+              <span
+                class="RoomListItemView-module_sender"
+              >
+                Alice:
+              </span>
+               Hey everyone!
+            </span>
           </div>
         </div>
       </div>
@@ -1518,21 +1522,9 @@ exports[`<RoomListItemView /> > renders WithMention story 1`] = `
             </div>
           </div>
           <div
-            class="RoomListItemView-module_previewRow"
+            class="RoomListItemView-module_preview"
+            title="Hey everyone!"
           >
-            <div
-              class="RoomListItemView-module_preview"
-              title="Hey everyone!"
-            >
-              <span>
-                <span
-                  class="RoomListItemView-module_sender"
-                >
-                  Alice:
-                </span>
-                 Hey everyone!
-              </span>
-            </div>
             <div
               aria-hidden="true"
               class="RoomListItemView-module_notificationDecoration"
@@ -1566,6 +1558,18 @@ exports[`<RoomListItemView /> > renders WithMention story 1`] = `
                 </span>
               </div>
             </div>
+            <span
+              aria-hidden="true"
+              class="RoomListItemView-module_hiddenLines"
+            />
+            <span>
+              <span
+                class="RoomListItemView-module_sender"
+              >
+                Alice:
+              </span>
+               Hey everyone!
+            </span>
           </div>
         </div>
       </div>
@@ -1669,21 +1673,9 @@ exports[`<RoomListItemView /> > renders WithNotification story 1`] = `
             </div>
           </div>
           <div
-            class="RoomListItemView-module_previewRow"
+            class="RoomListItemView-module_preview"
+            title="Hey everyone!"
           >
-            <div
-              class="RoomListItemView-module_preview"
-              title="Hey everyone!"
-            >
-              <span>
-                <span
-                  class="RoomListItemView-module_sender"
-                >
-                  Alice:
-                </span>
-                 Hey everyone!
-              </span>
-            </div>
             <div
               aria-hidden="true"
               class="RoomListItemView-module_notificationDecoration"
@@ -1701,6 +1693,18 @@ exports[`<RoomListItemView /> > renders WithNotification story 1`] = `
                 </span>
               </div>
             </div>
+            <span
+              aria-hidden="true"
+              class="RoomListItemView-module_hiddenLines"
+            />
+            <span>
+              <span
+                class="RoomListItemView-module_sender"
+              >
+                Alice:
+              </span>
+               Hey everyone!
+            </span>
           </div>
         </div>
       </div>
@@ -1804,21 +1808,9 @@ exports[`<RoomListItemView /> > renders WithVideoCall story 1`] = `
             </div>
           </div>
           <div
-            class="RoomListItemView-module_previewRow"
+            class="RoomListItemView-module_preview"
+            title="Hey everyone!"
           >
-            <div
-              class="RoomListItemView-module_preview"
-              title="Hey everyone!"
-            >
-              <span>
-                <span
-                  class="RoomListItemView-module_sender"
-                >
-                  Alice:
-                </span>
-                 Hey everyone!
-              </span>
-            </div>
             <div
               aria-hidden="true"
               class="RoomListItemView-module_notificationDecoration"
@@ -1841,6 +1833,18 @@ exports[`<RoomListItemView /> > renders WithVideoCall story 1`] = `
                 </svg>
               </div>
             </div>
+            <span
+              aria-hidden="true"
+              class="RoomListItemView-module_hiddenLines"
+            />
+            <span>
+              <span
+                class="RoomListItemView-module_sender"
+              >
+                Alice:
+              </span>
+               Hey everyone!
+            </span>
           </div>
         </div>
       </div>
@@ -1944,21 +1948,9 @@ exports[`<RoomListItemView /> > renders WithVoiceCall story 1`] = `
             </div>
           </div>
           <div
-            class="RoomListItemView-module_previewRow"
+            class="RoomListItemView-module_preview"
+            title="Hey everyone!"
           >
-            <div
-              class="RoomListItemView-module_preview"
-              title="Hey everyone!"
-            >
-              <span>
-                <span
-                  class="RoomListItemView-module_sender"
-                >
-                  Alice:
-                </span>
-                 Hey everyone!
-              </span>
-            </div>
             <div
               aria-hidden="true"
               class="RoomListItemView-module_notificationDecoration"
@@ -1981,6 +1973,18 @@ exports[`<RoomListItemView /> > renders WithVoiceCall story 1`] = `
                 </svg>
               </div>
             </div>
+            <span
+              aria-hidden="true"
+              class="RoomListItemView-module_hiddenLines"
+            />
+            <span>
+              <span
+                class="RoomListItemView-module_sender"
+              >
+                Alice:
+              </span>
+               Hey everyone!
+            </span>
           </div>
         </div>
       </div>

@@ -131,12 +131,9 @@ export const RoomListItemContent = memo(function RoomListItemContent({
                         {item.showMoreOptionsMenu && <RoomListItemHoverMenu vm={vm} />}
                     </div>
                 </div>
-                <div className={styles.previewRow}>
-                    {preview && (
-                        <div className={styles.preview} title={previewTitle}>
-                            {preview}
-                        </div>
-                    )}
+                {/* Like Telegram's, the decorations float at the end of both preview lines, centered on the second, so
+                    both lines make room for them; the lines that the clamp hides start below them */}
+                <div className={styles.preview} title={preview ? previewTitle : undefined}>
                     {/* aria-hidden because we summarise the unread count/notification status in a11yLabel */}
                     <div className={styles.notificationDecoration} aria-hidden={true}>
                         <NotificationDecoration {...item.notification} />
@@ -150,6 +147,8 @@ export const RoomListItemContent = memo(function RoomListItemContent({
                             />
                         )}
                     </div>
+                    <span className={styles.hiddenLines} aria-hidden={true} />
+                    {preview}
                 </div>
             </div>
         </div>

@@ -119,21 +119,9 @@ exports[`<VirtualizedRoomListView /> > renders Default story 1`] = `
                       </div>
                     </div>
                     <div
-                      class="RoomListItemView-module_previewRow"
+                      class="RoomListItemView-module_preview"
+                      title="Last message in General"
                     >
-                      <div
-                        class="RoomListItemView-module_preview"
-                        title="Last message in General"
-                      >
-                        <span>
-                          <span
-                            class="RoomListItemView-module_sender"
-                          >
-                            Alice:
-                          </span>
-                           Last message in General
-                        </span>
-                      </div>
                       <div
                         aria-hidden="true"
                         class="RoomListItemView-module_notificationDecoration"
@@ -165,6 +153,18 @@ exports[`<VirtualizedRoomListView /> > renders Default story 1`] = `
                           />
                         </div>
                       </div>
+                      <span
+                        aria-hidden="true"
+                        class="RoomListItemView-module_hiddenLines"
+                      />
+                      <span>
+                        <span
+                          class="RoomListItemView-module_sender"
+                        >
+                          Alice:
+                        </span>
+                         Last message in General
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -264,11 +264,15 @@ exports[`<VirtualizedRoomListView /> > renders Default story 1`] = `
                       </div>
                     </div>
                     <div
-                      class="RoomListItemView-module_previewRow"
+                      class="RoomListItemView-module_preview"
                     >
                       <div
                         aria-hidden="true"
                         class="RoomListItemView-module_notificationDecoration"
+                      />
+                      <span
+                        aria-hidden="true"
+                        class="RoomListItemView-module_hiddenLines"
                       />
                     </div>
                   </div>
@@ -369,18 +373,18 @@ exports[`<VirtualizedRoomListView /> > renders Default story 1`] = `
                       </div>
                     </div>
                     <div
-                      class="RoomListItemView-module_previewRow"
+                      class="RoomListItemView-module_preview"
+                      title="Last message in Engineering"
                     >
-                      <div
-                        class="RoomListItemView-module_preview"
-                        title="Last message in Engineering"
-                      >
-                        Last message in Engineering
-                      </div>
                       <div
                         aria-hidden="true"
                         class="RoomListItemView-module_notificationDecoration"
                       />
+                      <span
+                        aria-hidden="true"
+                        class="RoomListItemView-module_hiddenLines"
+                      />
+                      Last message in Engineering
                     </div>
                   </div>
                 </div>
@@ -480,11 +484,15 @@ exports[`<VirtualizedRoomListView /> > renders Default story 1`] = `
                       </div>
                     </div>
                     <div
-                      class="RoomListItemView-module_previewRow"
+                      class="RoomListItemView-module_preview"
                     >
                       <div
                         aria-hidden="true"
                         class="RoomListItemView-module_notificationDecoration"
+                      />
+                      <span
+                        aria-hidden="true"
+                        class="RoomListItemView-module_hiddenLines"
                       />
                     </div>
                   </div>
@@ -585,25 +593,25 @@ exports[`<VirtualizedRoomListView /> > renders Default story 1`] = `
                       </div>
                     </div>
                     <div
-                      class="RoomListItemView-module_previewRow"
+                      class="RoomListItemView-module_preview"
+                      title="Last message in Product"
                     >
-                      <div
-                        class="RoomListItemView-module_preview"
-                        title="Last message in Product"
-                      >
-                        <span>
-                          <span
-                            class="RoomListItemView-module_sender"
-                          >
-                            Alice:
-                          </span>
-                           Last message in Product
-                        </span>
-                      </div>
                       <div
                         aria-hidden="true"
                         class="RoomListItemView-module_notificationDecoration"
                       />
+                      <span
+                        aria-hidden="true"
+                        class="RoomListItemView-module_hiddenLines"
+                      />
+                      <span>
+                        <span
+                          class="RoomListItemView-module_sender"
+                        >
+                          Alice:
+                        </span>
+                         Last message in Product
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -703,7 +711,7 @@ exports[`<VirtualizedRoomListView /> > renders Default story 1`] = `
                       </div>
                     </div>
                     <div
-                      class="RoomListItemView-module_previewRow"
+                      class="RoomListItemView-module_preview"
                     >
                       <div
                         aria-hidden="true"
@@ -738,6 +746,10 @@ exports[`<VirtualizedRoomListView /> > renders Default story 1`] = `
                           </span>
                         </div>
                       </div>
+                      <span
+                        aria-hidden="true"
+                        class="RoomListItemView-module_hiddenLines"
+                      />
                     </div>
                   </div>
                 </div>
@@ -837,18 +849,18 @@ exports[`<VirtualizedRoomListView /> > renders Default story 1`] = `
                       </div>
                     </div>
                     <div
-                      class="RoomListItemView-module_previewRow"
+                      class="RoomListItemView-module_preview"
+                      title="Last message in Sales"
                     >
-                      <div
-                        class="RoomListItemView-module_preview"
-                        title="Last message in Sales"
-                      >
-                        Last message in Sales
-                      </div>
                       <div
                         aria-hidden="true"
                         class="RoomListItemView-module_notificationDecoration"
                       />
+                      <span
+                        aria-hidden="true"
+                        class="RoomListItemView-module_hiddenLines"
+                      />
+                      Last message in Sales
                     </div>
                   </div>
                 </div>
@@ -948,11 +960,15 @@ exports[`<VirtualizedRoomListView /> > renders Default story 1`] = `
                       </div>
                     </div>
                     <div
-                      class="RoomListItemView-module_previewRow"
+                      class="RoomListItemView-module_preview"
                     >
                       <div
                         aria-hidden="true"
                         class="RoomListItemView-module_notificationDecoration"
+                      />
+                      <span
+                        aria-hidden="true"
+                        class="RoomListItemView-module_hiddenLines"
                       />
                     </div>
                   </div>
@@ -1053,25 +1069,25 @@ exports[`<VirtualizedRoomListView /> > renders Default story 1`] = `
                       </div>
                     </div>
                     <div
-                      class="RoomListItemView-module_previewRow"
+                      class="RoomListItemView-module_preview"
+                      title="Last message in Announcements"
                     >
-                      <div
-                        class="RoomListItemView-module_preview"
-                        title="Last message in Announcements"
-                      >
-                        <span>
-                          <span
-                            class="RoomListItemView-module_sender"
-                          >
-                            Alice:
-                          </span>
-                           Last message in Announcements
-                        </span>
-                      </div>
                       <div
                         aria-hidden="true"
                         class="RoomListItemView-module_notificationDecoration"
                       />
+                      <span
+                        aria-hidden="true"
+                        class="RoomListItemView-module_hiddenLines"
+                      />
+                      <span>
+                        <span
+                          class="RoomListItemView-module_sender"
+                        >
+                          Alice:
+                        </span>
+                         Last message in Announcements
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -1171,11 +1187,15 @@ exports[`<VirtualizedRoomListView /> > renders Default story 1`] = `
                       </div>
                     </div>
                     <div
-                      class="RoomListItemView-module_previewRow"
+                      class="RoomListItemView-module_preview"
                     >
                       <div
                         aria-hidden="true"
                         class="RoomListItemView-module_notificationDecoration"
+                      />
+                      <span
+                        aria-hidden="true"
+                        class="RoomListItemView-module_hiddenLines"
                       />
                     </div>
                   </div>

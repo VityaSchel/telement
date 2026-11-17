@@ -339,22 +339,22 @@ describe("<RoomListItemView />", () => {
         expect(screen.queryByTestId("notification-decoration")).toBeNull();
     });
 
-    it("should show the notification decoration and the pin after the message preview", () => {
+    it("should float the notification decoration and the pin at the end of the message preview's second line", () => {
         const { unmount } = render(<WithNotification />);
         const decoration = screen.getByTestId("notification-decoration").parentElement!;
         expect(decoration).toHaveClass(styles.notificationDecoration);
-        expect(decoration.previousElementSibling).toHaveClass(styles.preview);
+        expect(decoration.parentElement).toHaveClass(styles.preview);
         unmount();
 
         render(<Pinned />);
-        expect(screen.getByTestId("pinned-icon").parentElement!.previousElementSibling).toHaveClass(styles.preview);
+        expect(screen.getByTestId("pinned-icon").parentElement!.parentElement).toHaveClass(styles.preview);
     });
 
     it("should show the pin of a pinned room without a message preview under its name", () => {
         render(<NoMessagePreview isFavourite={true} />);
         const decoration = screen.getByTestId("pinned-icon").parentElement!;
-        expect(decoration.parentElement).toHaveClass(styles.previewRow);
-        expect(decoration.previousElementSibling).toBeNull();
+        expect(decoration.parentElement).toHaveClass(styles.preview);
+        expect(decoration.parentElement).not.toHaveAttribute("title");
     });
 
     it("should describe a pinned room as pinned to assistive technologies", () => {

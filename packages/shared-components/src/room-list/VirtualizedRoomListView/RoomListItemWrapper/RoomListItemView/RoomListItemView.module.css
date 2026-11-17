@@ -166,29 +166,34 @@
 }
 
 /*
- * The preview row fills the two reserved preview lines, and the decorations sit on the second of them, however long the
- * preview is, so they are never right under the time
+ * The two reserved preview lines. The decorations float at the end of both lines, centered on the second, so both lines
+ * make room for them, as in Telegram for macOS, which narrows the whole preview by a badge's width plus 5px: a badge
+ * taller than the line would touch the first line's text otherwise. Without decorations the lines take the whole
+ * width. The padding keeps the badges' overflow below the second line inside the clip, and a last float as tall as
+ * that overflow starts the lines the clamp hides below it.
  */
-.previewRow {
-    flex: 1;
-    display: flex;
-    align-items: flex-end;
-    gap: var(--cpd-space-2x);
-}
-
 .preview {
-    align-self: flex-start;
-    flex: 1;
-    min-inline-size: 0;
+    --badge-overflow: max(0px, (1.25rem - 1lh) / 2 + 1px);
+
     font: var(--cpd-font-body-sm-regular);
     line-height: var(--cpd-font-line-height-tight);
     letter-spacing: var(--cpd-font-letter-spacing-body-sm);
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 2;
+    block-size: calc(2 * 1lh);
+    padding-block-end: var(--badge-overflow);
+    margin-block-end: calc(-1 * var(--badge-overflow));
     overflow: hidden;
     /* A long link or user ID wraps instead of overflowing the two lines */
     overflow-wrap: anywhere;
+}
+
+.hiddenLines {
+    float: inline-start;
+    clear: both;
+    inline-size: 100%;
+    block-size: var(--badge-overflow);
 }
 
 .sender {
@@ -204,14 +209,22 @@
     color: var(--cpd-color-text-critical-primary);
 }
 
-/* One preview line tall, so the badges, the pin and the icons are centered on that line */
+/*
+ * As tall as both preview lines, with the badges, the pin and the icons centered on the second, 6px after the text.
+ * A row without any keeps it, 0px wide, so the lines the clamp hides still start below the second line and the
+ * preview doesn't move when a badge appears or clears.
+ */
 .notificationDecoration {
-    flex-shrink: 0;
-    margin-inline-start: auto;
+    float: inline-end;
     display: flex;
     align-items: center;
     gap: var(--cpd-space-1x);
-    block-size: calc(var(--cpd-font-size-body-sm) * var(--cpd-font-line-height-tight));
+    block-size: 1lh;
+    padding-block-start: 1lh;
+
+    &:not(:empty) {
+        margin-inline-start: var(--cpd-space-1-5x);
+    }
 }
 
 /* Like Telegram's, the pin is tilted and smaller than the other decorations, padded to keep their 20px size */

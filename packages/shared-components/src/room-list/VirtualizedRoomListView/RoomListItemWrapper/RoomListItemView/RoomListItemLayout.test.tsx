@@ -25,6 +25,9 @@ import styles from "./RoomListItemView.module.css";
 const TWO_LINES =
     "Has anyone tried the new release? The room list looks very different now, with two lines of preview and more";
 
+/** A preview with no spaces, which can only break between letters. */
+const UNBROKEN = "abcdefghij".repeat(30);
+
 const unread = {
     ...defaultSnapshot.notification,
     hasAnyNotificationOrActivity: true,
@@ -91,6 +94,44 @@ function center(element: Element): number {
 
 /** The height of one preview line at the default font size. */
 const PREVIEW_LINE = 16.25;
+
+/** The height of the preview's lines, without the padding that keeps the badges' overflow inside its clip. */
+function linesHeight(preview: HTMLElement): number {
+    return rect(preview).height - parseFloat(getComputedStyle(preview).paddingBottom);
+}
+
+interface TextLine {
+    top: number;
+    left: number;
+    right: number;
+}
+
+/**
+ * Where each line of the preview's own text starts and ends, from its text alone: neither the badges floated into it
+ * nor the full-width float that starts the lines the clamp hides.
+ */
+function textLines(preview: Element): TextLine[] {
+    const decoration = preview.querySelector(`.${styles.notificationDecoration}`)!;
+    const walker = document.createTreeWalker(preview, NodeFilter.SHOW_TEXT);
+    const lines = new Map<number, TextLine>();
+    for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+        if (decoration.contains(node)) continue;
+        const range = document.createRange();
+        range.selectNodeContents(node);
+        for (const box of range.getClientRects()) {
+            if (box.width < 1) continue;
+            // A line's boxes (the sender's name, the text) can start a fraction of a pixel apart
+            const key = Math.round(box.top / 8);
+            const line = lines.get(key) ?? { top: Infinity, left: Infinity, right: -Infinity };
+            lines.set(key, {
+                top: Math.min(line.top, box.top),
+                left: Math.min(line.left, box.left),
+                right: Math.max(line.right, box.right),
+            });
+        }
+    }
+    return [...lines.entries()].sort(([a], [b]) => a - b).map(([, line]) => line);
+}
 
 /** The vertical center of the plate's bottom line: the second of the two preview lines. */
 function bottomLineCenter(row: HTMLElement, scale = 1): number {
@@ -191,7 +232,7 @@ describe("Room list item layout", () => {
         const row = renderRow({ messagePreview: TWO_LINES, notification: unread });
         const preview = part(row, styles.preview);
 
-        expect(rect(preview).height).toBe(32.5);
+        expect(linesHeight(preview)).toBe(32.5);
         expect(center(screen.getByText("3"))).toBeCloseTo(lineCenter(preview, 1, PREVIEW_LINE), 5);
     });
 
@@ -241,11 +282,62 @@ describe("Room list item layout", () => {
         expect(center(find(row))).toBeCloseTo(bottomLineCenter(row), 5);
     });
 
+    it("makes room for the badges on both preview lines, 6px before them, as in Telegram for macOS", () => {
+        // Letters with nowhere else to break fill each line to within a letter of its end
+        const row = renderRow({ messagePreview: UNBROKEN, messagePreviewSender: undefined, notification: unread });
+        const badgeStart = rect(screen.getByText("3")).left;
+        const lines = textLines(part(row, styles.preview));
+
+        // The first line keeps clear of the badge, which is taller than the second line and reaches into the first
+        expect(rect(screen.getByText("3")).top).toBeLessThan(rect(part(row, styles.preview)).top + PREVIEW_LINE);
+        for (const { right } of lines.slice(0, 2)) {
+            expect(right).toBeLessThanOrEqual(badgeStart - 6);
+            expect(right).toBeGreaterThan(badgeStart - 6 - 20);
+        }
+        // The badge stays whole, and the lines the clamp hides start below it
+        const preview = part(row, styles.preview);
+        expect(rect(screen.getByText("3")).bottom).toBeLessThanOrEqual(rect(preview).bottom);
+        expect(lines.length).toBeGreaterThan(2);
+    });
+
+    it("runs both preview lines to the plate's padding without badges", () => {
+        const row = renderRow({ messagePreview: UNBROKEN, messagePreviewSender: undefined });
+        const contentEnd = rect(part(row, styles.container)).right - 8;
+        const [first, second] = textLines(part(row, styles.preview));
+
+        expect(first.right).toBeGreaterThan(contentEnd - 10);
+        expect(second.right).toBeGreaterThan(contentEnd - 20);
+        expect(Math.max(first.right, second.right)).toBeLessThanOrEqual(contentEnd);
+    });
+
+    it.each([
+        ["a one-line preview", "bump"],
+        ["a two-line preview", UNBROKEN],
+    ])("keeps %s in its place whether a badge or a pin is shown or not", (_, messagePreview) => {
+        render(
+            <div role="listbox" aria-label="Rooms" style={{ width: "370px" }}>
+                <Row messagePreview={messagePreview} messagePreviewSender={undefined} />
+                <Row messagePreview={messagePreview} messagePreviewSender={undefined} notification={unread} />
+                <Row messagePreview={messagePreview} messagePreviewSender={undefined} isFavourite={true} />
+            </div>,
+        );
+        const [plain, unreadRow, pinned] = screen.getAllByRole("option").map((row) => {
+            const preview = part(row, styles.preview);
+            const [first] = textLines(preview);
+            return { preview: rect(preview).top - rect(row).top, firstLine: first.top - rect(row).top };
+        });
+
+        // The first line starts at the top of the preview, right under the name
+        expect(plain.firstLine).toBeCloseTo(plain.preview, 0);
+        expect(unreadRow).toEqual(plain);
+        expect(pinned).toEqual(plain);
+    });
+
     it("clamps the preview to two lines with an ellipsis", () => {
         const row = renderRow({ messagePreview: `${TWO_LINES} ${TWO_LINES} ${TWO_LINES}` });
         const preview = part(row, styles.preview);
 
-        expect(rect(preview).height).toBe(32.5);
+        expect(linesHeight(preview)).toBe(32.5);
         expect(preview.scrollHeight).toBeGreaterThan(preview.clientHeight);
         expect(getComputedStyle(preview).webkitLineClamp).toBe("2");
     });
@@ -408,9 +500,12 @@ describe("Room list item layout", () => {
         expect(rect(text).height).toBeCloseTo(51.25 * 1.5, 5);
         expect(plate.height).toBeCloseTo(51.25 * 1.5 + 12, 5);
         expect(rect(row).height).toBeCloseTo(plate.height + 8, 5);
-        expect(rect(part(row, styles.preview)).height).toBeCloseTo(2 * 16.25 * 1.5, 5);
+        expect(linesHeight(part(row, styles.preview))).toBeCloseTo(2 * 16.25 * 1.5, 5);
         // The lines fit the text block; only the badge, centered on the last one, reaches into the plate's padding
-        expect(rect(part(row, styles.preview)).bottom).toBeCloseTo(rect(text).bottom, 5);
+        expect(rect(part(row, styles.preview)).top + linesHeight(part(row, styles.preview))).toBeCloseTo(
+            rect(text).bottom,
+            5,
+        );
         expect(rect(screen.getByText("3")).bottom).toBeLessThan(plate.bottom);
         expect(avatar.top - plate.top).toBeCloseTo(plate.bottom - avatar.bottom, 5);
     });
