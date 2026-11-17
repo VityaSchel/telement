@@ -103,7 +103,7 @@ describe("<RoomListItemNotificationMenu />", () => {
         const checked = screen.getAllByRole("menuitemradio", { checked: true });
         expect(checked).toHaveLength(1);
         expect(checked[0]).toHaveAccessibleName(label);
-        expect(checked[0].querySelector("svg")).toBeVisible();
+        expect(checked[0].querySelector('input[type="radio"]')).toBeChecked();
     });
 
     it.each([

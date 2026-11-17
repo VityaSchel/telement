@@ -219,16 +219,12 @@ describe("Compound's menus", () => {
         expect(singleIcon.top + singleIcon.height / 2).toBe(singleRow.top + singleRow.height / 2);
     });
 
-    it("ends the hover chevron's drawing 16px from the menu's edge, as the room menus' chevron and toggle", async () => {
+    it("shows no chevron on a hovered item, which opens no submenu, as in Telegram", async () => {
         const menu = await renderMenu([item("Photo or video", ImageIcon), item("Poll", PollsIcon)]);
         const poll = rows(menu)[1];
         await userEvent.hover(poll);
 
         const chevron = poll.querySelector<SVGSVGElement>(":scope > svg:last-child")!;
-        expect(chevron.getBoundingClientRect().height).toBe(16);
-        const path = chevron.querySelector("path")!;
-        const box = path.getBBox();
-        const inkRight = new DOMPoint(box.x + box.width, box.y).matrixTransform(path.getScreenCTM()!).x;
-        expect(menu.getBoundingClientRect().right - inkRight).toBeCloseTo(16, 1);
+        expect(chevron).not.toBeVisible();
     });
 });

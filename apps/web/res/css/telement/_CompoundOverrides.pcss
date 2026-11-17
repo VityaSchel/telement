@@ -102,6 +102,14 @@ Please see LICENSE files in the repository root for full details.
 }
 
 /*
+ * Like Telegram, menu items and the right panel's action lists show no chevron when hovered; only a submenu's trigger
+ * (aria-haspopup) keeps one.
+ */
+:where([class^="_item_"], [class*=" _item_"]):not([aria-haspopup]) > [class*="_nav-hint_"] {
+    display: none;
+}
+
+/*
  * Compound's Button is 48px tall at its default size lg, which callers get whenever they pass no size. Controls are
  * 36px, so lg takes the md geometry: the same padding, height and 20px icon. :where() leaves the app's own rules for a
  * button ahead of this one, as they are ahead of Compound's.

@@ -79,8 +79,9 @@
         flex-direction: column;
         gap: 0;
         font: var(--cpd-font-body-md-medium);
+        /* The same icon color as every other menu */
         > button[data-kind="primary"] > svg {
-            color: var(--cpd-color-icon-secondary);
+            color: var(--cpd-color-icon-primary);
         }
 
         > [role="menuitem"] {
