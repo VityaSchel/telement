@@ -83,6 +83,8 @@ pnpm test:unit
     - `pnpm-lock.yaml`: take upstream's version, then run `pnpm install`.
     - `apps/web/res/css/_components.pcss`: run `pnpm --filter element-web rethemendex`.
     - `apps/web/src/i18n/strings/en_EN.json`: take upstream's version, then run `pnpm i18n`.
+    - Sentence case overrides: run `pnpm vitest run apps/web/src/telement/i18n/sentenceCase.test.ts`, then fix or drop
+      the overrides it lists, and add any new Title Case strings to `apps/web/src/telement/i18n/sentenceCase.en.json`.
 - Start the app and check the screens Telement changes.
 - Add a row to the [upstream merge log](#upstream-merge-log), noting conflicts and anything surprising.
 
@@ -97,8 +99,9 @@ git merge-tree --write-tree --name-only main upstream/develop
 
 - Follow upstream's [code_style.md](./code_style.md): one concern per commit, short imperative subject, no
   conventional-commit prefixes, and never mix formatting changes with behavior changes.
-- Commit messages are a single line. Keep history linear, and fold a fix into the commit it fixes unless that commit
-  has already been pushed.
+- Commit messages are a single line, apart from `See …` lines that name upstream pull requests (see
+  [upstream pull requests](#upstream-pull-requests)). Keep history linear, and fold a fix into the commit it fixes
+  unless that commit has already been pushed.
 - Sign every commit and tag with an explicit key: `git commit -S<key-id>`, `git tag -s -u <key-id>`.
 - New files need a copyright header. Put your own name as the holder (`Element Creations Ltd.` is only for work done
   as part of Element) and the package's open-source licences without Element's commercial option, which covers only
@@ -119,8 +122,8 @@ git merge-tree --write-tree --name-only main upstream/develop
 - See [versions and release tags](#versions-and-release-tags) for tagging releases.
 - Telement does not generally send changes upstream. Features, refactors and performance work stay here. Critical bug
   fixes, security fixes and small layout fixes may go upstream, submitted manually by the maintainer (see
-  [upstream pull requests](#upstream-pull-requests)). Keep those in standalone commits that apply cleanly to upstream
-  `develop`, with no dependency on Telement code, so they can be cherry-picked.
+  [upstream pull requests](#upstream-pull-requests)). Keep each in a commit of its own, so its upstream branch is easy
+  to prepare from it; that branch is written against upstream's code, without Telement's tokens.
 
 ### Versions and release tags
 
@@ -143,20 +146,42 @@ git merge-tree --write-tree --name-only main upstream/develop
 
 ### Upstream pull requests
 
-Decided 2026-11-13: layout fixes that also apply to Element go upstream as about nine small pull requests, one per
-component or area, because Element merges small fixes tied to one issue each.
+Fixes that also apply to Element go upstream one problem per pull request, each linked to its own issue, because
+Element merges small fixes tied to one issue each. The first round (2026-11-16) grouped fixes by area; Element asked
+for one of those to be split one problem per pull request, and every pull request since fixes one problem.
 
-- Each is prepared as a local branch `telement-upstream/<area>` based on upstream `develop`: `bubble-media`,
-  `bubble-rows`, `code-quotes`, `dialogs-login`, `event-summary`, `misc-chrome`, `polls-cards`, `spaces-panels` and
-  `thread-panel`.
-- The maintainer writes each title and description and opens the pull request himself, from a branch of his fork:
-  since 2026-10-02 Element closes pull requests with AI-written descriptions (CONTRIBUTING.md), and its AGENTS.md
-  tells agents not to open them. Agents prepare the commits, tests, baselines and before/after images; the maintainer
-  ticks the template's "AI assistance" box.
+- Each fix is prepared on a branch `fix/<name>` in a separate clone, `~/Documents/element-web`, that holds only
+  upstream history and can't push to Element, so Telement stays out of Element's fork network. The branches are
+  written against upstream's code, without Telement's tokens, and pushed to the maintainer's GitHub fork. Notes,
+  drafts and images are in `~/Documents/element-web-prs`.
+- Agents prepare the commits, tests, Linux screenshot baselines (regenerated in Docker) and before/after images, and
+  draft the issue, the title and the description. The maintainer rewrites the text in his own words, files the issue
+  and opens the pull request himself: since 2026-10-02 Element closes pull requests with AI-written descriptions
+  (CONTRIBUTING.md), and its AGENTS.md tells agents not to open them. He ticks the template's "AI assistance" box.
 - Each pull request needs the Element CLA signed through cla-assistant (the commit email must belong to the GitHub
   account that signed), a linked issue (`Fixes #…`; file a bug report first if none exists, which adds T-Defect), a
-  before/after screenshot table, and the Linux screenshot baselines it moves regenerated in Docker.
-- Interface-only right-to-left fixes and accessibility-only fixes stay out of these pull requests.
+  before/after table (screenshots, or an accessibility tree or a performance trace when nothing visible changes), and
+  the Linux screenshot baselines it moves. Once it is open, never force-push; catch up by merging `upstream/develop`.
+- Accessibility-only fixes go up as pull requests of their own, never inside a layout fix. Interface-only
+  right-to-left fixes stay out: Element never sets the page's direction.
+- A Telement commit that carries the same fix keeps a plain subject and names the pull request in its body, one
+  line per pull request: `See https://github.com/element-hq/element-web/pull/35983`. `git log --grep pull/35983`
+  finds it. When an upstream release brings one of these fixes, the merge meets Telement's version; keep the one
+  Telement needs and note it in the upstream merge log.
+
+Pull requests in [element-hq/element-web](https://github.com/element-hq/element-web/pulls) and the Telement commits
+that carry the same fixes, as of 2026-11-20:
+
+| Pull requests                 | Telement commit                                                                    | State                                        |
+| ----------------------------- | ---------------------------------------------------------------------------------- | -------------------------------------------- |
+| #35834, #35852                | 6941fa855b                                                                         | merged upstream                              |
+| #35835–#35838, #35842         | 17f8ec6213; #35836 also 89400a168f                                                 | open                                         |
+| #35845, #35846                | 45456fb2da, 3522d6cdc5; #35845 also the user avatar commit, #35846 also 89400a168f | open                                         |
+| #35847–#35851, #35853, #35855 | 15cf3387ba                                                                         | split from #35844; #35853 merged upstream    |
+| #35854                        | efe6f11062                                                                         | open                                         |
+| #35983–#35989, #35994–#35996  | `git log --grep pull/<N>`                                                          | open                                         |
+| #35990                        | "Disable every AccessibleButton kind the way Compound disables its Button…"        | open; Telement fixes the bug its own way     |
+| #35991–#35993                 | none                                                                               | open; #35993 misses Telement's drawer button |
 
 ## Changing upstream code
 
@@ -183,7 +208,13 @@ easier.
    Telement's radius and spacing tokens (see [radius and spacing](#radius-and-spacing)). Replace a value with a token
    only on lines or in rules Telement changes anyway; never sweep upstream stylesheets.
 6. **Strings.** Use `telement|…` translation keys so Telement's strings land in one block of `en_EN.json`. Run
-   `pnpm i18n` in `apps/web` and `packages/shared-components` after removing code, so unused strings go too.
+   `pnpm i18n` in `apps/web` and `packages/shared-components` after removing code, so unused strings go too. English
+   sentence case for upstream strings lives in `apps/web/src/telement/i18n/sentenceCase.en.json`, never in
+   `en_EN.json`, which every merge takes from upstream as it is. The file is keyed by translation key and registered
+   over the English strings of `apps/web` and `packages/shared-components` at startup and after every language change
+   (`sentenceCase.ts`); other languages keep their translations, and a deployment's custom translations still win.
+   `sentenceCase.test.ts` fails when an override changes anything but letter case (placeholders, tags and plural forms
+   included), or names a string upstream has dropped or already writes that way.
 7. **Extension points.** The module API (`packages/module-api`) offers custom message renderers, composer upload
    options and component visibility; use it where it fits.
 
@@ -203,14 +234,19 @@ What Telement changes in Element's behavior, apart from the features described f
   chats show only the text (Element showed the sender there too). Emotes, calls and reactions keep Element's sentence.
   Someone typing replaces the preview, in the accent color. Names are always medium weight: Element's bold and gray
   names are gone, and only the badges show unread rooms. Badges, the pin and the call, invite and unsent icons always
-  sit on the row's bottom line and stay while hovering. The selected room is a solid accent plate with inverted text,
-  icons and badges, in place of Element's marker at the panel's edge.
+  sit on the row's bottom line and stay while hovering; both preview lines make room for them, 6px before them, as
+  Telegram for macOS narrows the whole preview by a badge (a 20px badge would touch the first line otherwise), and
+  without them both lines run to the row's edge. The selected room is a solid plate with white text, icons
+  (the avatar's public, video and presence icons too) and inverted badges, in place of Element's marker at the
+  panel's edge: the accent in light themes, Telegram's night selection blue #3d6a97 in dark ones. The selected space
+  in the space panel and the selected tab of every settings dialog use the same plate, and hovered ones the room
+  list's gray hover fill (2026-11-18).
 - **Drafts and read checks in the room list:** a draft left in a room replaces its preview with a red "Draft:" and the
   draft's text, except for the open room, whose draft is in the composer. The composers save drafts in local storage
   when the user leaves the room and now tell the room list (`telement/room-list/roomDrafts.ts`), which also hears other
   tabs. When the last message is the user's own, a check before the time shows its state, as in Telegram: a clock while
-  it is being sent, one check once sent, two once any other member has read it. Failed messages keep Element's unsent
-  icon instead.
+  it is being sent, one check as soon as the server confirms it, two once any other member has read it. Failed messages
+  keep Element's unsent icon instead.
 - **Pinned chats:** Element's favourites are called "Pinned" (room menus say "Pin"/"Unpin", room info says "Pin to
   top") and always sit at the top of the list under every sort, ordered among themselves by the active sort; the
   `m.favourite` order value is ignored and there is no Pinned filter. A pin tilted 45° sits at the end of the row's
@@ -235,7 +271,11 @@ What Telement changes in Element's behavior, apart from the features described f
   the last line, in a reserved gutter. Bubbles: in the bottom-right corner, sharing the last line when it fits.
   Pictures, stickers and videos without a caption show the time as a dark pill over the media's bottom-right corner. The filename and size banner shown when hovering a picture is gone.
 - **Message menu:** right-clicking anywhere on a message row (margins, avatar, sender, reply quote, reactions,
-  receipts) opens the message menu, with "Copy image" on pictures and "Copy link" on links. Every message with a file
+  receipts) opens the message menu, with "Copy image" on pictures and "Copy link" on links. Above it, Telegram's quick
+  reactions: a pill of the six emoji the user reacts with most (the emoji picker's history, filled with Telegram's
+  👍 ❤️ 🔥 🥰 👏 😁) and a chevron that opens the full picker; choosing one adds or removes the user's reaction, in
+  place of the menu's React item. "Copy text" copies a message's plain text or a file's caption, and "View source"
+  shows only in developer mode (2026-11-18). Every message with a file
   has "Save as…", which opens the system save dialog in Chromium and Telement Desktop (File System Access API) and
   downloads elsewhere; the picture viewer's Download is "Save as…" too. Electron's own picture menu is gone.
   `BasePlatform.allowOverridingNativeContextMenus()` is gone.
@@ -249,14 +289,25 @@ What Telement changes in Element's behavior, apart from the features described f
   one-line excerpt, like the reply quote in messages; Element's "Replying" header is gone.
 - **Cursors:** the arrow on every control (`apps/web/res/css/telement/_Cursor.pcss`); the hand only on links in
   message text and link preview headers; the I-beam over the whole text of a message; not-allowed on disabled
-  controls.
+  controls. The left panel's separator shows its own resize cursor, and while it is dragged a window-wide layer keeps
+  it; the panels library's cursor rule on every element (`disableCursor`) and any cursor rule conditioned on the
+  separator's state are gone, as each restyled the whole page on hover, grab, release and at the panel's limits.
 - **Dialogs with tabs** (user, room and space settings) focus the selected tab when they open, so Escape works
-  straight away. Before, focus could fall to the page when React replaced the first focused element.
+  straight away. Before, focus could fall to the page when React replaced the first focused element. The room settings
+  dialog is titled "<room name>: <tab>" like the user settings' "Settings: <tab>" (the room's name semibold, the tab's
+  regular), and its tabs no longer open with a heading repeating the tab's name.
+- **Create a space** dims the app like a dialog, so it has a dialog's close button on its title's line.
+- **Explore rooms:** a public room's result shows its address only when it has one, never the raw room ID.
+- **English text** is in sentence case: Telement overrides the English of 213 upstream titles and labels written in
+  Title Case (see [Strings](#changing-upstream-code)), for example "Security & privacy" and "Voice & video".
 - **Stickers:** the "Show stickers button" setting is gone; stickers are available whenever widgets are
   (`UIFeature.Widgets`).
 - **Defaults:** GIFs autoplay, and the message layout is bubbles.
 - **Preferences:** the "Room list" subsection only appears when its settings list in `PreferencesUserSettingsTab` is
-  not empty, which it is today.
+  not empty, which it is today. "Show all rooms" in Home is only in the Sidebar tab, indented under Home, so the
+  Preferences tab's Spaces subsection, which held only that setting, is gone.
+- **Sidebar:** the spaces to show (Home, Rooms outside of a space, Video rooms and conferences) are toggles like every
+  other on/off setting, with their icon in the label and their description under it, rather than checkboxes.
 - **Settings button:** the gear at the bottom of the space panel opens Settings directly. Element's "Quick settings"
   popup offered only "All settings", a theme switcher and, in developer mode, a developer tools shortcut; it is gone.
   Themes are in Settings › Appearance and developer tools stay reachable with `/devtools`.
@@ -410,7 +461,8 @@ electron-builder.
   such as a local unsigned one, gets a password prompt.
 - Upstream handles a denied prompt badly: the prompt repeats, then its Linux keyring dialog offers only "Use no
   encryption", and its "Clear data and reload?" keeps the unreadable item, which asks again on every launch. Reported
-  as [element-web#35886](https://github.com/element-hq/element-web/issues/35886).
+  as [element-web#35886](https://github.com/element-hq/element-web/issues/35886), with the fix proposed in
+  [element-web#35995](https://github.com/element-hq/element-web/pull/35995).
 - Telement checks, when encryption is unavailable on macOS, whether its keychain item exists (reading only the item's
   attributes, which never prompts). If it does, a dialog offers Quit or "Clear data and restart", which deletes the
   item with `security delete-generic-password` (allowed even without read access) and the app's data, then relaunches
@@ -491,7 +543,6 @@ Worth re-implementing on current code:
 | ------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- | -------- | -------------- |
 | Telegram-style chat tile (50 px avatar, 2-line preview, time) | `packages/shared-components/src/room-list/VirtualizedRoomListView/`, `apps/web/src/viewmodels/room-list/RoomListItemViewModel.ts` | 4–8 h    | high           |
 | Chat wallpaper pattern                                        | `apps/web/res/css/structures/_RoomView.pcss`, plus `TimelineView.module.css` for the labs timeline                                | 2–4 h    | low            |
-| Quick reactions above the message context menu                | `apps/web/src/components/views/context_menus/MessageContextMenu.tsx`, `ReactionPicker.tsx`                                        | 4–6 h    | low–medium     |
 | Context menu on right-click anywhere in a message             | `EventTileView.tsx` in shared-components                                                                                          | 1 h      | high           |
 | Bubbles: own messages on the right without an avatar          | `EventTileView.module.css` custom properties                                                                                      | 1–2 h    | high           |
 | Composer: attachments on the left, mic in place of Send       | `apps/web/src/components/views/rooms/MessageComposer.tsx`, `MessageComposerButtons.tsx`                                           | 8–12 h   | medium         |
@@ -653,7 +704,10 @@ Do not repeat:
       encryption state in the room header, and the drawer (`ComposerDrawerView`, `ComposerDrawerViewModel`,
       `ComposerDrawerButton`). The drawer has an Emoji tab with Element's picker (without its quick reactions bar)
       and a Stickers tab that opens Element's integration-manager sticker picker; it reopens on the last tab used.
-    - Voice messages have no entry point until the record button lands.
+    - The composer asks "Write a message…" in every state (the encryption state is in the room header). While the
+      field is empty, the send slot holds a microphone that starts Element's voice message recorder (not in narrow
+      composers, where its controls don't fit); once there is something to send it becomes Send, a bare paper plane in
+      the accent, mirrored in RTL (2026-11-18). The video note record button still lands with the redesign.
     - Next: the record button with the video note overlay, then Telement's own sticker packs and the GIFs tab.
 
 ### Radius and spacing
@@ -730,7 +784,7 @@ kinds, legacy dialog buttons) giving about 17 button specs in 8 visible families
   chip/tab spec. The pill kinds of `AccessibleButton` and the legacy dialog buttons are retuned to Compound's md
   geometry in `_AccessibleButton.pcss` and `_common.pcss`, and Compound Button's lg size takes the same geometry
   through one override, so its callers don't change. Component code changes only where Telement edits it anyway. Text
-  buttons lose their underline; inline links keep it.
+  buttons lose their underline; inline links keep it, in the weight of the sentence around them.
 - **Where tokens live:** one `:root` file in shared-components (imported by its index and Storybook), registered in
   `apps/web/.stylelintrc.cjs` so `.pcss` files may use it. Compound tokens and components are not redefined, except
   single overrides where Compound has no variable (tooltip radius and arrow, text-button underline, the geometry of
@@ -748,29 +802,52 @@ kinds, legacy dialog buttons) giving about 17 button specs in 8 visible families
 - **Visible results**, by area:
     - **Menus and search dialog:** the shared menu geometry covers the message and room menus with their Notifications
       submenu, the user menu, the thread filter, the legacy call menu, the Threads Activity Centre, the video viewer's
-      speed menu and Compound's menus (paperclip, sort, compose, space, room header, pinned message, avatar). The
-      search dialog lines its text, section headers, hints and avatars up 24px in; its rows are 40px with the avatar
-      8px from every side. Its recently viewed tiles keep upstream's 58px width and are 67px tall, with the avatar
-      centered 8px from the top and the name 8px from the bottom. The keyboard hint is a pill of four 19px keys whose
-      arrow icons sit 2px inside them at every font size.
+      speed menu and Compound's menus (paperclip, sort, compose, space, room header, pinned message, avatar). The space
+      menu has no title row, as it opens from the space's name. The user menu's name, status and Matrix ID are 4px
+      apart, 8px under the 64px avatar. With no threads, the Threads Activity Centre centers Compound's threads icon in
+      a 56px tile, 16px above its caption. The search dialog lines its text, section headers, hints and avatars up 24px
+      in; its rows are 40px with the avatar 8px from every side. Explore rooms lists public rooms as 52px two-line rows:
+      a 36px avatar 8px from the row's start, top and bottom, and the name over 13px details, centered on the row with
+      its button. Its recently viewed tiles keep upstream's 58px width and are 67px tall, with the avatar centered 8px
+      from the top and the name 8px from the bottom. The keyboard hint is a pill of four 19px keys whose arrow icons sit
+      2px inside them at every font size.
     - **Composer and editor:** the composer's text field sits 8px from its buttons. The rich-text field is a 36px pill
       that keeps 18px corners as it grows, with its buttons on its last line and the formatting bar starting at its
       edge. Code blocks in the editor and the Markdown viewer match sent ones, and the Markdown viewer's quote line is
-      the message quote's 2px pill.
+      the message quote's 2px pill. The reply bar's quote line sits on the paperclip's drawn glyph, 5px into its 20px
+      icon.
     - **Code:** blocks round to 4 in every layout, with their text and line numbers 12px inside the edge and the
       numbers 8px from the code, at the start side (on the right in right-to-left messages). The expand and copy
       buttons are 20px icons in 28px boxes, 12px from the top and end. A numbered block in a bubble fits its longest
       line. Inline code is 22px tall with 4px side padding on a 24px line, and stays open where it breaks across
       lines. A code block quoted in a reply keeps 4px under it. Quote lines in formatted text are pills like the reply
       quote. IRC messages are 4px apart; state events stay together.
-    - **Bubbles:** text bubbles pad 8 × 12, sections are 12px apart, and reactions sit 8px under the bubble. Hovering
-      draws no band; selected and highlighted messages keep theirs, and the selected band is a gray step darker than
-      other people's bubbles. Your own messages have no avatar. Read receipts are pills that end at the timeline's
-      content edge, and informational rows leave them 60px, as message rows do. Emotes and rows that hide their sender
-      center their avatar on their first line, and informational rows are 20px with a 14px avatar 3px from their
-      edges, so the read marker clears every avatar by at least 2px. Times of informational rows and emotes center on
-      their last line. In the thread panel, receipts end at the content edge and informational rows show their time at
-      the row's start.
+    - **Bubbles:** text bubbles pad 8 × 12 and sections are 12px apart. Reactions sit at the bottom of the bubble, 8px
+      under the message and starting on its padding, as in Telegram: the time ends their last line when it fits there,
+      centered on it, and takes a line of its own when it doesn't. Messages drawn without a bubble (pictures without a
+      caption, stickers, emotes, maps) keep their reactions 8px under them. Messages of only emoji, which Element draws
+      large, have no bubble: the emoji stand where the bubble would start (your own, and their reactions, end at the
+      row's end), and the time is the pictures' 20px dark badge after them or after their reactions; a quoted reply
+      keeps the bubble. Hovering draws no band; selected and highlighted messages keep theirs, and the selected band is
+      a gray step darker than other people's bubbles. Your own messages have no avatar. Your own bubbles are filled like
+      Telegram's Day and Night themes: the accent (#2481cc) in light themes and #3d6a97 in dark ones, deeper blues in
+      high contrast, with white text; times and other secondary content are Telegram's 80% white (`#effaff`), and what
+      the bubble holds (links, code, quotes, reactions, polls, players) is re-pointed to white or translucent white
+      (`--tl-color-bg-bubble-own*`, `--tl-color-on-bubble-own*`); a quote's line in formatted text is solid white like
+      the reply quote's, and its text the 80% white. Bubbles show no read receipts: your own carry
+      Telegram's checks after the time, one when sent and two once someone has read it, and the message menu lists
+      who has under "Seen by N". Group and IRC layouts keep Element's receipts. A pinned message shows the room list's
+      tilted pin before its time, and bubbles have no add-reaction button (reactions come from the message menu).
+      Other people's 32px avatar sits beside the last bubble of their run, 8px outside it, its bottom level with the bubble's, with no
+      ring; the sender's name stays on the run's first bubble, and an emote's avatar centers on its last line. Bubbles
+      of a run meet with 4px corners on the sender's side, and the last one has a Telegram tail there (bottom start for
+      other people, bottom end for your own, mirrored in RTL). The room and thread timelines are inset 12px, so
+      avatars start 12px in and other people's bubbles 52px in. The selected or highlighted band reaches one avatar gap (8px) past the row's start, so the
+      avatar beside the bubble stays clear of its edge. In the settings previews your own bubble sits at the end, its
+      tail ending at the card's inset. Informational rows are 20px with a 14px avatar 3px from their edges, so the read
+      marker clears every avatar by at least 2px. In bubbles they start on the bubble column, the avatar on their first
+      line, and their time follows the text 8px after it, at the end of the last line, in the bubble time style. Times
+      of emotes center on their last line.
     - **Cards and media:** a captioned picture or video is one bubble, the media across the top, clipped to the
       bubble's corners, with the caption below it; media under 160px wide is centered in a 160px bubble. Files, audio
       and voice messages are bubbles in the sender's color, with or without a caption: the card or player sits 8px
@@ -784,10 +861,19 @@ kinds, legacy dialog buttons) giving about 17 button specs in 8 visible families
       own and the time 12px from its bottom and end; in IRC the card leaves the caller's avatar and name to the row.
       Ongoing call cards are 60px with their content 12px from every edge.
     - **Timeline pieces:** reaction chips are 24px pills with their content 8px from each edge, custom emoji included,
-      and the add-reaction button is a 24px circle. The pinned badge is a 24px pill. Every separator (dates, jump to
-      date, "Originally sent …", search results, edit history, export) is a 24px gray pill with 13px medium text and
-      no lines, and the jump-to-date chevron sits on the middle of the date's lowercase letters. Search highlights
-      round to 4.
+      and the add-reaction button (group and IRC layouts) is a 24px circle. In bubbles the chips have no outline (a transparent border keeps
+      their shape in forced colors): your own is filled with the accent and white (`--cpd-color-bg-accent-rest`,
+      `--tl-color-on-accent`), other people's are tinted with it (`--cpd-color-bg-badge-accent`,
+      `--cpd-color-text-badge-accent`), and the count is body-sm medium (13px) in tabular digits trimmed to their cap
+      height; the modern and IRC layouts keep Element's outlined chips and the 24px pinned badge. Voice and audio play
+      buttons, their played part, poll choices and result bars, and file and link icon tiles are in the accent in
+      other people's bubbles (`--tl-color-bg-media-icon`, `--tl-color-media-played`) and white in your own, where the
+      play button is a white circle holding the bubble's blue glyph, as in Telegram's Day and Night themes
+      (`--tl-color-bg-media-play`, `--tl-color-on-media-play`). Every separator
+      (dates, jump to date, "Originally sent …", search results, edit history, export) is a 24px gray pill with 13px
+      medium text and no lines, and the jump-to-date chevron sits on the middle of the date's lowercase letters. Search
+      highlights round to 4. The end of message search results ("No more results", "No results") is a centered line of
+      13px secondary text, 8px above and below, rather than a heading.
       The jump-to-bottom count is a 20px circle for one digit and a pill for more, centered on the button's bottom
       edge.
     - **Controls and fields:** buttons are 36px pills with Compound's hover and pressed colors, including the older 40
@@ -798,29 +884,38 @@ kinds, legacy dialog buttons) giving about 17 button specs in 8 visible families
       verification options round to 12, and the verification panel's buttons sit 16px under their text. Dialogs are
       30 inside a 42 Glass frame and clip their scrollbars to their corners.
     - **Right panel and panels:** every right panel card keeps its content 12px from both edges, like its header. Room
-      info, member info, the threads list and the notifications card highlight their rows 4px from the edge with the
-      content 8px inside, and member tiles hold the avatar 12px from the start, top and bottom. The document, PDF and
+      info, member info, the member list, the threads list and the notifications card highlight their rows 4px from
+      the edge with the content 8px inside; the member list's 56px tiles have no dividers and hold the avatar 12px from
+      the start, top and bottom. The document, PDF and
       Markdown viewers use the same 12px edge. Settings tabs are 36px pills with the 20px icon on the dialog title's
-      edge (circles in a narrow dialog). Theme choices are 44px chips with the radio 12px from their top, bottom and
-      start. Home page tiles and the session security card are 12px cards, and space home tiles pad 16 (76px tall).
+      edge (circles in a narrow dialog). Theme choices are 44px pills with the radio 12px from their top, bottom and
+      start, and the message layout cards have a 44px header with the radio 12px from the card's top and start. Home
+      page tiles and the session security card are 12px cards, and space home tiles pad 16 (76px tall).
       In the space panel, Threads and Settings are 40px circles when collapsed and 40px rows when expanded, like the
       space buttons. The widget picture-in-picture is 25 around its 12px widget, with a 36px back button.
     - **Headers and viewers:** icon buttons in the room header, right panel card headers, the thread list and both
       media viewers are 36px circles around 24px icons; the legacy call header's hold 20px icons, as does the thread
-      list's mark-all-read button. The room header and card headers inset their content 12px. The face pile and the
+      list's mark-all-read button. Every right panel card header button (back, options, close) is filled at rest with
+      the fill of Compound's secondary icon buttons (`bg-subtle-secondary`), `bg-subtle-primary` when hovered or
+      pressed, and the card's title is 15px semibold in the primary text color, the room name's weight and color a
+      size smaller. The room header and card headers inset their content 12px. The face pile and the
       thread list's filter are 36px pills. The image and video viewers share a 68px top bar in the dark theme's
       colors, with the sender and the buttons 16px from the edges, and both show the sender as a semibold name over a
       gray date. The video viewer's speed menu is a 12px menu with 8px items inset 4px, and the PDF viewer's zoom
       buttons and page field are 36px.
     - **Pickers and chrome:** the emoji picker's category tabs sit at its top above the search field, highlight as
       36px circles, and mark the selected tab with a 20px line with round ends; headers, emoji, quick reactions and
-      the search field share an 8px inset. Emoji cells are 38px squares rounded by 4 (rows 2px shorter). The reaction
+      the search field share an 8px inset. The Frequently used tab is Compound's 24px history icon rather than a clock
+      emoji, in an icon button's colors, and in the disabled icon color while there are no recent emoji. Emoji cells
+      are 38px squares rounded by 4 (rows 2px shorter). The reaction
       menu rounds all four corners to 27 and clips the picker along its 26px inner edge. Legacy search boxes (Forward,
       Add existing rooms, space home) match the room list's search field. Small toasts center their icon on the first
       line, so one line makes a 36px toast. The action bar's label items are 28px like its icon items.
     - **Room list:** rows are 72px, with a 64px plate inset 4px and rounded by 8; the plate holds a 48px avatar 8px
       from its start, top and bottom. The search field, header, filters and rows share a 12px edge; header buttons are
-      36px with 24px icons, and filter chips 28px with their labels centered by cap height. Badges sit on the row's
+      36px with 24px icons, and filter chips 28px with their labels centered by cap height. The sort and compose menus
+      open aligned to their button's end, over the list, and the filters' 28px chevron is outlined like the chips
+      beside it, with their hover border. Badges sit on the row's
       bottom line; unread counters and the @ are 20px at the default font size and grow with it (30px at 24px), so one
       digit is a circle and longer counts are pills.
 
@@ -833,29 +928,74 @@ Decided 2026-11-17 after a second inventory (five audits: fields, menus, icons a
 [Radius and spacing](#radius-and-spacing) already held; these rules cover what it didn't. Review page with the
 findings: https://claude.ai/artifact/BVZ6pyrzyasmRRAVMFxxB7.
 
-- **Accent:** Telegram blue by default instead of Compound's green, overridable by the system accent color where the
-  OS has one (macOS sets it system-wide; CSS exposes it as `AccentColor`). Links use the accent. Element's custom
-  themes and the legacy-light and legacy-dark theme builds that only they use are removed.
+- **Accent:** Telegram blue by default instead of Compound's green: Telegram for macOS's #2481cc in light themes and
+  #2ea6ff in dark ones, as step 900 of a 14-step `--tl-accent-*` scale in `telement/tokens.css` that Compound's accent
+  tokens point at (success stays green). White text on #2481cc is 4.1:1, under the 4.5:1 guideline for small text;
+  kept by choice, as Telegram does. To come: overridable by the system accent color where the OS has one (macOS sets
+  it system-wide; CSS exposes it as `AccentColor`). Links use the accent. Element's custom themes and the legacy-light
+  and legacy-dark theme builds that only they use are removed. What sits on an accent fill (counter digits, the @,
+  checks, radio dots, switch knobs) is white in every theme (`--tl-color-on-accent`); dark themes fill with step 800
+  (#0183d3, 4.05:1) and dark high contrast with step 600 (7:1). Compound's dark primary buttons keep their light fill
+  and dark text. Compound's info blue follows the accent, so the accent is the only blue, and the status glyphs next
+  to the room name are secondary gray, as they aren't actions (2026-11-18).
+- **Letter avatars** are Telegram's: a gradient from its avatar palette with white initials in both themes
+  (`_CompoundOverrides.pcss`), as Compound's pastel and dark circles had no contrast with hovered rows (1.0:1).
 - **Color roles:** one Compound token per role, light and dark from Compound, named `--tl-color-*` in
   `telement/tokens.css`: one secondary text color (`text-secondary`) for meta, previews, captions, timestamps and
   placeholders; one divider (`separator-primary`); one hover fill (Compound's secondary hover) and one pressed fill,
   which keyboard selection in lists also uses; one media overlay. Unread counters and mentions look like the room
   list's everywhere: accent counter, gray when muted, accent @.
 - **Type:** Compound's eight sizes only. 12px becomes 13 (11 in badges), 18 becomes 20, 10 becomes 11, bold becomes
-  semibold.
+  semibold. Identifiers (Matrix user and room IDs, room addresses, server names, usernames, copyable values and code)
+  are drawn as typed: `--tl-font-feature-settings-identifier` turns off Inter's contextual alternates, which draw an
+  "x" between digits as a multiplication sign
+  ([element-web#25538](https://github.com/element-hq/element-web/issues/25538), fix proposed upstream in
+  [element-web#35996](https://github.com/element-hq/element-web/pull/35996)), and keeps kerning and ligatures.
 - **Dialogs:** one anatomy. Content, title, body and footer on a 24px edge; the close button on the title's line and
   kept on every dialog; titles 20 semibold (Compound heading-sm), start-aligned except hero cards (security flows,
   big icon) which center. Footer: Telegram-style flat accent text buttons at the bottom right, Cancel before the
   action, red for destructive, one shared component. Widths: 400 confirmations, 480 forms, 640 lists, 980 tabbed
-  settings. Image and video viewers, the search dialog, spinner, maps and dial pad stay as they are.
+  settings. Image and video viewers, the search dialog, spinner, maps and dial pad stay as they are. The Create a
+  space panel, which dims the app, is laid out as a 480px dialog: its title shares a line 16px from the top with the
+  close button and, after the first step, the back button; the rest sits on the 24px edge, and its corners are 32
+  around its 8px cards.
+- **Settings** are grouped as in Telegram (`settingsGroupLabel`, `settingsGroupCard` and `settingsGroupHelp` in
+  `_common.pcss`): each group's rows sit on a card rounded by 12 with 12 × 16 padding, under a 13px secondary label
+  and over 13px secondary help, both 8px from the card and on its 16px content edge. Groups are 24px apart, with no
+  separators between them and no lines under headings or profiles; a fieldset inside a card keeps its label and help
+  without a card of its own. The dialog title is the only large heading: section and subsection headings are group
+  labels, a section's subheading is help under its card, and room settings tabs leave their name to the title. The
+  cards sit on a gray pane that runs from the tabs' top to the dialog's end and bottom edges, starting 16px before the
+  cards, with a 12px corner by the tabs. Light themes put cards in the dialog's white on Compound's gray 300; dark
+  themes put the pane in the page canvas and the cards in the raised dialog color, as Telegram's night theme does;
+  high contrast themes also outline the cards (`--tl-color-bg-settings-pane`, `--tl-color-bg-settings-card`,
+  `--tl-color-border-settings-card`). Fields and dropdowns span their card. The room Notifications options are rows
+  like the Security tab's join rules: the radio on the card's content edge, a 15px semibold label 12px after it, a
+  13px secondary description 4px under the label, 16px above and below each row and a separator between rows. The
+  Sounds block shows the sound's name as regular secondary text and "Set a new custom sound" as a 15px semibold label
+  8px above an outline "Browse…" button. Beta cards are settings cards, and in dark themes the Video rooms beta shows
+  a dark illustration, loaded only there.
 - **Menus:** one menu spec for every floating menu and dropdown (the geometry in Radius and spacing), one dense list
   spec for autocomplete, receipts and search results, and the right panel lists keep their larger 24px icons and
-  medium labels. Selected options keep Compound's radios. Chevrons only on submenus. Destructive items are red with a
+  medium labels. The selected option has a 16px check at the row's end in the text color, as Telegram's menus do, and
+  a menu title is a 32px row. Chevrons only on submenus. Destructive items are red with a
   red hover everywhere. Upstream menus nobody restyled yet (jump to date, server picker, read-receipt popup,
-  autocomplete, which floats above the composer) are restyled too.
+  autocomplete, which floats above the composer) are restyled too. In dark themes, where shadows don't show, menus,
+  pickers, the autocomplete, dropdowns and dialogs are one gray step lighter than the page (Compound's raised canvas)
+  and the hover, pressed, subtle and disabled fills and separators inside them one step further (`floatingSurface` in
+  `_common.pcss`, 2026-11-18). Raised that way, they share the color of other people's bubbles, so dark themes give
+  them a stronger shadow (`--tl-shadow-floating`), and a dialog's glass frame stays one step lighter than its body.
+  The user menu opens at the space panel's edge, clear of the space badges.
 - **Fields:** one field spec (36px, 1px border, 8 radius, 15px text 12px inside, floated label) for legacy and
-  Compound fields alike, with a hover border, Compound's focus blue (`border-focused`) for borders and rings, and one
-  invalid and disabled look. Every search is the filled pill, with a visible focus ring.
+  Compound fields alike, with a hover border, the accent as the focus color (`border-focused`) for borders and rings,
+  a step deeper in light themes so that a focused field's label stays 4.5:1, and one invalid and disabled look. Every
+  search is the filled pill, with a visible focus ring.
+- **Switches** are Telegram's, for Compound's switch and the legacy `ToggleSwitch` alike (`_CompoundOverrides.pcss`,
+  `_ToggleSwitch.pcss`): when off, the track is filled with the separator gray of the surface it is on instead of
+  outlined, and the knob is white with a soft shadow (`--tl-shadow-switch-knob`) in both states. That gray is under
+  3:1 against the page, as in Telegram, so high contrast themes fill the off track with Compound's outline color
+  (`--tl-color-bg-switch-off`). Disabled switches keep Compound's disabled knob and checked track; their off track is
+  the separator gray and their knob is flat.
 - **Icons:** 16 (menus, inline status, 24px buttons), 20 (composer, buttons with labels, 28px buttons, toasts, tabs,
   badges), 24 (header-class icon buttons including media viewer controls, right panel rows) and 48 (media play), as
   tokens. The image viewer's ··· and the video controls become 24, status glyphs a fixed 16, space panel tiles 24, and
@@ -867,7 +1007,9 @@ findings: https://claude.ai/artifact/BVZ6pyrzyasmRRAVMFxxB7.
   Compound's filled envelope, which has no outline variant.
 - **Buttons:** filled, outline and plain (each with a destructive variant), inline links, icon buttons at 24/28/36.
   The 32px icon buttons become 36, the `_sm` kinds and the 156px minimum go, every button uses Compound's disabled
-  look, and standalone link buttons lose the underline.
+  look, and standalone link buttons lose the underline. Inline links are underlined in the weight of the sentence
+  around them, and every link that leaves the app is an `ExternalLink`, underlined, with its external icon (bridges,
+  Labs, key storage help, managing a session on the account's page).
 - **The rest:** four shadows (floating, raised, edge, on media), Compound's tooltip only, two toasts on tokens,
   eleven avatar sizes (14, 16, 20, 24, 32, 36, 40, 48, 64, 80, 120), three durations (100ms, 200ms ease-out, 300ms).
 
@@ -1034,12 +1176,33 @@ Deferred work:
 | 2026-11-16 | Room list read checks: ✓✓ once any other member has read your last message.                                                                     | [Open questions](#open-questions)                                                    |
 | 2026-11-16 | Hovering shows no toolbar, keyboard focus still does; its actions are in the right-click menu.                                                  | [Floating toolbar](#floating-toolbar)                                                |
 | 2026-11-16 | GIFs come from GIPHY with the maintainer's key, up to R, uploaded to the homeserver when sent, without pingbacks.                               | [GIFs](#gifs)                                                                        |
+| 2026-11-16 | Upstream pull requests fix one problem each, linked to one issue (Element asked to split #35844), from `fix/<name>` branches in a clean clone.  | [Upstream pull requests](#upstream-pull-requests)                                    |
 | 2026-11-17 | On macOS an unreadable keychain item leads to Quit or "Clear data and restart", which deletes it.                                               | [Keychain on macOS](#keychain-on-macos)                                              |
 | 2026-11-17 | Keep the backup authenticity shield; implementing MSC4048 is on the backlog.                                                                    | [Authenticated key backup](#authenticated-key-backup-msc4048)                        |
 | 2026-11-17 | Accent is Telegram blue, overridable by the system accent; custom themes are removed.                                                           | [Colors, type and components](#colors-type-and-components)                           |
 | 2026-11-17 | One token per color role, Compound's type scale only, one dialog anatomy with text-button footers.                                              | [Colors, type and components](#colors-type-and-components)                           |
 | 2026-11-17 | One menu spec with Compound's radios, one field spec with floated labels and hover borders, icons 16/20/24.                                     | [Colors, type and components](#colors-type-and-components)                           |
 | 2026-11-17 | Menus get 32px rows, 2px separator spacing and 10px icon-to-label gaps (were 40, 4 and 12): 40px rows were too spacey.                          | [Radius and spacing](#radius-and-spacing)                                            |
+| 2026-11-18 | Accent #2481cc / #2ea6ff (white on #2481cc stays 4.1:1); dark themes select in #3d6a97 with white text; Telegram's gradient letter avatars.     | [Colors, type and components](#colors-type-and-components)                           |
+| 2026-11-18 | In bubbles, reactions sit in the bubble before the time, your own filled with the accent; emoji-only messages lose the bubble for a time badge. | [Radius and spacing](#radius-and-spacing)                                            |
+| 2026-11-18 | Bubble runs: 4px joined corners, a Telegram tail and the avatar beside the last bubble.                                                         | [Radius and spacing](#radius-and-spacing)                                            |
+| 2026-11-18 | Composer: "Write a message…", a microphone while empty, a bare accent paper plane to send; quick reactions and Copy text in the message menu.   | [Behavior changes](#behavior-changes)                                                |
+| 2026-11-18 | Dark menus and dialogs one gray step above the page; white on a deeper dark accent; one blue; selected space and settings tab use the plate.    | [Colors, type and components](#colors-type-and-components)                           |
+| 2026-11-19 | Your own bubbles in the accent (#2481cc light, #3d6a97 dark) with white content; times in Telegram's 80% white.                                 | [Radius and spacing](#radius-and-spacing)                                            |
+| 2026-11-19 | Read checks in your own bubbles and "Seen by N" in the message menu replace bubble receipts (declined 2026-11-18, chosen 2026-11-19).           | [Radius and spacing](#radius-and-spacing)                                            |
+| 2026-11-19 | Informational rows show their time after the text; a pin before the time replaces the pinned pill; no add-reaction button in bubbles.           | [Radius and spacing](#radius-and-spacing)                                            |
+| 2026-11-19 | Quick reactions: a capsule with 8px ends 8px above the menu, one shared shadow; menus mark the chosen option with a trailing check.             | [Colors, type and components](#colors-type-and-components)                           |
+| 2026-11-19 | Accent for voice, poll and file controls, open controls, selected settings cards, the avatar edit badge and standalone text buttons.            | [Colors, type and components](#colors-type-and-components)                           |
+| 2026-11-19 | Forward dialog: a paper plane per row on hover; Start chat rows match its 52px rows.                                                            | [Colors, type and components](#colors-type-and-components)                           |
+| 2026-11-19 | Settings are grouped as in Telegram: cards on a gray pane, 13px labels above and help below, no separators; room settings are "Room: Tab".      | [Colors, type and components](#colors-type-and-components)                           |
+| 2026-11-19 | English sentence case for 213 upstream strings comes from an overrides file loaded at startup, never from edits to `en_EN.json`.                | [Changing upstream code](#changing-upstream-code)                                    |
+| 2026-11-19 | Telegram switches: a filled gray track when off, a white knob with a soft shadow; Sidebar's spaces are toggles, Show all rooms only there.      | [Colors, type and components](#colors-type-and-components)                           |
+| 2026-11-19 | Right panel card header buttons are filled circles at rest, no longer transparent until hovered; card titles are primary 15px semibold.         | [Radius and spacing](#radius-and-spacing)                                            |
+| 2026-11-19 | Member list without dividers; space menu without a title; room list menus open at their button's end; the filters chevron is outlined.          | [Radius and spacing](#radius-and-spacing)                                            |
+| 2026-11-19 | Inline links keep the sentence's weight and the underline; links leaving the app show the external icon; identifiers drop Inter's alternates.   | [Colors, type and components](#colors-type-and-components)                           |
+| 2026-11-19 | Your own bubbles: a white play button with a blue glyph and a white quote line; Explore rooms hides raw room IDs; Create a space is a dialog.   | [Radius and spacing](#radius-and-spacing)                                            |
+| 2026-11-20 | Agents draft upstream issues and pull request texts, which the maintainer rewrites; accessibility-only fixes go up as their own pull requests.  | [Upstream pull requests](#upstream-pull-requests)                                    |
+| 2026-11-20 | Telement commits that carry an upstream fix name its pull request in a body line, `See https://github.com/element-hq/element-web/pull/N`.       | [Upstream pull requests](#upstream-pull-requests)                                    |
 
 ## Upstream merge log
 
