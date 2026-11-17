@@ -293,6 +293,12 @@
         fill: var(--cpd-color-icon-on-solid-primary);
     }
 
+    /* The icons the app draws on the avatar (public room, video room, low priority, presence) too: the public room's
+       info blue would vanish on the accent plate */
+    .container > :first-child svg {
+        color: var(--cpd-color-icon-on-solid-primary);
+    }
+
     .notificationDecoration {
         color: var(--cpd-color-icon-on-solid-primary);
     }

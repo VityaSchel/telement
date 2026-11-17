@@ -38,9 +38,11 @@ const unread = {
 
 interface RowProps extends Partial<RoomListItemViewSnapshot> {
     isSelected?: boolean;
+    /** What the app draws as the avatar, instead of a 48px box */
+    avatar?: JSX.Element;
 }
 
-function Row({ isSelected = false, ...overrides }: RowProps): JSX.Element {
+function Row({ isSelected = false, avatar, ...overrides }: RowProps): JSX.Element {
     const vm = useMockedViewModel({ ...defaultSnapshot, ...overrides }, mockedActions);
     return (
         <RoomListItemView
@@ -48,7 +50,7 @@ function Row({ isSelected = false, ...overrides }: RowProps): JSX.Element {
             isSelected={isSelected}
             isFocused={false}
             onFocus={() => {}}
-            renderAvatar={() => <div data-testid="avatar" style={{ width: "48px", height: "48px" }} />}
+            renderAvatar={() => avatar ?? <div data-testid="avatar" style={{ width: "48px", height: "48px" }} />}
             role="option"
         />
     );
@@ -390,6 +392,21 @@ describe("Room list item layout", () => {
         expect(plate.right - time.right).toBe(8);
         expect(center(check)).toBeCloseTo(center(part(row, styles.titleRow)), 5);
         expect(getComputedStyle(check).color).toBe(colorOf("--cpd-color-icon-accent-primary"));
+    });
+
+    it("draws the icons on the selected room's avatar in the plate's on-solid color", () => {
+        renderRow({
+            isSelected: true,
+            avatar: (
+                <div>
+                    <svg data-testid="public-icon" color="var(--cpd-color-icon-info-primary)" />
+                </div>
+            ),
+        });
+
+        expect(getComputedStyle(screen.getByTestId("public-icon")).color).toBe(
+            colorOf("--cpd-color-icon-on-solid-primary"),
+        );
     });
 
     it("draws the sending clock at 12px in the checks' 16px slot, so it looks as big as they do", () => {
