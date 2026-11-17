@@ -10,7 +10,16 @@ import { userEvent } from "vitest/browser";
 import { createElement, type ReactNode } from "react";
 import { flushSync } from "react-dom";
 import { createRoot, type Root } from "react-dom/client";
-import { Button } from "@vector-im/compound-web";
+import {
+    Button,
+    EditInPlace,
+    Field,
+    Label,
+    PasswordInput,
+    Root as FormRoot,
+    TextControl,
+    TooltipProvider,
+} from "@vector-im/compound-web";
 import LinkIcon from "@vector-im/compound-design-tokens/assets/web/icons/link";
 import compoundBase from "@vector-im/compound-design-tokens/assets/web/css/cpd-common-base.css?raw";
 import compoundSemantic from "@vector-im/compound-design-tokens/assets/web/css/cpd-common-semantic.css?raw";
@@ -663,6 +672,95 @@ describe("App controls", () => {
             expect(getComputedStyle(get("[data-testid=invalid] label")).color).toBe(
                 colorOf("--cpd-color-text-critical-primary"),
             );
+        });
+
+        it("are what Compound's text fields look like too, with the label floated on the border", async () => {
+            const noop = (): void => {};
+            renderReact(
+                createElement(
+                    TooltipProvider,
+                    null,
+                    createElement(
+                        "div",
+                        { style: { display: "flex", flexDirection: "column", gap: "24px", padding: "24px" } },
+                        createElement(
+                            FormRoot,
+                            { onSubmit: (e) => e.preventDefault() },
+                            createElement(
+                                "div",
+                                { "data-testid": "text" },
+                                createElement(
+                                    Field,
+                                    { name: "name" },
+                                    createElement(Label, null, "Room name"),
+                                    createElement(TextControl, { defaultValue: "Design" }),
+                                ),
+                            ),
+                            createElement(
+                                "div",
+                                { "data-testid": "password" },
+                                createElement(
+                                    Field,
+                                    { name: "key" },
+                                    createElement(Label, null, "Recovery key"),
+                                    createElement(PasswordInput, { defaultValue: "secret" }),
+                                ),
+                            ),
+                        ),
+                        createElement(
+                            "div",
+                            { "data-testid": "edit" },
+                            createElement(EditInPlace, {
+                                label: "Display name",
+                                value: "Alice",
+                                saveButtonLabel: "Save",
+                                savingLabel: "Saving…",
+                                cancelButtonLabel: "Cancel",
+                                onChange: noop,
+                                onSave: noop,
+                                onCancel: noop,
+                            }),
+                        ),
+                    ),
+                ),
+            );
+            const legacyField = document.createElement("div");
+            legacyField.innerHTML = field("Legacy", "Value");
+            stage().append(legacyField);
+            const legacyLabel = getComputedStyle(get(".mx_Field label"));
+
+            for (const testId of ["text", "password", "edit"]) {
+                const fieldElement = get(`[data-testid=${testId}]`);
+                const control = fieldElement.querySelector<HTMLInputElement>("input")!;
+                const label = fieldElement.querySelector("label")!;
+                const controlBox = box(control);
+
+                expect(controlBox.height).toBe(36);
+                expect(getComputedStyle(control).paddingLeft).toBe("12px");
+                expect(getComputedStyle(control).borderTopWidth).toBe("1px");
+                expect(settledStyle(control).borderTopColor).toBe(colorOf("--cpd-color-border-interactive-secondary"));
+                // Floated like a legacy field's label
+                expect(getComputedStyle(label).fontSize).toBe(legacyLabel.fontSize);
+                expect(center(label)).toBe(controlBox.top + 0.5);
+                expect(box(label).left + parseFloat(getComputedStyle(label).paddingLeft)).toBe(
+                    controlBox.left + parseFloat(getComputedStyle(control).paddingLeft),
+                );
+            }
+
+            const reveal = box(get("[data-testid=password] button"));
+            const password = box(get("[data-testid=password] input"));
+            expect([reveal.width, reveal.height]).toEqual([28, 28]);
+            expect(center(get("[data-testid=password] button"))).toBe(password.top + password.height / 2);
+            expect(password.right - reveal.right).toBe(4);
+            expect(box(get("[data-testid=password] button svg")).width).toBe(20);
+
+            const text = get("[data-testid=text] input");
+            await userEvent.hover(text);
+            expect(settledStyle(text).borderTopColor).toBe(colorOf("--cpd-color-border-interactive-hovered"));
+            expect(getComputedStyle(text).boxShadow).toBe("none");
+            text.focus();
+            expect(settledStyle(text).borderTopColor).toBe(colorOf("--cpd-color-border-focused"));
+            expect(getComputedStyle(text).outlineStyle).toBe("none");
         });
 
         it("put a text area's label on its first line", () => {

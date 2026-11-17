@@ -102,6 +102,81 @@ Please see LICENSE files in the repository root for full details.
 }
 
 /*
+ * One field spec for legacy and Compound text fields (TELEMENT.md, "Colors, type and components"; _Field.pcss): 36px
+ * with the text 12px inside a 1px border, darker when hovered, Compound's focus blue when focused, without Compound's
+ * hover shadow or 2px ring.
+ */
+:is(input, textarea)[class*="_control_"] {
+    padding: calc((var(--tl-control-size) - 2 * var(--cpd-border-width-1) - 1lh) / 2) var(--cpd-space-3x);
+    border-color: var(--cpd-color-border-interactive-secondary);
+    font: var(--cpd-font-body-md-regular);
+
+    &:hover,
+    &:active {
+        border-color: var(--cpd-color-border-interactive-hovered);
+        box-shadow: none;
+    }
+
+    &:focus {
+        outline: none;
+        border-color: var(--cpd-color-border-focused);
+    }
+
+    /* Compound's own states, which the border color above would otherwise hide */
+    &[data-invalid] {
+        border-color: var(--cpd-color-border-critical-primary);
+    }
+
+    &:disabled {
+        border-color: var(--cpd-color-border-disabled);
+    }
+
+    &[readonly] {
+        border-color: var(--cpd-color-bg-subtle-secondary);
+    }
+}
+
+/* The password field's reveal button, a 28px icon button with a 20px icon, centered in the 36px field */
+input[class*="_control_"] + button[class*="_action_"] {
+    inset-block: calc((var(--tl-control-size) - var(--cpd-space-7x)) / 2);
+    inset-inline-end: calc((var(--tl-control-size) - var(--cpd-space-7x)) / 2);
+
+    > svg {
+        inline-size: var(--cpd-space-5x);
+        block-size: var(--cpd-space-5x);
+    }
+}
+
+/* The label floats on the middle of the control's top border, its text where the control's starts */
+[class*="_field_"]:has(> label[class*="_label_"]):has(input[class*="_control_"], textarea[class*="_control_"]) {
+    position: relative;
+
+    > label[class*="_label_"] {
+        position: absolute;
+        z-index: 1;
+        inset-block-start: calc(var(--cpd-border-width-1) / 2);
+        inset-inline-start: calc(var(--cpd-space-3x) - var(--cpd-space-0-5x));
+        max-inline-size: calc(100% - 2 * var(--cpd-space-3x));
+        padding-inline: var(--cpd-space-0-5x);
+        transform: translateY(-50%);
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        font: var(--cpd-font-body-xs-regular);
+        color: var(--cpd-color-text-secondary);
+        background-color: var(--cpd-color-bg-canvas-default);
+    }
+
+    &:focus-within > label[class*="_label_"] {
+        color: var(--cpd-color-text-link-external);
+    }
+
+    > label[class*="_label_"][data-invalid] {
+        color: var(--cpd-color-text-critical-primary);
+    }
+}
+
+/*
  * Like Telegram, menu items and the right panel's action lists show no chevron when hovered; only a submenu's trigger
  * (aria-haspopup) keeps one.
  */
