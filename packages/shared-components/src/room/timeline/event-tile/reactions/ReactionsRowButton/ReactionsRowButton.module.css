@@ -26,8 +26,8 @@
 }
 
 .reactionsRowButtonSelected {
-    background-color: var(--cpd-color-green-300);
-    border-color: var(--cpd-color-green-800);
+    background-color: var(--tl-accent-300);
+    border-color: var(--tl-accent-800);
 }
 
 .reactionsRowButtonDisabled {

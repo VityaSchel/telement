@@ -29,3 +29,132 @@ Please see LICENSE files in the repository root for full details.
     --tl-radius-menu: calc(var(--tl-radius-row) + var(--tl-inset-menu));
     --tl-radius-surface: calc(var(--tl-radius-row) + var(--tl-inset-surface));
 }
+
+/*
+ * Telegram's accent in place of Compound's green: Telegram for macOS's #2481cc in light themes and #2ea6ff in dark
+ * ones, at step 900 of a 14-step scale built like Compound's blue one: each step keeps the OKLCH lightness and chroma
+ * profile of Compound's blue, moved to Telegram's hue and anchor. High contrast themes move the anchor as far as
+ * Compound moves its own blue-900. Success stays green.
+ */
+:root,
+.cpd-theme-light.cpd-theme-light {
+    --tl-accent-100: #fafcfe;
+    --tl-accent-200: #f4f9fd;
+    --tl-accent-300: #ebf3fc;
+    --tl-accent-400: #dceaf9;
+    --tl-accent-500: #c1dbf4;
+    --tl-accent-600: #accef0;
+    --tl-accent-700: #8bbbe9;
+    --tl-accent-800: #539bdd;
+    --tl-accent-900: #2481cc;
+    --tl-accent-1000: #1470b5;
+    --tl-accent-1100: #045f9f;
+    --tl-accent-1200: #044a7d;
+    --tl-accent-1300: #00345b;
+    --tl-accent-1400: #01223e;
+    --cpd-color-gradient-action-stop1: var(--tl-accent-500);
+    --cpd-color-gradient-action-stop2: var(--tl-accent-700);
+    --cpd-color-gradient-action-stop3: var(--tl-accent-900);
+    --cpd-color-gradient-action-stop4: var(--tl-accent-1100);
+}
+
+.cpd-theme-dark.cpd-theme-dark {
+    --tl-accent-100: #001c33;
+    --tl-accent-200: #001e37;
+    --tl-accent-300: #002541;
+    --tl-accent-400: #002f51;
+    --tl-accent-500: #013f69;
+    --tl-accent-600: #024c7c;
+    --tl-accent-700: #08609a;
+    --tl-accent-800: #0183d3;
+    --tl-accent-900: #2ea6ff;
+    --tl-accent-1000: #5ab3fe;
+    --tl-accent-1100: #7ac1fe;
+    --tl-accent-1200: #a1d2fe;
+    --tl-accent-1300: #cae5fe;
+    --tl-accent-1400: #e1effd;
+    --cpd-color-gradient-action-stop1: var(--tl-accent-1100);
+    --cpd-color-gradient-action-stop2: var(--tl-accent-900);
+    --cpd-color-gradient-action-stop3: var(--tl-accent-700);
+    --cpd-color-gradient-action-stop4: var(--tl-accent-500);
+}
+
+.cpd-theme-light-hc.cpd-theme-light-hc {
+    --tl-accent-100: #f3f8fd;
+    --tl-accent-200: #e9f3fd;
+    --tl-accent-300: #d9eafb;
+    --tl-accent-400: #c9e1f9;
+    --tl-accent-500: #a6cdf4;
+    --tl-accent-600: #82b9ee;
+    --tl-accent-700: #4c9ee7;
+    --tl-accent-800: #0a84d8;
+    --tl-accent-900: #015d9c;
+    --tl-accent-1000: #05538a;
+    --tl-accent-1100: #034474;
+    --tl-accent-1200: #013963;
+    --tl-accent-1300: #002747;
+    --tl-accent-1400: #00213c;
+    --cpd-color-gradient-action-stop1: var(--tl-accent-500);
+    --cpd-color-gradient-action-stop2: var(--tl-accent-700);
+    --cpd-color-gradient-action-stop3: var(--tl-accent-900);
+    --cpd-color-gradient-action-stop4: var(--tl-accent-1100);
+}
+
+.cpd-theme-dark-hc.cpd-theme-dark-hc {
+    --tl-accent-100: #011e36;
+    --tl-accent-200: #002440;
+    --tl-accent-300: #012e4f;
+    --tl-accent-400: #01365a;
+    --tl-accent-500: #034979;
+    --tl-accent-600: #015d97;
+    --tl-accent-700: #0778c1;
+    --tl-accent-800: #0097f2;
+    --tl-accent-900: #9fd1fe;
+    --tl-accent-1000: #add7fe;
+    --tl-accent-1100: #bfe0fe;
+    --tl-accent-1200: #cde7ff;
+    --tl-accent-1300: #e4f2ff;
+    --tl-accent-1400: #ecf6ff;
+    --cpd-color-gradient-action-stop1: var(--tl-accent-1100);
+    --cpd-color-gradient-action-stop2: var(--tl-accent-900);
+    --cpd-color-gradient-action-stop3: var(--tl-accent-700);
+    --cpd-color-gradient-action-stop4: var(--tl-accent-500);
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --tl-accent-100: #001c33;
+        --tl-accent-200: #001e37;
+        --tl-accent-300: #002541;
+        --tl-accent-400: #002f51;
+        --tl-accent-500: #013f69;
+        --tl-accent-600: #024c7c;
+        --tl-accent-700: #08609a;
+        --tl-accent-800: #0183d3;
+        --tl-accent-900: #2ea6ff;
+        --tl-accent-1000: #5ab3fe;
+        --tl-accent-1100: #7ac1fe;
+        --tl-accent-1200: #a1d2fe;
+        --tl-accent-1300: #cae5fe;
+        --tl-accent-1400: #e1effd;
+        --cpd-color-gradient-action-stop1: var(--tl-accent-1100);
+        --cpd-color-gradient-action-stop2: var(--tl-accent-900);
+        --cpd-color-gradient-action-stop3: var(--tl-accent-700);
+        --cpd-color-gradient-action-stop4: var(--tl-accent-500);
+    }
+}
+
+:root,
+[class*="cpd-theme-"] {
+    --cpd-color-bg-accent-rest: var(--tl-accent-900);
+    --cpd-color-bg-accent-hovered: var(--tl-accent-1000);
+    --cpd-color-bg-accent-pressed: var(--tl-accent-1100);
+    --cpd-color-bg-accent-subtle: var(--tl-accent-200);
+    --cpd-color-bg-badge-accent: var(--tl-accent-400);
+    --cpd-color-border-accent-primary: var(--tl-accent-900);
+    --cpd-color-border-accent-subtle: var(--tl-accent-700);
+    --cpd-color-icon-accent-primary: var(--tl-accent-900);
+    --cpd-color-icon-accent-tertiary: var(--tl-accent-800);
+    --cpd-color-text-action-accent: var(--tl-accent-900);
+    --cpd-color-text-badge-accent: var(--tl-accent-1100);
+}
