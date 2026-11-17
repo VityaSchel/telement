@@ -106,6 +106,29 @@ describe("SearchBox styles", () => {
         expect(textStart - searchBox.getBoundingClientRect().left).toBe(12 + 20 + 8);
     });
 
+    it("fills the pill without a visible border, and rings it in Compound's focus blue while focused", () => {
+        const searchBox = renderSearchBox(["cpd-theme-light", "mx_Dialog"]);
+        const style = getComputedStyle(searchBox);
+        const probe = document.createElement("span");
+        probe.style.backgroundColor = "var(--cpd-color-bg-subtle-secondary)";
+        document.querySelector(".cpd-theme-light")!.append(probe);
+        const fill = getComputedStyle(probe).backgroundColor;
+        probe.remove();
+
+        expect(style.backgroundColor).toBe(fill);
+        expect(style.borderTopColor).toBe("rgba(0, 0, 0, 0)");
+        expect(style.outlineStyle).toBe("none");
+        searchBox.querySelector("input")!.focus();
+        expect(getComputedStyle(searchBox).outlineStyle).toBe("solid");
+        expect(getComputedStyle(searchBox).outlineWidth).toBe("2px");
+        expect(getComputedStyle(searchBox).outlineOffset).toBe("-2px");
+        expect(getComputedStyle(searchBox).outlineColor).toBe(tokenColor("--cpd-color-border-focused"));
+        // Unfocused again, the pill stays filled
+        searchBox.querySelector("input")!.blur();
+        searchBox.classList.add("mx_SearchBox_blurred");
+        expect(getComputedStyle(searchBox).backgroundColor).toBe(fill);
+    });
+
     // As in SearchFieldView, where the input spans the pill and the magnifier lets clicks through to it
     it("focuses the input from a click anywhere in the pill but the clear button", async () => {
         const searchBox = renderSearchBox(["cpd-theme-light", "mx_Dialog"], true);

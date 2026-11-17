@@ -86,6 +86,17 @@ describe("SearchFieldView", () => {
         expect(getInsets(field, getDecoration(field)).left).toBe(12);
     });
 
+    it("rings the pill in Compound's focus blue while the user types in it", async () => {
+        render(<Default />);
+        const field = getField();
+        expect(getComputedStyle(field).outlineStyle).toBe("none");
+
+        await userEvent.click(screen.getByRole("textbox", { name: "Search" }));
+
+        const style = getComputedStyle(field);
+        expect([style.outlineStyle, style.outlineWidth, style.outlineOffset]).toEqual(["solid", "2px", "-2px"]);
+    });
+
     it("keeps the magnifier at the left edge while the field holds text, even unfocused", () => {
         render(<WithValue />);
         const field = getField();

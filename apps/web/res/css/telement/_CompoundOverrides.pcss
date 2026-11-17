@@ -136,6 +136,23 @@ Please see LICENSE files in the repository root for full details.
     }
 }
 
+/* Compound's search field is the filled pill of every search field (SearchFieldView), with its focus ring */
+[class*="_search_"]:has(> input[type="search"]) {
+    border-color: transparent;
+    background-color: var(--cpd-color-bg-subtle-secondary);
+
+    &:hover,
+    &:active,
+    &:focus-within {
+        border-color: transparent;
+    }
+
+    &:focus-within {
+        outline: var(--cpd-border-width-2) solid var(--cpd-color-border-focused);
+        outline-offset: calc(-1 * var(--cpd-border-width-2));
+    }
+}
+
 /* The password field's reveal button, a 28px icon button with a 20px icon, centered in the 36px field */
 input[class*="_control_"] + button[class*="_action_"] {
     inset-block: calc((var(--tl-control-size) - var(--cpd-space-7x)) / 2);

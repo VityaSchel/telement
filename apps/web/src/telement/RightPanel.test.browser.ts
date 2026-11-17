@@ -54,6 +54,7 @@ import memberListHeaderViewStyles from "../../res/css/views/rooms/_MemberListHea
 import memberTileViewStyles from "../../res/css/views/rooms/_MemberTileView.pcss?raw";
 import pinnedEventTileStyles from "../../res/css/views/rooms/_PinnedEventTile.pcss?raw";
 import thirdPartyMemberInfoStyles from "../../res/css/views/rooms/_ThirdPartyMemberInfo.pcss?raw";
+import compoundOverrides from "../../res/css/telement/_CompoundOverrides.pcss?raw";
 import lightTheme from "../../res/themes/light/css/_light.pcss?raw";
 import { cornerRadii, toBrowserCss } from "../test/telement/browserCss";
 import { settledStyle, tokenColor } from "../test/telement/computedStyle";
@@ -258,6 +259,7 @@ describe("Right panel", () => {
                     memberTileViewStyles,
                     pinnedEventTileStyles,
                     thirdPartyMemberInfoStyles,
+                    compoundOverrides,
                 ]
                     .map((styles) => toBrowserCss(styles, lightTheme, fontSizes))
                     .join("\n")}
@@ -378,6 +380,26 @@ describe("Right panel", () => {
     });
 
     describe("member list", () => {
+        it("makes the search field the filled pill of every search, ringed in Compound's focus blue while focused", () => {
+            const card = renderMemberList();
+            const search = card.querySelector<HTMLElement>(".mx_MemberListHeaderView_search")!;
+            const fill = (): string => getComputedStyle(search).backgroundColor;
+            const probe = document.createElement("span");
+            probe.style.backgroundColor = "var(--cpd-color-bg-subtle-secondary)";
+            card.append(probe);
+            const subtle = getComputedStyle(probe).backgroundColor;
+            probe.remove();
+
+            expect(fill()).toBe(subtle);
+            expect(settledStyle(search).borderTopColor).toBe("rgba(0, 0, 0, 0)");
+            expect(search.getBoundingClientRect().height).toBe(36);
+            search.querySelector("input")!.focus();
+            expect(settledStyle(search).borderTopColor).toBe("rgba(0, 0, 0, 0)");
+            const focused = getComputedStyle(search);
+            expect(`${focused.outlineStyle} ${focused.outlineWidth} ${focused.outlineOffset}`).toBe("solid 2px -2px");
+            expect(getComputedStyle(search).outlineColor).toBe(tokenColor("--cpd-color-border-focused", card));
+        });
+
         it.each(["ltr", "rtl"])(
             "starts the search field and the member count and ends the invite button on the content edge (%s)",
             (dir) => {

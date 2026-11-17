@@ -14,7 +14,16 @@ Please see LICENSE files in the repository root for full details.
     /* Same specificity as the 4px of `.mx_Dialog .mx_textinput` and `.mx_MatrixChat_wrapper .mx_textinput` in
        _common.pcss; this wins because it loads later */
     &.mx_textinput {
+        /* The filled pill of every search field (SearchFieldView), its border kept clear so the insets below hold */
+        border-color: transparent;
         border-radius: var(--tl-radius-control);
+        background-color: var(--cpd-color-bg-subtle-secondary);
+
+        &:focus-within {
+            outline: var(--cpd-border-width-2) solid var(--cpd-color-border-focused);
+            outline-offset: calc(-1 * var(--cpd-border-width-2));
+        }
+
         /* Laid out like Telement's search field (SearchFieldView): the input fills the pill, so a click anywhere but
            the clear button focuses it, and the magnifier and the clear button sit over its padding */
         position: relative;
@@ -44,10 +53,6 @@ Please see LICENSE files in the repository root for full details.
             padding-inline: calc(var(--cpd-space-3x) - 1px + var(--cpd-space-5x) + var(--cpd-space-2x))
                 calc(var(--cpd-space-1x) - 1px + var(--cpd-space-7x) + var(--cpd-space-2x));
         }
-    }
-
-    &.mx_SearchBox_blurred:not(:hover) {
-        background-color: transparent;
     }
 
     /* A 16px filled circle in a 28px click target 4px from the end of the pill, as in SearchFieldView. The cross

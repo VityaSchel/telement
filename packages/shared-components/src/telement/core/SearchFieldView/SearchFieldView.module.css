@@ -24,6 +24,12 @@ Please see LICENSE files in the repository root for full details.
     color: var(--cpd-color-text-secondary);
     font: var(--cpd-font-body-md-regular);
     letter-spacing: var(--cpd-font-letter-spacing-body-md);
+
+    /* Every search field shows Compound's focus ring, inside the pill so a container can't clip it */
+    &:focus-within {
+        outline: var(--cpd-border-width-2) solid var(--cpd-color-border-focused);
+        outline-offset: calc(-1 * var(--cpd-border-width-2));
+    }
 }
 
 /* The magnifier and the placeholder, drawn above the input so they can be centered and moved */
