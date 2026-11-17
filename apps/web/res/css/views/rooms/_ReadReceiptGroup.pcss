@@ -61,15 +61,15 @@ Please see LICENSE files in the repository root for full details.
     }
 }
 
+/* Telement: the shared menu surface (TELEMENT.md, "Radius and spacing") holding a dense list: a Compound-style title, then
+   40px rows inset 4px from the menu's edge, the avatar 16px in and the name 12px after it, with the time at the end */
 .mx_ReadReceiptGroup_popup {
     max-height: 300px;
-    width: 220px;
-    border-radius: 8px;
+    width: 280px;
     display: flex;
     flex-direction: column;
-    text-align: left;
-    font-size: 12px;
-    line-height: 15px;
+    text-align: start;
+    font: var(--cpd-font-body-md-regular);
 
     right: 0;
 
@@ -82,53 +82,68 @@ Please see LICENSE files in the repository root for full details.
     }
 
     .mx_ReadReceiptGroup_title {
-        font-size: 12px;
-        line-height: 15px;
-        margin: 16px 16px 8px;
-        font-weight: var(--cpd-font-weight-semibold);
+        margin: 0 0 var(--tl-inset-menu);
+        padding: var(--cpd-space-2x) var(--cpd-space-3x) calc(var(--cpd-space-2x) - var(--cpd-border-width-1));
+        border-block-end: var(--cpd-border-width-1) solid var(--cpd-color-gray-400);
+        font: var(--cpd-font-body-sm-semibold);
+        color: var(--cpd-color-text-secondary);
         /* shouldn’t be actually focusable */
         outline: none;
     }
 
     .mx_AutoHideScrollbar {
+        padding: calc(var(--tl-inset-menu) - var(--cpd-border-width-1));
+
         .mx_ReadReceiptGroup_person {
             display: flex;
-            flex-direction: row;
-            padding: 4px;
-            margin: 0 12px;
-            border-radius: 8px;
+            align-items: center;
+            gap: var(--cpd-space-3x);
+            box-sizing: border-box;
+            min-block-size: var(--cpd-space-10x);
+            padding: var(--cpd-space-2x) var(--cpd-space-3x);
+            border-radius: var(--tl-radius-row);
 
-            &:hover {
-                background: $menu-selected-color;
+            &:hover,
+            &:focus-visible {
+                background-color: var(--cpd-color-bg-action-secondary-hovered);
             }
 
-            &:last-child {
-                margin-bottom: 8px;
+            &:active {
+                background-color: var(--cpd-color-bg-action-secondary-pressed);
+            }
+
+            /* Inside the highlight, as in the other menus */
+            &:focus-visible {
+                outline: var(--cpd-border-width-2) solid var(--cpd-color-border-focused);
+                outline-offset: calc(-1 * var(--cpd-border-width-2));
             }
 
             .mx_BaseAvatar {
-                margin: 6px 8px;
-                align-self: center;
-                justify-self: center;
                 flex-shrink: 0; /* Long names should not shrink the picture */
             }
 
             .mx_ReadReceiptGroup_name {
                 display: flex;
-                flex-direction: column;
+                align-items: baseline;
+                gap: var(--cpd-space-2x);
                 flex-grow: 1;
-                flex-shrink: 1;
-                overflow: hidden;
+                min-inline-size: 0;
 
                 p {
-                    margin: 2px 0;
+                    margin: 0;
                     text-overflow: ellipsis;
                     overflow: hidden;
                     white-space: nowrap;
                 }
 
+                p:first-child {
+                    flex-grow: 1;
+                }
+
                 .mx_ReadReceiptGroup_secondary {
-                    color: $secondary-content;
+                    flex-shrink: 0;
+                    font: var(--cpd-font-body-sm-regular);
+                    color: var(--cpd-color-text-secondary);
                 }
             }
         }

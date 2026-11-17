@@ -20,6 +20,7 @@ import threadPanelStyles from "../../res/css/views/right_panel/_ThreadPanel.pcss
 import legacyCallMenuStyles from "../../res/css/views/context_menus/_LegacyCallContextMenu.pcss?raw";
 import genericDropdownMenuStyles from "../../res/css/structures/_GenericDropdownMenu.pcss?raw";
 import networkDropdownStyles from "../../res/css/views/directory/_NetworkDropdown.pcss?raw";
+import readReceiptGroupStyles from "../../res/css/views/rooms/_ReadReceiptGroup.pcss?raw";
 import lightTheme from "../../res/themes/light/css/_light.pcss?raw";
 import { toBrowserCss } from "../test/telement/browserCss";
 
@@ -76,6 +77,26 @@ function renderServerPicker(): void {
     `;
 }
 
+/** The read receipts popup, as ReadReceiptGroup renders it for two people. */
+function renderReceiptsPopup(): void {
+    const person = (id: string, name: string, time: string): string =>
+        `<div class="mx_AccessibleButton mx_ReadReceiptGroup_person" role="menuitem" id="${id}" tabindex="-1">` +
+        `<span class="mx_BaseAvatar" style="display: inline-block; inline-size: 24px; block-size: 24px"></span>` +
+        `<div class="mx_ReadReceiptGroup_name"><p>${name}</p><p class="mx_ReadReceiptGroup_secondary">${time}</p></div>` +
+        `</div>`;
+    document.body.innerHTML = `
+        <div class="mx_ContextualMenu_wrapper cpd-theme-light" style="top: 48px; left: 48px">
+            <div class="mx_ContextualMenu mx_ReadReceiptGroup_popup" role="menu" id="menu">
+                <div class="mx_AutoHideScrollbar">
+                    <h3 class="mx_ReadReceiptGroup_title" role="menuitem" tabindex="-1" id="title">Seen by 2 people</h3>
+                    ${person("alice", "Alice", "14:02")}
+                    ${person("bob", "Bartholomew Montgomery-Fitzgerald of the Northern Reaches", "Thu, 9:41")}
+                </div>
+            </div>
+        </div>
+    `;
+}
+
 /** LegacyCallContextMenu for a call that can be transferred. */
 function renderLegacyCallMenu(): void {
     document.body.innerHTML = `
@@ -122,6 +143,7 @@ describe("Legacy context menus", () => {
                 legacyCallMenuStyles,
                 genericDropdownMenuStyles,
                 networkDropdownStyles,
+                readReceiptGroupStyles,
             ]
                 .map((styles) => toBrowserCss(styles, lightTheme))
                 .join("\n")}
@@ -226,6 +248,45 @@ describe("Legacy context menus", () => {
             await userEvent.hover(irc);
             expect(getComputedStyle(irc).backgroundColor).not.toBe(rest);
             expect(await keyboardFocusRing(document.getElementById("matrix")!)).toBe("solid 2px -2px");
+        });
+    });
+
+    describe("the read receipts popup", () => {
+        it("has the menus' corners and a title like Compound's, with the people in 40px rows inset 4px", () => {
+            renderReceiptsPopup();
+            const menuElement = document.getElementById("menu")!;
+            const menu = rectOf(menuElement);
+            const title = document.getElementById("title")!;
+            const people = [...document.querySelectorAll<HTMLElement>(".mx_ReadReceiptGroup_person")];
+
+            expect(getComputedStyle(menuElement).borderRadius).toBe("12px");
+            expect(textLeft(title) - menu.left).toBe(16);
+            expect(getComputedStyle(title).fontWeight).toBe("600");
+            expect(getComputedStyle(title).borderBottomStyle).toBe("solid");
+            expect(rectOf(people[0]).top - rectOf(title).bottom).toBe(4);
+            expect(menu.bottom - rectOf(people[1]).bottom).toBe(4);
+            for (const person of people) {
+                expect(rectOf(person).height).toBe(40);
+                expect([rectOf(person).left - menu.left, menu.right - rectOf(person).right]).toEqual([4, 4]);
+                expect(getComputedStyle(person).borderRadius).toBe("8px");
+                const avatar = rectOf(person.querySelector(".mx_BaseAvatar")!);
+                expect(avatar.left - menu.left).toBe(16);
+                expect(textLeft(person.querySelector("p")!) - avatar.right).toBe(12);
+                // The time ends where the row's content does, and a long name gives way to it
+                expect(menu.right - rectOf(person.querySelector(".mx_ReadReceiptGroup_secondary")!).right).toBe(16);
+            }
+            const longName = people[1].querySelector("p")!;
+            expect(longName.scrollWidth).toBeGreaterThan(longName.clientWidth);
+        });
+
+        it("highlights the hovered person and draws the focus ring inside the highlight", async () => {
+            renderReceiptsPopup();
+            const [alice, bob] = document.querySelectorAll<HTMLElement>(".mx_ReadReceiptGroup_person");
+            const rest = getComputedStyle(bob).backgroundColor;
+
+            await userEvent.hover(bob);
+            expect(getComputedStyle(bob).backgroundColor).not.toBe(rest);
+            expect(await keyboardFocusRing(alice)).toBe("solid 2px -2px");
         });
     });
 
