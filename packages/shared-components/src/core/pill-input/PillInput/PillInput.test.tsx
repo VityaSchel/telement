@@ -22,6 +22,19 @@ describe("PillInput", () => {
         expect(container).toMatchSnapshot();
     });
 
+    it("turns its border Compound's focus blue while focused, as every text field does", async () => {
+        const { container } = render(<NoChild />);
+        const field = container.firstElementChild as HTMLElement;
+        const probe = document.createElement("span");
+        probe.style.color = "var(--cpd-color-border-focused)";
+        container.append(probe);
+        const focusBlue = getComputedStyle(probe).color;
+
+        await userEvent.click(screen.getByRole("textbox"));
+
+        expect(getComputedStyle(field).borderTopColor).toBe(focusBlue);
+    });
+
     it("renders only the input without children", () => {
         const { container } = render(<NoChild />);
         expect(container).toMatchSnapshot();
