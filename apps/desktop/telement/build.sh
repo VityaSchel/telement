@@ -17,4 +17,5 @@ cp "$desktop_dir/telement/release/config.json" "$desktop_dir/webapp/config.json"
 
 cd "$desktop_dir"
 pnpm run asar-webapp
-VARIANT_PATH=telement/release/build.json pnpm run build "$@"
+# Nx hashes only files git tracks, so it misses the ignored webapp.asar and would restore an older dist from its cache
+NX_SKIP_NX_CACHE=true VARIANT_PATH=telement/release/build.json pnpm run build "$@"
