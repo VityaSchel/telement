@@ -18,6 +18,19 @@
     cursor: ew-resize;
 }
 
+/*
+ * While the separator is dragged, a layer over the whole window keeps the resize cursor wherever the pointer goes. The
+ * library would set the cursor on every element instead (disableCursor in GroupView), which restyles the whole page at
+ * the start and end of each drag and whenever the panel reaches its minimum or maximum width.
+ */
+.separator[data-separator="active"]::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 2147483647;
+    cursor: ew-resize;
+}
+
 .content {
     display: flex;
     align-items: center;

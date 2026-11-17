@@ -10,6 +10,7 @@ import { render, screen } from "@test-utils";
 import { composeStories } from "@storybook/react-vite";
 import { describe, it, expect, vi } from "vitest";
 import userEvent from "@testing-library/user-event";
+import { userEvent as browserUserEvent } from "vitest/browser";
 
 import * as stories from "./GroupView.stories";
 import { BaseViewModel } from "../../core/viewmodel";
@@ -53,5 +54,28 @@ describe("<GroupView />", () => {
             { keys: "[/MouseLeft]" },
         ]);
         expect(vm.onLeftPanelResized).toHaveBeenCalledOnce();
+    });
+
+    it("leaves the cursor to the separator, without a cursor rule for every element of the page", async () => {
+        render(
+            <div style={{ display: "flex", width: "600px", height: "200px" }}>
+                <GroupView vm={new MockViewModel()}>
+                    <Panel>Test</Panel>
+                    <Separator style={{ width: "8px" }} />
+                    <Panel>Test</Panel>
+                </GroupView>
+            </div>,
+        );
+        const separator = screen.getByRole("separator");
+        const pageCursorRules = (): string[] =>
+            [...document.adoptedStyleSheets]
+                .flatMap((sheet) => [...sheet.cssRules])
+                .map((rule) => rule.cssText)
+                .filter((rule) => rule.includes("cursor"));
+
+        // A real pointer, which the library's own hit testing sees
+        await browserUserEvent.hover(separator);
+        expect(separator).toHaveAttribute("data-separator", "hover");
+        expect(pageCursorRules()).toEqual([]);
     });
 });

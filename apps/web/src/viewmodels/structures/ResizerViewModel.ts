@@ -133,6 +133,7 @@ export class ResizerViewModel
 
     public onPointerUp = (): void => {
         this.mouseClickHandler.onPointerUp();
+        setPersistedElementsInteractive(true);
     };
 
     public onPointerMove = (event: PointerEvent): void => {
@@ -141,7 +142,28 @@ export class ResizerViewModel
 
     public onPointerDown = (event: PointerEvent): void => {
         this.mouseClickHandler.onPointerDown(event.clientX, event.clientY);
+        setPersistedElementsInteractive(false);
+        // The pointer can also be released or cancelled away from the separator
+        const restore = (): void => {
+            setPersistedElementsInteractive(true);
+            window.removeEventListener("pointerup", restore, true);
+            window.removeEventListener("pointercancel", restore, true);
+            window.removeEventListener("blur", restore);
+        };
+        window.addEventListener("pointerup", restore, true);
+        window.addEventListener("pointercancel", restore, true);
+        window.addEventListener("blur", restore);
     };
+}
+
+/**
+ * Widgets in the persisted element container (calls, Jitsi) are iframes, which would take the pointer from the
+ * separator while it is dragged over them. Set on the container directly: a style rule on the separator's state needed
+ * `:root:has()`, which restyled the whole page each time a drag started and ended.
+ */
+function setPersistedElementsInteractive(interactive: boolean): void {
+    const container = document.getElementById("mx_PersistedElement_container");
+    if (container) container.style.pointerEvents = interactive ? "" : "none";
 }
 
 /**

@@ -7,7 +7,7 @@
 
 // @vitest-environment happy-dom
 
-import { vi, describe, it, expect, afterEach } from "vitest";
+import { vi, describe, it, expect, afterEach, beforeEach } from "vitest";
 import { type PointerEvent } from "react";
 
 import { waitFor } from "test-utils-rtl";
@@ -186,5 +186,34 @@ describe("LeftPanelResizerViewModel", () => {
 
         vm.onLeftPanelResized(50);
         expect(mockHandle.resize).not.toHaveBeenCalled();
+    });
+
+    describe("keeps the widgets' iframes from taking the pointer while the separator is held", () => {
+        const container = (): HTMLElement => document.getElementById("mx_PersistedElement_container")!;
+
+        beforeEach(() => {
+            const element = document.createElement("div");
+            element.id = "mx_PersistedElement_container";
+            document.body.append(element);
+        });
+
+        afterEach(() => {
+            container().remove();
+        });
+
+        it.each([
+            ["released on the separator", (vm: ResizerViewModel) => vm.onPointerUp()],
+            ["released elsewhere", () => window.dispatchEvent(new Event("pointerup"))],
+            ["cancelled", () => window.dispatchEvent(new Event("pointercancel"))],
+            ["lost with the window's focus", () => window.dispatchEvent(new Event("blur"))],
+        ])("until the pointer is %s", (_, release) => {
+            const vm = new ResizerViewModel(CallStore.instance);
+
+            vm.onPointerDown(pointerAt(100, 100));
+            expect(container().style.pointerEvents).toBe("none");
+
+            release(vm);
+            expect(container().style.pointerEvents).toBe("");
+        });
     });
 });

@@ -71,7 +71,6 @@ describe("Telement's cursors", () => {
 
     afterEach(() => {
         document.body.innerHTML = "";
-        document.adoptedStyleSheets = [];
     });
 
     it("shows the arrow on controls and what they contain, whatever cursor they declare", () => {
@@ -192,28 +191,5 @@ describe("Telement's cursors", () => {
             "topic",
         ];
         expect(cursorsOf(disabled)).toEqual(allShowing(disabled, "not-allowed"));
-    });
-
-    it("lets the left panel's resize cursor show while its separator is hovered or dragged", () => {
-        render(`
-            <div role="separator" data-separator="inactive" id="separator"></div>
-            <button id="button">Room</button>
-            <div contenteditable="true" id="composer"></div>
-        `);
-        // What the resizing library adds to the page while it controls the cursor
-        const librarySheet = new CSSStyleSheet();
-        librarySheet.replaceSync("*, *:hover { cursor: ew-resize !important; }");
-        document.adoptedStyleSheets = [librarySheet];
-
-        expect(cursorOf("button")).toBe("default");
-
-        for (const state of ["hover", "active"]) {
-            document.getElementById("separator")!.dataset.separator = state;
-            expect({ state, ...cursorsOf(["button", "composer"]) }).toEqual({
-                state,
-                button: "ew-resize",
-                composer: "ew-resize",
-            });
-        }
     });
 });

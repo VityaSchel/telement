@@ -15,120 +15,118 @@ Compound and the shared components whatever their specificity. The selectors are
 these rules, the later one wins. Elements that are not controls keep their own cursor (resize handles, draggable
 areas, maps).
 
-While the left panel's separator is hovered or dragged, its library sets the resize cursor on every element with an
-unlayered important rule, which these rules would beat. They step aside then, so the resize cursor shows everywhere.
+The left panel's separator shows its own resize cursor (SeparatorView), so these rules need no exception for it: a
+condition on the whole page here would restyle every control each time the separator is hovered or dragged.
 */
-:where(:root:not(:has([data-separator="hover"], [data-separator="active"]))) {
-    /* Controls, what they contain, and the tooltips that hover over them. */
-    :where(
-        a,
-        button,
-        label,
-        option,
-        select,
-        summary,
-        input:is(
-            [type="button"],
-            [type="checkbox"],
-            [type="color"],
-            [type="file"],
-            [type="image"],
-            [type="radio"],
-            [type="range"],
-            [type="reset"],
-            [type="submit"]
-        ),
-        [role="button"],
-        [role="checkbox"],
-        [role="gridcell"],
-        [role="link"],
-        [role="menuitem"],
-        [role="menuitemcheckbox"],
-        [role="menuitemradio"],
-        [role="option"],
-        [role="radio"],
-        [role="slider"],
-        [role="switch"],
-        [role="tab"],
-        [role="toolbar"],
-        [role="treeitem"],
-        .mx_AccessibleButton,
-        [data-floating-ui-portal]
-    ) {
-        &,
-        & * {
-            cursor: default !important;
-        }
-    }
-
-    /* A slider's thumb is not one of its contents, and an unknown pseudo-element would void a whole selector list. */
-    input[type="range"]::-webkit-slider-thumb {
+/* Controls, what they contain, and the tooltips that hover over them. */
+:where(
+    a,
+    button,
+    label,
+    option,
+    select,
+    summary,
+    input:is(
+        [type="button"],
+        [type="checkbox"],
+        [type="color"],
+        [type="file"],
+        [type="image"],
+        [type="radio"],
+        [type="range"],
+        [type="reset"],
+        [type="submit"]
+    ),
+    [role="button"],
+    [role="checkbox"],
+    [role="gridcell"],
+    [role="link"],
+    [role="menuitem"],
+    [role="menuitemcheckbox"],
+    [role="menuitemradio"],
+    [role="option"],
+    [role="radio"],
+    [role="slider"],
+    [role="switch"],
+    [role="tab"],
+    [role="toolbar"],
+    [role="treeitem"],
+    .mx_AccessibleButton,
+    [data-floating-ui-portal]
+) {
+    &,
+    & * {
         cursor: default !important;
     }
+}
 
-    input[type="range"]::-moz-range-thumb {
-        cursor: default !important;
+/* A slider's thumb is not one of its contents, and an unknown pseudo-element would void a whole selector list. */
+input[type="range"]::-webkit-slider-thumb {
+    cursor: default !important;
+}
+
+input[type="range"]::-moz-range-thumb {
+    cursor: default !important;
+}
+
+/* Text fields and the composers, also when they sit inside a control such as a search field's label. */
+:where(
+    input:not(
+        [type="button"],
+        [type="checkbox"],
+        [type="color"],
+        [type="file"],
+        [type="hidden"],
+        [type="image"],
+        [type="radio"],
+        [type="range"],
+        [type="reset"],
+        [type="submit"]
+    ),
+    textarea,
+    [contenteditable]:not([contenteditable="false"]),
+    [contenteditable]:not([contenteditable="false"]) *
+) {
+    cursor: text !important;
+}
+
+/*
+The browser shows the I-beam only while the pointer is exactly over a glyph, so most of a message bubble showed the
+arrow. Message text shows it over its whole block, unless the message sits inside a control, like a reply quote
+that jumps to the original message. Edited messages and emotes render their text inline, so their block is the
+message content that holds it.
+*/
+:where(
+    :is(
+        .mx_EventTile_body,
+        .mx_EventTile_content:has(> .mx_EventTile_body, > [data-textual-body-annotation-wrapper])
+    ):not(:is(a, button, [role="button"], [role="link"], [role="option"]) *)
+) {
+    cursor: text !important;
+}
+
+/* Links inside messages and their link previews keep the pointing hand. */
+:where(.mx_EventTile_body a[href], .mx_TextualBody_urlPreviews a[href]) {
+    &,
+    & * {
+        cursor: pointer !important;
     }
+}
 
-    /* Text fields and the composers, also when they sit inside a control such as a search field's label. */
-    :where(
-        input:not(
-            [type="button"],
-            [type="checkbox"],
-            [type="color"],
-            [type="file"],
-            [type="hidden"],
-            [type="image"],
-            [type="radio"],
-            [type="range"],
-            [type="reset"],
-            [type="submit"]
-        ),
-        textarea,
-        [contenteditable]:not([contenteditable="false"]),
-        [contenteditable]:not([contenteditable="false"]) *
-    ) {
-        cursor: text !important;
-    }
-
-    /*
-    The browser shows the I-beam only while the pointer is exactly over a glyph, so most of a message bubble showed the
-    arrow. Message text shows it over its whole block, unless the message sits inside a control, like a reply quote
-    that jumps to the original message. Edited messages and emotes render their text inline, so their block is the
-    message content that holds it.
-    */
-    :where(
-        :is(
-            .mx_EventTile_body,
-            .mx_EventTile_content:has(> .mx_EventTile_body, > [data-textual-body-annotation-wrapper])
-        ):not(:is(a, button, [role="button"], [role="link"], [role="option"]) *)
-    ) {
-        cursor: text !important;
-    }
-
-    /* Links inside messages and their link previews keep the pointing hand. */
-    :where(.mx_EventTile_body a[href], .mx_TextualBody_urlPreviews a[href]) {
-        &,
-        & * {
-            cursor: pointer !important;
-        }
-    }
-
-    /*
-    Disabled controls, what they contain and their labels: a label wraps its control, comes before it in the same
-    field or comes after it (checkboxes), or sits in the body next to the control of an inline field.
-    */
-    :where(
-        :disabled,
-        [aria-disabled="true"],
-        label:has(:is(button, input, select, textarea):disabled),
-        label:has(~ :is(input, select, textarea):disabled, ~ * :is(input, select, textarea):disabled),
-        :is(input, select, textarea):disabled ~ label,
-        :has(> * > input:disabled) + * > label
-    ) {
-        &,
-        & * {
-            cursor: not-allowed !important;
-        }
+/*
+Disabled controls, what they contain and their labels: a label wraps its control, comes before it in the same
+field or comes after it (checkboxes), or sits in the body next to the control of an inline field.
+*/
+:where(
+    :disabled,
+    [aria-disabled="true"],
+    label:has(:is(button, input, select, textarea):disabled),
+    label:has(~ :is(input, select, textarea):disabled, ~ * :is(input, select, textarea):disabled),
+    :is(input, select, textarea):disabled ~ label,
+    :has(> * > input:disabled) + * > label
+) {
+    &,
+    & * {
+        cursor: not-allowed !important;
     }
 }

@@ -38,5 +38,10 @@ export function GroupView({ vm, children }: PropsWithChildren<Props>): React.Rea
         vm.onLeftPanelResized(newSize);
     };
 
-    return <Group onLayoutChanged={onLayoutChanged}>{children}</Group>;
+    // The separator shows its own resize cursor while it is dragged: the library's would restyle every element
+    return (
+        <Group disableCursor={true} onLayoutChanged={onLayoutChanged}>
+            {children}
+        </Group>
+    );
 }
