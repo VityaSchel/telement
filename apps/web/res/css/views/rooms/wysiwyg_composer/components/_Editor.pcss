@@ -173,15 +173,7 @@ Please see LICENSE files in the repository root for full details.
     }
 }
 
+/* The autocomplete has a border all around, like every floating menu (_Autocomplete.pcss) */
 .mx_WysiwygComposer_AutoCompleteWrapper {
     position: relative;
-
-    /* Due to the fact that editing a message now has a larger amount of grey
-    colour above it (due to the rich text buttons above the composer), we need
-    to give the autocomplete a bit more visual separation by using a border.
-    */
-    > .mx_Autocomplete {
-        border: 1px solid $quinary-content;
-        border-radius: 8px;
-    }
 }

@@ -1,70 +1,77 @@
+/* Telement: a floating menu (TELEMENT.md, "Radius and spacing") 8px above the line over the composer's text, which
+   is either the composer's top border or the rich text field's, holding the dense list: 40px rows inset 4px from its
+   edge, an avatar or emoji 16px in and the name 12px after it */
 .mx_Autocomplete {
     position: absolute;
-    bottom: 0;
+    bottom: calc(var(--cpd-space-2x) + var(--cpd-border-width-1));
     z-index: 1001;
     width: 100%;
-    border: 1px solid $primary-hairline-color;
-    background: $background;
-    border-bottom: none;
-    border-radius: 8px 8px 0 0;
+    box-sizing: border-box;
+    padding: calc(var(--tl-inset-menu) - var(--cpd-border-width-1));
+    border: var(--cpd-border-width-1) solid var(--cpd-color-border-interactive-secondary);
+    border-radius: var(--tl-radius-menu);
+    background: var(--cpd-color-bg-canvas-default);
     overflow: clip;
     display: flex;
     flex-direction: column;
-    box-shadow: 0px -16px 32px $composer-shadow-color;
+    box-shadow: 0 4px 24px rgb(0 0 0 / 10%);
 }
 
 .mx_Autocomplete_ProviderSection {
-    border-bottom: 1px solid $primary-hairline-color;
     width: 100%;
+
+    /* Separated as a menu's groups are, the rows kept 4px clear of the line */
+    & + & {
+        margin-block-start: var(--tl-inset-menu);
+        padding-block-start: var(--tl-inset-menu);
+        border-block-start: var(--cpd-border-width-1) solid var(--cpd-color-gray-400);
+    }
 }
 
-/* a "block" completion takes up a whole line */
-.mx_Autocomplete_Completion_block {
-    min-height: 34px;
-    display: flex;
-    flex-wrap: wrap;
-    padding: 0 12px;
-    user-select: none;
-    cursor: pointer;
-    align-items: center;
-    color: $primary-content;
-}
-
-.mx_Autocomplete_Completion_block * {
-    margin: 0 3px;
-}
-
+/* Both kinds of completion are rows of the dense list; a "block" one, a command, may wrap its description */
+.mx_Autocomplete_Completion_block,
 .mx_Autocomplete_Completion_pill {
     box-sizing: border-box;
-    border-radius: 2rem;
-    height: $font-34px;
-    padding: 0.4rem;
+    min-height: var(--cpd-space-10x);
     display: flex;
+    align-items: center;
+    gap: var(--cpd-space-2x);
+    padding: var(--cpd-space-2x) var(--cpd-space-3x);
+    border-radius: var(--tl-radius-row);
     user-select: none;
     cursor: pointer;
-    align-items: center;
-    color: $primary-content;
+    font: var(--cpd-font-body-md-regular);
+    color: var(--cpd-color-text-primary);
 }
 
-.mx_Autocomplete_Completion_pill > * {
-    margin-right: 0.3rem;
+.mx_Autocomplete_Completion_block {
+    flex-wrap: wrap;
+}
+
+/* The avatar or emoji before the name, 12px from it */
+.mx_Autocomplete_Completion_pill > :first-child:not(.mx_Autocomplete_Completion_title) {
+    flex-shrink: 0;
+    margin-inline-end: var(--cpd-space-1x);
 }
 
 /* styling for common completion elements */
 .mx_Autocomplete_Completion_subtitle {
-    font-style: italic;
     flex: 1;
 }
 
+.mx_Autocomplete_Completion_subtitle,
 .mx_Autocomplete_Completion_description {
-    color: gray;
+    font: var(--cpd-font-body-sm-regular);
+    color: var(--cpd-color-text-secondary);
+}
+
+.mx_Autocomplete_Completion_description {
     min-width: 150px;
 }
 
 .mx_Autocomplete_Completion_container_pill {
-    margin: 12px;
     height: 100%;
-    overflow-y: scroll;
+    overflow-y: auto;
 }
 
 @container roomview (height >= 0px) {
@@ -84,15 +91,20 @@
     }
 }
 
-.mx_Autocomplete_Completion.selected,
+/* The menus' hover fill; the row chosen with the arrow keys, and a pressed one, take the pressed fill */
 .mx_Autocomplete_Completion:hover {
-    background: $selected-color;
+    background: var(--cpd-color-bg-action-secondary-hovered);
+}
+
+.mx_Autocomplete_Completion.selected,
+.mx_Autocomplete_Completion:active {
+    background: var(--cpd-color-bg-action-secondary-pressed);
     outline: none;
 }
 
+/* A group's title, as in the room directory's server picker, its text where the rows' content starts */
 .mx_Autocomplete_provider_name {
-    margin: 12px;
-    color: $primary-content;
-    font-weight: 400;
-    opacity: 0.4;
+    padding: var(--cpd-space-2x) var(--cpd-space-3x);
+    font: var(--cpd-font-body-sm-semibold);
+    color: var(--cpd-color-text-secondary);
 }
