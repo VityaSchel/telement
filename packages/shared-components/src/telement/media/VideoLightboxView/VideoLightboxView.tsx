@@ -19,7 +19,6 @@ import React, {
 } from "react";
 import classNames from "classnames";
 import {
-    CheckIcon,
     CloseIcon,
     DownloadIcon,
     ExitFullScreenIcon,
@@ -31,11 +30,13 @@ import {
     VolumeOffSolidIcon,
     VolumeOnSolidIcon,
 } from "@vector-im/compound-design-tokens/assets/web/icons";
-import { Avatar, IconButton, InlineSpinner } from "@vector-im/compound-web";
+import { Avatar, IconButton, InlineSpinner, RadioInput } from "@vector-im/compound-web";
 
 import { _t } from "../../../core/i18n/i18n";
 import { type ViewModel, useViewModel } from "../../../core/viewmodel";
 import styles from "./VideoLightboxView.module.css";
+
+const noop = (): void => {};
 
 /**
  * Render states of the video viewer.
@@ -678,10 +679,15 @@ export function VideoLightboxView({ vm, videoRef, className }: Readonly<VideoLig
                                         aria-checked={rate === playbackRate}
                                         onClick={(): void => vm.setPlaybackRate(rate)}
                                     >
+                                        {/* Compound's radio marks the current speed, as in Telement's other menus */}
+                                        <RadioInput
+                                            className={styles.speedMenuRadio}
+                                            aria-hidden={true}
+                                            tabIndex={-1}
+                                            checked={rate === playbackRate}
+                                            onChange={noop}
+                                        />
                                         {formatRate(rate)}
-                                        {rate === playbackRate && (
-                                            <CheckIcon width="20" height="20" aria-hidden="true" />
-                                        )}
                                     </button>
                                 ))}
                             </div>

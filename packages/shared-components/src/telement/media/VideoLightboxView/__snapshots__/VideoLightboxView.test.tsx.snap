@@ -2467,6 +2467,19 @@ exports[`VideoLightboxView > matches snapshot for speed menu open story 1`] = `
               role="menuitemradio"
               type="button"
             >
+              <div
+                class="_container_1ug7n_10 VideoLightboxView-module_speedMenuRadio"
+              >
+                <input
+                  aria-hidden="true"
+                  class="_input_1ug7n_18"
+                  tabindex="-1"
+                  type="radio"
+                />
+                <div
+                  class="_ui_1ug7n_19"
+                />
+              </div>
               0.5×
             </button>
             <button
@@ -2475,6 +2488,19 @@ exports[`VideoLightboxView > matches snapshot for speed menu open story 1`] = `
               role="menuitemradio"
               type="button"
             >
+              <div
+                class="_container_1ug7n_10 VideoLightboxView-module_speedMenuRadio"
+              >
+                <input
+                  aria-hidden="true"
+                  class="_input_1ug7n_18"
+                  tabindex="-1"
+                  type="radio"
+                />
+                <div
+                  class="_ui_1ug7n_19"
+                />
+              </div>
               1×
             </button>
             <button
@@ -2483,6 +2509,19 @@ exports[`VideoLightboxView > matches snapshot for speed menu open story 1`] = `
               role="menuitemradio"
               type="button"
             >
+              <div
+                class="_container_1ug7n_10 VideoLightboxView-module_speedMenuRadio"
+              >
+                <input
+                  aria-hidden="true"
+                  class="_input_1ug7n_18"
+                  tabindex="-1"
+                  type="radio"
+                />
+                <div
+                  class="_ui_1ug7n_19"
+                />
+              </div>
               1.25×
             </button>
             <button
@@ -2491,19 +2530,21 @@ exports[`VideoLightboxView > matches snapshot for speed menu open story 1`] = `
               role="menuitemradio"
               type="button"
             >
-              1.5×
-              <svg
-                aria-hidden="true"
-                fill="currentColor"
-                height="20"
-                viewBox="0 0 24 24"
-                width="20"
-                xmlns="http://www.w3.org/2000/svg"
+              <div
+                class="_container_1ug7n_10 VideoLightboxView-module_speedMenuRadio"
               >
-                <path
-                  d="M9.55 17.575q-.2 0-.375-.062a.9.9 0 0 1-.325-.213L4.55 13q-.274-.274-.262-.713.012-.437.287-.712a.95.95 0 0 1 .7-.275q.425 0 .7.275L9.55 15.15l8.475-8.475q.274-.275.713-.275.437 0 .712.275.275.274.275.713 0 .437-.275.712l-9.2 9.2q-.15.15-.325.212a1.1 1.1 0 0 1-.375.063"
+                <input
+                  aria-hidden="true"
+                  checked=""
+                  class="_input_1ug7n_18"
+                  tabindex="-1"
+                  type="radio"
                 />
-              </svg>
+                <div
+                  class="_ui_1ug7n_19"
+                />
+              </div>
+              1.5×
             </button>
             <button
               aria-checked="false"
@@ -2511,6 +2552,19 @@ exports[`VideoLightboxView > matches snapshot for speed menu open story 1`] = `
               role="menuitemradio"
               type="button"
             >
+              <div
+                class="_container_1ug7n_10 VideoLightboxView-module_speedMenuRadio"
+              >
+                <input
+                  aria-hidden="true"
+                  class="_input_1ug7n_18"
+                  tabindex="-1"
+                  type="radio"
+                />
+                <div
+                  class="_ui_1ug7n_19"
+                />
+              </div>
               2×
             </button>
           </div>

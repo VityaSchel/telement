@@ -349,15 +349,17 @@ Please see LICENSE files in the repository root for full details.
     border: var(--cpd-border-width-1) solid var(--cpd-color-border-interactive-secondary);
     border-radius: var(--tl-radius-menu);
     background-color: var(--cpd-color-bg-canvas-default);
+    /* The menus' shadow, stronger over the dark viewer */
     box-shadow: 0 4px 24px rgb(0 0 0 / 40%);
 }
 
+/* The shared menu rows: 40px tall, content 16px from the menu's edge, the radio 12px before the label */
 .speedMenuItem {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: var(--cpd-space-4x);
-    padding: var(--cpd-space-2x) var(--cpd-space-4x);
+    gap: var(--cpd-space-3x);
+    min-block-size: var(--cpd-space-10x);
+    padding: var(--cpd-space-2x) var(--cpd-space-3x);
     border: none;
     border-radius: var(--tl-radius-row);
     background: none;
@@ -368,12 +370,22 @@ Please see LICENSE files in the repository root for full details.
 
 .speedMenuItem:hover,
 .speedMenuItem:focus-visible {
-    outline: none;
-    background-color: var(--cpd-color-bg-subtle-secondary);
+    background-color: var(--cpd-color-bg-action-secondary-hovered);
 }
 
-.speedMenuItem > svg {
-    color: var(--cpd-color-icon-accent-primary);
+.speedMenuItem:active {
+    background-color: var(--cpd-color-bg-action-secondary-pressed);
+}
+
+/* Inside the highlight, as in the other menus */
+.speedMenuItem:focus-visible {
+    outline: var(--cpd-border-width-2) solid var(--cpd-color-border-focused);
+    outline-offset: calc(-1 * var(--cpd-border-width-2));
+}
+
+.speedMenuRadio {
+    flex-shrink: 0;
+    pointer-events: none;
 }
 
 /* On narrow screens the seek bar takes a row of its own above the buttons, which keep play at the start and the
