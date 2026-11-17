@@ -857,6 +857,23 @@ Researched 2026-11-11:
   the same. Self-host the files rather than loading them from Google. Microsoft's animated Fluent emoji are MIT but
   ship as animated PNGs. Mixing Noto animations with Twemoji glyphs would look inconsistent.
 
+### Authenticated key backup (MSC4048)
+
+- Messages decrypted with keys restored from server-side key backup show a grey shield: "The authenticity of this
+  encrypted message can't be guaranteed on this device." This is expected in every Matrix client
+  ([element-web#14323](https://github.com/element-hq/element-web/issues/14323)). Entries are encrypted to the backup's
+  public key, which needs no secret, so anyone who can write to the backup (the homeserver, or a stolen access token)
+  could add a key that claims to be someone's and forge their history. Emoji verification proves who the devices are,
+  not who wrote each entry.
+- [MSC4048](https://github.com/matrix-org/matrix-spec-proposals/pull/4048) adds a MAC to each entry, keyed from the
+  backup secret that only verified devices hold, so restored keys would count as authenticated. It is open and
+  unimplemented: matrix-rust-sdk's implementation ([#2659](https://github.com/matrix-org/matrix-rust-sdk/pull/2659))
+  was shelved in 2024.
+- Decided (2026-11-17): keep Element's shield and wording for now. Implementing MSC4048 is on the backlog. It needs
+  forks of matrix-rust-sdk (crypto crate, probably Ruma too) and of `matrix-sdk-crypto-wasm` built in Telement's
+  pipeline, since Element Web's encryption runs in that WebAssembly module. It would only cover keys that Telement
+  devices upload after the change; other clients' uploads carry no MAC, and the MSC may still change.
+
 ### Analytics and phoning home
 
 Telement is a private Matrix client: it has no analytics, crash reporting or bug reporting, not even as an option.
@@ -890,6 +907,8 @@ None. Answered on 2026-11-16 (see the decision log):
 
 Deferred work:
 
+- [Authenticated key backup (MSC4048)](#authenticated-key-backup-msc4048), so history restored from key backup stops
+  showing the authenticity warning.
 - About 180 Linux screenshot baselines (Playwright and the shared-components visual tests) show surfaces changed by
   [radius and spacing](#radius-and-spacing) and the room list rows. They are out of date until regenerated in Docker,
   and each needs a look before it is committed.
@@ -969,6 +988,7 @@ Deferred work:
 | 2026-11-16 | Hovering shows no toolbar, keyboard focus still does; its actions are in the right-click menu.                                                  | [Floating toolbar](#floating-toolbar)                                                |
 | 2026-11-16 | GIFs come from GIPHY with the maintainer's key, up to R, uploaded to the homeserver when sent, without pingbacks.                               | [GIFs](#gifs)                                                                        |
 | 2026-11-17 | On macOS an unreadable keychain item leads to Quit or "Clear data and restart", which deletes it.                                               | [Keychain on macOS](#keychain-on-macos)                                              |
+| 2026-11-17 | Keep the backup authenticity shield; implementing MSC4048 is on the backlog.                                                                    | [Authenticated key backup](#authenticated-key-backup-msc4048)                        |
 
 ## Upstream merge log
 
