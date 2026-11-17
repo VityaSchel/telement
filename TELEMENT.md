@@ -403,6 +403,19 @@ electron-builder.
 - `apps/desktop/src/telement/variant.test.ts` checks the variant and config: no Element URL schemes or services, and
   the OAuth rules below.
 
+### Keychain on macOS
+
+- Electron keeps the key of safeStorage (the session and encryption keys) and of Chromium's cookies in the keychain
+  item "Telement Safe Storage". Only the build that created it reads it without asking; a build signed differently,
+  such as a local unsigned one, gets a password prompt.
+- Upstream handles a denied prompt badly: the prompt repeats, then its Linux keyring dialog offers only "Use no
+  encryption", and its "Clear data and reload?" keeps the unreadable item, which asks again on every launch. Reported
+  as [element-web#35886](https://github.com/element-hq/element-web/issues/35886).
+- Telement checks, when encryption is unavailable on macOS, whether its keychain item exists (reading only the item's
+  attributes, which never prompts). If it does, a dialog offers Quit or "Clear data and restart", which deletes the
+  item with `security delete-generic-password` (allowed even without read access) and the app's data, then relaunches
+  with a new key (`src/telement/safeStorageKeychain.ts`).
+
 ### OAuth login
 
 Matrix's OAuth 2.0 login (used by matrix.org and other servers with next-generation auth) registers every client with
@@ -955,6 +968,7 @@ Deferred work:
 | 2026-11-16 | Room list read checks: ✓✓ once any other member has read your last message.                                                                     | [Open questions](#open-questions)                                                    |
 | 2026-11-16 | Hovering shows no toolbar, keyboard focus still does; its actions are in the right-click menu.                                                  | [Floating toolbar](#floating-toolbar)                                                |
 | 2026-11-16 | GIFs come from GIPHY with the maintainer's key, up to R, uploaded to the homeserver when sent, without pingbacks.                               | [GIFs](#gifs)                                                                        |
+| 2026-11-17 | On macOS an unreadable keychain item leads to Quit or "Clear data and restart", which deletes it.                                               | [Keychain on macOS](#keychain-on-macos)                                              |
 
 ## Upstream merge log
 

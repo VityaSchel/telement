@@ -19,6 +19,7 @@ import { app, safeStorage, dialog, type SafeStorage, type Session } from "electr
 
 import { _t } from "./language-helper.js";
 import { getConfig } from "./config.js";
+import { deleteSafeStorageKeychainItem, hasSafeStorageKeychainItem } from "./telement/safeStorageKeychain.js";
 
 /**
  * String union type representing all the safeStorage backends.
@@ -319,6 +320,20 @@ class Store extends ElectronStore<StoreData> {
         // The backend and encryption status of the currently loaded backend
         const backend = this.chooseBackend(this.mode === Mode.ForcePlaintext);
 
+        // On macOS, no encryption while the app's keychain item exists means the item can't be read: the user denied
+        // access, or another build of the app created it. Upstream's dialogs here are about Linux keyrings, offer only
+        // plaintext, and a reset that keeps the unreadable item, which asks again on every launch.
+        if (
+            process.platform === "darwin" &&
+            this.mode === Mode.Encrypted &&
+            backend === "plaintext" &&
+            existingSafeStorageBackend !== "plaintext" &&
+            hasSafeStorageKeychainItem(app.getName())
+        ) {
+            await this.consultUserKeychainItemUnreadable(electronSession);
+            return false;
+        }
+
         // Handle migrations
         if (existingSafeStorageBackend) {
             if (existingSafeStorageBackend === "basic_text" && backend !== "plaintext" && backend !== "basic_text") {
@@ -373,6 +388,32 @@ class Store extends ElectronStore<StoreData> {
         }
 
         return true;
+    }
+
+    /**
+     * Asks whether to start over when the macOS keychain item holding the safeStorage key can't be read. Starting over
+     * deletes the item along with the app's data, so the relaunched app makes a new key without asking. Throws if the
+     * user declines, which quits the app with its data untouched.
+     */
+    private async consultUserKeychainItemUnreadable(electronSession: Session): Promise<void> {
+        const brand = getConfig().brand;
+        const { response } = await dialog.showMessageBox({
+            title: _t("telement|store|keychain_unreadable_title"),
+            message: _t("telement|store|keychain_unreadable", { brand }),
+            detail: _t("telement|store|keychain_unreadable_detail", { brand }),
+            type: "warning",
+            buttons: [_t("action|quit"), _t("telement|store|keychain_unreadable_reset")],
+            defaultId: 0,
+            cancelId: 0,
+        });
+        if (response === 0) {
+            throw new Error("safeStorage keychain item can't be read and user declined to start over");
+        }
+        if (!deleteSafeStorageKeychainItem(app.getName())) {
+            throw new Error("Failed to delete the safeStorage keychain item");
+        }
+        await clearData(electronSession);
+        relaunchApp();
     }
 
     private async consultUserBackendChangedUnableToMigrate(electronSession: Session): Promise<void> {

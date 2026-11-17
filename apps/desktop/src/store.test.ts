@@ -6,10 +6,16 @@ SPDX-License-Identifier: AGPL-3.0-only OR GPL-3.0-only OR LicenseRef-Element-Com
 Please see LICENSE files in the repository root for full details.
 */
 
-import { expect, describe, it, beforeAll, beforeEach, vi } from "vitest";
+import { expect, describe, it, beforeAll, beforeEach, afterEach, vi } from "vitest";
 import { app, dialog, safeStorage } from "electron";
 
 import Store, { SafeStorageDecryptionError, clearData } from "./store.js";
+import { deleteSafeStorageKeychainItem, hasSafeStorageKeychainItem } from "./telement/safeStorageKeychain.js";
+
+vi.mock("./telement/safeStorageKeychain.js", () => ({
+    hasSafeStorageKeychainItem: vi.fn(() => false),
+    deleteSafeStorageKeychainItem: vi.fn(() => true),
+}));
 
 // In-memory ElectronStore replacement so the tests don't touch the filesystem or real config.
 const backing = new Map<string, unknown>();
@@ -51,6 +57,7 @@ const PREFIX = "enc:";
 vi.mock("electron", () => ({
     app: {
         whenReady: vi.fn(() => Promise.resolve()),
+        getName: vi.fn(() => "Telement"),
         getPath: vi.fn(() => "/tmp/element-test"),
         relaunch: vi.fn(),
         exit: vi.fn(),
@@ -253,6 +260,89 @@ describe("Store secret encryption (safeStorage)", () => {
             expect(electronSession.clearStorageData).toHaveBeenCalled();
             expect(app.relaunch).toHaveBeenCalled();
             expect(app.exit).toHaveBeenCalled();
+        });
+    });
+
+    describe("macOS keychain item that can't be read", () => {
+        const electronSession = (): Electron.Session =>
+            ({ flushStorageData: vi.fn(), clearStorageData: vi.fn() }) as unknown as Electron.Session;
+
+        beforeEach(() => {
+            vi.spyOn(process, "platform", "get").mockReturnValue("darwin");
+            vi.mocked(safeStorage.isEncryptionAvailable).mockReturnValue(false);
+            vi.mocked(hasSafeStorageKeychainItem).mockReturnValue(true);
+            vi.mocked(deleteSafeStorageKeychainItem).mockClear().mockReturnValue(true);
+            vi.mocked(dialog.showMessageBox).mockClear();
+            vi.mocked(app.relaunch).mockClear();
+        });
+
+        afterEach(() => {
+            vi.mocked(safeStorage.isEncryptionAvailable).mockReturnValue(true);
+            vi.mocked(hasSafeStorageKeychainItem).mockReturnValue(false);
+        });
+
+        it.each([undefined, "system"])(
+            "quits with the data and the item untouched when the user declines (stored backend %s)",
+            async (storedBackend) => {
+                if (storedBackend) backing.set("safeStorageBackend", storedBackend);
+                backing.set("fakeDataItem", true);
+                vi.mocked(dialog.showMessageBox).mockResolvedValueOnce({
+                    response: 0,
+                } as Electron.MessageBoxReturnValue);
+                const session = electronSession();
+
+                await expect(store.prepareSafeStorage(session)).rejects.toThrow("declined to start over");
+
+                expect(dialog.showMessageBox).toHaveBeenCalledWith(
+                    expect.objectContaining({ title: "telement|store|keychain_unreadable_title" }),
+                );
+                expect(deleteSafeStorageKeychainItem).not.toHaveBeenCalled();
+                expect(backing.get("fakeDataItem")).toBe(true);
+                expect(session.clearStorageData).not.toHaveBeenCalled();
+                expect(app.relaunch).not.toHaveBeenCalled();
+            },
+        );
+
+        it("deletes the item, clears the data and relaunches when the user starts over", async () => {
+            backing.set("safeStorageBackend", "system");
+            vi.mocked(dialog.showMessageBox).mockResolvedValueOnce({
+                response: 1,
+            } as Electron.MessageBoxReturnValue);
+            const session = electronSession();
+
+            await expect(store.prepareSafeStorage(session)).resolves.toBe(false);
+
+            expect(deleteSafeStorageKeychainItem).toHaveBeenCalledWith("Telement");
+            expect(backing.size).toBe(0);
+            expect(session.clearStorageData).toHaveBeenCalled();
+            expect(app.relaunch).toHaveBeenCalled();
+        });
+
+        it("keeps the data when the item can't be deleted", async () => {
+            backing.set("fakeDataItem", true);
+            vi.mocked(deleteSafeStorageKeychainItem).mockReturnValue(false);
+            vi.mocked(dialog.showMessageBox).mockResolvedValueOnce({
+                response: 1,
+            } as Electron.MessageBoxReturnValue);
+            const session = electronSession();
+
+            await expect(store.prepareSafeStorage(session)).rejects.toThrow("Failed to delete");
+
+            expect(backing.get("fakeDataItem")).toBe(true);
+            expect(session.clearStorageData).not.toHaveBeenCalled();
+        });
+
+        it("falls back to upstream's dialogs without a keychain item, and for data the user chose to keep plain", async () => {
+            vi.mocked(hasSafeStorageKeychainItem).mockReturnValue(false);
+            vi.mocked(dialog.showMessageBox).mockResolvedValueOnce({
+                response: 0,
+            } as Electron.MessageBoxReturnValue);
+            await expect(store.prepareSafeStorage(electronSession())).rejects.toThrow("user rejected plaintext");
+
+            vi.mocked(hasSafeStorageKeychainItem).mockReturnValue(true);
+            backing.set("safeStorageBackend", "plaintext");
+            await expect(store.prepareSafeStorage(electronSession())).resolves.toBe(true);
+            expect(deleteSafeStorageKeychainItem).not.toHaveBeenCalled();
         });
     });
 
