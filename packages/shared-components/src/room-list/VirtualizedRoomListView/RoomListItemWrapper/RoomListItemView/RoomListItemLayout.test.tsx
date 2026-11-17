@@ -394,7 +394,7 @@ describe("Room list item layout", () => {
         expect(getComputedStyle(check).color).toBe(colorOf("--cpd-color-icon-accent-primary"));
     });
 
-    it("draws the icons on the selected room's avatar in the plate's on-solid color", () => {
+    it("draws the icons on the selected room's avatar in the plate's white", () => {
         renderRow({
             isSelected: true,
             avatar: (
@@ -404,9 +404,7 @@ describe("Room list item layout", () => {
             ),
         });
 
-        expect(getComputedStyle(screen.getByTestId("public-icon")).color).toBe(
-            colorOf("--cpd-color-icon-on-solid-primary"),
-        );
+        expect(getComputedStyle(screen.getByTestId("public-icon")).color).toBe(colorOf("--tl-color-on-selection"));
     });
 
     it("draws the sending clock at 12px in the checks' 16px slot, so it looks as big as they do", () => {
@@ -428,26 +426,29 @@ describe("Room list item layout", () => {
         expect(getComputedStyle(screen.getByTestId("last-message-sent")).visibility).toBe("hidden");
     });
 
-    it("shows the draft label in red, and on the selected plate in the on-solid color", () => {
+    it("shows the draft label in red, and on the selected plate in white", () => {
         const { unmount } = render(<Row draft="See you at nine" />);
         expect(getComputedStyle(screen.getByText("Draft:")).color).toBe(colorOf("--cpd-color-text-critical-primary"));
         unmount();
 
         render(<Row isSelected={true} lastMessageState="read" messagePreviewSender="You" />);
         expect(getComputedStyle(screen.getByTestId("last-message-read")).color).toBe(
-            colorOf("--cpd-color-text-on-solid-primary"),
+            colorOf("--tl-color-on-selection"),
         );
     });
 
-    it("fills the selected plate with the accent and puts everything on it in the on-solid color", () => {
+    it("fills the selected plate with the accent and puts everything on it in white", () => {
         const row = renderRow({
             isSelected: true,
             isFavourite: false,
             notification: { ...unread, isMention: true, isNotification: false, muted: true },
         });
         const plate = part(row, styles.container);
-        const onSolid = colorOf("--cpd-color-text-on-solid-primary");
-        const accent = colorOf("--cpd-color-bg-accent-rest");
+        const onSolid = colorOf("--tl-color-on-selection");
+        const accent = colorOf("--tl-color-bg-selection");
+
+        expect(onSolid).toBe("rgb(255, 255, 255)");
+        expect(accent).toBe(colorOf("--cpd-color-bg-accent-rest"));
 
         expect(getComputedStyle(plate).backgroundColor).toBe(accent);
         for (const element of [
@@ -473,9 +474,19 @@ describe("Room list item layout", () => {
         const row = renderRow({ isSelected: true, notification: unread });
         await userEvent.hover(row);
 
-        const hovered = colorOf("--cpd-color-bg-accent-hovered");
+        const hovered = colorOf("--tl-color-bg-selection-hovered");
+        expect(hovered).toBe(colorOf("--cpd-color-bg-accent-hovered"));
         expect(getComputedStyle(part(row, styles.container)).backgroundColor).toBe(hovered);
         expect(getComputedStyle(screen.getByText("3")).color).toBe(hovered);
+    });
+
+    it("selects in Telegram's muted night blue with white text in the dark theme", () => {
+        const row = renderRow({ isSelected: true, notification: unread });
+        row.closest('[role="listbox"]')!.classList.add("cpd-theme-dark");
+
+        expect(getComputedStyle(part(row, styles.container)).backgroundColor).toBe("rgb(61, 106, 151)");
+        expect(getComputedStyle(screen.getByTestId("room-name")).color).toBe("rgb(255, 255, 255)");
+        expect(getComputedStyle(screen.getByText("3")).backgroundColor).toBe("rgb(255, 255, 255)");
     });
 
     it("draws the keyboard focus ring 2px around the plate, inside the row", async () => {

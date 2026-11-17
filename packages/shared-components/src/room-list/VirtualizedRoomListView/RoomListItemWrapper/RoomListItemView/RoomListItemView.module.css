@@ -262,7 +262,7 @@
     }
 
     &.selected {
-        --plate-color: var(--cpd-color-bg-accent-hovered);
+        --plate-color: var(--tl-color-bg-selection-hovered);
     }
 }
 
@@ -276,13 +276,13 @@
     }
 }
 
-/* Like Telegram's desktop apps, the selected room is an accent plate with everything on it in the on-solid color */
+/* Like Telegram's desktop apps, the selected room is a plate in the selection color with everything on it in white */
 .selected {
-    --plate-color: var(--cpd-color-bg-accent-rest);
+    --plate-color: var(--tl-color-bg-selection);
 
     .container {
         background-color: var(--plate-color);
-        color: var(--cpd-color-text-on-solid-primary);
+        color: var(--tl-color-on-selection);
     }
 
     :is(.roomName, .sender, .typing, .draftLabel, .lastMessageState) {
@@ -290,22 +290,22 @@
     }
 
     :is(.mutedIcon, .pinnedIcon, .notificationDecoration svg, .hoverMenu svg) {
-        fill: var(--cpd-color-icon-on-solid-primary);
+        fill: var(--tl-color-on-selection);
     }
 
     /* The icons the app draws on the avatar (public room, video room, low priority, presence) too: the public room's
        info blue would vanish on the accent plate */
     .container > :first-child svg {
-        color: var(--cpd-color-icon-on-solid-primary);
+        color: var(--tl-color-on-selection);
     }
 
     .notificationDecoration {
-        color: var(--cpd-color-icon-on-solid-primary);
+        color: var(--tl-color-on-selection);
     }
 
     /* The counter and the @ are inverted, a muted room's counter too, as in Telegram for macOS */
     .notificationDecoration [data-badge] {
-        background-color: var(--cpd-color-icon-on-solid-primary);
+        background-color: var(--tl-color-on-selection);
         color: var(--plate-color);
 
         svg {
@@ -317,9 +317,9 @@
         background-color: currentColor;
     }
 
-    /* Compound's hover color for the "…" button would hide its on-solid dots */
+    /* Compound's hover color for the "…" button would hide its white dots */
     .hoverMenu button:hover {
-        background-color: color-mix(in srgb, var(--cpd-color-icon-on-solid-primary) 20%, transparent);
+        background-color: color-mix(in srgb, var(--tl-color-on-selection) 20%, transparent);
     }
 }
 

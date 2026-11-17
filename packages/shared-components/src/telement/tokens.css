@@ -157,4 +157,27 @@ Please see LICENSE files in the repository root for full details.
     --cpd-color-icon-accent-tertiary: var(--tl-accent-800);
     --cpd-color-text-action-accent: var(--tl-accent-900);
     --cpd-color-text-badge-accent: var(--tl-accent-1100);
+
+    /* The selected room: the accent with white text, as in Telegram's day themes */
+    --tl-color-bg-selection: var(--tl-accent-900);
+    --tl-color-bg-selection-hovered: var(--tl-accent-1000);
+    --tl-color-on-selection: #ffffff;
+}
+
+/* Telegram's night theme selects in a muted blue rather than the bright accent, keeping white text on it */
+.cpd-theme-dark.cpd-theme-dark {
+    --tl-color-bg-selection: #3d6a97;
+    --tl-color-bg-selection-hovered: #46739f;
+}
+
+.cpd-theme-dark-hc.cpd-theme-dark-hc {
+    --tl-color-bg-selection: #2b5784;
+    --tl-color-bg-selection-hovered: #33608c;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --tl-color-bg-selection: #3d6a97;
+        --tl-color-bg-selection-hovered: #46739f;
+    }
 }
