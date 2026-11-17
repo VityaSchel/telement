@@ -95,7 +95,7 @@ describe("Compound's menus", () => {
         document.body.innerHTML = "";
     });
 
-    it("insets the items 4px from the menu's edge as 40px rows, rounded concentrically with its corners", async () => {
+    it("insets the items 4px from the menu's edge as 32px rows, rounded concentrically with its corners", async () => {
         const menu = await renderMenu([
             item("Photo or video", ImageIcon),
             item("File", AttachmentIcon),
@@ -111,26 +111,26 @@ describe("Compound's menus", () => {
             const rect = row.getBoundingClientRect();
             expect(rect.left - edge.left).toBe(4);
             expect(edge.right - rect.right).toBe(4);
-            expect(rect.height).toBe(40);
+            expect(rect.height).toBe(32);
             expect(getComputedStyle(row).borderRadius).toBe("8px");
-            // What the item holds starts 16px from the menu's edge, as in Compound: a 16px icon, as far from the
-            // item's start as from its top and bottom, with the label in regular text 12px after it
+            // What the item holds starts 16px from the menu's edge, as in Compound: a 16px icon centered on the row,
+            // with the label in regular text 10px after it
             const icon = row.querySelector("svg")!.getBoundingClientRect();
             expect(icon.left - edge.left).toBe(16);
             expect(icon.width).toBe(16);
             expect(icon.height).toBe(16);
-            expect(icon.top - rect.top).toBe(12);
-            expect(rect.bottom - icon.bottom).toBe(12);
+            expect(icon.top - rect.top).toBe(8);
+            expect(rect.bottom - icon.bottom).toBe(8);
             const label = row.querySelector("span")!;
-            expect(label.getBoundingClientRect().left - icon.right).toBe(12);
+            expect(label.getBoundingClientRect().left - icon.right).toBe(10);
             expect(getComputedStyle(label).fontWeight).toBe("400");
         }
         // One row after another, with no gap
         const tops = items.map((row) => row.getBoundingClientRect().top);
-        expect(tops).toEqual(items.map((_, index) => tops[0] + 40 * index));
+        expect(tops).toEqual(items.map((_, index) => tops[0] + 32 * index));
     });
 
-    it("spans the item highlights with separators, 4px above and below", async () => {
+    it("spans the item highlights with separators, 2px above and below", async () => {
         const menu = await renderMenu([
             item("Photo or video", ImageIcon),
             createElement(Separator, { key: "separator" }),
@@ -142,8 +142,8 @@ describe("Compound's menus", () => {
 
         expect(separator.left - edge.left).toBe(4);
         expect(edge.right - separator.right).toBe(4);
-        expect(separator.top - above.bottom).toBe(4);
-        expect(below.top - separator.bottom).toBe(4);
+        expect(separator.top - above.bottom).toBe(2);
+        expect(below.top - separator.bottom).toBe(2);
     });
 
     it("puts a title's text where the items' content starts, 12px from the top, and centers radios on their rows", async () => {
@@ -160,13 +160,13 @@ describe("Compound's menus", () => {
 
         expect(text.getBoundingClientRect().left - edge.left).toBe(16);
         expect(titleBox.top - edge.top + parseFloat(getComputedStyle(title).paddingTop)).toBe(12);
-        // Its line spans the item highlights, like a separator, 4px above the first item
+        // Its line spans the item highlights, like a separator, 2px above the first item
         expect(titleBox.left - edge.left).toBe(4);
-        expect(rows(menu)[0].getBoundingClientRect().top - titleBox.bottom).toBe(4);
+        expect(rows(menu)[0].getBoundingClientRect().top - titleBox.bottom).toBe(2);
         for (const row of rows(menu)) {
             const rect = row.getBoundingClientRect();
             const radio = row.querySelector(":scope > div")!.getBoundingClientRect();
-            expect(rect.height).toBe(40);
+            expect(rect.height).toBe(32);
             expect(radio.top + radio.height / 2).toBe(rect.top + rect.height / 2);
             expect(radio.left - edge.left).toBe(16);
         }
@@ -213,7 +213,7 @@ describe("Compound's menus", () => {
 
         expect(label.getBoundingClientRect().height).toBeGreaterThanOrEqual(2 * lineHeight);
         expect(icon.top + icon.height / 2).toBe(label.getBoundingClientRect().top + lineHeight / 2);
-        // A label on one line still has its icon in the middle of the 40px row
+        // A label on one line still has its icon in the middle of the 32px row
         const singleIcon = single.querySelector("svg")!.getBoundingClientRect();
         const singleRow = single.getBoundingClientRect();
         expect(singleIcon.top + singleIcon.height / 2).toBe(singleRow.top + singleRow.height / 2);

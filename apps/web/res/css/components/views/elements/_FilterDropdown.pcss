@@ -40,16 +40,16 @@ Please see LICENSE files in the repository root for full details.
     }
 }
 
-/* Telement: the shared menu rows, with Compound's radio marking the chosen filter 12px before the label, and the
+/* Telement: the shared menu rows, with Compound's radio marking the chosen filter 10px before the label, and the
    description in secondary text under it */
 .mx_FilterDropdown_option {
     display: grid;
     grid-template-columns: auto 1fr;
-    column-gap: var(--cpd-space-3x);
+    column-gap: var(--tl-menu-icon-gap);
     align-items: center;
     width: 100%;
     box-sizing: border-box;
-    padding-block: var(--cpd-space-2x);
+    padding-block: var(--cpd-space-1x);
     font: var(--cpd-font-body-md-regular);
     color: var(--cpd-color-text-primary);
 }
@@ -70,6 +70,6 @@ Please see LICENSE files in the repository root for full details.
 .mx_FilterDropdown_optionDescription {
     font: var(--cpd-font-body-sm-regular);
     color: var(--cpd-color-text-secondary);
-    /* Puts a two-line row on the 4px grid: 8 + 22.5 + 2 + 19.5 + 8 = 60 */
+    /* Puts a two-line row on the 4px grid: 4 + 22.5 + 2 + 19.5 + 4 = 52 */
     margin-block-start: 2px;
 }

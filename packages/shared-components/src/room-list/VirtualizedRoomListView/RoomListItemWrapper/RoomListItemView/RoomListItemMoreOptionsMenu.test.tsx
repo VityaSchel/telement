@@ -260,8 +260,8 @@ describe("<RoomListItemMoreOptionsMenu />", () => {
             expect(getComputedStyle(item).borderRadius).toBe("8px");
             expect(rect.left - menuRect.left).toBe(4);
             expect(menuRect.right - rect.right).toBe(4);
-            // The message menu's items: 15px regular text on a 22.5px line, in 40px rows
-            expect(rect.height).toBe(40);
+            // The message menu's items: 15px regular text on a 22.5px line, in 32px rows
+            expect(rect.height).toBe(32);
         }
 
         const markAsRead = screen.getByRole("menuitem", { name: "Mark as read" });
@@ -270,18 +270,18 @@ describe("<RoomListItemMoreOptionsMenu />", () => {
         expect(icon.getBoundingClientRect().width).toBe(16);
         expect(icon.getBoundingClientRect().height).toBe(16);
         // As far from the item's start as from its top and bottom
-        expect(icon.getBoundingClientRect().top - markAsRead.getBoundingClientRect().top).toBe(12);
+        expect(icon.getBoundingClientRect().top - markAsRead.getBoundingClientRect().top).toBe(8);
         expect(icon.getBoundingClientRect().left - markAsRead.getBoundingClientRect().left).toBe(12);
-        expect(label.getBoundingClientRect().left - icon.getBoundingClientRect().right).toBe(12);
+        expect(label.getBoundingClientRect().left - icon.getBoundingClientRect().right).toBe(10);
         expect(getComputedStyle(label).fontSize).toBe("15px");
         expect(getComputedStyle(label).fontWeight).toBe("400");
 
-        // Separators span the menu padding and keep the item highlights that padding away
+        // Separators span the menu padding and keep the item highlights 2px away
         const separator = screen.getAllByRole("separator")[0];
         const separatorRect = separator.getBoundingClientRect();
         expect(separatorRect.left - menuRect.left).toBe(4);
-        expect(separatorRect.top - separator.previousElementSibling!.getBoundingClientRect().bottom).toBe(4);
-        expect(separator.nextElementSibling!.getBoundingClientRect().top - separatorRect.bottom).toBe(4);
+        expect(separatorRect.top - separator.previousElementSibling!.getBoundingClientRect().bottom).toBe(2);
+        expect(separator.nextElementSibling!.getBoundingClientRect().top - separatorRect.bottom).toBe(2);
     });
 
     it("should centre the icons, the Notifications chevron and the Low priority toggle on their labels", async () => {

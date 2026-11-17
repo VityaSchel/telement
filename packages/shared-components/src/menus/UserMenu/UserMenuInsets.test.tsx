@@ -26,7 +26,7 @@ function inkRight(svg: SVGSVGElement): number {
 }
 
 describe("User menu insets", () => {
-    it("insets the items 4px from the menu's edge as 40px rows with no gaps, rounded concentrically with it", async () => {
+    it("insets the items 4px from the menu's edge as 32px rows with no gaps, rounded concentrically with it", async () => {
         render(<Open />);
         const menu = await screen.findByRole("menu");
         await Promise.all(menu.getAnimations().map((animation) => animation.finished));
@@ -38,7 +38,7 @@ describe("User menu insets", () => {
             const rect = item.getBoundingClientRect();
             expect(rect.left - edge.left).toBe(4);
             expect(edge.right - rect.right).toBe(4);
-            expect(rect.height).toBe(40);
+            expect(rect.height).toBe(32);
             expect(getComputedStyle(item).borderRadius).toBe("8px");
             if (index > 0) expect(rect.top).toBe(items[index - 1].getBoundingClientRect().bottom);
 
@@ -47,9 +47,9 @@ describe("User menu insets", () => {
             const icon = item.querySelector("svg")!.getBoundingClientRect();
             expect(icon.width).toBe(16);
             expect(icon.left - edge.left).toBe(16);
-            expect(icon.top - rect.top).toBe(12);
+            expect(icon.top - rect.top).toBe(8);
             const label = item.querySelector("span")!;
-            expect(label.getBoundingClientRect().left - icon.right).toBe(12);
+            expect(label.getBoundingClientRect().left - icon.right).toBe(10);
             expect(getComputedStyle(label).fontWeight).toBe("400");
         }
         expect(edge.bottom - items.at(-1)!.getBoundingClientRect().bottom).toBe(4);

@@ -187,7 +187,7 @@ describe("Legacy context menus", () => {
             expect(getComputedStyle(label).fontSize).toBe("15px");
             expect(getComputedStyle(label).fontWeight).toBe("400");
             expect(getComputedStyle(description).fontSize).toBe("13px");
-            expect(rectOf(options[0]).height).toBe(60);
+            expect(rectOf(options[0]).height).toBe(52);
             for (const option of options) {
                 const radioBox = rectOf(option.querySelector(".mx_ThreadPanel_Header_FilterOptionItem_selection")!);
                 expect(radioBox.width).toBe(20);
@@ -195,8 +195,8 @@ describe("Legacy context menus", () => {
                 expect(radioBox.top + radioBox.height / 2).toBe(
                     rectOf(option.querySelector("span")!).top + lineHeight / 2,
                 );
-                // Both lines 12px after the radio, as in the message menu
-                for (const text of option.querySelectorAll("span")) expect(textLeft(text) - menu.left).toBe(48);
+                // Both lines 10px after the radio, as in the message menu
+                for (const text of option.querySelectorAll("span")) expect(textLeft(text) - menu.left).toBe(46);
             }
             expect(menu.right - rectOf(label).right).toBe(16);
         });
@@ -213,7 +213,7 @@ describe("Legacy context menus", () => {
     });
 
     describe("the room directory's server picker", () => {
-        it("lays out 40px rows inset 4px, radios and the add icon 16px in, and labels 12px after them", () => {
+        it("lays out 32px rows inset 4px, radios and the add icon 16px in, and labels 10px after them", () => {
             renderServerPicker();
             const menu = rectOf(document.getElementById("menu")!);
             const items = [...document.querySelectorAll<HTMLElement>(".mx_GenericDropdownMenu_Option")];
@@ -221,7 +221,7 @@ describe("Legacy context menus", () => {
             expect(rectOf(items[0]).top - menu.top).toBe(4);
             expect(menu.bottom - rectOf(items.at(-1)!).bottom).toBe(4);
             for (const item of items) {
-                expect(rectOf(item).height).toBe(40);
+                expect(rectOf(item).height).toBe(32);
                 expect(rectOf(item).left - menu.left).toBe(4);
                 expect(menu.right - rectOf(item).right).toBe(4);
                 expect(getComputedStyle(item).borderRadius).toBe("8px");
@@ -232,12 +232,12 @@ describe("Legacy context menus", () => {
                 const option = document.getElementById(id)!;
                 const marker = rectOf(option.firstElementChild!);
                 expect([marker.width, marker.left - menu.left]).toEqual([20, 16]);
-                expect(textLeft(option.querySelector("span")!) - marker.right).toBe(12);
+                expect(textLeft(option.querySelector("span")!) - marker.right).toBe(10);
             }
             // The separator keeps the rows 4px clear of it, as the menu's edge does
             const divider = rectOf(document.getElementById("divider")!);
-            expect(divider.top - rectOf(document.getElementById("irc")!).bottom).toBe(4);
-            expect(rectOf(document.getElementById("add")!).top - divider.bottom).toBe(4);
+            expect(divider.top - rectOf(document.getElementById("irc")!).bottom).toBe(2);
+            expect(rectOf(document.getElementById("add")!).top - divider.bottom).toBe(2);
         });
 
         it("highlights the hovered option and draws the focus ring inside its highlight", async () => {
@@ -252,7 +252,7 @@ describe("Legacy context menus", () => {
     });
 
     describe("the read receipts popup", () => {
-        it("has the menus' corners and a title like Compound's, with the people in 40px rows inset 4px", () => {
+        it("has the menus' corners and a title like Compound's, with the people in 32px rows inset 4px", () => {
             renderReceiptsPopup();
             const menuElement = document.getElementById("menu")!;
             const menu = rectOf(menuElement);
@@ -263,15 +263,15 @@ describe("Legacy context menus", () => {
             expect(textLeft(title) - menu.left).toBe(16);
             expect(getComputedStyle(title).fontWeight).toBe("600");
             expect(getComputedStyle(title).borderBottomStyle).toBe("solid");
-            expect(rectOf(people[0]).top - rectOf(title).bottom).toBe(4);
+            expect(rectOf(people[0]).top - rectOf(title).bottom).toBe(2);
             expect(menu.bottom - rectOf(people[1]).bottom).toBe(4);
             for (const person of people) {
-                expect(rectOf(person).height).toBe(40);
+                expect(rectOf(person).height).toBe(32);
                 expect([rectOf(person).left - menu.left, menu.right - rectOf(person).right]).toEqual([4, 4]);
                 expect(getComputedStyle(person).borderRadius).toBe("8px");
                 const avatar = rectOf(person.querySelector(".mx_BaseAvatar")!);
                 expect(avatar.left - menu.left).toBe(16);
-                expect(textLeft(person.querySelector("p")!) - avatar.right).toBe(12);
+                expect(textLeft(person.querySelector("p")!) - avatar.right).toBe(10);
                 // The time ends where the row's content does, and a long name gives way to it
                 expect(menu.right - rectOf(person.querySelector(".mx_ReadReceiptGroup_secondary")!).right).toBe(16);
             }
@@ -302,7 +302,7 @@ describe("Legacy context menus", () => {
             for (const item of items) {
                 expect(rectOf(item).left - menu.left).toBe(4);
                 expect(menu.right - rectOf(item).right).toBe(4);
-                expect(rectOf(item).height).toBe(40);
+                expect(rectOf(item).height).toBe(32);
                 expect(getComputedStyle(item).borderRadius).toBe("8px");
                 expect(textLeft(item) - menu.left).toBe(16);
             }

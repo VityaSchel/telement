@@ -68,8 +68,8 @@
     }
     /*
      * The items have the geometry of the other menus (_CompoundOverrides.pcss in the app): highlights inset 4px from
-     * the menu's edge and rounded by 8, concentric with its 12px corners, following each other as 40px rows with
-     * 16px icons and regular text, 4px below the separator (the gap Compound puts between a menu's children) and 4px
+     * the menu's edge and rounded by 8, concentric with its 12px corners, following each other as 32px rows with
+     * 16px icons and regular text, the label 10px after the icon, 4px below the separator (the gap Compound puts between a menu's children) and 4px
      * from the menu's bottom. What an item holds sits 16px from the menu's edge.
      */
     section.actions {
@@ -85,7 +85,8 @@
         }
 
         > [role="menuitem"] {
-            min-block-size: var(--cpd-space-10x);
+            min-block-size: var(--tl-menu-row-size);
+            padding-block: var(--cpd-space-1x);
             padding-inline: var(--cpd-space-3x);
             border-radius: var(--tl-radius-row);
             /* The first row, which holds the icon and the chevron, is as tall as the label's first line, so that they
@@ -98,6 +99,7 @@
             > svg:first-child {
                 inline-size: 16px;
                 block-size: 16px;
+                margin-inline-end: var(--tl-menu-icon-gap);
             }
 
             > span {

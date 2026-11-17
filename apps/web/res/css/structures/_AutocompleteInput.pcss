@@ -83,7 +83,7 @@ Please see LICENSE files in the repository root for full details.
 }
 
 /* A floating menu 4px under the field (its inline top is the field's height inside the border), holding the dense
-   list: 40px rows inset 4px, their text 16px in */
+   list: 32px rows inset 4px, their text 16px in */
 .mx_AutocompleteInput_matches {
     position: absolute;
     left: 0;
@@ -100,10 +100,10 @@ Please see LICENSE files in the repository root for full details.
 .mx_AutocompleteInput_suggestion {
     display: flex;
     align-items: center;
-    gap: var(--cpd-space-2x);
+    gap: var(--tl-menu-icon-gap);
     box-sizing: border-box;
-    min-height: var(--cpd-space-10x);
-    padding: var(--cpd-space-2x) var(--cpd-space-3x);
+    min-height: var(--tl-menu-row-size);
+    padding: var(--cpd-space-1x) var(--cpd-space-3x);
     border-radius: var(--tl-radius-row);
     font: var(--cpd-font-body-md-regular);
     cursor: default;

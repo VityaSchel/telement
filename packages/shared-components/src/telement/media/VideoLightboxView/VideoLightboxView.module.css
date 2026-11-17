@@ -353,13 +353,13 @@ Please see LICENSE files in the repository root for full details.
     box-shadow: 0 4px 24px rgb(0 0 0 / 40%);
 }
 
-/* The shared menu rows: 40px tall, content 16px from the menu's edge, the radio 12px before the label */
+/* The shared menu rows: 32px tall, content 16px from the menu's edge, the radio 10px before the label */
 .speedMenuItem {
     display: flex;
     align-items: center;
-    gap: var(--cpd-space-3x);
-    min-block-size: var(--cpd-space-10x);
-    padding: var(--cpd-space-2x) var(--cpd-space-3x);
+    gap: var(--tl-menu-icon-gap);
+    min-block-size: var(--tl-menu-row-size);
+    padding: var(--cpd-space-1x) var(--cpd-space-3x);
     border: none;
     border-radius: var(--tl-radius-row);
     background: none;

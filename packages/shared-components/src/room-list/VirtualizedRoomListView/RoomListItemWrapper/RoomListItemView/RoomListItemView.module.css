@@ -309,8 +309,8 @@
 
 /*
  * The room menus (more options, right-click and the notifications submenu) have the size of the message menu
- * (_IconizedContextMenu.pcss): 16px icons and regular body text in 40px items, with what they hold 12px from their
- * sides. The items are inset by the menu padding, and the menu's corner radius is an item highlight's radius plus that
+ * (_IconizedContextMenu.pcss): 16px icons and regular body text in 32px items, with what they hold 12px from their
+ * sides and the label 10px after the icon. The items are inset by the menu padding, and the menu's corner radius is an item highlight's radius plus that
  * padding, so the corners are concentric.
  */
 [role="menu"]:has(> [role="none"] > .menuContent) {
@@ -342,16 +342,16 @@
 }
 
 .menuContent {
-    /* Like the message menu's, separators span the menu with the menu padding above and below */
+    /* Like the message menu's, separators span the menu with 2px above and below */
     --cpd-separator-inset: 0;
-    --cpd-separator-spacing: var(--tl-inset-menu);
+    --cpd-separator-spacing: var(--tl-menu-separator-spacing);
 
     > [role^="menuitem"] {
-        padding-block: var(--cpd-space-2x);
+        padding-block: var(--cpd-space-1x);
         /* As far from the item's sides as a 16px icon is from its top and bottom: 16px from the menu's edge, as the
            content of the message menu and of Compound's menus */
         padding-inline: var(--cpd-space-3x);
-        min-block-size: var(--cpd-space-10x);
+        min-block-size: var(--tl-menu-row-size);
         border-radius: var(--tl-radius-row);
         /* The message menu's minimum width (146px inside its padding), instead of Compound's 200px */
         min-inline-size: 146px;
@@ -365,7 +365,10 @@
         > svg:first-child {
             inline-size: 16px;
             block-size: 16px;
-            margin-inline-end: var(--cpd-space-3x);
+        }
+
+        > [class*="_icon_"] {
+            margin-inline-end: var(--tl-menu-icon-gap);
         }
 
         > span {

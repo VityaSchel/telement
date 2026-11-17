@@ -113,32 +113,32 @@ describe("IconizedContextMenu", () => {
         }
     });
 
-    it("keeps the item highlights the inset away from the separator between the lists", () => {
+    it("keeps the item highlights 2px from the separator between the lists", () => {
         render(true);
         const separator = document.getElementById("secondList")!;
 
         expect(getComputedStyle(separator).borderTopWidth).toBe("1px");
-        expect(rectOf("secondList").top - rectOf("quote").bottom).toBe(4);
-        expect(rectOf("reply").top - rectOf("secondList").top).toBe(4 + 1);
+        expect(rectOf("secondList").top - rectOf("quote").bottom).toBe(2);
+        expect(rectOf("reply").top - rectOf("secondList").top).toBe(2 + 1);
     });
 
-    it("gives the compact items the room menus' size: 40px rows, their 16px icons as far from the sides as from the top", () => {
+    it("gives the compact items the room menus' size: 32px rows, their 16px icons centered and 12px from the start", () => {
         render(true);
         const item = rectOf("copy");
         const icon = document.querySelector("#copy svg")!.getBoundingClientRect();
         const label = document.querySelector("#copy .mx_IconizedContextMenu_label")!.getBoundingClientRect();
 
-        expect(item.height).toBe(40);
+        expect(item.height).toBe(32);
         expect(rectOf("quote").top).toBe(item.bottom);
         expect(icon.width).toBe(16);
-        expect(icon.top - item.top).toBe(12);
-        expect(item.bottom - icon.bottom).toBe(12);
+        expect(icon.top - item.top).toBe(8);
+        expect(item.bottom - icon.bottom).toBe(8);
         expect(icon.left - item.left).toBe(12);
-        // The label's padding puts it 12px after the icon; its line is centered on the row
+        // The label's padding puts it 10px after the icon; its line is centered on the row
         expect(label.left - icon.right).toBe(0);
         expect(
             parseFloat(getComputedStyle(document.querySelector("#copy .mx_IconizedContextMenu_label")!).paddingLeft),
-        ).toBe(12);
+        ).toBe(10);
         expect(label.top + label.height / 2).toBe(item.top + item.height / 2);
     });
 
@@ -149,16 +149,16 @@ describe("IconizedContextMenu", () => {
         expect(document.querySelector("#copy svg")!.getBoundingClientRect().left - menu.left).toBe(16);
     });
 
-    it("puts the radio of a selectable option where an icon would be, 12px before its label", () => {
+    it("puts the radio of a selectable option where an icon would be, 10px before its label", () => {
         render(true);
         const radio = rectOf("reply-radio");
         const labelElement = document.querySelector("#reply .mx_IconizedContextMenu_label")!;
         const label = labelElement.getBoundingClientRect();
 
         expect(radio.left - rectOf("menu").left).toBe(16);
-        // The label's padding puts its text 12px after the radio, as after an icon
+        // The label's padding puts its text 10px after the radio, as after an icon
         expect(label.left).toBe(radio.right);
-        expect(getComputedStyle(labelElement).paddingInlineStart).toBe("12px");
+        expect(getComputedStyle(labelElement).paddingInlineStart).toBe("10px");
         expect(radio.top + radio.height / 2).toBe(label.top + label.height / 2);
     });
 

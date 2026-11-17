@@ -536,7 +536,7 @@ describe("App controls", () => {
             expect(getComputedStyle(matches).borderRadius).toBe("12px");
             for (const id of ["alice", "bob"]) {
                 const row = box(get(`#${id}`));
-                expect(row.height).toBe(40);
+                expect(row.height).toBe(32);
                 expect([row.left - menu.left, menu.right - row.right]).toEqual([4, 4]);
                 expect(box(get(`#${id} .mx_AutocompleteInput_suggestion_title`)).left - menu.left).toBe(16);
             }
@@ -888,7 +888,7 @@ describe("App controls", () => {
                 // In the menu, the icon and the label's line share the row's middle, under the closed value's icon
                 const row = get(`${scope} .mx_Dropdown_menu .mx_Dropdown_option`);
                 const rowIcon = box(get(`${scope} .mx_JoinRuleDropdown_public svg`));
-                expect(box(row).height).toBe(40);
+                expect(box(row).height).toBe(32);
                 expect([rowIcon.top + rowIcon.height / 2, center(get(`${scope} .mx_JoinRuleDropdown_public`))]).toEqual(
                     [center(row), center(row)],
                 );
@@ -945,7 +945,7 @@ describe("App controls", () => {
                 ...document.querySelectorAll<HTMLElement>(".mx_Dropdown_menu .mx_Dropdown_option"),
             ];
 
-            it("float 4px under the field, 12px menus with 40px rows inset 4px and rounded 8px", () => {
+            it("float 4px under the field, 12px menus with 32px rows inset 4px and rounded 8px", () => {
                 render(openDropdown(["English", "Deutsch", "Español"], 360));
                 const closed = box(get(".mx_Dropdown_input"));
                 const menuElement = get(".mx_Dropdown_menu");
@@ -957,7 +957,7 @@ describe("App controls", () => {
                 expect([box(rows()[0]).top - menu.top, menu.bottom - box(rows().at(-1)!).bottom]).toEqual([4, 4]);
                 for (const row of rows()) {
                     expect([box(row).left - menu.left, menu.right - box(row).right, box(row).height]).toEqual([
-                        4, 4, 40,
+                        4, 4, 32,
                     ]);
                     expect(cornerRadii(row)).toEqual({ x: 8, y: 8 });
                     expect(center(row.firstElementChild!)).toBe(center(row));
@@ -1058,7 +1058,7 @@ describe("App controls", () => {
                     "border-box",
                     "none",
                 ]);
-                expect(filterRows.map((row) => box(row).height)).toEqual([40, 60, 60]);
+                expect(filterRows.map((row) => box(row).height)).toEqual([32, 52, 52]);
                 for (const row of filterRows) {
                     expect([box(row).left - menu.left, menu.right - box(row).right]).toEqual([4, 4]);
                     expect(cornerRadii(row)).toEqual({ x: 8, y: 8 });

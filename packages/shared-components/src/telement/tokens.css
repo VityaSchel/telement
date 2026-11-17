@@ -21,6 +21,11 @@ Please see LICENSE files in the repository root for full details.
     --tl-inset-surface: var(--cpd-space-4x);
     --tl-control-size: var(--cpd-space-9x);
 
+    /* Menus: 32px rows, a label 10px after its icon, and separators 2px from the rows, Telegram's proportions */
+    --tl-menu-row-size: var(--cpd-space-8x);
+    --tl-menu-icon-gap: calc(var(--cpd-space-2x) + var(--cpd-space-0-5x));
+    --tl-menu-separator-spacing: var(--cpd-space-0-5x);
+
     --tl-radius-menu: calc(var(--tl-radius-row) + var(--tl-inset-menu));
     --tl-radius-surface: calc(var(--tl-radius-row) + var(--tl-inset-surface));
 }

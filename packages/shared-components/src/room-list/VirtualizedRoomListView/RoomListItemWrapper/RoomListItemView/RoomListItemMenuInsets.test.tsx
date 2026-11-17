@@ -78,10 +78,10 @@ describe("Room menu insets", () => {
         // The icons start as far in, 12px inside their item as from its top
         const icon = toggleItem.querySelector("svg")!.getBoundingClientRect();
         expect(icon.left - menu.left).toBe(16);
-        expect(icon.top - toggleItem.getBoundingClientRect().top).toBe(12);
+        expect(icon.top - toggleItem.getBoundingClientRect().top).toBe(8);
     });
 
-    it("puts the submenu's radios where the menu's icons are, 12px before their labels, in 40px rows", async () => {
+    it("puts the submenu's radios where the menu's icons are, 10px before their labels, in 32px rows", async () => {
         const user = userEvent.setup();
         renderMenu();
 
@@ -94,11 +94,11 @@ describe("Room menu insets", () => {
 
         for (const item of subMenu.querySelectorAll<HTMLElement>('[role="menuitemradio"]')) {
             const rect = item.getBoundingClientRect();
-            expect(rect.height).toBe(40);
+            expect(rect.height).toBe(32);
             expect(rect.left - edge.left).toBe(4);
             const radio = item.querySelector('input[type="radio"]')!.parentElement!.getBoundingClientRect();
             expect(radio.left - edge.left).toBe(16);
-            expect(item.querySelector("span")!.getBoundingClientRect().left - radio.right).toBe(12);
+            expect(item.querySelector("span")!.getBoundingClientRect().left - radio.right).toBe(10);
         }
     });
 

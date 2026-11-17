@@ -1,6 +1,6 @@
 /* Telement: a floating menu (TELEMENT.md, "Radius and spacing") 8px above the line over the composer's text, which
-   is either the composer's top border or the rich text field's, holding the dense list: 40px rows inset 4px from its
-   edge, an avatar or emoji 16px in and the name 12px after it */
+   is either the composer's top border or the rich text field's, holding the dense list: 32px rows inset 4px from its
+   edge, an avatar or emoji 16px in and the name 10px after it */
 .mx_Autocomplete {
     position: absolute;
     bottom: calc(var(--cpd-space-2x) + var(--cpd-border-width-1));
@@ -20,10 +20,10 @@
 .mx_Autocomplete_ProviderSection {
     width: 100%;
 
-    /* Separated as a menu's groups are, the rows kept 4px clear of the line */
+    /* Separated as a menu's groups are, the rows kept 2px clear of the line */
     & + & {
-        margin-block-start: var(--tl-inset-menu);
-        padding-block-start: var(--tl-inset-menu);
+        margin-block-start: var(--tl-menu-separator-spacing);
+        padding-block-start: var(--tl-menu-separator-spacing);
         border-block-start: var(--cpd-border-width-1) solid var(--cpd-color-gray-400);
     }
 }
@@ -32,11 +32,11 @@
 .mx_Autocomplete_Completion_block,
 .mx_Autocomplete_Completion_pill {
     box-sizing: border-box;
-    min-height: var(--cpd-space-10x);
+    min-height: var(--tl-menu-row-size);
     display: flex;
     align-items: center;
     gap: var(--cpd-space-2x);
-    padding: var(--cpd-space-2x) var(--cpd-space-3x);
+    padding: var(--cpd-space-1x) var(--cpd-space-3x);
     border-radius: var(--tl-radius-row);
     user-select: none;
     cursor: pointer;
@@ -48,10 +48,10 @@
     flex-wrap: wrap;
 }
 
-/* The avatar or emoji before the name, 12px from it */
+/* The avatar or emoji before the name, as far from it as a menu's icons from their labels */
 .mx_Autocomplete_Completion_pill > :first-child:not(.mx_Autocomplete_Completion_title) {
     flex-shrink: 0;
-    margin-inline-end: var(--cpd-space-1x);
+    margin-inline-end: calc(var(--tl-menu-icon-gap) - var(--cpd-space-2x));
 }
 
 /* styling for common completion elements */

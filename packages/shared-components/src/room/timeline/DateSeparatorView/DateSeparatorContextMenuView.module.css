@@ -17,11 +17,11 @@
     }
 }
 
-/* 40px rows with 8px highlights, their content 16px from the menu's edge, in regular text */
+/* 32px rows with 8px highlights, their content 16px from the menu's edge, in regular text */
 .picker_menu_item {
-    min-block-size: var(--cpd-space-10x);
+    min-block-size: var(--tl-menu-row-size);
     margin-inline: var(--tl-inset-menu);
-    padding: var(--cpd-space-2x) var(--cpd-space-3x);
+    padding: var(--cpd-space-1x) var(--cpd-space-3x);
     border-radius: var(--tl-radius-row);
 
     > span {

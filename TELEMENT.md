@@ -696,19 +696,22 @@ kinds, legacy dialog buttons) giving about 17 button specs in 8 visible families
   header, room list header, card headers and media viewers hold 24px icons (Compound's own 36px icon button would draw
   27px ones); legacy call buttons hold 20px icons. An icon that fills its whole box, unlike Compound's,
   gets a 20px box so it looks as big as its neighbors.
-- **Equal insets:** an icon or avatar sits as far from its box's start as from its top and bottom: menu icons 12px,
-  room list avatars 8px, a voice message's play button 8px, an SSO logo 6px.
+- **Equal insets:** an icon or avatar sits as far from its box's start as from its top and bottom: room list avatars
+  8px, a voice message's play button 8px, an SSO logo 6px, the room list row's "…" button as far from the plate's end
+  as from its top. Menu rows are the exception (below).
 - **One content edge per container:** everything in a container starts and ends on one inset, in both writing
   directions: 12px in the room list, the room header, right panel cards and their headers; 16px in menus; 24px in the
   search dialog. Row highlights are rounded by 8 and sit 4px from the edge of a menu or panel (16px in the search
   dialog, concentric with its 24px corners), so the rows' content stays on the edge. A control puts its box on the
   edge.
-- **Menus share one geometry:** 12px corners, 40px rows with no gaps, highlights inset 4px and rounded by 8, 16px
-  icons and regular text. What an item holds starts 16px from the menu's edge, so an icon sits 12px from its row's
-  top, bottom and start and 12px before its label. Icons, checks, toggles and chevrons sit on the label's first line,
-  and what ends an item ends 16px from the edge, measured on what is drawn. Separators span the highlights with 4px
-  above and below. Keyboard focus is Compound's 2px ring inside the highlight, and a focused row also gets the hover
-  fill.
+- **Menus share one geometry:** 12px corners, 32px rows with no gaps (Telegram for macOS's 28px rows at 13px text,
+  scaled to our 15px), highlights inset 4px and rounded by 8, 16px icons and regular text. What an item holds starts
+  16px from the menu's edge, so an icon sits 12px from its row's start, centered on the row, and 10px before its
+  label; avatars in dense lists (autocomplete, receipts) too. Icons, checks, toggles and chevrons sit on the label's
+  first line, and what ends an item ends 16px from the edge, measured on what is drawn. Separators span the
+  highlights with 2px above and below. Two-line rows (filters with a description) are 52px. Keyboard focus is
+  Compound's 2px ring inside the highlight, and a focused row also gets the hover fill. Tokens: `--tl-menu-row-size`,
+  `--tl-menu-icon-gap`, `--tl-menu-separator-spacing`.
 - **Legacy fields and dropdowns** are 36px, with their 15px text 12px inside the 1px border and a floated label
   centered on the top border. Their block padding is computed so the 22.5px line is centered. Stacked fields are 16px
   apart at every font size. A dropdown looks like a field in every state: its arrow sits 9px from the end, as from the
@@ -1031,6 +1034,7 @@ Deferred work:
 | 2026-11-17 | Accent is Telegram blue, overridable by the system accent; custom themes are removed.                                                           | [Colors, type and components](#colors-type-and-components)                           |
 | 2026-11-17 | One token per color role, Compound's type scale only, one dialog anatomy with text-button footers.                                              | [Colors, type and components](#colors-type-and-components)                           |
 | 2026-11-17 | One menu spec with Compound's radios, one field spec with floated labels and hover borders, icons 16/20/24.                                     | [Colors, type and components](#colors-type-and-components)                           |
+| 2026-11-17 | Menus get 32px rows, 2px separator spacing and 10px icon-to-label gaps (were 40, 4 and 12): 40px rows were too spacey.                          | [Radius and spacing](#radius-and-spacing)                                            |
 
 ## Upstream merge log
 

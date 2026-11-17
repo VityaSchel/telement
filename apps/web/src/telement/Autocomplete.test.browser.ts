@@ -156,7 +156,7 @@ describe("The composer's autocomplete", () => {
         expect(rectOf("#field").top - rectOf("#mx_Autocomplete").bottom).toBe(8);
     });
 
-    it("lists completions in 40px rows inset 4px, the avatar 16px in and the name 12px after it", () => {
+    it("lists completions in 32px rows inset 4px, the avatar 16px in and the name 10px after it", () => {
         renderComposer();
         const menu = rectOf("#mx_Autocomplete");
 
@@ -164,7 +164,7 @@ describe("The composer's autocomplete", () => {
         expect(menu.bottom - rectOf("#shrug").bottom).toBe(4);
         for (const id of ["alice", "bob", "shrug"]) {
             const row = document.getElementById(id)!;
-            expect(row.getBoundingClientRect().height).toBe(40);
+            expect(row.getBoundingClientRect().height).toBe(32);
             expect(row.getBoundingClientRect().left - menu.left).toBe(4);
             expect(menu.right - row.getBoundingClientRect().right).toBe(4);
             expect(getComputedStyle(row).borderRadius).toBe("8px");
@@ -173,18 +173,18 @@ describe("The composer's autocomplete", () => {
             const avatar = rectOf(`#${id} .mx_BaseAvatar`);
             expect(avatar.left - menu.left).toBe(16);
             expect(textLeft(document.querySelector(`#${id} .mx_Autocomplete_Completion_title`)!) - avatar.right).toBe(
-                12,
+                10,
             );
         }
         expect(textLeft(document.querySelector("#shrug .mx_Autocomplete_Completion_title")!) - menu.left).toBe(16);
-        // The groups' titles start where the rows' content does, and a line separates the groups, 4px from the rows
+        // The groups' titles start where the rows' content does, and a line separates the groups, 2px from the rows
         for (const title of document.querySelectorAll(".mx_Autocomplete_provider_name")) {
             expect(textLeft(title) - menu.left).toBe(16);
             expect(getComputedStyle(title).fontWeight).toBe("600");
         }
         const commands = document.getElementById("commands")!;
         expect(getComputedStyle(commands).borderTopStyle).toBe("solid");
-        expect(commands.getBoundingClientRect().top - rectOf("#bob").bottom).toBe(4);
+        expect(commands.getBoundingClientRect().top - rectOf("#bob").bottom).toBe(2);
     });
 
     it("fills the row chosen with the arrow keys darker than a hovered one", async () => {

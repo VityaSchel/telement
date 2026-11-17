@@ -125,7 +125,7 @@ input.mx_Dropdown_option:focus {
     border: var(--cpd-border-width-1) solid var(--cpd-color-border-interactive-secondary);
     background-color: var(--cpd-color-bg-canvas-default);
     /* About five and a half rows, so the cut row shows that the list scrolls */
-    max-height: calc(5.5 * var(--cpd-space-10x));
+    max-height: calc(5.5 * var(--tl-menu-row-size));
     overflow-y: auto;
     /* Always-on scrollbars ignore border-radius and would run over the corners */
     clip-path: border-box;
@@ -133,8 +133,9 @@ input.mx_Dropdown_option:focus {
 
 .mx_Dropdown_menu .mx_Dropdown_option {
     height: auto;
-    /* 40px rows, as in Telement's other menus, with what they hold in the middle */
-    min-height: var(--cpd-space-10x);
+    /* 32px rows, as in Telement's other menus, with what they hold in the middle */
+    min-height: var(--tl-menu-row-size);
+    line-height: var(--cpd-font-line-height-regular);
     display: flex;
     align-items: center;
     margin-inline: calc(var(--tl-inset-menu) - var(--cpd-border-width-1));

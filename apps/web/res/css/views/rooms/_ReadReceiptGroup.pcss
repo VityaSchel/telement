@@ -62,7 +62,7 @@ Please see LICENSE files in the repository root for full details.
 }
 
 /* Telement: the shared menu surface (TELEMENT.md, "Radius and spacing") holding a dense list: a Compound-style title, then
-   40px rows inset 4px from the menu's edge, the avatar 16px in and the name 12px after it, with the time at the end */
+   32px rows inset 4px from the menu's edge, the avatar 16px in and the name 10px after it, with the time at the end */
 .mx_ReadReceiptGroup_popup {
     max-height: 300px;
     width: 280px;
@@ -82,7 +82,7 @@ Please see LICENSE files in the repository root for full details.
     }
 
     .mx_ReadReceiptGroup_title {
-        margin: 0 0 var(--tl-inset-menu);
+        margin: 0 0 var(--tl-menu-separator-spacing);
         padding: var(--cpd-space-2x) var(--cpd-space-3x) calc(var(--cpd-space-2x) - var(--cpd-border-width-1));
         border-block-end: var(--cpd-border-width-1) solid var(--cpd-color-gray-400);
         font: var(--cpd-font-body-sm-semibold);
@@ -97,10 +97,10 @@ Please see LICENSE files in the repository root for full details.
         .mx_ReadReceiptGroup_person {
             display: flex;
             align-items: center;
-            gap: var(--cpd-space-3x);
+            gap: var(--tl-menu-icon-gap);
             box-sizing: border-box;
-            min-block-size: var(--cpd-space-10x);
-            padding: var(--cpd-space-2x) var(--cpd-space-3x);
+            min-block-size: var(--tl-menu-row-size);
+            padding: var(--cpd-space-1x) var(--cpd-space-3x);
             border-radius: var(--tl-radius-row);
 
             &:hover,
