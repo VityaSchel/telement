@@ -660,7 +660,7 @@ describe("App controls", () => {
             expect(getComputedStyle(prefixFlag).marginInlineEnd).toBe("8px");
         });
 
-        it("put the join rule's icon where a field's text starts, 8px before its label and centered on the row", () => {
+        it("put the join rule's icon where a field's text starts, 12px before its label and centered on the row", () => {
             const joinRule = (testId: string): string => `
                 <div class="mx_Dropdown mx_JoinRuleDropdown" data-testid="${testId}">
                     <div class="mx_AccessibleButton mx_Dropdown_input mx_no_textinput" role="button">
@@ -693,7 +693,7 @@ describe("App controls", () => {
                         ? [icon.left - closed.left, labelBox(option).left - icon.right]
                         : [closed.right - icon.right, icon.left - labelBox(option).right];
 
-                expect([iconInset, labelGap]).toEqual([fieldInset, 8]);
+                expect([iconInset, labelGap]).toEqual([fieldInset, 12]);
                 expect(icon.top + icon.height / 2).toBe(center(value));
                 // In the menu, the icon and the label's line share the row's middle, under the closed value's icon
                 const row = get(`${scope} .mx_Dropdown_menu .mx_Dropdown_option`);
@@ -815,7 +815,7 @@ describe("App controls", () => {
 
         describe("sessions filter", () => {
             const filterOption = (label: string, description = "", selected = false, highlight = false): string =>
-                `<li class="mx_Dropdown_option${highlight ? " mx_Dropdown_option_highlight" : ""}" role="option" tabindex="-1"><div class="mx_FilterDropdown_option">${selected ? '<svg class="mx_FilterDropdown_optionSelectedIcon" viewBox="0 0 24 24"></svg>' : ""}<span class="mx_FilterDropdown_optionLabel">${label}</span>${description ? `<span class="mx_FilterDropdown_optionDescription">${description}</span>` : ""}</div></li>`;
+                `<li class="mx_Dropdown_option${highlight ? " mx_Dropdown_option_highlight" : ""}" role="option" tabindex="-1"><div class="mx_FilterDropdown_option"><input type="radio" class="mx_FilterDropdown_optionSelectedIcon" style="inline-size: 20px; block-size: 20px; margin-inline: 0"${selected ? " checked" : ""}><span class="mx_FilterDropdown_optionLabel">${label}</span>${description ? `<span class="mx_FilterDropdown_optionDescription">${description}</span>` : ""}</div></li>`;
             /** FilteredDeviceList's header with the FilterDropdown, as SessionManagerTab shows it. */
             const sessionsHeader = (open: boolean): string => `
                 <div class="mx_FilteredDeviceList">
@@ -868,18 +868,18 @@ describe("App controls", () => {
                     "border-box",
                     "none",
                 ]);
-                expect(filterRows.map((row) => box(row).height)).toEqual([40, 48, 48]);
+                expect(filterRows.map((row) => box(row).height)).toEqual([40, 60, 60]);
                 for (const row of filterRows) {
                     expect([box(row).left - menu.left, menu.right - box(row).right]).toEqual([4, 4]);
                     expect(cornerRadii(row)).toEqual({ x: 8, y: 8 });
                     const content = row.querySelector<HTMLElement>(".mx_FilterDropdown_option")!;
                     expect(box(content).left - menu.left).toBe(16);
-                    // The descriptions don't wrap, so they keep the room beside the check that upstream's menu gave
-                    expect(content.clientWidth - parseFloat(getComputedStyle(content).paddingInlineStart)).toBe(212);
+                    // The descriptions don't wrap, so the menu is wide enough for them beside the radio
+                    expect(content.scrollWidth).toBeLessThanOrEqual(content.clientWidth);
                 }
                 expect(box(get(".mx_FilterDropdown_optionSelectedIcon")).left - menu.left).toBe(16);
-                // The check is centered on the label's line
-                expect(center(get(".mx_FilterDropdown_optionSelectedIcon"))).toBe(
+                // The radio is centered on the label's line
+                expect(center(filterRows[2].querySelector(".mx_FilterDropdown_optionSelectedIcon")!)).toBe(
                     center(filterRows[2].querySelector(".mx_FilterDropdown_optionLabel")!),
                 );
                 // The highlight shows on the menu, as in the other dropdowns
@@ -1063,10 +1063,11 @@ describe("App controls", () => {
             expect(border(closed)).toBe(focusColor);
             expect(ring(closed)).toBe(`solid 1px -1px ${focusColor}`);
 
-            // The arrow keys move the focus into the open menu, and the dropdown stays as focused as its menu
+            // The arrow keys move the focus into the open menu: the dropdown stays focused, and its menu has the border
+            // of every other menu
             get("[data-testid=open] .mx_Dropdown_menu .mx_Dropdown_option").focus();
             expect(border(open)).toBe(focusColor);
-            expect(border(get("[data-testid=open] .mx_Dropdown_menu"))).toBe(focusColor);
+            expect(border(get("[data-testid=open] .mx_Dropdown_menu"))).toBe(restColor);
         });
 
         it("keep the focus visible from the keyboard on a dropdown without a border, the language and space pickers", async () => {

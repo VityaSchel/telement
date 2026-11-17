@@ -8,10 +8,12 @@ Please see LICENSE files in the repository root for full details.
 
 import React, { type ReactElement } from "react";
 import classNames from "classnames";
-import CheckmarkIcon from "@vector-im/compound-design-tokens/assets/web/icons/check";
+import { RadioInput } from "@vector-im/compound-web";
 
 import Dropdown, { type DropdownProps } from "./Dropdown";
 import { type NonEmptyArray } from "../../../@types/common";
+
+const noop = (): void => {};
 
 export type FilterDropdownOption<FilterKeysType extends string> = {
     id: FilterKeysType;
@@ -59,7 +61,14 @@ export const FilterDropdown = <FilterKeysType extends string = string>({
             {
                 options.map(({ id, label, description }) => (
                     <div className="mx_FilterDropdown_option" data-testid={`filter-option-${id}`} key={id}>
-                        {id === value && <CheckmarkIcon className="mx_FilterDropdown_optionSelectedIcon" />}
+                        {/* Telement: Compound's radio marks the chosen filter, as in Telement's other menus */}
+                        <RadioInput
+                            className="mx_FilterDropdown_optionSelectedIcon"
+                            aria-hidden={true}
+                            tabIndex={-1}
+                            checked={id === value}
+                            onChange={noop}
+                        />
                         <span className="mx_FilterDropdown_optionLabel">{label}</span>
                         {!!description && <span className="mx_FilterDropdown_optionDescription">{description}</span>}
                     </div>

@@ -11,10 +11,8 @@ Please see LICENSE files in the repository root for full details.
     .mx_Dropdown_menu {
         left: unset;
         box-sizing: border-box;
-        /* The descriptions don't wrap (_Dropdown.pcss), so they keep the 212px they had beside the check */
-        width: 264px;
-
-        border: 1px solid $quinary-content;
+        /* The descriptions don't wrap (_Dropdown.pcss), so the menu fits the longest beside the radio */
+        width: 288px;
 
         /* Less the inset, the content sits 16px from the menu's edge, as in Telement's other menus */
         .mx_Dropdown_option {
@@ -42,33 +40,36 @@ Please see LICENSE files in the repository root for full details.
     }
 }
 
+/* Telement: the shared menu rows, with Compound's radio marking the chosen filter 12px before the label, and the
+   description in secondary text under it */
 .mx_FilterDropdown_option {
-    position: relative;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    column-gap: var(--cpd-space-3x);
+    align-items: center;
     width: 100%;
     box-sizing: border-box;
-    padding: var(--cpd-space-2x) 0 var(--cpd-space-2x) var(--cpd-space-5x);
-
-    font-size: $font-12px;
-    /* Rows of one or two lines are 40 and 48px, on the grid */
-    line-height: $font-16px;
-    color: $primary-content;
+    padding-block: var(--cpd-space-2x);
+    font: var(--cpd-font-body-md-regular);
+    color: var(--cpd-color-text-primary);
 }
 
 .mx_FilterDropdown_optionSelectedIcon {
-    height: 14px;
-    width: 14px;
-    position: absolute;
+    grid-row: 1 / span 2;
+    align-self: start;
     /* Centered on the label's line */
-    top: calc(var(--cpd-space-2x) + (1lh - 14px) / 2);
-    left: 0;
+    margin-block-start: calc((var(--cpd-font-size-body-md) * var(--cpd-font-line-height-regular) - 20px) / 2);
+    pointer-events: none;
 }
 
-.mx_FilterDropdown_optionLabel {
-    font-weight: var(--cpd-font-weight-semibold);
-    display: block;
+.mx_FilterDropdown_optionLabel,
+.mx_FilterDropdown_optionDescription {
+    grid-column: 2;
 }
 
 .mx_FilterDropdown_optionDescription {
-    color: $secondary-content;
-    margin-top: var(--cpd-space-1x);
+    font: var(--cpd-font-body-sm-regular);
+    color: var(--cpd-color-text-secondary);
+    /* Puts a two-line row on the 4px grid: 8 + 22.5 + 2 + 19.5 + 8 = 60 */
+    margin-block-start: 2px;
 }

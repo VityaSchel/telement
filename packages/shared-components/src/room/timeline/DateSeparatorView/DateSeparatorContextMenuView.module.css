@@ -8,21 +8,27 @@
 .picker_menu {
     max-inline-size: none;
 
-    /*
-     * Awful, brittle hack to remove padding from the menu which is now added on the content child
-     * This probably ought to be a parameter to the compound component if we sometimes don't want padding.
-     */
+    /* Telement: the shared menu geometry (TELEMENT.md, "Radius and spacing"): rows follow each other inset 4px from
+       the menu's edge, as do the separators */
     > [role="none"] {
-        padding: 0;
+        padding-block: var(--tl-inset-menu);
         gap: 0;
-        --cpd-menu-padding-block-end: 0;
+        --cpd-menu-padding-block-end: var(--tl-inset-menu);
     }
 }
 
+/* 40px rows with 8px highlights, their content 16px from the menu's edge, in regular text */
 .picker_menu_item {
-    padding: var(--cpd-space-3x) var(--cpd-space-5x);
+    min-block-size: var(--cpd-space-10x);
+    margin-inline: var(--tl-inset-menu);
+    padding: var(--cpd-space-2x) var(--cpd-space-3x);
+    border-radius: var(--tl-radius-row);
+
+    > span {
+        font: var(--cpd-font-body-md-regular);
+    }
 }
 
 .picker_separator {
-    margin-inline: 0;
+    margin-inline: var(--tl-inset-menu);
 }

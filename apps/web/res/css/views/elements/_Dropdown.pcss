@@ -117,9 +117,10 @@ input.mx_Dropdown_option:focus {
        corners are concentric. The rows take the inline inset as a margin, so a menuWidth still sizes what is inside */
     padding: calc(var(--tl-inset-menu) - var(--cpd-border-width-1)) 0;
     scroll-padding-block: calc(var(--tl-inset-menu) - var(--cpd-border-width-1));
+    /* The border and background of every other menu. The clip below would cut off their shadow */
     border-radius: var(--tl-radius-menu);
-    border: 1px solid $accent-alt;
-    background-color: $background;
+    border: var(--cpd-border-width-1) solid var(--cpd-color-border-interactive-secondary);
+    background-color: var(--cpd-color-bg-canvas-default);
     /* About five and a half rows, so the cut row shows that the list scrolls */
     max-height: calc(5.5 * var(--cpd-space-10x));
     overflow-y: auto;
@@ -149,8 +150,13 @@ ul.mx_Dropdown_menu li.mx_Dropdown_option {
     list-style: none;
 }
 
+/* The highlighted option (hovered or chosen with the arrow keys) takes the menus' hover fill */
 .mx_Dropdown_menu .mx_Dropdown_option_highlight {
-    background-color: $focus-bg-color;
+    background-color: var(--cpd-color-bg-action-secondary-hovered);
+}
+
+.mx_Dropdown_menu .mx_Dropdown_option:active {
+    background-color: var(--cpd-color-bg-action-secondary-pressed);
 }
 
 .mx_Dropdown_searchPrompt {
