@@ -30,16 +30,19 @@ Please see LICENSE files in the repository root for full details.
     cursor: not-allowed;
 }
 
-/* Focused, also while an option of the open menu has the focus, it looks like a focused text field (_Field.pcss): its
-   border turns the color of the menu's */
+/* Hovered and focused, also while an option of the open menu has the focus, it looks like a text field (_Field.pcss) */
+.mx_Dropdown_input:hover {
+    border-color: var(--cpd-color-border-interactive-hovered);
+}
+
 .mx_Dropdown_input:focus-within {
-    border-color: $accent-alt;
+    border-color: var(--cpd-color-border-focused);
 }
 
 /* From the keyboard, a ring on the border instead of the browser's: a dropdown with a border looks as above, and one
    without (the language and space pickers) still shows its focus */
 .mx_Dropdown_input:focus-visible {
-    outline: var(--cpd-border-width-1) solid $accent-alt;
+    outline: var(--cpd-border-width-1) solid var(--cpd-color-border-focused);
     outline-offset: calc(-1 * var(--cpd-border-width-1));
 }
 

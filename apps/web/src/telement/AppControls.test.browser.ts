@@ -67,7 +67,7 @@ import settingsTabStyles from "../../res/css/views/settings/tabs/_SettingsTab.pc
 import spaceCreateMenuStyles from "../../res/css/views/spaces/_SpaceCreateMenu.pcss?raw";
 import callViewButtonsStyles from "../../res/css/views/voip/LegacyCallView/_LegacyCallViewButtons.pcss?raw";
 import { cornerRadii, toBrowserCss } from "../test/telement/browserCss";
-import { settledStyle } from "../test/telement/computedStyle";
+import { settledStyle, tokenColor } from "../test/telement/computedStyle";
 import { loadInter } from "../test/telement/fonts";
 
 const APP_STYLES = [
@@ -161,6 +161,11 @@ function center(element: Element): number {
 function ring(element: Element): string {
     const style = getComputedStyle(element);
     return [style.outlineStyle, style.outlineWidth, style.outlineOffset, style.outlineColor].join(" ");
+}
+
+/** What a color token resolves to in the light theme the tests render in. */
+function colorOf(token: string): string {
+    return tokenColor(token, document.querySelector(".cpd-theme-light")!);
 }
 
 function padding(element: Element): string {
@@ -569,8 +574,45 @@ describe("App controls", () => {
             render(field("Topic", "A room for designers"));
             const border = parseFloat(getComputedStyle(get(".mx_Field")).borderTopWidth);
 
-            expect(getComputedStyle(get("label")).fontSize).toBe("10px");
+            expect(getComputedStyle(get("label")).fontSize).toBe("11px");
             expect(center(get("label"))).toBe(box(get(".mx_Field")).top + border / 2);
+        });
+
+        it("darken the border on hover and turn it Compound's focus blue when focused", async () => {
+            render(field("Room name"));
+            const fieldBox = get(".mx_Field");
+            const border = (): string => settledStyle(fieldBox).borderTopColor;
+            const rest = border();
+
+            await userEvent.hover(fieldBox);
+            expect(border()).toBe(colorOf("--cpd-color-border-interactive-hovered"));
+            expect(border()).not.toBe(rest);
+            get("input").focus();
+            expect(border()).toBe(colorOf("--cpd-color-border-focused"));
+        });
+
+        it("show Compound's disabled and invalid looks", async () => {
+            render(`
+                <div data-testid="disabled">${field("Disabled", "Value")}</div>
+                <div data-testid="invalid">${field("Invalid", "Value", "input", "mx_Field_invalid")}</div>
+            `);
+            get("[data-testid=disabled] input").setAttribute("disabled", "");
+            const disabled = get("[data-testid=disabled] .mx_Field");
+            const invalid = get("[data-testid=invalid] .mx_Field");
+
+            expect(settledStyle(disabled).borderTopColor).toBe(colorOf("--cpd-color-border-disabled"));
+            expect(getComputedStyle(get("[data-testid=disabled] input")).backgroundColor).toBe(
+                colorOf("--cpd-color-bg-canvas-disabled"),
+            );
+            expect(getComputedStyle(get("[data-testid=disabled] input")).color).toBe(
+                colorOf("--cpd-color-text-disabled"),
+            );
+            // Hovering a disabled field or an invalid one doesn't change its border
+            await userEvent.hover(invalid);
+            expect(settledStyle(invalid).borderTopColor).toBe(colorOf("--cpd-color-border-critical-primary"));
+            expect(getComputedStyle(get("[data-testid=invalid] label")).color).toBe(
+                colorOf("--cpd-color-text-critical-primary"),
+            );
         });
 
         it("put a text area's label on its first line", () => {
@@ -955,7 +997,8 @@ describe("App controls", () => {
                 return fields.slice(1).map((field, index) => spacing(fields[index], field));
             }
 
-            const apart16 = { gap: 16, label: expect.closeTo(10, 0) };
+            // The 11px floated label clears the field above by about 9px
+            const apart16 = { gap: 16, label: expect.closeTo(9, 0) };
 
             it("are 16px apart in a dialog's 15px text and in the sign in page's 12px text", () => {
                 render(`

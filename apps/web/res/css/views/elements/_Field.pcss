@@ -70,8 +70,14 @@ Please see LICENSE files in the repository root for full details.
     pointer-events: none;
 }
 
+/* Telement: the field spec's states (TELEMENT.md, "Colors, type and components"), as Compound's text fields have them:
+   a darker border on hover, Compound's focus blue when focused */
+.mx_Field:hover {
+    border-color: var(--cpd-color-border-interactive-hovered);
+}
+
 .mx_Field:focus-within {
-    border-color: $accent-alt;
+    border-color: var(--cpd-color-border-focused);
 }
 
 .mx_Field input:focus,
@@ -128,7 +134,8 @@ Please see LICENSE files in the repository root for full details.
         color 0.25s ease-out 0s,
         transform 0.25s ease-out 0s,
         background-color 0.25s ease-out 0s;
-    font-size: $font-10px;
+    /* Compound's smallest size */
+    font-size: var(--cpd-font-size-body-xs);
     /* From the middle of the field's one line to the middle of its top border */
     transform: translateY(calc(var(--cpd-border-width-1) / 2 - var(--tl-control-size) / 2));
     padding: 0 2px;
@@ -142,14 +149,23 @@ Please see LICENSE files in the repository root for full details.
     color: $accent-alt;
 }
 
+/* Compound's disabled field: a gray fill and border, and disabled text. The label keeps the background it floats on */
+.mx_Field:has(> :is(input, select, textarea):disabled) {
+    border-color: var(--cpd-color-border-disabled);
+    background-color: var(--cpd-color-bg-canvas-disabled);
+}
+
 .mx_Field select:disabled,
-.mx_Field select:disabled + label,
 .mx_Field input:disabled,
+.mx_Field textarea:disabled {
+    background-color: var(--cpd-color-bg-canvas-disabled);
+    color: var(--cpd-color-text-disabled);
+}
+
+.mx_Field select:disabled + label,
 .mx_Field input:disabled + label,
-.mx_Field textarea:disabled,
 .mx_Field textarea:disabled + label {
-    background-color: $background;
-    color: $info-plinth-fg-color;
+    color: var(--cpd-color-text-disabled);
 }
 
 .mx_Field_valid {
@@ -167,12 +183,12 @@ Please see LICENSE files in the repository root for full details.
 .mx_Field_invalid {
     &.mx_Field,
     &.mx_Field:focus-within {
-        border-color: $alert;
+        border-color: var(--cpd-color-border-critical-primary);
     }
 
     &.mx_Field label,
     &.mx_Field:focus-within label {
-        color: $alert;
+        color: var(--cpd-color-text-critical-primary);
     }
 }
 
