@@ -300,6 +300,17 @@ describe("Room list item layout", () => {
         expect(getComputedStyle(check).color).toBe(colorOf("--cpd-color-icon-accent-primary"));
     });
 
+    it("draws the sending clock at 12px in the checks' 16px slot, so it looks as big as they do", () => {
+        const row = renderRow({ lastMessageState: "sending", messagePreviewSender: "You" });
+        const clock = rect(screen.getByTestId("last-message-sending"));
+        const time = rect(screen.getByText("12:41"));
+
+        expect([clock.width, clock.height]).toEqual([12, 12]);
+        // 2px on each side make up the 16px a check takes, 2px before the time
+        expect([time.left - clock.right, clock.left]).toEqual([4, time.left - 2 - 16 + 2]);
+        expect(center(screen.getByTestId("last-message-sending"))).toBeCloseTo(center(part(row, styles.titleRow)), 5);
+    });
+
     it("hides the check with the time when the more options button takes its place", async () => {
         const row = renderRow({ lastMessageState: "sent", messagePreviewSender: "You" });
 

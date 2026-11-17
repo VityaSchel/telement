@@ -24,11 +24,10 @@ Please see LICENSE files in the repository root for full details.
             color: $secondary-content;
         }
 
-        /* As big as the card header's buttons, with a 20px icon: mark all as read draws to the edges of its box, so at
-           20px it looks as big as the header's 24px icons. Compound puts its class first; Headers.test.browser.ts fails
-           when an upgrade renames it. */
+        /* As big as the card header's buttons, with their 24px icon. Compound puts its class first;
+           Headers.test.browser.ts fails when an upgrade renames it. */
         [class^="_icon-button_"] {
-            padding: calc((var(--BaseCard_header-button-size) - var(--cpd-space-5x)) / 2);
+            padding: calc((var(--BaseCard_header-button-size) - var(--cpd-space-6x)) / 2);
         }
 
         .mx_ThreadPanel_vertical_separator {

@@ -7,10 +7,10 @@ Please see LICENSE files in the repository root for full details.
 
 import React, { useEffect, type JSX } from "react";
 import { MessageTimestampView } from "@element-hq/web-shared-components";
+import { HistoryIcon } from "@vector-im/compound-design-tokens/assets/web/icons";
 
 import { type EventTileViewModel } from "../../../../viewmodels/room/timeline/event-tile/EventTileViewModel";
 import { type MessageTimestampViewModelProps } from "../../../../viewmodels/room/timeline/event-tile/timestamp/MessageTimestampViewModel.ts";
-import LateIcon from "../../../../../res/img/sensor.svg?react";
 
 /**
  * Props for the {@link MessageTimestampAdapter} component.
@@ -44,7 +44,7 @@ export function MessageTimestampAdapter({
     return (
         <>
             {timestampProps.receivedTs ? (
-                <LateIcon className="mx_MessageTimestamp_lateIcon" width="16" height="16" />
+                <HistoryIcon className="mx_MessageTimestamp_lateIcon" width="16" height="16" />
             ) : undefined}
             <MessageTimestampView vm={vm} className="mx_MessageTimestamp" />
         </>

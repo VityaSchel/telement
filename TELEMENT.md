@@ -859,7 +859,12 @@ findings: https://claude.ai/artifact/BVZ6pyrzyasmRRAVMFxxB7.
 - **Icons:** 16 (menus, inline status, 24px buttons), 20 (composer, buttons with labels, 28px buttons, toasts, tabs,
   badges), 24 (header-class icon buttons including media viewer controls, right panel rows) and 48 (media play), as
   tokens. The image viewer's ··· and the video controls become 24, status glyphs a fixed 16, space panel tiles 24, and
-  the room list's dial-pad and explore buttons plain 24px icon buttons.
+  the room list's dial-pad and explore buttons plain 24px icon buttons. One icon family: Compound's outline icons in
+  menus, lists, headers and tabs (Solid only for badges, toasts and status), no legacy `res/img` icons. Where
+  Compound's glyph is much smaller than its neighbors, its larger variant is used: End poll `polls-end`, Collapse reply
+  thread `collapse`, Share `share-ios`, Save as and download `download-ios`, external URL `pop-out`, the room list's
+  compose button `compose`; the sending clock in room rows is 12px in the checks' 16px slot. Mark as read keeps
+  Compound's filled envelope, which has no outline variant.
 - **Buttons:** filled, outline and plain (each with a destructive variant), inline links, icon buttons at 24/28/36.
   The 32px icon buttons become 36, the `_sm` kinds and the 156px minimum go, every button uses Compound's disabled
   look, and standalone link buttons lose the underline.

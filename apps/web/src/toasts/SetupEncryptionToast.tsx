@@ -8,7 +8,7 @@ Please see LICENSE files in the repository root for full details.
 */
 
 import React from "react";
-import { KeyIcon, ErrorSolidIcon, SettingsSolidIcon } from "@vector-im/compound-design-tokens/assets/web/icons";
+import { ErrorSolidIcon, SettingsSolidIcon, KeySolidIcon } from "@vector-im/compound-design-tokens/assets/web/icons";
 import { Link } from "@vector-im/compound-web";
 import { type ComponentType } from "react";
 import { logger } from "matrix-js-sdk/src/logger";
@@ -101,7 +101,7 @@ const getPrimaryButtonIcon = (
 ): ComponentType<React.SVGAttributes<SVGElement>> | undefined => {
     switch (state) {
         case "key_storage_out_of_sync":
-            return KeyIcon;
+            return KeySolidIcon;
         default:
             return;
     }

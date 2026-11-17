@@ -14,10 +14,10 @@ import {
     GroupIcon,
     PlusIcon,
     RoomIcon,
-    SettingsSolidIcon,
     UserAddIcon,
     UserProfileSolidIcon,
-    VideoCallSolidIcon,
+    VideoCallIcon,
+    SettingsIcon,
 } from "@vector-im/compound-design-tokens/assets/web/icons";
 import { emailLooksValid } from "@element-hq/element-web-shared-utils";
 
@@ -140,7 +140,7 @@ const SpaceLandingAddButton: React.FC<{ space: Room }> = ({ space }) => {
                             {videoRoomsEnabled && (
                                 <IconizedContextMenuOption
                                     label={_t("action|new_video_room")}
-                                    icon={<VideoCallSolidIcon />}
+                                    icon={<VideoCallIcon />}
                                     onClick={async (e): Promise<void> => {
                                         e.preventDefault();
                                         e.stopPropagation();
@@ -257,7 +257,7 @@ const SpaceLanding: React.FC<{ space: Room }> = ({ space }) => {
                 title={_t("common|settings")}
                 placement="bottom"
             >
-                <SettingsSolidIcon />
+                <SettingsIcon />
             </AccessibleButton>
         );
     }

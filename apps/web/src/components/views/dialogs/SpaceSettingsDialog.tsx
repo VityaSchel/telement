@@ -11,8 +11,8 @@ import { type Room, type MatrixClient } from "matrix-js-sdk/src/matrix";
 import {
     AdminIcon,
     AdvancedSettingsIcon,
-    SettingsSolidIcon,
     VisibilityOnIcon,
+    SettingsIcon,
 } from "@vector-im/compound-design-tokens/assets/web/icons";
 
 import { _t, _td } from "../../../languageHandler";
@@ -54,7 +54,7 @@ const SpaceSettingsDialog: React.FC<IProps> = ({ matrixClient: cli, space, onFin
             new Tab(
                 SpaceSettingsTab.General,
                 _td("common|general"),
-                <SettingsSolidIcon key={SpaceSettingsTab.General} />,
+                <SettingsIcon key={SpaceSettingsTab.General} />,
                 <SpaceSettingsGeneralTab key={SpaceSettingsTab.General} matrixClient={cli} space={space} />,
             ),
             new Tab(

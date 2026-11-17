@@ -10,9 +10,12 @@ import React, { useContext, useEffect, useRef, useState } from "react";
 import { type EventTimelineSet, type Room, Thread } from "matrix-js-sdk/src/matrix";
 import { IconButton, RadioInput, Tooltip } from "@vector-im/compound-web";
 import { logger } from "matrix-js-sdk/src/logger";
-import { ThreadsIcon, ChevronDownIcon } from "@vector-im/compound-design-tokens/assets/web/icons";
+import {
+    ThreadsIcon,
+    ChevronDownIcon,
+    MarkThreadsAsReadIcon,
+} from "@vector-im/compound-design-tokens/assets/web/icons";
 
-import MarkAllThreadsReadIcon from "../../../res/img/element-icons/check-all.svg?react";
 import BaseCard from "../views/right_panel/BaseCard";
 import type ResizeNotifier from "../../utils/ResizeNotifier";
 import MatrixClientContext, { useMatrixClientContext } from "../../contexts/MatrixClientContext";
@@ -140,7 +143,7 @@ export const ThreadPanelHeader: React.FC<{
         <div className="mx_ThreadPanelHeader">
             <Tooltip label={_t("threads|mark_all_read")}>
                 <IconButton onClick={onMarkAllThreadsReadClick} size="var(--BaseCard_header-button-size)">
-                    <MarkAllThreadsReadIcon height={20} width={20} />
+                    <MarkThreadsAsReadIcon />
                 </IconButton>
             </Tooltip>
             <div className="mx_ThreadPanel_vertical_separator" />

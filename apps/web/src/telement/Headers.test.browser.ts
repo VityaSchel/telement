@@ -18,6 +18,7 @@ import {
     CloseIcon,
     DownloadIcon,
     ExpandIcon,
+    MarkThreadsAsReadIcon,
     OverflowHorizontalIcon,
     PinSolidIcon,
     PopOutIcon,
@@ -43,7 +44,6 @@ import baseCardStyles from "../../res/css/views/right_panel/_BaseCard.pcss?raw";
 import threadPanelStyles from "../../res/css/views/right_panel/_ThreadPanel.pcss?raw";
 import imageViewStyles from "../../res/css/views/elements/_ImageView.pcss?raw";
 import legacyCallHeaderStyles from "../../res/css/views/voip/_LegacyCallViewHeader.pcss?raw";
-import markAllThreadsReadSvg from "../../res/img/element-icons/check-all.svg?raw";
 import lightTheme from "../../res/themes/light/css/_light.pcss?raw";
 import { cornerRadii, toBrowserCss } from "../test/telement/browserCss";
 import { tokenColor } from "../test/telement/computedStyle";
@@ -72,18 +72,6 @@ function box(selector: string): DOMRect {
 
 function button(label: string): HTMLElement {
     return document.querySelector<HTMLElement>(`[aria-label="${label}"]`)!;
-}
-
-/** ThreadPanel's mark all as read icon, from its file, at the size ThreadPanel asks for. */
-function MarkAllThreadsReadIcon(): ReactNode {
-    const svg = new DOMParser().parseFromString(markAllThreadsReadSvg, "image/svg+xml").documentElement;
-    return h("svg", {
-        viewBox: svg.getAttribute("viewBox")!,
-        fill: "none",
-        width: 20,
-        height: 20,
-        dangerouslySetInnerHTML: { __html: svg.innerHTML },
-    });
 }
 
 /** The button's size, its icon's size, and the icon's inset from the button's top and start. */
@@ -397,7 +385,7 @@ describe("Telement's headers", () => {
                         h(
                             IconButton,
                             { "aria-label": "Mark all as read", "size": "var(--BaseCard_header-button-size)" },
-                            h(MarkAllThreadsReadIcon),
+                            h(MarkThreadsAsReadIcon),
                         ),
                         h("div", { className: "mx_ThreadPanel_vertical_separator" }),
                         h(
@@ -415,12 +403,12 @@ describe("Telement's headers", () => {
             );
         }
 
-        it("puts mark all as read where the card header puts back: a 36px button 12px from the start, its icon 20px", () => {
+        it("puts mark all as read where the card header puts back: a 36px button 12px from the start, its icon 24px", () => {
             render(threadPanelHeader());
 
             const header = box(".mx_ThreadPanelHeader");
             const markRead = button("Mark all as read").getBoundingClientRect();
-            expect(iconGeometry(button("Mark all as read"))).toEqual([36, 36, 20, 20, 8, 8]);
+            expect(iconGeometry(button("Mark all as read"))).toEqual([36, 36, 24, 24, 6, 6]);
             expect([markRead.left - header.left, markRead.top - header.top]).toEqual([12, 13.5]);
             expect(markRead.left).toBe(button("Back").getBoundingClientRect().left);
         });
@@ -430,12 +418,12 @@ describe("Telement's headers", () => {
             async (theme) => {
                 render(threadPanelHeader(), theme);
                 const markRead = button("Mark all as read");
-                const strokes = (): Set<string> =>
-                    new Set([...markRead.querySelectorAll("path")].map((path) => getComputedStyle(path).stroke));
+                const fills = (): Set<string> =>
+                    new Set([...markRead.querySelectorAll("path")].map((path) => getComputedStyle(path).fill));
 
-                expect(strokes()).toEqual(new Set([tokenColor("--cpd-color-icon-secondary", markRead)]));
+                expect(fills()).toEqual(new Set([tokenColor("--cpd-color-icon-secondary", markRead)]));
                 await userEvent.hover(markRead);
-                expect(strokes()).toEqual(new Set([tokenColor("--cpd-color-icon-primary", markRead)]));
+                expect(fills()).toEqual(new Set([tokenColor("--cpd-color-icon-primary", markRead)]));
             },
         );
 

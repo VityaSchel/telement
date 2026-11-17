@@ -9,13 +9,13 @@ Please see LICENSE files in the repository root for full details.
 import React, { type JSX, useContext } from "react";
 import { type Room, EventType, RoomType } from "matrix-js-sdk/src/matrix";
 import {
-    HomeSolidIcon,
     PlusIcon,
-    SettingsSolidIcon,
     LeaveIcon,
     SearchIcon,
     PreferencesIcon,
     UserAddIcon,
+    HomeIcon,
+    SettingsIcon,
 } from "@vector-im/compound-design-tokens/assets/web/icons";
 
 import { type IProps as IContextMenuProps } from "../../structures/ContextMenu";
@@ -89,7 +89,7 @@ const SpaceContextMenu: React.FC<IProps> = ({ space, hideHeader, onFinished, ...
         settingsOption = (
             <IconizedContextMenuOption
                 data-testid="settings-option"
-                icon={<SettingsSolidIcon />}
+                icon={<SettingsIcon />}
                 label={_t("common|settings")}
                 onClick={onSettingsClick}
             />
@@ -130,7 +130,7 @@ const SpaceContextMenu: React.FC<IProps> = ({ space, hideHeader, onFinished, ...
 
         devtoolsOption = (
             <IconizedContextMenuOption
-                icon={<SettingsSolidIcon />}
+                icon={<SettingsIcon />}
                 label={_t("space|context_menu|devtools_open_timeline")}
                 onClick={onViewTimelineClick}
             />
@@ -237,7 +237,7 @@ const SpaceContextMenu: React.FC<IProps> = ({ space, hideHeader, onFinished, ...
             {!hideHeader && <div className="mx_SpacePanel_contextMenu_header">{space.name}</div>}
             <IconizedContextMenuOptionList first>
                 <IconizedContextMenuOption
-                    icon={<HomeSolidIcon />}
+                    icon={<HomeIcon />}
                     label={_t("space|context_menu|home")}
                     onClick={onHomeClick}
                 />

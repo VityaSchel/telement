@@ -7,7 +7,7 @@
 
 import React, { type JSX } from "react";
 import { IconButton, H1 } from "@vector-im/compound-web";
-import { ChatIcon } from "@vector-im/compound-design-tokens/assets/web/icons";
+import { ComposeIcon } from "@vector-im/compound-design-tokens/assets/web/icons";
 
 import { type ViewModel, useViewModel } from "../../core/viewmodel";
 import { Flex } from "../../core/utils/Flex";
@@ -138,7 +138,7 @@ export function RoomListHeaderView({ vm }: Readonly<RoomListHeaderViewProps>): J
                             onClick={(e) => vm.createChatRoom(e.nativeEvent)}
                             tooltip={_t("action|start_chat")}
                         >
-                            <ChatIcon color="var(--cpd-color-icon-secondary)" aria-hidden />
+                            <ComposeIcon color="var(--cpd-color-icon-secondary)" aria-hidden />
                         </IconButton>
                     ) : (
                         <ComposeMenuView vm={vm} />

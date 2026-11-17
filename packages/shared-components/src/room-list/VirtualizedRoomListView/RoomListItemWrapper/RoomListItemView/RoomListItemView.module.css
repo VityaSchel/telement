@@ -123,8 +123,12 @@
     color: var(--cpd-color-icon-accent-primary);
 }
 
+/* Compound's clock fills its box, unlike the checks' small glyph: at 12px, in the checks' 16px slot, it looks as big */
 .lastMessageState.sending {
     color: var(--cpd-color-icon-tertiary);
+    inline-size: 12px;
+    block-size: 12px;
+    margin-inline: var(--cpd-space-0-5x);
 }
 
 .time {

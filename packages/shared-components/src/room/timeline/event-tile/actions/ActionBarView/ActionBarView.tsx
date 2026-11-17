@@ -21,7 +21,7 @@ import {
     ThreadsIcon,
     VisibilityOnIcon,
     VisibilityOffIcon,
-    DownloadIcon,
+    DownloadIosIcon,
     OverflowHorizontalIcon,
     ReactionAddIcon,
 } from "@vector-im/compound-design-tokens/assets/web/icons";
@@ -241,7 +241,7 @@ export function ActionBarView({ vm, className }: Readonly<ActionBarViewProps>): 
             buttonRef={actionButtonRefSetters[ActionBarAction.Download]}
             label={downloadTitle}
             onActivate={vm.onDownloadClick}
-            icon={isDownloadLoading ? InlineSpinner : DownloadIcon}
+            icon={isDownloadLoading ? InlineSpinner : DownloadIosIcon}
             disabled={isDownloadLoading}
         />
     );

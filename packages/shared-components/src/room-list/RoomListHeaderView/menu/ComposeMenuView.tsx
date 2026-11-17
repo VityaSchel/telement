@@ -10,7 +10,7 @@ import { IconButton, Menu, MenuItem } from "@vector-im/compound-web";
 import VideoCallIcon from "@vector-im/compound-design-tokens/assets/web/icons/video-call";
 import ChatIcon from "@vector-im/compound-design-tokens/assets/web/icons/chat";
 import RoomIcon from "@vector-im/compound-design-tokens/assets/web/icons/room";
-import PlusIcon from "@vector-im/compound-design-tokens/assets/web/icons/plus";
+import ComposeIcon from "@vector-im/compound-design-tokens/assets/web/icons/compose";
 
 import { type RoomListHeaderViewModel } from "../RoomListHeaderView";
 import { useI18n } from "../../../core/i18n/i18nContext";
@@ -44,7 +44,7 @@ export function ComposeMenuView({ vm }: ComposeMenuViewProps): JSX.Element {
             style={{ padding: "var(--cpd-space-1-5x)" }}
             tooltip={_t("action|new_conversation")}
         >
-            <PlusIcon color="var(--cpd-color-icon-secondary)" aria-hidden />
+            <ComposeIcon color="var(--cpd-color-icon-secondary)" aria-hidden />
         </IconButton>
     );
 

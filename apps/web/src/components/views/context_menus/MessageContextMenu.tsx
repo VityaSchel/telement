@@ -21,16 +21,12 @@ import {
     M_POLL_START,
 } from "matrix-js-sdk/src/matrix";
 import {
-    CheckIcon,
-    ChevronUpIcon,
     CloseIcon,
     CollapseIcon,
     ExpandIcon,
     VisibilityOffIcon,
     EditIcon,
-    ErrorSolidIcon,
     InlineCodeIcon,
-    LinkIcon,
     PinIcon,
     QuoteIcon,
     ReactionAddIcon,
@@ -42,11 +38,13 @@ import {
     ForwardIcon,
     PopOutIcon,
     VisibilityOnIcon,
-    ShareIcon,
     CopyIcon,
     TreeIcon,
     ImageIcon,
-    DownloadIcon,
+    PollsEndIcon,
+    ErrorIcon,
+    ShareIosIcon,
+    DownloadIosIcon,
 } from "@vector-im/compound-design-tokens/assets/web/icons";
 import { copyPlainTextToClipboard } from "@element-hq/element-web-shared-utils";
 
@@ -629,7 +627,7 @@ export default class MessageContextMenu extends React.Component<IProps, IState> 
         if (permalink) {
             permalinkButton = (
                 <IconizedContextMenuOption
-                    icon={<ShareIcon />}
+                    icon={<ShareIosIcon />}
                     onClick={this.onShareClick}
                     label={_t("action|share")}
                     element="a"
@@ -649,7 +647,7 @@ export default class MessageContextMenu extends React.Component<IProps, IState> 
         if (this.canEndPoll(mxEvent)) {
             endPollButton = (
                 <IconizedContextMenuOption
-                    icon={<CheckIcon />}
+                    icon={<PollsEndIcon />}
                     label={_t("poll|end_title")}
                     onClick={this.onEndPollClick}
                 />
@@ -664,7 +662,7 @@ export default class MessageContextMenu extends React.Component<IProps, IState> 
         ) {
             externalURLButton = (
                 <IconizedContextMenuOption
-                    icon={<LinkIcon />}
+                    icon={<PopOutIcon />}
                     onClick={this.closeMenu}
                     label={_t("timeline|context_menu|external_url")}
                     element="a"
@@ -684,7 +682,7 @@ export default class MessageContextMenu extends React.Component<IProps, IState> 
         if (collapseReplyChain) {
             collapseReplyChainButton = (
                 <IconizedContextMenuOption
-                    icon={<ChevronUpIcon />}
+                    icon={<CollapseIcon />}
                     label={_t("timeline|context_menu|collapse_reply_thread")}
                     onClick={this.onCollapseReplyChainClick}
                 />
@@ -707,7 +705,7 @@ export default class MessageContextMenu extends React.Component<IProps, IState> 
         if (mxEvent.getSender() !== me) {
             reportEventButton = (
                 <IconizedContextMenuOption
-                    icon={<ErrorSolidIcon />}
+                    icon={<ErrorIcon />}
                     label={_t("timeline|context_menu|report")}
                     onClick={this.onReportEventClick}
                 />
@@ -749,7 +747,7 @@ export default class MessageContextMenu extends React.Component<IProps, IState> 
         if (contentActionable && MediaEventHelper.isEligible(mxEvent) && this.state.canSaveMedia) {
             saveAsButton = (
                 <IconizedContextMenuOption
-                    icon={<DownloadIcon />}
+                    icon={<DownloadIosIcon />}
                     label={_t("telement|media|save_as")}
                     onClick={this.onSaveAsClick}
                 />
