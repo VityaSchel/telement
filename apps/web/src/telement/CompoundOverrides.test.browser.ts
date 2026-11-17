@@ -9,7 +9,15 @@ import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
 import { createElement, type ReactNode } from "react";
 import { flushSync } from "react-dom";
 import { createRoot, type Root } from "react-dom/client";
-import { Button, IconButton, Link, ReleaseAnnouncement, Tooltip, TooltipProvider } from "@vector-im/compound-web";
+import {
+    Avatar,
+    Button,
+    IconButton,
+    Link,
+    ReleaseAnnouncement,
+    Tooltip,
+    TooltipProvider,
+} from "@vector-im/compound-web";
 import { OverflowHorizontalIcon } from "@vector-im/compound-design-tokens/assets/web/icons";
 import compoundBase from "@vector-im/compound-design-tokens/assets/web/css/cpd-common-base.css?raw";
 import compoundSemantic from "@vector-im/compound-design-tokens/assets/web/css/cpd-common-semantic.css?raw";
@@ -169,5 +177,23 @@ describe("Telement's overrides of Compound", () => {
         )!.parentElement!;
 
         expect(arrowOf(announcement)?.checkVisibility()).toBe(true);
+    });
+
+    it("draws letter avatars as Telegram's gradients with white initials, one for each of Compound's colors", () => {
+        // Names that Compound's hash spreads over its six colors
+        const names = ["Alice", "Bob", "Charlie", "Dave", "Eve", "Frank", "Grace", "Heidi", "Ivan", "Judy", "Mallory"];
+        render(
+            names.map((name) => createElement(Avatar, { key: name, id: `@${name}:example.org`, name, size: "48px" })),
+        );
+        const avatars = [...document.querySelectorAll<HTMLElement>("[data-color]")];
+        const colors = new Set(avatars.map((avatar) => avatar.dataset.color));
+
+        expect(colors.size).toBeGreaterThanOrEqual(5);
+        for (const avatar of avatars) {
+            const style = getComputedStyle(avatar);
+            expect(style.backgroundImage).toMatch(/^linear-gradient\(rgb/);
+            expect(style.color).toBe("rgb(255, 255, 255)");
+            expect(style.borderTopColor).toBe("rgba(0, 0, 0, 0)");
+        }
     });
 });

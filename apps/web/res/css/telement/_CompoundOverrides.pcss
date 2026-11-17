@@ -199,6 +199,49 @@ input[class*="_control_"] + button[class*="_action_"] {
 }
 
 /*
+ * Letter avatars are Telegram's: a gradient from its avatar palette with white initials, in both themes, so they stand
+ * out on hovered and selected rows as well as on the page. Compound's six colors take the Telegram gradient of the
+ * nearest hue (Telegram for macOS's day palette: lime to green, cyan, fuchsia to pink, purple to violet, pink to red,
+ * orange). The border Compound draws for high contrast mode would be a solid ring around the gradient.
+ */
+[class*="_avatar-imageless_"] {
+    --cpd-avatar-color: #ffffff;
+
+    background: linear-gradient(var(--tl-avatar-top), var(--tl-avatar-bottom));
+    border-color: transparent;
+
+    &[data-color="1"] {
+        --tl-avatar-top: #a0de7e;
+        --tl-avatar-bottom: #54cb68;
+    }
+
+    &[data-color="2"] {
+        --tl-avatar-top: #53edd6;
+        --tl-avatar-bottom: #28c9b7;
+    }
+
+    &[data-color="3"] {
+        --tl-avatar-top: #e0a2f3;
+        --tl-avatar-bottom: #d669ed;
+    }
+
+    &[data-color="4"] {
+        --tl-avatar-top: #82b1ff;
+        --tl-avatar-bottom: #665fff;
+    }
+
+    &[data-color="5"] {
+        --tl-avatar-top: #ff885e;
+        --tl-avatar-bottom: #ff516a;
+    }
+
+    &[data-color="6"] {
+        --tl-avatar-top: #ffcd6a;
+        --tl-avatar-bottom: #ffa85c;
+    }
+}
+
+/*
  * Like Telegram, menu items and the right panel's action lists show no chevron when hovered; only a submenu's trigger
  * (aria-haspopup) keeps one.
  */
