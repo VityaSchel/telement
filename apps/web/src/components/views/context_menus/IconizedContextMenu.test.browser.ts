@@ -18,11 +18,12 @@ let stylesheet: HTMLStyleElement;
 
 const ICON = `<svg viewBox="0 0 24 24"><rect width="24" height="24" /></svg>`;
 
-function option(id: string, label: string, checked = false): string {
-    const check = checked
-        ? `<svg class="mx_IconizedContextMenu_checked" id="${id}-check" viewBox="0 0 24 24"></svg>`
-        : "";
-    return `<li class="mx_IconizedContextMenu_item" role="menuitem" tabindex="-1" id="${id}">${ICON}<span class="mx_IconizedContextMenu_label">${label}</span>${check}</li>`;
+function option(id: string, label: string, selectable = false): string {
+    // Compound's 20px radio, which marks a selectable option where its icon would be
+    const lead = selectable
+        ? `<input type="radio" class="mx_IconizedContextMenu_selection" id="${id}-radio" style="inline-size: 20px; block-size: 20px; margin: 0" checked>`
+        : ICON;
+    return `<li class="mx_IconizedContextMenu_item" role="menuitem" tabindex="-1" id="${id}">${lead}<span class="mx_IconizedContextMenu_label">${label}</span></li>`;
 }
 
 /** The DOM of the message menu, as MessageContextMenu renders it, with two lists of options. */
@@ -72,6 +73,11 @@ describe("IconizedContextMenu", () => {
                 --cpd-color-border-interactive-secondary: gray;
                 --cpd-color-gray-400: gray;
                 --cpd-color-border-focused: blue;
+                --cpd-color-text-primary: black;
+                --cpd-color-text-critical-primary: rgb(200, 0, 0);
+                --cpd-color-icon-critical-primary: rgb(200, 0, 0);
+                --cpd-color-bg-critical-subtle: rgb(255, 230, 230);
+                --cpd-color-text-disabled: rgb(150, 150, 150);
             }
             ${contextualMenuStyles}
             ${iconizedContextMenuStyles}
@@ -141,21 +147,38 @@ describe("IconizedContextMenu", () => {
         const menu = rectOf("menu");
 
         expect(document.querySelector("#copy svg")!.getBoundingClientRect().left - menu.left).toBe(16);
-        // The check of an active option ends there too, its drawing pulled out of its box's padding
-        const check = rectOf("reply-check");
-        expect(menu.right - check.right).toBeCloseTo(16 - (16 * 4.275) / 24, 1);
-        expect(rectOf("reply").right - check.right).toBeCloseTo(12 - (16 * 4.275) / 24, 1);
     });
 
-    it("ends the check of an active option 16px from the menu's edge in right-to-left text too", () => {
+    it("puts the radio of a selectable option where an icon would be, 12px before its label", () => {
         render(true);
-        document.getElementById("menu")!.dir = "rtl";
-        const menu = rectOf("menu");
-        const check = rectOf("reply-check");
+        const radio = rectOf("reply-radio");
+        const labelElement = document.querySelector("#reply .mx_IconizedContextMenu_label")!;
+        const label = labelElement.getBoundingClientRect();
 
-        // At the left end of the item, its drawing pulled out of its box's padding
-        expect(check.left - menu.left).toBeCloseTo(16 - (16 * 4.275) / 24, 1);
-        expect(check.left - rectOf("reply").left).toBeCloseTo(12 - (16 * 4.275) / 24, 1);
+        expect(radio.left - rectOf("menu").left).toBe(16);
+        // The label's padding puts its text 12px after the radio, as after an icon
+        expect(label.left).toBe(radio.right);
+        expect(getComputedStyle(labelElement).paddingInlineStart).toBe("12px");
+        expect(radio.top + radio.height / 2).toBe(label.top + label.height / 2);
+    });
+
+    it("paints destructive items red, with a red highlight", async () => {
+        render(true);
+        const reply = document.getElementById("reply")!;
+        reply.classList.add("mx_IconizedContextMenu_option_red");
+        await userEvent.hover(reply);
+
+        expect(getComputedStyle(reply).color).toBe("rgb(200, 0, 0)");
+        expect(getComputedStyle(reply).backgroundColor).toBe("rgb(255, 230, 230)");
+    });
+
+    it("shows a disabled item in Compound's disabled color instead of fading it", () => {
+        render(true);
+        const copy = document.getElementById("copy")!;
+        copy.classList.add("mx_AccessibleButton_disabled");
+
+        expect(getComputedStyle(copy).opacity).toBe("1");
+        expect(getComputedStyle(copy).color).toBe("rgb(150, 150, 150)");
     });
 
     it("draws the keyboard focus ring inside the item's highlight, clear of the menu's border", async () => {

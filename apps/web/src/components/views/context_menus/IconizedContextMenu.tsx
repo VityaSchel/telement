@@ -8,7 +8,7 @@ Please see LICENSE files in the repository root for full details.
 
 import React, { type JSX, type ReactNode } from "react";
 import classNames from "classnames";
-import { CheckIcon } from "@vector-im/compound-design-tokens/assets/web/icons";
+import { CheckboxInput, RadioInput } from "@vector-im/compound-web";
 
 import ContextMenu, {
     ChevronFace,
@@ -18,6 +18,8 @@ import ContextMenu, {
     MenuItemRadio,
 } from "../../structures/ContextMenu";
 import { _t } from "../../../languageHandler";
+
+const noop = (): void => {};
 
 interface IProps extends IContextMenuProps {
     className?: string;
@@ -57,9 +59,16 @@ export const IconizedContextMenuRadio: React.FC<IRadioProps> = ({ label, icon, a
             active={active}
             label={label}
         >
+            {/* Telement: Compound's radio marks the selected option, as in Compound's menus */}
+            <RadioInput
+                className="mx_IconizedContextMenu_selection"
+                aria-hidden={true}
+                tabIndex={-1}
+                checked={!!active}
+                onChange={noop}
+            />
             {icon}
             <span className="mx_IconizedContextMenu_label">{label}</span>
-            {active && <CheckIcon className="mx_IconizedContextMenu_checked" />}
         </MenuItemRadio>
     );
 };
@@ -77,8 +86,6 @@ export const IconizedContextMenuCheckbox: React.FC<ICheckboxProps> = ({
         marker = (
             <span className="mx_IconizedContextMenu_activeText">{active ? _t("common|on") : _t("common|off")}</span>
         );
-    } else if (active) {
-        marker = <CheckIcon className="mx_IconizedContextMenu_checked" />;
     }
 
     return (
@@ -91,6 +98,16 @@ export const IconizedContextMenuCheckbox: React.FC<ICheckboxProps> = ({
             active={active}
             label={label}
         >
+            {/* Telement: Compound's checkbox marks the option, as in Compound's menus */}
+            {!words && (
+                <CheckboxInput
+                    className="mx_IconizedContextMenu_selection"
+                    aria-hidden={true}
+                    tabIndex={-1}
+                    checked={!!active}
+                    onChange={noop}
+                />
+            )}
             {icon}
             <span className="mx_IconizedContextMenu_label">{label}</span>
             {marker}

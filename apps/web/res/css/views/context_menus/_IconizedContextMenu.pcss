@@ -58,15 +58,35 @@ Please see LICENSE files in the repository root for full details.
                 background-color: var(--cpd-color-bg-action-secondary-hovered);
             }
 
+            &:active {
+                background-color: var(--cpd-color-bg-action-secondary-pressed);
+            }
+
             /* Inside the highlight, so that the ring keeps clear of the menu's border, as far as the highlight does */
             &:focus-visible {
                 outline: var(--cpd-border-width-2) solid var(--cpd-color-border-focused);
                 outline-offset: calc(-1 * var(--cpd-border-width-2));
             }
 
+            /* Compound's disabled look rather than a faded item */
             &.mx_AccessibleButton_disabled {
-                opacity: 0.5;
+                color: var(--cpd-color-text-disabled);
+                background-color: transparent;
                 cursor: not-allowed;
+
+                svg {
+                    color: var(--cpd-color-icon-disabled);
+                }
+            }
+
+            /* Compound's 20px radio or checkbox marks the selected option where an icon would be */
+            .mx_IconizedContextMenu_selection {
+                flex-shrink: 0;
+                pointer-events: none;
+
+                & + .mx_IconizedContextMenu_label {
+                    padding-inline-start: var(--cpd-space-3x);
+                }
             }
 
             span.mx_IconizedContextMenu_label {
@@ -97,32 +117,21 @@ Please see LICENSE files in the repository root for full details.
         }
     }
 
-    .mx_IconizedContextMenu_optionList_red {
-        .mx_IconizedContextMenu_item {
-            color: $alert !important;
-        }
+    /* Destructive items are red with a red highlight, as in Compound's menus */
+    :is(.mx_IconizedContextMenu_optionList_red .mx_IconizedContextMenu_item, .mx_IconizedContextMenu_option_red) {
+        color: var(--cpd-color-text-critical-primary) !important;
 
         svg {
             color: var(--cpd-color-icon-critical-primary);
         }
-    }
 
-    .mx_IconizedContextMenu_option_red {
-        color: $alert !important;
-
-        svg {
-            color: $alert;
+        &:hover,
+        &:focus-visible {
+            background-color: var(--cpd-color-bg-critical-subtle);
         }
-    }
 
-    .mx_IconizedContextMenu_active {
-        &.mx_IconizedContextMenu_item,
-        .mx_IconizedContextMenu_item {
-            color: $accent !important;
-
-            svg {
-                color: $accent;
-            }
+        &:active {
+            background-color: var(--cpd-color-bg-critical-subtle-hovered);
         }
     }
 
@@ -132,13 +141,6 @@ Please see LICENSE files in the repository root for full details.
         }
     }
 
-    /* The check is drawn 4.275 of its 24 units inside its box: pulled out by them, it ends where the content of the
-       item ends, 16px from the menu's edge */
-    svg.mx_IconizedContextMenu_checked {
-        margin-inline-start: 16px;
-        margin-inline-end: calc(-16px * 4.275 / 24);
-    }
-
     .mx_IconizedContextMenu_sublabel {
         margin-left: 20px;
         color: $tertiary-content;
@@ -146,5 +148,10 @@ Please see LICENSE files in the repository root for full details.
 }
 
 .mx_IconizedContextMenu_item.mx_IconizedContextMenu_itemDestructive {
-    color: $alert !important;
+    color: var(--cpd-color-text-critical-primary) !important;
+
+    &:hover,
+    &:focus-visible {
+        background-color: var(--cpd-color-bg-critical-subtle);
+    }
 }
