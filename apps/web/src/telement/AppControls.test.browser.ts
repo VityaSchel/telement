@@ -51,6 +51,7 @@ import joinRuleDropdownStyles from "../../res/css/views/dialogs/_JoinRuleDropdow
 import accessibleButtonStyles from "../../res/css/views/elements/_AccessibleButton.pcss?raw";
 import dropdownStyles from "../../res/css/views/elements/_Dropdown.pcss?raw";
 import fieldStyles from "../../res/css/views/elements/_Field.pcss?raw";
+import autocompleteInputStyles from "../../res/css/structures/_AutocompleteInput.pcss?raw";
 import roomAliasFieldStyles from "../../res/css/views/elements/_RoomAliasField.pcss?raw";
 import spinnerStyles from "../../res/css/views/elements/_Spinner.pcss?raw";
 import ssoButtonStyles from "../../res/css/views/elements/_SSOButtons.pcss?raw";
@@ -95,6 +96,7 @@ const APP_STYLES = [
     accessibleButtonStyles,
     dropdownStyles,
     fieldStyles,
+    autocompleteInputStyles,
     roomAliasFieldStyles,
     spinnerStyles,
     ssoButtonStyles,
@@ -485,6 +487,54 @@ describe("App controls", () => {
                 expect(cornerRadii(button)).toEqual({ x: 18, y: 18 });
                 expect(center(icon)).toBe(center(button));
             }
+        });
+
+        it("makes the privileged users picker a 36px field with its matches in a menu 4px under it", () => {
+            render(`
+                <div class="mx_AutocompleteInput" style="inline-size: 400px">
+                    <div class="mx_AutocompleteInput_editor mx_AutocompleteInput_editor--focused">
+                        <svg class="mx_AutocompleteInput_search_icon" width="20px" height="20px" viewBox="0 0 24 24"></svg>
+                        <input type="text" placeholder="Add people">
+                    </div>
+                    <div class="mx_AutocompleteInput_matches">
+                        <div class="mx_AutocompleteInput_suggestion" id="alice">
+                            <span class="mx_AutocompleteInput_suggestion_title">Alice</span>
+                            <span class="mx_AutocompleteInput_suggestion_description">@alice:example.org</span>
+                        </div>
+                        <div class="mx_AutocompleteInput_suggestion mx_AutocompleteInput_suggestion--selected" id="bob">
+                            <span class="mx_AutocompleteInput_suggestion_title">Bob</span>
+                            <span class="mx_AutocompleteInput_suggestion_description">@bob:example.org</span>
+                        </div>
+                    </div>
+                </div>
+            `);
+            const editor = get(".mx_AutocompleteInput_editor");
+            const matches = get(".mx_AutocompleteInput_matches");
+            // AutocompleteInput puts the matches at the field's height inside its border
+            matches.style.top = `${editor.clientHeight}px`;
+            const icon = box(get(".mx_AutocompleteInput_search_icon"));
+            const input = get(".mx_AutocompleteInput_editor input");
+
+            expect(box(editor).height).toBe(36);
+            expect(getComputedStyle(editor).borderRadius).toBe("8px");
+            expect(settledStyle(editor).borderTopColor).toBe(colorOf("--cpd-color-border-focused"));
+            expect([icon.width, icon.left - box(editor).left]).toEqual([20, 13]);
+            expect(box(input).left + parseFloat(getComputedStyle(input).paddingLeft) - icon.right).toBe(8);
+            expect(center(get(".mx_AutocompleteInput_search_icon"))).toBe(center(editor));
+
+            const menu = box(matches);
+            expect(menu.top - box(editor).bottom).toBe(4);
+            expect(getComputedStyle(matches).borderRadius).toBe("12px");
+            for (const id of ["alice", "bob"]) {
+                const row = box(get(`#${id}`));
+                expect(row.height).toBe(40);
+                expect([row.left - menu.left, menu.right - row.right]).toEqual([4, 4]);
+                expect(box(get(`#${id} .mx_AutocompleteInput_suggestion_title`)).left - menu.left).toBe(16);
+            }
+            // Someone already added has the darker fill
+            expect(getComputedStyle(get("#bob")).backgroundColor).not.toBe(
+                getComputedStyle(get("#alice")).backgroundColor,
+            );
         });
 
         it("makes the invite dialog's address bar a 36px field, with its button beside the first row as pills grow it", () => {

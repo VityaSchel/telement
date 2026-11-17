@@ -127,7 +127,7 @@ export const AutocompleteInput: React.FC<AutocompleteInputProps> = ({
                 onClick={onClickInputArea}
                 data-testid="autocomplete-editor"
             >
-                <SearchIcon className="mx_AutocompleteInput_search_icon" width="18px" height="18px" />
+                <SearchIcon className="mx_AutocompleteInput_search_icon" width="20px" height="20px" />
                 {selection.map((item) => (
                     <SelectionItem
                         key={item.completionId}

@@ -10,9 +10,15 @@ Please see LICENSE files in the repository root for full details.
     position: relative;
 }
 
+/* Telement: a text field of the field spec (TELEMENT.md, "Colors, type and components"): 36px with one row of pills, a
+   1px border rounded 8px, darker when hovered and Compound's focus blue when focused, and the search icon and text
+   12px inside */
 .mx_AutocompleteInput_search_icon {
-    margin-left: var(--cpd-space-2x);
-    fill: $secondary-content;
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+    margin-inline-start: var(--cpd-space-3x);
+    color: var(--cpd-color-icon-secondary);
 }
 
 .mx_AutocompleteInput_editor {
@@ -20,11 +26,18 @@ Please see LICENSE files in the repository root for full details.
     display: flex;
     flex-wrap: wrap;
     align-items: center;
+    gap: var(--cpd-space-1x) var(--cpd-space-2x);
+    box-sizing: border-box;
+    min-height: var(--tl-control-size);
     overflow-x: hidden;
     overflow-y: auto;
-    border: 1px solid $input-border-color;
-    border-radius: 4px;
+    border: var(--cpd-border-width-1) solid var(--cpd-color-border-interactive-secondary);
+    border-radius: var(--tl-radius-row);
     transition: border-color 0.25s;
+
+    &:hover {
+        border-color: var(--cpd-color-border-interactive-hovered);
+    }
 
     > input {
         flex: 1;
@@ -32,30 +45,26 @@ Please see LICENSE files in the repository root for full details.
         resize: none;
         /* `!important` is required to bypass global input styles. */
         margin: 0 !important;
-        padding: var(--cpd-space-2x) 9px;
+        padding: calc((var(--tl-control-size) - 2 * var(--cpd-border-width-1) - 1lh) / 2) var(--cpd-space-3x)
+            calc((var(--tl-control-size) - 2 * var(--cpd-border-width-1) - 1lh) / 2) 0 !important;
         border: none !important;
-        color: $primary-content !important;
-        font-weight: normal !important;
+        font: var(--cpd-font-body-md-regular) !important;
+        color: var(--cpd-color-text-primary) !important;
 
         &::placeholder {
-            color: $primary-content !important;
+            color: var(--cpd-color-text-secondary) !important;
             font-weight: normal !important;
         }
     }
 }
 
-.mx_AutocompleteInput_editor--focused {
-    border-color: $links;
-}
-
-.mx_AutocompleteInput_editor--has-suggestions {
-    border-bottom-left-radius: 0;
-    border-bottom-right-radius: 0;
+.mx_AutocompleteInput_editor--focused,
+.mx_AutocompleteInput_editor--focused:hover {
+    border-color: var(--cpd-color-border-focused);
 }
 
 .mx_AutocompleteInput_editor_selection {
     display: flex;
-    margin-left: var(--cpd-space-2x);
 }
 
 .mx_AutocompleteInput_editor_selection_pill {
@@ -66,29 +75,37 @@ Please see LICENSE files in the repository root for full details.
     padding-right: var(--cpd-space-2x);
     background-color: $username-variant1-color;
     color: #ffffff;
-    font-size: $font-12px;
+    font: var(--cpd-font-body-sm-regular);
 }
 
 .mx_AutocompleteInput_editor_selection_remove_button svg {
     vertical-align: middle;
 }
 
+/* A floating menu 4px under the field (its inline top is the field's height inside the border), holding the dense
+   list: 40px rows inset 4px, their text 16px in */
 .mx_AutocompleteInput_matches {
     position: absolute;
     left: 0;
     right: 0;
-    background-color: $background;
-    border: 1px solid $links;
-    border-top-color: $input-border-color;
-    border-bottom-left-radius: 4px;
-    border-bottom-right-radius: 4px;
+    margin-block-start: calc(2 * var(--cpd-border-width-1) + var(--cpd-space-1x));
+    padding: calc(var(--tl-inset-menu) - var(--cpd-border-width-1));
+    background-color: var(--cpd-color-bg-canvas-default);
+    border: var(--cpd-border-width-1) solid var(--cpd-color-border-interactive-secondary);
+    border-radius: var(--tl-radius-menu);
+    box-shadow: 0 4px 24px rgb(0 0 0 / 10%);
     z-index: 1000;
 }
 
 .mx_AutocompleteInput_suggestion {
     display: flex;
     align-items: center;
-    padding: var(--cpd-space-2x);
+    gap: var(--cpd-space-2x);
+    box-sizing: border-box;
+    min-height: var(--cpd-space-10x);
+    padding: var(--cpd-space-2x) var(--cpd-space-3x);
+    border-radius: var(--tl-radius-row);
+    font: var(--cpd-font-body-md-regular);
     cursor: default;
 
     > * {
@@ -96,26 +113,17 @@ Please see LICENSE files in the repository root for full details.
     }
 
     &:hover {
-        background-color: $quinary-content;
-        border-bottom-left-radius: 4px;
-        border-bottom-right-radius: 4px;
+        background-color: var(--cpd-color-bg-action-secondary-hovered);
     }
 }
 
-.mx_AutocompleteInput_suggestion--selected {
-    background-color: $quinary-content;
-
-    &:last-child {
-        border-bottom-left-radius: 4px;
-        border-bottom-right-radius: 4px;
-    }
-}
-
-.mx_AutocompleteInput_suggestion_title {
-    margin-right: var(--cpd-space-2x);
+/* A person already added takes the pressed fill, as the row chosen with the arrow keys does in other lists */
+.mx_AutocompleteInput_suggestion--selected,
+.mx_AutocompleteInput_suggestion--selected:hover {
+    background-color: var(--cpd-color-bg-action-secondary-pressed);
 }
 
 .mx_AutocompleteInput_suggestion_description {
-    color: $secondary-content;
-    font-size: $font-12px;
+    font: var(--cpd-font-body-sm-regular);
+    color: var(--cpd-color-text-secondary);
 }
