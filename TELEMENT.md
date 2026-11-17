@@ -824,6 +824,45 @@ kinds, legacy dialog buttons) giving about 17 button specs in 8 visible families
     Linux screenshot baselines that show these surfaces are out of date until regenerated in Docker (see
     [open questions](#open-questions)).
 
+### Colors, type and components
+
+Decided 2026-11-17 after a second inventory (five audits: fields, menus, icons and buttons, dialogs, colors and type).
+[Radius and spacing](#radius-and-spacing) already held; these rules cover what it didn't. Review page with the
+findings: https://claude.ai/artifact/BVZ6pyrzyasmRRAVMFxxB7.
+
+- **Accent:** Telegram blue by default instead of Compound's green, overridable by the system accent color where the
+  OS has one (macOS sets it system-wide; CSS exposes it as `AccentColor`). Links use the accent. Element's custom
+  themes and the legacy-light and legacy-dark theme builds that only they use are removed.
+- **Color roles:** one Compound token per role, light and dark from Compound, named `--tl-color-*` in
+  `telement/tokens.css`: one secondary text color (`text-secondary`) for meta, previews, captions, timestamps and
+  placeholders; one divider (`separator-primary`); one hover fill (Compound's secondary hover) and one pressed fill,
+  which keyboard selection in lists also uses; one media overlay. Unread counters and mentions look like the room
+  list's everywhere: accent counter, gray when muted, accent @.
+- **Type:** Compound's eight sizes only. 12px becomes 13 (11 in badges), 18 becomes 20, 10 becomes 11, bold becomes
+  semibold.
+- **Dialogs:** one anatomy. Content, title, body and footer on a 24px edge; the close button on the title's line and
+  kept on every dialog; titles 20 semibold (Compound heading-sm), start-aligned except hero cards (security flows,
+  big icon) which center. Footer: Telegram-style flat accent text buttons at the bottom right, Cancel before the
+  action, red for destructive, one shared component. Widths: 400 confirmations, 480 forms, 640 lists, 980 tabbed
+  settings. Image and video viewers, the search dialog, spinner, maps and dial pad stay as they are.
+- **Menus:** one menu spec for every floating menu and dropdown (the geometry in Radius and spacing), one dense list
+  spec for autocomplete, receipts and search results, and the right panel lists keep their larger 24px icons and
+  medium labels. Selected options keep Compound's radios. Chevrons only on submenus. Destructive items are red with a
+  red hover everywhere. Upstream menus nobody restyled yet (jump to date, server picker, read-receipt popup,
+  autocomplete, which floats above the composer) are restyled too.
+- **Fields:** one field spec (36px, 1px border, 8 radius, 15px text 12px inside, floated label) for legacy and
+  Compound fields alike, with a hover border, Compound's focus blue (`border-focused`) for borders and rings, and one
+  invalid and disabled look. Every search is the filled pill, with a visible focus ring.
+- **Icons:** 16 (menus, inline status, 24px buttons), 20 (composer, buttons with labels, 28px buttons, toasts, tabs,
+  badges), 24 (header-class icon buttons including media viewer controls, right panel rows) and 48 (media play), as
+  tokens. The image viewer's ··· and the video controls become 24, status glyphs a fixed 16, space panel tiles 24, and
+  the room list's dial-pad and explore buttons plain 24px icon buttons.
+- **Buttons:** filled, outline and plain (each with a destructive variant), inline links, icon buttons at 24/28/36.
+  The 32px icon buttons become 36, the `_sm` kinds and the 156px minimum go, every button uses Compound's disabled
+  look, and standalone link buttons lose the underline.
+- **The rest:** four shadows (floating, raised, edge, on media), Compound's tooltip only, two toasts on tokens,
+  eleven avatar sizes (14, 16, 20, 24, 32, 36, 40, 48, 64, 80, 120), three durations (100ms, 200ms ease-out, 300ms).
+
 ### Floating toolbar
 
 Checked 2026-11-11 whether the hover toolbar can go. The message menu lacks these toolbar actions: resend and
@@ -989,6 +1028,9 @@ Deferred work:
 | 2026-11-16 | GIFs come from GIPHY with the maintainer's key, up to R, uploaded to the homeserver when sent, without pingbacks.                               | [GIFs](#gifs)                                                                        |
 | 2026-11-17 | On macOS an unreadable keychain item leads to Quit or "Clear data and restart", which deletes it.                                               | [Keychain on macOS](#keychain-on-macos)                                              |
 | 2026-11-17 | Keep the backup authenticity shield; implementing MSC4048 is on the backlog.                                                                    | [Authenticated key backup](#authenticated-key-backup-msc4048)                        |
+| 2026-11-17 | Accent is Telegram blue, overridable by the system accent; custom themes are removed.                                                           | [Colors, type and components](#colors-type-and-components)                           |
+| 2026-11-17 | One token per color role, Compound's type scale only, one dialog anatomy with text-button footers.                                              | [Colors, type and components](#colors-type-and-components)                           |
+| 2026-11-17 | One menu spec with Compound's radios, one field spec with floated labels and hover borders, icons 16/20/24.                                     | [Colors, type and components](#colors-type-and-components)                           |
 
 ## Upstream merge log
 
