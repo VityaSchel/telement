@@ -372,9 +372,16 @@ electron-builder.
 - **Signing (macOS):** electron-builder signs with the first "Developer ID Application" identity in the keychain. Set
   `CSC_IDENTITY_AUTO_DISCOVERY=false` for an unsigned local build, or `CSC_NAME` to pick an identity.
 - **Notarization (macOS):** store the Apple credentials in the keychain once with
-  `xcrun notarytool store-credentials telement --apple-id <apple-id> --team-id <team-id>`, then build with
-  `APPLE_KEYCHAIN_PROFILE=telement APPLE_TEAM_ID=<team-id>`. Without these variables electron-builder skips
-  notarization.
+  `xcrun notarytool store-credentials <profile> --apple-id <apple-id> --team-id <team-id>` (the maintainer's profile
+  is `dev.hloth.telement`), then build with `APPLE_KEYCHAIN_PROFILE=<profile> APPLE_TEAM_ID=<team-id>`. Without these
+  variables electron-builder skips notarization. It notarizes and staples the app; the DMG itself stays unsigned.
+- **Linux:** native modules (`pkcs11js`, and seshat's prebuilt binary) can't be cross-built from macOS, so Linux
+  packages are built in upstream's Debian container: `pnpm run docker:setup`, `pnpm run docker:install`, then
+  `INDOCKER_VARIANT_PATH=telement/release/build.json pnpm run docker:build -- --linux --x64` from `apps/desktop`
+  (after `build.sh --reuse-web` has made `webapp.asar`). `scripts/in-docker.sh` needs a terminal (`docker run -ti`).
+- **Windows:** needs Windows for real packages. From macOS, `electron-builder --win zip --x64 -c.npmRebuild=false`
+  makes a portable smoke-test build, which carries the macOS `pkcs11js` (no smart-card login) and no search
+  module; the NSIS installer needs Rosetta for electron-builder's `makensis`.
 
 ### What makes it Telement
 
@@ -439,7 +446,8 @@ icon and keeps its name by choice.
   configured.
 - The `ELEMENT_PROFILE_DIR` environment variable is shared with Element Desktop: if it is set, both apps use the
   same profile directory.
-- Only macOS builds have been tried. Windows and Linux packaging is untested.
+- Built and checked on 2026-11-17: the signed and notarized macOS arm64 app, and Linux x64 `deb` and `tar.gz`. Windows
+  has only had the macOS smoke-test zip; its installer and signing are untested.
 
 ## CI
 
