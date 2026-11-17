@@ -167,15 +167,14 @@ Please see LICENSE files in the repository root for full details.
 }
 
 .mx_ContextualMenu_wrapper {
+    /* The shared menu rows (TELEMENT.md, "Radius and spacing"): content 16px from the menu's edge, Compound's radio
+       12px before the label, and the description in smaller secondary text under it */
     .mx_ThreadPanel_Header_FilterOptionItem {
-        display: flex;
-        flex-grow: 1;
-        justify-content: space-between;
-        flex-direction: column;
-        /* As in the other menus: what the item holds 16px from the menu's edge, the text 12px after the check's 16px */
-        padding: var(--cpd-space-2x) var(--cpd-space-3x) var(--cpd-space-2x)
-            calc(var(--cpd-space-3x) + 16px + var(--cpd-space-3x));
-        position: relative;
+        display: grid;
+        grid-template-columns: auto 1fr;
+        column-gap: var(--cpd-space-3x);
+        align-items: center;
+        padding: var(--cpd-space-2x) var(--cpd-space-3x);
         border-radius: var(--tl-radius-row);
 
         /* Highlighted as in the other menus, also when focused with the keyboard */
@@ -184,33 +183,33 @@ Please see LICENSE files in the repository root for full details.
             background-color: var(--cpd-color-bg-action-secondary-hovered);
         }
 
+        &:active {
+            background-color: var(--cpd-color-bg-action-secondary-pressed);
+        }
+
         /* Inside the highlight, so that the ring keeps clear of the menu's border, as far as the highlight does */
         &:focus-visible {
             outline: var(--cpd-border-width-2) solid var(--cpd-color-border-focused);
             outline-offset: calc(-1 * var(--cpd-border-width-2));
         }
 
-        &[aria-checked="true"] {
-            span:first-child {
-                margin-left: -20px;
-            }
-
-            /* Where the other menus' icons are, centered on the first line */
-            svg {
-                width: 16px;
-                height: 16px;
-                margin-right: 8px;
-                color: $primary-content;
-                display: inline-block;
-                vertical-align: middle;
-                position: absolute;
-                top: calc(var(--cpd-space-2x) + (1lh - 16px) / 2);
-                left: var(--cpd-space-3x);
-            }
+        /* Centered on the label's line */
+        .mx_ThreadPanel_Header_FilterOptionItem_selection {
+            grid-row: 1 / span 2;
+            align-self: start;
+            margin-block-start: calc((1lh - 20px) / 2);
+            pointer-events: none;
         }
 
-        span:last-child {
-            color: $secondary-content;
+        > span {
+            grid-column: 2;
+        }
+
+        /* Puts the row on the 4px grid: 8 + 22.5 + 2 + 19.5 + 8 = 60 */
+        > span:last-child {
+            margin-block-start: 2px;
+            font: var(--cpd-font-body-sm-regular);
+            color: var(--cpd-color-text-secondary);
         }
     }
 }

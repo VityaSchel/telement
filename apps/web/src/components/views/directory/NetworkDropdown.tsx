@@ -9,7 +9,7 @@ Please see LICENSE files in the repository root for full details.
 import { without } from "lodash";
 import React, { useCallback, useEffect, useState } from "react";
 import { MatrixError } from "matrix-js-sdk/src/matrix";
-import { CloseIcon } from "@vector-im/compound-design-tokens/assets/web/icons";
+import { CloseIcon, PlusIcon } from "@vector-im/compound-design-tokens/assets/web/icons";
 
 import { _t } from "../../../languageHandler";
 import { MatrixClientPeg } from "../../../MatrixClientPeg";
@@ -231,7 +231,7 @@ export const NetworkDropdown: React.FC<IProps> = ({ protocols, config, setConfig
                             });
                         }
                     }}
-                    isSelected={false}
+                    icon={<PlusIcon />}
                     label={_t("spotlight|public_rooms|network_dropdown_add_server_option")}
                 />
             </>

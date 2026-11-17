@@ -8,9 +8,9 @@ Please see LICENSE files in the repository root for full details.
 
 import React, { useContext, useEffect, useRef, useState } from "react";
 import { type EventTimelineSet, type Room, Thread } from "matrix-js-sdk/src/matrix";
-import { IconButton, Tooltip } from "@vector-im/compound-web";
+import { IconButton, RadioInput, Tooltip } from "@vector-im/compound-web";
 import { logger } from "matrix-js-sdk/src/logger";
-import { ThreadsIcon, CheckIcon, ChevronDownIcon } from "@vector-im/compound-design-tokens/assets/web/icons";
+import { ThreadsIcon, ChevronDownIcon } from "@vector-im/compound-design-tokens/assets/web/icons";
 
 import MarkAllThreadsReadIcon from "../../../res/img/element-icons/check-all.svg?react";
 import BaseCard from "../views/right_panel/BaseCard";
@@ -30,6 +30,8 @@ import { clearRoomNotification } from "../../utils/notifications";
 import EmptyState from "../views/right_panel/EmptyState";
 import { ScopedRoomContextProvider, useScopedRoomContext } from "../../contexts/ScopedRoomContext.tsx";
 import { EventPresentationContextProvider } from "../../utils/EventPresentationContextProvider";
+
+const noop = (): void => {};
 
 interface IProps {
     roomId: string;
@@ -57,7 +59,14 @@ export const ThreadPanelHeaderFilterOptionItem: React.FC<
 > = ({ label, description, onClick, isSelected }) => {
     return (
         <MenuItemRadio active={isSelected} className="mx_ThreadPanel_Header_FilterOptionItem" onClick={onClick}>
-            {isSelected ? <CheckIcon /> : null}
+            {/* Telement: Compound's radio marks the chosen filter, as in Telement's other menus */}
+            <RadioInput
+                className="mx_ThreadPanel_Header_FilterOptionItem_selection"
+                aria-hidden={true}
+                tabIndex={-1}
+                checked={isSelected}
+                onChange={noop}
+            />
             <span>{label}</span>
             <span>{description}</span>
         </MenuItemRadio>

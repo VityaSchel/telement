@@ -8,11 +8,14 @@ Please see LICENSE files in the repository root for full details.
 
 import classNames from "classnames";
 import React, { type JSX, type FunctionComponent, type Key, type PropsWithChildren, type ReactNode } from "react";
-import { ChevronDownIcon, CheckIcon } from "@vector-im/compound-design-tokens/assets/web/icons";
+import { ChevronDownIcon } from "@vector-im/compound-design-tokens/assets/web/icons";
+import { RadioInput } from "@vector-im/compound-web";
 
 import { MenuItemRadio } from "../../accessibility/context_menu/MenuItemRadio";
 import { type ButtonEvent } from "../views/elements/AccessibleButton";
 import ContextMenu, { aboveLeftOf, ChevronFace, ContextMenuButton, useContextMenu } from "./ContextMenu";
+
+const noop = (): void => {};
 
 export type GenericDropdownMenuOption<T> = {
     key: T;
@@ -32,18 +35,32 @@ export function GenericDropdownMenuOption<T extends Key>({
     description,
     onClick,
     isSelected,
+    icon,
     adornment,
 }: GenericDropdownMenuOption<T> & {
     onClick: (ev: ButtonEvent) => void;
-    isSelected: boolean;
+    /** Whether this option is the chosen one. Leave it out for an option that runs an action instead. */
+    isSelected?: boolean;
+    /** Telement: an icon in the radio's place, for an option that runs an action */
+    icon?: ReactNode;
 }): JSX.Element {
     return (
         <MenuItemRadio
-            active={isSelected}
+            active={!!isSelected}
             className="mx_GenericDropdownMenu_Option mx_GenericDropdownMenu_Option--item"
             onClick={onClick}
         >
-            {isSelected && <CheckIcon className="mx_GenericDropdownMenu_Option--checkIcon" />}
+            {/* Telement: Compound's radio marks the chosen option, as in Telement's other menus */}
+            {isSelected !== undefined && (
+                <RadioInput
+                    className="mx_GenericDropdownMenu_Option--selection"
+                    aria-hidden={true}
+                    tabIndex={-1}
+                    checked={isSelected}
+                    onChange={noop}
+                />
+            )}
+            {icon}
             <div className="mx_GenericDropdownMenu_Option--label">
                 <span>{label}</span>
                 {description && <span>{description}</span>}

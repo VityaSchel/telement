@@ -11,10 +11,14 @@ import { describe, it, expect, vi } from "vitest";
 import React from "react";
 import { render, screen, fireEvent } from "test-utils-rtl";
 
-import { GenericDropdownMenu, type GenericDropdownMenuItem } from "./GenericDropdownMenu.tsx";
+import {
+    GenericDropdownMenu,
+    GenericDropdownMenuOption,
+    type GenericDropdownMenuItem,
+} from "./GenericDropdownMenu.tsx";
 
 describe("GenericDropdownMenu", () => {
-    it("should render check icon for checked option", async () => {
+    it("should check the radio of the selected option", async () => {
         const options: GenericDropdownMenuItem<string>[] = [
             {
                 key: "selected",
@@ -40,9 +44,37 @@ describe("GenericDropdownMenu", () => {
         fireEvent.click(trigger);
 
         const dropdown = await screen.findByRole("menu");
-        expect(
-            dropdown.querySelector('[aria-checked="true"]')?.querySelector(".mx_GenericDropdownMenu_Option--checkIcon"),
-        ).toBeTruthy();
+        const radioOf = (option: string): HTMLInputElement | null | undefined =>
+            dropdown
+                .querySelector(`[aria-checked="${option}"]`)
+                ?.querySelector<HTMLInputElement>(".mx_GenericDropdownMenu_Option--selection input");
+        expect(radioOf("true")?.checked).toBe(true);
+        expect(radioOf("false")?.checked).toBe(false);
         expect(dropdown).toMatchSnapshot();
+    });
+
+    it("should show an action option's icon instead of a radio", async () => {
+        const options: GenericDropdownMenuItem<string>[] = [{ key: "only", label: "Only" }];
+        render(
+            <GenericDropdownMenu
+                value="only"
+                options={options}
+                onChange={vi.fn()}
+                selectedLabel={() => "Only"}
+                AdditionalOptions={() => (
+                    <GenericDropdownMenuOption
+                        key="action"
+                        label="Add server"
+                        icon={<svg data-testid="add-icon" />}
+                        onClick={vi.fn()}
+                    />
+                )}
+            />,
+        );
+
+        fireEvent.click(screen.getByRole("button"));
+        const action = await screen.findByRole("menuitemradio", { name: "Add server" });
+        expect(action.querySelector('input[type="radio"]')).toBeNull();
+        expect(screen.getByTestId("add-icon")).toBeInTheDocument();
     });
 });

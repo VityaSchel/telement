@@ -18,16 +18,25 @@ import contextualMenuStyles from "../../res/css/structures/_ContextualMenu.pcss?
 import baseCardStyles from "../../res/css/views/right_panel/_BaseCard.pcss?raw";
 import threadPanelStyles from "../../res/css/views/right_panel/_ThreadPanel.pcss?raw";
 import legacyCallMenuStyles from "../../res/css/views/context_menus/_LegacyCallContextMenu.pcss?raw";
+import genericDropdownMenuStyles from "../../res/css/structures/_GenericDropdownMenu.pcss?raw";
+import networkDropdownStyles from "../../res/css/views/directory/_NetworkDropdown.pcss?raw";
 import lightTheme from "../../res/themes/light/css/_light.pcss?raw";
 import { toBrowserCss } from "../test/telement/browserCss";
 
-const CHECK = `<svg viewBox="0 0 24 24"><path d="M4 12l5 5L20 6" /></svg>`;
+/** Compound's RadioInput, sized as its stylesheet sizes it */
+function radio(className: string, checked: boolean): string {
+    return (
+        `<div class="${className}" style="display: inline-flex; inline-size: 20px; block-size: 20px">` +
+        `<input type="radio" style="margin: 0; inline-size: 20px; block-size: 20px"${checked ? " checked" : ""}></div>`
+    );
+}
 
 /** The threads panel's filter menu, as ThreadPanelHeader renders it, with "All threads" selected. */
 function renderThreadFilter(): void {
     const option = (id: string, label: string, description: string, checked: boolean): string =>
         `<div class="mx_AccessibleButton mx_ThreadPanel_Header_FilterOptionItem" role="menuitemradio" id="${id}" ` +
-        `aria-checked="${checked}" tabindex="-1">${checked ? CHECK : ""}<span>${label}</span>` +
+        `aria-checked="${checked}" tabindex="-1">${radio("mx_ThreadPanel_Header_FilterOptionItem_selection", checked)}` +
+        `<span>${label}</span>` +
         `<span>${description}</span></div>`;
     document.body.innerHTML = `
         <div class="mx_ContextualMenu_wrapper mx_BaseCard_header_title cpd-theme-light" style="top: 48px; left: 48px">
@@ -35,6 +44,33 @@ function renderThreadFilter(): void {
                 <div class="mx_ContextualMenu_chevron_top"></div>
                 ${option("all", "All threads", "Shows all threads from current room", true)}
                 ${option("mine", "My threads", "Shows all threads you've participated in", false)}
+            </div>
+        </div>
+    `;
+}
+
+/** The room directory's server picker, as NetworkDropdown renders it, with Matrix on matrix.org selected. */
+function renderServerPicker(): void {
+    const option = (id: string, label: string, checked: boolean): string =>
+        `<div class="mx_AccessibleButton mx_GenericDropdownMenu_Option mx_GenericDropdownMenu_Option--item" ` +
+        `role="menuitemradio" id="${id}" aria-checked="${checked}" tabindex="-1">` +
+        radio("mx_GenericDropdownMenu_Option--selection", checked) +
+        `<div class="mx_GenericDropdownMenu_Option--label"><span>${label}</span></div></div>`;
+    document.body.innerHTML = `
+        <div class="mx_ContextualMenu_wrapper mx_GenericDropdownMenu_wrapper mx_NetworkDropdown_wrapper cpd-theme-light"
+            style="top: 48px; left: 48px">
+            <div class="mx_ContextualMenu" role="menu" id="menu">
+                <div class="mx_GenericDropdownMenu_Option mx_GenericDropdownMenu_Option--header" id="header">
+                    <div class="mx_GenericDropdownMenu_Option--label"><span>matrix.org</span><span>Your server</span></div>
+                </div>
+                ${option("matrix", "Matrix", true)}
+                ${option("irc", "IRC", false)}
+                <span class="mx_GenericDropdownMenu_divider" id="divider"></span>
+                <div class="mx_AccessibleButton mx_GenericDropdownMenu_Option mx_GenericDropdownMenu_Option--item"
+                    role="menuitemradio" id="add" aria-checked="false" tabindex="-1">
+                    <svg viewBox="0 0 24 24"><path d="M11 5h2v14h-2zM5 11h14v2H5z" /></svg>
+                    <div class="mx_GenericDropdownMenu_Option--label"><span>Add new server…</span></div>
+                </div>
             </div>
         </div>
     `;
@@ -79,7 +115,14 @@ describe("Legacy context menus", () => {
         stylesheet.textContent = `
             ${compoundBase} ${compoundSemantic} ${compoundLightTheme} ${telementTokens}
             body { font: var(--cpd-font-body-md-regular); }
-            ${[contextualMenuStyles, baseCardStyles, threadPanelStyles, legacyCallMenuStyles]
+            ${[
+                contextualMenuStyles,
+                baseCardStyles,
+                threadPanelStyles,
+                legacyCallMenuStyles,
+                genericDropdownMenuStyles,
+                networkDropdownStyles,
+            ]
                 .map((styles) => toBrowserCss(styles, lightTheme))
                 .join("\n")}
         `;
@@ -111,28 +154,78 @@ describe("Legacy context menus", () => {
             }
         });
 
-        it("puts the check where the other menus' icons are, centered on the first line, and the text after it", () => {
+        it("puts the radio where the other menus' icons are, centered on the first line, and the text after it", () => {
             renderThreadFilter();
             const menu = rectOf(document.getElementById("menu")!);
-            const all = document.getElementById("all")!;
-            const check = rectOf(all.querySelector("svg")!);
-            const label = all.querySelector("span")!;
+            const options = [...document.querySelectorAll<HTMLElement>(".mx_ThreadPanel_Header_FilterOptionItem")];
+            const [label, description] = options[0].querySelectorAll("span");
             const lineHeight = parseFloat(getComputedStyle(label).lineHeight);
 
-            expect(check.width).toBe(16);
-            expect(check.left - menu.left).toBe(16);
-            expect(check.top - rectOf(all).top).toBe(8 + (lineHeight - 16) / 2);
-            expect(check.top + check.height / 2).toBe(rectOf(label).top + lineHeight / 2);
-            // Both options' text 12px after the check, as in the message menu
-            for (const option of document.querySelectorAll(".mx_ThreadPanel_Header_FilterOptionItem")) {
-                for (const text of option.querySelectorAll("span")) expect(textLeft(text) - menu.left).toBe(44);
+            // Regular 15px labels with 13px secondary descriptions, as in the sessions filter, in rows on the grid
+            expect(getComputedStyle(label).fontSize).toBe("15px");
+            expect(getComputedStyle(label).fontWeight).toBe("400");
+            expect(getComputedStyle(description).fontSize).toBe("13px");
+            expect(rectOf(options[0]).height).toBe(60);
+            for (const option of options) {
+                const radioBox = rectOf(option.querySelector(".mx_ThreadPanel_Header_FilterOptionItem_selection")!);
+                expect(radioBox.width).toBe(20);
+                expect(radioBox.left - menu.left).toBe(16);
+                expect(radioBox.top + radioBox.height / 2).toBe(
+                    rectOf(option.querySelector("span")!).top + lineHeight / 2,
+                );
+                // Both lines 12px after the radio, as in the message menu
+                for (const text of option.querySelectorAll("span")) expect(textLeft(text) - menu.left).toBe(48);
             }
             expect(menu.right - rectOf(label).right).toBe(16);
+        });
+
+        it("doesn't point at its button, like the other menus", () => {
+            renderThreadFilter();
+            expect(getComputedStyle(document.querySelector(".mx_ContextualMenu_chevron_top")!).display).toBe("none");
         });
 
         it("draws the keyboard focus ring inside the option's highlight", async () => {
             renderThreadFilter();
             expect(await keyboardFocusRing(document.getElementById("mine")!)).toBe("solid 2px -2px");
+        });
+    });
+
+    describe("the room directory's server picker", () => {
+        it("lays out 40px rows inset 4px, radios and the add icon 16px in, and labels 12px after them", () => {
+            renderServerPicker();
+            const menu = rectOf(document.getElementById("menu")!);
+            const items = [...document.querySelectorAll<HTMLElement>(".mx_GenericDropdownMenu_Option")];
+
+            expect(rectOf(items[0]).top - menu.top).toBe(4);
+            expect(menu.bottom - rectOf(items.at(-1)!).bottom).toBe(4);
+            for (const item of items) {
+                expect(rectOf(item).height).toBe(40);
+                expect(rectOf(item).left - menu.left).toBe(4);
+                expect(menu.right - rectOf(item).right).toBe(4);
+                expect(getComputedStyle(item).borderRadius).toBe("8px");
+            }
+            // The group's title starts where the options' radios do
+            expect(textLeft(document.querySelector("#header span")!) - menu.left).toBe(16);
+            for (const id of ["matrix", "irc", "add"]) {
+                const option = document.getElementById(id)!;
+                const marker = rectOf(option.firstElementChild!);
+                expect([marker.width, marker.left - menu.left]).toEqual([20, 16]);
+                expect(textLeft(option.querySelector("span")!) - marker.right).toBe(12);
+            }
+            // The separator keeps the rows 4px clear of it, as the menu's edge does
+            const divider = rectOf(document.getElementById("divider")!);
+            expect(divider.top - rectOf(document.getElementById("irc")!).bottom).toBe(4);
+            expect(rectOf(document.getElementById("add")!).top - divider.bottom).toBe(4);
+        });
+
+        it("highlights the hovered option and draws the focus ring inside its highlight", async () => {
+            renderServerPicker();
+            const irc = document.getElementById("irc")!;
+            const rest = getComputedStyle(irc).backgroundColor;
+
+            await userEvent.hover(irc);
+            expect(getComputedStyle(irc).backgroundColor).not.toBe(rest);
+            expect(await keyboardFocusRing(document.getElementById("matrix")!)).toBe("solid 2px -2px");
         });
     });
 
