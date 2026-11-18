@@ -48,6 +48,16 @@ describe("<LayoutSwitcher />", () => {
         expect(asFragment()).toMatchSnapshot();
     });
 
+    it("should show each preview as a message on its own, which bubbles round at every corner", async () => {
+        const { container } = await renderLayoutSwitcher();
+        const previews = container.querySelectorAll('[data-testid="event-tile"]');
+
+        expect(previews).toHaveLength(3);
+        for (const preview of previews) {
+            expect(preview.className).toMatch(/stateLastInSection/);
+        }
+    });
+
     describe("layout selection", () => {
         it("should display the modern layout", async () => {
             await renderLayoutSwitcher();

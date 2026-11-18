@@ -119,10 +119,13 @@ export default class EventTilePreview extends React.Component<IProps, IState> {
         return (
             <EventPresentationContextProvider layout={this.props.layout} useCompactLayout={false}>
                 <div className={className} role="presentation">
+                    {/* Telement: a message on its own, so that its bubble is rounded at every corner, as the last of a
+                        run of bubbles is in the timeline */}
                     <EventTile
                         mxEvent={event}
                         layout={this.props.layout}
                         as="div"
+                        lastInSection
                         hideTimestamp
                         inhibitInteraction
                         useEventSenderSnapshot

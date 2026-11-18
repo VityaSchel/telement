@@ -22,6 +22,12 @@ Please see LICENSE files in the repository root for full details.
     .mx_ReadReceiptGroup {
         display: none;
     }
+
+    /* Telement: the message is the last of its run, for a bubble's rounded corners, but the space under it is the
+       card's padding, not the gap the timeline leaves after a run */
+    .mx_EventTile {
+        margin-block-end: 0;
+    }
 }
 
 .mx_FontScalingPanel_Dropdown {
