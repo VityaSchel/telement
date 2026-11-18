@@ -27,6 +27,8 @@
 
     /* The plate's color when shown, which the inverted badges of the selected plate take too */
     --plate-color: var(--cpd-color-bg-action-tertiary-hovered);
+    /* The keyboard focus ring's color, drawn inside the plate */
+    --focus-ring-color: var(--cpd-color-border-focused);
 }
 
 /*
@@ -264,17 +266,22 @@
 
 .roomListItem:focus-visible {
     outline: none;
+}
 
-    /* Around the plate, inside the row's inset */
-    .container {
-        outline: var(--cpd-border-width-2) solid var(--cpd-color-border-focused);
-        outline-offset: var(--cpd-border-width-2);
-    }
+/*
+ * Inside the plate, like the ring of a menu item, so it keeps clear of the panel's dividers and the plates around it.
+ * While one of the row's menus is open, the plate's hover fill marks the row instead, as Telegram draws no ring there.
+ */
+.roomListItem:focus-visible:not([data-state="open"], :has(.hoverMenu > button[data-state="open"])) .container {
+    outline: var(--cpd-border-width-2) solid var(--focus-ring-color);
+    outline-offset: calc(-1 * var(--cpd-border-width-2));
 }
 
 /* Like Telegram's desktop apps, the selected room is a plate in the selection color with everything on it in white */
 .selected {
     --plate-color: var(--tl-color-bg-selection);
+    /* Compound's focus blue would vanish on the accent plate */
+    --focus-ring-color: var(--tl-color-on-selection);
 
     .container {
         background-color: var(--plate-color);

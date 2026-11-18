@@ -500,7 +500,7 @@ describe("Room list item layout", () => {
         expect(getComputedStyle(screen.getByText("3")).backgroundColor).toBe("rgb(255, 255, 255)");
     });
 
-    it("draws the keyboard focus ring 2px around the plate, inside the row", async () => {
+    it("draws the keyboard focus ring inside the plate, clear of the row's edges", async () => {
         const row = renderRow();
         row.tabIndex = 0;
         await userEvent.keyboard("{Tab}");
@@ -509,9 +509,38 @@ describe("Room list item layout", () => {
         const plate = getComputedStyle(part(row, styles.container));
         expect(plate.outlineStyle).toBe("solid");
         expect(plate.outlineWidth).toBe("2px");
-        expect(plate.outlineOffset).toBe("2px");
+        expect(plate.outlineOffset).toBe("-2px");
         expect(plate.outlineColor).toBe(colorOf("--cpd-color-border-focused"));
         expect(getComputedStyle(row).outlineStyle).toBe("none");
+    });
+
+    it("draws the selected plate's focus ring in white, as Compound's focus blue would vanish on it", async () => {
+        const row = renderRow({ isSelected: true });
+        row.tabIndex = 0;
+        await userEvent.keyboard("{Tab}");
+        expect(row).toHaveFocus();
+
+        const plate = getComputedStyle(part(row, styles.container));
+        expect(plate.outlineStyle).toBe("solid");
+        expect(plate.outlineColor).toBe(colorOf("--tl-color-on-selection"));
+    });
+
+    it.each([
+        ["the right-click menu", (row: HTMLElement) => row],
+        ["the more options menu", () => screen.getByRole("button", { name: "More Options" })],
+    ])("draws no focus ring while %s is open, as the plate's hover fill marks the row", async (_, trigger) => {
+        const row = renderRow();
+        row.tabIndex = 0;
+        await userEvent.keyboard("{Tab}");
+        expect(row).toHaveFocus();
+
+        // In the app the room list can focus the row while its menu is open; here the menu would take the focus, so
+        // the trigger is marked open by hand, as Radix marks it
+        trigger(row).dataset.state = "open";
+
+        const plate = getComputedStyle(part(row, styles.container));
+        expect(plate.outlineStyle).toBe("none");
+        expect(plate.backgroundColor).toBe(colorOf("--cpd-color-bg-action-tertiary-hovered"));
     });
 
     it("mirrors the row in right-to-left languages", () => {
