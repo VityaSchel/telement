@@ -995,16 +995,12 @@ describe("RoomView", () => {
     });
 
     describe("message search", () => {
-        const stubElementHover = (el: Element): (() => void) => {
-            const original = HTMLElement.prototype.matches;
-            const spy = vi.spyOn(HTMLElement.prototype, "matches").mockImplementation(function (
-                this: HTMLElement,
-                selector: string,
-            ) {
-                if (selector === ":hover") return this === el;
-                return original.call(this, selector);
-            });
-            return () => spy.mockRestore();
+        /** Edits a message as Telement does: from its right-click menu, which holds the toolbar's actions. */
+        const editFromContextMenu = async (tile: HTMLElement): Promise<void> => {
+            // The menu lists unsent messages, which this client's chronological ordering can't give
+            room.getPendingEvents = vi.fn().mockReturnValue([]);
+            fireEvent.contextMenu(tile);
+            await userEvent.click(await screen.findByRole("menuitem", { name: "Edit" }));
         };
 
         it("should close search results when edit is clicked", async () => {
@@ -1013,7 +1009,7 @@ describe("RoomView", () => {
             const eventMapper = (obj: Partial<IEvent>) => new MatrixEvent(obj);
 
             const roomViewRef = createRef<RoomView>();
-            const { container, getByText, findByLabelText } = await mountRoomView(roomViewRef);
+            const { container, getByText } = await mountRoomView(roomViewRef);
             await waitFor(() => expect(roomViewRef.current).toBeTruthy());
             // @ts-ignore - triggering a search organically is a lot of work
             act(() =>
@@ -1064,10 +1060,7 @@ describe("RoomView", () => {
             const searchResultTile = getByText("search term").closest(".mx_EventTile");
             expect(searchResultTile).not.toBeNull();
 
-            const unhover = stubElementHover(searchResultTile!);
-            await userEvent.hover(searchResultTile!);
-            await userEvent.click(await findByLabelText("Edit"), { skipHover: true });
-            unhover();
+            await editFromContextMenu(searchResultTile as HTMLElement);
 
             await waitFor(() => {
                 expect(container.querySelector(".mx_RoomView_searchResultsPanel")).not.toBeInTheDocument();
@@ -1077,13 +1070,16 @@ describe("RoomView", () => {
         it("should switch rooms when edit is clicked on a search result for a different room", async () => {
             const room2 = new Room(`!roomswitchtest:example.org`, cli, "@alice:example.org");
             rooms.set(room2.roomId, room2);
+            // The result's own room decides whether its message menu offers Edit
+            room2.getMyMembership = vi.fn().mockReturnValue(KnownMembership.Join);
+            room2.getPendingEvents = vi.fn().mockReturnValue([]);
 
             room.getMyMembership = vi.fn().mockReturnValue(KnownMembership.Join);
 
             const eventMapper = (obj: Partial<IEvent>) => new MatrixEvent(obj);
 
             const roomViewRef = createRef<RoomView>();
-            const { container, getByText, findByLabelText } = await mountRoomView(roomViewRef);
+            const { container, getByText } = await mountRoomView(roomViewRef);
             await waitFor(() => expect(roomViewRef.current).toBeTruthy());
             // @ts-ignore - triggering a search organically is a lot of work
             act(() =>
@@ -1135,10 +1131,7 @@ describe("RoomView", () => {
             const searchResultTile = getByText("search term").closest(".mx_EventTile");
             expect(searchResultTile).not.toBeNull();
 
-            const unhover = stubElementHover(searchResultTile!);
-            await userEvent.hover(searchResultTile!);
-            await userEvent.click(await findByLabelText("Edit"), { skipHover: true });
-            unhover();
+            await editFromContextMenu(searchResultTile as HTMLElement);
 
             await expect(prom).resolves.toEqual(expect.objectContaining({ room_id: room2.roomId }));
         });
