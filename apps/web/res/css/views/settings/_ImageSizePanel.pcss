@@ -18,7 +18,9 @@ Please see LICENSE files in the repository root for full details.
 
     .mx_ImageSizePanel_size {
         display: block;
-        color: $quinary-content;
+        /* Telement: the drawing's lines in Compound's separator, which a dark theme's raised dialogs (_common.pcss)
+           move a step further, as they do their other lines */
+        color: var(--cpd-color-separator-primary);
         width: 221px;
         height: 148px;
         margin-bottom: 14px; /* move radio button away from bottom edge a bit */

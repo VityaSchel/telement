@@ -15,7 +15,9 @@ Please see LICENSE files in the repository root for full details.
 
     padding: var(--cpd-space-4x);
 
-    border: 1px solid $quinary-content;
+    /* Telement: Compound's separator, which a dark theme's raised dialogs (_common.pcss) move a step further, as they
+       do their other lines; the fixed gray stayed at the dialog's own color */
+    border: 1px solid var(--cpd-color-separator-primary);
     border-radius: var(--tl-radius-bubble);
 }
 
