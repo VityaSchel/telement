@@ -101,10 +101,14 @@ function rectOf(selector: string): DOMRect {
     return document.querySelector(selector)!.getBoundingClientRect();
 }
 
-function textLeft(element: Element): number {
+function textBox(element: Element): DOMRect {
     const range = document.createRange();
     range.selectNodeContents(element);
-    return range.getBoundingClientRect().left;
+    return range.getBoundingClientRect();
+}
+
+function textLeft(element: Element): number {
+    return textBox(element).left;
 }
 
 let stylesheet: HTMLStyleElement;
@@ -185,6 +189,16 @@ describe("The composer's autocomplete", () => {
         const commands = document.getElementById("commands")!;
         expect(getComputedStyle(commands).borderTopStyle).toBe("solid");
         expect(commands.getBoundingClientRect().top - rectOf("#bob").bottom).toBe(2);
+    });
+
+    it("ends a user's ID 16px from the menu's edge, as what ends a menu item does", () => {
+        renderComposer();
+        const menu = rectOf("#mx_Autocomplete");
+
+        for (const id of ["alice", "bob"]) {
+            const userId = textBox(document.querySelector(`#${id} .mx_Autocomplete_Completion_description`)!);
+            expect(menu.right - userId.right).toBeCloseTo(16, 0);
+        }
     });
 
     it("fills the row chosen with the arrow keys darker than a hovered one", async () => {
