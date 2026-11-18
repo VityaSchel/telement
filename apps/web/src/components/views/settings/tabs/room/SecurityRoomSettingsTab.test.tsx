@@ -463,6 +463,19 @@ describe("<SecurityRoomSettingsTab />", () => {
             expect(screen.getByLabelText("Encrypted")).toBeDisabled();
         });
 
+        it("describes the toggle under its label, as other toggles are described", async () => {
+            const room = new Room(roomId, client, userId);
+            setRoomStateEvents(room);
+            getComponent(room);
+
+            await waitFor(() => expect(screen.getByLabelText("Encrypted")).not.toBeChecked());
+            const description = screen.getByText("Once enabled, encryption cannot be disabled.");
+            const label = screen.getByText("Encrypted", { selector: "label" });
+            expect(description.parentElement).toBe(label.parentElement);
+            expect(label.compareDocumentPosition(description) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+            expect(description.closest(".mx_SettingsFieldset_description")).toBeNull();
+        });
+
         it("asks users to confirm when setting room to encrypted", async () => {
             const room = new Room(roomId, client, userId);
             setRoomStateEvents(room);

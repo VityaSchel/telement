@@ -545,23 +545,23 @@ export default class SecurityRoomSettingsTab extends React.Component<IProps, ISt
                     }}
                 >
                     <SettingsSection heading={_t("room_settings|security|title")}>
-                        <SettingsFieldset
-                            legend={_t("settings|security|encryption_section")}
-                            description={
-                                isEncryptionForceDisabled && !isEncrypted
-                                    ? undefined
-                                    : _t("room_settings|security|encryption_permanent")
-                            }
-                        >
+                        <SettingsFieldset legend={_t("settings|security|encryption_section")}>
                             {isEncryptionLoading ? (
                                 <InlineSpinner />
                             ) : (
                                 <>
+                                    {/* Telement: the warning is the toggle's own description, under its label, as
+                                        other toggles have theirs */}
                                     <SettingsToggleInput
                                         name="enable-encryption"
                                         checked={isEncrypted}
                                         onChange={this.onEncryptionChange}
                                         label={_t("common|encrypted")}
+                                        helpMessage={
+                                            isEncryptionForceDisabled && !isEncrypted
+                                                ? undefined
+                                                : _t("room_settings|security|encryption_permanent")
+                                        }
                                         disabled={!canEnableEncryption}
                                     />
                                     {isEncryptionForceDisabled && !isEncrypted && (
