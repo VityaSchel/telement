@@ -58,4 +58,14 @@ describe("Search highlight", () => {
     it("takes its radius from --tl-radius-inline", () => {
         expect(getComputedStyle(render("--tl-radius-inline: 3px")).borderRadius).toBe("3px");
     });
+
+    it("fills the matched word with the accent and writes it in white", () => {
+        const highlight = render();
+        const probe = document.createElement("span");
+        probe.style.color = "var(--cpd-color-bg-accent-rest)";
+        document.body.append(probe);
+
+        expect(getComputedStyle(highlight).backgroundColor).toBe(getComputedStyle(probe).color);
+        expect(getComputedStyle(highlight).color).toBe("rgb(255, 255, 255)");
+    });
 });

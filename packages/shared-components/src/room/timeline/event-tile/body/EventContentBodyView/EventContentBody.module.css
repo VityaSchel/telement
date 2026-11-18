@@ -75,14 +75,15 @@
     }
 }
 
+/* An accent fill with white text, as the other accent fills: the dark themes' deeper fill keeps it readable */
 .EventTile_searchHighlight {
-    background-color: var(--cpd-color-text-action-accent);
-    color: var(--cpd-color-text-on-solid-primary);
+    background-color: var(--cpd-color-bg-accent-rest);
+    color: var(--tl-color-on-accent);
     border-radius: var(--tl-radius-inline);
     padding-inline: var(--cpd-space-0-5x);
 
     a {
-        background-color: var(--cpd-color-text-action-accent);
-        color: var(--cpd-color-text-on-solid-primary);
+        background-color: var(--cpd-color-bg-accent-rest);
+        color: var(--tl-color-on-accent);
     }
 }

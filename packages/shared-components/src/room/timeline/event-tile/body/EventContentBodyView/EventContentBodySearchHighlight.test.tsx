@@ -32,4 +32,22 @@ describe("Search highlight", () => {
 
         expect(getComputedStyle(screen.getByText("highlighted")).borderRadius).toBe("3px");
     });
+
+    it.each(["cpd-theme-light", "cpd-theme-dark"])(
+        "fills a highlighted word with the accent and writes it in white (%s)",
+        (theme) => {
+            render(
+                <div className={theme}>
+                    <WithHighlight />
+                </div>,
+            );
+            const word = screen.getByText("highlighted");
+            const probe = document.createElement("span");
+            probe.style.color = "var(--cpd-color-bg-accent-rest)";
+            word.parentElement!.append(probe);
+
+            expect(getComputedStyle(word).backgroundColor).toBe(getComputedStyle(probe).color);
+            expect(getComputedStyle(word).color).toBe("rgb(255, 255, 255)");
+        },
+    );
 });

@@ -51,15 +51,16 @@ $left-gutter: 64px;
         overflow: visible;
     }
 
+    /* An accent fill with white text, as the other accent fills: the dark themes' deeper fill keeps it readable */
     .mx_EventTile_searchHighlight {
-        background-color: $accent;
-        color: $accent-fg-color;
+        background-color: var(--cpd-color-bg-accent-rest);
+        color: var(--tl-color-on-accent);
         border-radius: var(--tl-radius-inline);
         padding-inline: 2px;
 
         a {
-            background-color: $accent;
-            color: $accent-fg-color;
+            background-color: var(--cpd-color-bg-accent-rest);
+            color: var(--tl-color-on-accent);
         }
     }
 
