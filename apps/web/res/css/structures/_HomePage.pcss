@@ -31,12 +31,11 @@ Please see LICENSE files in the repository root for full details.
         line-height: 1.375;
     }
 
+    /* Compound's heading-sm, as 18px is not on its scale, in the one secondary text color */
     h2 {
         margin-top: 4px;
-        font-weight: var(--cpd-font-weight-semibold);
-        font-size: $font-18px;
-        line-height: $font-25px;
-        color: $muted-fg-color;
+        font: var(--cpd-font-heading-sm-semibold);
+        color: var(--cpd-color-text-secondary);
     }
 
     .mx_MiniAvatarUploader {
@@ -65,15 +64,26 @@ Please see LICENSE files in the repository root for full details.
             font-weight: var(--cpd-font-weight-semibold);
             font-size: $font-15px;
             line-height: $font-20px;
-            color: #fff; /* on all themes */
-            background-color: $accent;
+            /* The accent fill white sits on, which dark themes take a step deeper than the accent so it stays 4:1 */
+            color: var(--tl-color-on-accent);
+            background-color: var(--cpd-color-bg-accent-rest);
+
+            @media (hover) {
+                &:hover {
+                    background-color: var(--cpd-color-bg-accent-hovered);
+                }
+            }
+
+            &:active {
+                background-color: var(--cpd-color-bg-accent-pressed);
+            }
 
             svg {
                 display: block;
                 width: 100%;
                 height: 40px;
                 object-fit: contain;
-                color: #fff; /* on all themes */
+                color: var(--tl-color-on-accent);
             }
         }
 

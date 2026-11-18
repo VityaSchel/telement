@@ -14,6 +14,8 @@ import compoundBase from "@vector-im/compound-design-tokens/assets/web/css/cpd-c
 import compoundSemantic from "@vector-im/compound-design-tokens/assets/web/css/cpd-common-semantic.css?raw";
 import compoundLightTheme from "@vector-im/compound-design-tokens/assets/web/css/cpd-theme-light-base.css?raw";
 import compoundLightSemantic from "@vector-im/compound-design-tokens/assets/web/css/cpd-theme-light-semantic.css?raw";
+import compoundDarkTheme from "@vector-im/compound-design-tokens/assets/web/css/cpd-theme-dark-base.css?raw";
+import compoundDarkSemantic from "@vector-im/compound-design-tokens/assets/web/css/cpd-theme-dark-semantic.css?raw";
 import compoundStyles from "@vector-im/compound-web/dist/style.css?raw";
 // The package doesn't export its token stylesheet on its own
 // eslint-disable-next-line no-restricted-imports
@@ -22,7 +24,9 @@ import fontSizes from "../../res/css/_font-sizes.pcss?raw";
 import homePageStyles from "../../res/css/structures/_HomePage.pcss?raw";
 import spaceHierarchyStyles from "../../res/css/structures/_SpaceHierarchy.pcss?raw";
 import lightTheme from "../../res/themes/light/css/_light.pcss?raw";
+import darkTheme from "../../res/themes/dark/css/_dark.pcss?raw";
 import { cornerRadii, toBrowserCss } from "../test/telement/browserCss";
+import { settledStyle, tokenColor } from "../test/telement/computedStyle";
 
 /** A SpaceHierarchy tile as Tile renders it: the room's avatar, name and member count, and its actions. */
 function tile(name: string, { subspace = false }: { subspace?: boolean } = {}): string {
@@ -183,6 +187,101 @@ describe("Home and space home", () => {
 
             expect(getComputedStyle(subspace).backgroundColor).not.toBe("rgba(0, 0, 0, 0)");
             expect(getComputedStyle(toggle).backgroundColor).toBe("rgba(0, 0, 0, 0)");
+        });
+    });
+});
+
+/** Each theme's class with the theme stylesheets it is built from, in the order its entry point imports them. */
+const THEMES: [string, string[]][] = [
+    ["cpd-theme-light", [lightTheme]],
+    ["cpd-theme-dark", [lightTheme, darkTheme]],
+];
+
+/** The accent step each theme fills with where white sits on it: the accent itself, or a deeper step in dark themes. */
+const ACCENT_FILL_STEP: Record<string, string> = {
+    "cpd-theme-light": "--tl-accent-900",
+    "cpd-theme-dark": "--tl-accent-800",
+};
+
+/** HomePage's default page in a theme: the title and subtitle over its three action tiles. */
+function renderHomePage(theme: string): HTMLElement {
+    const container = document.createElement("div");
+    container.className = theme;
+    container.innerHTML = `
+        <main class="mx_HomePage mx_HomePage_default">
+            <div class="mx_HomePage_default_wrapper">
+                <h1>Welcome Alice</h1>
+                <h2>Now, let's help you get started</h2>
+                <div class="mx_HomePage_default_buttons">
+                    <div class="mx_AccessibleButton mx_HomePage_button_sendDm" role="button" tabindex="0">
+                        <svg viewBox="0 0 24 24"></svg>Send a Direct Message
+                    </div>
+                </div>
+            </div>
+        </main>
+    `;
+    document.body.append(container);
+    return container;
+}
+
+describe("Home page colors", () => {
+    beforeAll(() => {
+        // Each theme's variables apply within its own class, as each theme is a separate stylesheet in the app
+        const themed = THEMES.map(
+            ([theme, sources]) => `.${theme} { ${toBrowserCss(homePageStyles, ...sources, fontSizes)} }`,
+        ).join("\n");
+        stylesheet = document.createElement("style");
+        stylesheet.textContent = `
+            @layer compound-tokens, shared-components, app-web;
+            @layer compound-tokens {
+                ${compoundBase} ${compoundSemantic}
+                ${compoundLightTheme} ${compoundLightSemantic} ${compoundDarkTheme} ${compoundDarkSemantic}
+            }
+            @layer shared-components { ${telementTokens} }
+            @layer app-web { ${themed} }
+        `;
+        document.head.append(stylesheet);
+    });
+
+    afterAll(() => {
+        stylesheet.remove();
+    });
+
+    afterEach(async () => {
+        await userEvent.unhover(document.body);
+        document.body.innerHTML = "";
+    });
+
+    describe.each(THEMES.map(([theme]) => theme))("in %s", (theme) => {
+        it("fills the action tiles with the accent fill white sits on, a step deeper in dark themes", async () => {
+            const container = renderHomePage(theme);
+            const tile = container.querySelector<HTMLElement>(".mx_HomePage_button_sendDm")!;
+            const onAccent = tokenColor("--tl-color-on-accent", container);
+
+            expect(settledStyle(tile).backgroundColor).toBe(tokenColor("--cpd-color-bg-accent-rest", container));
+            expect(getComputedStyle(tile).backgroundColor).toBe(tokenColor(ACCENT_FILL_STEP[theme], container));
+            expect(getComputedStyle(tile).color).toBe(onAccent);
+            expect(getComputedStyle(tile.querySelector("svg")!).color).toBe(onAccent);
+
+            await userEvent.hover(tile);
+            expect(settledStyle(tile).backgroundColor).toBe(tokenColor("--cpd-color-bg-accent-hovered", container));
+        });
+
+        it("sets the subtitle in Compound's heading-sm, in the secondary text color", () => {
+            const container = renderHomePage(theme);
+            const subtitle = getComputedStyle(container.querySelector("h2")!);
+            const probe = document.createElement("div");
+            probe.style.font = "var(--cpd-font-heading-sm-semibold)";
+            container.append(probe);
+            const headingSm = getComputedStyle(probe);
+
+            expect(subtitle.color).toBe(tokenColor("--cpd-color-text-secondary", container));
+            expect([subtitle.fontSize, subtitle.lineHeight, subtitle.fontWeight]).toEqual([
+                headingSm.fontSize,
+                headingSm.lineHeight,
+                headingSm.fontWeight,
+            ]);
+            expect(subtitle.fontSize).toBe("20px");
         });
     });
 });
