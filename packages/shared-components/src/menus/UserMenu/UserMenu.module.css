@@ -19,6 +19,11 @@
     }
     max-width: 300px;
     /*
+     * Compound opens the menu 8px past the avatar, which is where the space badges end. This opens it 8px further, at
+     * the collapsed space panel's edge, so that it keeps clear of them.
+     */
+    margin-inline-start: var(--cpd-space-2x);
+    /*
      * Awful, brittle hack to remove padding from the menu which is now added on the content child
      * This probably ought to be a parameter to the compound component if we sometimes don't want padding.
      */
@@ -188,4 +193,9 @@
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
+}
+
+/* The open menu covers the display name, but starts 8px after it, which would leave its first letter showing */
+.triggerButton[aria-expanded="true"] ~ .displayName {
+    visibility: hidden;
 }

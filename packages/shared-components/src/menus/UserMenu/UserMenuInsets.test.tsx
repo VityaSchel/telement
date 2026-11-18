@@ -90,6 +90,35 @@ describe("User menu insets", () => {
         expect(style.outlineOffset).toBe("-2px");
     });
 
+    it("opens the menu at the space panel's edge, clear of the space badges that reach past the space avatars", async () => {
+        render(
+            <div data-testid="space-panel" style={{ inlineSize: `${SPACE_PANEL_WIDTH}px` }}>
+                <Open expanded={false} />
+            </div>,
+        );
+        const menu = await screen.findByRole("menu");
+        await Promise.all(menu.getAnimations().map((animation) => animation.finished));
+        const panel = screen.getByTestId("space-panel").getBoundingClientRect();
+
+        await waitFor(() => expect(menu.getBoundingClientRect().left - panel.left).toBe(SPACE_PANEL_WIDTH));
+    });
+
+    it("hides the expanded display name only while the menu that opens past its start is open", async () => {
+        const { unmount } = render(<Default expanded />);
+        expect(getComputedStyle(screen.getByText(Default.args.displayName!)).visibility).toBe("visible");
+        unmount();
+
+        render(<Open expanded />);
+        const menu = await screen.findByRole("menu");
+        await Promise.all(menu.getAnimations().map((animation) => animation.finished));
+        const name = screen.getAllByText(Open.args.displayName!).find((element) => !menu.contains(element))!;
+
+        await waitFor(() =>
+            expect(menu.getBoundingClientRect().left).toBeGreaterThan(name.getBoundingClientRect().left),
+        );
+        expect(getComputedStyle(name).visibility).toBe("hidden");
+    });
+
     it.each([false, true])(
         "centers the avatar on the space panel's axis, as the space avatars are, when expanded is %s",
         (expanded) => {
