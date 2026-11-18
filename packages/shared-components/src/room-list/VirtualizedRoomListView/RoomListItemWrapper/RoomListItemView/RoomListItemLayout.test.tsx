@@ -372,6 +372,17 @@ describe("Room list item layout", () => {
         );
     });
 
+    it("draws the more options button's dots in the gray of the header's icons, darker when it is hovered", async () => {
+        const row = renderRow();
+        await userEvent.hover(row);
+        const button = screen.getByRole("button", { name: "More Options" });
+        const dots = button.querySelector("svg")!;
+
+        expect(getComputedStyle(dots).fill).toBe(colorOf("--cpd-color-icon-secondary"));
+        await userEvent.hover(button);
+        expect(getComputedStyle(dots).fill).toBe(colorOf("--cpd-color-icon-primary"));
+    });
+
     it("keeps the name 8px from the time and the plate's padding after the time", () => {
         const row = renderRow({ name: "Loooooooooooooooooooooooooooooooooooooong name" });
         const plate = rect(part(row, styles.container));

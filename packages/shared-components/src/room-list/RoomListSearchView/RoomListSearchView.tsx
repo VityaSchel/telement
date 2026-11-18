@@ -6,7 +6,7 @@
  */
 
 import React, { type JSX, type MouseEventHandler } from "react";
-import { Button } from "@vector-im/compound-web";
+import { IconButton } from "@vector-im/compound-web";
 import ExploreIcon from "@vector-im/compound-design-tokens/assets/web/icons/explore";
 import DialPadIcon from "@vector-im/compound-design-tokens/assets/web/icons/dial-pad";
 
@@ -84,25 +84,26 @@ export function RoomListSearchView({ vm }: Readonly<RoomListSearchViewProps>): J
             <SearchFieldButtonView id="room-list-search-button" className={styles.search} onClick={vm.onSearchClick}>
                 {_t("telement|room_list|search_with_shortcut", { shortcut: searchShortcut })}
             </SearchFieldButtonView>
+            {/* Plain 36px icon buttons with 24px icons, transparent until hovered like the room list header's */}
             {displayDialButton && (
-                <Button
-                    kind="secondary"
-                    size="md"
-                    Icon={DialPadIcon}
-                    iconOnly={true}
+                <IconButton
+                    size="var(--tl-control-size)"
+                    style={{ padding: "var(--cpd-space-1-5x)" }}
                     aria-label={_t("left_panel|open_dial_pad")}
                     onClick={vm.onDialPadClick}
-                />
+                >
+                    <DialPadIcon />
+                </IconButton>
             )}
             {displayExploreButton && (
-                <Button
-                    kind="secondary"
-                    size="md"
-                    Icon={ExploreIcon}
-                    iconOnly={true}
+                <IconButton
+                    size="var(--tl-control-size)"
+                    style={{ padding: "var(--cpd-space-1-5x)" }}
                     aria-label={_t("action|explore_rooms")}
                     onClick={vm.onExploreClick}
-                />
+                >
+                    <ExploreIcon />
+                </IconButton>
             )}
         </Flex>
     );

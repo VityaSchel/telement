@@ -140,7 +140,8 @@
 
 /*
  * The 24px button is centered on the name line and sits as far from the plate's end as from its top. The text is
- * centered in the plate's minimum height, or 6px from its top once it is taller (.container, .text).
+ * centered in the plate's minimum height, or 6px from its top once it is taller (.container, .text). Its dots keep
+ * Compound's icon button colors, the gray of the header's icons, darker on hover.
  */
 .hoverMenu {
     visibility: hidden;
@@ -160,17 +161,12 @@
     );
 }
 
-/* Set icon color for hover menu buttons */
-.hoverMenu svg {
-    fill: var(--cpd-color-icon-primary);
-}
-
 /*
  * The two reserved preview lines. The decorations float at the end of both lines, centered on the second, so both lines
  * make room for them, as in Telegram for macOS, which narrows the whole preview by a badge's width plus 5px: a badge
  * taller than the line would touch the first line's text otherwise. Without decorations the lines take the whole
  * width. The padding keeps the badges' overflow below the second line inside the clip, and a last float as tall as
- * that overflow starts the lines the clamp hides below it.
+ * that overflow, cleared below the decorations, starts the lines the clamp hides below it.
  */
 .preview {
     --badge-overflow: max(0px, (1.25rem - 1lh) / 2 + 1px);
