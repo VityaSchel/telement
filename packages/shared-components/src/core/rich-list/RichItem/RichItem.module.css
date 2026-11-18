@@ -9,7 +9,9 @@
     /* Remove browser button style */
     background: transparent;
     border: none;
-    padding: var(--cpd-space-2x) var(--cpd-space-4x) var(--cpd-space-2x) var(--cpd-space-4x);
+    /* Telement: the avatar 8px inside the row's highlight, which sits 8px outside the content edge of the list's
+       container, so the avatar is on that edge (TELEMENT.md, "Radius and spacing") */
+    padding: var(--cpd-space-2x);
     width: 100%;
     box-sizing: border-box;
     cursor: pointer;
@@ -23,14 +25,11 @@
         "avatar description time";
 }
 
+/* Telement: rounded as rows are, with no divider between them, like the room list's */
 .richItem:hover,
 .richItem:focus {
     background-color: var(--cpd-color-bg-subtle-secondary);
-    border-radius: 12px;
-}
-
-.richItem:not(:last-child) {
-    border-bottom: var(--cpd-border-width-1) solid var(--cpd-color-gray-300);
+    border-radius: var(--tl-radius-row);
 }
 
 .avatar {

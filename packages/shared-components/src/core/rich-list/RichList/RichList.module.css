@@ -12,7 +12,8 @@
 .title {
     font: var(--cpd-font-body-sm-semibold);
     color: var(--cpd-color-text-secondary);
-    padding: var(--cpd-space-2x) var(--cpd-space-4x) var(--cpd-space-2x) var(--cpd-space-4x);
+    /* Telement: on the items' content, 8px inside their highlight (RichItem) */
+    padding: var(--cpd-space-2x);
 }
 
 .content {
@@ -24,7 +25,8 @@
 }
 
 .empty {
-    margin-left: var(--cpd-space-6x);
+    /* Telement: where the title starts */
+    margin-inline-start: var(--cpd-space-2x);
     font: var(--cpd-font-body-sm-regular);
     color: var(--cpd-color-text-secondary);
 }

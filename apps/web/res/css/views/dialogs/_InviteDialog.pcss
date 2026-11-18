@@ -38,14 +38,16 @@ Please see LICENSE files in the repository root for full details.
 .mx_InviteDialog_section {
     padding-bottom: var(--cpd-space-1x);
 
+    /* Telement: on the dialog's content edge, where the suggestions' rows hold their avatars */
     .mx_InviteDialog_section_showMore {
-        margin: 7px 18px;
+        margin: var(--cpd-space-2x);
         display: block;
     }
 }
 
 .mx_InviteDialog_section_hidden_suggestions_disclaimer {
-    padding: var(--cpd-space-2x) 0 var(--cpd-space-4x) 0;
+    /* Telement: back on the dialog's content edge from the suggestions' 8px outside it */
+    padding: var(--cpd-space-2x) var(--cpd-space-2x) var(--cpd-space-4x);
     font: var(--cpd-font-body-md-regular);
 
     > span {
@@ -59,14 +61,14 @@ Please see LICENSE files in the repository root for full details.
 }
 
 .mx_InviteDialog_footer {
-    border-top: 1px solid $input-border-color;
+    /* Telement: the one divider color (TELEMENT.md, "Colors, type and components") */
+    border-top: 1px solid var(--cpd-color-separator-primary);
 
+    /* Telement: drawn like the suggestions' section header above it (RichList) */
     > h3 {
         margin: var(--cpd-space-3x) 0;
-        font-size: $font-12px;
-        color: $muted-fg-color;
-        font-weight: bold;
-        text-transform: uppercase;
+        font: var(--cpd-font-body-sm-semibold);
+        color: var(--cpd-color-text-secondary);
     }
 
     .mx_CopyableText.mx_CopyableText_border {
@@ -83,11 +85,19 @@ Please see LICENSE files in the repository root for full details.
 }
 
 .mx_InviteDialog_other {
-    /* Prevent the dialog from jumping around randomly when elements change. */
     display: flex;
     flex-direction: column;
-    height: 600px;
+    /* Telement: a list dialog, 640px with the dialog's 24px padding (TELEMENT.md, "Colors, type and components") */
+    max-width: calc(640px - 2 * var(--cpd-space-6x));
+    /* As tall as its content up to 600px, so a dialog with nothing to suggest isn't mostly empty */
+    max-height: 600px;
     overflow: hidden;
+
+    /* Prevent the dialog from jumping around randomly when the suggestions change, or when the invites' progress
+       takes their place once Go is pressed */
+    &:has(.mx_InviteDialog_section, .mx_InviteProgressBody) {
+        height: 600px;
+    }
 
     h2 {
         display: -webkit-box;
@@ -164,6 +174,9 @@ Please see LICENSE files in the repository root for full details.
 .mx_InviteDialog_userSections {
     overflow-y: auto;
     padding: 0 45px var(--cpd-space-1x) 0;
+    /* Telement: the suggestions' rows highlight 8px outside the dialog's content edge, keeping their content on it, so
+       the list reaches 8px past the edge on both sides (TELEMENT.md, "Radius and spacing") */
+    margin-inline: calc(-1 * var(--cpd-space-2x));
 }
 
 .mx_InviteDialog_helpText {

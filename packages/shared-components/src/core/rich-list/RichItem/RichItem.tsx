@@ -41,7 +41,6 @@ export interface RichItemProps extends HTMLAttributes<HTMLLIElement> {
 /**
  * A rich item to display in a list, with an avatar, title, description and optional timestamp.
  * If selected, the avatar is replaced with a checkmark.
- * A separator is added between items in a list.
  *
  * @example
  * ```tsx

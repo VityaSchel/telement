@@ -14,7 +14,7 @@ import { describe, it, vi, beforeAll, expect } from "vitest";
 
 import * as stories from "./RichItem.stories";
 
-const { Default, Selected, WithoutTimestamp } = composeStories(stories);
+const { Default, Selected, WithoutTimestamp, Separator } = composeStories(stories);
 
 describe("RichItem", () => {
     beforeAll(() => {
@@ -49,5 +49,24 @@ describe("RichItem", () => {
     it("renders the item without timestamp", () => {
         const { container } = render(<WithoutTimestamp />);
         expect(container).toMatchSnapshot();
+    });
+
+    it("holds its avatar 8px inside the row, with no divider between rows", () => {
+        const { container } = render(<Separator />);
+        const [first, second] = [...container.querySelectorAll<HTMLElement>("li")];
+        const avatar = first.querySelector("[class*='avatar']")!;
+
+        expect(avatar.getBoundingClientRect().left - first.getBoundingClientRect().left).toBe(8);
+        expect(getComputedStyle(first).padding).toBe("8px");
+        expect(getComputedStyle(first).borderBottomStyle).toBe("none");
+        expect(second.getBoundingClientRect().top).toBe(first.getBoundingClientRect().bottom);
+    });
+
+    it("rounds the focused row's highlight as rows are rounded", () => {
+        const { container } = render(<Default />);
+        const item = container.querySelector<HTMLElement>("li")!;
+        item.focus();
+
+        expect(getComputedStyle(item).borderTopLeftRadius).toBe("8px");
     });
 });
