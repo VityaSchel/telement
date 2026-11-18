@@ -37,5 +37,11 @@ Please see LICENSE files in the repository root for full details.
     grid-template-columns: minmax(0, 1fr);
     gap: var(--cpd-space-8x);
 
-    margin: var(--cpd-space-4x) 0;
+    /* Telement: 16px under the section's heading only, so that a section without one starts its first line where the
+       tabs start, as one with a heading does, and sections are the tab's 32px apart (_SettingsTab.pcss) */
+    margin: 0;
+
+    &:not(:first-child) {
+        margin-block-start: var(--cpd-space-4x);
+    }
 }
