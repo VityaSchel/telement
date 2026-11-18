@@ -335,21 +335,39 @@ describe("SpacePanel badges and create button", () => {
     });
 
     it.each(["badge_2char", "dot"] as const)(
-        "inverts the %s badge of the selected space and rings it in the plate's color",
-        (badgeType) => {
+        "inverts the %s badge of the selected space and rings it in the panel's color, cut out of the plate's corner",
+        async (badgeType) => {
             renderBadge(badgeType, "3", true);
             const panel = document.querySelector(".mx_SpacePanel")!;
-            const style = getComputedStyle(badge());
             const plate = tokenColor("--tl-color-bg-selection", panel);
 
             expect(getComputedStyle(document.querySelector(".mx_SpaceButton_selectionWrapper")!).backgroundColor).toBe(
                 plate,
             );
-            expect(style.backgroundColor).toBe(tokenColor("--tl-color-on-selection", panel));
-            expect(style.borderTopColor).toBe(plate);
-            expect(style.color).toBe(plate);
+            expect(getComputedStyle(badge()).backgroundColor).toBe(tokenColor("--tl-color-on-selection", panel));
+            expect(getComputedStyle(badge()).borderTopColor).toBe(getComputedStyle(panel).backgroundColor);
+            expect(getComputedStyle(badge()).color).toBe(plate);
+
+            // Hovered, the plate darkens and the count with it, while the ring stays the panel's
+            await userEvent.hover(button("Home"));
+            expect(getComputedStyle(badge()).borderTopColor).toBe(getComputedStyle(panel).backgroundColor);
+            expect(getComputedStyle(badge()).color).toBe(tokenColor("--tl-color-bg-selection-hovered", panel));
+            await userEvent.unhover(button("Home"));
         },
     );
+
+    it("draws Home's and the create button's icons at 24px, 4px inside their 32px tiles, as Threads and Settings are", () => {
+        renderBadge("dot", "");
+        document.querySelector(".mx_SpaceButton_icon")!.innerHTML = renderToStaticMarkup(createElement(HomeSolidIcon));
+
+        for (const label of ["Home", "Create a space"]) {
+            const tile = button(label).querySelector(".mx_SpaceButton_icon")!.getBoundingClientRect();
+            const icon = button(label).querySelector(".mx_SpaceButton_icon svg")!.getBoundingClientRect();
+            expect([tile.width, tile.height]).toEqual([32, 32]);
+            expect([icon.width, icon.height]).toEqual([24, 24]);
+            expect([icon.left - tile.left, icon.top - tile.top]).toEqual([4, 4]);
+        }
+    });
 
     it("grows the counter down and to the left with the font, keeping it within the space button's top", () => {
         renderBadge("badge_2char", "3");

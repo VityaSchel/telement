@@ -164,12 +164,13 @@ Please see LICENSE files in the repository root for full details.
         }
 
         .mx_SpaceButton_icon {
-            /* Calculate height excluding padding to allow svg to inherit */
-            width: calc(var(--height-topLevel) - 14px);
-            height: calc(var(--height-topLevel) - 14px);
+            /* Calculate height excluding padding to allow svg to inherit. The 32px tile holds a 24px icon, as the
+               Threads and Settings buttons below do. */
+            width: calc(var(--height-topLevel) - 2 * var(--cpd-space-1x));
+            height: calc(var(--height-topLevel) - 2 * var(--cpd-space-1x));
             flex-shrink: 0;
             border-radius: 8px;
-            padding: 7px;
+            padding: var(--cpd-space-1x);
             background-color: $panel-actions;
 
             svg {
@@ -208,7 +209,6 @@ Please see LICENSE files in the repository root for full details.
 
                 .mx_SpacePanel_notificationBadge {
                     color: var(--tl-color-bg-selection-hovered);
-                    border-color: var(--tl-color-bg-selection-hovered);
                 }
             }
 
@@ -220,12 +220,12 @@ Please see LICENSE files in the repository root for full details.
                 color: var(--tl-color-on-selection);
             }
 
-            /* Its badge is inverted and ringed in the plate's color, as the selected room's badges are: the accent badge
-               would vanish on the accent plate */
+            /* Its badge is inverted, as the selected room's badges are: the accent badge would vanish on the accent
+               plate. It keeps the ring in the panel's color, so it reads as cut out of the tile where it hangs past
+               the plate's corner, rather than outlined in the plate's color there. */
             .mx_SpacePanel_notificationBadge {
                 background-color: var(--tl-color-on-selection);
                 color: var(--tl-color-bg-selection);
-                border-color: var(--tl-color-bg-selection);
             }
         }
 
