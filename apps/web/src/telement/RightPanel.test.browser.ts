@@ -100,7 +100,7 @@ function renderRoomSummaryCard(dir = "ltr"): HTMLElement {
             <p>This is the room's topic, which is long enough to wrap onto a second line in the right panel</p>
             ${html(createElement(IconButton, { className: "mx_RoomSummaryCard_topic_chevron", size: "24px" }, createElement(ChevronDownIcon)))}
         </div>
-        <div class="mx_RoomSummaryCard_topic_edit" style="flex: 1">${html(createElement(Link, { kind: "primary" }, "Edit"))}</div>`,
+        <div class="mx_RoomSummaryCard_topic_edit" style="flex: 1">${html(createElement(Link, { kind: "primary", className: "mx_RoomSummaryCard_topic_link" }, "Edit"))}</div>`,
         "var(--cpd-space-2x)",
     );
     document.body.innerHTML = `
@@ -302,6 +302,14 @@ describe("Right panel", () => {
             expect(insets(textOf(card.querySelector(".mx_RoomSummaryCard_topic_edit a")!), card).start).toBe(
                 CONTENT_EDGE,
             );
+        });
+
+        it("shows the topic's Edit link as a text button in the accent", () => {
+            const card = renderRoomSummaryCard();
+            const style = getComputedStyle(card.querySelector(".mx_RoomSummaryCard_topic_edit a")!);
+
+            expect(style.color).toBe(tokenColor("--tl-accent-900", card));
+            expect(style.textDecorationLine).toBe("none");
         });
 
         it("mirrors its rows and summary right to left", () => {

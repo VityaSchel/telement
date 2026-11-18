@@ -78,7 +78,7 @@ const RoomTopic: React.FC<Pick<IProps, "room">> = ({ room }): JSX.Element | null
                 className="mx_RoomSummaryCard_topic"
             >
                 <Box flex="1" className="mx_RoomSummaryCard_topic_box">
-                    <Link kind="primary" onClick={vm.onEditClick}>
+                    <Link kind="primary" className="mx_RoomSummaryCard_topic_link" onClick={vm.onEditClick}>
                         <Text size="sm" weight="regular">
                             {_t("right_panel|add_topic")}
                         </Text>
@@ -110,7 +110,7 @@ const RoomTopic: React.FC<Pick<IProps, "room">> = ({ room }): JSX.Element | null
             </Box>
             {vm.expanded && vm.canEditTopic && (
                 <Box flex="1" className="mx_RoomSummaryCard_topic_edit">
-                    <Link kind="primary" onClick={vm.onEditClick}>
+                    <Link kind="primary" className="mx_RoomSummaryCard_topic_link" onClick={vm.onEditClick}>
                         <Text size="sm" weight="regular">
                             {_t("action|edit")}
                         </Text>

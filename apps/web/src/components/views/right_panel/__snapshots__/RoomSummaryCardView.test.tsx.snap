@@ -181,7 +181,7 @@ exports[`<RoomSummaryCard /> > has button to edit topic 1`] = `
             style="--mx-box-flex: 1;"
           >
             <a
-              class="_link"
+              class="_link mx_RoomSummaryCard_topic_link"
               data-kind="primary"
               data-size="md"
               rel="noreferrer noopener"
@@ -880,7 +880,7 @@ exports[`<RoomSummaryCard /> > renders the room summary 1`] = `
             style="--mx-box-flex: 1;"
           >
             <a
-              class="_link"
+              class="_link mx_RoomSummaryCard_topic_link"
               data-kind="primary"
               data-size="md"
               rel="noreferrer noopener"
@@ -1621,7 +1621,7 @@ exports[`<RoomSummaryCard /> > renders the room topic in the summary 1`] = `
             style="--mx-box-flex: 1;"
           >
             <a
-              class="_link"
+              class="_link mx_RoomSummaryCard_topic_link"
               data-kind="primary"
               data-size="md"
               rel="noreferrer noopener"
