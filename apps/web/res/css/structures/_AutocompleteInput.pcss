@@ -10,9 +10,9 @@ Please see LICENSE files in the repository root for full details.
     position: relative;
 }
 
-/* Telement: a text field of the field spec (TELEMENT.md, "Colors, type and components"): 36px with one row of pills, a
-   1px border rounded 8px, darker when hovered and in the focus color when focused, and the search icon and text
-   12px inside */
+/* Telement: the filled pill of every search field (SearchFieldView), 36px with one row of pills and ringed in the focus
+   color while focused, with the search icon and text 12px inside its 1px clear border. As pills wrap it onto more rows
+   it keeps the one-line pill's 18px corners. */
 .mx_AutocompleteInput_search_icon {
     flex-shrink: 0;
     width: 20px;
@@ -31,13 +31,9 @@ Please see LICENSE files in the repository root for full details.
     min-height: var(--tl-control-size);
     overflow-x: hidden;
     overflow-y: auto;
-    border: var(--cpd-border-width-1) solid var(--cpd-color-border-interactive-secondary);
-    border-radius: var(--tl-radius-row);
-    transition: border-color 0.25s;
-
-    &:hover {
-        border-color: var(--cpd-color-border-interactive-hovered);
-    }
+    border: var(--cpd-border-width-1) solid transparent;
+    border-radius: calc(var(--tl-control-size) / 2);
+    background-color: var(--cpd-color-bg-subtle-secondary);
 
     > input {
         flex: 1;
@@ -58,9 +54,9 @@ Please see LICENSE files in the repository root for full details.
     }
 }
 
-.mx_AutocompleteInput_editor--focused,
-.mx_AutocompleteInput_editor--focused:hover {
-    border-color: var(--cpd-color-border-focused);
+.mx_AutocompleteInput_editor--focused {
+    outline: var(--cpd-border-width-2) solid var(--cpd-color-border-focused);
+    outline-offset: calc(-1 * var(--cpd-border-width-2));
 }
 
 .mx_AutocompleteInput_editor_selection {

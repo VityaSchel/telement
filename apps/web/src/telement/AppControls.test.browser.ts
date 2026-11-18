@@ -498,7 +498,7 @@ describe("App controls", () => {
             }
         });
 
-        it("makes the privileged users picker a 36px field with its matches in a menu 4px under it", () => {
+        it("makes the privileged users picker the 36px filled search pill with its matches in a menu 4px under it", () => {
             render(`
                 <div class="mx_AutocompleteInput" style="inline-size: 400px">
                     <div class="mx_AutocompleteInput_editor mx_AutocompleteInput_editor--focused">
@@ -525,8 +525,11 @@ describe("App controls", () => {
             const input = get(".mx_AutocompleteInput_editor input");
 
             expect(box(editor).height).toBe(36);
-            expect(getComputedStyle(editor).borderRadius).toBe("8px");
-            expect(settledStyle(editor).borderTopColor).toBe(colorOf("--cpd-color-border-focused"));
+            // The filled pill of every search, ringed in the focus color inside its clear border while focused
+            expect(cornerRadii(editor)).toEqual({ x: 18, y: 18 });
+            expect(getComputedStyle(editor).backgroundColor).toBe(colorOf("--cpd-color-bg-subtle-secondary"));
+            expect(settledStyle(editor).borderTopColor).toBe("rgba(0, 0, 0, 0)");
+            expect(ring(editor)).toBe(`solid 2px -2px ${colorOf("--cpd-color-border-focused")}`);
             expect([icon.width, icon.left - box(editor).left]).toEqual([20, 13]);
             expect(box(input).left + parseFloat(getComputedStyle(input).paddingLeft) - icon.right).toBe(8);
             expect(center(get(".mx_AutocompleteInput_search_icon"))).toBe(center(editor));
