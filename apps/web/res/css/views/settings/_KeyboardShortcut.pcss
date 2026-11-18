@@ -7,16 +7,22 @@ SPDX-License-Identifier: AGPL-3.0-only OR GPL-3.0-only OR LicenseRef-Element-Com
 Please see LICENSE files in the repository root for full details.
 */
 
+/* Telement: flat keys like the search dialog's (_SpotlightDialog.pcss), in the app's font rather than the browser's
+   monospace: 24px tiles rounded as inline elements, in the subtle fill that raised dialogs move a step further
+   (_common.pcss) */
 .mx_KeyboardShortcut {
     kbd {
-        padding: 5px;
-        border-radius: 4px;
-        background-color: $background;
-        min-width: 20px;
-        text-align: center;
-        display: inline-block;
-        border: 1px solid $kbd-border-color;
-        box-shadow: 0 2px $kbd-border-color;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        box-sizing: border-box;
+        min-inline-size: var(--cpd-space-6x);
+        block-size: var(--cpd-space-6x);
+        padding: 0 var(--cpd-space-2x);
+        border-radius: var(--tl-radius-inline);
+        background-color: var(--cpd-color-bg-subtle-primary);
+        color: $secondary-content;
+        font: var(--cpd-font-body-sm-medium);
         text-transform: capitalize;
     }
 }
