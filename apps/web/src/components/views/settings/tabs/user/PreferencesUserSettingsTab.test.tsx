@@ -51,7 +51,7 @@ describe("PreferencesUserSettingsTab", () => {
         PlatformPeg.get()!.reload = reloadStub;
 
         renderTab();
-        const languageDropdown = await screen.findByRole("button", { name: "Language Dropdown" });
+        const languageDropdown = await screen.findByRole("button", { name: "Application language" });
         expect(languageDropdown).toBeInTheDocument();
 
         await userEvent.click(languageDropdown);
@@ -59,6 +59,22 @@ describe("PreferencesUserSettingsTab", () => {
         const germanOption = await screen.findByText("Deutsch");
         await userEvent.click(germanOption);
         expect(reloadStub).toHaveBeenCalled();
+    });
+
+    it("shows the language and timezone labels on their dropdowns rather than above them", async () => {
+        renderTab();
+
+        const language = await screen.findByRole("button", { name: "Application language" });
+        const timezone = screen.getByRole("button", { name: "Set timezone" });
+        for (const [dropdown, label] of [
+            [language, "Application language"],
+            [timezone, "Set timezone"],
+        ] as const) {
+            const root = dropdown.closest(".mx_Dropdown")!;
+            expect(root.querySelector(".mx_Dropdown_label")).toHaveTextContent(label);
+            const textAbove = [...root.parentElement!.childNodes].filter((node) => node.nodeType === Node.TEXT_NODE);
+            expect(textAbove).toHaveLength(0);
+        }
     });
 
     it("should search and select a user timezone", async () => {

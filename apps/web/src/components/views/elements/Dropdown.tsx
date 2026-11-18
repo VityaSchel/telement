@@ -77,6 +77,10 @@ export interface DropdownProps {
     id: string;
     // ARIA label
     label: string;
+    /**
+     * Whether the label is also shown, floated on the dropdown's top border as a text field's is.
+     */
+    showLabel?: boolean;
     value?: string;
     className?: string;
     autoComplete?: string;
@@ -394,6 +398,12 @@ export default class Dropdown extends React.Component<DropdownProps, IState> {
         // to the input, but overflows below it. The root contains both.
         return (
             <div className={dropdownClasses} ref={this.collectRoot}>
+                {/* The button already has the label as its accessible name */}
+                {this.props.showLabel && (
+                    <span className="mx_Dropdown_label" aria-hidden="true">
+                        {this.props.label}
+                    </span>
+                )}
                 <AccessibleButton
                     className="mx_Dropdown_input mx_no_textinput"
                     onClick={this.onAccessibleButtonClick}

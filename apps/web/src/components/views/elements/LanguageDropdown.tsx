@@ -31,6 +31,10 @@ interface IProps {
     onOptionChange: (language: string) => void;
     value: string;
     disabled?: boolean;
+    /**
+     * A label shown on the dropdown's border, which also becomes its accessible name.
+     */
+    label?: string;
 }
 
 interface IState {
@@ -120,7 +124,8 @@ export default class LanguageDropdown extends React.Component<IProps, IState> {
                 onSearchChange={this.onSearchChange}
                 searchEnabled={true}
                 value={this.props.value}
-                label={_t("language_dropdown_label")}
+                label={this.props.label ?? _t("language_dropdown_label")}
+                showLabel={this.props.label !== undefined}
                 disabled={this.props.disabled}
             >
                 {options}

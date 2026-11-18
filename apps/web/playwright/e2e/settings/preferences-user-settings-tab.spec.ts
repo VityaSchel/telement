@@ -43,7 +43,7 @@ test.describe("Preferences user settings tab", () => {
 
     test("should be able to change the app language", { tag: ["@no-firefox", "@no-webkit"] }, async ({ uut, user }) => {
         // Check language and region setting dropdown
-        const languageInput = uut.getByRole("button", { name: "Language Dropdown" });
+        const languageInput = uut.getByRole("button", { name: "Application language" });
         await languageInput.scrollIntoViewIfNeeded();
         // Check the default value
         await expect(languageInput.getByText("English")).toBeVisible();

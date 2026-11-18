@@ -47,6 +47,19 @@ describe("<Dropdown />", () => {
         expect(asFragment()).toMatchSnapshot();
     });
 
+    it("shows its label only when asked, keeping it as the button's name", () => {
+        const { container, rerender } = renderDropdown();
+        expect(container.querySelector(".mx_Dropdown_label")).toBeNull();
+
+        rerender(
+            <Dropdown id="id" label="Test Dropdown" showLabel onOptionChange={onOptionChange}>
+                {[<div key="one">one</div>] as NonEmptyArray<ReactElement & { key: string }>}
+            </Dropdown>,
+        );
+        expect(container.querySelector(".mx_Dropdown_label")).toHaveTextContent("Test Dropdown");
+        expect(screen.getByRole("button", { name: "Test Dropdown" })).toBeInTheDocument();
+    });
+
     it("expands and collapses on click", async () => {
         const user = userEvent.setup();
         renderDropdown();

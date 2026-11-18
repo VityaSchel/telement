@@ -69,7 +69,8 @@ Please see LICENSE files in the repository root for full details.
 
     .mx_SettingsSubsection_dropdown {
         min-width: 360px;
-        /* Same spacing between the label and the dropdown as Compound's form fields */
+        /* The dropdown and the hint under it, spaced as Compound's form fields. Telement: the label floats on the
+           dropdown's border (Dropdown's showLabel) rather than sitting above it */
         display: flex;
         flex-direction: column;
         gap: var(--cpd-space-1x);

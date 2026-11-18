@@ -15,6 +15,30 @@ Please see LICENSE files in the repository root for full details.
     opacity: 0.3;
 }
 
+/* Telement: a shown label floats on the middle of the top border, its text where the value's starts, as a text
+   field's does (_Field.pcss) */
+.mx_Dropdown_label {
+    position: absolute;
+    z-index: 1;
+    inset-block-start: calc(var(--cpd-border-width-1) / 2);
+    inset-inline-start: calc(var(--cpd-border-width-1) + var(--cpd-space-3x) - var(--cpd-space-0-5x));
+    max-inline-size: calc(100% - 2 * var(--cpd-space-3x));
+    padding-inline: var(--cpd-space-0-5x);
+    transform: translateY(-50%);
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    pointer-events: none;
+    font: var(--cpd-font-body-xs-regular);
+    color: var(--cpd-color-text-secondary);
+    background-color: var(--cpd-color-bg-canvas-default);
+}
+
+/* The focus color of the border it sits on, as a focused field's label */
+.mx_Dropdown:focus-within > .mx_Dropdown_label {
+    color: var(--cpd-color-border-focused);
+}
+
 .mx_Dropdown_input {
     display: flex;
     align-items: center;

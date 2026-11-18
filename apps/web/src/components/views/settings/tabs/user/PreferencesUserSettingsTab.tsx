@@ -65,8 +65,11 @@ const LanguageSection: React.FC = () => {
 
     return (
         <div className="mx_SettingsSubsection_dropdown">
-            {_t("settings|general|application_language")}
-            <LanguageDropdown onOptionChange={onLanguageChange} value={language} />
+            <LanguageDropdown
+                onOptionChange={onLanguageChange}
+                value={language}
+                label={_t("settings|general|application_language")}
+            />
             <div className="mx_PreferencesUserSettingsTab_section_hint">
                 {_t("settings|general|application_language_reload_hint")}
             </div>
@@ -307,7 +310,6 @@ export default class PreferencesUserSettingsTab extends React.Component<EmptyObj
 
                     <SettingsSubsection heading={_t("settings|preferences|time_heading")} formWrap>
                         <div className="mx_SettingsSubsection_dropdown">
-                            {_t("settings|preferences|user_timezone")}
                             <Dropdown
                                 id="mx_dropdownUserTimezone"
                                 className="mx_dropdownUserTimezone"
@@ -315,6 +317,7 @@ export default class PreferencesUserSettingsTab extends React.Component<EmptyObj
                                 searchEnabled={true}
                                 value={this.state.timezone}
                                 label={_t("settings|preferences|user_timezone")}
+                                showLabel
                                 placeholder={browserTimezoneLabel}
                                 onOptionChange={this.onTimezoneChange}
                                 onSearchChange={this.onTimezoneSearchChange}
