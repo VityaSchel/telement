@@ -350,6 +350,7 @@ const ForwardDialog: React.FC<IProps> = ({ matrixClient: cli, event, permalinkCr
                         layout={previewLayout}
                         permalinkCreator={permalinkCreator}
                         as="div"
+                        lastInSection
                         inhibitInteraction
                     />
                 </EventPresentationContextProvider>

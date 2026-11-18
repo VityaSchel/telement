@@ -55,6 +55,8 @@ export interface EventTileSenderProfileStateInput {
     timelineRenderingType: TimelineRenderingType;
     /** Whether the tile is a continuation of the previous event. */
     continuation?: boolean;
+    /** Whether the tile is the last of its section, the run of messages its sender sent in a row. */
+    lastInSection?: boolean;
     /** The Matrix event type for event-type sender profile derivation. */
     eventType: string;
     /** Whether the tile should use bubble container styling. */
@@ -83,6 +85,7 @@ export function getEventTileSenderProfileState({
     isInfoMessage,
     timelineRenderingType,
     continuation,
+    lastInSection,
     eventType,
     isBubbleMessage,
     layout,
@@ -98,10 +101,26 @@ export function getEventTileSenderProfileState({
         return { avatarSize: "14px", needsSenderProfile: false };
     }
 
+    if (timelineRenderingType === TimelineRenderingType.ThreadsList) {
+        return { avatarSize: "32px", needsSenderProfile: true };
+    }
+
+    const isCall = isCallInvite || ElementCallEventType.matches(eventType) || isRtcNotification;
+
+    // In bubbles, as in Telegram, the sender's name heads a run of their messages and their avatar sits beside the
+    // run's last bubble. The file list, room creation, cards and calls follow the rules below.
     if (
-        timelineRenderingType === TimelineRenderingType.ThreadsList ||
-        (timelineRenderingType === TimelineRenderingType.Thread && !continuation)
+        layout === Layout.Bubble &&
+        timelineRenderingType !== TimelineRenderingType.File &&
+        !isRoomCreate &&
+        !isBubbleMessage &&
+        !isCall
     ) {
+        const avatarSize = timelineRenderingType === TimelineRenderingType.Thread ? "32px" : "30px";
+        return { avatarSize: lastInSection ? avatarSize : null, needsSenderProfile: !continuation };
+    }
+
+    if (timelineRenderingType === TimelineRenderingType.Thread && !continuation) {
         return { avatarSize: "32px", needsSenderProfile: true };
     }
 
@@ -113,12 +132,7 @@ export function getEventTileSenderProfileState({
         return { avatarSize: "14px", needsSenderProfile: true };
     }
 
-    if (
-        (continuation && timelineRenderingType !== TimelineRenderingType.File) ||
-        isCallInvite ||
-        ElementCallEventType.matches(eventType) ||
-        isRtcNotification
-    ) {
+    if ((continuation && timelineRenderingType !== TimelineRenderingType.File) || isCall) {
         return { avatarSize: null, needsSenderProfile: false };
     }
 

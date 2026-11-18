@@ -531,6 +531,49 @@ describe("EventTileViewModel", () => {
         expect(snapshot.sender.viewUserOnClick).toBe(true);
     });
 
+    it.each([
+        [TimelineRenderingType.Room, "30px"],
+        [TimelineRenderingType.Thread, "32px"],
+    ])(
+        "puts the sender on the first message of a run and the avatar on the last in bubbles in the %s timeline",
+        (timelineRenderingType, avatarSize) => {
+            const profileState = (continuation: boolean, isLastInSection: boolean): unknown =>
+                EventTileViewModel.createSnapshot(
+                    makeProps({
+                        display: { timelineRenderingType, layout: Layout.Bubble, continuation, isLastInSection },
+                    }),
+                ).sender.profileState;
+
+            expect(profileState(false, true)).toEqual({ avatarSize, needsSenderProfile: true });
+            expect(profileState(false, false)).toEqual({ avatarSize: null, needsSenderProfile: true });
+            expect(profileState(true, false)).toEqual({ avatarSize: null, needsSenderProfile: false });
+            expect(profileState(true, true)).toEqual({ avatarSize, needsSenderProfile: false });
+        },
+    );
+
+    it("keeps the avatar on the first message of a run outside bubbles", () => {
+        const profileState = (continuation: boolean, isLastInSection: boolean): unknown =>
+            EventTileViewModel.createSnapshot(makeProps({ display: { continuation, isLastInSection } })).sender
+                .profileState;
+
+        expect(profileState(false, false)).toEqual({ avatarSize: "30px", needsSenderProfile: true });
+        expect(profileState(true, true)).toEqual({ avatarSize: null, needsSenderProfile: false });
+    });
+
+    it.each<[string, EventTileViewModelPropsOverrides]>([
+        ["a card", { display: { isBubbleMessage: true } }],
+        ["a call invite", { event: { isCallInvite: true } }],
+    ])("gives %s no avatar in bubbles, even at the end of a run", (_name, overrides) => {
+        const snapshot = EventTileViewModel.createSnapshot(
+            makeProps({
+                ...overrides,
+                display: { layout: Layout.Bubble, isLastInSection: true, ...overrides.display },
+            }),
+        );
+
+        expect(snapshot.sender.profileState.avatarSize).toBeNull();
+    });
+
     it("carries pure sender render inputs", () => {
         const snapshot = EventTileViewModel.createSnapshot(
             makeProps({

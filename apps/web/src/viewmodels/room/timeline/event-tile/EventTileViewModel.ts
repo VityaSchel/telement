@@ -625,6 +625,7 @@ export class EventTileViewModel extends BaseViewModel<EventTileViewModelRenderSt
             isInfoMessage: display.isInfoMessage,
             timelineRenderingType: display.timelineRenderingType,
             continuation: display.continuation,
+            lastInSection: display.isLastInSection,
             eventType: event.eventType,
             isBubbleMessage: display.isBubbleMessage,
             layout: display.layout,

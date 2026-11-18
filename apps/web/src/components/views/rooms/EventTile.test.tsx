@@ -417,12 +417,20 @@ describe("EventTile", () => {
             expect(senderDetails).toContainElement(avatarSlot);
         });
 
-        it("keeps sender and avatar when only the layout prop is set to bubble", () => {
-            const { container } = getComponent({ layout: Layout.Bubble });
+        it.each([
+            ["the only message of a run", { lastInSection: true }, true, true],
+            ["the first message of a run", { lastInSection: false }, true, false],
+            ["a message in the middle of a run", { continuation: true, lastInSection: false }, false, false],
+            ["the last message of a run", { continuation: true, lastInSection: true }, false, true],
+        ])(
+            "shows the sender of %s only at the run's start and the avatar only at its end in bubbles",
+            (_name, props, hasSender, hasAvatar) => {
+                const { container } = getComponent({ layout: Layout.Bubble, ...props });
 
-            expect(container.querySelector(".mx_DisambiguatedProfile")).not.toBeNull();
-            expect(container.querySelector('[data-testid="event-tile-slot-avatar"]')).not.toBeNull();
-        });
+                expect(container.querySelector(".mx_DisambiguatedProfile") !== null).toBe(hasSender);
+                expect(container.querySelector('[data-testid="event-tile-slot-avatar"]') !== null).toBe(hasAvatar);
+            },
+        );
 
         it("hides the sender but keeps the info-message avatar for room create events", () => {
             const createEvent = mkEvent({
