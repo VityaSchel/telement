@@ -16,7 +16,11 @@ import { userEvent } from "vitest/browser";
 
 import * as stories from "./UserMenu.stories.tsx";
 
-const { Open } = composeStories(stories);
+const { Default, Open } = composeStories(stories);
+
+/** The space panel's width when collapsed; the app's 32px space avatars start 18px from its edge, so center on 34px. */
+const SPACE_PANEL_WIDTH = 68;
+const SPACE_AVATAR_AXIS = 18 + 32 / 2;
 
 /** Where an icon's drawing, rather than its box, ends on the screen. */
 function inkRight(svg: SVGSVGElement): number {
@@ -85,4 +89,21 @@ describe("User menu insets", () => {
         expect(style.outlineWidth).toBe("2px");
         expect(style.outlineOffset).toBe("-2px");
     });
+
+    it.each([false, true])(
+        "centers the avatar on the space panel's axis, as the space avatars are, when expanded is %s",
+        (expanded) => {
+            render(
+                <div data-testid="space-panel" style={{ inlineSize: expanded ? "240px" : `${SPACE_PANEL_WIDTH}px` }}>
+                    <Default expanded={expanded} />
+                </div>,
+            );
+            const avatarWrapper = screen.getByRole("button", { name: "User menu" }).firstElementChild!;
+            const box = avatarWrapper.firstElementChild!.getBoundingClientRect();
+            const start = box.left - screen.getByTestId("space-panel").getBoundingClientRect().left;
+
+            expect(box.width).toBe(36);
+            expect(start + box.width / 2).toBe(SPACE_AVATAR_AXIS);
+        },
+    );
 });

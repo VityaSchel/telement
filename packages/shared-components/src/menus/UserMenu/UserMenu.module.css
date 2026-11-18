@@ -179,7 +179,8 @@
     }
     margin-left: var(--cpd-space-3x);
     margin-right: var(--cpd-space-2x);
-    padding-inline-start: var(--cpd-space-1-5x);
+    /* 16px from the space panel's edge, so that the 36px avatar centers on the 68px panel like the space avatars */
+    padding-inline-start: var(--cpd-space-1x);
 }
 
 .displayName {
