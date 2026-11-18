@@ -65,7 +65,7 @@ exports[`ImportE2eKeysDialog > renders 1`] = `
             class="mx_E2eKeysDialog_inputRow"
           >
             <div
-              class="mx_Field mx_Field_input"
+              class="mx_Field mx_Field_input mx_Field_placeholderIsLabel"
             >
               <input
                 id="mx_Field_1"

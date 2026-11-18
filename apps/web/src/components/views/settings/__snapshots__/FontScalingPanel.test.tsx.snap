@@ -19,7 +19,7 @@ exports[`FontScalingPanel > renders the font scaling UI 1`] = `
       class="mx_SettingsSubsection_content mx_SettingsSubsection_contentStretch"
     >
       <div
-        class="mx_Field mx_Field_select mx_FontScalingPanel_Dropdown"
+        class="mx_Field mx_Field_select mx_FontScalingPanel_Dropdown mx_Field_placeholderIsLabel"
       >
         <select
           id="mx_Field_1"

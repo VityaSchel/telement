@@ -7,7 +7,7 @@ exports[`AddRemoveThreepids > should handle no email addresses 1`] = `
     novalidate=""
   >
     <div
-      class="mx_Field mx_Field_input"
+      class="mx_Field mx_Field_input mx_Field_placeholderIsLabel"
     >
       <input
         autocomplete="email"
@@ -57,7 +57,7 @@ exports[`AddRemoveThreepids > should render email addresses 1`] = `
     novalidate=""
   >
     <div
-      class="mx_Field mx_Field_input"
+      class="mx_Field mx_Field_input mx_Field_placeholderIsLabel"
     >
       <input
         autocomplete="email"
@@ -107,7 +107,7 @@ exports[`AddRemoveThreepids > should render phone numbers 1`] = `
     novalidate=""
   >
     <div
-      class="mx_Field mx_Field_input mx_Field_labelAlwaysTopLeft"
+      class="mx_Field mx_Field_input mx_Field_labelAlwaysTopLeft mx_Field_placeholderIsLabel"
     >
       <span
         class="mx_Field_prefix"

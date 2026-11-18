@@ -92,8 +92,9 @@ Please see LICENSE files in the repository root for full details.
     color: transparent;
 }
 
-.mx_Field input:placeholder-shown:focus::placeholder,
-.mx_Field textarea:placeholder-shown:focus::placeholder,
+/* Telement: not a placeholder that only repeats the label, which floats onto the border on focus (Field.tsx) */
+.mx_Field:not(.mx_Field_placeholderIsLabel) input:placeholder-shown:focus::placeholder,
+.mx_Field:not(.mx_Field_placeholderIsLabel) textarea:placeholder-shown:focus::placeholder,
 .mx_Field.mx_Field_placeholderIsHint input::placeholder {
     transition: color 0.25s ease-in 0.1s;
     color: $info-plinth-fg-color;

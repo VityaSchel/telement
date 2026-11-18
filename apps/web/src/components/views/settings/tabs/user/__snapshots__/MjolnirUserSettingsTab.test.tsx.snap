@@ -130,7 +130,7 @@ exports[`<MjolnirUserSettingsTab /> > renders correctly when user has no ignored
                 autocomplete="off"
               >
                 <div
-                  class="mx_Field mx_Field_input"
+                  class="mx_Field mx_Field_input mx_Field_placeholderIsLabel"
                 >
                   <input
                     id="mx_Field_2"

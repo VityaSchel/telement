@@ -327,6 +327,10 @@ export default class Field extends React.PureComponent<PropShapes, IState> {
             // properly.
             mx_Field_labelAlwaysTopLeft: prefixComponent || usePlaceholderAsHint,
             mx_Field_placeholderIsHint: usePlaceholderAsHint,
+            // Telement: the label floats onto the border when the field is focused, so a placeholder repeating it
+            // would show it twice
+            mx_Field_placeholderIsLabel:
+                !usePlaceholderAsHint && !!this.props.label && inputProps.placeholder === this.props.label,
             mx_Field_valid: hasValidationFlag ? forceValidity : onValidate && this.state.valid === true,
             mx_Field_invalid: hasValidationFlag ? !forceValidity : onValidate && this.state.valid === false,
         });

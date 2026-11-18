@@ -6,7 +6,7 @@ exports[`<RoomStateExplorer /> > should render 1`] = `
     class="mx_DevTools_content"
   >
     <div
-      class="mx_Field mx_Field_input mx_TextInputDialog_input mx_DevTools_RoomStateExplorer_query"
+      class="mx_Field mx_Field_input mx_TextInputDialog_input mx_DevTools_RoomStateExplorer_query mx_Field_placeholderIsLabel"
     >
       <input
         autocomplete="off"

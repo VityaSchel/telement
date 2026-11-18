@@ -82,7 +82,7 @@ exports[`<ServerPickerDialog /> > should render dialog 1`] = `
           class="mx_StyledRadioButton_content"
         >
           <div
-            class="mx_Field mx_Field_input mx_ServerPickerDialog_otherHomeserver"
+            class="mx_Field mx_Field_input mx_ServerPickerDialog_otherHomeserver mx_Field_placeholderIsLabel"
           >
             <input
               id="mx_homeserverInput"

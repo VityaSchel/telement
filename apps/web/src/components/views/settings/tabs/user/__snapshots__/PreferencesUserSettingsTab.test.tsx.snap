@@ -36,7 +36,6 @@ exports[`PreferencesUserSettingsTab > should render 1`] = `
                 <div
                   class="mx_SettingsSubsection_dropdown"
                 >
-                  Application language
                   <div
                     class="mx_Spinner"
                   >
@@ -220,10 +219,15 @@ exports[`PreferencesUserSettingsTab > should render 1`] = `
                 <div
                   class="mx_SettingsSubsection_dropdown"
                 >
-                  Set timezone
                   <div
                     class="mx_Dropdown mx_dropdownUserTimezone"
                   >
+                    <span
+                      aria-hidden="true"
+                      class="mx_Dropdown_label"
+                    >
+                      Set timezone
+                    </span>
                     <div
                       aria-describedby="mx_dropdownUserTimezone_value"
                       aria-expanded="false"
@@ -1655,7 +1659,7 @@ exports[`PreferencesUserSettingsTab > should render 1`] = `
                   </div>
                 </div>
                 <div
-                  class="mx_Field mx_Field_input"
+                  class="mx_Field mx_Field_input mx_Field_placeholderIsLabel"
                 >
                   <input
                     id="mx_Field_1"
@@ -1671,7 +1675,7 @@ exports[`PreferencesUserSettingsTab > should render 1`] = `
                   </label>
                 </div>
                 <div
-                  class="mx_Field mx_Field_input"
+                  class="mx_Field mx_Field_input mx_Field_placeholderIsLabel"
                 >
                   <input
                     id="mx_Field_2"
@@ -1687,7 +1691,7 @@ exports[`PreferencesUserSettingsTab > should render 1`] = `
                   </label>
                 </div>
                 <div
-                  class="mx_Field mx_Field_input"
+                  class="mx_Field mx_Field_input mx_Field_placeholderIsLabel"
                 >
                   <input
                     id="mx_Field_3"

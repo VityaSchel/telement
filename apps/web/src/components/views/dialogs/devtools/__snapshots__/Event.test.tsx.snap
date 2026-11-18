@@ -9,7 +9,7 @@ exports[`<EventEditor /> > should render 1`] = `
       class="mx_DevTools_eventTypeStateKeyGroup"
     >
       <div
-        class="mx_Field mx_Field_input"
+        class="mx_Field mx_Field_input mx_Field_placeholderIsLabel"
       >
         <input
           autocomplete="on"
@@ -28,7 +28,7 @@ exports[`<EventEditor /> > should render 1`] = `
       </div>
     </div>
     <div
-      class="mx_Field mx_Field_textarea mx_DevTools_textarea"
+      class="mx_Field mx_Field_textarea mx_DevTools_textarea mx_Field_placeholderIsLabel"
     >
       <textarea
         autocomplete="off"
@@ -76,7 +76,7 @@ exports[`<EventEditor /> > thread context > should pre-populate a thread relatio
       class="mx_DevTools_eventTypeStateKeyGroup"
     >
       <div
-        class="mx_Field mx_Field_input"
+        class="mx_Field mx_Field_input mx_Field_placeholderIsLabel"
       >
         <input
           autocomplete="on"
@@ -95,7 +95,7 @@ exports[`<EventEditor /> > thread context > should pre-populate a thread relatio
       </div>
     </div>
     <div
-      class="mx_Field mx_Field_textarea mx_DevTools_textarea"
+      class="mx_Field mx_Field_textarea mx_DevTools_textarea mx_Field_placeholderIsLabel"
     >
       <textarea
         autocomplete="off"

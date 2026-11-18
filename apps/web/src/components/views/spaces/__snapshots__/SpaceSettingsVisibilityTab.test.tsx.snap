@@ -200,7 +200,7 @@ exports[`<SpaceSettingsVisibilityTab /> > for a public space > renders addresses
                   class="mx_SettingsFieldset_content"
                 >
                   <div
-                    class="mx_Field mx_Field_select"
+                    class="mx_Field mx_Field_select mx_Field_placeholderIsLabel"
                   >
                     <select
                       disabled=""
@@ -234,7 +234,7 @@ exports[`<SpaceSettingsVisibilityTab /> > for a public space > renders addresses
                     </svg>
                   </div>
                   <form
-                    class="_root"
+                    class="_root mx_RoomPublishSetting"
                   >
                     <div
                       class="_inline-field"

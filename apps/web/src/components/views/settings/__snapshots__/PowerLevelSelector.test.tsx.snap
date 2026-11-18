@@ -16,7 +16,7 @@ exports[`PowerLevelSelector > should display only the current user 1`] = `
       class="mx_PowerSelector"
     >
       <div
-        class="mx_Field mx_Field_select"
+        class="mx_Field mx_Field_select mx_Field_placeholderIsLabel"
       >
         <select
           data-testid="power-level-select-element"
@@ -100,7 +100,7 @@ exports[`PowerLevelSelector > should render 1`] = `
       class="mx_PowerSelector"
     >
       <div
-        class="mx_Field mx_Field_select"
+        class="mx_Field mx_Field_select mx_Field_placeholderIsLabel"
       >
         <select
           data-testid="power-level-select-element"
@@ -157,7 +157,7 @@ exports[`PowerLevelSelector > should render 1`] = `
       class="mx_PowerSelector"
     >
       <div
-        class="mx_Field mx_Field_select"
+        class="mx_Field mx_Field_select mx_Field_placeholderIsLabel"
       >
         <select
           data-testid="power-level-select-element"
@@ -214,7 +214,7 @@ exports[`PowerLevelSelector > should render 1`] = `
       class="mx_PowerSelector"
     >
       <div
-        class="mx_Field mx_Field_select"
+        class="mx_Field mx_Field_select mx_Field_placeholderIsLabel"
       >
         <select
           data-testid="power-level-select-element"

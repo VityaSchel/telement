@@ -45,6 +45,20 @@ describe("Field", () => {
             // Then
             expect(screen.getByRole("textbox")).not.toHaveAttribute("placeholder", "my placeholder");
         });
+
+        it.each([
+            ["defaults the placeholder to the label", true, { label: "Name" }],
+            ["passes the label as the placeholder", true, { label: "Name", placeholder: "Name" }],
+            ["has a placeholder of its own", false, { label: "Name", placeholder: "Design team" }],
+            ["uses the placeholder as a hint", false, { label: "Name", usePlaceholderAsHint: true }],
+            ["has no label", false, { placeholder: "Name" }],
+        ])("marks whether a field that %s repeats its label as the placeholder (%s)", (_, marked, props) => {
+            const { container } = render(<Field value="" {...props} />);
+
+            expect(container.querySelector(".mx_Field")!.classList.contains("mx_Field_placeholderIsLabel")).toBe(
+                marked,
+            );
+        });
     });
 
     describe("Feedback", () => {

@@ -38,7 +38,7 @@ exports[`<AccountUserSettingsTab /> > 3pids > should display 3pid email addresse
       novalidate=""
     >
       <div
-        class="mx_Field mx_Field_input"
+        class="mx_Field mx_Field_input mx_Field_placeholderIsLabel"
       >
         <input
           autocomplete="email"
@@ -104,7 +104,7 @@ exports[`<AccountUserSettingsTab /> > 3pids > should display 3pid email addresse
       novalidate=""
     >
       <div
-        class="mx_Field mx_Field_input mx_Field_labelAlwaysTopLeft"
+        class="mx_Field mx_Field_input mx_Field_labelAlwaysTopLeft mx_Field_placeholderIsLabel"
       >
         <span
           class="mx_Field_prefix"
