@@ -126,6 +126,20 @@ input + [class^="_ui_"] {
 }
 
 /*
+ * Compound's info alert is drawn in its base blues rather than the info tokens, which follow the accent
+ * (telement/tokens.css), so it showed a second blue beside the accent. The element type keeps this ahead of
+ * Compound's rule where Compound's stylesheet comes later (shared-components tests).
+ */
+div:is([class^="_alert_"], [class*=" _alert_"])[data-type="info"] {
+    background-color: var(--cpd-color-bg-info-subtle);
+    border-color: var(--cpd-color-border-info-subtle);
+
+    > svg[class*="_icon_"] {
+        color: var(--cpd-color-icon-info-primary);
+    }
+}
+
+/*
  * One field spec for legacy and Compound text fields (TELEMENT.md, "Colors, type and components"; _Field.pcss): 36px
  * with the text 12px inside a 1px border, darker when hovered, in the focus color (the accent) when focused, without
  * Compound's hover shadow or 2px ring.
