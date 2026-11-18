@@ -136,17 +136,13 @@ const NewRoomIntro: React.FC = () => {
 
         let topicText;
         if (canAddTopic && topic) {
-            topicText = _t(
-                "room|intro|edit_topic",
-                {},
-                {
-                    a: (sub) => (
-                        <AccessibleButton element="a" kind="link_inline" onClick={onTopicClick}>
-                            {sub}
-                        </AccessibleButton>
-                    ),
-                    topic: renderedTopic,
-                },
+            topicText = (
+                <>
+                    {_t("room|intro|display_topic", {}, { topic: renderedTopic })}{" "}
+                    <AccessibleButton element="a" kind="link_inline" onClick={onTopicClick}>
+                        {_t("action|edit")}
+                    </AccessibleButton>
+                </>
             );
         } else if (topic) {
             topicText = _t("room|intro|display_topic", {}, { topic: renderedTopic });
@@ -276,12 +272,18 @@ const NewRoomIntro: React.FC = () => {
 
     const subText = _t("room|intro|private_unencrypted_warning");
 
-    let subButton: JSX.Element | undefined;
+    let subButton: React.ReactNode;
     if (room.currentState.mayClientSendStateEvent(EventType.RoomEncryption, cli) && !isLocalRoom) {
-        subButton = (
-            <AccessibleButton kind="link_inline" onClick={openRoomSettings}>
-                {_t("room|intro|enable_encryption_prompt")}
-            </AccessibleButton>
+        subButton = _t(
+            "telement|room|enable_encryption_prompt",
+            {},
+            {
+                a: (sub) => (
+                    <AccessibleButton kind="link_inline" onClick={openRoomSettings}>
+                        {sub}
+                    </AccessibleButton>
+                ),
+            },
         );
     }
 

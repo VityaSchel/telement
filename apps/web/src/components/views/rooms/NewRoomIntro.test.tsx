@@ -32,6 +32,7 @@ import { ScopedRoomContextProvider } from "../../../contexts/ScopedRoomContext.t
 import defaultDispatcher from "../../../dispatcher/dispatcher";
 import type { RoomContextType } from "../../../contexts/RoomContext.ts";
 import { SDKContextClass } from "../../../contexts/SDKContextClass.ts";
+import { RoomSettingsTab } from "../dialogs/RoomSettingsDialog-tab";
 
 const renderNewRoomIntro = (client: MatrixClient, room: Room | LocalRoom) => {
     render(
@@ -158,7 +159,8 @@ describe("NewRoomIntro", () => {
             const spyDispatcher = vi.spyOn(defaultDispatcher, "dispatch").mockImplementation(() => {});
 
             renderNewRoomIntro(client, room);
-            screen.getByRole("button", { name: "edit" }).click();
+            expect(screen.getByTestId("topic")).toHaveTextContent("Topic: Test topic Edit");
+            screen.getByRole("button", { name: "Edit" }).click();
             expect(spyDispatcher).toHaveBeenCalledWith(
                 {
                     action: "open_room_settings",
@@ -166,6 +168,24 @@ describe("NewRoomIntro", () => {
                 },
                 true,
             );
+        });
+    });
+
+    describe("unencrypted room warning", () => {
+        it("should end the sentence after the link to the encryption settings", () => {
+            const room = new Room(roomId, client, userId);
+            vi.spyOn(room.currentState, "mayClientSendStateEvent").mockReturnValue(true);
+            const spyDispatcher = vi.spyOn(defaultDispatcher, "dispatch").mockImplementation(() => {});
+
+            renderNewRoomIntro(client, room);
+            const link = screen.getByRole("button", { name: "Enable encryption in settings" });
+            expect(link.parentElement).toHaveTextContent(/^Enable encryption in settings\.$/);
+
+            link.click();
+            expect(spyDispatcher).toHaveBeenCalledWith({
+                action: "open_room_settings",
+                initial_tab_id: RoomSettingsTab.Security,
+            });
         });
     });
 });
