@@ -9,6 +9,7 @@ import React, { type HTMLAttributes, type JSX } from "react";
 import classNames from "classnames";
 
 import { type ViewModel, useViewModel } from "../../../../../core/viewmodel";
+import { useEventPresentation } from "../../../EventPresentation";
 import { ReactionsRowButtonTooltipView, type ReactionsRowButtonTooltipViewModel } from "../ReactionsRowButtonTooltip";
 import styles from "./ReactionsRowButton.module.css";
 
@@ -67,16 +68,19 @@ interface ReactionsRowButtonViewProps {
  * Renders a single reaction button within a reactions row.
  *
  * The button supports text or image reactions, selected and disabled
- * styling, and wraps its content in the reactions tooltip view.
+ * styling, and wraps its content in the reactions tooltip view. In the bubble
+ * layout it takes the filled look of reactions inside a bubble.
  */
 export function ReactionsRowButtonView({ vm }: Readonly<ReactionsRowButtonViewProps>): JSX.Element {
     const snapshot = useViewModel(vm) as ReactionsRowButtonViewSnapshot & { ariaLabel?: string };
+    const { layout } = useEventPresentation();
     const { content, count, className, isSelected, isDisabled, imageSrc, imageAlt, tooltipVm } = snapshot;
     const ariaLabel = snapshot["aria-label"] ?? snapshot.ariaLabel;
     const ariaDisabled = isDisabled ? true : undefined;
     const classes = classNames(className, styles.reactionsRowButton, {
         [styles.reactionsRowButtonSelected]: isSelected,
         [styles.reactionsRowButtonDisabled]: isDisabled,
+        [styles.reactionsRowButtonInBubble]: layout === "bubble",
     });
 
     const reactionContent = imageSrc ? (

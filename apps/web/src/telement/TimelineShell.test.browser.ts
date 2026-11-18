@@ -37,6 +37,10 @@ import disambiguatedProfileStyles from "../../../../packages/shared-components/s
 import eventTileBubbleStyles from "../../../../packages/shared-components/src/room/timeline/event-tile/EventTileView/EventTileBubble/EventTileBubble.module.css?raw";
 // eslint-disable-next-line no-restricted-imports
 import readMarkerStyles from "../../../../packages/shared-components/src/room/timeline/ReadMarker/ReadMarker.module.css?raw";
+// eslint-disable-next-line no-restricted-imports
+import reactionsRowStyles from "../../../../packages/shared-components/src/room/timeline/event-tile/reactions/ReactionsRow/ReactionsRow.module.css?raw";
+// eslint-disable-next-line no-restricted-imports
+import reactionsRowButtonStyles from "../../../../packages/shared-components/src/room/timeline/event-tile/reactions/ReactionsRowButton/ReactionsRowButton.module.css?raw";
 // The package doesn't export its token stylesheet on its own
 // eslint-disable-next-line no-restricted-imports
 import telementTokens from "../../../../packages/shared-components/src/telement/tokens.css?raw";
@@ -79,6 +83,33 @@ const slot = (name: string, content: string): string => `<div class="slot${name}
 
 const text = (body: string): string =>
     `<div class="mx_MTextBody mx_EventTile_content TextualBody_root TextualBody_text"><div class="mx_EventTile_body translate" dir="auto">${body}</div></div>`;
+
+/** A message of only emoji, which the app marks to draw them large. */
+const bigEmoji = (emoji: string): string =>
+    `<div class="mx_MTextBody mx_EventTile_content TextualBody_root TextualBody_text"><span class="mx_EventTile_body mx_EventTile_bigEmoji translate" dir="auto">${emoji}</span></div>`;
+
+/**
+ * A reactions row as ReactionsRowView renders it in a bubble, each reaction an emoji, its count and whether it is the
+ * reader's own, with the add-reaction button hidden until the message is hovered.
+ */
+function reactions(...items: Array<[emoji: string, count: number, own?: boolean]>): string {
+    const chips = items.map(
+        ([emoji, count, own]) => `
+            <button type="button" aria-label="${count} reactions for ${emoji}"
+                class="ReactionsRowButton_reactionsRowButton${own ? " ReactionsRowButton_reactionsRowButtonSelected" : ""} ReactionsRowButton_reactionsRowButtonInBubble">
+                <span class="ReactionsRowButton_reactionsRowButtonContent" aria-hidden="true">${emoji}</span>
+                <span class="ReactionsRowButton_reactionsRowButtonCount" aria-hidden="true">${count}</span>
+            </button>`,
+    );
+    return `
+        <div class="mx_ReactionsRow ReactionsRow_reactionsRow" role="toolbar" aria-label="Reactions">
+            ${chips.join("")}
+            <button type="button" class="ReactionsRow_addReactionButton" aria-label="Add reaction">
+                <svg width="16" height="16"></svg>
+            </button>
+        </div>
+    `;
+}
 
 const RECEIPTS = `
     <div class="mx_ReadReceiptGroup" role="group" aria-label="Read receipts">
@@ -138,8 +169,14 @@ function row(layout: Layout, body: string, options: RowOptions = {}): string {
             : `<div class="mx_DisambiguatedProfile"><span>${name}</span></div>`;
     const sender =
         ((first && !info) || layout === "irc") && options.sender !== "none" ? slot("Sender", senderMarkup) : "";
+    // In bubbles a message's avatar is on the last row of its sender's run and follows the line, beside the bubble's
+    // bottom; informational and full-width rows keep it before their content
+    const fullWidth = states.some((state) => ["stateBubbleContainer", "stateLeftAlignedBubble"].includes(state));
+    const avatarFollowsLine = layout === "bubble" && !info && !fullWidth;
     const avatarSlot =
-        first || info || layout === "irc" ? slot("Avatar", avatar(info || layout === "irc" ? 14 : 30, name)) : "";
+        (avatarFollowsLine ? last : first) || info || layout === "irc"
+            ? slot("Avatar", avatar(info || layout === "irc" ? 14 : 30, name))
+            : "";
     const lock = padlock ? slot("Padlock", PADLOCK) : "";
     const footer = options.footer ? slot("Footer", options.footer) : "";
     const threadInfo = options.threadInfo ? slot("ThreadInfo", options.threadInfo) : "";
@@ -148,7 +185,14 @@ function row(layout: Layout, body: string, options: RowOptions = {}): string {
     if (layout === "irc") {
         return `${open}${timestamp}${lock}${avatarSlot}${sender}<div class="line mx_EventTile_line ${lineClass}">${slot("Body", body)}${footer}${threadInfo}</div>${receipt}</li>`;
     }
-    return `${open}${sender}${avatarSlot}<div class="line mx_EventTile_line ${lineClass}">${timestamp}${lock}${slot("Body", body)}</div>${footer}${threadInfo}${receipt}</li>`;
+    // In bubbles a message's reactions end its bubble; a message drawn without one keeps them under it
+    const footerInLine =
+        avatarFollowsLine && !states.includes("stateNoBubble") && !lineClass.includes("lineTimestampOverMedia");
+    const line = `<div class="line mx_EventTile_line ${lineClass}">${timestamp}${lock}${slot("Body", body)}${footerInLine ? footer : ""}</div>`;
+    const after = footerInLine ? "" : footer;
+    return avatarFollowsLine
+        ? `${open}${sender}${line}${avatarSlot}${after}${threadInfo}${receipt}</li>`
+        : `${open}${sender}${avatarSlot}${line}${after}${threadInfo}${receipt}</li>`;
 }
 
 const INTRO = `
@@ -288,6 +332,8 @@ describe("Timeline shell", () => {
                 ${moduleCss(eventTileBubbleStyles, "EventTileBubble")}
                 ${moduleCss(readMarkerStyles, "ReadMarker")}
                 ${moduleCss(disambiguatedProfileStyles, "DisambiguatedProfile")}
+                ${moduleCss(reactionsRowStyles, "ReactionsRow")}
+                ${moduleCss(reactionsRowButtonStyles, "ReactionsRowButton")}
             }
             @layer app-web {
                 /* The theme's own variable, which the app's font stack reads: without it the timestamp has no font */
@@ -333,12 +379,57 @@ describe("Timeline shell", () => {
             expect(third.top - second.bottom).toBe(12);
         });
 
-        it("puts reactions 8px under their bubble", () => {
-            render("bubble", row("bubble", text("Lunch?"), { footer: '<div style="height: 24px"></div>' }));
+        it.each([
+            ["another's", false],
+            ["your own", true],
+        ])(
+            "holds reactions at the bottom of %s bubble, 8px under the text, the time centered on their row",
+            (_name, own) => {
+                render("bubble", row("bubble", text("Lunch?"), { own, footer: reactions(["🔥", 1, true], ["👍", 2]) }));
+                const line = box(document.querySelector(".line")!);
+                const chips = all(".ReactionsRowButton_reactionsRowButton").map(box);
 
+                expect(chips[0].left - line.left).toBe(12);
+                expect(chips[0].top - box(document.querySelector(".mx_EventTile_content")!).bottom).toBe(8);
+                expect(line.bottom - chips[0].bottom).toBe(8);
+                expect(
+                    Math.abs(middle(timeOf(document.querySelector(".root")!)) - middle(chips[0])),
+                ).toBeLessThanOrEqual(0.5);
+                expect(timeOf(document.querySelector(".root")!).left).toBeGreaterThan(chips[1].right);
+            },
+        );
+
+        it("keeps reactions 8px under a picture without a caption, which has no bubble", () => {
+            render(
+                "bubble",
+                row("bubble", '<div style="width: 160px; height: 120px"></div>', {
+                    lineClass: "lineMedia lineTimestampOverMedia",
+                    footer: reactions(["🔥", 1]),
+                }),
+            );
+
+            expect(document.querySelector(".line .slotFooter")).toBeNull();
             expect(box(document.querySelector(".slotFooter")!).top - box(document.querySelector(".line")!).bottom).toBe(
                 8,
             );
+        });
+
+        it.each([
+            ["another's", false],
+            ["your own", true],
+        ])("draws %s message of only large emoji without a bubble, its time a badge after them", (_name, own) => {
+            render("bubble", row("bubble", bigEmoji("👍"), { own }));
+            const line = document.querySelector(".line")!;
+            const badge = document.querySelector(".slotTimestamp")!;
+            const emoji = textBox(document.querySelector(".mx_EventTile_bigEmoji")!);
+
+            expect(getComputedStyle(line).backgroundColor).toBe("rgba(0, 0, 0, 0)");
+            expect(getComputedStyle(badge).backgroundColor).toBe("rgba(0, 0, 0, 0.55)");
+            expect(getComputedStyle(badge.firstElementChild!).color).toBe("rgb(255, 255, 255)");
+            expect(box(badge).height).toBe(20);
+            expect(box(badge).right).toBe(box(line).right);
+            expect(box(badge).bottom).toBe(box(line).bottom);
+            expect(box(badge).left).toBeGreaterThanOrEqual(emoji.right);
         });
 
         it.each([
@@ -367,16 +458,45 @@ describe("Timeline shell", () => {
                 row("bubble", text("Or the pizza place"), { states: ["stateSelected"] }),
             );
             const [hovered, selected] = all(".root");
-            const canvas = tokenColor("--cpd-color-bg-canvas-default", hovered);
             const band = tokenColor("--event-tile-bubble-hover-background", selected);
             await userEvent.hover(hovered.querySelector(".line")!);
 
             expect(hovered.matches(":hover")).toBe(true);
             expect(getComputedStyle(hovered, "::before").backgroundColor).toBe("rgba(0, 0, 0, 0)");
-            expect(getComputedStyle(hovered.querySelector(".slotAvatar")!).borderColor).toBe(canvas);
             expect(getComputedStyle(selected, "::before").backgroundColor).toBe(band);
-            expect(getComputedStyle(selected.querySelector(".slotAvatar")!).borderColor).toBe(band);
         });
+
+        it.each<[string, RowOptions]>([
+            ["another's message", {}],
+            ["a selected message", { states: ["stateSelected"] }],
+            ["a message that hides its sender", { states: ["stateNoSender"], sender: "none" }],
+        ])(
+            "puts the avatar beside the last bubble of %s, 8px before it and level with its bottom, with no ring",
+            (_name, options) => {
+                render(
+                    "bubble",
+                    row("bubble", text("Morning everyone"), { ...options, last: false }),
+                    row("bubble", text(LONG_TEXT), {
+                        ...options,
+                        first: false,
+                        footer: '<div style="height: 24px"></div>',
+                    }),
+                );
+                const [first, last] = all(".root");
+                const line = box(last.querySelector(".line")!);
+                const picture = last.querySelector(".slotAvatar > *")!;
+
+                expect(first.querySelector(".slotAvatar")).toBeNull();
+                expect([box(picture).width, box(picture).height]).toEqual([30, 30]);
+                expect(line.left - box(picture).right).toBe(8);
+                expect(box(picture).bottom).toBe(line.bottom);
+                expect(box(picture).left).toBeGreaterThanOrEqual(
+                    box(document.querySelector(".mx_RoomView_MessageList")!).left,
+                );
+                expect(getComputedStyle(last.querySelector(".slotAvatar")!).borderTopWidth).toBe("0px");
+                expect(getComputedStyle(picture).boxShadow).toBe("none");
+            },
+        );
 
         it("hides the avatar beside your own bubbles, so the read marker before them crosses nothing", () => {
             render(
@@ -464,40 +584,60 @@ describe("Timeline shell", () => {
                 document.documentElement.style.fontSize = "";
             });
 
-            it.each<[string, string, string, RowOptions]>([
-                [
-                    "another person's emote",
-                    EMOTE,
-                    ".mx_MEmoteBody",
-                    { states: ["stateEmote", "stateNoBubble"], lineClass: "lineEmote" },
-                ],
-                ["a message that hides its sender", text("Hello"), ".mx_EventTile_body", { states: ["stateNoSender"] }],
-            ])(
-                "centers the avatar on the first line of %s, which has no sender row, inside the row, clear of the read markers around it",
-                (_name, body, selector, options) => {
-                    render(
-                        "bubble",
-                        row("bubble", text("Morning everyone"), { sender: "profile" }),
-                        READ_MARKER,
-                        row("bubble", body, { ...options, sender: "none" }),
-                        READ_MARKER,
-                        row("bubble", text("Lunch?"), { sender: "profile" }),
-                    );
-                    const tile = all(".root")[1];
-                    const avatar = box(tile.querySelector(".slotAvatar > *")!);
-                    const [before, after] = all(".ReadMarker_line").map(box);
+            /** The row between two read markers, with the avatar's box and the markers' lines. */
+            function renderBetweenMarkers(body: string, options: RowOptions): [Element, DOMRect, DOMRect, DOMRect] {
+                render(
+                    "bubble",
+                    row("bubble", text("Morning everyone"), { sender: "profile" }),
+                    READ_MARKER,
+                    row("bubble", body, { ...options, sender: "none" }),
+                    READ_MARKER,
+                    row("bubble", text("Lunch?"), { sender: "profile" }),
+                );
+                const tile = all(".root")[1];
+                const [before, after] = all(".ReadMarker_line").map(box);
+                return [tile, box(tile.querySelector(".slotAvatar > *")!), before, after];
+            }
 
-                    // The text's own box sits up to a pixel off the middle of its line at some font sizes, as the font's
-                    // ascent and descent are rounded to whole pixels
-                    expect(
-                        Math.abs(middle(avatar) - lineMiddles(tile.querySelector(selector)!)[0]),
-                    ).toBeLessThanOrEqual(1);
-                    expect(avatar.top).toBeGreaterThanOrEqual(box(tile).top);
-                    expect(avatar.bottom).toBeLessThanOrEqual(box(tile).bottom);
-                    expect(avatar.top - before.bottom).toBeGreaterThanOrEqual(4);
-                    expect(after.top - avatar.bottom).toBeGreaterThanOrEqual(4);
-                },
-            );
+            it.each([
+                ["fits on a line", "waves"],
+                ["wraps", LONG_TEXT],
+            ])("centers the avatar on the last line of another person's emote that %s", (_name, words) => {
+                const [tile, avatar] = renderBetweenMarkers(EMOTE.replace("waves", words), {
+                    states: ["stateEmote", "stateNoBubble"],
+                    lineClass: "lineEmote",
+                });
+
+                // The text's own box sits up to a pixel off the middle of its line at some font sizes, as the font's
+                // ascent and descent are rounded to whole pixels
+                expect(
+                    Math.abs(middle(avatar) - lineMiddles(tile.querySelector(".mx_MEmoteBody")!).at(-1)!),
+                ).toBeLessThanOrEqual(1);
+                expect(avatar.bottom).toBeLessThanOrEqual(box(tile).bottom);
+            });
+
+            it("keeps the avatar of a one-line emote, which has no sender row, inside the row, clear of the read markers around it", () => {
+                const [tile, avatar, before, after] = renderBetweenMarkers(EMOTE, {
+                    states: ["stateEmote", "stateNoBubble"],
+                    lineClass: "lineEmote",
+                });
+
+                expect(avatar.top).toBeGreaterThanOrEqual(box(tile).top);
+                expect(avatar.bottom).toBeLessThanOrEqual(box(tile).bottom);
+                expect(avatar.top - before.bottom).toBeGreaterThanOrEqual(4);
+                expect(after.top - avatar.bottom).toBeGreaterThanOrEqual(4);
+            });
+
+            it("puts the avatar of a message that hides its sender level with its bubble's bottom, clear of the read markers around it", () => {
+                const [tile, avatar, before, after] = renderBetweenMarkers(text("Hello"), {
+                    states: ["stateNoSender"],
+                });
+
+                expect(Math.abs(avatar.bottom - box(tile.querySelector(".line")!).bottom)).toBeLessThanOrEqual(0.5);
+                expect(avatar.top).toBeGreaterThanOrEqual(box(tile).top);
+                expect(avatar.top - before.bottom).toBeGreaterThanOrEqual(4);
+                expect(after.top - avatar.bottom).toBeGreaterThanOrEqual(4);
+            });
         });
 
         /** LocationBodyFallbackContent: the text MLocationBody shows when the map fails to load. */
@@ -523,7 +663,7 @@ describe("Timeline shell", () => {
             const otherText = textBox(other.querySelector(selector)!);
 
             expect(otherText.left).toBe(bodyText(message).left);
-            expect(otherText.left).toBeGreaterThanOrEqual(box(other.querySelector(".slotAvatar")!).right);
+            expect(otherText.left).toBeGreaterThanOrEqual(box(other.querySelector(".slotAvatar > *")!).right);
         });
 
         it("centers the time of the text shown when a location's map fails to load on its last line", () => {
@@ -636,17 +776,26 @@ describe("Timeline shell", () => {
         `;
 
         /** A message in ThreadView, whose Thread shape puts the read receipts in the line. */
-        function threadRow(body: string, { own = false, info = false, readers = 2 } = {}): string {
+        function threadRow(
+            body: string,
+            { own = false, info = false, readers = 2, first = true, last = true } = {},
+        ): string {
             const classes = ["root", "mx_EventTile", "shapeThread", "layoutBubble", "hasReceiptSlot"];
             if (own) classes.push("stateOwnEvent");
             if (info) classes.push("stateInfo");
-            const sender = own || info ? "" : slot("Sender", profile("bubble", "Alice"));
+            if (!first) classes.push("stateContinuation");
+            if (last) classes.push("stateLastInSection");
+            const sender = own || info || !first ? "" : slot("Sender", profile("bubble", "Alice"));
+            // Another person's avatar follows the line of the last message of their run, as in the room; an
+            // informational row keeps its own beside its text
+            const avatarSlot = own ? "" : slot("Avatar", avatar(info ? 14 : 32));
             return `
                 <li class="${classes.join(" ")}" data-testid="event-tile">
-                    <div class="senderDetails">${own ? "" : slot("Avatar", avatar(info ? 14 : 30))}${sender}</div>
+                    <div class="senderDetails">${info ? avatarSlot : ""}${sender}</div>
                     <div class="line mx_EventTile_line">
                         ${slot("Body", body)}${slot("Timestamp", '<a class="mx_MessageTimestamp content">12:41</a>')}${slot("Receipt", receipts(readers))}
                     </div>
+                    ${!info && last ? avatarSlot : ""}
                 </li>
             `;
         }
@@ -677,6 +826,27 @@ describe("Timeline shell", () => {
 
             expect(contentEnd() - box(others).right).toBe(36);
             expect(contentEnd() - box(own).right).toBe(60);
+        });
+
+        it("starts other people's bubbles where they do in the room, with their avatar 8px before the last one, level with its bottom", () => {
+            renderThread(
+                threadRow(text("Morning"), { last: false }),
+                threadRow(text("A much longer message that wraps in the thread panel, over two lines or more"), {
+                    first: false,
+                }),
+            );
+            const list = document.querySelector(".mx_RoomView_MessageList")!;
+            const contentStart = box(list).left + parseFloat(getComputedStyle(list).paddingLeft);
+            const [first, last] = all(".line").map(box);
+            const picture = box(document.querySelector(".slotAvatar > *")!);
+
+            expect(all(".slotAvatar")).toHaveLength(1);
+            expect(picture.width).toBe(32);
+            expect(first.left - contentStart).toBe(40);
+            expect(last.left).toBe(first.left);
+            expect(last.left - picture.right).toBe(8);
+            expect(picture.bottom).toBe(last.bottom);
+            expect(picture.left).toBeGreaterThanOrEqual(contentStart);
         });
 
         // As in the room: the bubble keeps clear of up to three readers, its text and time of four

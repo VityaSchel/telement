@@ -196,22 +196,6 @@ exports[`<LayoutSwitcher /> > should render 1`] = `
                   </div>
                 </div>
                 <div
-                  class="_slotAvatar"
-                  data-testid="event-tile-slot-avatar"
-                >
-                  <span
-                    class="_avatar mx_BaseAvatar _avatar-imageless"
-                    data-color="2"
-                    data-testid="avatar-img"
-                    data-type="round"
-                    role="presentation"
-                    style="--cpd-avatar-size: 30px;"
-                    title="@userId:matrix.org"
-                  >
-                    A
-                  </span>
-                </div>
-                <div
                   class="_line mx_EventTile_line"
                   data-testid="event-tile-line"
                   id="2"
@@ -233,6 +217,22 @@ exports[`<LayoutSwitcher /> > should render 1`] = `
                       </div>
                     </div>
                   </div>
+                </div>
+                <div
+                  class="_slotAvatar"
+                  data-testid="event-tile-slot-avatar"
+                >
+                  <span
+                    class="_avatar mx_BaseAvatar _avatar-imageless"
+                    data-color="2"
+                    data-testid="avatar-img"
+                    data-type="round"
+                    role="presentation"
+                    style="--cpd-avatar-size: 30px;"
+                    title="@userId:matrix.org"
+                  >
+                    A
+                  </span>
                 </div>
               </div>
             </div>

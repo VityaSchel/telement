@@ -163,6 +163,28 @@ const groupRootSlotOrder = [
     "event-tile-slot-receipt",
 ];
 
+/** In bubbles a message's reactions are at the bottom of its bubble, so they end the line. */
+const bubbleLineSlotOrder = [...groupLineSlotOrder, "event-tile-slot-footer"];
+
+/** In bubbles a message's avatar sits beside the bottom of its bubble, so it follows the line. */
+const bubbleMessageRootSlotOrder = [
+    "event-tile-slot-sender",
+    "event-tile-line",
+    "event-tile-slot-avatar",
+    "event-tile-slot-threadInfo",
+    "event-tile-slot-receipt",
+];
+
+/** A message drawn without a bubble keeps its reactions under it. */
+const noBubbleMessageRootSlotOrder = [
+    "event-tile-slot-sender",
+    "event-tile-line",
+    "event-tile-slot-avatar",
+    "event-tile-slot-footer",
+    "event-tile-slot-threadInfo",
+    "event-tile-slot-receipt",
+];
+
 const ircLineSlotOrder = [
     "styling-contract-contextMenu",
     "event-tile-slot-replyChain",
@@ -343,8 +365,20 @@ describe("EventTileView", () => {
                 throw new Error("Expected EventTile root and line to be present");
             }
 
-            const lineSlotOrder = layout === "irc" ? ircLineSlotOrder : groupLineSlotOrder;
-            const rootSlotOrder = layout === "irc" ? ircRootSlotOrder : groupRootSlotOrder;
+            const isBubbleMessage =
+                layout === "bubble" &&
+                !["info", "bubbleContainer", "leftAlignedBubble"].some((state) => state in rootState);
+            const hasBubble = isBubbleMessage && !("noBubble" in rootState);
+            const lineSlotOrder =
+                layout === "irc" ? ircLineSlotOrder : hasBubble ? bubbleLineSlotOrder : groupLineSlotOrder;
+            const rootSlotOrder =
+                layout === "irc"
+                    ? ircRootSlotOrder
+                    : hasBubble
+                      ? bubbleMessageRootSlotOrder
+                      : isBubbleMessage
+                        ? noBubbleMessageRootSlotOrder
+                        : groupRootSlotOrder;
 
             expect(Array.from(line.children).map((child) => child.getAttribute("data-testid"))).toEqual(lineSlotOrder);
             expect(Array.from(root.children).map((child) => child.getAttribute("data-testid") ?? child.id)).toEqual(
@@ -465,7 +499,7 @@ describe("EventTileView", () => {
         expect(withoutReceipt.container.querySelector("li")).not.toHaveClass(styles.hasReceiptSlot);
     });
 
-    it.each(["group", "bubble"] as const)("renders the %s thread layout in the original slot order", (layout) => {
+    it.each(["group", "bubble"] as const)("renders the %s thread layout in its slot order", (layout) => {
         const { container, getByTestId } = render(
             <EventTileView
                 {...createProps({
@@ -491,26 +525,33 @@ describe("EventTileView", () => {
             { presentation: { layout } },
         );
         const root = container.firstElementChild!;
-        const senderDetails = getByTestId("avatar").parentElement?.parentElement;
+        const senderDetails = getByTestId("sender").parentElement?.parentElement;
         const line = getByTestId("body").parentElement?.parentElement;
 
         if (!senderDetails || !line) {
             throw new Error("Expected EventTile thread layout elements to be present");
         }
 
-        expect(senderDetails).toContainElement(getByTestId("sender"));
         expect(senderDetails).toHaveClass("legacy-sender-details");
         expect(senderDetails).toBe(root.firstElementChild);
+        // In bubbles the avatar sits beside the bottom of the bubble, as in the room
+        if (layout === "bubble") {
+            expect(getByTestId("avatar").parentElement?.previousElementSibling).toBe(line);
+        } else {
+            expect(senderDetails).toContainElement(getByTestId("avatar"));
+        }
         expect(line).toContainElement(getByTestId("reply-chain"));
         expect(line).toContainElement(getByTestId("action-bar"));
         expect(line).toContainElement(getByTestId("timestamp"));
         expect(line).toContainElement(getByTestId("receipt"));
-        expect(getByTestId("footer").parentElement?.parentElement).toBe(root);
+        // In bubbles the reactions are inside the bubble, as in the room
+        expect(getByTestId("footer").parentElement?.parentElement).toBe(layout === "bubble" ? line : root);
 
         expect(Array.from(line.children).map((child) => child.getAttribute("data-testid"))).toEqual([
             "event-tile-slot-replyChain",
             "event-tile-slot-body",
             "event-tile-slot-actionBar",
+            ...(layout === "bubble" ? ["event-tile-slot-footer"] : []),
             "event-tile-slot-timestamp",
             "event-tile-slot-receipt",
         ]);
@@ -872,12 +913,13 @@ describe("EventTileView bubble layout reactions", () => {
         addReactionButtonVisible: true,
     };
 
-    const renderAddReactionButton = (isOwnEvent: boolean): HTMLElement => {
+    const renderAddReactionButton = (isOwnEvent: boolean, line?: EventTileViewLine): HTMLElement => {
         const vm = new MockViewModel<ReactionsRowViewSnapshot>(reactionsSnapshot);
         const { getByRole } = render(
             <EventTileView
                 {...createProps({
                     root: { ...renderState, state: { ...renderState.state, hasReply: false, isOwnEvent } },
+                    line,
                     slots: {
                         body: <span data-testid="body">Body</span>,
                         footer: (
@@ -894,16 +936,25 @@ describe("EventTileView bubble layout reactions", () => {
         return getByRole("button", { name: "Add reaction" });
     };
 
-    it("moves the add-reaction control ahead of the reactions in an own-message bubble", () => {
-        // The footer is right-aligned for own messages, so an add-reaction control
-        // left at the end of the row reserves space between the reactions and the
-        // bubble edge even while it is hidden.
-        expect(getComputedStyle(renderAddReactionButton(true)).order).toBe("-1");
+    it("moves the add-reaction control ahead of the reactions under your own picture", () => {
+        // The reactions under a message without a bubble end where it does for your own messages, so an add-reaction
+        // control left at the end of the row reserves space between the reactions and the picture's edge even while it
+        // is hidden.
+        expect(getComputedStyle(renderAddReactionButton(true, { media: true, timestampOverMedia: true })).order).toBe(
+            "-1",
+        );
     });
 
-    it("keeps the add-reaction control after the reactions in another user's bubble", () => {
-        expect(getComputedStyle(renderAddReactionButton(false)).order).toBe("0");
-    });
+    it.each([true, false])(
+        "keeps the add-reaction control after the reactions inside a bubble (own: %s)",
+        (isOwnEvent) => {
+            // In a bubble the reactions start at the bubble's start for everyone, as in Telegram
+            const button = renderAddReactionButton(isOwnEvent);
+
+            expect(button.closest(`.${styles.line}`)).not.toBeNull();
+            expect(getComputedStyle(button).order).toBe("0");
+        },
+    );
 });
 
 describe("EventTileView placement", () => {
@@ -1100,7 +1151,6 @@ describe("EventTileView placement", () => {
             const box = line.getBoundingClientRect();
             const time = timestampRect();
 
-            expect(style.borderRadius).toBe("12px");
             expect([style.paddingTop, style.paddingRight, style.paddingBottom, style.paddingLeft]).toEqual([
                 "8px",
                 "12px",
@@ -1144,6 +1194,124 @@ describe("EventTileView placement", () => {
             const text = lastLineOf(document.querySelector(".mx_EventTile_body")!);
 
             expect(screen.getByTestId("sender").getBoundingClientRect().left).toBeCloseTo(text.left, 1);
+        });
+
+        describe("in a run of one sender's messages", () => {
+            /** A bubble's corners from its top start round to its bottom start. */
+            const cornersOf = (element: Element): string[] => {
+                const style = getComputedStyle(element);
+                return [
+                    style.borderStartStartRadius,
+                    style.borderStartEndRadius,
+                    style.borderEndEndRadius,
+                    style.borderEndStartRadius,
+                ];
+            };
+            const tailOf = (line: Element): CSSStyleDeclaration => getComputedStyle(line, "::after");
+            const setDirection = (dir: "ltr" | "rtl"): void => document.querySelector("ol")!.setAttribute("dir", dir);
+
+            function renderRun(isOwnEvent: boolean): HTMLElement[] {
+                renderTiles(
+                    "bubble",
+                    { state: { isOwnEvent }, slots: { body: textBody("Morning!") } },
+                    { state: { isOwnEvent, continuation: true }, slots: { body: textBody("The build is green") } },
+                    {
+                        state: { isOwnEvent, continuation: true, lastInSection: true },
+                        slots: { body: textBody("Lunch?") },
+                    },
+                );
+                return screen.getAllByTestId("event-tile-line");
+            }
+
+            it("rounds the corners where another person's bubbles meet to 4px, with a tail at the last one's bottom start", () => {
+                const [first, middle, last] = renderRun(false);
+
+                expect(cornersOf(first)).toEqual(["12px", "12px", "12px", "4px"]);
+                expect(cornersOf(middle)).toEqual(["4px", "12px", "12px", "4px"]);
+                expect(cornersOf(last)).toEqual(["4px", "12px", "12px", "0px"]);
+                expect(tailOf(first).content).toBe("none");
+                expect(tailOf(middle).content).toBe("none");
+                expect([tailOf(last).left, tailOf(last).bottom]).toEqual(["-6px", "0px"]);
+                expect([tailOf(last).width, tailOf(last).height]).toEqual(["6px", "16px"]);
+                expect(tailOf(last).maskImage).toContain("svg");
+                expect(tailOf(last).scale).toBe("none");
+                expect(tailOf(last).backgroundColor).toBe(getComputedStyle(last).backgroundColor);
+            });
+
+            it("rounds the corners where your own bubbles meet to 4px, with a tail at the last one's bottom end", () => {
+                const [first, middle, last] = renderRun(true);
+
+                expect(cornersOf(first)).toEqual(["12px", "12px", "4px", "12px"]);
+                expect(cornersOf(middle)).toEqual(["12px", "4px", "4px", "12px"]);
+                expect(cornersOf(last)).toEqual(["12px", "4px", "0px", "12px"]);
+                expect([tailOf(last).right, tailOf(last).bottom]).toEqual(["-6px", "0px"]);
+                // The drawing points to the start, so it is mirrored to point away from the bubble's end
+                expect(tailOf(last).scale).toBe("-1 1");
+                expect(tailOf(last).backgroundColor).toBe(getComputedStyle(last).backgroundColor);
+            });
+
+            it.each([
+                ["another person's", false, "right", "-1 1"],
+                ["your own", true, "left", "none"],
+            ])("mirrors the tail of %s last bubble in right-to-left text", (_name, isOwnEvent, side, scale) => {
+                const last = renderRun(isOwnEvent).at(-1)!;
+                setDirection("rtl");
+
+                expect(tailOf(last).getPropertyValue(side)).toBe("-6px");
+                expect(tailOf(last).scale).toBe(scale);
+            });
+
+            it("leaves no tail to see beside a picture, which has no bubble", () => {
+                renderTiles("bubble", {
+                    state: { lastInSection: true },
+                    line: mediaLine,
+                    slots: { body: imageBody() },
+                });
+
+                expect(tailOf(screen.getByTestId("event-tile-line")).backgroundColor).toBe("rgba(0, 0, 0, 0)");
+            });
+
+            const avatar = (
+                <span data-testid="avatar" style={{ display: "inline-block", width: 30, height: 30 }}>
+                    A
+                </span>
+            );
+            const LONG_TEXT = "A message long enough to wrap onto a second line in this narrow timeline, and a third.";
+
+            it.each(["ltr", "rtl"] as const)(
+                "puts the sender's avatar 8px outside the start of their last bubble, level with its bottom, in %s text",
+                (dir) => {
+                    renderTiles("bubble", {
+                        state: { lastInSection: true },
+                        slots: { avatar, body: textBody(LONG_TEXT), footer: <div style={{ height: 24 }} /> },
+                    });
+                    setDirection(dir);
+                    const timeline = document.querySelector("ol")!.getBoundingClientRect();
+                    const line = screen.getByTestId("event-tile-line").getBoundingClientRect();
+                    const picture = screen.getByTestId("avatar").getBoundingClientRect();
+                    const slot = screen.getByTestId("event-tile-slot-avatar");
+
+                    expect([picture.width, picture.height]).toEqual([30, 30]);
+                    expect(dir === "ltr" ? line.left - picture.right : picture.left - line.right).toBeCloseTo(8, 1);
+                    // The bubble's bottom, not the row's, which ends under the reactions
+                    expect(picture.bottom).toBeCloseTo(line.bottom, 1);
+                    expect(picture.left).toBeGreaterThanOrEqual(timeline.left);
+                    expect(picture.right).toBeLessThanOrEqual(timeline.right);
+                    // No ring cut out of the bubble around it
+                    expect(getComputedStyle(slot).borderTopWidth).toBe("0px");
+                    expect(getComputedStyle(screen.getByTestId("avatar")).boxShadow).toBe("none");
+                },
+            );
+
+            it("keeps no ring around the avatar of a selected message", () => {
+                renderTiles("bubble", {
+                    state: { lastInSection: true, selected: true },
+                    slots: { avatar, body: textBody("Hello") },
+                });
+
+                expect(getComputedStyle(screen.getByTestId("event-tile-slot-avatar")).borderTopWidth).toBe("0px");
+                expect(getComputedStyle(screen.getByTestId("avatar")).boxShadow).toBe("none");
+            });
         });
 
         it.each([
@@ -1190,7 +1358,14 @@ describe("EventTileView placement", () => {
                     { line: mediaLine, slots: { body: videoBody() } },
                 );
 
-                expect(radiusOf(screen.getAllByTestId("event-tile-line")[0])).toBe("20px");
+                const line = getComputedStyle(screen.getAllByTestId("event-tile-line")[0]);
+
+                // The fourth corner, by the sender's avatar, carries the tail
+                expect([line.borderStartStartRadius, line.borderStartEndRadius, line.borderEndEndRadius]).toEqual([
+                    "20px",
+                    "20px",
+                    "20px",
+                ]);
                 expect(radiusOf(videoFrame())).toBe("20px");
             } finally {
                 document.documentElement.style.removeProperty("--tl-radius-bubble");
@@ -1217,6 +1392,295 @@ describe("EventTileView placement", () => {
             } finally {
                 document.documentElement.style.removeProperty("--tl-radius-control");
             }
+        });
+    });
+
+    /** A reactions row of 24px chips, as ReactionsRowView lays it out, with its hidden add-reaction button. */
+    const reactions = (count: number, chipWidth = 40): React.ReactElement => (
+        <ReactionsRowView
+            vm={
+                new MockViewModel<ReactionsRowViewSnapshot>({
+                    ariaLabel: "Reactions",
+                    isVisible: true,
+                    showAddReactionButton: true,
+                    addReactionButtonLabel: "Add reaction",
+                })
+            }
+        >
+            {Array.from({ length: count }, (_, index) => (
+                <span
+                    key={index}
+                    data-testid="chip"
+                    style={{ display: "inline-block", width: chipWidth, height: 24 }}
+                />
+            ))}
+        </ReactionsRowView>
+    );
+    const middle = (box: DOMRect): number => (box.top + box.bottom) / 2;
+    const lineBox = (): DOMRect => screen.getByTestId("event-tile-line").getBoundingClientRect();
+    const rowBox = (): DOMRect => screen.getByRole("toolbar", { name: "Reactions" }).getBoundingClientRect();
+    const messageBox = (): DOMRect => document.querySelector(".mx_EventTile_content")!.getBoundingClientRect();
+    /** The add-reaction button, hidden until the message is hovered, so it has no accessible name to find it by. */
+    const addReactionBox = (): DOMRect =>
+        document.querySelector("[aria-label='Add reaction']")!.getBoundingClientRect();
+
+    describe("reactions in the bubble layout", () => {
+        const setDirection = (dir: "ltr" | "rtl"): void => document.querySelector("ol")!.setAttribute("dir", dir);
+
+        it.each([
+            ["another person's", false],
+            ["your own", true],
+        ])(
+            "holds them at the bottom of %s bubble, 8px under the message, with the time ending their row",
+            (_name, isOwnEvent) => {
+                renderTiles("bubble", {
+                    state: { isOwnEvent, lastInSection: true },
+                    slots: { body: textBody("Lunch?"), footer: reactions(2) },
+                });
+                const line = lineBox();
+                const row = rowBox();
+                const time = timestampRect();
+
+                expect(screen.getByTestId("event-tile-slot-footer").parentElement).toBe(
+                    screen.getByTestId("event-tile-line"),
+                );
+                expect(row.top - messageBox().bottom).toBeCloseTo(8, 1);
+                // They start at the bubble's start for everyone, as in Telegram
+                expect(row.left - line.left).toBeCloseTo(12, 1);
+                expect(line.bottom - row.bottom).toBeCloseTo(8, 1);
+                expect(line.right - time.right).toBeCloseTo(12, 1);
+                expect(middle(time)).toBeCloseTo(middle(row), 1);
+                expect(time.left).toBeGreaterThanOrEqual(addReactionBox().right);
+            },
+        );
+
+        it("makes the bubble as wide as its reactions and the time need when they are wider than the message", () => {
+            renderTiles("bubble", { slots: { body: textBody("Ok"), footer: reactions(2) } });
+            const addReaction = document.querySelector("[aria-label='Add reaction']")!;
+            const reactionsEnd =
+                addReaction.getBoundingClientRect().right + parseFloat(getComputedStyle(addReaction).marginRight);
+
+            // An 8px gap and the time's 30px, then the bubble's padding
+            expect(lineBox().right - reactionsEnd).toBeCloseTo(8 + 30 + 12, 1);
+            expect(lineBox().left).toBeCloseTo(rowBox().left - 12, 1);
+        });
+
+        it("drops the room the message's last line keeps for the time, which ends the reactions' row instead", () => {
+            renderTiles(
+                "bubble",
+                { slots: { body: textBody("Hello") } },
+                { slots: { body: textBody("Hello"), footer: reactions(1) } },
+            );
+            const [plain, reacted] = Array.from(document.querySelectorAll(".mx_EventTile_body"));
+
+            expect(getComputedStyle(plain, "::after").float).toBe("right");
+            expect(getComputedStyle(reacted, "::after").float).toBe("none");
+        });
+
+        // The bubble's content is 203.7px wide here: four 40px chips to a line, then the add-reaction button, 32px with
+        // its margins
+        it("ends the last line of reactions that wrap with the time when it fits there, as in Telegram", () => {
+            renderTiles("bubble", { slots: { body: textBody("Lunch?"), footer: reactions(5) } });
+            const chips = screen.getAllByTestId("chip").map((chip) => chip.getBoundingClientRect());
+            const time = timestampRect();
+
+            expect(chips.at(-1)!.top).toBeGreaterThan(chips[0].top);
+            expect(middle(time)).toBeCloseTo(middle(chips.at(-1)!), 1);
+            expect(time.left).toBeGreaterThanOrEqual(addReactionBox().right);
+            expect(lineBox().bottom - time.bottom).toBeCloseTo(8, 1);
+        });
+
+        it("gives the time a line of its own under reactions that fill theirs", () => {
+            // Three 48px chips and the add-reaction button make a 188px line, with no room left for the time
+            renderTiles("bubble", { slots: { body: textBody("Lunch?"), footer: reactions(3, 48) } });
+            const chips = screen.getAllByTestId("chip").map((chip) => chip.getBoundingClientRect());
+            const time = timestampRect();
+
+            expect(addReactionBox().top).toBe(chips[0].top);
+            expect(time.top).toBeGreaterThanOrEqual(chips[0].bottom);
+            expect(lineBox().bottom - time.bottom).toBeCloseTo(8, 1);
+        });
+
+        it("keeps the time clear of a pinned badge that ends the reactions", () => {
+            renderTiles("bubble", {
+                slots: {
+                    body: textBody("Ok"),
+                    footer: (
+                        <>
+                            {reactions(1)}
+                            <span data-testid="pinned" style={{ display: "inline-block", width: 60, height: 24 }} />
+                        </>
+                    ),
+                },
+            });
+
+            expect(timestampRect().left).toBeGreaterThanOrEqual(
+                screen.getByTestId("pinned").getBoundingClientRect().right,
+            );
+        });
+
+        it("starts them at the bubble's start and ends their row with the time in right-to-left text", () => {
+            renderTiles("bubble", { slots: { body: textBody("مرحبا"), footer: reactions(2) } });
+            setDirection("rtl");
+            const line = lineBox();
+            const row = rowBox();
+            const time = timestampRect();
+
+            expect(line.right - row.right).toBeCloseTo(12, 1);
+            expect(time.left - line.left).toBeCloseTo(12, 1);
+            expect(time.right).toBeLessThanOrEqual(addReactionBox().left);
+            expect(middle(time)).toBeCloseTo(middle(row), 1);
+        });
+
+        it("keeps a padlock beside the message, with the reactions under both", () => {
+            renderTiles("bubble", {
+                slots: {
+                    padlock: <span data-testid="padlock" style={{ display: "inline-block", width: 14, height: 14 }} />,
+                    body: textBody("From an unverified device"),
+                    footer: reactions(1),
+                },
+            });
+            const padlock = screen.getByTestId("event-tile-slot-padlock").getBoundingClientRect();
+            const message = messageBox();
+
+            expect(padlock.top).toBeCloseTo(message.top, 1);
+            expect(padlock.right).toBeLessThanOrEqual(message.left);
+            expect(rowBox().left - lineBox().left).toBeCloseTo(12, 1);
+            expect(rowBox().top).toBeGreaterThanOrEqual(message.bottom);
+        });
+
+        it("keeps them 8px under a picture without a caption, which has no bubble", () => {
+            renderTiles("bubble", {
+                line: { media: true, timestampOverMedia: true },
+                slots: { body: <div style={{ width: 160, height: 120 }} />, footer: reactions(1) },
+            });
+
+            expect(screen.getByTestId("event-tile-slot-footer").parentElement).toBe(screen.getByTestId("event-tile"));
+            expect(rowBox().top - lineBox().bottom).toBeCloseTo(8, 1);
+        });
+
+        it("leaves the bubble as it was when the reactions row renders nothing, as after the last reaction is removed", () => {
+            // The app keeps passing the footer once a message has had reactions, and the row then renders nothing
+            const Nothing = (): null => null;
+            renderTiles(
+                "bubble",
+                { slots: { body: textBody("Hello") } },
+                { slots: { body: textBody("Hello"), footer: <Nothing /> } },
+            );
+            const [plain, emptied] = screen
+                .getAllByTestId("event-tile-line")
+                .map((line) => line.getBoundingClientRect());
+            const [plainBody, emptiedBody] = Array.from(document.querySelectorAll(".mx_EventTile_body"));
+
+            expect(emptied.height).toBe(plain.height);
+            expect(emptied.width).toBe(plain.width);
+            expect(getComputedStyle(emptiedBody, "::after").float).toBe(getComputedStyle(plainBody, "::after").float);
+        });
+    });
+
+    describe("large emoji in the bubble layout", () => {
+        /** A message of only emoji, which the app draws large and marks as such. */
+        const emojiBody = (emoji: string): React.ReactElement => (
+            <div className="mx_EventTile_content">
+                <div
+                    className="mx_EventTile_body mx_EventTile_bigEmoji"
+                    dir="auto"
+                    style={{ fontSize: 48, lineHeight: "57px" }}
+                >
+                    {emoji}
+                </div>
+            </div>
+        );
+        const BADGE = "rgba(0, 0, 0, 0.55)";
+        const TRANSPARENT = "rgba(0, 0, 0, 0)";
+        const line = (): HTMLElement => screen.getByTestId("event-tile-line");
+        const time = (): HTMLElement => screen.getByTestId("event-tile-slot-timestamp");
+
+        it.each([
+            ["another person's", false],
+            ["your own", true],
+        ])(
+            "draws %s emoji without a bubble, with the time as pictures' badge at the end of their line",
+            (_name, isOwnEvent) => {
+                renderTiles("bubble", {
+                    state: { isOwnEvent, lastInSection: true },
+                    slots: { body: emojiBody("👍") },
+                });
+                const style = getComputedStyle(line());
+                const box = line().getBoundingClientRect();
+                const badge = time().getBoundingClientRect();
+
+                expect(style.backgroundColor).toBe(TRANSPARENT);
+                expect(getComputedStyle(line(), "::after").backgroundColor).toBe(TRANSPARENT);
+                expect([style.paddingTop, style.paddingRight, style.paddingBottom, style.paddingLeft]).toEqual([
+                    "0px",
+                    "0px",
+                    "0px",
+                    "0px",
+                ]);
+                expect(getComputedStyle(time()).backgroundColor).toBe(BADGE);
+                expect(badge.height).toBe(20);
+                expect(badge.right).toBeCloseTo(box.right, 1);
+                expect(badge.bottom).toBeCloseTo(box.bottom, 1);
+                expect(badge.left).toBeGreaterThanOrEqual(
+                    lastLineOf(document.querySelector(".mx_EventTile_body")!).right,
+                );
+            },
+        );
+
+        it("ends right-to-left emoji with the badge on the left", () => {
+            renderTiles("bubble", { slots: { body: emojiBody("👍") } });
+            document.querySelector("ol")!.setAttribute("dir", "rtl");
+
+            expect(time().getBoundingClientRect().left).toBeCloseTo(line().getBoundingClientRect().left, 1);
+        });
+
+        it("puts the badge at the end of the reactions' row, 4px under the emoji", () => {
+            renderTiles("bubble", { slots: { body: emojiBody("👍"), footer: reactions(1) } });
+            const box = lineBox();
+            const badge = time().getBoundingClientRect();
+            const row = rowBox();
+
+            expect(row.top - messageBox().bottom).toBeCloseTo(4, 1);
+            expect(row.left).toBeCloseTo(box.left, 1);
+            expect(badge.right).toBeCloseTo(box.right, 1);
+            expect(middle(badge)).toBeCloseTo(middle(row), 1);
+        });
+
+        it("ends your own emoji and their reactions where the row does, with the badge last", () => {
+            renderTiles("bubble", {
+                state: { isOwnEvent: true },
+                slots: { body: emojiBody("👍"), footer: reactions(2) },
+            });
+            const box = lineBox();
+            const emoji = lastLineOf(document.querySelector(".mx_EventTile_body")!);
+            const chips = screen.getAllByTestId("chip").map((chip) => chip.getBoundingClientRect());
+            const badge = time().getBoundingClientRect();
+
+            // The reactions are wider than the emoji, which still end at the row's end
+            expect(rowBox().width).toBeGreaterThan(emoji.width);
+            expect(box.right - emoji.right).toBeLessThan(2);
+            // The footer's 8px gap, less what the badge's medium digits are wider than the time's room
+            expect(badge.left - chips.at(-1)!.right).toBeGreaterThan(6);
+            expect(badge.left - chips.at(-1)!.right).toBeLessThanOrEqual(8);
+            // Hidden until the message is hovered, so it has no accessible name to find it by
+            expect(getComputedStyle(document.querySelector("[aria-label='Add reaction']")!).order).toBe("-1");
+        });
+
+        it("keeps the bubble around emoji under a quoted reply", () => {
+            renderTiles("bubble", {
+                state: { hasReply: true },
+                slots: { replyChain: <div style={{ height: 20 }} />, body: emojiBody("👍") },
+            });
+
+            expect(getComputedStyle(line()).backgroundColor).not.toBe(TRANSPARENT);
+            expect(getComputedStyle(time()).backgroundColor).toBe(TRANSPARENT);
+        });
+
+        it("leaves emoji in the group layout with their plain time", () => {
+            renderTiles("group", { slots: { body: emojiBody("👍") } });
+
+            expect(getComputedStyle(time()).backgroundColor).toBe(TRANSPARENT);
         });
     });
 });

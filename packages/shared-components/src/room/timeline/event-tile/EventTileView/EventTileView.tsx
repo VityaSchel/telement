@@ -81,6 +81,13 @@ export function EventTileView({
 
     const hasReceiptSlot = isRenderableSlot(slots.receipt);
     const timestampOverMedia = !!lineState?.timestampOverMedia;
+    // In bubbles a message's avatar sits beside the bottom of its bubble, so it follows the line. Informational and
+    // full-width rows keep it before their content.
+    const avatarFollowsLine =
+        layout === "bubble" && !root.state.info && !root.state.bubbleContainer && !root.state.leftAlignedBubble;
+    // Reactions sit at the bottom of the bubble, before the time, as in Telegram. Messages drawn without a bubble, such
+    // as an emote or a picture without a caption, keep them under the message.
+    const footerInLine = avatarFollowsLine && !root.state.noBubble && !timestampOverMedia;
 
     const lineClassName = classNames(styles.line, classNameOverrides?.line, {
         [styles.lineMedia]: lineState?.media,
@@ -163,16 +170,19 @@ export function EventTileView({
         return renderRoot(
             <>
                 <div className={classNames(styles.senderDetails, classNameOverrides?.senderDetails)}>
-                    {renderSlots("avatar", "sender")}
+                    {!avatarFollowsLine && renderSlot("avatar")}
+                    {renderSlot("sender")}
                 </div>
                 <div id={root.id} data-testid="event-tile-line" className={lineClassName}>
                     {renderSlots("contextMenu", "replyChain")}
                     {renderBody()}
                     {renderSlot("actionBar")}
+                    {footerInLine && renderSlot("footer")}
                     {renderLineTimestamp()}
                     {renderSlot("receipt")}
                 </div>
-                {renderSlot("footer")}
+                {avatarFollowsLine && renderSlot("avatar")}
+                {!footerInLine && renderSlot("footer")}
             </>,
             undefined,
             undefined,
@@ -263,15 +273,19 @@ export function EventTileView({
     // Group and bubble layouts: sender details precede the line content. The whole row opens the context menu.
     return renderRoot(
         <>
-            {renderSlots("sender", "avatar")}
+            {renderSlot("sender")}
+            {!avatarFollowsLine && renderSlot("avatar")}
             <div id={root.id} data-testid="event-tile-line" className={lineClassName}>
                 {renderSlot("contextMenu")}
                 {renderLineTimestamp()}
                 {renderSlots("padlock", "replyChain")}
                 {renderBody()}
                 {renderSlot("actionBar")}
+                {footerInLine && renderSlot("footer")}
             </div>
-            {renderSlots("footer", "threadInfo", "receipt")}
+            {avatarFollowsLine && renderSlot("avatar")}
+            {!footerInLine && renderSlot("footer")}
+            {renderSlots("threadInfo", "receipt")}
         </>,
         undefined,
         -1,

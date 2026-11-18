@@ -13,6 +13,18 @@
     gap: var(--cpd-space-1x);
 }
 
+/* The host can keep room at the end of the row's last line, as a bubble does for the message's time, which then shares
+   that line when it fits and takes a line of its own when it doesn't. The room includes the gap before it, so that by
+   default the row is as wide as without it. */
+.reactionsRow::after {
+    content: "";
+    order: 1;
+    flex: none;
+    inline-size: var(--event-tile-reactions-end-space, 0px);
+    block-size: var(--cpd-space-6x);
+    margin-inline-start: calc(-1 * var(--cpd-space-1x));
+}
+
 .showAllButton {
     all: unset;
     color: var(--cpd-color-text-secondary);

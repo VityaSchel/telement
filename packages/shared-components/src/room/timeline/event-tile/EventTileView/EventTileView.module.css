@@ -26,6 +26,10 @@
 
     /* Bubble geometry. */
     --event-tile-bubble-corner-radius: var(--tl-radius-bubble);
+    --event-tile-bubble-joined-corner-radius: var(--tl-radius-inline);
+    --event-tile-bubble-tail-width: var(--cpd-space-1-5x);
+    --event-tile-bubble-tail-height: var(--cpd-space-4x);
+    --event-tile-bubble-avatar-gap: var(--cpd-space-2x);
     --event-tile-bubble-gap: var(--cpd-space-1x);
     --event-tile-bubble-gutter: var(--cpd-space-3x);
     --event-tile-bubble-padding-block: var(--cpd-space-2x);
@@ -195,7 +199,7 @@
    badge matches the time badge of round video notes and stays legible over any picture in either theme,
    and over the page behind a sticker. Small pictures grow to fit it. The IRC layout keeps the timestamp in its
    own column. In bubbles a location map has the badge too, as in Telegram; the text shown when the map fails to
-   load keeps the plain time. */
+   load keeps the plain time. So do large emoji, which have no bubble behind their time (see the bubble layout). */
 .root:not(.layoutIrc) .line.lineTimestampOverMedia {
     --image-body-min-width: calc(var(--event-tile-timestamp-text-width) + 4 * var(--cpd-space-2x));
 }
@@ -211,7 +215,10 @@
 }
 
 .root .line.lineTimestampOverMedia .slotBody > .slotTimestamp,
-.root.layoutBubble .line:has(> .slotBody :global(.mx_MLocationBody_map)) > .slotTimestamp {
+.root.layoutBubble .line:has(> .slotBody :global(.mx_MLocationBody_map)) > .slotTimestamp,
+.root.layoutBubble:not(.stateHasReply)
+    .line:not(.lineEmote, .lineMedia):has(> .slotBody > :global(.mx_EventTile_content) :global(.mx_EventTile_bigEmoji))
+    > .slotTimestamp {
     position: absolute;
     z-index: 3;
     inset-block: auto var(--cpd-space-2x);
@@ -228,7 +235,11 @@
 }
 
 .root .line.lineTimestampOverMedia .slotBody > .slotTimestamp > *,
-.root.layoutBubble .line:has(> .slotBody :global(.mx_MLocationBody_map)) > .slotTimestamp > * {
+.root.layoutBubble .line:has(> .slotBody :global(.mx_MLocationBody_map)) > .slotTimestamp > *,
+.root.layoutBubble:not(.stateHasReply)
+    .line:not(.lineEmote, .lineMedia):has(> .slotBody > :global(.mx_EventTile_content) :global(.mx_EventTile_bigEmoji))
+    > .slotTimestamp
+    > * {
     color: #fff;
     font: var(--cpd-font-body-xs-medium);
     /* A 16px line, so the badge is 20px tall, on the grid, like a GIF's label and a video's length */
@@ -820,6 +831,9 @@
         var(--event-tile-bubble-padding-inline) + var(--event-tile-timestamp-text-width) +
             var(--event-tile-timestamp-gap)
     );
+    /* How wide the time is where a message's last line or its reactions keep room for it: its text, or the badge of
+       large emoji. */
+    --event-tile-bubble-timestamp-width: var(--event-tile-timestamp-text-width);
 
     /* Root. Each row stacks its own band and content, so the band below the content still takes the pointer in
        the row's side margins rather than the timeline behind it. */
@@ -834,17 +848,22 @@
         padding-top: 0;
     }
 
-    /* The band is part of the row: hovering or right-clicking the row's side margins reaches the row. */
+    /* The band is part of the row: hovering or right-clicking the row's side margins reaches the row. The avatar beside
+       another person's last bubble fills the start margin, so the band reaches one avatar gap further there and the
+       avatar stays clear of its edge, as it stays clear of the bubble. The band's top and bottom stay 1px out, as the
+       bubbles of a run are only 2px apart. */
     &::before {
         content: "";
         position: absolute;
         z-index: -1;
-        inset: -1px calc(-1 * var(--event-tile-bubble-margin-inline-end)) -1px
-            calc(-1 * var(--event-tile-bubble-margin-inline-start));
+        inset-block: -1px;
+        inset-inline: calc(-1 * (var(--event-tile-bubble-margin-inline-start) + var(--event-tile-bubble-avatar-gap)))
+            calc(-1 * var(--event-tile-bubble-margin-inline-end));
         border-radius: 4px;
     }
 
-    /* Bubble geometry and slot placement. */
+    /* Bubble geometry and slot placement. The bottom start corner is where the run's next bubble meets this one. The
+       section state below sets the other corners where bubbles meet, and the last bubble's tail. */
     .line {
         display: flex;
         gap: var(--event-tile-bubble-gap);
@@ -852,13 +871,13 @@
         max-width: var(--event-tile-bubble-line-max-width);
         margin-block: 0;
         margin-inline: var(--event-tile-bubble-line-margin-inline-start) var(--event-tile-bubble-line-margin-inline-end);
-        border-radius: var(--event-tile-bubble-corner-radius) var(--event-tile-bubble-corner-radius) 0 0;
+        border-radius: var(--event-tile-bubble-corner-radius);
+        border-end-start-radius: var(--event-tile-bubble-joined-corner-radius);
         line-height: var(--event-tile-bubble-line-height);
         position: relative;
         padding: var(--event-tile-bubble-padding-block) var(--event-tile-bubble-padding-inline);
         padding-inline-end: var(--event-tile-timestamp-gutter);
         background: var(--event-tile-bubble-other-background);
-        border-end-end-radius: var(--event-tile-bubble-corner-radius);
     }
 
     /* Text bubbles keep room for the timestamp only at the end of their last line, as Telegram does: the
@@ -873,22 +892,23 @@
         padding-inline-end: var(--event-tile-bubble-padding-inline);
     }
 
-    /* A caption has the same room: it sits in the same bubble as its media or file, with the bubble's padding. */
-    .line:not(.lineEmote)
+    /* A caption has the same room: it sits in the same bubble as its media or file, with the bubble's padding. Under
+       reactions the time ends their row instead (below). */
+    .line:not(.lineEmote, :has(> .slotFooter:not(:empty)))
         > .slotBody
         > :global(.mx_EventTile_content)
         > :is(:global(.mx_EventTile_body), [data-textual-body-annotation-wrapper]):last-child::after,
-    .line:not(.lineEmote)
+    .line:not(.lineEmote, :has(> .slotFooter:not(:empty)))
         > .slotBody
         > :global(.mx_EventTile_content)
         > :global(.mx_EventTile_body):last-child
         > p:last-child::after,
-    .line
+    .line:not(:has(> .slotFooter:not(:empty)))
         > .slotBody
         > :global(.mx_EventTile_content)
         > :global(.mx_EventTile_caption)
         > :is(:global(.mx_EventTile_body), [data-textual-body-annotation-wrapper]):last-child::after,
-    .line
+    .line:not(:has(> .slotFooter:not(:empty)))
         > .slotBody
         > :global(.mx_EventTile_content)
         > :global(.mx_EventTile_caption)
@@ -899,7 +919,7 @@
            cascade layer, which only an important declaration in this layer overrides. */
         display: block !important;
         float: right;
-        width: calc(var(--event-tile-timestamp-text-width) + var(--event-tile-timestamp-gap));
+        width: calc(var(--event-tile-bubble-timestamp-width) + var(--event-tile-timestamp-gap));
         height: var(--event-tile-bubble-line-height);
     }
 
@@ -925,7 +945,7 @@
     }
 
     /* A text bubble that ends in link previews has a row for the timestamp under the last card, as in Telegram,
-       rather than a column beside the cards that widens the bubble. */
+       rather than a column beside the cards that widens the bubble. Reactions under the cards are that row. */
     .line:not(.lineEmote):has(
             > .slotBody > :global(.mx_EventTile_content) > :global(.mx_TextualBody_urlPreviews):last-child
         ) {
@@ -939,12 +959,12 @@
         padding-inline-end: var(--event-tile-bubble-padding-inline);
     }
 
-    .line > .slotBody > :global(.mx_MPollBody) :global(.mx_MPollBody_totalVotes) {
+    .line:not(:has(> .slotFooter:not(:empty))) > .slotBody > :global(.mx_MPollBody) :global(.mx_MPollBody_totalVotes) {
         padding-inline-end: calc(var(--event-tile-timestamp-text-width) + var(--event-tile-timestamp-gap));
     }
 
     /* A group that ends in its "Show more" button has room for the timestamp beside the button. */
-    .line:not(.lineEmote)
+    .line:not(.lineEmote, :has(> .slotFooter:not(:empty)))
         > .slotBody
         > :global(.mx_EventTile_content)
         > :global(.mx_TextualBody_urlPreviews):last-child:not(:has(> button:last-child)) {
@@ -1030,16 +1050,39 @@
             overflow-wrap: anywhere;
         }
 
+        /* Reactions wrap within the media's width too, inset like the caption, with the bubble's padding under them
+           rather than under the caption. */
+        > .slotFooter {
+            contain: inline-size;
+            margin-inline: var(--event-tile-bubble-padding-inline);
+            margin-block-end: var(--event-tile-bubble-padding-block);
+        }
+
+        &:has(> .slotFooter:not(:empty)) > .slotBody > :global(.mx_EventTile_content) > :global(.mx_EventTile_caption) {
+            margin-block-end: 0;
+        }
+
         /* The padlock sits at the start of the caption's last line, beside the timestamp at its end, rather than
-           pushing the media away from the bubble's edge. */
+           pushing the media away from the bubble's edge. Under reactions it starts their row, centered on it. */
         > .slotPadlock {
             position: absolute;
             inset-block-end: var(--event-tile-bubble-padding-block);
             inset-inline-start: var(--event-tile-bubble-padding-inline);
         }
 
-        &:has(> .slotPadlock) > .slotBody > :global(.mx_EventTile_content) > :global(.mx_EventTile_caption) {
-            /* The padlock is 14px wide. */
+        &:has(> .slotFooter:not(:empty)) > .slotPadlock {
+            inset-block-end: calc(
+                var(--event-tile-bubble-padding-block) + (var(--cpd-space-6x) - var(--event-tile-bubble-line-height)) /
+                    2
+            );
+        }
+
+        /* The padlock is 14px wide. */
+        &:has(> .slotPadlock):not(:has(> .slotFooter:not(:empty)))
+            > .slotBody
+            > :global(.mx_EventTile_content)
+            > :global(.mx_EventTile_caption),
+        &:has(> .slotPadlock) > .slotFooter {
             padding-inline-start: calc(14px + var(--event-tile-bubble-gap));
         }
     }
@@ -1083,12 +1126,17 @@
         > .slotBody > :global(.mx_EventTile_content) > :global(.mx_EventTile_caption) {
             margin: var(--event-tile-bubble-padding-block) 0 0;
         }
+
+        > .slotFooter {
+            margin: calc(var(--cpd-space-2x) - var(--event-tile-bubble-gap)) 0 0;
+        }
     }
 
     /* Audio, voice messages and files are bubbles too, as in Telegram: the player or the file card drops its own
        frame and spacing, so the bubble is the card, with a column at its end for the timestamp (a file's card has
        none, below). The player or the card sits as far from the bubble's start as from its top and bottom. A caption
-       follows in the same bubble, with the timestamp at the end of its last line. */
+       follows in the same bubble, with the timestamp at the end of its last line, and so do reactions, with the
+       timestamp at the end of their row. */
     .lineMedia:has(
         > .slotBody > :is(:global(.mx_MAudioBody), :global(.mx_MVoiceMessageBody), :global(.mx_MFileBody)),
         > .slotBody
@@ -1105,7 +1153,10 @@
         padding-inline-end: var(--event-tile-timestamp-gutter);
         background: var(--event-tile-bubble-other-background);
 
-        &:has(> .slotBody > :global(.mx_EventTile_content) > :global(.mx_EventTile_caption)) {
+        &:has(
+            > .slotBody > :global(.mx_EventTile_content) > :global(.mx_EventTile_caption),
+            > .slotFooter:not(:empty)
+        ) {
             padding-inline-end: var(--event-tile-bubble-padding-inline);
         }
 
@@ -1139,9 +1190,10 @@
             margin-block-start: var(--event-tile-bubble-padding-block);
         }
 
-        /* A caption and a reply quote keep a text bubble's inset. */
+        /* A caption, a reply quote and reactions keep a text bubble's inset. */
         > .slotBody > :global(.mx_EventTile_content) > :global(.mx_EventTile_caption),
-        > .slotReplyChain > * {
+        > .slotReplyChain > *,
+        > .slotFooter {
             margin-inline-start: calc(var(--event-tile-bubble-padding-inline) - var(--event-tile-bubble-padding-block));
         }
     }
@@ -1244,8 +1296,9 @@
             }
         }
 
-        /* Without a caption, the size's line keeps room at its end for the timestamp. */
-        > .slotBody
+        /* Without a caption or reactions, the size's line keeps room at its end for the timestamp. */
+        &:not(:has(> .slotFooter:not(:empty)))
+            > .slotBody
             > :global(.mx_EventTile_content)
             > :only-child
             > *
@@ -1256,7 +1309,13 @@
             padding-inline-end: calc(var(--event-tile-timestamp-text-width) + var(--event-tile-timestamp-gap));
         }
 
-        &:not(:has(> .slotBody > :global(.mx_EventTile_content) > :global(.mx_EventTile_caption))) > .slotTimestamp {
+        &:not(
+                :has(
+                    > .slotBody > :global(.mx_EventTile_content) > :global(.mx_EventTile_caption),
+                    > .slotFooter:not(:empty)
+                )
+            )
+            > .slotTimestamp {
             /* Level with the size's line, as with a text bubble's last line: the bubble's padding, and half of what the
                icon is taller than the two lines centered beside it, if it is (larger fonts make the lines taller) */
             inset-block-end: calc(
@@ -1340,19 +1399,23 @@
         line-height: var(--cpd-font-line-height-minimum);
     }
 
-    .slotAvatar {
-        position: absolute;
-        z-index: 9;
-        inset-block-start: 6px;
-        inset-inline-start: -36px;
+    /* The sender's avatar sits beside the last bubble of their run, as in Telegram: outside the bubble, 8px before its
+       start, with its bottom on the bubble's. The slot follows the bubble as a box of no size, and the avatar hangs from
+       it up and towards the start. */
+    > .line + .slotAvatar {
+        display: flex;
+        align-items: flex-end;
+        justify-content: flex-end;
+        width: 0;
+        height: 0;
+        margin-inline-start: calc(
+            var(--event-tile-bubble-line-margin-inline-start) - var(--event-tile-bubble-avatar-gap)
+        );
         line-height: 0;
-        border: 4px solid var(--cpd-color-bg-canvas-default);
-        border-radius: 50%;
     }
 
-    .slotAvatar > * {
-        border-radius: 50%;
-        box-shadow: 0 0 0 3px var(--cpd-color-bg-canvas-default);
+    > .line + .slotAvatar > * {
+        flex-shrink: 0;
     }
 
     /* Read receipts end at the timeline's content edge, with the date separators and the read marker's label. */
@@ -1376,11 +1439,67 @@
         inset-inline-end: auto;
     }
 
-    .slotFooter {
+    /* A message without a bubble, such as a picture without a caption or an emote, has its reactions under it. */
+    > .slotFooter {
         display: flex;
         align-items: center;
         margin-block: var(--cpd-space-2x);
         margin-inline: var(--event-tile-bubble-line-margin-inline-start) var(--event-tile-bubble-line-margin-inline-end);
+    }
+
+    /* A bubble holds its reactions at its bottom, 8px under the message and starting on its padding, as in Telegram.
+       The line stacks them under the message, so that the bubble is as wide as the wider of the two. The time ends
+       their last row when it fits there, centered on it, and moves to a row of its own under them when it doesn't.
+       The time's own room in the message goes, and so does the column some bubbles keep for it. A footer with nothing
+       in it, as the app leaves once a message's last reaction is removed, changes nothing. */
+    .line > .slotFooter:empty {
+        display: none;
+    }
+
+    .line:has(> .slotFooter:not(:empty)) {
+        flex-direction: column;
+
+        > .slotTimestamp {
+            height: var(--cpd-space-6x);
+            align-items: center;
+        }
+    }
+
+    .line:not(.lineMedia):has(> .slotFooter:not(:empty)) {
+        padding-inline-end: var(--event-tile-bubble-padding-inline);
+    }
+
+    /* 8px under the message, with the gap the line puts between its parts */
+    .line > .slotFooter {
+        flex-wrap: wrap;
+        margin: calc(var(--cpd-space-2x) - var(--event-tile-bubble-gap)) 0 0;
+        /* A row of its own where the line is a grid */
+        grid-column: 1 / -1;
+    }
+
+    .line > .slotFooter::after {
+        content: "";
+        flex: none;
+        inline-size: var(--event-tile-bubble-timestamp-width);
+        block-size: var(--cpd-space-6x);
+    }
+
+    /* Reactions (ReactionsRowView's toolbar) that end the footer keep that room at the end of their own last line
+       instead, so that the time shares it when they wrap, as in Telegram. A pinned badge after them keeps the
+       footer's. */
+    .line > .slotFooter:has(> [role="toolbar"]:last-child) {
+        --event-tile-reactions-end-space: calc(var(--cpd-space-2x) + var(--event-tile-bubble-timestamp-width));
+
+        &::after {
+            content: none;
+        }
+    }
+
+    /* A padlock stays beside the message, in a column of its own, rather than on a line above it. */
+    &:not(.stateHasReply, .stateEncryptionFailure)
+        .line:not(.lineMedia):has(> .slotFooter:not(:empty)):has(> .slotPadlock) {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr);
     }
 
     /* The thread summary lines up with the edge of the bubble above it. */
@@ -1414,10 +1533,6 @@
         gap: var(--event-tile-bubble-gutter);
     }
 
-    &.stateHasReply .slotReplyChain .root .slotAvatar {
-        position: static;
-    }
-
     &.stateHasReply .slotReplyChain .root .slotSender {
         display: none;
     }
@@ -1429,7 +1544,7 @@
 
     &.stateOwnEvent .line {
         border-end-start-radius: var(--event-tile-bubble-corner-radius);
-        border-end-end-radius: 0;
+        border-end-end-radius: var(--event-tile-bubble-joined-corner-radius);
         background: var(--event-tile-bubble-self-background);
         margin-inline-start: auto;
     }
@@ -1451,13 +1566,13 @@
         inset-inline-end: 0;
     }
 
-    &.stateOwnEvent .slotFooter {
+    /* Under your own message without a bubble the reactions end where it does, so the reactions row puts its
+       add-reaction control at the start. Left at the end it reserves space between the reactions and the message's
+       edge even while hidden, and the reactions stop short of it. In a bubble they start at its start, as in
+       Telegram. */
+    &.stateOwnEvent > .slotFooter {
         justify-content: flex-end;
 
-        /* The footer is right-aligned, so the reactions row must put its
-           add-reaction control at the start. Left at the end it reserves space
-           between the reactions and the bubble edge even while hidden, and the
-           reactions stop short of the bubble. */
         --event-tile-reactions-add-button-order: -1;
     }
 
@@ -1475,34 +1590,19 @@
         background: var(--event-tile-state-highlight-background);
     }
 
-    &.stateSelected .slotAvatar {
-        border-color: var(--event-tile-bubble-hover-background);
-    }
-
-    &.stateHighlighted .slotAvatar {
-        border-color: var(--event-tile-state-highlight-background);
-    }
-
-    &.stateSelected .slotAvatar > * {
-        box-shadow: 0 0 0 3px var(--event-tile-bubble-hover-background);
-    }
-
-    &.stateHighlighted .slotAvatar > * {
-        box-shadow: 0 0 0 3px var(--event-tile-state-highlight-background);
-    }
-
-    /* Section state. */
+    /* Section state. The bubbles of a run meet on the side of the sender's avatar (your own: the end) with 4px corners,
+       as in Telegram, and the last one has a tail there instead of a corner. */
     &.stateContinuation {
         margin-top: 2px;
     }
 
     &.stateContinuation .line {
-        border-start-start-radius: 0;
+        border-start-start-radius: var(--event-tile-bubble-joined-corner-radius);
     }
 
     &.stateContinuation.stateOwnEvent .line {
         border-start-start-radius: var(--event-tile-bubble-corner-radius);
-        border-start-end-radius: 0;
+        border-start-end-radius: var(--event-tile-bubble-joined-corner-radius);
     }
 
     &.stateLastInSection {
@@ -1510,12 +1610,41 @@
     }
 
     &.stateLastInSection .line {
-        border-end-start-radius: var(--event-tile-bubble-corner-radius);
+        border-end-start-radius: 0;
     }
 
     &.stateLastInSection.stateOwnEvent .line {
         border-end-start-radius: var(--event-tile-bubble-corner-radius);
-        border-end-end-radius: var(--event-tile-bubble-corner-radius);
+        border-end-end-radius: 0;
+    }
+
+    /* The tail continues the bubble's side into a point level with its bottom. It takes the bubble's own fill, so a line
+       that paints none, like a picture's, has no tail. A click on it reaches the row as one beside the bubble would. */
+    &.stateLastInSection .line::after {
+        content: "";
+        position: absolute;
+        inset-block-end: 0;
+        inset-inline-start: calc(-1 * var(--event-tile-bubble-tail-width));
+        width: var(--event-tile-bubble-tail-width);
+        height: var(--event-tile-bubble-tail-height);
+        background-color: inherit;
+        mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 6 16'%3E%3Cpath d='M6 0C6 7.5 4.5 12.5.9 14.9a.6.6 0 0 0 .3 1.1H6Z'/%3E%3C/svg%3E")
+            0 0 / 100% 100% no-repeat;
+        pointer-events: none;
+    }
+
+    /* The tail points away from the bubble: the drawing points to the left, so it is mirrored where it points right. */
+    &.stateLastInSection.stateOwnEvent .line::after {
+        inset-inline: auto calc(-1 * var(--event-tile-bubble-tail-width));
+        scale: -1 1;
+    }
+
+    &.stateLastInSection:dir(rtl) .line::after {
+        scale: -1 1;
+    }
+
+    &.stateLastInSection.stateOwnEvent:dir(rtl) .line::after {
+        scale: none;
     }
 
     /* Bubble-column events without a normal message bubble keep their column
@@ -1543,23 +1672,63 @@
         font-style: italic;
     }
 
-    /* Rows without a sender row, emotes and events that hide their sender, center the avatar on their first line rather
-       than hang it above the row, so nothing drawn between two rows, like the read marker, crosses it. The slot is the
-       30px avatar in its 4px ring. */
-    &.stateNoSender .slotAvatar {
-        inset-block-start: calc(
-            var(--event-tile-bubble-padding-block) + var(--event-tile-body-padding, 1px) +
-                var(--event-tile-bubble-line-height) / 2 - 19px
-        );
+    /* Text without a bubble, an emote or what a location shows when its map fails to load, has the avatar's middle on
+       its last line rather than the avatar's bottom on the line's. */
+    &.stateNoBubble
+        > :is(.lineEmote, .line:has(> .slotBody > :global(.mx_MLocationBody.mx_EventTile_body)))
+        + .slotAvatar {
+        position: relative;
+        inset-block-start: calc(-1 * (var(--event-tile-body-padding, 1px) + var(--event-tile-bubble-line-height) / 2));
+        align-items: center;
     }
 
-    /* An emote has no bubble around its text, so its row is padded to the avatar's height, with its first line in the
-       middle and the avatar at the top */
+    /* An emote's row is padded to the avatar's height, so that the avatar beside a one-line emote stays inside the row,
+       clear of anything drawn between two rows, like the read marker. */
     &.stateEmote:has(> .slotAvatar):not(.stateOwnEvent) {
         padding-block: calc((30px - var(--event-tile-bubble-line-height)) / 2 - var(--event-tile-body-padding, 1px));
+    }
 
-        .slotAvatar {
-            inset-block-start: -4px;
+    /* A message of only emoji, which Element draws large, has no bubble, as in Telegram: the emoji stand on the
+       timeline where the bubble would start, and the time is the badge pictures carry, at the end of their last line or
+       of their reactions' row. A quoted reply keeps the bubble around it. */
+    &:not(.stateHasReply)
+        .line:not(.lineEmote, .lineMedia):has(
+            > .slotBody > :global(.mx_EventTile_content) :global(.mx_EventTile_bigEmoji)
+        ) {
+        --event-tile-bubble-timestamp-width: calc(var(--event-tile-timestamp-text-width) + 2 * var(--cpd-space-2x));
+
+        padding: 0;
+        background: transparent;
+
+        > .slotTimestamp {
+            inset-block-end: 0;
+            inset-inline-end: 0;
+        }
+
+        /* The badge is 20px tall, centered on the reactions' 24px row */
+        &:has(> .slotFooter:not(:empty)) > .slotTimestamp {
+            inset-block-end: var(--cpd-space-0-5x);
+        }
+
+        /* 4px under the emoji, whose line already leaves room under them */
+        > .slotFooter {
+            margin-block-start: 0;
+        }
+    }
+
+    /* Your own emoji and their reactions end where the row does, as under your own pictures, with the time last. */
+    &.stateOwnEvent:not(.stateHasReply)
+        .line:not(.lineEmote, .lineMedia):has(
+            > .slotBody > :global(.mx_EventTile_content) :global(.mx_EventTile_bigEmoji)
+        ) {
+        > .slotBody > * {
+            text-align: end;
+        }
+
+        > .slotFooter {
+            justify-content: flex-end;
+
+            --event-tile-reactions-add-button-order: -1;
         }
     }
 
@@ -1582,7 +1751,6 @@
 
         /* The full-width line would otherwise squeeze the avatar out of round. */
         .slotAvatar {
-            position: static;
             order: -1;
             display: inline-flex;
             flex-shrink: 0;
@@ -1622,14 +1790,25 @@
         margin-block: 0;
     }
 
-    /* These events span the space between the two bubble columns. */
+    /* These events span the space between the two bubble columns. Their band is measured from these margins, so that
+       it starts and ends where the other rows' bands do. */
     &.stateAlignedBetweenBubbles {
-        margin-inline-start: calc(
+        --event-tile-between-bubbles-margin-inline-start: calc(
             var(--event-tile-bubble-margin-inline-start) + var(--event-tile-bubble-line-margin-inline-start)
         );
-        margin-inline-end: calc(
+        --event-tile-between-bubbles-margin-inline-end: calc(
             var(--event-tile-bubble-margin-inline-end) + var(--event-tile-bubble-line-margin-inline-end)
         );
+
+        margin-inline: var(--event-tile-between-bubbles-margin-inline-start)
+            var(--event-tile-between-bubbles-margin-inline-end);
+
+        &::before {
+            inset-inline: calc(
+                    -1 * (var(--event-tile-between-bubbles-margin-inline-start) + var(--event-tile-bubble-avatar-gap))
+                )
+                calc(-1 * var(--event-tile-between-bubbles-margin-inline-end));
+        }
 
         .line {
             width: 100%;
@@ -1654,14 +1833,12 @@
         padding-block: var(--cpd-space-0-5x);
 
         .slotAvatar {
-            position: static;
             order: -1;
             display: inline-flex;
             align-items: center;
             width: 14px;
             height: 14px;
             margin-inline-end: var(--event-tile-bubble-gap);
-            border: 0;
             flex-shrink: 0;
             line-height: 1;
         }
@@ -1671,7 +1848,6 @@
             /* Compound Avatar's own line-height (its size less 2px) centres the initial. A clickable avatar is a
                <button>, which the app makes inherit the slot's line-height instead, from a later layer. */
             line-height: calc(var(--cpd-avatar-size) - 2px) !important;
-            box-shadow: none;
         }
 
         /* The line ends at the row's end, beside the avatar, and keeps the bubble rows' 60px free for the read
@@ -1739,6 +1915,11 @@
             margin-block-end: var(--event-tile-bubble-gap);
         }
 
+        /* The grid's rows have no gap, so the reactions keep all of their 8px themselves. */
+        .line > .slotFooter {
+            margin-block-start: var(--cpd-space-2x);
+        }
+
         &.stateInfo .line {
             gap: 0 9px;
             align-items: center;
@@ -1761,18 +1942,24 @@
     width: 100%;
     padding-top: 0;
 
-    /* ThreadView uses the narrower BaseCard gutter for bubble tiles. The
+    /* ThreadView uses the narrower BaseCard gutter for bubble tiles, except before other people's bubbles. The
        regular room bubble margins would overflow the thread card because the
        thread shell is otherwise full-width. As in the room, the read receipts end at the timeline's content edge: your
        own bubbles keep the room's end margin, a column that keeps them clear of the receipts, and informational rows
        reach that edge, keeping their text clear of the receipts. The receipts are in the line, so the row is a
        container whose width places them wherever the bubble ends. */
     &.layoutBubble {
+        --event-tile-thread-margin-inline-start: var(--event-tile-thread-margin-inline);
         --event-tile-thread-margin-inline-end: var(--event-tile-thread-margin-inline);
 
         width: auto;
-        margin-inline: var(--event-tile-thread-margin-inline) var(--event-tile-thread-margin-inline-end);
+        margin-inline: var(--event-tile-thread-margin-inline-start) var(--event-tile-thread-margin-inline-end);
         container-type: inline-size;
+
+        /* Other people's bubbles start where they do in the room, which leaves room beside them for the avatar. */
+        &:not(.stateOwnEvent, .stateInfo, .stateBubbleContainer, .stateLeftAlignedBubble) {
+            --event-tile-thread-margin-inline-start: var(--event-tile-bubble-margin-inline-start);
+        }
 
         &.stateOwnEvent {
             --event-tile-thread-margin-inline-end: var(--event-tile-bubble-margin-inline-end);
@@ -1802,8 +1989,11 @@
             inset-inline-end: 0;
         }
 
+        /* As in the room, the band reaches one avatar gap past the row's start, clear of the avatar there. */
         &::before {
-            inset-inline: calc(-1 * var(--event-tile-thread-margin-inline))
+            inset-inline: calc(
+                    -1 * (var(--event-tile-thread-margin-inline-start) + var(--event-tile-bubble-avatar-gap))
+                )
                 calc(-1 * var(--event-tile-thread-margin-inline-end));
             z-index: auto;
         }

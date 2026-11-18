@@ -1167,12 +1167,13 @@ function EventTileViewStoryContent({
         const showActionBar =
             shape === "ThreadsList" || tileState.actionBarFocused || interaction.hovered || interaction.focused;
         const timestamp = hideTimestampStoryOverride ? undefined : <StoryTimestamp linked />;
-        const showSenderAndAvatar =
-            showSenderAndAvatarOverride ??
-            showSenderAndAvatarStoryOverride ??
-            (layout === "irc" || !tileState.continuation);
-        const sender = createStorySender(isOwnEvent, showSenderAndAvatar && !tileState.noSender && !tileState.info);
-        const avatar = createStoryAvatar(isOwnEvent, layout, showSenderAndAvatar, tileState.info ? "14px" : undefined);
+        const startsRun = layout === "irc" || !tileState.continuation;
+        // In bubbles the app gives a message's avatar to the last of its sender's run, beside its bubble
+        const hasRunAvatar = layout === "bubble" && !tileState.info ? !!tileState.lastInSection : startsRun;
+        const showSender = showSenderAndAvatarOverride ?? showSenderAndAvatarStoryOverride ?? startsRun;
+        const showAvatar = showSenderAndAvatarOverride ?? showSenderAndAvatarStoryOverride ?? hasRunAvatar;
+        const sender = createStorySender(isOwnEvent, showSender && !tileState.noSender && !tileState.info);
+        const avatar = createStoryAvatar(isOwnEvent, layout, showAvatar, tileState.info ? "14px" : undefined);
         const tileSlots = {
             ...(slotsOverride ?? props.slots),
             ...(bodyOverride === undefined ? {} : { body: bodyOverride }),

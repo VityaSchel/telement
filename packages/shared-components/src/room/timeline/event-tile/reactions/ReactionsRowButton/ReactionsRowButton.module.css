@@ -59,3 +59,31 @@
 img.reactionsRowButtonContent {
     vertical-align: calc(0.5cap - 8px);
 }
+
+/* In bubbles the reactions sit inside the bubble, as in Telegram: pills without an outline, the reader's own filled with
+   the accent and white, other people's tinted with it. The border stays, transparent, so that the pill keeps its shape
+   where forced colors drop the fill. The chip centers each part on its own: the count is smaller and medium, its digits
+   of one width so that it doesn't shift as it changes, and trimmed to their cap height. */
+.reactionsRowButtonInBubble {
+    display: inline-flex;
+    align-items: center;
+    box-sizing: border-box;
+    block-size: var(--cpd-space-6x);
+    padding-block: 0;
+    border-color: transparent;
+    background-color: var(--cpd-color-bg-badge-accent);
+    color: var(--cpd-color-text-badge-accent);
+}
+
+.reactionsRowButtonInBubble.reactionsRowButtonSelected {
+    background-color: var(--cpd-color-bg-accent-rest);
+    color: var(--tl-color-on-accent);
+}
+
+.reactionsRowButtonInBubble .reactionsRowButtonCount {
+    inset-block-start: 0;
+    font: var(--cpd-font-body-sm-medium);
+    font-variant-numeric: tabular-nums;
+    line-height: 1cap;
+    text-box: trim-both cap alphabetic;
+}

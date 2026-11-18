@@ -40,6 +40,10 @@ import mediaBodyStyles from "../../../../packages/shared-components/src/room/tim
 // eslint-disable-next-line no-restricted-imports
 import audioPlayerViewStyles from "../../../../packages/shared-components/src/room/timeline/event-tile/body/AudioPlayerView/AudioPlayerView.module.css?raw";
 // eslint-disable-next-line no-restricted-imports
+import reactionsRowStyles from "../../../../packages/shared-components/src/room/timeline/event-tile/reactions/ReactionsRow/ReactionsRow.module.css?raw";
+// eslint-disable-next-line no-restricted-imports
+import reactionsRowButtonStyles from "../../../../packages/shared-components/src/room/timeline/event-tile/reactions/ReactionsRowButton/ReactionsRowButton.module.css?raw";
+// eslint-disable-next-line no-restricted-imports
 import flexStyles from "../../../../packages/shared-components/src/core/utils/Flex/Flex.module.css?raw";
 // eslint-disable-next-line no-restricted-imports
 import telementTokens from "../../../../packages/shared-components/src/telement/tokens.css?raw";
@@ -77,12 +81,22 @@ interface TileOptions {
     reply?: string;
     padlock?: boolean;
     lineClass?: string;
+    /** The reactions row, which ends the bubble. */
+    footer?: string;
 }
 
 /** An EventTileView in the bubble layout, as the room timeline renders it. */
 function tile(
     body: string,
-    { own = false, continuation = false, last = true, reply, padlock = false, lineClass = "" }: TileOptions = {},
+    {
+        own = false,
+        continuation = false,
+        last = true,
+        reply,
+        padlock = false,
+        lineClass = "",
+        footer,
+    }: TileOptions = {},
 ): string {
     const states = [
         own && "stateOwnEvent",
@@ -98,6 +112,7 @@ function tile(
             <div class="line mx_EventTile_line ${lineClass}">
                 ${timestamp}${padlock ? PADLOCK : ""}${replyChain}
                 <div class="slotBody">${body}</div>
+                ${footer ? `<div class="slotFooter">${footer}</div>` : ""}
             </div>
         </li>
     `;
@@ -124,6 +139,27 @@ function video(width: number, height: number): string {
             <button type="button" class="mx_MVideoBody_container VideoBodyView_container VideoBodyView_frame"
                 style="width: ${width}px; max-width: 100%; max-height: ${height}px; aspect-ratio: ${width} / ${height}"></button>
         </span>
+    `;
+}
+
+/** A reactions row of the given number of reactions as ReactionsRowView renders it in a bubble, the first your own. */
+function reactions(count: number): string {
+    const chips = Array.from(
+        { length: count },
+        (_, index) => `
+            <button type="button" aria-label="${index + 1} reactions"
+                class="ReactionsRowButton_reactionsRowButton${index === 0 ? " ReactionsRowButton_reactionsRowButtonSelected" : ""} ReactionsRowButton_reactionsRowButtonInBubble">
+                <span class="ReactionsRowButton_reactionsRowButtonContent" aria-hidden="true">🔥</span>
+                <span class="ReactionsRowButton_reactionsRowButtonCount" aria-hidden="true">${index + 1}</span>
+            </button>`,
+    );
+    return `
+        <div class="mx_ReactionsRow ReactionsRow_reactionsRow" role="toolbar" aria-label="Reactions">
+            ${chips.join("")}
+            <button type="button" class="ReactionsRow_addReactionButton" aria-label="Add reaction">
+                <svg width="16" height="16"></svg>
+            </button>
+        </div>
     `;
 }
 
@@ -265,13 +301,13 @@ function withPreviews(text: string, cards: number, options: TileOptions = {}, sh
     );
 }
 
-/** A 14px avatar as BaseAvatar renders it: a <button> when clicking it opens the user's profile. */
-function avatar(clickable: boolean): string {
+/** An avatar as BaseAvatar renders it, 14px by default: a <button> when clicking it opens the user's profile. */
+function avatar(clickable: boolean, size = 14): string {
     return renderToStaticMarkup(
         createElement(Avatar, {
             id: "@alice:example.org",
             name: "Alice",
-            size: "14px",
+            size: `${size}px`,
             type: "round",
             className: "mx_BaseAvatar",
             onClick: clickable ? (): void => {} : undefined,
@@ -287,6 +323,22 @@ function infoRow(layout: "layoutBubble" | "layoutGroup", clickable: boolean): st
             <div class="line mx_EventTile_line">
                 ${timestamp}<div class="slotBody"><div class="mx_TextualEvent">Alice joined the room</div></div>
             </div>
+        </li>
+    `;
+}
+
+/**
+ * Another person's message in the given states, the last of their run, with their avatar beside its bubble: 30px in the
+ * room, 32px in the thread view.
+ */
+function lastOfRun(states: string[], thread = false): string {
+    const classes = ["root", "mx_EventTile", thread && "shapeThread", "layoutBubble", "stateLastInSection", ...states];
+    return `
+        <li class="${classes.filter(Boolean).join(" ")}" data-testid="event-tile">
+            <div class="line mx_EventTile_line">
+                ${timestamp}<div class="slotBody">${plain("Can you check the dark theme as well?")}</div>
+            </div>
+            <div class="slotAvatar">${avatar(false, thread ? 32 : 30)}</div>
         </li>
     `;
 }
@@ -310,6 +362,18 @@ function all(selector: string): HTMLElement[] {
 
 function box(element: Element): DOMRect {
     return element.getBoundingClientRect();
+}
+
+/** The band behind a row, which the row draws as its ::before. */
+function bandOf(row: Element): DOMRect {
+    const rect = box(row);
+    const { top, right, bottom, left } = getComputedStyle(row, "::before");
+    return new DOMRect(
+        rect.left + parseFloat(left),
+        rect.top + parseFloat(top),
+        rect.width - parseFloat(left) - parseFloat(right),
+        rect.height - parseFloat(top) - parseFloat(bottom),
+    );
 }
 
 function timeOf(line: Element): DOMRect {
@@ -356,6 +420,8 @@ describe("Bubble layout", () => {
                 ${moduleCss(mediaBodyStyles, "MediaBody")}
                 ${moduleCss(audioPlayerViewStyles, "AudioPlayerView")}
                 ${moduleCss(flexStyles, "Flex")}
+                ${moduleCss(reactionsRowStyles, "ReactionsRow")}
+                ${moduleCss(reactionsRowButtonStyles, "ReactionsRowButton")}
             }
             @layer app-web {
                 ${githubMarkdown}
@@ -429,11 +495,12 @@ describe("Bubble layout", () => {
             const [first, continuation, ownContinuation] = all(".line").map((line) =>
                 getComputedStyle(line.querySelector(".mx_EventTile_content")!),
             );
+            // Where bubbles of a run meet, the corner on the sender's side is 4px
             expect([first.borderStartStartRadius, first.borderStartEndRadius]).toEqual(["12px", "12px"]);
-            expect([continuation.borderStartStartRadius, continuation.borderStartEndRadius]).toEqual(["0px", "12px"]);
+            expect([continuation.borderStartStartRadius, continuation.borderStartEndRadius]).toEqual(["4px", "12px"]);
             expect([ownContinuation.borderStartStartRadius, ownContinuation.borderStartEndRadius]).toEqual([
                 "12px",
-                "0px",
+                "4px",
             ]);
         });
 
@@ -594,6 +661,30 @@ describe("Bubble layout", () => {
             expect(cornerRadii(frameElement)).toEqual({ x: 8, y: 8 });
         });
 
+        it.each([
+            ["another's", false],
+            ["your own", true],
+        ])(
+            "holds reactions under the caption of %s picture, inset like it and within the picture's width, the time ending their row",
+            (_name, own) => {
+                render(captioned(PICTURE, "My desk", { own, footer: reactions(6) }));
+                const line = all(".line")[0];
+                const bubble = box(line);
+                const chips = all(".ReactionsRowButton_reactionsRowButton").map(box);
+                const time = timeOf(line);
+
+                expect(bubble.width).toBe(240);
+                expect(chips[0].left - bubble.left).toBe(12);
+                expect(chips[0].top - box(line.querySelector(".mx_EventTile_caption")!).bottom).toBe(8);
+                expect(bubble.bottom - chips.at(-1)!.bottom).toBe(8);
+                expect(Math.max(...chips.map((chip) => chip.right))).toBeLessThanOrEqual(bubble.right - 12);
+                expect(
+                    Math.abs((time.top + time.bottom) / 2 - (chips.at(-1)!.top + chips.at(-1)!.bottom) / 2),
+                ).toBeLessThanOrEqual(0.5);
+                expect(chips.some((chip) => overlaps(chip, time))).toBe(false);
+            },
+        );
+
         it("leaves a picture without a caption as it was: no bubble, rounded by 12 all round", () => {
             render(tile(PICTURE, { lineClass: "lineMedia lineTimestampOverMedia" }));
             const [line] = all(".line");
@@ -601,6 +692,21 @@ describe("Bubble layout", () => {
 
             expect(getComputedStyle(line).backgroundColor).toBe("rgba(0, 0, 0, 0)");
             expect(getComputedStyle(frame).borderRadius).toBe("12px");
+            // Nor a tail, though it ends its sender's run
+            expect(getComputedStyle(line, "::after").backgroundColor).toBe("rgba(0, 0, 0, 0)");
+        });
+
+        it.each([
+            ["another's", false, "--event-tile-bubble-other-background"],
+            ["your own", true, "--event-tile-bubble-self-background"],
+        ])("gives %s captioned picture at the end of a run a tail in its bubble's color", (_name, own, color) => {
+            render(captioned(PICTURE, "The view", { own }));
+            const [line] = all(".line");
+            const tail = getComputedStyle(line, "::after");
+
+            expect(tail.content).not.toBe("none");
+            expect(tail.backgroundColor).toBe(tokenColor(color, line));
+            expect(own ? tail.right : tail.left).toBe("-6px");
         });
     });
 
@@ -680,6 +786,33 @@ describe("Bubble layout", () => {
             }
         });
 
+        it.each(CARDS)(
+            "hold reactions under %s at a text bubble's inset, with the time ending their row rather than in a column",
+            (_name, body) => {
+                render(
+                    tile(body, { lineClass: "lineMedia", footer: reactions(2) }),
+                    tile(body, { own: true, lineClass: "lineMedia", footer: reactions(2) }),
+                );
+
+                for (const line of all(".line")) {
+                    const bubble = box(line);
+                    const card = box(cardOf(line));
+                    const chip = box(line.querySelector(".ReactionsRowButton_reactionsRowButton")!);
+                    const time = timeOf(line);
+
+                    expect(getComputedStyle(line).paddingRight).toBe("12px");
+                    expect(chip.left - bubble.left).toBe(12);
+                    expect(chip.top - card.bottom).toBe(8);
+                    expect(bubble.bottom - chip.bottom).toBe(8);
+                    expect(bubble.right - time.right).toBe(12);
+                    expect(Math.abs((time.top + time.bottom) / 2 - (chip.top + chip.bottom) / 2)).toBeLessThanOrEqual(
+                        0.5,
+                    );
+                    expect(time.top).toBeGreaterThanOrEqual(card.bottom);
+                }
+            },
+        );
+
         it.each(CARDS)("keep a reply quote above %s at a text bubble's inset", (_name, body) => {
             render(tile(body, { lineClass: "lineMedia", reply: "<blockquote>Are you coming?</blockquote>" }));
             const [line] = all(".line");
@@ -708,9 +841,13 @@ describe("Bubble layout", () => {
                     getComputedStyle(lines[i + 1]).borderRadius,
                 );
             }
-            // Where another's group ends, all four corners are round
+            // Where another's group ends, the corner by the avatar is the tail's, in the card's color
             const lastOfGroup = getComputedStyle(paintedBubble(lines[2]));
-            expect([lastOfGroup.borderEndStartRadius, lastOfGroup.borderEndEndRadius]).toEqual(["12px", "12px"]);
+            expect([lastOfGroup.borderEndStartRadius, lastOfGroup.borderEndEndRadius]).toEqual(["0px", "12px"]);
+            expect(getComputedStyle(paintedBubble(lines[2]), "::after").backgroundColor).toBe(
+                lastOfGroup.backgroundColor,
+            );
+            expect(lastOfGroup.backgroundColor).not.toBe("rgba(0, 0, 0, 0)");
         });
     });
 
@@ -961,6 +1098,65 @@ describe("Bubble layout", () => {
             for (const element of links) {
                 expect(getComputedStyle(element).color).toBe(tokenColor("--tl-accent-900", element));
             }
+        });
+    });
+
+    describe("the band behind a selected or highlighted message", () => {
+        it.each([
+            ["selected", "stateSelected"],
+            ["highlighted", "stateHighlighted"],
+        ])("keeps the avatar beside another person's %s bubble clear of the band's start", (_name, state) => {
+            render(lastOfRun([state]));
+            const row = document.querySelector(".root")!;
+            const band = bandOf(row);
+            const picture = box(row.querySelector(".slotAvatar > *")!);
+
+            expect(getComputedStyle(row, "::before").backgroundColor).not.toBe("rgba(0, 0, 0, 0)");
+            // At least the 8px the avatar keeps from the bubble
+            expect(picture.left - band.left).toBeGreaterThanOrEqual(8);
+            // The bubble stays 40px into the timeline, and the band 1px above and below the row: the bubbles of a run
+            // are only 2px apart
+            expect(box(row.querySelector(".line")!).left - box(document.querySelector("ol")!).left).toBe(40);
+            expect(box(row).top - band.top).toBe(1);
+            expect(band.bottom - box(row).bottom).toBe(1);
+        });
+
+        it("mirrors the band in right-to-left text, where the avatar is on the right", () => {
+            render(lastOfRun(["stateSelected"]));
+            const list = document.querySelector("ol")!;
+            const row = document.querySelector(".root")!;
+            const picture = row.querySelector(".slotAvatar > *")!;
+            const leftToRight = { list: box(list), band: bandOf(row), picture: box(picture) };
+
+            list.dir = "rtl";
+            const band = bandOf(row);
+
+            expect(band.right - box(picture).right).toBe(leftToRight.picture.left - leftToRight.band.left);
+            expect(box(list).right - band.right).toBe(leftToRight.band.left - leftToRight.list.left);
+            expect(band.left - box(list).left).toBe(leftToRight.list.right - leftToRight.band.right);
+        });
+
+        it("starts and ends the band of a row between the bubble columns where a message's band does", () => {
+            render(
+                lastOfRun(["stateSelected"]),
+                `<li class="root mx_EventTile layoutBubble stateAlignedBetweenBubbles stateSelected">
+                    <div class="line mx_EventTile_line"><div class="slotBody">${plain("Alice started a call")}</div></div>
+                </li>`,
+            );
+            const [message, between] = all(".root").map(bandOf);
+
+            expect(between.left).toBe(message.left);
+            expect(between.right).toBe(message.right);
+        });
+
+        it("keeps the avatar beside another person's selected bubble in the thread view clear of the band's start", () => {
+            renderAt(380, lastOfRun(["stateSelected"], true));
+            const row = document.querySelector(".root")!;
+            const picture = box(row.querySelector(".slotAvatar > *")!);
+
+            expect(picture.width).toBe(32);
+            expect(picture.left - bandOf(row).left).toBeGreaterThanOrEqual(8);
+            expect(box(row.querySelector(".line")!).left - box(document.querySelector("ol")!).left).toBe(40);
         });
     });
 

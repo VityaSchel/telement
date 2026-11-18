@@ -155,4 +155,97 @@ describe("Reactions row shape", () => {
         expect(style.outlineOffset).toBe("1px");
         expect(style.outlineColor).toBe(tokenColor("--cpd-color-border-focused"));
     });
+
+    it("keeps the room its host asks for at the end of its last line, and none otherwise", () => {
+        render(
+            <>
+                <div data-testid="plain" style={{ width: "fit-content" }}>
+                    <Default />
+                </div>
+                <div
+                    data-testid="spaced"
+                    style={{ width: "fit-content", ["--event-tile-reactions-end-space" as string]: "50px" }}
+                >
+                    <Default />
+                </div>
+            </>,
+        );
+        const plain = screen.getByTestId("plain").getBoundingClientRect();
+        const spaced = screen.getByTestId("spaced").getBoundingClientRect();
+        const buttons = screen.getAllByRole("button", { name: "Add reaction" });
+        const lastControlEnd =
+            buttons[0].getBoundingClientRect().right + parseFloat(getComputedStyle(buttons[0]).marginRight);
+
+        expect(plain.right).toBeCloseTo(lastControlEnd, 1);
+        expect(spaced.width - plain.width).toBeCloseTo(50, 1);
+    });
+
+    it("keeps Element's outlined chips outside bubbles", () => {
+        render(<Default />);
+
+        for (const chip of chips()) {
+            expect(getComputedStyle(chip).borderTopColor).not.toBe("rgba(0, 0, 0, 0)");
+        }
+    });
+});
+
+describe("Reactions in a bubble", () => {
+    function renderInBubble(): void {
+        render(
+            <div style={TIMELINE_FONT}>
+                <Default />
+            </div>,
+            { presentation: { layout: "bubble" } },
+        );
+    }
+
+    it("fills your own reaction with the accent and white, and tints other people's with it, with no outline", () => {
+        renderInBubble();
+        const [own, ...others] = chips();
+
+        expect(getComputedStyle(own).backgroundColor).toBe(tokenColor("--cpd-color-bg-accent-rest"));
+        expect(getComputedStyle(own).color).toBe("rgb(255, 255, 255)");
+        for (const chip of others) {
+            expect(getComputedStyle(chip).backgroundColor).toBe(tokenColor("--cpd-color-bg-badge-accent"));
+            expect(getComputedStyle(chip).color).toBe(tokenColor("--cpd-color-text-badge-accent"));
+        }
+        for (const chip of chips()) {
+            const style = getComputedStyle(chip);
+            // The border stays, transparent, for forced colors, where the fill is dropped
+            expect(style.borderTopWidth).toBe("1px");
+            expect(style.borderTopColor).toBe("rgba(0, 0, 0, 0)");
+        }
+    });
+
+    it("sets the count in medium body-sm digits of one width", () => {
+        renderInBubble();
+        const bodySmMedium = document.createElement("span");
+        bodySmMedium.style.font = "var(--cpd-font-body-sm-medium)";
+        document.body.append(bodySmMedium);
+        onTestFinished(() => bodySmMedium.remove());
+
+        for (const chip of chips()) {
+            const style = getComputedStyle(chip.querySelectorAll("span")[1]);
+            expect(style.fontSize).toBe(getComputedStyle(bodySmMedium).fontSize);
+            expect(style.fontWeight).toBe("500");
+            expect(style.fontVariantNumeric).toBe("tabular-nums");
+        }
+    });
+
+    it("keeps the 24px pill with its content 8px from either end, the emoji and the count centered on it", async () => {
+        await loadInter();
+        renderInBubble();
+
+        for (const chip of chips()) {
+            const box = chip.getBoundingClientRect();
+            const [emoji, count] = chip.querySelectorAll("span");
+            expect(box.height).toBe(24);
+            expect(emoji.getBoundingClientRect().left - box.left).toBe(8);
+            expect(box.right - count.getBoundingClientRect().right).toBeCloseTo(8, 1);
+            expect(middle(textBox(emoji))).toBeCloseTo(middle(box), 1);
+            // The count's box is trimmed to its digits' cap height, so its middle is theirs
+            expect(count.getBoundingClientRect().height).toBeLessThan(14);
+            expect(Math.abs(middle(count.getBoundingClientRect()) - middle(box))).toBeLessThanOrEqual(0.5);
+        }
+    });
 });
