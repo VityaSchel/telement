@@ -464,15 +464,18 @@ describe("Timeline cards", () => {
             },
         );
 
-        it.each<Layout>(["irc", "group"])("centers the radio on the label's line in the %s layout", (layout) => {
-            render(layout, POLL);
-            const option = card(POLL);
-            const radio = box(option.querySelector("input + div")!);
-            const label = box(option.querySelector(".mx_PollOption_optionText")!);
+        it.each<Layout>(["irc", "group"])(
+            "centers the radio on the label's line in the %s layout, on the bar's edge",
+            (layout) => {
+                render(layout, POLL);
+                const option = card(POLL);
+                const radio = box(option.querySelector("input + div")!);
+                const label = box(option.querySelector(".mx_PollOption_optionText")!);
 
-            expect(insets(option, option.querySelector("input + div")!).start).toBe(15);
-            expect(radio.top + radio.height / 2).toBe(label.top + label.height / 2);
-        });
+                expect(insets(option, option.querySelector("input + div")!).start).toBe(13);
+                expect(radio.top + radio.height / 2).toBe(label.top + label.height / 2);
+            },
+        );
 
         it.each<[Layout, "ltr" | "rtl"]>([
             ["group", "ltr"],
@@ -490,7 +493,8 @@ describe("Timeline cards", () => {
             expect(option.right - bar.right).toBe(13);
             // The vote count ends where the bar does, and the label's line starts as far from the top
             expect(countEnd).toBe(dir === "ltr" ? bar.right : bar.left);
-            expect(Math.abs(labelStart - (dir === "ltr" ? option.left : option.right))).toBe(39);
+            // After the 20px radio and its 8px gap
+            expect(Math.abs(labelStart - (dir === "ltr" ? option.left : option.right))).toBe(41);
             expect(label.top - option.top).toBe(13);
         });
     });

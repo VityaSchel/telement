@@ -465,7 +465,7 @@ describe("Telement's chrome colors", () => {
             );
         });
 
-        it("draws the legacy radio's checked ring and dot, which have nothing white on them, in the accent", () => {
+        it("fills the legacy radio when checked like Compound's, with a white dot, and outlines its option in the accent", () => {
             const container = render(
                 theme,
                 `<div class="mx_Dialog">
@@ -481,12 +481,14 @@ describe("Telement's chrome colors", () => {
             const radio = container.querySelector<HTMLElement>(".mx_StyledRadioButton")!;
             const ring = radio.querySelector("input + div")!;
             const accent = tokenColor("--tl-accent-900", container);
+            const fill = tokenColor("--cpd-color-bg-accent-rest", container);
 
             expect({
                 ring: getComputedStyle(ring).borderTopColor,
+                fill: getComputedStyle(ring).backgroundColor,
                 dot: getComputedStyle(ring.firstElementChild!).backgroundColor,
                 outline: getComputedStyle(radio).borderTopColor,
-            }).toEqual({ ring: accent, dot: accent, outline: accent });
+            }).toEqual({ ring: fill, fill, dot: tokenColor("--tl-color-on-accent", container), outline: accent });
         });
 
         it("fills the search dialog's selected recent room with the subtle fill, a step further in a dark dialog", () => {

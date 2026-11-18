@@ -26,12 +26,11 @@ Please see LICENSE files in the repository root for full details.
             display: none;
         }
 
-        .mx_StyledRadioButton input[type="radio"]:checked + div > div {
-            background: $info-plinth-fg-color;
-        }
-
+        /* Telement: the checked radio, filled like Compound's (_StyledRadioButton.pcss), takes the disabled fill of a
+           checked radio while the options can't change */
         .mx_StyledRadioButton input[type="radio"]:checked + div {
-            border-color: unset;
+            border-color: var(--cpd-color-bg-action-primary-disabled);
+            background-color: var(--cpd-color-bg-action-primary-disabled);
         }
 
         .mx_Field_valid.mx_Field label,

@@ -13,9 +13,10 @@ Please see LICENSE files in the repository root for full details.
 
 .mx_StyledRadioButton {
     $radio-circle-color: var(--cpd-color-border-interactive-primary);
-    /* Telement: the checked ring and dot have nothing white on them, so they are drawn in the accent, as lines are,
-       rather than in the deeper fill that dark themes put white on (telement/tokens.css) */
-    $active-radio-circle-color: var(--cpd-color-border-accent-primary);
+    /* Telement: Compound's radio (TELEMENT.md, "Colors, type and components": selected options keep Compound's
+       radios), so these look like the theme and layout choices beside them: a 20px ring, filled with the accent when
+       checked, its dot white on the fill (telement/tokens.css) */
+    $radio-size: 20px;
     position: relative;
 
     display: flex;
@@ -36,8 +37,9 @@ Please see LICENSE files in the repository root for full details.
         flex-shrink: 0;
         flex-grow: 0;
 
-        height: $font-16px;
-        width: $font-16px;
+        /* Only as wide as the radio: a height would move the label's baseline, and with it the label, down */
+        height: 0;
+        width: $radio-size;
     }
 
     input[type="radio"] {
@@ -55,35 +57,37 @@ Please see LICENSE files in the repository root for full details.
             justify-content: center;
 
             box-sizing: border-box;
-            height: $font-16px;
-            width: $font-16px;
-            margin-left: 2px; /* For the highlight on focus */
+            height: $radio-size;
+            width: $radio-size;
 
             border: 1px solid $radio-circle-color;
-            border-radius: $font-16px;
+            border-radius: 50%;
 
             > div {
                 box-sizing: border-box;
 
-                height: $font-8px;
-                width: $font-8px;
+                height: 8px;
+                width: 8px;
 
-                border-radius: $font-8px;
+                border-radius: 50%;
             }
         }
 
+        /* Compound's focus ring around the radio, which leaves the ring itself on the content's edge */
         &:focus-visible {
             & + div {
-                @mixin unreal-focus;
+                outline: 2px solid var(--cpd-color-border-focused);
+                outline-offset: 1px;
             }
         }
 
         &:checked {
             & + div {
-                border-color: $active-radio-circle-color;
+                border-color: var(--cpd-color-bg-accent-rest);
+                background-color: var(--cpd-color-bg-accent-rest);
 
                 & > div {
-                    background: $active-radio-circle-color;
+                    background: var(--tl-color-on-accent);
                     /* For enhanced visibility under contrast control */
                     outline: 1px solid transparent;
                 }
@@ -91,20 +95,42 @@ Please see LICENSE files in the repository root for full details.
         }
 
         &:disabled {
-            & + div,
             & + div + span {
                 opacity: 0.5;
                 cursor: not-allowed;
             }
 
+            /* Compound's disabled colors show it, without fading it as well */
             & + div {
-                border-color: $radio-circle-color;
+                cursor: not-allowed;
+                border-color: var(--cpd-color-border-disabled);
+                background-color: var(--cpd-color-bg-canvas-disabled);
             }
         }
 
         &:checked:disabled {
-            & + div > div {
-                background-color: $radio-circle-color;
+            & + div {
+                border-color: var(--cpd-color-bg-action-primary-disabled);
+                background-color: var(--cpd-color-bg-action-primary-disabled);
+            }
+        }
+    }
+
+    /* Compound's hover: the ring takes the accent, with a gray dot, and a checked radio's fill deepens */
+    @media (hover) {
+        &.mx_StyledRadioButton_enabled:hover input[type="radio"] {
+            &:not(:checked) + div {
+                border-color: var(--cpd-color-bg-accent-hovered);
+                box-shadow: 0 1.2px 2.4px 0 rgb(0 0 0 / 15%);
+
+                > div {
+                    background: var(--cpd-color-icon-quaternary);
+                }
+            }
+
+            &:checked + div {
+                border-color: var(--cpd-color-bg-accent-hovered);
+                background-color: var(--cpd-color-bg-accent-hovered);
             }
         }
     }
@@ -122,6 +148,7 @@ Please see LICENSE files in the repository root for full details.
 }
 
 .mx_StyledRadioButton_checked {
-    /* Telement: a line, so the accent, like the ring above */
+    /* Telement: an outlined option's border is a line, so it takes the accent rather than the deeper fill dark themes
+       put white on */
     border-color: var(--cpd-color-border-accent-primary);
 }

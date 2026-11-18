@@ -32,8 +32,10 @@ Please see LICENSE files in the repository root for full details.
         align-items: start;
     }
 
+    /* The 20px radio (_StyledRadioButton.pcss) takes only the label's line, so it doesn't make the option taller where
+       the line is shorter than the radio */
     input[type="radio"] + div {
-        margin-block-start: calc(2px + (1lh - $font-16px) / 2);
+        margin-block: calc(2px + (1lh - 20px) / 2) calc((1lh - 20px) / 2);
     }
 }
 
