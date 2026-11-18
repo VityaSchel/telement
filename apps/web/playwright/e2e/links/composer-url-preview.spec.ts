@@ -43,7 +43,7 @@ test.describe("Composer URL preview", () => {
 
                 await page.goto(`#/room/${room.roomId}`);
                 const composerRegion = page.getByRole("region", { name: "Message composer" });
-                const composer = composerRegion.getByRole("textbox", { name: "Send an unencrypted message…" });
+                const composer = composerRegion.getByRole("textbox", { name: "Write a message…" });
                 await composer.pressSequentially("https://example.org/");
                 const preview = composerRegion.getByRole("link", { name: "Example Site" });
                 await expect(preview).toBeVisible();
@@ -56,7 +56,7 @@ test.describe("Composer URL preview", () => {
                 await page.route(PREVIEW_URL_PATTERN, (route) => route.fulfill({ status: 404 }));
 
                 await page.goto(`#/room/${room.roomId}`);
-                const composer = page.getByRole("textbox", { name: "Send an unencrypted message…" });
+                const composer = page.getByRole("textbox", { name: "Write a message…" });
                 await composer.pressSequentially("https://example.org/");
 
                 await expect(page.getByRole("button", { name: "Hide preview" })).not.toBeVisible();
@@ -77,7 +77,7 @@ test.describe("Composer URL preview", () => {
                 });
 
                 await page.goto(`#/room/${room.roomId}`);
-                const composer = page.getByRole("textbox", { name: "Send an unencrypted message…" });
+                const composer = page.getByRole("textbox", { name: "Write a message…" });
                 await composer.pressSequentially("https://example.org/ https://fallback.example.org/");
 
                 await expect(page.getByRole("link", { name: "Fallback Site" })).toBeVisible();

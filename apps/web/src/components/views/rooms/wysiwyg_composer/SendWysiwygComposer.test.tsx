@@ -23,7 +23,6 @@ import { type ComposerInsertPayload, ComposerType } from "../../../../dispatcher
 import { setSelection } from "./utils/selection";
 import { createMocks } from "./__mocks__";
 import { ScopedRoomContextProvider } from "../../../../contexts/ScopedRoomContext.tsx";
-import { E2EStatus } from "../../../../utils/ShieldUtils.ts";
 import { RoomUploadContextProvider } from "../../../../viewmodels/room/RoomUploadViewModel.tsx";
 
 beforeAll(initOnce, 10000);
@@ -62,7 +61,6 @@ describe("SendWysiwygComposer", () => {
         disabled = false,
         isRichTextEnabled = true,
         placeholder?: string,
-        e2eStatus?: E2EStatus,
     ) => {
         return render(
             <MatrixClientContext.Provider value={mockClient}>
@@ -75,7 +73,6 @@ describe("SendWysiwygComposer", () => {
                             isRichTextEnabled={isRichTextEnabled}
                             menuPosition={aboveLeftOf({ top: 0, bottom: 0, right: 0 })}
                             placeholder={placeholder}
-                            e2eStatus={e2eStatus}
                         />
                     </RoomUploadContextProvider>
                 </ScopedRoomContextProvider>
@@ -335,23 +332,6 @@ describe("SendWysiwygComposer", () => {
                 // Then
                 await waitFor(() => expect(screen.getByRole("textbox")).toHaveTextContent(/wo🦫d/));
             });
-        },
-    );
-
-    describe.each([{ isRichTextEnabled: true }, { isRichTextEnabled: false }])(
-        "Encryption icon when %s",
-        ({ isRichTextEnabled }) => {
-            it.each([E2EStatus.Verified, E2EStatus.Warning, undefined])(
-                "Should leave the encryption icon to the room header when e2eStatus is %s",
-                async (e2eStatus) => {
-                    // When
-                    customRender(vi.fn(), vi.fn(), false, isRichTextEnabled, undefined, e2eStatus);
-                    await waitFor(() => expect(screen.getByRole("textbox")).toHaveAttribute("contentEditable", "true"));
-
-                    // Then
-                    expect(screen.queryByTestId("e2e-icon")).not.toBeInTheDocument();
-                },
-            );
         },
     );
 });

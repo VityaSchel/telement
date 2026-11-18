@@ -29,7 +29,6 @@ import TimelinePanel from "./TimelinePanel";
 import dis from "../../dispatcher/dispatcher";
 import { type ActionPayload } from "../../dispatcher/payloads";
 import { Action } from "../../dispatcher/actions";
-import { type E2EStatus } from "../../utils/ShieldUtils";
 import EditorStateTransfer from "../../utils/EditorStateTransfer";
 import RoomContext, { TimelineRenderingType } from "../../contexts/RoomContext";
 import ContentMessages from "../../ContentMessages";
@@ -57,7 +56,6 @@ interface IProps {
     resizeNotifier: ResizeNotifier;
     mxEvent: MatrixEvent;
     permalinkCreator?: RoomPermalinkCreator;
-    e2eStatus?: E2EStatus;
     initialEvent?: MatrixEvent;
     isInitialEventHighlighted?: boolean;
     initialEventScrollIntoView?: boolean;
@@ -442,7 +440,6 @@ export default class ThreadView extends React.Component<IProps, IState> {
                                 relation={threadRelation}
                                 replyToEvent={this.state.replyToEvent}
                                 permalinkCreator={this.props.permalinkCreator}
-                                e2eStatus={this.props.e2eStatus}
                                 compact={true}
                             />
                         )}

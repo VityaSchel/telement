@@ -11,7 +11,7 @@ Please see LICENSE files in the repository root for full details.
 import React from "react";
 import { describe, it, expect, vi, beforeAll, beforeEach, afterEach, onTestFinished } from "vitest";
 import { act, fireEvent, render, screen, waitFor } from "test-utils-rtl";
-import { EventType, type MatrixEvent, RoomMember, THREAD_RELATION_TYPE } from "matrix-js-sdk/src/matrix";
+import { type MatrixEvent, RoomMember } from "matrix-js-sdk/src/matrix";
 import userEvent from "@testing-library/user-event";
 import { initOnce } from "@vector-im/matrix-wysiwyg";
 import {
@@ -34,7 +34,6 @@ import { LocalRoom } from "../../../models/LocalRoom";
 import SettingsStore from "../../../settings/SettingsStore";
 import { SettingLevel } from "../../../settings/SettingLevel";
 import dis from "../../../dispatcher/dispatcher";
-import { E2EStatus } from "../../../utils/ShieldUtils";
 import UIStore, { UI_EVENTS } from "../../../stores/UIStore";
 import { Action } from "../../../dispatcher/actions";
 import { UIFeature } from "../../../settings/UIFeature";
@@ -127,14 +126,14 @@ describe("MessageComposer", () => {
 
         it("Renders a SendMessageComposer and the composer buttons by default", () => {
             wrapAndRender({ room });
-            expect(screen.getByLabelText("Send an unencrypted message…")).toBeInTheDocument();
+            expect(screen.getByLabelText("Write a message…")).toBeInTheDocument();
             expect(screen.getByRole("button", { name: "Attachment" })).toBeInTheDocument();
             expect(screen.getByRole("button", { name: "Emoji" })).toBeInTheDocument();
         });
 
         it("Does not render a SendMessageComposer or the composer buttons when user has no permission", () => {
             wrapAndRender({ room }, false);
-            expect(screen.queryByLabelText("Send an unencrypted message…")).not.toBeInTheDocument();
+            expect(screen.queryByLabelText("Write a message…")).not.toBeInTheDocument();
             expect(screen.queryByRole("button", { name: "Attachment" })).not.toBeInTheDocument();
             expect(screen.getByText("You do not have permission to post to this room")).toBeInTheDocument();
         });
@@ -155,7 +154,7 @@ describe("MessageComposer", () => {
                 }),
             );
 
-            expect(screen.queryByLabelText("Send an unencrypted message…")).not.toBeInTheDocument();
+            expect(screen.queryByLabelText("Write a message…")).not.toBeInTheDocument();
             expect(screen.getByText("This room has been replaced and is no longer active.")).toBeInTheDocument();
         });
 
@@ -335,83 +334,6 @@ describe("MessageComposer", () => {
                     expect(
                         screen.queryByText("You don't currently have any stickerpacks enabled"),
                     ).not.toBeInTheDocument();
-                });
-            });
-        });
-
-        describe("when not replying to an event", () => {
-            it("should pass the expected placeholder to SendMessageComposer", () => {
-                wrapAndRender({ room });
-                expect(screen.getByLabelText("Send an unencrypted message…")).toBeInTheDocument();
-            });
-
-            it("and an e2e status it should pass the expected placeholder to SendMessageComposer", () => {
-                wrapAndRender({
-                    room,
-                    e2eStatus: E2EStatus.Normal,
-                });
-                expect(screen.getByLabelText("Send a message…")).toBeInTheDocument();
-            });
-        });
-
-        describe("when replying to an event", () => {
-            let replyToEvent: MatrixEvent;
-            let props: Partial<React.ComponentProps<typeof MessageComposer>>;
-
-            const checkPlaceholder = (expected: string) => {
-                it("should pass the expected placeholder to SendMessageComposer", () => {
-                    wrapAndRender(props);
-                    expect(screen.getByLabelText(expected)).toBeInTheDocument();
-                });
-            };
-
-            const setEncrypted = () => {
-                beforeEach(() => {
-                    props.e2eStatus = E2EStatus.Normal;
-                });
-            };
-
-            beforeEach(() => {
-                replyToEvent = mkEvent({
-                    event: true,
-                    type: EventType.RoomMessage,
-                    user: cli.getUserId()!,
-                    content: {},
-                });
-
-                props = {
-                    room,
-                    replyToEvent,
-                };
-            });
-
-            describe("without encryption", () => {
-                checkPlaceholder("Send an unencrypted reply…");
-            });
-
-            describe("with encryption", () => {
-                setEncrypted();
-                checkPlaceholder("Send a reply…");
-            });
-
-            describe("with a non-thread relation", () => {
-                beforeEach(() => {
-                    props.relation = { rel_type: "test" };
-                });
-
-                checkPlaceholder("Send an unencrypted reply…");
-            });
-
-            describe("that is a thread", () => {
-                beforeEach(() => {
-                    props.relation = { rel_type: THREAD_RELATION_TYPE.name };
-                });
-
-                checkPlaceholder("Reply to unencrypted thread…");
-
-                describe("with encryption", () => {
-                    setEncrypted();
-                    checkPlaceholder("Reply to thread…");
                 });
             });
         });

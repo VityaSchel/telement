@@ -127,7 +127,7 @@ for (const embedding of ["widget", "react"] as const) {
 
                 // Alice leaves; the room view is back and nothing is left to join
                 await callScope(page).getByTestId("incall_leave").click();
-                await expect(page.getByRole("textbox", { name: "Send an unencrypted message…" })).toBeVisible({
+                await expect(page.getByRole("textbox", { name: "Write a message…" })).toBeVisible({
                     timeout: 30_000,
                 });
                 await expect(page.getByTestId("join-call-button")).not.toBeVisible();

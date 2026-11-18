@@ -294,7 +294,6 @@ interface LocalRoomViewProps {
     resizeNotifier: ResizeNotifier;
     permalinkCreator: RoomPermalinkCreator;
     roomView: RefObject<HTMLElement | null>;
-    e2eStatus?: E2EStatus;
 }
 
 /**
@@ -321,7 +320,6 @@ function LocalRoomView(props: LocalRoomViewProps): ReactElement {
     } else {
         composer = (
             <MessageComposer
-                e2eStatus={props.e2eStatus}
                 room={props.localRoom}
                 resizeNotifier={props.resizeNotifier}
                 permalinkCreator={props.permalinkCreator}
@@ -2128,7 +2126,6 @@ export class RoomView extends React.Component<IRoomProps, IRoomState> {
         return (
             <ScopedRoomContextProvider {...this.state} roomViewStore={this.roomViewStore}>
                 <LocalRoomView
-                    e2eStatus={this.state.e2eStatus}
                     localRoom={localRoom}
                     resizeNotifier={this.context.resizeNotifier}
                     permalinkCreator={this.permalinkCreator}
@@ -2509,7 +2506,6 @@ export class RoomView extends React.Component<IRoomProps, IRoomState> {
             messageComposer = (
                 <MessageComposer
                     room={this.state.room}
-                    e2eStatus={this.state.e2eStatus}
                     resizeNotifier={this.context.resizeNotifier}
                     replyToEvent={this.state.replyToEvent}
                     permalinkCreator={this.permalinkCreator}
@@ -2623,7 +2619,6 @@ export class RoomView extends React.Component<IRoomProps, IRoomState> {
                 room={this.state.room}
                 resizeNotifier={this.context.resizeNotifier}
                 permalinkCreator={this.permalinkCreator}
-                e2eStatus={this.state.e2eStatus}
                 onSearchChange={this.onSearchChange}
                 onSearchCancel={this.onCancelSearchClick}
                 searchTerm={this.state.search?.term ?? ""}

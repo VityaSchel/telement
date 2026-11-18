@@ -23,7 +23,7 @@ import formattingButtonsStyles from "../../../res/css/views/rooms/wysiwyg_compos
 import lightTheme from "../../../res/themes/light/css/_light.pcss?raw";
 import { cornerRadii, toBrowserCss } from "../../test/telement/browserCss";
 
-const PLACEHOLDER = "Send a message…";
+const PLACEHOLDER = "Write a message…";
 
 /** Drafts as the rich-text editor holds them, without whitespace between tags, which its pre-wrap would show. */
 const RICH_TEXT_DRAFTS = [

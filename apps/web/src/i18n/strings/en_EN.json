@@ -578,12 +578,6 @@
         "mode_plain": "Hide formatting",
         "mode_rich_text": "Show formatting",
         "no_perms_notice": "You do not have permission to post to this room",
-        "placeholder": "Send an unencrypted message…",
-        "placeholder_encrypted": "Send a message…",
-        "placeholder_reply": "Send an unencrypted reply…",
-        "placeholder_reply_encrypted": "Send a reply…",
-        "placeholder_thread": "Reply to unencrypted thread…",
-        "placeholder_thread_encrypted": "Reply to thread…",
         "poll_button": "Poll",
         "poll_button_no_perms_description": "You do not have permission to start polls in this room.",
         "poll_button_no_perms_title": "Permission Required",
@@ -593,7 +587,8 @@
         "send_button_title": "Send message",
         "send_button_voice_message": "Send voice message",
         "send_voice_message": "Send voice message",
-        "stop_voice_message": "Stop recording"
+        "stop_voice_message": "Stop recording",
+        "voice_message_button": "Voice Message"
     },
     "console_scam_warning": "If someone told you to copy/paste something here, there is a high likelihood you're being scammed!",
     "console_wait": "Wait!",
@@ -3158,6 +3153,7 @@
             "integration_stickers_description": "Sticker packs from your integration manager.",
             "open_integration_stickers": "Open sticker packs",
             "photo_or_video": "Photo or video",
+            "placeholder": "Write a message…",
             "reply_to": "Reply to %(name)s",
             "stickers": "Stickers"
         },

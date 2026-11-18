@@ -31,7 +31,7 @@ async function startDM(app: ElementAppPage, page: Page, name: string): Promise<v
     await result.first().click();
 
     // send first message to start DM
-    const locator = page.getByRole("textbox", { name: "Send a message…" });
+    const locator = page.getByRole("textbox", { name: "Write a message…" });
     await expect(locator).toBeFocused();
     await locator.fill("Hey!");
     await locator.press("Enter");
@@ -259,7 +259,7 @@ test.describe("Spotlight", () => {
 
         // Send first message to actually start DM
         await expect(roomHeaderName(page)).toHaveText(bot2.credentials!.displayName!);
-        const locator = page.getByRole("textbox", { name: "Send a message…" });
+        const locator = page.getByRole("textbox", { name: "Write a message…" });
         await locator.fill("Hey!");
         await locator.press("Enter");
 

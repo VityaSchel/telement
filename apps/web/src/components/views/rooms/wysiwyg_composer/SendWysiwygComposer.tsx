@@ -13,7 +13,6 @@ import { useWysiwygSendActionHandler } from "./hooks/useWysiwygSendActionHandler
 import { WysiwygComposer } from "./components/WysiwygComposer";
 import { PlainTextComposer } from "./components/PlainTextComposer";
 import { type ComposerFunctions } from "./types";
-import { type E2EStatus } from "../../../../utils/ShieldUtils";
 import { type MenuProps } from "../../../structures/ContextMenu";
 import { ComposerContext, getDefaultContextValue } from "./ComposerContext";
 
@@ -33,7 +32,6 @@ export interface SendWysiwygComposerProps {
     isRichTextEnabled: boolean;
     placeholder?: string;
     disabled?: boolean;
-    e2eStatus?: E2EStatus;
     onChange: (content: string) => void;
     onSend: () => void;
     menuPosition: MenuProps;
@@ -43,7 +41,6 @@ export interface SendWysiwygComposerProps {
 // Default needed for React.lazy
 export default function SendWysiwygComposer({
     isRichTextEnabled,
-    e2eStatus,
     menuPosition,
     ...props
 }: SendWysiwygComposerProps): JSX.Element {

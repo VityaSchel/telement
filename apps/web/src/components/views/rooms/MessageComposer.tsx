@@ -36,7 +36,6 @@ import VoiceRecordComposerTile from "./VoiceRecordComposerTile";
 import { VoiceRecordingStore } from "../../../stores/VoiceRecordingStore";
 import { RecordingState } from "../../../audio/VoiceRecording";
 import type ResizeNotifier from "../../../utils/ResizeNotifier";
-import { type E2EStatus } from "../../../utils/ShieldUtils";
 import SendMessageComposer, { type SendMessageComposer as SendMessageComposerClass } from "./SendMessageComposer";
 import { type ComposerInsertPayload } from "../../../dispatcher/payloads/ComposerInsertPayload";
 import { Action } from "../../../dispatcher/actions";
@@ -64,6 +63,7 @@ import PlatformPeg from "../../../PlatformPeg";
 import { ModuleApi } from "../../../modules/Api";
 import { AttachButton } from "../../../telement/composer/AttachButton";
 import { TelegramComposerActions } from "../../../telement/composer/TelegramComposerActions";
+import { VoiceMessageButton } from "../../../telement/composer/VoiceMessageButton";
 import { notifyDraftChanged } from "../../../telement/room-list/roomDrafts";
 
 // The prefix used when persisting editor drafts to localstorage.
@@ -79,7 +79,7 @@ interface ISendButtonProps {
 function SendButton(props: ISendButtonProps): JSX.Element {
     return (
         <AccessibleButton
-            className="mx_MessageComposer_sendMessage"
+            className="mx_MessageComposer_button mx_MessageComposer_sendMessage"
             onClick={props.onClick}
             title={props.title ?? _t("composer|send_button_title")}
             data-testid="sendmessagebtn"
@@ -95,7 +95,6 @@ interface IProps extends MatrixClientProps {
     permalinkCreator?: RoomPermalinkCreator;
     replyToEvent?: MatrixEvent;
     relation?: IEventRelation;
-    e2eStatus?: E2EStatus;
     compact?: boolean;
     urlPreviewVm: MessageComposerUrlPreviewViewModel;
 }
@@ -357,27 +356,6 @@ export class MessageComposer extends React.Component<IProps, IState> {
         });
     };
 
-    private renderPlaceholderText = (): string => {
-        if (this.props.replyToEvent) {
-            const replyingToThread = this.props.relation?.rel_type === THREAD_RELATION_TYPE.name;
-            if (replyingToThread && this.props.e2eStatus) {
-                return _t("composer|placeholder_thread_encrypted");
-            } else if (replyingToThread) {
-                return _t("composer|placeholder_thread");
-            } else if (this.props.e2eStatus) {
-                return _t("composer|placeholder_reply_encrypted");
-            } else {
-                return _t("composer|placeholder_reply");
-            }
-        } else {
-            if (this.props.e2eStatus) {
-                return _t("composer|placeholder_encrypted");
-            } else {
-                return _t("composer|placeholder");
-            }
-        }
-    };
-
     private addEmoji = (emoji: string): boolean => {
         dis.dispatch<ComposerInsertPayload>({
             action: Action.ComposerInsert,
@@ -494,6 +472,10 @@ export class MessageComposer extends React.Component<IProps, IState> {
         this.setStickerPickerOpen(!this.state.isStickerPickerOpen);
     };
 
+    private onRecordStartEndClick = (): void => {
+        void this.voiceRecordingButton.current?.onRecordStartEndClick();
+    };
+
     private get showStickersButton(): boolean {
         return this.state.showStickersButton && !isLocalRoom(this.props.room);
     }
@@ -523,6 +505,8 @@ export class MessageComposer extends React.Component<IProps, IState> {
         const menuPosition = this.getMenuPosition();
 
         const canSendMessages = this.context.canSendMessages && !this.context.tombstone;
+        // One placeholder for every state, as in Telegram: the room header shows whether the room is encrypted
+        const placeholder = _t("telement|composer|placeholder");
         let composer: ReactNode;
         if (canSendMessages) {
             if (this.state.isWysiwygLabEnabled && menuPosition) {
@@ -534,9 +518,8 @@ export class MessageComposer extends React.Component<IProps, IState> {
                         onSend={this.sendMessage}
                         isRichTextEnabled={this.state.isRichTextEnabled}
                         initialContent={this.state.initialComposerContent}
-                        e2eStatus={this.props.e2eStatus}
                         menuPosition={menuPosition}
-                        placeholder={this.renderPlaceholderText()}
+                        placeholder={placeholder}
                         eventRelation={this.props.relation}
                     />
                 );
@@ -546,7 +529,7 @@ export class MessageComposer extends React.Component<IProps, IState> {
                         ref={this.messageComposerInput}
                         key="controls_input"
                         room={this.props.room}
-                        placeholder={this.renderPlaceholderText()}
+                        placeholder={placeholder}
                         relation={this.props.relation}
                         replyToEvent={this.props.replyToEvent}
                         onChange={this.onChange}
@@ -626,7 +609,20 @@ export class MessageComposer extends React.Component<IProps, IState> {
             />,
         );
 
-        const showSendButton = canSendMessages && (!this.state.isComposerEmpty || this.state.haveRecording);
+        const hasSomethingToSend = !this.state.isComposerEmpty || this.state.haveRecording;
+        let sendSlot: ReactNode;
+        if (canSendMessages && hasSomethingToSend) {
+            sendSlot = (
+                <SendButton
+                    key="controls_send"
+                    onClick={this.sendMessage}
+                    title={this.state.haveRecording ? _t("composer|send_button_voice_message") : undefined}
+                />
+            );
+        } else if (canSendMessages && !this.context.narrow) {
+            // Element leaves voice messages out of narrow composers, where its recording controls don't fit
+            sendSlot = <VoiceMessageButton onClick={this.onRecordStartEndClick} />;
+        }
 
         const classes = classNames({
             "mx_MessageComposer": true,
@@ -668,15 +664,7 @@ export class MessageComposer extends React.Component<IProps, IState> {
                                     onRichTextToggle={this.onRichTextToggle}
                                 />
                             )}
-                            {showSendButton && (
-                                <SendButton
-                                    key="controls_send"
-                                    onClick={this.sendMessage}
-                                    title={
-                                        this.state.haveRecording ? _t("composer|send_button_voice_message") : undefined
-                                    }
-                                />
-                            )}
+                            {sendSlot}
                         </div>
                     </div>
                 </div>

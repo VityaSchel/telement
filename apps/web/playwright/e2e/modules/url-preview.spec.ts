@@ -143,7 +143,7 @@ test.describe("URL Preview API", () => {
             await app.viewRoomById(room.roomId);
 
             const composerRegion = page.getByRole("region", { name: "Message composer" });
-            const composer = composerRegion.getByRole("textbox", { name: "Send an unencrypted message…" });
+            const composer = composerRegion.getByRole("textbox", { name: "Write a message…" });
             await composer.pressSequentially("https://module.example.org/page");
 
             // Nothing has been sent yet, so the handler is called without an event.

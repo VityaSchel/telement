@@ -23,7 +23,6 @@ import MessageComposer from "../rooms/MessageComposer";
 import { type RoomPermalinkCreator } from "../../../utils/permalinks/Permalinks";
 import { Layout } from "../../../settings/enums/Layout";
 import TimelinePanel from "../../structures/TimelinePanel";
-import { type E2EStatus } from "../../../utils/ShieldUtils";
 import EditorStateTransfer from "../../../utils/EditorStateTransfer";
 import RoomContext, { type TimelineRenderingType } from "../../../contexts/RoomContext";
 import dis from "../../../dispatcher/dispatcher";
@@ -47,7 +46,6 @@ interface IProps {
     onClose: () => void;
     resizeNotifier: ResizeNotifier;
     permalinkCreator: RoomPermalinkCreator;
-    e2eStatus?: E2EStatus;
     classNames?: string;
     timelineSet: EventTimelineSet;
     timelineRenderingType?: TimelineRenderingType;
@@ -255,7 +253,6 @@ export default class TimelineCard extends React.Component<IProps, IState> {
                                 resizeNotifier={this.props.resizeNotifier}
                                 replyToEvent={this.state.replyToEvent}
                                 permalinkCreator={this.props.permalinkCreator}
-                                e2eStatus={this.props.e2eStatus}
                                 compact={true}
                             />
                         )}

@@ -91,7 +91,7 @@ test.describe("EventTileView application coverage", () => {
             await page.mouse.move(0, 0);
             await expect(actionBar).not.toBeVisible();
 
-            await page.getByRole("textbox", { name: "Send an unencrypted message…" }).focus();
+            await page.getByRole("textbox", { name: "Write a message…" }).focus();
             // what-input listens for keyboard events and records the modality on <html>.
             await page.keyboard.press("ArrowRight");
             await expect(page.locator("html")).toHaveAttribute("data-whatinput", "keyboard");

@@ -49,7 +49,7 @@ test.describe("Threads", () => {
 
         const roomViewLocator = page.locator(".mx_RoomView_body");
         // User sends message
-        const textbox = roomViewLocator.getByRole("textbox", { name: "Send an unencrypted message…" });
+        const textbox = roomViewLocator.getByRole("textbox", { name: "Write a message…" });
         await textbox.fill("Hello Mr. Bot");
         await textbox.press("Enter");
 
@@ -118,7 +118,7 @@ test.describe("Threads", () => {
         await app.settings.setValue("layout", null, SettingLevel.DEVICE, Layout.Group);
 
         // User responds in thread
-        locator = page.locator(".mx_ThreadView").getByRole("textbox", { name: "Send an unencrypted message…" });
+        locator = page.locator(".mx_ThreadView").getByRole("textbox", { name: "Write a message…" });
         await locator.fill("Test");
         await locator.press("Enter");
 
@@ -273,7 +273,7 @@ test.describe("Threads", () => {
         await locator.locator(".mx_EventTile_line").click();
 
         // User responds & asserts
-        locator = page.locator(".mx_ThreadView").getByRole("textbox", { name: "Send an unencrypted message…" });
+        locator = page.locator(".mx_ThreadView").getByRole("textbox", { name: "Write a message…" });
         await locator.fill("Great!");
         await locator.press("Enter");
 
@@ -346,8 +346,8 @@ test.describe("Threads", () => {
 
             // Send message
             const locator = page.locator(".mx_RoomView_body");
-            await locator.getByRole("textbox", { name: "Send an unencrypted message…" }).fill("Hello Mr. Bot");
-            await locator.getByRole("textbox", { name: "Send an unencrypted message…" }).press("Enter");
+            await locator.getByRole("textbox", { name: "Write a message…" }).fill("Hello Mr. Bot");
+            await locator.getByRole("textbox", { name: "Write a message…" }).press("Enter");
             // Create thread
             const locator2 = locator.locator(".mx_EventTile[data-scroll-tokens]").filter({ hasText: "Hello Mr. Bot" });
             await locator2.click({ button: "right" });
@@ -368,8 +368,8 @@ test.describe("Threads", () => {
 
             // Send message
             const locator = page.locator(".mx_RoomView_body");
-            await locator.getByRole("textbox", { name: "Send an unencrypted message…" }).fill("Hello Mr. Bot");
-            await locator.getByRole("textbox", { name: "Send an unencrypted message…" }).press("Enter");
+            await locator.getByRole("textbox", { name: "Write a message…" }).fill("Hello Mr. Bot");
+            await locator.getByRole("textbox", { name: "Write a message…" }).press("Enter");
             // Create thread
             const locator2 = locator.locator(".mx_EventTile[data-scroll-tokens]").filter({ hasText: "Hello Mr. Bot" });
             await locator2.click({ button: "right" });
@@ -390,8 +390,8 @@ test.describe("Threads", () => {
 
             // Send message
             const locator = page.locator(".mx_RoomView_body");
-            await locator.getByRole("textbox", { name: "Send an unencrypted message…" }).fill("Hello Mr. Bot");
-            await locator.getByRole("textbox", { name: "Send an unencrypted message…" }).press("Enter");
+            await locator.getByRole("textbox", { name: "Write a message…" }).fill("Hello Mr. Bot");
+            await locator.getByRole("textbox", { name: "Write a message…" }).press("Enter");
             // Create thread
             const locator2 = locator.locator(".mx_EventTile[data-scroll-tokens]").filter({ hasText: "Hello Mr. Bot" });
             await locator2.click({ button: "right" });
@@ -418,7 +418,7 @@ test.describe("Threads", () => {
 
             let locator = page.locator(".mx_RoomView_body");
             // User sends message
-            let textbox = locator.getByRole("textbox", { name: "Send an unencrypted message…" });
+            let textbox = locator.getByRole("textbox", { name: "Write a message…" });
             await textbox.fill("Hello Mr. Bot");
             await textbox.press("Enter");
             // Wait for message to send, get its ID and save as @threadId
@@ -453,7 +453,7 @@ test.describe("Threads", () => {
             locator = page.locator(".mx_ThreadView");
             await locator.locator(".mx_EventTile").last().click({ button: "right" });
             await page.getByRole("menuitem", { name: "Reply" }).click();
-            textbox = locator.getByRole("textbox", { name: "Reply to unencrypted thread…" });
+            textbox = locator.getByRole("textbox", { name: "Write a message…" });
             await textbox.fill("Please come here");
             await textbox.press("Enter");
             // Wait until the reply is sent
@@ -474,7 +474,7 @@ test.describe("Threads", () => {
 
         // Send message
         let locator = page.locator(".mx_RoomView_body");
-        let textbox = locator.getByRole("textbox", { name: "Send an unencrypted message…" });
+        let textbox = locator.getByRole("textbox", { name: "Write a message…" });
         await textbox.fill("Hello Mr. Bot");
         await textbox.press("Enter");
         // Create thread
@@ -485,7 +485,7 @@ test.describe("Threads", () => {
 
         // Send message to thread
         locator = page.locator(".mx_ThreadPanel");
-        textbox = locator.getByRole("textbox", { name: "Send an unencrypted message…" });
+        textbox = locator.getByRole("textbox", { name: "Write a message…" });
         await textbox.fill("Hello Mr. User");
         await textbox.press("Enter");
         await expect(locator.locator(".mx_EventTile").last().getByText("Hello Mr. User")).toBeVisible();
@@ -516,7 +516,7 @@ test.describe("Threads", () => {
          */
         const sendMessage = async (message: string) => {
             const messageComposer = page.getByRole("region", { name: "Message composer" });
-            const textbox = messageComposer.getByRole("textbox", { name: "Send an unencrypted message…" });
+            const textbox = messageComposer.getByRole("textbox", { name: "Write a message…" });
             await textbox.fill(message);
             await textbox.press("Enter");
         };
@@ -538,7 +538,7 @@ test.describe("Threads", () => {
 
             // Send a message in the thread
             const threadPanel = page.locator(".mx_ThreadPanel");
-            const textbox = threadPanel.getByRole("textbox", { name: "Send an unencrypted message…" });
+            const textbox = threadPanel.getByRole("textbox", { name: "Write a message…" });
             await textbox.fill(threadMessage);
             await textbox.press("Enter");
             await expect(threadPanel.locator(".mx_EventTile").last().getByText(threadMessage)).toBeVisible();
@@ -581,7 +581,7 @@ test.describe("Threads", () => {
 
         // Send a message and pin it, so the pinned message banner is shown
         const roomViewBody = page.locator(".mx_RoomView_body");
-        const textbox = roomViewBody.getByRole("textbox", { name: "Send an unencrypted message…" });
+        const textbox = roomViewBody.getByRole("textbox", { name: "Write a message…" });
         await textbox.fill("Hello Mr. Bot");
         await textbox.press("Enter");
 
@@ -601,7 +601,7 @@ test.describe("Threads", () => {
         await expect(page.locator(".mx_ThreadView_timelinePanelWrapper")).toHaveCount(1);
 
         const threadPanel = page.locator(".mx_ThreadPanel");
-        const threadTextbox = threadPanel.getByRole("textbox", { name: "Send an unencrypted message…" });
+        const threadTextbox = threadPanel.getByRole("textbox", { name: "Write a message…" });
         await threadTextbox.fill("Hello Mr. User in a thread");
         await threadTextbox.press("Enter");
         await expect(threadPanel.locator(".mx_EventTile").last().getByText("Hello Mr. User in a thread")).toBeVisible();

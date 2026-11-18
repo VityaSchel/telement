@@ -10,6 +10,8 @@ import { userEvent } from "vitest/browser";
 import compoundTokens from "@vector-im/compound-design-tokens/assets/web/css/cpd-common-base.css?raw";
 import compoundSemantic from "@vector-im/compound-design-tokens/assets/web/css/cpd-common-semantic.css?raw";
 import compoundLightTheme from "@vector-im/compound-design-tokens/assets/web/css/cpd-theme-light-base.css?raw";
+import compoundDarkTheme from "@vector-im/compound-design-tokens/assets/web/css/cpd-theme-dark-base.css?raw";
+import compoundDarkSemantic from "@vector-im/compound-design-tokens/assets/web/css/cpd-theme-dark-semantic.css?raw";
 import compoundStyles from "@vector-im/compound-web/dist/style.css?raw";
 import sharedComponentsStyles from "@element-hq/web-shared-components/dist/element-web-shared-components.css?raw";
 
@@ -22,20 +24,22 @@ import accessibleButtonStyles from "../../../../res/css/views/elements/_Accessib
 import emojiButtonStyles from "../../../../res/css/views/rooms/_EmojiButton.pcss?raw";
 import messageComposerStyles from "../../../../res/css/views/rooms/_MessageComposer.pcss?raw";
 import { cornerRadii, toBrowserCss } from "../../../test/telement/browserCss";
-import { press, settledStyle, tokenColor } from "../../../test/telement/computedStyle";
+import { settledStyle, tokenColor } from "../../../test/telement/computedStyle";
 
 const ICON = `<svg viewBox="0 0 24 24"><rect width="24" height="24" /></svg>`;
 
-/** The composer's action buttons, as MessageComposer renders them with or without the rich text editor. */
-function renderComposerActions(richText: boolean): HTMLElement[] {
+/**
+ * The composer's action buttons, as MessageComposer renders them with or without the rich text editor. The last one
+ * is the send slot, which holds the microphone while the field is empty and Send otherwise.
+ */
+function renderComposerActions(richText: boolean, theme = "cpd-theme-light", dir = "ltr"): HTMLElement[] {
     document.body.innerHTML = `
-        <div class="cpd-theme-light mx_MessageComposer${richText ? " mx_MessageComposer_wysiwyg" : ""}">
+        <div class="${theme} mx_MessageComposer${richText ? " mx_MessageComposer_wysiwyg" : ""}" dir="${dir}">
             <div class="mx_MessageComposer_actions">
                 <div class="mx_AccessibleButton mx_MessageComposer_button" role="button" aria-label="Formatting">${ICON}</div>
                 <div class="mx_AccessibleButton mx_MessageComposer_button" role="button" aria-label="Emoji">${ICON}</div>
-                <div class="mx_AccessibleButton mx_MessageComposer_sendMessage" role="button" aria-label="Send">${ICON}</div>
-                <!-- A <button> so that holding Space presses it; the rules don't depend on the element -->
-                <button class="mx_AccessibleButton mx_MessageComposer_sendMessage" aria-label="Pressed send">${ICON}</button>
+                <div class="mx_AccessibleButton mx_MessageComposer_button" role="button" aria-label="Voice Message">${ICON}</div>
+                <div class="mx_AccessibleButton mx_MessageComposer_button mx_MessageComposer_sendMessage" role="button" aria-label="Send">${ICON}</div>
             </div>
         </div>
     `;
@@ -53,7 +57,10 @@ describe("MessageComposer button styles", () => {
         stylesheet = document.createElement("style");
         stylesheet.textContent = `
             @layer compound-tokens, compound-web, shared-components, app-web;
-            @layer compound-tokens { ${compoundTokens} ${compoundSemantic} ${compoundLightTheme} ${telementTokens} }
+            @layer compound-tokens {
+                ${compoundTokens} ${compoundSemantic} ${compoundLightTheme} ${compoundDarkTheme} ${compoundDarkSemantic}
+                ${telementTokens}
+            }
             @layer compound-web { ${compoundStyles} }
             ${sharedComponentsStyles}
             @layer app-web {
@@ -69,14 +76,15 @@ describe("MessageComposer button styles", () => {
         stylesheet.remove();
     });
 
-    afterEach(() => {
+    afterEach(async () => {
+        await userEvent.unhover(document.body);
         document.body.innerHTML = "";
     });
 
     it.each([
         ["plain", false],
         ["rich text", true],
-    ])("draws the formatting and emoji buttons as 36px circles in the %s composer", (_, richText) => {
+    ])("draws the composer's buttons, the send slot's too, as 36px circles in the %s composer", (_, richText) => {
         for (const button of renderComposerActions(richText)) {
             const box = button.getBoundingClientRect();
             expect([box.width, box.height]).toEqual([36, 36]);
@@ -90,26 +98,51 @@ describe("MessageComposer button styles", () => {
     ])(
         "rests the buttons' icons in the secondary gray and darkens them on hover in the %s composer",
         async (_, richText) => {
-            const [formatting, emoji] = renderComposerActions(richText);
+            const [formatting, emoji, microphone] = renderComposerActions(richText);
             const iconColor = (button: HTMLElement): string => getComputedStyle(button.querySelector("svg")!).color;
 
             expect(iconColor(formatting)).toBe(lightColor("--cpd-color-icon-secondary"));
+            expect(iconColor(microphone)).toBe(lightColor("--cpd-color-icon-secondary"));
             await userEvent.hover(emoji);
             expect(iconColor(emoji)).toBe(lightColor("--cpd-color-icon-primary"));
         },
     );
 
-    it("fills the send button with the accent, deeper on hover and press, with the arrow on top", async () => {
-        renderComposerActions(false);
-        const send = document.querySelector<HTMLElement>('[aria-label="Send"]')!;
+    describe.each([
+        ["light", "cpd-theme-light", false],
+        ["dark", "cpd-theme-dark", false],
+        ["light", "cpd-theme-light", true],
+        ["dark", "cpd-theme-dark", true],
+    ])("in the %s theme's %s composer", (_, theme, richText) => {
+        const accent = (): string =>
+            tokenColor("--cpd-color-icon-accent-primary", document.querySelector(`.${theme}`)!);
 
-        expect(settledStyle(send).backgroundColor).toBe(lightColor("--cpd-color-bg-accent-rest"));
-        expect(getComputedStyle(send.querySelector("svg")!).color).toBe(
-            lightColor("--cpd-color-icon-on-solid-primary"),
-        );
-        await userEvent.hover(send);
-        expect(settledStyle(send).backgroundColor).toBe(lightColor("--cpd-color-bg-accent-hovered"));
-        const pressed = await press(document.querySelector<HTMLElement>('[aria-label="Pressed send"]')!);
-        expect(pressed.backgroundColor).toBe(lightColor("--cpd-color-bg-accent-pressed"));
+        it("draws Send as a bare paper plane in the accent, with no fill", () => {
+            renderComposerActions(richText, theme);
+            const send = document.querySelector<HTMLElement>('[aria-label="Send"]')!;
+
+            expect(settledStyle(send).backgroundColor).toBe("rgba(0, 0, 0, 0)");
+            expect(getComputedStyle(send.querySelector("svg")!).color).toBe(accent());
+        });
+
+        it("keeps the plane in the accent on the other buttons' hover background", async () => {
+            const [, emoji, , send] = renderComposerActions(richText, theme);
+            await userEvent.hover(emoji);
+            const emojiHover = settledStyle(emoji).backgroundColor;
+
+            await userEvent.hover(send);
+
+            expect(settledStyle(send).backgroundColor).toBe(emojiHover);
+            expect(getComputedStyle(send.querySelector("svg")!).color).toBe(accent());
+        });
+    });
+
+    it.each([
+        ["ltr", "none"],
+        ["rtl", "matrix(-1, 0, 0, 1, 0, 0)"],
+    ])("points the paper plane the way %s text runs", (dir, transform) => {
+        renderComposerActions(false, "cpd-theme-light", dir);
+
+        expect(getComputedStyle(document.querySelector('[aria-label="Send"] svg')!).transform).toBe(transform);
     });
 });

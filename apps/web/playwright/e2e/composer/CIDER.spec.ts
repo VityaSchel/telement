@@ -37,7 +37,7 @@ test.describe("Composer", () => {
 
     test.describe("CIDER", () => {
         test("sends a message when you click send or press Enter", async ({ page }) => {
-            const composer = page.getByRole("textbox", { name: "Send an unencrypted message…" });
+            const composer = page.getByRole("textbox", { name: "Write a message…" });
 
             // Type a message
             await composer.pressSequentially("my message 0");
@@ -59,7 +59,7 @@ test.describe("Composer", () => {
         });
 
         test("can write formatted text", async ({ page }) => {
-            const composer = page.getByRole("textbox", { name: "Send an unencrypted message…" });
+            const composer = page.getByRole("textbox", { name: "Write a message…" });
 
             await composer.pressSequentially("my bold");
             await composer.press(`${CtrlOrMeta}+KeyB`);
@@ -77,7 +77,7 @@ test.describe("Composer", () => {
             await page.getByLabel("Emoji picker").getByRole("button", { name: "😇" }).click();
 
             await page.locator(".mx_ContextualMenu_background").click(); // Close emoji picker
-            await page.getByRole("textbox", { name: "Send an unencrypted message…" }).press("Enter"); // Send message
+            await page.getByRole("textbox", { name: "Write a message…" }).press("Enter"); // Send message
 
             await expect(page.getByTestId("event-tile-slot-body").filter({ hasText: "😇" })).toBeVisible();
         });
@@ -160,7 +160,7 @@ test.describe("Composer", () => {
 
         test("keeps its buttons next to the last line of text, with 20px icons on 36px targets", async ({ app }) => {
             const composer = app.getComposer(false);
-            const field = composer.getByRole("textbox", { name: "Send an unencrypted message…" });
+            const field = composer.getByRole("textbox", { name: "Write a message…" });
             await field.pressSequentially("one line");
             const buttons = ["Attachment", "Emoji", "Send message"].map((name) =>
                 composer.getByRole("button", { name }),
@@ -210,7 +210,7 @@ test.describe("Composer", () => {
             });
 
             test("only sends when you press Control+Enter", async ({ page }) => {
-                const composer = page.getByRole("textbox", { name: "Send an unencrypted message…" });
+                const composer = page.getByRole("textbox", { name: "Write a message…" });
                 // Type a message and press Enter
                 await composer.pressSequentially("my message 3");
                 await composer.press("Enter");
@@ -234,7 +234,7 @@ test.describe("Composer", () => {
             });
             await app.viewRoomByName("Bob");
 
-            const composer = page.getByRole("textbox", { name: "Send an unencrypted message…" });
+            const composer = page.getByRole("textbox", { name: "Write a message…" });
             await composer.click();
             await composer.pressSequentially("@bob");
 
@@ -248,7 +248,7 @@ test.describe("Composer", () => {
         });
 
         test("renders emoji autocomplete", { tag: "@screenshot" }, async ({ page }) => {
-            const composer = page.getByRole("textbox", { name: "Send an unencrypted message…" });
+            const composer = page.getByRole("textbox", { name: "Write a message…" });
 
             // Type ":+1" to trigger emoji autocomplete
             await composer.pressSequentially(":+1");

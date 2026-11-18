@@ -266,7 +266,7 @@ describe("RoomView", () => {
         vi.spyOn(room, "getMyMembership").mockReturnValue(KnownMembership.Join);
         const { asFragment } = await mountRoomView(undefined, { hideComposer: true });
 
-        expect(screen.queryByRole("textbox", { name: "Send an unencrypted message…" })).not.toBeInTheDocument();
+        expect(screen.queryByRole("textbox", { name: "Write a message…" })).not.toBeInTheDocument();
         expect(asFragment()).toMatchSnapshot();
     });
 
@@ -834,8 +834,7 @@ describe("RoomView", () => {
             ).toBeInTheDocument();
 
             // no message composer
-            expect(screen.queryByText("Send a message…")).not.toBeInTheDocument();
-            expect(screen.queryByText("Send an unencrypted message…")).not.toBeInTheDocument();
+            expect(screen.queryByRole("textbox", { name: "Write a message…" })).not.toBeInTheDocument();
         });
     });
 

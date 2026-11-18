@@ -26,7 +26,6 @@ import NotificationPanel from "./NotificationPanel";
 import type ResizeNotifier from "../../utils/ResizeNotifier";
 import { PinnedMessagesCard } from "../views/right_panel/PinnedMessagesCard";
 import { type RoomPermalinkCreator } from "../../utils/permalinks/Permalinks";
-import { type E2EStatus } from "../../utils/ShieldUtils";
 import TimelineCard from "../views/right_panel/TimelineCard";
 import { UPDATE_EVENT } from "../../stores/AsyncStore";
 import { type IRightPanelCard, type IRightPanelCardState } from "../../stores/right-panel/RightPanelStoreIPanelState";
@@ -39,7 +38,6 @@ import MemberListView from "../views/rooms/MemberList/MemberListView";
 interface BaseProps {
     overwriteCard?: IRightPanelCard; // used to display a custom card and ignoring the RightPanelStore (used for UserView)
     resizeNotifier: ResizeNotifier;
-    e2eStatus?: E2EStatus;
 }
 
 interface RoomlessProps extends BaseProps {
@@ -210,7 +208,6 @@ export default class RightPanel extends React.Component<Props, IState> {
                             resizeNotifier={this.props.resizeNotifier}
                             onClose={this.onClose}
                             permalinkCreator={this.props.permalinkCreator}
-                            e2eStatus={this.props.e2eStatus}
                         />
                     );
                 }
@@ -233,7 +230,6 @@ export default class RightPanel extends React.Component<Props, IState> {
                             isInitialEventHighlighted={cardState.isInitialEventHighlighted}
                             initialEventScrollIntoView={cardState.initialEventScrollIntoView}
                             permalinkCreator={this.props.permalinkCreator}
-                            e2eStatus={this.props.e2eStatus}
                         />
                     );
                 }

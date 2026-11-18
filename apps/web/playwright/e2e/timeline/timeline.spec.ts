@@ -438,11 +438,11 @@ test.describe("Timeline", () => {
                 // Send a emote
                 await page
                     .locator(".mx_RoomView_body")
-                    .getByRole("textbox", { name: "Send an unencrypted message…" })
+                    .getByRole("textbox", { name: "Write a message…" })
                     .fill("/me says hello to Mr. Bot");
                 await page
                     .locator(".mx_RoomView_body")
-                    .getByRole("textbox", { name: "Send an unencrypted message…" })
+                    .getByRole("textbox", { name: "Write a message…" })
                     .press("Enter");
                 const emoteTile = page.locator(".mx_EventTile").filter({ hasText: "says hello to Mr. Bot" }).last();
                 // Make sure emote was sent
@@ -1011,6 +1011,36 @@ test.describe("Timeline", () => {
             const eventTileLine = page.locator(".mx_RoomView_body .mx_EventTile").last().locator(".mx_EventTile_line");
             await expect(eventTileLine.getByTestId("reply-tile-body").getByText(MESSAGE)).toBeVisible();
             await expect(eventTileLine.getByText(reply)).toHaveCount(1);
+        });
+
+        test("can send a voice message from the composer's microphone", async ({ page, app, room }) => {
+            await app.viewRoomById(room.roomId);
+            const composer = app.getComposer();
+
+            await composer.getByRole("button", { name: "Voice Message" }).click();
+            // Record an empty message
+            await page.waitForTimeout(2000);
+            await composer.getByRole("button", { name: "Send voice message" }).click();
+
+            await expect(page.locator(".mx_RoomView_body .mx_MVoiceMessageBody")).toHaveCount(1);
+            await expect(composer.getByRole("button", { name: "Voice Message" })).toBeVisible();
+        });
+
+        test("can reply with a voice message", async ({ page, app, room }) => {
+            await viewRoomSendMessageAndSetupReply(page, app, room.roomId);
+            const composer = app.getComposer();
+
+            await composer.getByRole("button", { name: "Voice Message" }).click();
+            // Record an empty message
+            await page.waitForTimeout(3000);
+            await composer.getByRole("button", { name: "Send voice message" }).click();
+
+            const lastEventTileLine = page
+                .locator(".mx_RoomView_body .mx_EventTile")
+                .last()
+                .locator(".mx_EventTile_line");
+            await expect(lastEventTileLine.getByTestId("reply-tile-body").getByText(MESSAGE)).toBeVisible();
+            await expect(lastEventTileLine.locator(".mx_MVoiceMessageBody")).toHaveCount(1);
         });
 
         test("should not be possible to send flag with regional emojis", async ({ page, app, room }) => {
