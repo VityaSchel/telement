@@ -26,13 +26,14 @@
     border-color: var(--cpd-color-border-critical-subtle);
 }
 
+/* Compound's info colors, which follow the accent in Telement (telement/tokens.css), so the accent stays the only blue */
 .banner[data-type="info"] {
     background: var(--cpd-color-gradient-info-linear);
-    border-color: var(--cpd-color-blue-900);
+    border-color: var(--cpd-color-icon-info-primary);
 }
 
 .banner[data-type="info"] :is(svg) {
-    color: var(--cpd-color-blue-900);
+    color: var(--cpd-color-icon-info-primary);
 }
 
 .banner[data-type="success"] :is(.content, svg) {
