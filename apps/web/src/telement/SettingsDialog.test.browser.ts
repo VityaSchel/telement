@@ -8,7 +8,7 @@ Please see LICENSE files in the repository root for full details.
 import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { InlineField, Label, RadioControl, Root } from "@vector-im/compound-web";
+import { InlineField, Label, RadioControl, Root, ToggleControl } from "@vector-im/compound-web";
 import compoundBase from "@vector-im/compound-design-tokens/assets/web/css/cpd-common-base.css?raw";
 import compoundSemantic from "@vector-im/compound-design-tokens/assets/web/css/cpd-common-semantic.css?raw";
 import compoundLightTheme from "@vector-im/compound-design-tokens/assets/web/css/cpd-theme-light-base.css?raw";
@@ -159,6 +159,43 @@ describe("Settings dialogs", () => {
                 const body = chip.lastElementChild!.getBoundingClientRect();
                 expect(rect.right - body.right).toBe(12);
             }
+        });
+
+        it("label their options in the size and weight of the panel's Match system theme switch", () => {
+            document.body.innerHTML =
+                renderToStaticMarkup(
+                    createElement(
+                        Root,
+                        {},
+                        createElement(
+                            InlineField,
+                            { name: "systemTheme", control: createElement(ToggleControl, { name: "systemTheme" }) },
+                            createElement(Label, { id: "other" }, "Match system theme"),
+                        ),
+                    ),
+                ) +
+                renderToStaticMarkup(
+                    createElement(
+                        Root,
+                        { className: "mx_ThemeChoicePanel_ThemeSelectors" },
+                        createElement(
+                            InlineField,
+                            {
+                                name: "themeSelector",
+                                className: "mx_ThemeChoicePanel_themeSelector",
+                                control: createElement(RadioControl, { name: "themeSelector", value: "light" }),
+                            },
+                            createElement(
+                                Label,
+                                { id: "theme", className: "mx_ThemeChoicePanel_themeSelector_Label" },
+                                "Light",
+                            ),
+                        ),
+                    ),
+                );
+
+            const [theme, other] = ["theme", "other"].map((id) => getComputedStyle(document.getElementById(id)!));
+            expect([theme.fontSize, theme.fontWeight]).toEqual([other.fontSize, other.fontWeight]);
         });
     });
 
