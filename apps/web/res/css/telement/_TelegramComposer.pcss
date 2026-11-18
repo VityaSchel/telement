@@ -15,6 +15,13 @@ Please see LICENSE files in the repository root for full details.
     margin-block-end: calc((var(--MessageComposer-oneLineHeight) - var(--cpd-icon-button-size)) / 2);
     /* A 20px icon, like the other composer buttons */
     padding: var(--cpd-space-2x);
+
+    /* While its menu is open, the paperclip draws its glyph in the accent with no fill of its own, as the emoji button
+       does while its drawer is open. Hovered, it gets the gray hover fill and keeps the accent glyph. Compound colors
+       the glyph through every element in the button, so this does too. */
+    &[aria-expanded="true"] * {
+        color: var(--cpd-color-icon-accent-primary);
+    }
 }
 
 /*

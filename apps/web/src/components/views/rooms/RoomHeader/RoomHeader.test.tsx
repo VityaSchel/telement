@@ -55,7 +55,7 @@ import SettingsStore from "../../../../settings/SettingsStore";
 import SdkConfig from "../../../../SdkConfig";
 import dispatcher from "../../../../dispatcher/dispatcher";
 import { CallStore } from "../../../../stores/CallStore";
-import { type Call } from "../../../../models/Call";
+import { type Call, ConnectionState } from "../../../../models/Call";
 import * as ShieldUtils from "../../../../utils/ShieldUtils";
 import { WidgetLayoutStore } from "../../../../stores/widgets/WidgetLayoutStore";
 import MatrixClientContext from "../../../../contexts/MatrixClientContext";
@@ -693,6 +693,26 @@ describe("RoomHeader", () => {
             render(<RoomHeader room={room} />, getWrapper());
             expect(getByLabelText(document.body, "Close lobby")).toBeVisible();
         });
+
+        it.each([
+            [true, "Minimise call"],
+            [false, "Maximise call"],
+        ])(
+            "marks the button of a call you are in as toggled only while the call is shown (shown: %s)",
+            (isViewingCall, label) => {
+                mockRoomMembers(room, 3);
+                vi.spyOn(CallStore.instance, "getCall").mockReturnValue({
+                    ...createMockCall(ROOM_ID, 3),
+                    connectionState: ConnectionState.Connected,
+                } as unknown as Call);
+                mockRoomViewStore.isViewingCall.mockReturnValue(isViewingCall);
+
+                render(<RoomHeader room={room} />, getWrapper());
+
+                const icon = screen.getByRole("button", { name: label }).querySelector("svg")!;
+                expect(icon.classList.contains("mx_RoomHeader_toggled")).toBe(isViewingCall);
+            },
+        );
 
         it("don't show external conference button if the call is not shown", () => {
             mockRoomViewStore.isViewingCall.mockReturnValue(false);

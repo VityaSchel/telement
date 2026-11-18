@@ -93,10 +93,11 @@ function RoomHeaderButtons({ room, extraButtons }: { room: Room; extraButtons?: 
         [callOptions, voiceCallClick],
     );
 
+    // While the call is shown, its button is marked like a button whose right panel card is open
     const toggleCallButton = (
         <Tooltip label={isViewingCall ? _t("voip|minimise_call") : _t("voip|maximise_call")}>
             <IconButton onClick={toggleCall}>
-                <VideoCallIcon />
+                <VideoCallIcon className={isViewingCall ? "mx_RoomHeader_toggled" : undefined} />
             </IconButton>
         </Tooltip>
     );

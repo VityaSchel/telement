@@ -14,7 +14,8 @@ Please see LICENSE files in the repository root for full details.
     border-bottom: 1px solid $separator;
     background-color: $background;
 
-    button:has(svg.mx_RoomHeader_toggled) {
+    button:has(svg.mx_RoomHeader_toggled),
+    [class^="_icon-button_"][aria-expanded="true"] {
         /* For enhanced visibility under contrast control */
         outline: 1px solid transparent;
     }
@@ -108,9 +109,9 @@ Please see LICENSE files in the repository root for full details.
         background: var(--cpd-color-bg-subtle-primary);
     }
 
-    /* Accent text, as on the toggled buttons beside it, on an accent fill that stands apart from the gray hover */
+    /* While the member list is open, its count is in the accent with no fill, as the glyphs of the buttons beside it
+       are while their panel or menu is open */
     &.mx_FacePile_toggled {
-        background: var(--tl-accent-400);
         color: var(--cpd-color-text-action-accent);
         font: var(--cpd-font-body-sm-semibold);
         /* For enhanced visibility under contrast control */
@@ -127,6 +128,9 @@ Please see LICENSE files in the repository root for full details.
     min-width: 240px;
 }
 
-.mx_RoomHeader .mx_RoomHeader_toggled {
+/* A button whose right panel card, call or menu is open draws its glyph in the accent, with no fill of its own. Hovered,
+   it gets the gray hover fill and keeps the accent glyph. */
+.mx_RoomHeader .mx_RoomHeader_toggled,
+.mx_RoomHeader [class^="_icon-button_"][aria-expanded="true"] svg {
     fill: var(--cpd-color-icon-accent-primary);
 }

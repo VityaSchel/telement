@@ -6,9 +6,14 @@ Please see LICENSE files in the repository root for full details.
 */
 
 import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
+import { createElement } from "react";
+import { renderToStaticMarkup } from "react-dom/server";
+import { IconButton } from "@vector-im/compound-web";
+import { AttachmentIcon, ReactionIcon } from "@vector-im/compound-design-tokens/assets/web/icons";
 import compoundTokens from "@vector-im/compound-design-tokens/assets/web/css/cpd-common-base.css?raw";
 import compoundSemantic from "@vector-im/compound-design-tokens/assets/web/css/cpd-common-semantic.css?raw";
 import compoundLightTheme from "@vector-im/compound-design-tokens/assets/web/css/cpd-theme-light-base.css?raw";
+import compoundStyles from "@vector-im/compound-web/dist/style.css?raw";
 
 // The package doesn't export its token stylesheet on its own
 // eslint-disable-next-line no-restricted-imports
@@ -20,7 +25,10 @@ import sendMessageComposerStyles from "../../../res/css/views/rooms/_SendMessage
 import sendWysiwygComposerStyles from "../../../res/css/views/rooms/wysiwyg_composer/_SendWysiwygComposer.pcss?raw";
 import editorStyles from "../../../res/css/views/rooms/wysiwyg_composer/components/_Editor.pcss?raw";
 import telegramComposerStyles from "../../../res/css/telement/_TelegramComposer.pcss?raw";
+import emojiButtonStyles from "../../../res/css/views/rooms/_EmojiButton.pcss?raw";
+import lightTheme from "../../../res/themes/light/css/_light.pcss?raw";
 import { toBrowserCss } from "../../test/telement/browserCss";
+import { settledStyle, tokenColor } from "../../test/telement/computedStyle";
 
 const ICON = `<svg width="20" height="20"></svg>`;
 
@@ -188,5 +196,84 @@ describe("Telegram composer buttons", () => {
             above: field.top - row.top,
             below: row.bottom - field.bottom,
         }).toEqual({ attach: 0, action: 0, above: 8, below: 8 });
+    });
+});
+
+/**
+ * The paperclip as UploadButton renders it, a Compound IconButton that Compound's Menu marks as expanded while the
+ * menu is open, beside the emoji button as ComposerDrawerButton renders it while its drawer is open.
+ */
+function renderOpenButtons(paperclipOpen: boolean): { paperclip: HTMLElement; emoji: HTMLElement } {
+    const paperclip = renderToStaticMarkup(
+        createElement(
+            IconButton,
+            {
+                "className": "mx_TelementAttachButton",
+                "size": "36px",
+                "aria-label": "Attachment",
+                "aria-haspopup": "menu",
+                "aria-expanded": paperclipOpen,
+            },
+            createElement(AttachmentIcon),
+        ),
+    );
+    document.body.innerHTML = `
+        <div class="cpd-theme-light mx_MessageComposer">
+            <div class="mx_MessageComposer_row">
+                ${paperclip}
+                <div class="mx_AccessibleButton mx_MessageComposer_button mx_EmojiButton_highlight" role="button"
+                    aria-label="Emoji">${renderToStaticMarkup(createElement(ReactionIcon))}</div>
+            </div>
+        </div>
+    `;
+    return {
+        paperclip: document.querySelector<HTMLElement>('[aria-label="Attachment"]')!,
+        emoji: document.querySelector<HTMLElement>('[aria-label="Emoji"]')!,
+    };
+}
+
+describe("Telegram composer buttons while their menus are open", () => {
+    beforeAll(() => {
+        stylesheet = document.createElement("style");
+        stylesheet.textContent = `
+            @layer compound-tokens, compound-web, shared-components, app-web;
+            @layer compound-tokens { ${compoundTokens} ${compoundSemantic} ${compoundLightTheme} }
+            @layer compound-web { ${compoundStyles} }
+            @layer shared-components { ${telementTokens} }
+            @layer app-web {
+                ${toBrowserCss(messageComposerStyles, commonStyles, lightTheme, fontSizes)}
+                ${toBrowserCss(emojiButtonStyles, commonStyles, lightTheme)}
+                ${toBrowserCss(telegramComposerStyles, fontSizes)}
+            }
+        `;
+        document.head.append(stylesheet);
+    });
+
+    afterAll(() => {
+        stylesheet.remove();
+    });
+
+    afterEach(() => {
+        document.body.innerHTML = "";
+    });
+
+    /** The color a button's glyph is painted in: the fill its paths end up with. */
+    const glyphColor = (button: HTMLElement): string => getComputedStyle(button.querySelector("svg path")!).fill;
+
+    it("draws the paperclip's glyph in the accent with no fill while its menu is open, as the emoji button's while its drawer is", () => {
+        const { paperclip, emoji } = renderOpenButtons(true);
+        const accent = tokenColor("--cpd-color-icon-accent-primary", paperclip);
+
+        expect(settledStyle(paperclip).backgroundColor).toBe("rgba(0, 0, 0, 0)");
+        expect(settledStyle(emoji).backgroundColor).toBe("rgba(0, 0, 0, 0)");
+        expect(glyphColor(paperclip)).toBe(accent);
+        expect(glyphColor(emoji)).toBe(accent);
+    });
+
+    it("leaves the paperclip clear and gray while its menu is closed", () => {
+        const { paperclip } = renderOpenButtons(false);
+
+        expect(settledStyle(paperclip).backgroundColor).toBe("rgba(0, 0, 0, 0)");
+        expect(glyphColor(paperclip)).toBe(tokenColor("--cpd-color-icon-secondary", paperclip));
     });
 });

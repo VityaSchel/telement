@@ -278,18 +278,19 @@ describe("Telement's headers", () => {
         });
 
         it.each(["cpd-theme-light", "cpd-theme-dark"])(
-            "fills the toggled face pile with the accent, apart from its gray hover (%s)",
+            "draws the toggled face pile's count in the accent on the header's background, as the toggled buttons draw their glyph (%s)",
             async (theme) => {
                 render(h("div", { style: { width: "900px" } }, roomHeader(true)), theme);
+                const header = document.querySelector<HTMLElement>(".mx_RoomHeader")!;
                 const pile = document.querySelector<HTMLElement>(".mx_FacePile")!;
-                await userEvent.hover(pile);
-                const hover = getComputedStyle(pile).backgroundColor;
 
                 pile.classList.add("mx_FacePile_toggled");
                 const toggled = getComputedStyle(pile);
-                expect(toggled.backgroundColor).toBe(tokenColor("--tl-accent-400", pile));
-                expect(toggled.backgroundColor).not.toBe(hover);
+                expect(toggled.backgroundColor).toBe(getComputedStyle(header).backgroundColor);
                 expect(toggled.color).toBe(tokenColor("--cpd-color-text-action-accent", pile));
+                await userEvent.hover(pile);
+                expect(getComputedStyle(pile).backgroundColor).toBe(tokenColor("--cpd-color-bg-subtle-primary", pile));
+                expect(getComputedStyle(pile).color).toBe(tokenColor("--cpd-color-text-action-accent", pile));
             },
         );
     });

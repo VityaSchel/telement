@@ -74,13 +74,22 @@ describe("ComposerDrawerButton styles", () => {
     it.each([
         ["plain", false],
         ["rich text", true],
-    ])("fills the button while its drawer is open in the %s composer", (_, richText) => {
-        const atRest = renderDrawerButton(richText, false);
-        expect(settledStyle(atRest).backgroundColor).toBe("rgba(0, 0, 0, 0)");
+    ])(
+        "draws the button's glyph in the accent, with no fill, while its drawer is open in the %s composer",
+        (_, richText) => {
+            const atRest = renderDrawerButton(richText, false);
+            expect(settledStyle(atRest).backgroundColor).toBe("rgba(0, 0, 0, 0)");
+            expect(getComputedStyle(atRest.querySelector("svg")!).color).toBe(
+                tokenColor("--cpd-color-icon-secondary", atRest),
+            );
 
-        const open = renderDrawerButton(richText, true);
-        expect(settledStyle(open).backgroundColor).toBe(tokenColor("--cpd-color-bg-subtle-primary", open));
-    });
+            const open = renderDrawerButton(richText, true);
+            expect(settledStyle(open).backgroundColor).toBe("rgba(0, 0, 0, 0)");
+            expect(getComputedStyle(open.querySelector("svg")!).color).toBe(
+                tokenColor("--cpd-color-icon-accent-primary", open),
+            );
+        },
+    );
 
     it("ends the drawer on the spot ComposerDrawerButton gives it, the end of the button that opened it", () => {
         // ContextMenu's fixed wrapper at the button's end, 8px from the window's, and 8px above the composer's top
