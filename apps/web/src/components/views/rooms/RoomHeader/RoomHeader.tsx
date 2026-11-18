@@ -364,6 +364,7 @@ function RoomHeaderButtons({ room, extraButtons }: { room: Room; extraButtons?: 
 /** Create an icon to warn the user about shared history visibility, in encrypted rooms.
  *
  * Note that we use the same icon as in the room summary card and elsewhere, to aid user recognition.
+ * Like the other status icons next to the room name, it is gray: it is not an action.
  */
 function historyVisibilityIcon(historyVisibility: HistoryVisibility): JSX.Element | null {
     if (historyVisibility === HistoryVisibility.Shared) {
@@ -373,7 +374,7 @@ function historyVisibilityIcon(historyVisibility: HistoryVisibility): JSX.Elemen
                     width="16px"
                     height="16px"
                     className="mx_RoomHeader_icon"
-                    color="var(--cpd-color-icon-info-primary)"
+                    color="var(--cpd-color-icon-secondary)"
                     aria-label={_t("room|header|shared_history_tooltip")}
                 />
             </Tooltip>
@@ -385,7 +386,7 @@ function historyVisibilityIcon(historyVisibility: HistoryVisibility): JSX.Elemen
                     width="16px"
                     height="16px"
                     className="mx_RoomHeader_icon"
-                    color="var(--cpd-color-icon-info-primary)"
+                    color="var(--cpd-color-icon-secondary)"
                     aria-label={_t("room|header|world_readable_history_tooltip")}
                 />
             </Tooltip>
@@ -471,7 +472,7 @@ export default function RoomHeader({
                                         width="16px"
                                         height="16px"
                                         className="mx_RoomHeader_icon"
-                                        color="var(--cpd-color-icon-info-primary)"
+                                        color="var(--cpd-color-icon-secondary)"
                                         aria-label={_t("common|public_room")}
                                     />
                                 </Tooltip>

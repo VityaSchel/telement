@@ -775,7 +775,7 @@ describe("RoomHeader", () => {
     });
 
     describe("public room", () => {
-        it("shows a globe", async () => {
+        it("shows a globe in the secondary gray, as it is a status rather than an action", async () => {
             const joinRuleEvent = new MatrixEvent({
                 type: EventType.RoomJoinRules,
                 content: { join_rule: JoinRule.Public },
@@ -787,7 +787,10 @@ describe("RoomHeader", () => {
 
             render(<RoomHeader room={room} />, getWrapper());
 
-            expect(getByLabelText(document.body, "Public room")).toBeInTheDocument();
+            expect(getByLabelText(document.body, "Public room")).toHaveAttribute(
+                "color",
+                "var(--cpd-color-icon-secondary)",
+            );
         });
     });
 
@@ -819,6 +822,10 @@ describe("RoomHeader", () => {
 
         render(<RoomHeader room={room} />, getWrapper());
         await waitFor(() => expect(getByLabelText(document.body, "New members see history")).toBeVisible());
+        expect(getByLabelText(document.body, "New members see history")).toHaveAttribute(
+            "color",
+            "var(--cpd-color-icon-secondary)",
+        );
     });
 
     it("shows a user icon if the room is encrypted and has world readable history", async () => {
@@ -838,6 +845,10 @@ describe("RoomHeader", () => {
 
         render(<RoomHeader room={room} />, getWrapper());
         await waitFor(() => expect(getByLabelText(document.body, "Anyone can see history")).toBeVisible());
+        expect(getByLabelText(document.body, "Anyone can see history")).toHaveAttribute(
+            "color",
+            "var(--cpd-color-icon-secondary)",
+        );
     });
 
     describe("dm", () => {

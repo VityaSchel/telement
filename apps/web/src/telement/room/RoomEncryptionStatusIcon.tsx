@@ -30,7 +30,7 @@ interface RoomEncryptionStatusIconProps {
 /**
  * Room header icon showing the encryption state that Element shows in the composer. Telement's composer has no
  * encryption indicators, so the header shows that a room is unencrypted and, for group rooms, whether its members
- * are verified.
+ * are verified. The unencrypted lock is gray like the header's other status icons, as it is not an action.
  */
 export function RoomEncryptionStatusIcon({
     isRoomEncrypted,
@@ -44,7 +44,7 @@ export function RoomEncryptionStatusIcon({
                     width="16px"
                     height="16px"
                     className="mx_RoomHeader_icon"
-                    color="var(--cpd-color-icon-info-primary)"
+                    color="var(--cpd-color-icon-secondary)"
                     aria-label={_t("composer|room_unencrypted")}
                 />
             </Tooltip>

@@ -15,10 +15,13 @@ import { E2EStatus } from "../../utils/ShieldUtils";
 import { RoomEncryptionStatusIcon } from "./RoomEncryptionStatusIcon";
 
 describe("RoomEncryptionStatusIcon", () => {
-    it("shows the lock for an unencrypted room", () => {
+    it("shows the lock for an unencrypted room in the secondary gray, as it is a status rather than an action", () => {
         render(<RoomEncryptionStatusIcon isRoomEncrypted={false} isDirectMessage={false} e2eStatus={null} />);
 
-        expect(screen.getByLabelText("Messages in this room are not end-to-end encrypted")).toBeInTheDocument();
+        expect(screen.getByLabelText("Messages in this room are not end-to-end encrypted")).toHaveAttribute(
+            "color",
+            "var(--cpd-color-icon-secondary)",
+        );
     });
 
     it.each([
