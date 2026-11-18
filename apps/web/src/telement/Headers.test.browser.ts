@@ -117,7 +117,7 @@ function roomHeader(facePile: boolean): ReactNode {
     );
 }
 
-/** BaseCard's header: back, the title and close, as BaseCard sizes its icon buttons. */
+/** BaseCard's header: back, the title and close, as BaseCard sizes and fills its icon buttons. */
 function cardHeader(
     title: ReactNode = h("p", { className: "mx_BaseCard_header_title_heading" }, "Threads"),
 ): ReactNode {
@@ -315,26 +315,50 @@ describe("Telement's headers", () => {
             expect(button("Thread options").getBoundingClientRect().top - box(".mx_BaseCard_header").top).toBe(13.5);
         });
 
-        it("draws the options button round, with the hover disc of Compound's icon buttons", async () => {
+        it("draws the options button as the filled circle of Compound's secondary icon buttons, with their hover disc", async () => {
             render(
                 h(
                     "div",
                     null,
                     rightPanel(h("div", { className: "mx_BaseCard" }, cardHeader(optionsTitle()))),
-                    // A primary icon button, as in the room header
-                    h(IconButton, { "aria-label": "Compound", "size": "36px" }, h(CloseIcon)),
+                    h(IconButton, { "aria-label": "Compound", "kind": "secondary", "size": "36px" }, h(CloseIcon)),
                 ),
             );
             const options = button("Thread options");
 
             expect(cornerRadii(options)).toEqual({ x: 18, y: 18 });
-            expect(getComputedStyle(options).backgroundColor).toBe("rgba(0, 0, 0, 0)");
+            expect(getComputedStyle(options).backgroundColor).toBe(
+                getComputedStyle(button("Compound")).backgroundColor,
+            );
             await userEvent.hover(button("Compound"));
             const compoundHover = getComputedStyle(button("Compound")).backgroundColor;
             await userEvent.hover(options);
             expect(getComputedStyle(options).backgroundColor).toBe(compoundHover);
             expect(compoundHover).toBe(tokenColor("--cpd-color-bg-subtle-primary", options));
         });
+
+        it.each(["cpd-theme-light", "cpd-theme-dark"])(
+            "fills back, the thread's options and close alike before they are hovered (%s)",
+            async (theme) => {
+                render(rightPanel(h("div", { className: "mx_BaseCard" }, cardHeader(optionsTitle()))), theme);
+                const panel = document.querySelector("aside")!;
+                const [filled, hovered] = ["--cpd-color-bg-subtle-secondary", "--cpd-color-bg-subtle-primary"].map(
+                    (token) => tokenColor(token, panel),
+                );
+                const buttons = ["Back", "Thread options", "Close"].map(button);
+
+                expect(filled).not.toBe("rgba(0, 0, 0, 0)");
+                expect(buttons.map((element) => getComputedStyle(element).backgroundColor)).toEqual([
+                    filled,
+                    filled,
+                    filled,
+                ]);
+                for (const element of buttons) {
+                    await userEvent.hover(element);
+                    expect(getComputedStyle(element).backgroundColor).toBe(hovered);
+                }
+            },
+        );
 
         it("draws WidgetCard's options button like ThreadView's: its icon, and the disc on hover", async () => {
             render(

@@ -190,7 +190,7 @@ exports[`RoomView > for a local room > in state ERROR > should match the snapsho
                   data-testid="avatar-img"
                   data-type="round"
                   role="button"
-                  style="--cpd-avatar-size: 52px;"
+                  style="--cpd-avatar-size: 48px;"
                 >
                   u
                 </button>
@@ -386,7 +386,7 @@ exports[`RoomView > for a local room > in state NEW > should match the snapshot 
                   data-testid="avatar-img"
                   data-type="round"
                   role="button"
-                  style="--cpd-avatar-size: 52px;"
+                  style="--cpd-avatar-size: 48px;"
                 >
                   u
                 </button>
@@ -784,7 +784,7 @@ exports[`RoomView > for a local room > in state NEW > that is encrypted > should
                   data-testid="avatar-img"
                   data-type="round"
                   role="button"
-                  style="--cpd-avatar-size: 52px;"
+                  style="--cpd-avatar-size: 48px;"
                 >
                   u
                 </button>
@@ -1182,7 +1182,7 @@ exports[`RoomView > for a local room > in state NEW > that is encrypted > should
                   data-testid="avatar-img"
                   data-type="round"
                   role="button"
-                  style="--cpd-avatar-size: 52px;"
+                  style="--cpd-avatar-size: 48px;"
                 >
                   u
                 </button>

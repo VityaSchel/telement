@@ -73,8 +73,10 @@ Please see LICENSE files in the repository root for full details.
                 width: var(--cpd-space-6x);
                 height: var(--cpd-space-6x);
                 padding: calc((var(--BaseCard_header-button-size) - var(--cpd-space-6x)) / 2);
-                /* Round like the header's other icon buttons, with their disc while hovered or pressed. */
+                /* A filled circle like back and close, Compound's secondary icon buttons, with their hover and pressed
+                   disc */
                 border-radius: var(--tl-radius-control);
+                background: var(--cpd-color-bg-subtle-secondary);
 
                 &:is(:hover, :active) {
                     background: var(--cpd-color-bg-subtle-primary);
