@@ -11,7 +11,11 @@ Please see LICENSE files in the repository root for full details.
 
 import { vi, describe, it, expect, beforeEach, afterEach, type Mocked } from "vitest";
 
-import React from "react";
+import React, { type ComponentType } from "react";
+import VideoCallIcon from "@vector-im/compound-design-tokens/assets/web/icons/video-call";
+import VoiceCallIcon from "@vector-im/compound-design-tokens/assets/web/icons/voice-call";
+import ThreadsIcon from "@vector-im/compound-design-tokens/assets/web/icons/threads";
+import RoomInfoIcon from "@vector-im/compound-design-tokens/assets/web/icons/info";
 import { CallType, type MatrixCall } from "matrix-js-sdk/src/webrtc/call";
 import {
     EventType,
@@ -230,6 +234,32 @@ describe("RoomHeader", () => {
 
         await user.click(getByLabelText(document.body, "Notifications"));
         expect(setCardSpy).toHaveBeenCalledWith({ phase: RightPanelPhases.NotificationPanel });
+    });
+
+    it.each<[string, ComponentType, number]>([
+        ["Video call", VideoCallIcon, 0],
+        ["Voice call", VoiceCallIcon, 0],
+        ["Threads", ThreadsIcon, 0],
+        // The first "Room info" button is the room's name
+        ["Room info", RoomInfoIcon, 1],
+    ])("draws the %s button with Compound's outline icon", (name, Icon, index) => {
+        mockRoomMembers(room, 2);
+        render(<RoomHeader room={room} />, getWrapper());
+        const drawn = screen.getAllByRole("button", { name })[index].querySelector("svg")!;
+
+        const { container: outline } = render(<Icon />);
+        expect(drawn.innerHTML).toBe(outline.querySelector("svg")!.innerHTML);
+    });
+
+    it("anchors each call button's tooltip on the button rather than its icon", () => {
+        mockRoomMembers(room, 2);
+        render(<RoomHeader room={room} />, getWrapper());
+
+        for (const name of ["Video call", "Voice call"]) {
+            const button = screen.getByRole("button", { name });
+            expect(document.getElementById(button.getAttribute("aria-labelledby")!)).toHaveTextContent(name);
+            expect(button.querySelector("[aria-labelledby]")).toBeNull();
+        }
     });
 
     it("should show both call buttons in rooms smaller than 3 members", async () => {
@@ -712,6 +742,35 @@ describe("RoomHeader", () => {
             const legacyCallButton = screen.getByRole("menuitem", { name: "Legacy Call" });
             expect(elementCallButton).toBeInTheDocument();
             expect(legacyCallButton).toBeInTheDocument();
+        });
+
+        it("anchors the tooltips of the call menus' buttons on the buttons", () => {
+            mockRoomMembers(room, 2);
+            vi.spyOn(room.currentState, "mayClientSendStateEvent").mockImplementation(
+                (key) => key === ElementCallMemberEventType.name,
+            );
+            render(<RoomHeader room={room} />, getWrapper());
+
+            for (const name of ["Video call", "Voice call"]) {
+                const button = screen.getByRole("button", { name });
+                expect(button).toHaveAttribute("aria-haspopup", "menu");
+                expect(document.getElementById(button.getAttribute("aria-labelledby")!)).toHaveTextContent(name);
+                expect(button.querySelector("[aria-labelledby]")).toBeNull();
+            }
+        });
+
+        it("labels a disabled call button's tooltip with the reason it gives", () => {
+            mockRoomMembers(room, 3);
+            vi.spyOn(CallStore.prototype, "connectedCalls", "get").mockReturnValue(
+                new Set([{ roomId: "some_other_room" } as Call]),
+            );
+            render(<RoomHeader room={room} />, getWrapper());
+
+            const [button] = screen.getAllByRole("button", { name: "Ongoing call" });
+            expect(button).toHaveAttribute("aria-disabled", "true");
+            expect(document.getElementById(button.getAttribute("aria-labelledby")!)).toHaveTextContent(
+                button.getAttribute("aria-label")!,
+            );
         });
     });
 

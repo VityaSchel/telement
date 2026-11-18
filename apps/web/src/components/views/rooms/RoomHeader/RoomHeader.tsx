@@ -129,18 +129,6 @@ function RoomHeaderButtons({ room, extraButtons }: { room: Room; extraButtons?: 
         </Tooltip>
     );
 
-    const videoCallIconWithTooltip = (
-        <Tooltip label={videoCallDisabledReason ?? _t("voip|video_call")}>
-            <VideoCallIcon />
-        </Tooltip>
-    );
-
-    const voiceCallIconWithTooltip = (
-        <Tooltip label={videoCallDisabledReason ?? _t("voip|voice_call")}>
-            <VoiceCallIcon />
-        </Tooltip>
-    );
-
     const [videoMenuOpen, setVideoMenuOpen] = useState(false);
 
     const onVideoOpenChange = useCallback(
@@ -159,6 +147,7 @@ function RoomHeaderButtons({ room, extraButtons }: { room: Room; extraButtons?: 
         [voiceCallDisabledReason],
     );
 
+    // Tooltips anchored on the call buttons rather than their icons keep a gap below the buttons' hover circles
     const startVideoCallButton = (
         <>
             {/* Can be either a menu or just a button depending on the number of call options.*/}
@@ -171,8 +160,9 @@ function RoomHeaderButtons({ room, extraButtons }: { room: Room; extraButtons?: 
                         <IconButton
                             disabled={!!videoCallDisabledReason}
                             aria-label={videoCallDisabledReason ?? _t("voip|video_call")}
+                            tooltip={videoCallDisabledReason ?? _t("voip|video_call")}
                         >
-                            {videoCallIconWithTooltip}
+                            <VideoCallIcon />
                         </IconButton>
                     }
                     side="left"
@@ -201,9 +191,10 @@ function RoomHeaderButtons({ room, extraButtons }: { room: Room; extraButtons?: 
                 <IconButton
                     disabled={!!videoCallDisabledReason}
                     aria-label={videoCallDisabledReason ?? _t("voip|video_call")}
+                    tooltip={videoCallDisabledReason ?? _t("voip|video_call")}
                     onClick={videoClick}
                 >
-                    {videoCallIconWithTooltip}
+                    <VideoCallIcon />
                 </IconButton>
             )}
         </>
@@ -220,8 +211,9 @@ function RoomHeaderButtons({ room, extraButtons }: { room: Room; extraButtons?: 
                         <IconButton
                             disabled={!!voiceCallDisabledReason}
                             aria-label={voiceCallDisabledReason ?? _t("voip|voice_call")}
+                            tooltip={voiceCallDisabledReason ?? _t("voip|voice_call")}
                         >
-                            {voiceCallIconWithTooltip}
+                            <VoiceCallIcon />
                         </IconButton>
                     }
                     side="left"
@@ -250,9 +242,10 @@ function RoomHeaderButtons({ room, extraButtons }: { room: Room; extraButtons?: 
                 <IconButton
                     disabled={!!voiceCallDisabledReason}
                     aria-label={voiceCallDisabledReason ?? _t("voip|voice_call")}
+                    tooltip={voiceCallDisabledReason ?? _t("voip|voice_call")}
                     onClick={voiceClick}
                 >
-                    {voiceCallIconWithTooltip}
+                    <VoiceCallIcon />
                 </IconButton>
             )}
         </>
