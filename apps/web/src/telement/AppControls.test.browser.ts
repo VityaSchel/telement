@@ -637,7 +637,7 @@ describe("App controls", () => {
             expect(center(get("label"))).toBe(box(get(".mx_Field")).top + border / 2);
         });
 
-        it("darken the border on hover and turn it and the label Compound's focus blue when focused", async () => {
+        it("darken the border on hover and turn it and the label the focus color when focused", async () => {
             render(field("Room name"));
             const fieldBox = get(".mx_Field");
             const border = (): string => settledStyle(fieldBox).borderTopColor;

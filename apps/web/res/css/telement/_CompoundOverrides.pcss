@@ -106,10 +106,27 @@ Please see LICENSE files in the repository root for full details.
     }
 }
 
+/* Every Compound menu is a floating surface like the app's menus (_common.pcss), and its title's line a separator */
+:is([class^="_menu_"], [class*=" _menu_"])[role="menu"] {
+    @mixin floatingSurface;
+
+    [class*="_menu-title_"] {
+        border-block-end-color: var(--cpd-color-separator-primary);
+    }
+}
+
+/*
+ * What Compound's checkbox, radio and toggle draw on their accent fill (the check, the dot, the knob) is white in every
+ * theme (telement/tokens.css), as in Telegram; Compound draws it in the page's color, near-black in dark themes.
+ */
+input + [class^="_ui_"] {
+    --cpd-color-icon-on-solid-primary: var(--tl-color-on-accent);
+}
+
 /*
  * One field spec for legacy and Compound text fields (TELEMENT.md, "Colors, type and components"; _Field.pcss): 36px
- * with the text 12px inside a 1px border, darker when hovered, Compound's focus blue when focused, without Compound's
- * hover shadow or 2px ring.
+ * with the text 12px inside a 1px border, darker when hovered, in the focus color (the accent) when focused, without
+ * Compound's hover shadow or 2px ring.
  */
 :is(input, textarea)[class*="_control_"] {
     padding: calc((var(--tl-control-size) - 2 * var(--cpd-border-width-1) - 1lh) / 2) var(--cpd-space-3x);
@@ -189,7 +206,8 @@ input[class*="_control_"] + button[class*="_action_"] {
         background-color: var(--cpd-color-bg-canvas-default);
     }
 
-    /* The focus blue of the border it sits on, rather than the link color: the accent is under 4.5:1 on white */
+    /* The focus color of the border it sits on, a step deeper than the accent in light themes, where the accent is
+       under 4.5:1 on white (telement/tokens.css) */
     &:focus-within > label[class*="_label_"] {
         color: var(--cpd-color-border-focused);
     }

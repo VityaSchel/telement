@@ -92,7 +92,7 @@ export const RichItem = memo(function RichItem({
 function Checkmark(): JSX.Element {
     return (
         <Flex align="center" justify="center" aria-hidden="true" className={styles.checkmark}>
-            <CheckIcon width="24px" height="24px" color="var(--cpd-color-icon-on-solid-primary)" />
+            <CheckIcon width="24px" height="24px" color="var(--tl-color-on-accent)" />
         </Flex>
     );
 }

@@ -71,7 +71,7 @@ Please see LICENSE files in the repository root for full details.
 }
 
 /* Telement: the field spec's states (TELEMENT.md, "Colors, type and components"), as Compound's text fields have them:
-   a darker border on hover, Compound's focus blue when focused */
+   a darker border on hover, the focus color (the accent) when focused */
 .mx_Field:hover {
     border-color: var(--cpd-color-border-interactive-hovered);
 }
@@ -143,8 +143,8 @@ Please see LICENSE files in the repository root for full details.
     pointer-events: initial;
 }
 
-/* Telement: the focus blue of the border the label sits on, rather than the link color: the accent is under 4.5:1 on
-   white */
+/* Telement: the focus color of the border the label sits on, a step deeper than the accent in light themes, where the
+   accent is under 4.5:1 on white (telement/tokens.css) */
 .mx_Field input:focus + label,
 .mx_Field select:focus + label,
 .mx_Field textarea:focus + label {

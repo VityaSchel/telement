@@ -41,8 +41,17 @@ button.notificationBadge {
     display: none;
 }
 
-/* Unread messages are marked in the accent, as in the room list, whose counter is gray only for muted rooms */
+/*
+ * Unread messages are marked in the accent, as in the room list, whose counter is gray only for muted rooms: white on
+ * the accent fill, which is deeper in dark themes (telement/tokens.css), and a dot in the accent itself, like the room
+ * list's.
+ */
 .notificationBadge.visible.notification {
+    background-color: var(--cpd-color-bg-accent-rest);
+    color: var(--tl-color-on-accent);
+}
+
+.notificationBadge.visible.notification.dot {
     background-color: var(--cpd-color-icon-accent-primary);
 }
 

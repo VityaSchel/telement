@@ -30,6 +30,24 @@ Please see LICENSE files in the repository root for full details.
     }
 }
 
+/* A menu, picker, dropdown or dialog: one gray step lighter than the page in dark themes (telement/tokens.css). What it
+   holds in the page's colors, such as a menu item at rest or a field's floated label, takes its color, and the hover,
+   pressed and subtle fills and the separators inside it move one step further. */
+@define-mixin floatingSurface {
+    background-color: var(--tl-color-bg-floating);
+
+    --cpd-color-bg-canvas-default: var(--tl-color-bg-floating);
+    --cpd-color-bg-action-secondary-rest: var(--tl-color-bg-floating);
+    --cpd-color-bg-action-secondary-hovered: var(--tl-color-bg-floating-hovered);
+    --cpd-color-bg-action-secondary-pressed: var(--tl-color-bg-floating-pressed);
+    --cpd-color-bg-action-tertiary-rest: var(--tl-color-bg-floating);
+    --cpd-color-bg-action-tertiary-hovered: var(--tl-color-bg-floating-subtle-secondary);
+    --cpd-color-bg-action-tertiary-selected: var(--tl-color-bg-floating-subtle-primary);
+    --cpd-color-bg-subtle-secondary: var(--tl-color-bg-floating-subtle-secondary);
+    --cpd-color-bg-subtle-primary: var(--tl-color-bg-floating-subtle-primary);
+    --cpd-color-separator-primary: var(--tl-color-separator-floating);
+}
+
 :root {
     --container-border-width: 8px;
     --container-gap-width: 8px; /* only even numbers should be used because otherwise we get 0.5px margin values. */
@@ -329,7 +347,7 @@ summary {
 }
 
 .mx_Dialog {
-    background-color: $background;
+    @mixin floatingSurface;
     color: $light-fg-color;
     font-size: $font-15px;
     position: relative;

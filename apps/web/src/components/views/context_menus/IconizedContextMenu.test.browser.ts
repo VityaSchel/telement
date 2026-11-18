@@ -71,7 +71,7 @@ describe("IconizedContextMenu", () => {
             ${sharedComponentsStyles}
             :root {
                 --cpd-color-border-interactive-secondary: gray;
-                --cpd-color-gray-400: gray;
+                --cpd-color-separator-primary: gray;
                 --cpd-color-border-focused: blue;
                 --cpd-color-text-primary: black;
                 --cpd-color-text-critical-primary: rgb(200, 0, 0);

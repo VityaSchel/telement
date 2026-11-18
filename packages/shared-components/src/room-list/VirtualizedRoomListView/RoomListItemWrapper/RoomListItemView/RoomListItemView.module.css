@@ -280,7 +280,7 @@
 /* Like Telegram's desktop apps, the selected room is a plate in the selection color with everything on it in white */
 .selected {
     --plate-color: var(--tl-color-bg-selection);
-    /* Compound's focus blue would vanish on the accent plate */
+    /* The focus color, the accent, would vanish on the accent plate */
     --focus-ring-color: var(--tl-color-on-selection);
 
     .container {
@@ -297,7 +297,7 @@
     }
 
     /* The icons the app draws on the avatar (public room, video room, low priority, presence) too: the public room's
-       info blue would vanish on the accent plate */
+       globe, in the accent, would vanish on the accent plate */
     .container > :first-child svg {
         color: var(--tl-color-on-selection);
     }

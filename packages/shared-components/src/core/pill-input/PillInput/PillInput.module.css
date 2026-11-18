@@ -19,7 +19,7 @@
     border-color: var(--cpd-color-border-interactive-hovered);
 }
 
-/* Compound's focus blue, as every text field's (TELEMENT.md, "Colors, type and components") */
+/* The focus color, as every text field's (TELEMENT.md, "Colors, type and components") */
 .pillInput:focus-within {
     border-color: var(--cpd-color-border-focused);
 }

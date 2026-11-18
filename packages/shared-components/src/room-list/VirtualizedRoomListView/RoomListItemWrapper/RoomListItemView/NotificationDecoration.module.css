@@ -8,7 +8,8 @@ Please see LICENSE files in the repository root for full details.
 /*
  * The unread counter and the @ are 20px tall at the default font size and grow with the font, as their digits do. The
  * digits' cap height is padded by a whole number of pixels on every side (6px by default), so one digit makes a circle
- * and more make a pill with even sides.
+ * and more make a pill with even sides. They are white on the accent fill, which is deeper in dark themes
+ * (telement/tokens.css).
  */
 .decoration > [data-badge] {
     --badge-inset: round(calc((1.25rem - 1cap) / 2), 1px);
@@ -17,6 +18,8 @@ Please see LICENSE files in the repository root for full details.
     box-sizing: content-box;
     border-radius: var(--tl-radius-control);
     font: var(--cpd-font-body-xs-semibold);
+    background-color: var(--cpd-color-bg-accent-rest);
+    color: var(--tl-color-on-accent);
 }
 
 /*
@@ -41,8 +44,6 @@ Please see LICENSE files in the repository root for full details.
 
     display: flex;
     padding: var(--mention-inset);
-    background-color: var(--cpd-color-icon-accent-primary);
-    color: var(--cpd-color-icon-on-solid-primary);
 
     svg {
         inline-size: calc(1cap + 2 * (var(--badge-inset) - var(--mention-inset)));
@@ -51,9 +52,10 @@ Please see LICENSE files in the repository root for full details.
     }
 }
 
-/* Like Telegram, a muted room's unread counter is gray */
+/* Like Telegram, a muted room's unread counter is gray, with Compound's digits in the page's color */
 .decoration > [data-muted] {
     background-color: var(--cpd-color-icon-secondary);
+    color: var(--cpd-color-text-on-solid-primary);
 }
 
 @media (forced-colors: active) {

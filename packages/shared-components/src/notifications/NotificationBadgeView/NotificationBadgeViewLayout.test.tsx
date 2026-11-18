@@ -19,15 +19,23 @@ import { NotificationDecoration } from "../../room-list/VirtualizedRoomListView/
 
 const { Notification, Dot, Knocked } = composeStories(stories);
 
-/** The room list's unread counter, which the badge should look like. */
-function RoomListCounter({ count, muted = false }: { count: number; muted?: boolean }): JSX.Element {
+/** The room list's unread counter, which the badge should look like, after the @ of a mention. */
+function RoomListCounter({
+    count,
+    muted = false,
+    mention = false,
+}: {
+    count: number;
+    muted?: boolean;
+    mention?: boolean;
+}): JSX.Element {
     return (
         <div data-testid="room-list">
             <NotificationDecoration
                 hasAnyNotificationOrActivity={true}
                 isUnsentMessage={false}
                 invited={false}
-                isMention={false}
+                isMention={mention}
                 isActivityNotification={false}
                 isNotification={true}
                 hasUnreadCount={true}
@@ -39,7 +47,7 @@ function RoomListCounter({ count, muted = false }: { count: number; muted?: bool
 }
 
 function roomListCounter(): HTMLElement {
-    return screen.getByTestId("room-list").querySelector<HTMLElement>("[data-badge]")!;
+    return [...screen.getByTestId("room-list").querySelectorAll<HTMLElement>("[data-badge]")].at(-1)!;
 }
 
 function badge(): HTMLElement {
@@ -136,30 +144,47 @@ describe("NotificationBadgeView layout", () => {
         expect(box.bottom - baselineOf(count)).toBe(4);
     });
 
-    it("keeps a counter that isn't for notifications gray, like a muted room's", () => {
+    it("keeps a counter that isn't for notifications gray, like a muted room's, with the page's color on it", () => {
         render(
-            <>
+            <div className="cpd-theme-dark">
                 <Notification />
                 <RoomListCounter count={3} muted={true} />
-            </>,
+            </div>,
         );
 
         expect(getComputedStyle(badge()).backgroundColor).toBe(getComputedStyle(roomListCounter()).backgroundColor);
+        expect(getComputedStyle(badge()).color).toBe(getComputedStyle(roomListCounter()).color);
+        expect(getComputedStyle(roomListCounter()).color).toBe("rgb(16, 19, 23)");
     });
 
-    it("takes the dark theme's accent and text in a dark theme, as the room list's counter does", () => {
+    it("puts white digits on the dark theme's deeper accent fill, as the room list's counter and @ do", () => {
         render(
             <div className="cpd-theme-dark">
                 <Notification isNotification={true} symbol="3" />
-                <RoomListCounter count={3} />
+                <RoomListCounter count={3} mention={true} />
             </div>,
         );
         const style = getComputedStyle(badge());
-        const roomList = getComputedStyle(roomListCounter());
+        const mention = screen.getByTestId("room-list").querySelector<HTMLElement>("[data-badge]")!;
 
-        expect(style.backgroundColor).toBe("rgb(46, 166, 255)");
-        expect(style.backgroundColor).toBe(roomList.backgroundColor);
-        expect(style.color).toBe(roomList.color);
+        // Telegram for macOS's night accent is #2ea6ff; white on it would be 2.6:1, on #0183d3 4.1:1
+        expect(style.backgroundColor).toBe("rgb(1, 131, 211)");
+        expect(style.color).toBe("rgb(255, 255, 255)");
+        for (const roomList of [roomListCounter(), mention]) {
+            expect(getComputedStyle(roomList).backgroundColor).toBe(style.backgroundColor);
+            expect(getComputedStyle(roomList).color).toBe(style.color);
+        }
+        expect(getComputedStyle(mention.querySelector("svg")!).fill).toBe("rgb(255, 255, 255)");
+    });
+
+    it("keeps the dot in the dark theme's accent itself, as nothing is drawn on it", () => {
+        render(
+            <div className="cpd-theme-dark">
+                <Dot />
+            </div>,
+        );
+
+        expect(getComputedStyle(badge()).backgroundColor).toBe("rgb(46, 166, 255)");
     });
 
     it("marks unread messages with an 8px accent dot", () => {

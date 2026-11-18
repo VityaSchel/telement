@@ -59,7 +59,7 @@ exports[`RichItem > renders the list 1`] = `
             style="--mx-flex-display: flex; --mx-flex-direction: row; --mx-flex-align: center; --mx-flex-justify: center; --mx-flex-gap: 0; --mx-flex-wrap: nowrap;"
           >
             <svg
-              color="var(--cpd-color-icon-on-solid-primary)"
+              color="var(--tl-color-on-accent)"
               fill="currentColor"
               height="24px"
               viewBox="0 0 24 24"

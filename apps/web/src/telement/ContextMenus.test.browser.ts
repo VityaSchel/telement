@@ -14,6 +14,7 @@ import compoundLightTheme from "@vector-im/compound-design-tokens/assets/web/css
 // The package doesn't export its token stylesheet on its own
 // eslint-disable-next-line no-restricted-imports
 import telementTokens from "../../../../packages/shared-components/src/telement/tokens.css?raw";
+import commonStyles from "../../res/css/_common.pcss?raw";
 import contextualMenuStyles from "../../res/css/structures/_ContextualMenu.pcss?raw";
 import baseCardStyles from "../../res/css/views/right_panel/_BaseCard.pcss?raw";
 import threadPanelStyles from "../../res/css/views/right_panel/_ThreadPanel.pcss?raw";
@@ -145,7 +146,7 @@ describe("Legacy context menus", () => {
                 networkDropdownStyles,
                 readReceiptGroupStyles,
             ]
-                .map((styles) => toBrowserCss(styles, lightTheme))
+                .map((styles) => toBrowserCss(styles, commonStyles, lightTheme))
                 .join("\n")}
         `;
         document.head.append(stylesheet);

@@ -160,26 +160,101 @@ Please see LICENSE files in the repository root for full details.
     /* Links use the accent, as in Telegram, rather than Compound's own link blue */
     --cpd-color-text-link-external: var(--tl-accent-900);
 
+    /* Digits, icons, a switch's knob or a radio's dot on an accent fill are white in every theme, as in Telegram */
+    --tl-color-on-accent: #ffffff;
+
+    /*
+     * Compound's info blue and focus blue take the accent, so that it is the only blue: info icons, text and badges
+     * like the accent's own. Focus is a step deeper than the accent in light themes, where a focused field's label is
+     * drawn in it: 5.2:1 on white rather than 4.1:1.
+     */
+    --cpd-color-icon-info-primary: var(--tl-accent-900);
+    --cpd-color-text-info-primary: var(--tl-accent-1100);
+    --cpd-color-bg-info-subtle: var(--tl-accent-200);
+    --cpd-color-border-info-subtle: var(--tl-accent-700);
+    --cpd-color-bg-badge-info: var(--tl-accent-400);
+    --cpd-color-text-badge-info: var(--tl-accent-1100);
+    --cpd-color-gradient-info-stop1: var(--tl-accent-200);
+    --cpd-color-border-focused: var(--tl-accent-1000);
+
     /* The selected room: the accent with white text, as in Telegram's day themes */
     --tl-color-bg-selection: var(--tl-accent-900);
     --tl-color-bg-selection-hovered: var(--tl-accent-1000);
     --tl-color-on-selection: #ffffff;
 }
 
-/* Telegram's night theme selects in a muted blue rather than the bright accent, keeping white text on it */
+/*
+ * White on the dark themes' bright accent is 2.6:1, so their accent fills take the next, deeper step, where white is
+ * about 4:1 as in light themes. Text, icons, lines and focus rings keep the accent. Telegram's night theme selects in a
+ * muted blue rather than the accent, with white text on it.
+ */
 .cpd-theme-dark.cpd-theme-dark {
+    --cpd-color-bg-accent-rest: var(--tl-accent-800);
+    --cpd-color-bg-accent-hovered: var(--tl-accent-900);
+    --cpd-color-bg-accent-pressed: var(--tl-accent-1000);
+    --cpd-color-border-focused: var(--tl-accent-900);
+
     --tl-color-bg-selection: #3d6a97;
     --tl-color-bg-selection-hovered: #46739f;
 }
 
+/* Three steps down, so that white on the fills is 7:1 as in light high contrast */
 .cpd-theme-dark-hc.cpd-theme-dark-hc {
+    --cpd-color-bg-accent-rest: var(--tl-accent-600);
+    --cpd-color-bg-accent-hovered: var(--tl-accent-700);
+    --cpd-color-bg-accent-pressed: var(--tl-accent-800);
+    --cpd-color-border-focused: var(--tl-accent-900);
+
     --tl-color-bg-selection: #2b5784;
     --tl-color-bg-selection-hovered: #33608c;
 }
 
 @media (prefers-color-scheme: dark) {
     :root {
+        --cpd-color-bg-accent-rest: var(--tl-accent-800);
+        --cpd-color-bg-accent-hovered: var(--tl-accent-900);
+        --cpd-color-bg-accent-pressed: var(--tl-accent-1000);
+        --cpd-color-border-focused: var(--tl-accent-900);
+
         --tl-color-bg-selection: #3d6a97;
         --tl-color-bg-selection-hovered: #46739f;
+    }
+}
+
+/*
+ * Floating surfaces: menus, pickers, autocomplete, dropdowns and dialogs. Shadows don't show on near-black, so in dark
+ * themes they are one gray step lighter than the page, Compound's raised canvas, and the fills and separators inside
+ * them one step further, so that hovered and selected rows, fields and separators still show. Light themes keep
+ * Compound's colors. These name Compound's grays rather than its color roles, because a floating surface points those
+ * roles at these tokens.
+ */
+:root,
+[class*="cpd-theme-"] {
+    --tl-color-bg-floating: var(--cpd-color-theme-bg);
+    --tl-color-bg-floating-hovered: var(--cpd-color-alpha-gray-200);
+    --tl-color-bg-floating-pressed: var(--cpd-color-alpha-gray-300);
+    --tl-color-bg-floating-subtle-secondary: var(--cpd-color-gray-300);
+    --tl-color-bg-floating-subtle-primary: var(--cpd-color-gray-400);
+    --tl-color-separator-floating: var(--cpd-color-gray-400);
+}
+
+.cpd-theme-dark.cpd-theme-dark,
+.cpd-theme-dark-hc.cpd-theme-dark-hc {
+    --tl-color-bg-floating: var(--cpd-color-bg-canvas-default-level-1);
+    --tl-color-bg-floating-hovered: var(--cpd-color-gray-400);
+    --tl-color-bg-floating-pressed: var(--cpd-color-gray-500);
+    --tl-color-bg-floating-subtle-secondary: var(--cpd-color-gray-400);
+    --tl-color-bg-floating-subtle-primary: var(--cpd-color-gray-500);
+    --tl-color-separator-floating: var(--cpd-color-gray-500);
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --tl-color-bg-floating: var(--cpd-color-bg-canvas-default-level-1);
+        --tl-color-bg-floating-hovered: var(--cpd-color-gray-400);
+        --tl-color-bg-floating-pressed: var(--cpd-color-gray-500);
+        --tl-color-bg-floating-subtle-secondary: var(--cpd-color-gray-400);
+        --tl-color-bg-floating-subtle-primary: var(--cpd-color-gray-500);
+        --tl-color-separator-floating: var(--cpd-color-gray-500);
     }
 }

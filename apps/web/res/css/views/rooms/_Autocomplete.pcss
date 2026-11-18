@@ -2,6 +2,8 @@
    is either the composer's top border or the rich text field's, holding the dense list: 32px rows inset 4px from its
    edge, an avatar or emoji 16px in and the name 10px after it */
 .mx_Autocomplete {
+    @mixin floatingSurface;
+
     position: absolute;
     bottom: calc(var(--cpd-space-2x) + var(--cpd-border-width-1));
     z-index: 1001;
@@ -10,7 +12,6 @@
     padding: calc(var(--tl-inset-menu) - var(--cpd-border-width-1));
     border: var(--cpd-border-width-1) solid var(--cpd-color-border-interactive-secondary);
     border-radius: var(--tl-radius-menu);
-    background: var(--cpd-color-bg-canvas-default);
     overflow: clip;
     display: flex;
     flex-direction: column;
@@ -24,7 +25,7 @@
     & + & {
         margin-block-start: var(--tl-menu-separator-spacing);
         padding-block-start: var(--tl-menu-separator-spacing);
-        border-block-start: var(--cpd-border-width-1) solid var(--cpd-color-gray-400);
+        border-block-start: var(--cpd-border-width-1) solid var(--cpd-color-separator-primary);
     }
 }
 

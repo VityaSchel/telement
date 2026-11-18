@@ -47,7 +47,8 @@
 .header {
     display: flex;
     padding: var(--cpd-space-2x) var(--cpd-space-2x) var(--cpd-space-1x);
-    border-bottom: 1px solid var(--cpd-color-gray-400);
+    /* The divider, which the menus the picker opens in move a step further in dark themes (_common.pcss) */
+    border-bottom: 1px solid var(--cpd-color-separator-primary);
 }
 
 .anchor {
@@ -200,7 +201,7 @@
         1rem * var(--cpd-font-line-height-tight) + var(--cpd-font-size-heading-sm) *
             var(--cpd-font-line-height-regular) + 2 * var(--cpd-space-2x) + 3 * var(--cpd-space-1x)
     );
-    border-top: 1px solid var(--cpd-color-gray-400);
+    border-top: 1px solid var(--cpd-color-separator-primary);
     min-height: var(--emoji-picker-footer-height);
     max-height: var(--emoji-picker-footer-height);
 

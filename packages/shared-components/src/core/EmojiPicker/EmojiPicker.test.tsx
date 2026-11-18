@@ -36,6 +36,21 @@ describe("EmojiPicker", function () {
     const getActiveEmojiText = (container: HTMLElement): string =>
         container.querySelector('[role="gridcell"] [tabindex="0"]')?.textContent || "";
 
+    it("draws the lines under its tabs and over its footer in the divider color, which menus step up in dark themes", () => {
+        const { container } = render(
+            <div style={{ "--cpd-color-separator-primary": "rgb(255, 0, 0)" } as React.CSSProperties}>
+                <EmojiPicker onChoose={() => false} onFinished={vi.fn()} />
+            </div>,
+        );
+
+        expect(getComputedStyle(screen.getByRole("tablist", { name: "Categories" })).borderBottomColor).toBe(
+            "rgb(255, 0, 0)",
+        );
+        expect(getComputedStyle(container.querySelector("[class*='module_footer']")!).borderTopColor).toBe(
+            "rgb(255, 0, 0)",
+        );
+    });
+
     it("should disable the recent category when no recent emojis", () => {
         render(<EmojiPicker onChoose={() => false} onFinished={vi.fn()} />);
 

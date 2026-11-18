@@ -66,10 +66,11 @@
     color: var(--cpd-color-text-secondary);
 }
 
+/* A white check on the accent fill, which is deeper in dark themes (telement/tokens.css) */
 .checkmark {
     grid-area: avatar;
     align-self: center;
-    background-color: var(--cpd-color-icon-accent-primary);
+    background-color: var(--cpd-color-bg-accent-rest);
     width: 32px;
     height: 32px;
     border-radius: 100%;

@@ -31,7 +31,8 @@ Please see LICENSE files in the repository root for full details.
         /* the notFirst class is for cases where the optionList might be under a header of sorts. */
         &:nth-child(n + 2),
         .mx_IconizedContextMenu_optionList_notFirst {
-            border-top: var(--cpd-border-width-1) solid var(--cpd-color-gray-400);
+            /* The divider, a step further in a dark theme's raised menus (_common.pcss) */
+            border-top: var(--cpd-border-width-1) solid var(--cpd-color-separator-primary);
             /* The item highlights stay 2px from the separator */
             margin-top: var(--tl-menu-separator-spacing);
             padding-top: var(--tl-menu-separator-spacing);
