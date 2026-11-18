@@ -197,10 +197,15 @@ Please see LICENSE files in the repository root for full details.
         &.mx_SpaceButton_new .mx_SpaceButton_icon {
             background-color: unset;
 
+            /* The gray of the other icon buttons in the panel, darkening on hover like the Settings button */
             svg {
-                color: $primary-content;
+                color: var(--cpd-color-icon-secondary);
                 transition: all 0.2s ease-in-out; /* TODO transition */
             }
+        }
+
+        &.mx_SpaceButton_new:hover .mx_SpaceButton_icon svg {
+            color: var(--cpd-color-icon-primary);
         }
 
         &.mx_SpaceButton_newCancel .mx_SpaceButton_icon svg {
@@ -258,16 +263,20 @@ Please see LICENSE files in the repository root for full details.
             background-clip: padding-box;
         }
 
+        /* The rings around the badges are cut out of the avatar in the panel's color */
         [data-badge-type="dot"] {
             /* make the smaller dot occupy the same width for centering */
             margin: 0 -1px 0 0;
-            border: 3px solid $spacePanel-bg-color;
+            border: 3px solid var(--cpd-color-bg-canvas-default);
         }
 
+        /* The room list's counter, 20px at the default font size: with its 2px ring, centered 2px inside the avatar's
+           top right corner, as Element's 16px badge was. Longer counts and larger fonts grow it down and to the left:
+           on the first space its top already meets the top of the list's scroll area, which clips what is above. */
         [data-badge-type="badge_2char"],
         [data-badge-type="badge_3char"] {
-            margin: -5px -5px 0 0;
-            border: 2px solid $spacePanel-bg-color;
+            margin: -7px -7px 0 0;
+            border: 2px solid var(--cpd-color-bg-canvas-default);
         }
     }
 
