@@ -6,6 +6,7 @@ Please see LICENSE files in the repository root for full details.
 */
 
 import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
+import { userEvent } from "vitest/browser";
 import { createElement } from "react";
 import { flushSync } from "react-dom";
 import { createRoot, type Root } from "react-dom/client";
@@ -14,6 +15,7 @@ import { CopyIcon } from "@vector-im/compound-design-tokens/assets/web/icons";
 import compoundBase from "@vector-im/compound-design-tokens/assets/web/css/cpd-common-base.css?raw";
 import compoundSemantic from "@vector-im/compound-design-tokens/assets/web/css/cpd-common-semantic.css?raw";
 import compoundLightTheme from "@vector-im/compound-design-tokens/assets/web/css/cpd-theme-light-base.css?raw";
+import compoundDarkTheme from "@vector-im/compound-design-tokens/assets/web/css/cpd-theme-dark-base.css?raw";
 import compoundStyles from "@vector-im/compound-web/dist/style.css?raw";
 import githubMarkdown from "github-markdown-css/github-markdown-light.css?raw";
 
@@ -30,8 +32,10 @@ import commonStyles from "../../../../res/css/_common.pcss?raw";
 import fontSizes from "../../../../res/css/_font-sizes.pcss?raw";
 import accessibleButtonStyles from "../../../../res/css/views/elements/_AccessibleButton.pcss?raw";
 import eventTileStyles from "../../../../res/css/views/rooms/_EventTile.pcss?raw";
+import editorStyles from "../../../../res/css/views/rooms/wysiwyg_composer/components/_Editor.pcss?raw";
 import lightTheme from "../../../../res/themes/light/css/_light.pcss?raw";
 import { toBrowserCss } from "../../../test/telement/browserCss";
+import { tokenColor } from "../../../test/telement/computedStyle";
 import { loadFiraCode, loadInter } from "../../../test/telement/fonts";
 
 const CODE_LINES = ["pnpm i18n", "pnpm lint:fmt:fix"];
@@ -77,11 +81,46 @@ const LAYOUT_LINE_HEIGHTS = [
     ["the modern layout", "1.375rem"],
 ];
 
+/** A message in a bubble of the bubble layout, your own or someone else's. */
+const bubble = (message: string, own = false): string => `
+    <li class="root mx_EventTile layoutBubble${own ? " stateOwnEvent" : ""}">
+        <div class="line mx_EventTile_line">
+            <div class="slotBody">${message}</div>
+        </div>
+    </li>
+`;
+
+/** A computed `rgb()` or `rgba()` color's channels, from 0 to 255, and its alpha, from 0 to 1. */
+function channels(color: string): [number, number, number, number] {
+    const [red, green, blue, alpha = 1] = color.match(/[\d.]+/g)!.map(Number);
+    return [red, green, blue, alpha];
+}
+
+/** The color that `over` paints on the opaque color `under`. */
+function composite(over: string, under: string): number[] {
+    const [red, green, blue, alpha] = channels(over);
+    const base = channels(under);
+    return [red, green, blue].map((channel, i) => channel * alpha + base[i] * (1 - alpha));
+}
+
+/** WCAG's contrast ratio between two opaque colors. */
+function contrast(first: number[], second: number[]): number {
+    const luminance = (rgb: number[]): number => {
+        const [red, green, blue] = rgb.map((channel) => {
+            const value = channel / 255;
+            return value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4;
+        });
+        return 0.2126 * red + 0.7152 * green + 0.0722 * blue;
+    };
+    const [lighter, darker] = [luminance(first), luminance(second)].sort((a, b) => b - a);
+    return (lighter + 0.05) / (darker + 0.05);
+}
+
 let reactRoot: Root | undefined;
 
-function render(html: string, style = ""): void {
+function render(html: string, style = "", theme = "cpd-theme-light"): void {
     document.body.innerHTML = `
-        <div class="cpd-theme-light" style="--emoji-font-family: ''; font-family: Inter; line-height: 1.375rem; width: 480px; ${style}">
+        <div class="${theme}" style="--emoji-font-family: ''; font-family: Inter; line-height: 1.375rem; width: 480px; ${style}">
             ${html}
         </div>
     `;
@@ -139,7 +178,7 @@ describe("Code in a message", () => {
         stylesheet = document.createElement("style");
         stylesheet.textContent = `
             @layer compound-tokens, compound-web, shared-components, app-web;
-            @layer compound-tokens { ${compoundBase} ${compoundSemantic} ${compoundLightTheme} }
+            @layer compound-tokens { ${compoundBase} ${compoundSemantic} ${compoundLightTheme} ${compoundDarkTheme} }
             @layer compound-web { ${compoundStyles} }
             @layer shared-components {
                 ${telementTokens}
@@ -151,6 +190,7 @@ describe("Code in a message", () => {
                 ${toBrowserCss(commonStyles, commonStyles, fontSizes, lightTheme)}
                 ${toBrowserCss(accessibleButtonStyles, commonStyles, fontSizes, lightTheme)}
                 ${toBrowserCss(eventTileStyles, commonStyles, fontSizes, lightTheme)}
+                ${toBrowserCss(editorStyles, commonStyles, fontSizes, lightTheme)}
             }
         `;
         document.head.append(stylesheet);
@@ -181,6 +221,59 @@ describe("Code in a message", () => {
 
         expect(radius("p code")).toBe("3px");
         expect(radius("pre")).toBe("3px");
+    });
+
+    describe.each([
+        ["light", "cpd-theme-light"],
+        ["dark", "cpd-theme-dark"],
+    ])("in the %s theme", (_, theme) => {
+        it.each([
+            ["other people's", false],
+            ["your own", true],
+        ])("fills a code block one gray step from %s bubble, with no outline", (_, own) => {
+            render(bubble(MESSAGE, own), "", theme);
+            const pre = document.querySelector("pre")!;
+            const bubbleColor = getComputedStyle(document.querySelector(".line")!).backgroundColor;
+            const ratio = contrast(
+                composite(getComputedStyle(pre).backgroundColor, bubbleColor),
+                channels(bubbleColor),
+            );
+
+            expect(ratio).toBeGreaterThanOrEqual(1.1);
+            expect(ratio).toBeLessThan(1.25);
+            expect(getComputedStyle(pre).borderTopColor).toBe("rgba(0, 0, 0, 0)");
+            // The fill is translucent, so the code paints none of its own over it
+            expect(getComputedStyle(pre.querySelector("code")!).backgroundColor).toBe("rgba(0, 0, 0, 0)");
+        });
+    });
+
+    it("draws no outline around a code block while its message is hovered", async () => {
+        render(bubble(MESSAGE));
+        const line = document.querySelector<HTMLElement>(".line")!;
+
+        await userEvent.hover(line);
+        expect(getComputedStyle(document.querySelector("pre")!).borderTopColor).toBe("rgba(0, 0, 0, 0)");
+        await userEvent.unhover(line);
+    });
+
+    it("draws a code block in the rich-text editor with the fill and outline it has once sent", () => {
+        render(`
+            ${MESSAGE}
+            <div class="mx_WysiwygComposer_Editor_container">
+                <div class="mx_WysiwygComposer_Editor_content" contenteditable="true"><pre><code>pnpm i18n</code></pre></div>
+            </div>
+        `);
+        const [sent, draft] = [...document.querySelectorAll("pre")].map((pre) => getComputedStyle(pre));
+
+        expect(draft.backgroundColor).toBe(sent.backgroundColor);
+        expect(draft.borderTopColor).toBe(sent.borderTopColor);
+    });
+
+    it("writes the line numbers in the secondary text color", () => {
+        render(MESSAGE);
+        const numbers = document.querySelector(".mx_EventTile_lineNumbers")!;
+
+        expect(getComputedStyle(numbers).color).toBe(tokenColor("--cpd-color-text-secondary", numbers));
     });
 
     describe.each(LAYOUT_LINE_HEIGHTS)("in %s", (_, lineHeight) => {

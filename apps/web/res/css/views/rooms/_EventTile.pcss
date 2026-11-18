@@ -151,7 +151,6 @@ $left-gutter: 64px;
         pre,
         code {
             font-family: $monospace-font-family !important;
-            background-color: $system;
         }
 
         code:not(pre *) {
@@ -183,12 +182,18 @@ $left-gutter: 64px;
                 background: transparent;
             }
 
-            border: 1px solid $quinary-content;
+            /* One gray step over whatever is behind it, in both themes: a bubble of either color, the timeline, or a
+               selected or highlighted row. The border is transparent, keeping the inset below, and shows in forced
+               colors mode. */
+            background-color: var(--cpd-color-alpha-gray-300);
+            border: 1px solid transparent;
             border-radius: var(--tl-radius-inline);
             /* The text, the line numbers and the buttons' icons sit 12px inside the block's edge, border included. */
             padding: calc(var(--cpd-space-3x) - 1px);
 
             code {
+                /* The block's fill is translucent, so the code paints none of its own over it */
+                background-color: transparent;
                 white-space: pre; /* we want code blocks to be scrollable and not wrap */
 
                 > * {
@@ -308,15 +313,6 @@ $left-gutter: 64px;
 }
 
 .mx_EventTile_body {
-    pre {
-        border: 1px solid transparent;
-
-        .mx_EventTile:hover &,
-        .mx_EventTile:focus-visible:focus-within & {
-            border: 1px solid $tertiary-content;
-        }
-    }
-
     /* selector wrongly applies to pill avatars but those have explicit width/height passed at a higher specificity */
     &.markdown-body img {
         object-fit: contain;
@@ -381,7 +377,7 @@ $left-gutter: 64px;
 .mx_EventTile_lineNumbers {
     /* The numbers start at the block's padding, like its text */
     margin-inline-end: var(--cpd-space-2x);
-    color: gray;
+    color: var(--cpd-color-text-secondary);
 
     & span {
         text-align: right;
