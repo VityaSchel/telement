@@ -41,34 +41,47 @@ button.notificationBadge {
     display: none;
 }
 
-.notificationBadge.visible.dot.notification {
-    background-color: var(--cpd-color-icon-success-primary);
+/* Unread messages are marked in the accent, as in the room list, whose counter is gray only for muted rooms */
+.notificationBadge.visible.notification {
+    background-color: var(--cpd-color-icon-accent-primary);
 }
 
 .notificationBadge.visible.highlight {
     background-color: var(--cpd-color-icon-critical-primary);
 }
 
-.notificationBadge.visible > svg {
-    width: 16px;
-    height: 16px;
+/*
+ * Counters are the room list's: 20px tall at the default font size and growing with the font, as their digits do. The
+ * digits' cap height is padded by a whole number of pixels on every side (6px by default), so one digit makes a circle
+ * and more make a pill with even sides. A place with less room, such as the read receipts' 16px slot, sets
+ * --notification-badge-size.
+ */
+.notificationBadge.visible:is(.badge2Char, .badge3Char) {
+    --badge-inset: round(calc((var(--notification-badge-size, 1.25rem) - 1cap) / 2), 1px);
+
+    flex-shrink: 0;
+    inline-size: max-content;
+    min-inline-size: 1cap;
+    block-size: 1cap;
+    padding: var(--badge-inset);
+    border-radius: var(--tl-radius-control);
+    font: var(--cpd-font-body-xs-semibold);
 }
 
-.notificationBadge.visible.badge2Char {
-    width: 1rem;
-    height: 1rem;
-    border-radius: 1rem;
-}
-
-.notificationBadge.visible.badge3Char {
-    width: 1.625rem;
-    height: 1rem;
-    border-radius: 1rem;
-}
-
+/*
+ * The digits are trimmed to their cap height, so they sit in the middle of the padding wherever the counter falls on
+ * the pixel grid. Where text-box isn't supported, a line as tall as the cap height comes close.
+ */
 .notificationBadge.visible .count {
-    font-size: 0.625rem;
-    line-height: 0.875rem;
-    font-weight: var(--cpd-font-weight-semibold);
-    color: var(--cpd-color-text-on-solid-primary);
+    display: block;
+    line-height: 1cap;
+    text-box: trim-both cap alphabetic;
+}
+
+/* The knock icon fills the counter but for 2px around it, so 16px at the default font size */
+.notificationBadge.visible > svg {
+    flex-shrink: 0;
+    inline-size: calc(1cap + 2 * var(--badge-inset) - 4px);
+    block-size: calc(1cap + 2 * var(--badge-inset) - 4px);
+    margin: calc(2px - var(--badge-inset));
 }

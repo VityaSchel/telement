@@ -35,6 +35,9 @@ Please see LICENSE files in the repository root for full details.
     }
 
     .mx_ReadReceiptGroup_container {
+        /* The failed-to-send badge is a 16px glyph like the other receipts, rather than a 20px unread counter */
+        --notification-badge-size: 16px;
+
         position: relative;
         display: block;
         height: 100%;

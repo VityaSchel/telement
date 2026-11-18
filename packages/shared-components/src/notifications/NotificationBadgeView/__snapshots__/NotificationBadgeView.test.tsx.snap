@@ -3,7 +3,7 @@
 exports[`NotificationBadgeView > renders the default notification badge 1`] = `
 <div>
   <div
-    class="NotificationBadgeView-module_notificationBadge NotificationBadgeView-module_visible NotificationBadgeView-module_badge2Char cpd-theme-light"
+    class="NotificationBadgeView-module_notificationBadge NotificationBadgeView-module_visible NotificationBadgeView-module_badge2Char"
     data-badge-type="badge_2char"
     data-testid="notification-badge"
   >

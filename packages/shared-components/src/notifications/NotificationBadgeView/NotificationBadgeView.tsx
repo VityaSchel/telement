@@ -104,8 +104,6 @@ export function NotificationBadgeView({ vm, className }: Readonly<NotificationBa
         [styles.dot]: badgeType === "dot",
         [styles.badge2Char]: badgeType === "badge_2char",
         [styles.badge3Char]: badgeType === "badge_3char",
-        // Badges with text should always use light colors.
-        "cpd-theme-light": badgeType !== "dot",
     });
     const notificationLevel = isHighlight ? "highlight" : isNotification ? "notification" : undefined;
 
