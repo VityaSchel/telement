@@ -7,9 +7,6 @@ Please see LICENSE files in the repository root for full details.
 */
 
 .mx_SpacePanel {
-    --activeBackground-color: $panel-actions;
-    --activeBorder-color: $primary-content;
-    --activeBorder-transparent-gap: 1px;
     --gutterSize: 14px;
     --height-nested: 24px;
     --height-topLevel: 32px;
@@ -124,17 +121,6 @@ Please see LICENSE files in the repository root for full details.
         /* Override the unlayered cursor: grab; rule from react-beautiful-dnd */
         cursor: default !important;
 
-        &.mx_SpaceButton_active {
-            &:not(.mx_SpaceButton_narrow) .mx_SpaceButton_selectionWrapper {
-                background-color: var(--activeBackground-color);
-            }
-
-            &.mx_SpaceButton_narrow .mx_SpaceButton_selectionWrapper {
-                padding: var(--activeBorder-transparent-gap);
-                border: 3px var(--activeBorder-color) solid;
-            }
-        }
-
         .mx_SpaceButton_selectionWrapper {
             position: relative;
             display: flex;
@@ -191,6 +177,55 @@ Please see LICENSE files in the repository root for full details.
                 height: inherit;
                 display: block;
                 color: $secondary-content;
+            }
+        }
+
+        /* Hovering a space, or opening its options menu, fills it in the room list's hover gray. Whether the menu is
+           open is read from its "…" button: right-clicking a space that has no menu, such as Favourites or the "+",
+           also adds mx_SpaceButton_hasMenuOpen, and nothing removes it again. */
+        &:hover,
+        &:has(.mx_SpaceButton_menuButton[aria-expanded="true"]) {
+            .mx_SpaceButton_selectionWrapper {
+                background-color: var(--cpd-color-bg-action-tertiary-hovered);
+            }
+        }
+
+        /* The selected space is a plate in the selection color with its name and icons in white, as the selected room
+           is. Home's and the other icons drop their gray tile on it. */
+        &.mx_SpaceButton_active {
+            .mx_SpaceButton_selectionWrapper {
+                background-color: var(--tl-color-bg-selection);
+                color: var(--tl-color-on-selection);
+                /* For enhanced visibility under contrast control */
+                outline: 1px solid transparent;
+            }
+
+            &:hover,
+            &:has(.mx_SpaceButton_menuButton[aria-expanded="true"]) {
+                .mx_SpaceButton_selectionWrapper {
+                    background-color: var(--tl-color-bg-selection-hovered);
+                }
+
+                .mx_SpacePanel_notificationBadge {
+                    color: var(--tl-color-bg-selection-hovered);
+                    border-color: var(--tl-color-bg-selection-hovered);
+                }
+            }
+
+            .mx_SpaceButton_icon {
+                background-color: transparent;
+            }
+
+            :is(.mx_SpaceButton_icon, .mx_SpaceButton_menuButton) svg {
+                color: var(--tl-color-on-selection);
+            }
+
+            /* Its badge is inverted and ringed in the plate's color, as the selected room's badges are: the accent badge
+               would vanish on the accent plate */
+            .mx_SpacePanel_notificationBadge {
+                background-color: var(--tl-color-on-selection);
+                color: var(--tl-color-bg-selection);
+                border-color: var(--tl-color-bg-selection);
             }
         }
 

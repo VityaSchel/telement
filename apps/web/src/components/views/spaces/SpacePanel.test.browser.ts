@@ -10,11 +10,20 @@ import { userEvent } from "vitest/browser";
 import { createElement, Fragment } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { IconButton } from "@vector-im/compound-web";
-import { PlusIcon, SettingsSolidIcon, ThreadsSolidIcon } from "@vector-im/compound-design-tokens/assets/web/icons";
+import {
+    FavouriteSolidIcon,
+    HomeSolidIcon,
+    OverflowHorizontalIcon,
+    PlusIcon,
+    SettingsSolidIcon,
+    ThreadsSolidIcon,
+} from "@vector-im/compound-design-tokens/assets/web/icons";
 import compoundTokens from "@vector-im/compound-design-tokens/assets/web/css/cpd-common-base.css?raw";
 import compoundSemantic from "@vector-im/compound-design-tokens/assets/web/css/cpd-common-semantic.css?raw";
 import compoundLightTheme from "@vector-im/compound-design-tokens/assets/web/css/cpd-theme-light-base.css?raw";
 import compoundLightSemantic from "@vector-im/compound-design-tokens/assets/web/css/cpd-theme-light-semantic.css?raw";
+import compoundDarkTheme from "@vector-im/compound-design-tokens/assets/web/css/cpd-theme-dark-base.css?raw";
+import compoundDarkSemantic from "@vector-im/compound-design-tokens/assets/web/css/cpd-theme-dark-semantic.css?raw";
 import compoundStyles from "@vector-im/compound-web/dist/style.css?raw";
 import sharedComponentsStyles from "@element-hq/web-shared-components/dist/element-web-shared-components.css?raw";
 // The package doesn't export its token stylesheet on its own, and its build can be older than the badge's source
@@ -24,6 +33,7 @@ import telementTokens from "../../../../../../packages/shared-components/src/tel
 import notificationBadgeStyles from "../../../../../../packages/shared-components/src/notifications/NotificationBadgeView/NotificationBadgeView.module.css?raw";
 
 import lightTheme from "../../../../res/themes/light/css/_light.pcss?raw";
+import darkTheme from "../../../../res/themes/dark/css/_dark.pcss?raw";
 import quickSettingsButtonStyles from "../../../../res/css/structures/_QuickSettingsButton.pcss?raw";
 import spacePanelStyles from "../../../../res/css/structures/_SpacePanel.pcss?raw";
 import threadsActivityCentreStyles from "../../../../res/css/structures/_ThreadsActivityCentre.pcss?raw";
@@ -242,13 +252,13 @@ describe("SpacePanel button styles", () => {
  * The collapsed space panel with Home showing a notification badge, as SpaceButton and NotificationBadgeView render
  * them (with the badge's unhashed class names), and the "+" button below it.
  */
-function renderBadge(badgeType: "dot" | "badge_2char" | "badge_3char", count: string): void {
+function renderBadge(badgeType: "dot" | "badge_2char" | "badge_3char", count: string, selected = false): void {
     const badgeClass = { dot: "dot", badge_2char: "badge2Char", badge_3char: "badge3Char" }[badgeType];
     document.body.innerHTML = `
         <nav class="mx_SpacePanel cpd-theme-light collapsed" style="height: 400px">
             <ul class="mx_SpaceTreeLevel">
                 <li class="mx_SpaceItem collapsed">
-                    <div class="mx_AccessibleButton mx_SpaceButton mx_SpaceButton_active mx_SpaceButton_narrow" aria-label="Home">
+                    <div class="mx_AccessibleButton mx_SpaceButton ${selected ? "mx_SpaceButton_active" : ""} mx_SpaceButton_narrow" aria-label="Home">
                         <div class="mx_SpaceButton_selectionWrapper">
                             <div class="mx_SpaceButton_avatarWrapper">
                                 <div class="mx_SpaceButton_avatarPlaceholder"><div class="mx_SpaceButton_icon"></div></div>
@@ -324,6 +334,23 @@ describe("SpacePanel badges and create button", () => {
         expect(box.right).toBeLessThanOrEqual(panel.getBoundingClientRect().right);
     });
 
+    it.each(["badge_2char", "dot"] as const)(
+        "inverts the %s badge of the selected space and rings it in the plate's color",
+        (badgeType) => {
+            renderBadge(badgeType, "3", true);
+            const panel = document.querySelector(".mx_SpacePanel")!;
+            const style = getComputedStyle(badge());
+            const plate = tokenColor("--tl-color-bg-selection", panel);
+
+            expect(getComputedStyle(document.querySelector(".mx_SpaceButton_selectionWrapper")!).backgroundColor).toBe(
+                plate,
+            );
+            expect(style.backgroundColor).toBe(tokenColor("--tl-color-on-selection", panel));
+            expect(style.borderTopColor).toBe(plate);
+            expect(style.color).toBe(plate);
+        },
+    );
+
     it("grows the counter down and to the left with the font, keeping it within the space button's top", () => {
         renderBadge("badge_2char", "3");
         const spaceButton = button("Home").getBoundingClientRect();
@@ -365,5 +392,188 @@ describe("SpacePanel badges and create button", () => {
         expect(settledStyle(plus).color).toBe(tokenColor("--cpd-color-icon-secondary", panel));
         await userEvent.hover(button("Create a space"));
         expect(settledStyle(plus).color).toBe(tokenColor("--cpd-color-icon-primary", panel));
+    });
+});
+
+/** Each theme's class with the theme stylesheets it is built from, in the order its entry point imports them. */
+const THEMES: [string, string[]][] = [
+    ["cpd-theme-light", [lightTheme]],
+    ["cpd-theme-dark", [lightTheme, darkTheme]],
+];
+
+/**
+ * The space panel in a theme with Home above Favourites, as MetaSpaceButton renders them. Only Home has an options
+ * menu, so only it has the "…" button, which the collapsed panel keeps hidden.
+ *
+ * @param selected - The selected space.
+ * @param rightClicked - The right-clicked spaces. SpaceButton marks each as having its menu open, even Favourites,
+ *     which has no menu to open.
+ */
+function renderSpaces(
+    theme: string,
+    {
+        expanded,
+        dir = "ltr",
+        selected = "Home",
+        rightClicked = [],
+    }: { expanded: boolean; dir?: string; selected?: string; rightClicked?: string[] },
+): HTMLElement {
+    const icon = (Icon: typeof HomeSolidIcon): string => renderToStaticMarkup(createElement(Icon));
+    const spaceButton = (label: string, Icon: typeof HomeSolidIcon, hasMenu: boolean): string => `
+        <li class="mx_SpaceItem ${expanded ? "" : "collapsed"}" role="treeitem" aria-selected="${label === selected}">
+            <div class="mx_AccessibleButton mx_SpaceButton mx_SpaceButton_withIcon
+                ${label === selected ? "mx_SpaceButton_active" : ""}
+                ${rightClicked.includes(label) ? "mx_SpaceButton_hasMenuOpen" : ""}
+                ${expanded ? "" : "mx_SpaceButton_narrow"}"
+                role="button" aria-label="${label}">
+                <div class="mx_SpaceButton_selectionWrapper">
+                    <div class="mx_SpaceButton_avatarWrapper">
+                        <div class="mx_SpaceButton_avatarPlaceholder"><div class="mx_SpaceButton_icon">${icon(Icon)}</div></div>
+                    </div>
+                    ${expanded ? `<span class="mx_SpaceButton_name">${label}</span>` : ""}
+                    ${
+                        hasMenu
+                            ? `<div class="mx_AccessibleButton mx_SpaceButton_menuButton" role="button"
+                                aria-label="${label} options" aria-haspopup="true"
+                                aria-expanded="${rightClicked.includes(label)}">${icon(OverflowHorizontalIcon)}</div>`
+                            : ""
+                    }
+                </div>
+            </div>
+        </li>
+    `;
+    const container = document.createElement("div");
+    container.className = theme;
+    container.dir = dir;
+    container.innerHTML = `
+        <nav class="mx_SpacePanel ${expanded ? "" : "collapsed"}" style="height: 400px; ${expanded ? "width: 240px" : ""}">
+            <ul class="mx_SpaceTreeLevel" role="tree">
+                ${spaceButton("Home", HomeSolidIcon, true)}
+                ${spaceButton("Favourites", FavouriteSolidIcon, false)}
+            </ul>
+        </nav>
+    `;
+    document.body.append(container);
+    return container;
+}
+
+function selectionPlate(label: string): HTMLElement {
+    return button(label).querySelector<HTMLElement>(".mx_SpaceButton_selectionWrapper")!;
+}
+
+describe("SpacePanel selection", () => {
+    beforeAll(() => {
+        // Each theme's variables apply within its own class, as each theme is a separate stylesheet in the app
+        const themed = THEMES.map(
+            ([theme, sources]) => `.${theme} { ${toBrowserCss(spacePanelStyles, ...sources)} }`,
+        ).join("\n");
+        stylesheet = document.createElement("style");
+        stylesheet.textContent = `
+            @layer compound-tokens, shared-components, app-web;
+            @layer compound-tokens {
+                ${compoundTokens} ${compoundSemantic}
+                ${compoundLightTheme} ${compoundLightSemantic} ${compoundDarkTheme} ${compoundDarkSemantic}
+            }
+            @layer shared-components { ${telementTokens} }
+            @layer app-web { ${themed} }
+        `;
+        document.head.append(stylesheet);
+    });
+
+    afterAll(() => {
+        stylesheet.remove();
+    });
+
+    afterEach(async () => {
+        await userEvent.unhover(document.body);
+        document.body.innerHTML = "";
+    });
+
+    describe.each(THEMES.map(([theme]) => theme))("in %s", (theme) => {
+        it.each(["ltr", "rtl"])(
+            "marks the selected space in the collapsed panel with the room list's selection plate (%s)",
+            (dir) => {
+                const container = renderSpaces(theme, { expanded: false, dir });
+                const plate = selectionPlate("Home");
+                const style = getComputedStyle(plate);
+
+                expect(style.backgroundColor).toBe(tokenColor("--tl-color-bg-selection", container));
+                expect(style.borderTopWidth).toBe("0px");
+                const tile = plate.querySelector<HTMLElement>(".mx_SpaceButton_icon")!;
+                expect(getComputedStyle(tile).backgroundColor).toBe("rgba(0, 0, 0, 0)");
+                expect(getComputedStyle(tile.querySelector("svg")!).color).toBe(
+                    tokenColor("--tl-color-on-selection", container),
+                );
+                expect(getComputedStyle(selectionPlate("Favourites")).backgroundColor).toBe("rgba(0, 0, 0, 0)");
+
+                // A 40px plate rounded concentrically around the 32px tile
+                const box = plate.getBoundingClientRect();
+                const tileBox = tile.getBoundingClientRect();
+                expect([box.width, box.height]).toEqual([40, 40]);
+                expect([
+                    tileBox.left - box.left,
+                    tileBox.top - box.top,
+                    box.right - tileBox.right,
+                    box.bottom - tileBox.bottom,
+                ]).toEqual([4, 4, 4, 4]);
+                expect(cornerRadii(plate)).toEqual({ x: 12, y: 12 });
+            },
+        );
+
+        it("marks the selected space in the expanded panel with the plate, its name and icons in white", async () => {
+            const container = renderSpaces(theme, { expanded: true });
+            const plate = selectionPlate("Home");
+            const onSelection = tokenColor("--tl-color-on-selection", container);
+
+            expect(getComputedStyle(plate).backgroundColor).toBe(tokenColor("--tl-color-bg-selection", container));
+            expect(getComputedStyle(plate.querySelector(".mx_SpaceButton_name")!).color).toBe(onSelection);
+            expect(getComputedStyle(plate.querySelector(".mx_SpaceButton_icon svg")!).color).toBe(onSelection);
+            await userEvent.hover(button("Home"));
+            expect(getComputedStyle(plate.querySelector(".mx_SpaceButton_menuButton svg")!).color).toBe(onSelection);
+        });
+
+        it.each([
+            ["collapsed", false],
+            ["expanded", true],
+        ])(
+            "fills a hovered space in the room list's hover gray in the %s panel, and darkens the selected plate",
+            async (_, expanded) => {
+                const container = renderSpaces(theme, { expanded });
+
+                await userEvent.hover(button("Favourites"));
+                expect(getComputedStyle(selectionPlate("Favourites")).backgroundColor).toBe(
+                    tokenColor("--cpd-color-bg-action-tertiary-hovered", container),
+                );
+                await userEvent.hover(button("Home"));
+                expect(getComputedStyle(selectionPlate("Home")).backgroundColor).toBe(
+                    tokenColor("--tl-color-bg-selection-hovered", container),
+                );
+                expect(getComputedStyle(selectionPlate("Favourites")).backgroundColor).toBe("rgba(0, 0, 0, 0)");
+            },
+        );
+
+        it.each([
+            ["collapsed", false],
+            ["expanded", true],
+        ])(
+            "fills a space while its options menu is open in the %s panel, but not a right-clicked space without one",
+            (_, expanded) => {
+                const plateColor = (label: string): string => getComputedStyle(selectionPlate(label)).backgroundColor;
+                let container = renderSpaces(theme, { expanded, rightClicked: ["Home", "Favourites"] });
+
+                expect(plateColor("Home")).toBe(tokenColor("--tl-color-bg-selection-hovered", container));
+                expect(plateColor("Favourites")).toBe("rgba(0, 0, 0, 0)");
+
+                document.body.innerHTML = "";
+                container = renderSpaces(theme, {
+                    expanded,
+                    selected: "Favourites",
+                    rightClicked: ["Home", "Favourites"],
+                });
+
+                expect(plateColor("Home")).toBe(tokenColor("--cpd-color-bg-action-tertiary-hovered", container));
+                expect(plateColor("Favourites")).toBe(tokenColor("--tl-color-bg-selection", container));
+            },
+        );
     });
 });
