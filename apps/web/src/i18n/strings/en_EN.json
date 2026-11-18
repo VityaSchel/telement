@@ -3197,8 +3197,10 @@
             "context_menu": {
                 "collapse_quotes": "Collapse quotes",
                 "copy_image": "Copy image",
+                "copy_text": "Copy text",
                 "expand_quotes": "Expand quotes",
-                "hide_media": "Hide"
+                "hide_media": "Hide",
+                "quick_reactions": "Quick reactions"
             }
         },
         "video_note": {

@@ -24,6 +24,8 @@ const noop = (): void => {};
 interface IProps extends IContextMenuProps {
     className?: string;
     compact?: boolean;
+    // Telement: shown above the menu's list, outside it, such as the message menu's quick reactions
+    header?: ReactNode;
 }
 
 interface IOptionListProps {
@@ -164,13 +166,20 @@ export const IconizedContextMenuOptionList: React.FC<IOptionListProps> = ({
     );
 };
 
-const IconizedContextMenu: React.FC<React.PropsWithChildren<IProps>> = ({ className, children, compact, ...props }) => {
+const IconizedContextMenu: React.FC<React.PropsWithChildren<IProps>> = ({
+    className,
+    children,
+    compact,
+    header,
+    ...props
+}) => {
     const classes = classNames("mx_IconizedContextMenu", className, {
         mx_IconizedContextMenu_compact: compact,
     });
 
     return (
         <ContextMenu chevronFace={ChevronFace.None} {...props}>
+            {header}
             <ul role="none" className={classes}>
                 {children}
             </ul>

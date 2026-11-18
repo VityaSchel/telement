@@ -24,6 +24,8 @@ import {
     Thread,
     M_POLL_KIND_DISCLOSED,
     EventTimeline,
+    RelationType,
+    type Relations,
 } from "matrix-js-sdk/src/matrix";
 import { PollStartEvent } from "matrix-js-sdk/src/extensible_events_v1/PollStartEvent";
 import userEvent from "@testing-library/user-event";
@@ -49,6 +51,7 @@ import { checkMediaSavingAllowed, saveMediaAs } from "../../../telement/media/sa
 import Resend from "../../../Resend";
 import { setMediaVisibility } from "../../../utils/media/mediaVisibility";
 import { MediaPreviewValue } from "../../../@types/media_preview";
+import * as recent from "../../../emojipicker/recent";
 
 vi.mock("../../../utils/strings", () => ({
     getSelectedText: vi.fn(),
@@ -77,12 +80,17 @@ vi.mock("../../../telement/media/saveMediaAs", () => ({
     checkMediaSavingAllowed: vi.fn(),
     saveMediaAs: vi.fn(),
 }));
+vi.mock("../../../emojipicker/recent", () => ({
+    get: vi.fn(),
+    add: vi.fn(),
+}));
 
 const roomId = "roomid";
 
 describe("MessageContextMenu", () => {
     beforeEach(() => {
         stubClient();
+        vi.mocked(recent.get).mockReturnValue([]);
     });
 
     afterEach(() => {
@@ -789,6 +797,193 @@ describe("MessageContextMenu", () => {
         });
     });
 
+    describe("quick reactions", () => {
+        const messageId = "$message";
+
+        function createMessage(): MatrixEvent {
+            return new MatrixEvent({
+                type: EventType.RoomMessage,
+                room_id: roomId,
+                event_id: messageId,
+                content: createMessageEventContent("hello"),
+            });
+        }
+
+        /** The message's reactions, of which the user's own is a thumbs up. */
+        function ownThumbsUp(): { reaction: MatrixEvent; reactions: Relations } {
+            const userId = MatrixClientPeg.safeGet().getSafeUserId();
+            const reaction = new MatrixEvent({
+                type: EventType.Reaction,
+                room_id: roomId,
+                event_id: "$own",
+                sender: userId,
+                content: { "m.relates_to": { rel_type: RelationType.Annotation, event_id: messageId, key: "👍" } },
+            });
+            const reactions = {
+                getAnnotationsBySender: () => ({ [userId]: new Set([reaction]) }),
+            } as unknown as Relations;
+            return { reaction, reactions };
+        }
+
+        function quickReactionKeys(): string[] {
+            return screen.getAllByRole("menuitemcheckbox").map((item) => item.textContent!);
+        }
+
+        it("offers the six emoji the user reacts with most, then Telegram's, and a button to all reactions", () => {
+            vi.mocked(recent.get).mockReturnValue(["🎉", "👍"]);
+
+            createRightClickMenuWithContent(createMessageEventContent("hello"), { canReact: true });
+
+            expect(recent.get).toHaveBeenCalledWith(6);
+            expect(quickReactionKeys()).toEqual(["🎉", "👍", "❤️", "🔥", "🥰", "👏"]);
+            const group = screen.getByRole("group", { name: "Quick reactions" });
+            expect(group.lastElementChild).toBe(screen.getByRole("menuitem", { name: "React" }));
+        });
+
+        it("offers Telegram's reactions to a user who hasn't reacted yet", () => {
+            createRightClickMenuWithContent(createMessageEventContent("hello"), { canReact: true });
+
+            expect(quickReactionKeys()).toEqual(["👍", "❤️", "🔥", "🥰", "👏", "😁"]);
+        });
+
+        it("reacts with the chosen emoji, counts it as used and closes the menu", () => {
+            const onFinished = vi.fn();
+            const client = MatrixClientPeg.safeGet();
+
+            createMenu(createMessage(), { rightClick: true, onFinished }, { canReact: true });
+            fireEvent.click(screen.getByRole("menuitemcheckbox", { name: "❤️" }));
+
+            expect(client.sendEvent).toHaveBeenCalledWith(roomId, EventType.Reaction, {
+                "m.relates_to": { rel_type: RelationType.Annotation, event_id: messageId, key: "❤️" },
+            });
+            expect(recent.add).toHaveBeenCalledWith("❤️");
+            expect(dispatcher.dispatch).toHaveBeenCalledWith(
+                expect.objectContaining({ action: Action.FocusAComposer }),
+            );
+            expect(onFinished).toHaveBeenCalled();
+        });
+
+        it("marks the user's own reaction, and removes it when it is chosen again", () => {
+            const onFinished = vi.fn();
+            const client = MatrixClientPeg.safeGet();
+            const { reaction, reactions } = ownThumbsUp();
+
+            createMenu(
+                createMessage(),
+                { rightClick: true, onFinished, reactions },
+                { canReact: true, canSelfRedact: true },
+            );
+            const thumbsUp = screen.getByRole("menuitemcheckbox", { name: "👍" });
+            expect(thumbsUp).toHaveAttribute("aria-checked", "true");
+            expect(screen.getByRole("menuitemcheckbox", { name: "❤️" })).toHaveAttribute("aria-checked", "false");
+            fireEvent.click(thumbsUp);
+
+            expect(client.redactEvent).toHaveBeenCalledWith(roomId, reaction.getId());
+            expect(client.sendEvent).not.toHaveBeenCalled();
+            expect(recent.add).not.toHaveBeenCalled();
+            expect(onFinished).toHaveBeenCalled();
+        });
+
+        it("doesn't let the user choose their own reaction when they cannot remove it", () => {
+            const client = MatrixClientPeg.safeGet();
+            const { reactions } = ownThumbsUp();
+
+            createMenu(createMessage(), { rightClick: true, reactions }, { canReact: true, canSelfRedact: false });
+            const thumbsUp = screen.getByRole("menuitemcheckbox", { name: "👍" });
+            fireEvent.click(thumbsUp);
+
+            expect(thumbsUp).toHaveAttribute("aria-disabled", "true");
+            expect(client.redactEvent).not.toHaveBeenCalled();
+        });
+
+        it("opens the full picker in place of the quick reactions and hides the menu", async () => {
+            createRightClickMenuWithContent(createMessageEventContent("hello"), { canReact: true });
+            const group = screen.getByRole("group", { name: "Quick reactions" });
+            vi.spyOn(group, "getBoundingClientRect").mockReturnValue(new DOMRect(120, 80, 232, 40));
+
+            await userEvent.click(screen.getByRole("menuitem", { name: "React" }));
+
+            const picker = (await screen.findByLabelText("Emoji picker")).closest(".mx_ContextualMenu_wrapper");
+            expect(picker).toHaveStyle({ left: "120px", top: "80px" });
+            expect(screen.getByTestId("mx_MessageContextMenu")).toHaveClass("mx_MessageQuickReactions_menu_hidden");
+        });
+
+        it("moves along the quick reactions with the left and right keys, and between them and the menu's items with up and down", () => {
+            const onFinished = vi.fn();
+
+            createRightClickMenuWithContent(createMessageEventContent("hello"), { canReact: true }, onFinished);
+            const [first, second] = screen.getAllByRole("menuitemcheckbox");
+            act(() => first.focus());
+
+            fireEvent.keyDown(first, { key: "ArrowRight" });
+            expect(second).toHaveFocus();
+            fireEvent.keyDown(second, { key: "ArrowUp" });
+            expect(second).toHaveFocus();
+            fireEvent.keyDown(second, { key: "ArrowLeft" });
+            expect(first).toHaveFocus();
+            fireEvent.keyDown(first, { key: "ArrowLeft" });
+            expect(first).toHaveFocus();
+            fireEvent.keyDown(first, { key: "ArrowDown" });
+            const copyText = screen.getByRole("menuitem", { name: "Copy text" });
+            expect(copyText).toHaveFocus();
+            fireEvent.keyDown(copyText, { key: "ArrowUp" });
+            expect(screen.getByRole("menuitem", { name: "React" })).toHaveFocus();
+            expect(onFinished).not.toHaveBeenCalled();
+        });
+    });
+
+    describe("copy text", () => {
+        it("copies the whole text of a message and closes the menu", () => {
+            const onFinished = vi.fn();
+
+            createMenuWithContent(createMessageEventContent("hello world"), { rightClick: true, onFinished });
+            fireEvent.click(screen.getByRole("menuitem", { name: "Copy text" }));
+
+            expect(copyPlainTextToClipboard).toHaveBeenCalledWith("hello world");
+            expect(onFinished).toHaveBeenCalled();
+        });
+
+        it("is offered in the message options menu too", () => {
+            createMenuWithContent(createMessageEventContent("hello"));
+
+            expect(screen.getByRole("menuitem", { name: "Copy text" })).toBeInTheDocument();
+        });
+
+        it("copies a file's caption", () => {
+            createMenuWithContent({
+                msgtype: "m.image",
+                body: "A sunset",
+                filename: "sunset.jpg",
+                url: "mxc://server/sunset",
+            });
+            fireEvent.click(screen.getByRole("menuitem", { name: "Copy text" }));
+
+            expect(copyPlainTextToClipboard).toHaveBeenCalledWith("A sunset");
+        });
+
+        it("is not offered for a file without a caption", () => {
+            createMenuWithContent({ msgtype: "m.image", body: "sunset.jpg", url: "mxc://server/sunset" });
+
+            expect(screen.queryByRole("menuitem", { name: "Copy text" })).toBeNull();
+        });
+    });
+
+    describe("view source", () => {
+        it("is offered in developer mode", () => {
+            vi.spyOn(SettingsStore, "getValue").mockImplementation((name) => name === "developerMode");
+
+            createRightClickMenuWithContent(createMessageEventContent("hello"));
+
+            expect(screen.getByRole("menuitem", { name: "View source" })).toBeInTheDocument();
+        });
+
+        it("is not offered otherwise, as Telegram has no such item", () => {
+            createRightClickMenuWithContent(createMessageEventContent("hello"));
+
+            expect(screen.queryByRole("menuitem", { name: "View source" })).toBeNull();
+        });
+    });
+
     describe("right click", () => {
         it("copy button does work as expected", () => {
             const text = "hello";
@@ -841,6 +1036,15 @@ describe("MessageContextMenu", () => {
             expect(copyButton).toBeFalsy();
         });
 
+        it("offers to copy the selection rather than the whole text when text is selected", () => {
+            vi.mocked(getSelectedText).mockReturnValue("hel");
+
+            createRightClickMenuWithContent(createMessageEventContent("hello"));
+
+            expect(screen.getByRole("menuitem", { name: "Copy" })).toBeInTheDocument();
+            expect(screen.queryByRole("menuitem", { name: "Copy text" })).toBeNull();
+        });
+
         it("shows edit button when we can edit", () => {
             const eventContent = createMessageEventContent("hello");
             vi.mocked(canEditContent).mockReturnValue(true);
@@ -884,15 +1088,15 @@ describe("MessageContextMenu", () => {
             expect(replyButton).toBeFalsy();
         });
 
-        it("shows react button when we can react", () => {
-            const eventContent = createMessageEventContent("hello");
-            const context = {
-                canReact: true,
-            };
+        it("shows quick reactions above the menu's list, in place of the React item, when we can react", () => {
+            createRightClickMenuWithContent(createMessageEventContent("hello"), { canReact: true });
 
-            createRightClickMenuWithContent(eventContent, context);
-            const reactButton = document.querySelector('li[aria-label="React"]');
-            expect(reactButton).toBeTruthy();
+            const quickReactions = screen.getByRole("group", { name: "Quick reactions" });
+            const menu = screen.getByTestId("mx_MessageContextMenu");
+            expect(menu).toHaveClass("mx_MessageQuickReactions_menu");
+            expect(quickReactions.parentElement).toBe(menu);
+            expect(quickReactions.nextElementSibling).toHaveClass("mx_IconizedContextMenu");
+            expect(document.querySelector('.mx_IconizedContextMenu li[aria-label="React"]')).toBeNull();
         });
 
         it("opens the reaction picker in a menu rounded like the picker, without a chevron", async () => {
@@ -906,15 +1110,12 @@ describe("MessageContextMenu", () => {
             expect(menu!.querySelector(":scope > .mx_ContextualMenu_chevron_left")).toBeNull();
         });
 
-        it("does not show react button when we cannot react", () => {
-            const eventContent = createMessageEventContent("hello");
-            const context = {
-                canReact: false,
-            };
+        it("does not show quick reactions when we cannot react", () => {
+            createRightClickMenuWithContent(createMessageEventContent("hello"), { canReact: false });
 
-            createRightClickMenuWithContent(eventContent, context);
-            const reactButton = document.querySelector('li[aria-label="React"]');
-            expect(reactButton).toBeFalsy();
+            expect(screen.queryByRole("group", { name: "Quick reactions" })).toBeNull();
+            expect(screen.queryByRole("menuitem", { name: "React" })).toBeNull();
+            expect(screen.getByTestId("mx_MessageContextMenu")).not.toHaveClass("mx_MessageQuickReactions_menu");
         });
 
         it("shows view in room button when the event is a thread root", () => {
@@ -968,8 +1169,12 @@ describe("MessageContextMenu", () => {
     });
 });
 
-function createRightClickMenuWithContent(eventContent: object, context?: Partial<RoomContextType>): RenderResult {
-    return createMenuWithContent(eventContent, { rightClick: true }, context);
+function createRightClickMenuWithContent(
+    eventContent: object,
+    context?: Partial<RoomContextType>,
+    onFinished?: () => void,
+): RenderResult {
+    return createMenuWithContent(eventContent, { rightClick: true, ...(onFinished && { onFinished }) }, context);
 }
 
 function createRightClickMenu(mxEvent: MatrixEvent, context?: Partial<RoomContextType>): RenderResult {

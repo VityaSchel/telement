@@ -1,0 +1,101 @@
+/*
+Copyright 2026 Viktor Shchelochkov
+
+SPDX-License-Identifier: AGPL-3.0-only OR GPL-3.0-only
+Please see LICENSE files in the repository root for full details.
+*/
+
+/*
+ * The message menu with Telegram's quick reactions: a pill of reactions 4px above the menu's list, each its own floating
+ * surface. The menu's box holds both and draws neither, so that the menu keeps the pill inside the window too. The list
+ * is at least as wide as the pill, as Telegram's pill never reaches past its menu (AppMenuController.swift).
+ */
+.mx_ContextualMenu.mx_MessageQuickReactions_menu {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--tl-inset-menu);
+    border: none;
+    border-radius: 0;
+    background: none;
+    box-shadow: none;
+
+    > :is(.mx_MessageQuickReactions, .mx_IconizedContextMenu) {
+        /* The menu's own surface (_ContextualMenu.pcss) */
+        border: var(--cpd-border-width-1) solid var(--cpd-color-border-interactive-secondary);
+        background-color: var(--cpd-color-bg-canvas-default);
+        box-shadow: 0px 4px 24px rgb(0, 0, 0, 0.1);
+    }
+
+    > .mx_IconizedContextMenu {
+        align-self: stretch;
+        width: auto;
+        border-radius: var(--tl-radius-menu);
+    }
+}
+
+/* The full reaction picker opens in the pill's place, and the menu goes, as in Telegram */
+.mx_ContextualMenu.mx_MessageQuickReactions_menu_hidden {
+    visibility: hidden;
+}
+
+/* The reactions are round 32px buttons, inset from the pill's edge as the menu's items are from the menu's */
+.mx_MessageQuickReactions {
+    display: flex;
+    padding: calc(var(--tl-inset-menu) - var(--cpd-border-width-1));
+    border-radius: var(--tl-radius-control);
+}
+
+.mx_MessageQuickReactions_reaction,
+.mx_MessageQuickReactions_more {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-sizing: border-box;
+    inline-size: var(--tl-menu-row-size);
+    block-size: var(--tl-menu-row-size);
+    border-radius: 50%;
+
+    &:hover,
+    &:focus-visible {
+        background-color: var(--cpd-color-bg-action-secondary-hovered);
+    }
+
+    &:active {
+        background-color: var(--cpd-color-bg-action-secondary-pressed);
+    }
+
+    /* Inside the button, as on the menu's items */
+    &:focus-visible {
+        outline: var(--cpd-border-width-2) solid var(--cpd-color-border-focused);
+        outline-offset: calc(-1 * var(--cpd-border-width-2));
+    }
+}
+
+.mx_MessageQuickReactions_reaction {
+    /* The emoji picker's size, with no line spacing to push the emoji off center */
+    font-size: var(--cpd-font-size-heading-sm);
+    line-height: 1;
+
+    /* The user's own reactions, in the fill of their reactions under the message */
+    &[aria-checked="true"] {
+        background-color: var(--tl-accent-300);
+
+        &:hover:not(.mx_AccessibleButton_disabled),
+        &:focus-visible {
+            background-color: var(--tl-accent-400);
+        }
+    }
+
+    /* One of the user's own that they may not remove */
+    &.mx_AccessibleButton_disabled {
+        opacity: 0.5;
+    }
+}
+
+.mx_MessageQuickReactions_more svg {
+    inline-size: 20px;
+    block-size: 20px;
+    color: var(--cpd-color-icon-secondary);
+}

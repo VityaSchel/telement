@@ -12,6 +12,7 @@ import { rejectToast } from "@element-hq/element-web-playwright-common";
 import { SettingLevel } from "../../../src/settings/SettingLevel";
 import { UIFeature } from "../../../src/settings/UIFeature";
 import { test, expect } from "../../element-web-test";
+import { type ElementAppPage } from "../../pages/ElementAppPage";
 
 const name = "Test room";
 const topic = "A decently explanatory topic for a test room.";
@@ -157,7 +158,7 @@ test.describe("Create Room", () => {
             await expect(page.getByText("State encryption enabled")).not.toBeVisible();
 
             // And the room name state event is not encrypted
-            await viewSourceOnRoomNameEvent(page);
+            await viewSourceOnRoomNameEvent(page, app);
             await expect(page.getByText("Original event source")).toBeVisible();
             await expect(page.getByText("Decrypted event source")).not.toBeVisible();
         });
@@ -190,7 +191,7 @@ test.describe("Create Room", () => {
                 await expect(page.getByTestId("timeline").getByRole("heading", { name })).toBeVisible();
 
                 // And the room name state event is encrypted
-                await viewSourceOnRoomNameEvent(page);
+                await viewSourceOnRoomNameEvent(page, app);
                 await expect(page.getByText("Decrypted event source")).toBeVisible();
             },
         );
@@ -221,7 +222,7 @@ test.describe("Create Room", () => {
                 await expect(page.getByTestId("timeline").getByRole("heading", { name })).toBeVisible();
 
                 // And the room name state event is not encrypted
-                await viewSourceOnRoomNameEvent(page);
+                await viewSourceOnRoomNameEvent(page, app);
                 await expect(page.getByText("Original event source")).toBeVisible();
                 await expect(page.getByText("Decrypted event source")).not.toBeVisible();
             },
@@ -229,7 +230,10 @@ test.describe("Create Room", () => {
     });
 });
 
-async function viewSourceOnRoomNameEvent(page: Page) {
+async function viewSourceOnRoomNameEvent(page: Page, app: ElementAppPage) {
+    // Telement's message menu offers the event source in developer mode only
+    await app.settings.setValue("developerMode", null, SettingLevel.ACCOUNT, true);
+
     await page
         .getByRole("listitem")
         .filter({ hasText: "created and configured the room" })

@@ -9,6 +9,7 @@ Please see LICENSE files in the repository root for full details.
 */
 
 import React, { type JSX, createRef, useContext } from "react";
+import classNames from "classnames";
 import {
     EventStatus,
     type MatrixEvent,
@@ -29,7 +30,6 @@ import {
     InlineCodeIcon,
     PinIcon,
     QuoteIcon,
-    ReactionAddIcon,
     ReplyIcon,
     RestartIcon,
     ThreadsIcon,
@@ -61,7 +61,7 @@ import { Action } from "../../../dispatcher/actions";
 import { type RoomPermalinkCreator } from "../../../utils/permalinks/Permalinks";
 import { type ButtonEvent } from "../elements/AccessibleButton";
 import { getSelectedText } from "../../../utils/strings";
-import ContextMenu, { ChevronFace, toRightOf, type MenuProps } from "../../structures/ContextMenu";
+import ContextMenu, { ChevronFace, type MenuProps } from "../../structures/ContextMenu";
 import ReactionPicker from "../emojipicker/ReactionPicker";
 import ViewSource from "../../structures/ViewSource";
 import { createRedactEventDialog } from "../dialogs/ConfirmRedactDialog";
@@ -87,6 +87,8 @@ import { MediaEventHelper } from "../../../utils/MediaEventHelper";
 import { getMediaVisibility, setMediaVisibility } from "../../../utils/media/mediaVisibility";
 import { shouldDisplayReply } from "../../../utils/Reply";
 import { checkMediaSavingAllowed, saveMediaAs } from "../../../telement/media/saveMediaAs";
+import { MessageQuickReactions } from "../../../telement/message-context-menu/MessageQuickReactions";
+import { getMessageText } from "../../../telement/message-context-menu/getMessageText";
 
 interface IReplyInThreadButton {
     mxEvent: MatrixEvent;
@@ -164,7 +166,7 @@ export default class MessageContextMenu extends React.Component<IProps, IState> 
     public static contextType = RoomContext;
     declare public context: React.ContextType<typeof RoomContext>;
 
-    private reactButtonRef = createRef<any>(); // XXX Ref to a functional component
+    private quickReactionsRef = createRef<HTMLDivElement>();
     private readonly mediaSavingCheck: Promise<boolean> | undefined;
 
     public constructor(props: IProps) {
@@ -386,6 +388,11 @@ export default class MessageContextMenu extends React.Component<IProps, IState> 
         this.closeMenu();
     };
 
+    private onCopyTextClick = (text: string): void => {
+        void copyPlainTextToClipboard(text);
+        this.closeMenu();
+    };
+
     private onQuoteClick = (): void => {
         const selectedText = getSelectedText();
         if (selectedText) {
@@ -603,14 +610,17 @@ export default class MessageContextMenu extends React.Component<IProps, IState> 
             );
         }
 
-        // This is specifically not behind the developerMode flag to give people insight into the Matrix
-        const viewSourceButton = (
-            <IconizedContextMenuOption
-                icon={<InlineCodeIcon />}
-                label={_t("timeline|context_menu|view_source")}
-                onClick={this.onViewSourceClick}
-            />
-        );
+        // Telement: only in developer mode, like "View related event", as Telegram's menu has nothing like it
+        let viewSourceButton: JSX.Element | undefined;
+        if (SettingsStore.getValue("developerMode")) {
+            viewSourceButton = (
+                <IconizedContextMenuOption
+                    icon={<InlineCodeIcon />}
+                    label={_t("timeline|context_menu|view_source")}
+                    onClick={this.onViewSourceClick}
+                />
+            );
+        }
 
         let unhidePreviewButton: JSX.Element | undefined;
         if (eventTileOps?.isWidgetHidden()) {
@@ -757,6 +767,7 @@ export default class MessageContextMenu extends React.Component<IProps, IState> 
         const selectedText = getSelectedText();
 
         let copyButton: JSX.Element | undefined;
+        const messageText = getMessageText(mxEvent);
         if (rightClick && selectedText) {
             copyButton = (
                 <IconizedContextMenuOption
@@ -764,6 +775,15 @@ export default class MessageContextMenu extends React.Component<IProps, IState> 
                     label={_t("action|copy")}
                     triggerOnMouseDown={true} // We use onMouseDown so that the selection isn't cleared when we click
                     onClick={this.onCopyClick}
+                />
+            );
+        } else if (messageText) {
+            // Telement: Telegram's "Copy Text", the whole message without selecting it first
+            copyButton = (
+                <IconizedContextMenuOption
+                    icon={<CopyIcon />}
+                    label={_t("telement|timeline|context_menu|copy_text")}
+                    onClick={() => this.onCopyTextClick(messageText)}
                 />
             );
         }
@@ -813,14 +833,18 @@ export default class MessageContextMenu extends React.Component<IProps, IState> 
             replyInThreadButton = <ReplyInThreadButton mxEvent={mxEvent} closeMenu={this.closeMenu} />;
         }
 
-        let reactButton: JSX.Element | undefined;
+        // Telement: Telegram's quick reactions above the menu, in place of "React"; their last button opens the picker
+        let quickReactions: JSX.Element | undefined;
         if (rightClick && contentActionable && canReact) {
-            reactButton = (
-                <IconizedContextMenuOption
-                    icon={<ReactionAddIcon />}
-                    label={_t("action|react")}
-                    onClick={this.onReactClick}
-                    inputRef={this.reactButtonRef}
+            quickReactions = (
+                <MessageQuickReactions
+                    ref={this.quickReactionsRef}
+                    mxEvent={mxEvent}
+                    reactions={reactions}
+                    canSelfRedact={this.context.canSelfRedact}
+                    timelineRenderingType={timelineRenderingType}
+                    onShowAllReactions={this.onReactClick}
+                    onFinished={this.closeMenu}
                 />
             );
         }
@@ -872,10 +896,9 @@ export default class MessageContextMenu extends React.Component<IProps, IState> 
         }
 
         let quickItemsList: JSX.Element | undefined;
-        if (editButton || replyButton || replyInThreadButton || reactButton || pinButton) {
+        if (editButton || replyButton || replyInThreadButton || pinButton) {
             quickItemsList = (
                 <IconizedContextMenuOptionList>
-                    {reactButton}
                     {replyButton}
                     {replyInThreadButton}
                     {editButton}
@@ -910,10 +933,12 @@ export default class MessageContextMenu extends React.Component<IProps, IState> 
 
         let reactionPicker: JSX.Element | undefined;
         if (this.state.reactionPickerDisplayed) {
-            const buttonRect = (this.reactButtonRef.current as HTMLElement)?.getBoundingClientRect();
+            // The picker takes the quick reactions' place, as Telegram expands them into it
+            const quickReactionsRect = this.quickReactionsRef.current?.getBoundingClientRect();
             reactionPicker = (
                 <ContextMenu
-                    {...toRightOf(buttonRect)}
+                    left={quickReactionsRect?.left}
+                    top={quickReactionsRect?.top}
                     // The chevron would sit on the picker's round corner
                     chevronFace={ChevronFace.None}
                     menuClassName="mx_TelementEmojiPickerMenu"
@@ -933,6 +958,11 @@ export default class MessageContextMenu extends React.Component<IProps, IState> 
                     className="mx_MessageContextMenu"
                     compact={true}
                     data-testid="mx_MessageContextMenu"
+                    header={quickReactions}
+                    menuClassName={classNames({
+                        mx_MessageQuickReactions_menu: !!quickReactions,
+                        mx_MessageQuickReactions_menu_hidden: this.state.reactionPickerDisplayed,
+                    })}
                 >
                     {sendItemsList}
                     {nativeItemsList}
