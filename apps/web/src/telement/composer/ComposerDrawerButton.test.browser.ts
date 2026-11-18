@@ -12,9 +12,14 @@ import compoundLightTheme from "@vector-im/compound-design-tokens/assets/web/css
 import compoundStyles from "@vector-im/compound-web/dist/style.css?raw";
 import sharedComponentsStyles from "@element-hq/web-shared-components/dist/element-web-shared-components.css?raw";
 
+// The package doesn't export its token stylesheet on its own
+// eslint-disable-next-line no-restricted-imports
+import telementTokens from "../../../../../packages/shared-components/src/telement/tokens.css?raw";
 import lightTheme from "../../../res/themes/light/css/_light.pcss?raw";
 import commonStyles from "../../../res/css/_common.pcss?raw";
 import accessibleButtonStyles from "../../../res/css/views/elements/_AccessibleButton.pcss?raw";
+import contextualMenuStyles from "../../../res/css/structures/_ContextualMenu.pcss?raw";
+import composerDrawerStyles from "../../../res/css/telement/_ComposerDrawer.pcss?raw";
 import emojiButtonStyles from "../../../res/css/views/rooms/_EmojiButton.pcss?raw";
 import messageComposerStyles from "../../../res/css/views/rooms/_MessageComposer.pcss?raw";
 import { toBrowserCss } from "../../test/telement/browserCss";
@@ -44,13 +49,15 @@ describe("ComposerDrawerButton styles", () => {
         stylesheet = document.createElement("style");
         stylesheet.textContent = `
             @layer compound-tokens, compound-web, shared-components, app-web;
-            @layer compound-tokens { ${compoundBase} ${compoundSemantic} ${compoundLightTheme} }
+            @layer compound-tokens { ${compoundBase} ${compoundSemantic} ${compoundLightTheme} ${telementTokens} }
             @layer compound-web { ${compoundStyles} }
             ${sharedComponentsStyles}
             @layer app-web {
                 ${toBrowserCss(accessibleButtonStyles, lightTheme)}
                 ${toBrowserCss(emojiButtonStyles, commonStyles, lightTheme)}
                 ${toBrowserCss(messageComposerStyles, commonStyles, lightTheme)}
+                ${toBrowserCss(contextualMenuStyles, lightTheme)}
+                ${composerDrawerStyles}
             }
         `;
         document.head.append(stylesheet);
@@ -73,5 +80,23 @@ describe("ComposerDrawerButton styles", () => {
 
         const open = renderDrawerButton(richText, true);
         expect(settledStyle(open).backgroundColor).toBe(tokenColor("--cpd-color-bg-subtle-primary", open));
+    });
+
+    it("ends the drawer on the spot ComposerDrawerButton gives it, the end of the button that opened it", () => {
+        // ContextMenu's fixed wrapper at the button's end, 8px from the window's, and 8px above the composer's top
+        document.body.innerHTML = `
+            <div class="mx_ContextualMenu_wrapper" style="right: 8px; bottom: 120px">
+                <div class="mx_ContextualMenu mx_ContextualMenu_right mx_ContextualMenu_bottom mx_TelementComposerDrawer_menu">
+                    <div style="width: 340px; height: 200px"></div>
+                </div>
+            </div>
+        `;
+        const drawer = document.querySelector(".mx_TelementComposerDrawer_menu")!.getBoundingClientRect();
+        const viewport = document.documentElement;
+
+        expect({ right: viewport.clientWidth - drawer.right, bottom: viewport.clientHeight - drawer.bottom }).toEqual({
+            right: 8,
+            bottom: 120,
+        });
     });
 });

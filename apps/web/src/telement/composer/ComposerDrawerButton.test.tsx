@@ -12,6 +12,8 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { render, screen, waitFor } from "test-utils-rtl";
 import userEvent from "@testing-library/user-event";
 
+import { ChevronFace } from "../../components/structures/ContextMenu";
+import UIStore from "../../stores/UIStore";
 import { ComposerDrawerButton } from "./ComposerDrawerButton";
 
 // The real picker lays out its grid with measured sizes, which happy-dom doesn't provide. Like the real one, the stand-in
@@ -87,6 +89,27 @@ describe("ComposerDrawerButton", () => {
         // The drawer reopens on the Stickers tab
         await userEvent.click(button);
         await waitFor(() => expect(screen.getByRole("tab", { name: "Stickers" })).toHaveFocus());
+    });
+
+    it("opens where the composer's menus do, its end on the button's end, and stays there while emoji are picked", async () => {
+        const props = { addEmoji: vi.fn(() => true), onOpenStickerPicker: vi.fn(), showStickers: true };
+        // MessageComposer's spot for its menus: over the composer, ending on the composer's end
+        const menuPosition = { bottom: 120, right: 0, chevronFace: ChevronFace.None };
+        const { rerender } = render(<ComposerDrawerButton {...props} menuPosition={menuPosition} />);
+        const button = screen.getByRole("button", { name: "Emoji" });
+        const buttonRect = vi.spyOn(button, "getBoundingClientRect");
+        buttonRect.mockReturnValue(new DOMRect(UIStore.instance.windowWidth - 44, 700, 36, 36));
+
+        await userEvent.click(button);
+        const wrapper = screen.getByRole("tablist").closest<HTMLElement>(".mx_ContextualMenu_wrapper")!;
+        expect(wrapper.style).toMatchObject({ bottom: "120px", right: "8px" });
+
+        // Picking an emoji brings in the send button, which moves the emoji button towards the start
+        buttonRect.mockReturnValue(new DOMRect(UIStore.instance.windowWidth - 86, 700, 36, 36));
+        await userEvent.click(screen.getByRole("button", { name: "Choose 😀" }));
+        rerender(<ComposerDrawerButton {...props} menuPosition={{ ...menuPosition }} />);
+
+        expect(wrapper.style).toMatchObject({ bottom: "120px", right: "8px" });
     });
 
     it("has no Stickers tab when stickers aren't available", async () => {

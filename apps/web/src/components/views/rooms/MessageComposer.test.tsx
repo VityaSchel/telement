@@ -252,6 +252,21 @@ describe("MessageComposer", () => {
             expect(screen.getByRole("tab", { name: "Stickers" })).toBeInTheDocument();
         });
 
+        it("should open the emoji drawer 8px above the composer, as the autocomplete floats", async () => {
+            const { renderResult, rawComponent } = wrapAndRender({ room });
+            const composer = screen.getByRole("region", { name: "Message composer" });
+            vi.spyOn(composer, "getBoundingClientRect").mockReturnValue(new DOMRect(0, 600, 800, 60));
+            // The composer measures itself when it renders
+            renderResult.rerender(rawComponent);
+
+            await userEvent.click(screen.getByRole("button", { name: "Emoji" }));
+
+            const drawer = screen
+                .getByRole("tab", { name: "Stickers" })
+                .closest<HTMLElement>(".mx_ContextualMenu_wrapper")!;
+            expect(drawer.style.bottom).toBe(`${UIStore.instance.windowHeight - 600 + 8}px`);
+        });
+
         it("should not offer stickers when widgets are disabled", async () => {
             const getValue = SettingsStore.getValue.bind(SettingsStore);
             const getValueSpy = vi

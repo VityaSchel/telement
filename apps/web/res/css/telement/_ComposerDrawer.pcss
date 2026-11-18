@@ -16,6 +16,8 @@ Please see LICENSE files in the repository root for full details.
  * the menu's border to them.
  */
 .mx_ContextualMenu.mx_TelementComposerDrawer_menu {
+    /* Ends on the end of the button that opened it (see ComposerDrawerButton) rather than upstream's 16px inside it */
+    right: 0;
     border-radius: calc(var(--tl-control-size) / 2 + var(--cpd-space-2x) + var(--cpd-border-width-1))
         calc(var(--tl-control-size) / 2 + var(--cpd-space-2x) + var(--cpd-border-width-1))
         calc(var(--cpd-space-8x) / 2 + var(--cpd-space-2x) + var(--cpd-border-width-1))

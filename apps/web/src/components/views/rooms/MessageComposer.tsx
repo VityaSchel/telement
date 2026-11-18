@@ -28,7 +28,7 @@ import { type ActionPayload } from "../../../dispatcher/payloads";
 import Stickerpicker from "./Stickerpicker";
 import { makeRoomPermalink, type RoomPermalinkCreator } from "../../../utils/permalinks/Permalinks";
 import SettingsStore from "../../../settings/SettingsStore";
-import { aboveLeftOf, type MenuProps } from "../../structures/ContextMenu";
+import { aboveLeftOf, ChevronFace, type MenuProps } from "../../structures/ContextMenu";
 import ReplyPreview from "./ReplyPreview";
 import { UserIdentityWarning } from "./UserIdentityWarning";
 import { UPDATE_EVENT } from "../../../stores/AsyncStore";
@@ -513,7 +513,8 @@ export class MessageComposer extends React.Component<IProps, IState> {
                 contentRect.width,
                 contentRect.height - heightToRemove,
             );
-            return aboveLeftOf(fixedRect);
+            // Telement: the composer's menus open 8px above it, as the autocomplete does
+            return aboveLeftOf(fixedRect, ChevronFace.None, 8);
         }
     }
 
