@@ -51,6 +51,14 @@ Please see LICENSE files in the repository root for full details.
     --cpd-color-separator-primary: var(--tl-color-separator-floating);
 }
 
+/* The selected one of a set of choices drawn as cards (a theme, a message layout, an image size) is ringed in the
+   accent, as Telegram rings the selected theme. The 2px ring is drawn over the card's own 1px edge and follows its
+   corners, so selecting a card doesn't move what it holds. */
+@define-mixin selectedChoiceRing {
+    outline: 2px solid var(--cpd-color-border-accent-primary);
+    outline-offset: -2px;
+}
+
 :root {
     --container-border-width: 8px;
     --container-gap-width: 8px; /* only even numbers should be used because otherwise we get 0.5px margin values. */

@@ -188,6 +188,11 @@ Please see LICENSE files in the repository root for full details.
         .mx_UserInfo_verification_unavailable {
             color: var(--cpd-color-text-secondary);
         }
+
+        /* Telement: a standalone text button is accent text, as Telegram's flat actions are */
+        .mx_UserInfo_verify_button:not([aria-disabled="true"]) {
+            color: var(--cpd-color-text-action-accent);
+        }
     }
 
     .mx_UserInfo_memberDetails {

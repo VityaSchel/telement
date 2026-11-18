@@ -25,8 +25,9 @@ Please see LICENSE files in the repository root for full details.
         gap: var(--cpd-space-2x);
         background-color: var(--cpd-color-bg-canvas-default);
 
+        /* Each chip resolves the accent in the theme it shows */
         &.mx_ThemeChoicePanel_themeSelector_enabled {
-            border-color: var(--cpd-color-border-interactive-primary);
+            @mixin selectedChoiceRing;
         }
 
         &.mx_ThemeChoicePanel_themeSelector_disabled {

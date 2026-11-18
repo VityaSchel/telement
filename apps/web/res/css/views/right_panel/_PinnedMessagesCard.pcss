@@ -40,6 +40,11 @@ Please see LICENSE files in the repository root for full details.
         align-items: center;
         box-shadow: 0 4px 24px 0 rgb(27, 29, 34, 0.1);
         background: var(--cpd-color-bg-canvas-default);
+
+        /* Telement: a standalone text button is accent text, as Telegram's bar to unpin all messages is */
+        [data-kind="tertiary"]:not([aria-disabled="true"]) {
+            color: var(--cpd-color-text-action-accent);
+        }
     }
 
     .mx_EventTile_line {

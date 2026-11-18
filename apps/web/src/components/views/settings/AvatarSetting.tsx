@@ -7,7 +7,7 @@ Please see LICENSE files in the repository root for full details.
 */
 
 import React, { type JSX, type ReactNode, createRef, useCallback, useEffect, useState } from "react";
-import EditIcon from "@vector-im/compound-design-tokens/assets/web/icons/edit";
+import TakePhotoIcon from "@vector-im/compound-design-tokens/assets/web/icons/take-photo";
 import UploadIcon from "@vector-im/compound-design-tokens/assets/web/icons/share";
 import DeleteIcon from "@vector-im/compound-design-tokens/assets/web/icons/delete";
 import { Menu, MenuItem } from "@vector-im/compound-web";
@@ -201,7 +201,7 @@ const AvatarSetting: React.FC<IProps> = ({
                 tabIndex={0}
                 aria-haspopup="menu"
             >
-                <EditIcon aria-hidden={true} width="20px" height="20px" />
+                <TakePhotoIcon aria-hidden={true} width="16px" height="16px" />
             </div>
         );
     }

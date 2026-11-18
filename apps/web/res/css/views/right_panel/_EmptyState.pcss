@@ -23,7 +23,7 @@ Please see LICENSE files in the repository root for full details.
     }
 
     &::before {
-        /* Bloom using magic numbers directly out of Figma */
+        /* Bloom using magic numbers directly out of Figma. Telement: in the accent, at the strength of Element's green */
         content: "";
         position: absolute;
         z-index: -1;
@@ -31,7 +31,11 @@ Please see LICENSE files in the repository root for full details.
         height: 775px;
         right: -253.77px;
         top: 0;
-        background: radial-gradient(49.95% 49.95% at 50% 50%, rgb(13, 189, 139, 0.12) 0%, rgb(18, 115, 235, 0) 100%);
+        background: radial-gradient(
+            49.95% 49.95% at 50% 50%,
+            color-mix(in srgb, var(--cpd-color-icon-accent-primary) 12%, transparent) 0%,
+            transparent 100%
+        );
         transform: rotate(-89.69deg);
         overflow: hidden;
     }

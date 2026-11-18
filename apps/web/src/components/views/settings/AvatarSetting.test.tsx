@@ -13,8 +13,13 @@ import { vi, describe, it, expect, beforeEach } from "vitest";
 import { render, screen, fireEvent } from "test-utils-rtl";
 import userEvent from "@testing-library/user-event";
 import { stubClient } from "test-utils";
+import { renderToStaticMarkup } from "react-dom/server";
+import TakePhotoIcon from "@vector-im/compound-design-tokens/assets/web/icons/take-photo";
 
 import AvatarSetting from "./AvatarSetting";
+
+// The camera the edit badge should hold, rendered on its own to compare its drawing
+const CAMERA = renderToStaticMarkup(<TakePhotoIcon />);
 
 const BASE64_GIF = "R0lGODlhAQABAAAAACw=";
 const AVATAR_FILE = new File([Uint8Array.from(atob(BASE64_GIF), (c) => c.charCodeAt(0))], "avatar.gif", {
@@ -118,5 +123,24 @@ describe("<AvatarSetting />", () => {
 
         expect(onChange).not.toHaveBeenCalled();
         await expect(screen.findByRole("heading", { name: "Upload Failed" })).resolves.toBeInTheDocument();
+    });
+
+    it("draws a 16px camera on the badge that opens the photo menu", () => {
+        render(
+            <AvatarSetting
+                placeholderId="blee"
+                placeholderName="boo"
+                avatar="mxc://example.org/my-avatar"
+                avatarAccessibleName="Avatar of Peter Fox"
+            />,
+        );
+
+        const camera = screen.getByRole("button", { name: "Open avatar menu" }).querySelector("svg")!;
+        expect(camera).toHaveAttribute("width", "16px");
+        expect(camera).toHaveAttribute("height", "16px");
+        expect(camera).toHaveAttribute("aria-hidden", "true");
+        expect(camera.querySelector("path")!.getAttribute("d")).toBe(
+            new DOMParser().parseFromString(CAMERA, "image/svg+xml").querySelector("path")!.getAttribute("d"),
+        );
     });
 });

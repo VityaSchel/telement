@@ -38,28 +38,38 @@ Please see LICENSE files in the repository root for full details.
         object-fit: cover;
     }
 
+    /* Telement: setting the photo is an action, so its badge is an accent circle with a white camera in its middle, as
+       Telegram's set-photo control is. A 2px ring in the dialog's color keeps it apart from the photo. The transparent
+       border keeps the circle's edge in forced colors, which drop the ring and the fill. */
     .mx_AvatarSetting_uploadButton {
+        display: flex;
+        align-items: center;
+        justify-content: center;
         width: 28px;
         height: 28px;
-        border-radius: 32px;
-        border: 1px solid var(--cpd-color-bg-canvas-default);
-        background-color: var(--cpd-color-bg-canvas-default);
+        border: 1px solid transparent;
+        border-radius: 50%;
+        background-color: var(--cpd-color-bg-accent-rest);
+        box-shadow: 0 0 0 2px var(--cpd-color-bg-canvas-default);
+        color: var(--tl-color-on-accent);
 
         position: absolute;
-        bottom: 0;
-        right: 0;
-        text-align: center;
+        inset-block-end: 0;
+        inset-inline-end: 0;
         cursor: pointer;
 
-        svg {
-            position: relative;
-            top: 3px;
+        /* Outside the dialog-colored ring, as the browser's own ring would vanish against the accent */
+        &:focus-visible {
+            outline: var(--cpd-border-width-2) solid var(--cpd-color-border-focused);
+            outline-offset: var(--cpd-space-0-5x);
         }
     }
 
+    /* Hovered and while its menu is open, the badge takes the hover fill. In dark themes the hover and pressed fills are
+       lighter than the rest fill, and the white camera on the pressed one would be 2.3:1. */
     .mx_AvatarSetting_uploadButton:hover,
     .mx_AvatarSetting_uploadButton_active {
-        background-color: var(--cpd-color-bg-subtle-primary);
+        background-color: var(--cpd-color-bg-accent-hovered);
     }
 }
 
