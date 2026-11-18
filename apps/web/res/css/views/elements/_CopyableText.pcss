@@ -14,13 +14,29 @@ Please see LICENSE files in the repository root for full details.
     width: max-content;
     max-width: 100%;
 
+    /* Telement: a read-only text field (_Field.pcss): 36px for one line, with the field's border, hover border and
+       radius, its text 12px inside the border and the 28px copy button 4px from the top, bottom and end. It has no
+       margins of its own, so it sits where the layout around it puts a field */
     &.mx_CopyableText_border {
         overflow: auto;
-        border-radius: 5px;
-        border: solid 1px $light-fg-color;
-        margin-bottom: 10px;
-        margin-top: 10px;
-        padding: 10px;
+        box-sizing: border-box;
+        min-block-size: var(--tl-control-size);
+        border-radius: var(--tl-radius-row);
+        border: var(--cpd-border-width-1) solid var(--cpd-color-border-interactive-secondary);
+        margin: 0;
+        padding-block: calc((var(--tl-control-size) - 2 * var(--cpd-border-width-1) - 1lh) / 2);
+        padding-inline: var(--cpd-space-3x) calc(var(--cpd-space-1x) - var(--cpd-border-width-1));
+        transition: border-color 0.25s;
+
+        &:hover {
+            border-color: var(--cpd-color-border-interactive-hovered);
+        }
+
+        /* Taller than a line, the button would make the field taller: it takes no height, so the field is as tall as
+           its text, and is centered in it */
+        .mx_CopyableText_copyButton {
+            margin-block: calc(-1 * var(--cpd-space-7x) / 2);
+        }
     }
 
     .mx_CopyableText_copyButton {
@@ -30,9 +46,31 @@ Please see LICENSE files in the repository root for full details.
         position: sticky;
         margin-left: var(--cpd-space-1x);
 
+        /* Telement: no color of its own, so the icon takes the icon button's secondary gray and its primary on hover */
         svg {
-            color: $message-action-bar-fg-color;
             display: block;
         }
+    }
+}
+
+/* Telement: a copy field's label floats on the middle of its top border, its text where the field's starts, like a
+   text field's (_Field.pcss) */
+.mx_CopyableText_field {
+    position: relative;
+
+    > .mx_CopyableText_label {
+        position: absolute;
+        z-index: 1;
+        inset-block-start: calc(var(--cpd-border-width-1) / 2);
+        inset-inline-start: calc(var(--cpd-border-width-1) + var(--cpd-space-3x) - var(--cpd-space-0-5x));
+        max-inline-size: calc(100% - 2 * var(--cpd-space-3x));
+        padding-inline: var(--cpd-space-0-5x);
+        transform: translateY(-50%);
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        font: var(--cpd-font-body-xs-regular);
+        color: var(--cpd-color-text-secondary);
+        background-color: var(--cpd-color-bg-canvas-default);
     }
 }

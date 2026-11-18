@@ -110,6 +110,23 @@ describe("ProfileSettings", () => {
         expect(await screen.findByRole("textbox", { name: "What's your status?" })).toBeInTheDocument();
     });
 
+    it("describes the profile in the secondary text other subsections use", () => {
+        renderProfileSettings(toastRack, client);
+
+        expect(screen.getByText("This is how you appear to others on the app.")).toHaveClass(
+            "mx_SettingsSubsection_text",
+        );
+    });
+
+    it("floats the username's label on its copy field", () => {
+        renderProfileSettings(toastRack, client);
+
+        const label = screen.getByText("Username");
+        expect(label).toHaveClass("mx_CopyableText_label");
+        expect(label.parentElement).toHaveClass("mx_CopyableText_field");
+        expect(label.nextElementSibling).toHaveClass("mx_CopyableText_border");
+    });
+
     it("removes avatar", async () => {
         vi.spyOn(OwnProfileStore.instance, "avatarMxc", "get").mockReturnValue("mxc://example.org/my-avatar");
         renderProfileSettings(toastRack, client);

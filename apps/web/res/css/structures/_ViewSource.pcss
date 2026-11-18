@@ -41,4 +41,10 @@ Please see LICENSE files in the repository root for full details.
         box-sizing: border-box;
         width: 100%;
     }
+
+    /* Telement: copy fields have no margins of their own (_CopyableText.pcss), so the source keeps its space under the
+       heading here, in a rule more specific than that one, which comes later in the bundle */
+    .mx_CopyableText.mx_CopyableText_border {
+        margin-block: var(--cpd-space-3x);
+    }
 }

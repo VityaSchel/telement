@@ -34,8 +34,12 @@ exports[`AdvancedRoomSettingsTab > should render as expected 1`] = `
             <div
               class="mx_SettingsSubsection_content"
             >
-              <div>
-                <span>
+              <div
+                class="mx_CopyableText_field"
+              >
+                <span
+                  class="mx_CopyableText_label"
+                >
                   Internal room ID
                 </span>
                 <span

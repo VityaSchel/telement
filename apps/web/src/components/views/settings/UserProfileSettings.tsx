@@ -30,6 +30,7 @@ import LogoutDialog, { shouldShowLogoutDialog } from "../dialogs/LogoutDialog";
 import Modal from "../../../Modal";
 import defaultDispatcher from "../../../dispatcher/dispatcher";
 import { SettingsSection } from "./shared/SettingsSection.tsx";
+import { SettingsSubsectionText } from "./shared/SettingsSubsection.tsx";
 import { SetStatusViewModel } from "../../../viewmodels/status/SetStatusViewModel.ts";
 import SettingsStore from "../../../settings/SettingsStore.ts";
 
@@ -47,8 +48,8 @@ interface UsernameBoxProps {
 const UsernameBox: React.FC<UsernameBoxProps> = ({ username }) => {
     const labelId = useId();
     return (
-        <div className="mx_UserProfileSettings_profile_controls_userId">
-            <div className="mx_UserProfileSettings_profile_controls_userId_label" id={labelId}>
+        <div className="mx_UserProfileSettings_profile_controls_userId mx_CopyableText_field">
+            <div className="mx_CopyableText_label" id={labelId}>
                 {_t("settings|general|username")}
             </div>
             <CopyableText getTextToCopy={() => username} aria-labelledby={labelId}>
@@ -201,11 +202,11 @@ const UserProfileSettings: React.FC<UserProfileSettingsProps> = ({
     return (
         <SettingsSection heading={_t("common|profile")}>
             <div className="mx_UserProfileSettings">
-                <div>
+                <SettingsSubsectionText>
                     {someFieldsDisabled
                         ? _t("settings|general|profile_subtitle_oidc")
                         : _t("settings|general|profile_subtitle")}
-                </div>
+                </SettingsSubsectionText>
                 <div className="mx_UserProfileSettings_profile">
                     <AvatarSetting
                         avatar={avatarURL ?? undefined}
