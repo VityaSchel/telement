@@ -431,6 +431,18 @@ describe("InviteDialog", () => {
         expect(tile).toBeInTheDocument();
     });
 
+    it("should draw a suggested person's avatar at the 36px the Forward dialog's rooms have", async () => {
+        render(<InviteDialog kind={InviteKind.Invite} roomId={roomId} onFinished={vi.fn()} />);
+
+        const input = screen.getByTestId("invite-dialog-input");
+        input.focus();
+        await userEvent.keyboard(aliceId);
+
+        const option = await screen.findByRole("option", { name: aliceId });
+        const avatar = option.querySelector<HTMLElement>(".mx_BaseAvatar")!;
+        expect(avatar.style.getPropertyValue("--cpd-avatar-size")).toBe("36px");
+    });
+
     describe("while the invite is in progress", () => {
         it("should show a spinner", async () => {
             mockClient.invite.mockReturnValue(new Promise(() => {}));

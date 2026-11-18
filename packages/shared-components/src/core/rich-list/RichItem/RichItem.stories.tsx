@@ -18,7 +18,7 @@ const meta = {
     component: RichItem,
     tags: ["autodocs"],
     args: {
-        avatar: <div style={{ width: 32, height: 32, backgroundColor: "#ccc", borderRadius: "50%" }} />,
+        avatar: <div style={{ width: 36, height: 36, backgroundColor: "#ccc", borderRadius: "50%" }} />,
         title: "Rich Item Title",
         description: "This is a description of the rich item.",
         timestamp: currentTimestamp,

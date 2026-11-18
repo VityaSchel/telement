@@ -25,11 +25,16 @@
         "avatar description time";
 }
 
-/* Telement: rounded as rows are, with no divider between them, like the room list's */
+/* Telement: rounded as rows are, with no divider between them, like the room list's. They take the one hover fill, and
+   the pressed fill for the row the keyboard selects, as the Forward dialog's rows do (_ForwardDialog.pcss) */
 .richItem:hover,
 .richItem:focus {
-    background-color: var(--cpd-color-bg-subtle-secondary);
+    background-color: var(--cpd-color-bg-action-secondary-hovered);
     border-radius: var(--tl-radius-row);
+}
+
+.richItem:focus {
+    background-color: var(--cpd-color-bg-action-secondary-pressed);
 }
 
 .avatar {
@@ -37,9 +42,10 @@
     align-self: center;
 }
 
+/* Telement: the Forward dialog's 15px name (_ForwardDialog.pcss) */
 .title {
     grid-area: title;
-    font: var(--cpd-font-body-sm-semibold);
+    font: var(--cpd-font-body-md-regular);
     color: var(--cpd-color-text-primary);
 }
 
@@ -65,12 +71,19 @@
     color: var(--cpd-color-text-secondary);
 }
 
-/* A white check on the accent fill, which is deeper in dark themes (telement/tokens.css) */
+/* Telement: the name and the ID on tight lines, together as tall as the 36px avatar, so the row is 52px with the
+   avatar 8px from its start, top and bottom, as the Forward dialog's rows are */
+.title,
+.description {
+    line-height: var(--cpd-font-line-height-tight);
+}
+
+/* A white check on the accent fill, which is deeper in dark themes (telement/tokens.css), in the avatar's 36px */
 .checkmark {
     grid-area: avatar;
     align-self: center;
     background-color: var(--cpd-color-bg-accent-rest);
-    width: 32px;
-    height: 32px;
+    width: 36px;
+    height: 36px;
     border-radius: 100%;
 }

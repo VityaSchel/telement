@@ -33,7 +33,8 @@ export class DMRoomTile extends React.PureComponent<IDMRoomTileProps> {
     };
 
     public render(): React.ReactNode {
-        const avatarSize = "32px";
+        // Telement: the avatar size of the Forward dialog's rooms, so the two lists' rows match
+        const avatarSize = "36px";
         const avatar = (this.props.member as ThreepidMember).isEmail ? (
             <EmailPillAvatarIcon width={avatarSize} height={avatarSize} />
         ) : (

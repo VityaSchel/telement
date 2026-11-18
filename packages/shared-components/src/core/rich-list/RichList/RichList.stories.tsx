@@ -11,7 +11,7 @@ import { RichList } from "./RichList";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { RichItem } from "../RichItem";
 
-const avatar = <div style={{ width: 32, height: 32, backgroundColor: "#ccc", borderRadius: "50%" }} />;
+const avatar = <div style={{ width: 36, height: 36, backgroundColor: "#ccc", borderRadius: "50%" }} />;
 
 const meta = {
     title: "Core/RichList",

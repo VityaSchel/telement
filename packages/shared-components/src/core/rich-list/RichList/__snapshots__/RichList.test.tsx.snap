@@ -32,7 +32,7 @@ exports[`RichItem > renders the list 1`] = `
             style="--mx-flex-display: flex; --mx-flex-direction: row; --mx-flex-align: start; --mx-flex-justify: start; --mx-flex-gap: 0; --mx-flex-wrap: nowrap;"
           >
             <div
-              style="width: 32px; height: 32px; background-color: rgb(204, 204, 204); border-radius: 50%;"
+              style="width: 36px; height: 36px; background-color: rgb(204, 204, 204); border-radius: 50%;"
             />
           </div>
           <span
@@ -93,7 +93,7 @@ exports[`RichItem > renders the list 1`] = `
             style="--mx-flex-display: flex; --mx-flex-direction: row; --mx-flex-align: start; --mx-flex-justify: start; --mx-flex-gap: 0; --mx-flex-wrap: nowrap;"
           >
             <div
-              style="width: 32px; height: 32px; background-color: rgb(204, 204, 204); border-radius: 50%;"
+              style="width: 36px; height: 36px; background-color: rgb(204, 204, 204); border-radius: 50%;"
             />
           </div>
           <span
@@ -118,7 +118,7 @@ exports[`RichItem > renders the list 1`] = `
             style="--mx-flex-display: flex; --mx-flex-direction: row; --mx-flex-align: start; --mx-flex-justify: start; --mx-flex-gap: 0; --mx-flex-wrap: nowrap;"
           >
             <div
-              style="width: 32px; height: 32px; background-color: rgb(204, 204, 204); border-radius: 50%;"
+              style="width: 36px; height: 36px; background-color: rgb(204, 204, 204); border-radius: 50%;"
             />
           </div>
           <span
@@ -143,7 +143,7 @@ exports[`RichItem > renders the list 1`] = `
             style="--mx-flex-display: flex; --mx-flex-direction: row; --mx-flex-align: start; --mx-flex-justify: start; --mx-flex-gap: 0; --mx-flex-wrap: nowrap;"
           >
             <div
-              style="width: 32px; height: 32px; background-color: rgb(204, 204, 204); border-radius: 50%;"
+              style="width: 36px; height: 36px; background-color: rgb(204, 204, 204); border-radius: 50%;"
             />
           </div>
           <span
