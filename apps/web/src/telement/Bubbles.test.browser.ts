@@ -949,6 +949,21 @@ describe("Bubble layout", () => {
         });
     });
 
+    describe("links", () => {
+        it("are the accent, in formatted text and in linkified text, in either bubble", () => {
+            const link = '<a href="https://telegram.org">telegram.org</a>';
+            const formatted = `<div class="mx_EventTile_content"><div class="mx_EventTile_body markdown-body"><p>See ${link}</p></div></div>`;
+            const linked = `<div class="mx_EventTile_content"><div class="mx_EventTile_body LinkedText_container">See ${link}</div></div>`;
+            render(tile(formatted), tile(linked), tile(formatted, { own: true }), tile(linked, { own: true }));
+            const links = all("a[href]");
+
+            expect(links).toHaveLength(4);
+            for (const element of links) {
+                expect(getComputedStyle(element).color).toBe(tokenColor("--tl-accent-900", element));
+            }
+        });
+    });
+
     describe("informational rows", () => {
         function initialOffset(avatarElement: Element): number {
             const range = document.createRange();

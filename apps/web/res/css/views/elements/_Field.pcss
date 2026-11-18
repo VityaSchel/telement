@@ -143,10 +143,12 @@ Please see LICENSE files in the repository root for full details.
     pointer-events: initial;
 }
 
+/* Telement: the focus blue of the border the label sits on, rather than the link color: the accent is under 4.5:1 on
+   white */
 .mx_Field input:focus + label,
 .mx_Field select:focus + label,
 .mx_Field textarea:focus + label {
-    color: $accent-alt;
+    color: var(--cpd-color-border-focused);
 }
 
 /* Compound's disabled field: a gray fill and border, and disabled text. The label keeps the background it floats on */

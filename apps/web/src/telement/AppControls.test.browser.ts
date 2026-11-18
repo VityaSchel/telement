@@ -637,7 +637,7 @@ describe("App controls", () => {
             expect(center(get("label"))).toBe(box(get(".mx_Field")).top + border / 2);
         });
 
-        it("darken the border on hover and turn it Compound's focus blue when focused", async () => {
+        it("darken the border on hover and turn it and the label Compound's focus blue when focused", async () => {
             render(field("Room name"));
             const fieldBox = get(".mx_Field");
             const border = (): string => settledStyle(fieldBox).borderTopColor;
@@ -648,6 +648,8 @@ describe("App controls", () => {
             expect(border()).not.toBe(rest);
             get("input").focus();
             expect(border()).toBe(colorOf("--cpd-color-border-focused"));
+            // Not the link color, which is the accent
+            expect(settledStyle(get("label")).color).toBe(colorOf("--cpd-color-border-focused"));
         });
 
         it("show Compound's disabled and invalid looks", async () => {
@@ -761,6 +763,7 @@ describe("App controls", () => {
             text.focus();
             expect(settledStyle(text).borderTopColor).toBe(colorOf("--cpd-color-border-focused"));
             expect(getComputedStyle(text).outlineStyle).toBe("none");
+            expect(getComputedStyle(get("[data-testid=text] label")).color).toBe(colorOf("--cpd-color-border-focused"));
         });
 
         it("put a text area's label on its first line", () => {

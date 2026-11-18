@@ -189,8 +189,9 @@ input[class*="_control_"] + button[class*="_action_"] {
         background-color: var(--cpd-color-bg-canvas-default);
     }
 
+    /* The focus blue of the border it sits on, rather than the link color: the accent is under 4.5:1 on white */
     &:focus-within > label[class*="_label_"] {
-        color: var(--cpd-color-text-link-external);
+        color: var(--cpd-color-border-focused);
     }
 
     > label[class*="_label_"][data-invalid] {

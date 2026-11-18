@@ -157,6 +157,8 @@ Please see LICENSE files in the repository root for full details.
     --cpd-color-icon-accent-tertiary: var(--tl-accent-800);
     --cpd-color-text-action-accent: var(--tl-accent-900);
     --cpd-color-text-badge-accent: var(--tl-accent-1100);
+    /* Links use the accent, as in Telegram, rather than Compound's own link blue */
+    --cpd-color-text-link-external: var(--tl-accent-900);
 
     /* The selected room: the accent with white text, as in Telegram's day themes */
     --tl-color-bg-selection: var(--tl-accent-900);
