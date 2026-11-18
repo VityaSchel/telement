@@ -158,6 +158,21 @@ describe("A poll in the bubble layout", () => {
         expect(box("legend").left - box(".line").left).toBe(12);
     });
 
+    it.each<"ltr" | "rtl">(["ltr", "rtl"])(
+        "starts what the question's icon draws and the radios' rings on the bubble's text edge, with the bars (%s)",
+        (dir) => {
+            render("bubble", { dir });
+            const contentStart = box(".mx_PollOption_popularityBackground")[dir === "ltr" ? "left" : "right"];
+            const icon = box("legend svg");
+
+            // The poll icon draws 2px inside its 20px box
+            expect(dir === "ltr" ? icon.left + 2 : icon.right - 2).toBe(contentStart);
+            for (const ring of boxes(".mx_PollOption input + div")) {
+                expect(dir === "ltr" ? ring.left : ring.right).toBe(contentStart);
+            }
+        },
+    );
+
     it("centers each option's radio on its label's line", () => {
         render("bubble");
 

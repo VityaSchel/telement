@@ -62,6 +62,12 @@ $poll-max-width: 550px;
         max-width: 100%; /* prevent overflowing a reply tile */
         margin-top: 0;
 
+        /* The question's icon draws 2px inside its 20px box: pulled out by that, what it draws starts on the bubble's
+           text edge, with the radios and the bars */
+        legend svg {
+            margin-inline-start: -2px;
+        }
+
         .mx_PollOption {
             padding: 0;
             border: none;
