@@ -7,7 +7,8 @@ Please see LICENSE files in the repository root for full details.
 */
 
 .mx_ForwardDialog {
-    width: 520px;
+    /* Telement: a list dialog, 640px with the dialog's 24px padding (TELEMENT.md, "Colors, type and components") */
+    width: calc(640px - 2 * var(--cpd-space-6x));
     color: $primary-content;
     display: flex;
     flex-direction: column;
@@ -15,12 +16,12 @@ Please see LICENSE files in the repository root for full details.
     min-height: 0;
     height: 80vh;
 
+    /* Telement: drawn like the section header of Start chat's suggestions (RichList), 16px under the title together
+       with the header's 8px margin, which this column doesn't collapse into its own */
     > h3 {
-        margin: 0 0 6px;
-        color: $secondary-content;
-        font-size: $font-12px;
-        font-weight: var(--cpd-font-weight-semibold);
-        line-height: $font-15px;
+        margin: var(--cpd-space-2x) 0;
+        font: var(--cpd-font-body-sm-semibold);
+        color: var(--cpd-color-text-secondary);
     }
 
     > .mx_ForwardDialog_preview {
@@ -42,36 +43,71 @@ Please see LICENSE files in the repository root for full details.
         .mx_MFileBody [data-type="actions"] {
             display: none;
         }
+
+        /* Telement: your own bubble sits at the content edge with its tail ending there, as in the settings previews
+           (_FontScalingPanel.pcss), and the preview is as tall as the bubble. The timeline's column for read receipts
+           and its space between messages have no place here. The fallback, the tail's width, is for stylelint, which
+           doesn't read the tile's own variables. */
+        &[data-layout="bubble"] .mx_EventTile {
+            margin-block: 0;
+            margin-inline-end: 0;
+
+            .mx_EventTile_line {
+                margin-inline-end: var(--event-tile-bubble-tail-width, var(--cpd-space-1-5x));
+            }
+        }
     }
 
+    /* Telement: the one divider color, 16px from what it divides */
     > hr {
         width: 100%;
         border: none;
-        border-top: 1px solid $input-border-color;
-        margin: 12px 0;
+        border-top: 1px solid var(--cpd-color-separator-primary);
+        margin: var(--cpd-space-4x) 0;
     }
 
     > .mx_ForwardList {
         display: contents;
 
         .mx_SearchBox {
-            /* To match the space around the title */
-            margin: 0 0 15px 0;
+            /* Telement: 16px above the list, as the divider is 16px from what it divides */
+            margin: 0 0 var(--cpd-space-4x) 0;
             flex-grow: 0;
-
-            &:not(:focus-within) + .mx_ForwardList_content {
-                /* Inhibit the styling if focus is not within the input which handles keyboard accessibility */
-                --mx_ForwardList_entry_selectedBgColor: transparent;
-            }
         }
 
         .mx_ForwardList_content {
             flex-grow: 1;
+            /* Telement: the rows highlight 8px outside the dialog's content edge and keep their content on it, as Start
+               chat's suggestions do (_InviteDialog.pcss), so the list reaches 8px past the edge on both sides */
+            margin-inline: calc(-1 * var(--cpd-space-2x));
         }
 
         .mx_ForwardList_noResults {
             display: block;
             margin-top: 24px;
+            /* Telement: back on the dialog's content edge from the list's 8px outside it */
+            margin-inline: var(--cpd-space-2x);
+        }
+
+        /* Telement: the row the arrow keys select while the search field has the focus, which Enter sends to, in the
+           pressed fill, so it can't be mistaken for the row under the pointer */
+        .mx_SearchBox:focus-within + .mx_ForwardList_content .mx_ForwardList_entry_active {
+            background-color: var(--cpd-color-bg-action-secondary-pressed);
+        }
+
+        /* Telement: the send button rests hidden, so ten of them don't outweigh the rooms' names, and shows on the row
+           under the pointer, on the row the arrow keys select and while it has the focus. It stays in the page, so it is
+           still there for the keyboard and screen readers, and the state of a forward, once sent, always shows. It hides
+           only where a pointer can hover, as nothing would ever show it on a touch screen */
+        @media (hover) {
+            .mx_ForwardList_sendButton.mx_ForwardList_canSend {
+                opacity: 0;
+            }
+        }
+
+        .mx_ForwardList_entry:is(:hover, :focus-within) .mx_ForwardList_sendButton,
+        .mx_SearchBox:focus-within + .mx_ForwardList_content .mx_ForwardList_entry_active .mx_ForwardList_sendButton {
+            opacity: 1;
         }
 
         .mx_ForwardList_results {
@@ -79,71 +115,108 @@ Please see LICENSE files in the repository root for full details.
                 margin-top: 24px;
             }
 
-            .mx_ForwardList_resultsList {
-                padding-right: 8px;
-            }
-
             .mx_ForwardList_entry {
                 display: flex;
                 justify-content: space-between;
-                height: 32px;
-                padding: 6px;
-                border-radius: 8px;
+                align-items: center;
+                /* Telement: Start chat's 52px two-line row (RichItem), with the avatar 8px from its start, top and
+                   bottom, and the send button as far from its end */
+                gap: var(--cpd-space-3x);
+                padding: var(--cpd-space-2x);
+                border-radius: var(--tl-radius-row);
 
+                /* Telement: the one hover fill, which a row also gets while the keyboard has its focus */
                 &:hover,
-                &.mx_ForwardList_entry_active {
-                    background-color: var(--mx_ForwardList_entry_selectedBgColor, $spacePanel-bg-color);
+                &:has(:focus-visible) {
+                    background-color: var(--cpd-color-bg-action-secondary-hovered);
                 }
 
                 .mx_ForwardList_roomButton {
                     display: flex;
-                    margin-right: 12px;
+                    align-items: center;
+                    gap: var(--cpd-space-3x);
                     min-width: 0;
+                }
 
-                    .mx_DecoratedRoomAvatar {
-                        margin-right: 12px;
-                    }
+                /* Telement: the name over the room's details, centered beside the avatar, or the name alone on its
+                   line when the room has no details */
+                .mx_ForwardList_entry_text {
+                    display: flex;
+                    flex-direction: column;
+                    min-width: 0;
+                }
 
-                    .mx_ForwardList_entry_name,
-                    .mx_ForwardList_entry_detail {
-                        line-height: 30px;
-                        overflow: hidden;
-                        white-space: nowrap;
-                        text-overflow: ellipsis;
-                    }
+                .mx_ForwardList_entry_name,
+                .mx_ForwardList_entry_detail {
+                    overflow: hidden;
+                    white-space: nowrap;
+                    text-overflow: ellipsis;
+                }
 
-                    .mx_ForwardList_entry_name {
-                        font-size: $font-15px;
-                    }
+                /* Telement: Start chat's 15px name over a 13px secondary line, their tight lines together as tall as
+                   the avatar */
+                .mx_ForwardList_entry_name {
+                    font: var(--cpd-font-body-md-regular);
+                    line-height: var(--cpd-font-line-height-tight);
+                    color: var(--cpd-color-text-primary);
+                }
 
-                    .mx_ForwardList_entry_detail {
-                        font-size: $font-12px;
-                        margin-left: 8px;
-                        color: $tertiary-content;
+                .mx_ForwardList_entry_detail {
+                    font: var(--cpd-font-body-sm-regular);
+                    line-height: var(--cpd-font-line-height-tight);
+                    color: var(--cpd-color-text-secondary);
+
+                    &:empty {
+                        display: none;
                     }
                 }
 
+                /* Telement: a 36px circle around a 24px accent paper plane, transparent until hovered, as the
+                   composer's send button is (_MessageComposer.pcss). Once sent, the state of the forward takes its
+                   place in the same circle */
                 .mx_ForwardList_sendButton {
-                    position: relative;
-                    margin-left: 12px;
-
-                    &:not(.mx_ForwardList_canSend) .mx_ForwardList_sendLabel {
-                        /* Hide the "Send" label while preserving button size */
-                        visibility: hidden;
-                    }
+                    flex-shrink: 0;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    box-sizing: border-box;
+                    width: var(--tl-control-size);
+                    height: var(--tl-control-size);
+                    border-radius: var(--tl-radius-control);
+                    color: var(--cpd-color-icon-accent-primary);
 
                     & > svg {
-                        position: absolute;
-                        width: 14px;
-                        height: 14px;
-                        color: $accent;
+                        width: var(--cpd-space-6x);
+                        height: var(--cpd-space-6x);
                     }
 
-                    .mx_ForwardDialog_notificationBadge {
-                        /* Match the failed to send indicator's color with the disabled button */
-                        background-color: $button-danger-disabled-fg-color;
+                    /* A translucent gray, so the circle shows a step over the row's fill whether the row is hovered or
+                       selected. An opaque gray would match one of them: the subtle one is the selected row's fill in
+                       dark themes. */
+                    &:not(.mx_AccessibleButton_disabled):hover {
+                        background-color: var(--cpd-color-alpha-gray-300);
+                    }
+
+                    &.mx_ForwardList_canSend.mx_AccessibleButton_disabled {
+                        color: var(--cpd-color-icon-disabled);
+                    }
+
+                    /* The plane points the way the text runs */
+                    &.mx_ForwardList_canSend:dir(rtl) > svg {
+                        transform: scaleX(-1);
                     }
                 }
+            }
+
+            /* Telement: "and N others" holds its icon where the rooms hold their avatars */
+            .mx_OverflowTileView {
+                padding-block: var(--cpd-space-2x);
+                padding-inline-start: var(--cpd-space-2x);
+            }
+
+            .mx_OverflowTileView_icon {
+                padding: 0;
+                padding-inline-end: var(--cpd-space-3x);
             }
         }
     }

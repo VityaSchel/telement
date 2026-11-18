@@ -141,6 +141,41 @@ describe("ForwardDialog", () => {
         expect(previewAvatar?.getAttribute("title")).toBe("@bob:example.org");
     });
 
+    it("names the preview's layout, as the timeline does, so the bubble can sit on the content edge", () => {
+        const { container } = mountForwardDialog();
+
+        expect(container.querySelector(".mx_ForwardDialog_preview")).toHaveAttribute("data-layout", "bubble");
+    });
+
+    it("sends with a paper plane named Send rather than a Send label", () => {
+        const { container } = mountForwardDialog();
+        const buttons = screen.getAllByRole("button", { name: "Send" });
+
+        expect(buttons).toHaveLength(3);
+        for (const button of buttons) {
+            expect(button).toHaveClass("mx_ForwardList_sendButton");
+            expect(button.querySelector("svg")).toBeInTheDocument();
+            expect(button).toHaveTextContent("");
+        }
+        expect(container.querySelector(".mx_ForwardList_sendLabel")).toBeNull();
+    });
+
+    it("draws each room as Start chat draws a person: a 36px avatar beside the name over the room's details", () => {
+        const { container } = mountForwardDialog();
+
+        for (const entry of container.querySelectorAll(".mx_ForwardList_entry")) {
+            const text = entry.querySelector(".mx_ForwardList_roomButton > .mx_ForwardList_entry_text")!;
+
+            expect(
+                entry.querySelector<HTMLElement>(".mx_BaseAvatar")!.style.getPropertyValue("--cpd-avatar-size"),
+            ).toBe("36px");
+            expect([...text.children].map((child) => child.className)).toEqual([
+                "mx_ForwardList_entry_name",
+                "mx_ForwardList_entry_detail",
+            ]);
+        }
+    });
+
     it("filters the rooms", async () => {
         const { container } = mountForwardDialog();
 

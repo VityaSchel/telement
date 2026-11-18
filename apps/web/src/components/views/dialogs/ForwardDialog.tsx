@@ -23,7 +23,7 @@ import {
     type TimelineEvents,
 } from "matrix-js-sdk/src/matrix";
 import { KnownMembership } from "matrix-js-sdk/src/types";
-import { CheckCircleIcon, CircleIcon } from "@vector-im/compound-design-tokens/assets/web/icons";
+import { CheckCircleIcon, CircleIcon, SendIcon } from "@vector-im/compound-design-tokens/assets/web/icons";
 import { AutoHideScrollbar } from "@element-hq/web-shared-components";
 
 import { _t } from "../../../languageHandler";
@@ -119,6 +119,9 @@ const Entry: React.FC<IEntryProps<any>> = ({ room, type, content, matrixClient: 
     let icon;
     if (sendState === SendState.CanSend) {
         className = "mx_ForwardList_canSend";
+        // Telement: a paper plane rather than a "Send" label, so the title names the button and shows as its tooltip
+        title = _t("forward|send_label");
+        icon = <SendIcon />;
         if (!room.maySendMessage()) {
             disabled = true;
             title = _t("forward|no_perms_title");
@@ -165,14 +168,18 @@ const Entry: React.FC<IEntryProps<any>> = ({ room, type, content, matrixClient: 
                 placement="top"
                 tabIndex={isActive ? 0 : -1}
             >
-                <DecoratedRoomAvatar room={room} size="32px" tooltipProps={{ tabIndex: isActive ? 0 : -1 }} />
-                <span className="mx_ForwardList_entry_name" id={`${id}_name`}>
-                    {room.name}
+                {/* Telement: Start chat's row (RichItem), its 36px avatar beside the name over the room's details */}
+                <DecoratedRoomAvatar room={room} size="36px" tooltipProps={{ tabIndex: isActive ? 0 : -1 }} />
+                <span className="mx_ForwardList_entry_text">
+                    <span className="mx_ForwardList_entry_name" id={`${id}_name`}>
+                        {room.name}
+                    </span>
+                    <RoomContextDetails component="span" className="mx_ForwardList_entry_detail" room={room} />
                 </span>
-                <RoomContextDetails component="span" className="mx_ForwardList_entry_detail" room={room} />
             </AccessibleButton>
+            {/* Telement: an icon button that shows while the row is hovered or selected from the keyboard
+                (_ForwardDialog.pcss), and the state of the forward in its place once sent */}
             <AccessibleButton
-                kind={sendState === SendState.Failed ? "danger_outline" : "primary_outline"}
                 className={`mx_ForwardList_sendButton ${className}`}
                 onClick={send}
                 disabled={disabled}
@@ -181,7 +188,6 @@ const Entry: React.FC<IEntryProps<any>> = ({ room, type, content, matrixClient: 
                 tabIndex={isActive ? 0 : -1}
                 id={`${id}_send`}
             >
-                <div className="mx_ForwardList_sendLabel">{_t("forward|send_label")}</div>
                 {icon}
             </AccessibleButton>
         </div>
@@ -339,10 +345,12 @@ const ForwardDialog: React.FC<IProps> = ({ matrixClient: cli, event, permalinkCr
             fixedWidth={false}
         >
             <h3>{_t("forward|message_preview_heading")}</h3>
+            {/* Telement: the layout is named, as the timeline names it, for the bubble's place in the preview */}
             <div
                 className={classnames("mx_ForwardDialog_preview", {
                     mx_IRCLayout: previewLayout == Layout.IRC,
                 })}
+                data-layout={previewLayout}
             >
                 <EventPresentationContextProvider layout={previewLayout}>
                     <EventTile
