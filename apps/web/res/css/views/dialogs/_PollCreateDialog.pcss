@@ -56,7 +56,9 @@ Please see LICENSE files in the repository root for full details.
         margin-bottom: 40px; /* arbitrary to create scrollable area under the poll */
     }
 
-    .mx_AccessibleButton_disabled {
+    /* Only the buttons without a kind, such as an option's remove button, fade while disabled. "Add option" already
+       has Compound's disabled look from its kind (_AccessibleButton.pcss), and fading it as well would wash it out. */
+    .mx_AccessibleButton_disabled:not(.mx_AccessibleButton_hasKind) {
         opacity: 0.4;
     }
 }

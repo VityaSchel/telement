@@ -22,24 +22,6 @@ Please see LICENSE files in the repository root for full details.
         box-sizing: content-box;
     }
 
-    &.mx_AccessibleButton_disabled {
-        cursor: not-allowed;
-
-        &.mx_AccessibleButton_kind_icon_primary,
-        &.mx_AccessibleButton_kind_icon_primary_outline,
-        &.mx_AccessibleButton_kind_primary,
-        &.mx_AccessibleButton_kind_primary_outline,
-        &.mx_AccessibleButton_kind_primary_sm,
-        &.mx_AccessibleButton_kind_link,
-        &.mx_AccessibleButton_kind_link_accent,
-        &.mx_AccessibleButton_kind_link_inline,
-        &.mx_AccessibleButton_kind_danger_inline,
-        &.mx_AccessibleButton_kind_content_inline,
-        &.mx_AccessibleButton_kind_link_sm {
-            opacity: 0.4;
-        }
-    }
-
     &.mx_AccessibleButton_hasKind {
         /* Compound's md button, less the 1px border of the bordered kinds */
         padding-block: calc(var(--cpd-space-1x) - var(--cpd-border-width-1));
@@ -133,29 +115,12 @@ Please see LICENSE files in the repository root for full details.
         color: var(--cpd-color-text-on-solid-primary);
         background-color: var(--cpd-color-bg-critical-primary);
         border: 1px solid var(--cpd-color-bg-critical-primary);
-
-        &.mx_AccessibleButton_disabled {
-            color: var(--cpd-color-text-on-solid-primary);
-            background-color: var(--cpd-color-bg-critical-primary);
-        }
     }
 
     &.mx_AccessibleButton_kind_danger_outline {
         color: var(--cpd-color-text-critical-primary);
         background-color: transparent;
         border: 1px solid var(--cpd-color-border-critical-subtle);
-
-        &.mx_AccessibleButton_disabled {
-            color: var(--cpd-color-text-disabled);
-            border-color: var(--cpd-color-border-disabled);
-        }
-    }
-
-    &.mx_AccessibleButton_kind_danger_sm {
-        &.mx_AccessibleButton_disabled {
-            color: var(--cpd-color-text-disabled);
-            background-color: var(--cpd-color-bg-subtle-primary);
-        }
     }
 
     /* Compound Button's hover and pressed colors for the matching kind */
@@ -262,5 +227,45 @@ Please see LICENSE files in the repository root for full details.
     &.mx_AccessibleButton_kind_content_inline {
         display: inline;
         text-decoration: underline;
+    }
+
+    /* Every button is disabled the way Compound's Button is, for the kind each of these stands for: filled kinds, red
+       ones too, get its gray fill, outline kinds its gray outline on the subtle fill, and plain and link kinds only
+       its disabled text color. Last in the file, so that it wins over each kind's own colors. */
+    &.mx_AccessibleButton_disabled {
+        cursor: not-allowed;
+
+        &:is(
+            .mx_AccessibleButton_kind_primary,
+            .mx_AccessibleButton_kind_primary_sm,
+            .mx_AccessibleButton_kind_danger,
+            .mx_AccessibleButton_kind_danger_sm,
+            .mx_AccessibleButton_kind_icon_primary
+        ) {
+            color: var(--cpd-color-text-disabled);
+            background-color: var(--cpd-color-bg-subtle-primary);
+            border-color: var(--cpd-color-bg-subtle-primary);
+        }
+
+        &:is(
+            .mx_AccessibleButton_kind_primary_outline,
+            .mx_AccessibleButton_kind_danger_outline,
+            .mx_AccessibleButton_kind_icon_primary_outline
+        ) {
+            color: var(--cpd-color-text-disabled);
+            background-color: var(--cpd-color-bg-subtle-secondary);
+            border-color: var(--cpd-color-border-interactive-secondary);
+        }
+
+        &:is(
+            .mx_AccessibleButton_kind_secondary,
+            .mx_AccessibleButton_kind_link,
+            .mx_AccessibleButton_kind_link_inline,
+            .mx_AccessibleButton_kind_link_sm,
+            .mx_AccessibleButton_kind_danger_inline,
+            .mx_AccessibleButton_kind_content_inline
+        ) {
+            color: var(--cpd-color-text-disabled);
+        }
     }
 }

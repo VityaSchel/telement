@@ -7,6 +7,9 @@ Please see LICENSE files in the repository root for full details.
 
 import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
 import { userEvent } from "vitest/browser";
+import { createElement } from "react";
+import { renderToStaticMarkup } from "react-dom/server";
+import { Button } from "@vector-im/compound-web";
 import compoundBase from "@vector-im/compound-design-tokens/assets/web/css/cpd-common-base.css?raw";
 import compoundSemantic from "@vector-im/compound-design-tokens/assets/web/css/cpd-common-semantic.css?raw";
 import compoundLightTheme from "@vector-im/compound-design-tokens/assets/web/css/cpd-theme-light-base.css?raw";
@@ -15,7 +18,11 @@ import compoundStyles from "@vector-im/compound-web/dist/style.css?raw";
 // The package doesn't export its token stylesheet on its own
 // eslint-disable-next-line no-restricted-imports
 import telementTokens from "../../../../../../packages/shared-components/src/telement/tokens.css?raw";
+import fontSizes from "../../../../res/css/_font-sizes.pcss?raw";
 import accessibleButtonStyles from "../../../../res/css/views/elements/_AccessibleButton.pcss?raw";
+import pollCreateDialogStyles from "../../../../res/css/views/dialogs/_PollCreateDialog.pcss?raw";
+import lightTheme from "../../../../res/themes/light/css/_light.pcss?raw";
+import { toBrowserCss } from "../../../test/telement/browserCss";
 import { press, settledStyle, tokenColor } from "../../../test/telement/computedStyle";
 
 const PILL_KINDS = [
@@ -77,6 +84,34 @@ function render(html: string): void {
     `;
 }
 
+/** The Compound Button kind each AccessibleButton kind stands for, whose disabled look it takes. */
+const COMPOUND_KINDS = {
+    primary: "primary",
+    primary_sm: "primary",
+    danger: "primary",
+    danger_sm: "primary",
+    icon_primary: "primary",
+    primary_outline: "secondary",
+    danger_outline: "secondary",
+    icon_primary_outline: "secondary",
+    secondary: "tertiary",
+    link: "tertiary",
+    link_inline: "tertiary",
+    link_sm: "tertiary",
+    danger_inline: "tertiary",
+    content_inline: "tertiary",
+} as const;
+
+/** A disabled Compound Button of the given kind, red for the destructive kinds as their AccessibleButton kinds are. */
+function disabledCompoundButton(
+    kind: (typeof COMPOUND_KINDS)[keyof typeof COMPOUND_KINDS],
+    destructive: boolean,
+): string {
+    return renderToStaticMarkup(
+        createElement(Button, { kind, destructive, disabled: true, size: "md", id: `compound-${kind}` }, "Continue"),
+    );
+}
+
 function element(id: string): HTMLElement {
     return document.getElementById(id)!;
 }
@@ -96,7 +131,10 @@ describe("AccessibleButton styles", () => {
             /* Compound's stylesheet defines the pill radius */
             @layer compound-web { ${compoundStyles} }
             @layer shared-components { ${telementTokens} }
-            @layer app-web { ${accessibleButtonStyles} }
+            @layer app-web {
+                ${accessibleButtonStyles}
+                ${toBrowserCss(pollCreateDialogStyles, lightTheme, fontSizes)}
+            }
         `;
         document.head.append(stylesheet);
     });
@@ -170,6 +208,50 @@ describe("AccessibleButton styles", () => {
         const expanded = settledStyle(element("expanded"));
         expect(expanded.backgroundColor).toBe(lightColor(colors.pressed));
         expect(borderColor(expanded)).toBe(pressedBorder);
+    });
+
+    it.each(Object.entries(COMPOUND_KINDS))(
+        "disables the %s kind the way Compound disables its %s Button, without fading it",
+        (kind, compoundKind) => {
+            render(
+                accessibleButton(kind, "Continue", { disabled: true }) +
+                    disabledCompoundButton(compoundKind, kind.startsWith("danger")),
+            );
+            const disabled = getComputedStyle(element(kind));
+            const compound = getComputedStyle(element(`compound-${compoundKind}`));
+            // A filled button's border takes its fill, an outline button's is Compound's; plain buttons have none
+            const border = (style: CSSStyleDeclaration): string | null =>
+                compoundKind === "tertiary" ? null : style.borderTopColor;
+            const compoundBorder = {
+                primary: compound.backgroundColor,
+                secondary: compound.borderTopColor,
+                tertiary: null,
+            };
+
+            expect(disabled.opacity).toBe("1");
+            expect(disabled.cursor).toBe("not-allowed");
+            expect(disabled.color).toBe(lightColor("--cpd-color-text-disabled"));
+            expect({ color: disabled.color, fill: disabled.backgroundColor, border: border(disabled) }).toEqual({
+                color: compound.color,
+                fill: compound.backgroundColor,
+                border: compoundBorder[compoundKind],
+            });
+        },
+    );
+
+    it("fades only the poll dialog's buttons without a kind while disabled, not those with Compound's disabled look", () => {
+        render(`
+            <div class="mx_PollCreateDialog">
+                ${accessibleButton("secondary", "Add option", { disabled: true })}
+                <div id="remove" class="mx_AccessibleButton mx_PollCreateDialog_removeOption mx_AccessibleButton_disabled"
+                    aria-disabled="true" role="button" tabindex="0"></div>
+            </div>
+        `);
+        const addOption = getComputedStyle(element("secondary"));
+
+        expect(addOption.opacity).toBe("1");
+        expect(addOption.color).toBe(lightColor("--cpd-color-text-disabled"));
+        expect(getComputedStyle(element("remove")).opacity).toBe("0.4");
     });
 
     it("leaves a disabled pill's colors alone on hover", async () => {
