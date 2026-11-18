@@ -41,6 +41,12 @@ Please see LICENSE files in the repository root for full details.
         position: absolute;
         right: var(--cpd-space-4x);
     }
+
+    /* Red would hardly stand out on the selected tab's plate, so the dot is white there, as the room list's badges are
+       on the selected room */
+    .mx_TabbedView_tabLabel_active.mx_SettingsDialog_tabLabelsAlert::after {
+        background-color: var(--tl-color-on-selection);
+    }
 }
 
 /* On narrow viewports, the tab labels are hidden, so we need to shift the indicator so it isn't over the tab icon. */

@@ -6,6 +6,7 @@ Please see LICENSE files in the repository root for full details.
 */
 
 import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
+import { userEvent } from "vitest/browser";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { InlineField, Label, RadioControl, Root, ToggleControl } from "@vector-im/compound-web";
@@ -13,34 +14,49 @@ import compoundBase from "@vector-im/compound-design-tokens/assets/web/css/cpd-c
 import compoundSemantic from "@vector-im/compound-design-tokens/assets/web/css/cpd-common-semantic.css?raw";
 import compoundLightTheme from "@vector-im/compound-design-tokens/assets/web/css/cpd-theme-light-base.css?raw";
 import compoundLightSemantic from "@vector-im/compound-design-tokens/assets/web/css/cpd-theme-light-semantic.css?raw";
+import compoundDarkTheme from "@vector-im/compound-design-tokens/assets/web/css/cpd-theme-dark-base.css?raw";
+import compoundDarkSemantic from "@vector-im/compound-design-tokens/assets/web/css/cpd-theme-dark-semantic.css?raw";
 import compoundStyles from "@vector-im/compound-web/dist/style.css?raw";
 // The package doesn't export its token stylesheet on its own
 // eslint-disable-next-line no-restricted-imports
 import telementTokens from "../../../../packages/shared-components/src/telement/tokens.css?raw";
 import fontSizes from "../../res/css/_font-sizes.pcss?raw";
 import tabbedViewStyles from "../../res/css/structures/_TabbedView.pcss?raw";
+import settingsDialogStyles from "../../res/css/views/dialogs/_SettingsDialog.pcss?raw";
 import themeChoicePanelStyles from "../../res/css/views/settings/_ThemeChoicePanel.pcss?raw";
 import deviceSecurityCardStyles from "../../res/css/components/views/settings/devices/_DeviceSecurityCard.pcss?raw";
 import lightTheme from "../../res/themes/light/css/_light.pcss?raw";
+import darkTheme from "../../res/themes/dark/css/_dark.pcss?raw";
 import { cornerRadii, toBrowserCss } from "../test/telement/browserCss";
+import { settledStyle, tokenColor } from "../test/telement/computedStyle";
 
 const TAB_NAMES = ["Account", "Sessions", "Appearance", "Notifications"];
 
 /**
- * A settings dialog as BaseDialog and TabbedView render it. The dialog's 40px inline padding, where its title starts,
- * is _common.pcss's .mx_Dialog padding.
+ * A settings dialog as BaseDialog, UserSettingsDialog and TabbedView render it, with the first tab selected. The
+ * dialog's 40px inline padding, where its title starts, is _common.pcss's .mx_Dialog padding.
+ *
+ * @param responsive - Whether the tabs collapse to their icons in a narrow window.
+ * @param alertTabs - The tabs showing the red dot, as the Encryption tab does until recovery is set up.
  */
-function renderSettingsDialog({ responsive }: { responsive: boolean }): HTMLElement {
+function renderSettingsDialog({
+    responsive,
+    alertTabs = [],
+}: {
+    responsive: boolean;
+    alertTabs?: string[];
+}): HTMLElement {
     const tabs = TAB_NAMES.map(
         (name, index) => `
-            <li class="mx_AccessibleButton mx_TabbedView_tabLabel ${index === 0 ? "mx_TabbedView_tabLabel_active" : ""}"
-                role="tab" tabindex="${index === 0 ? 0 : -1}">
+            <li class="mx_AccessibleButton mx_TabbedView_tabLabel ${index === 0 ? "mx_TabbedView_tabLabel_active" : ""}
+                ${alertTabs.includes(name) ? "mx_SettingsDialog_tabLabelsAlert" : ""}"
+                role="tab" data-testid="settings-tab-${name}" tabindex="${index === 0 ? 0 : -1}">
                 <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /></svg>
                 <span class="mx_TabbedView_tabLabel_text">${name}</span>
             </li>`,
     ).join("");
     document.body.innerHTML = `
-        <div class="mx_Dialog" style="position: relative; box-sizing: border-box; width: 900px; height: 600px; padding: 32px 40px">
+        <div class="mx_Dialog mx_UserSettingsDialog" style="position: relative; box-sizing: border-box; width: 900px; height: 600px; padding: 32px 40px">
             <div class="mx_Dialog_header"><h1 class="mx_Dialog_title" style="margin: 0; font-size: 24px">Settings</h1></div>
             <div class="mx_TabbedView mx_TabbedView_tabsOnLeft ${responsive ? "mx_TabbedView_responsive" : ""}">
                 <ul class="mx_TabbedView_tabLabels" role="tablist">${tabs}</ul>
@@ -218,6 +234,94 @@ describe("Settings dialogs", () => {
             const iconRect = icon.getBoundingClientRect();
             // 12 less the inset is below zero, so the tile takes the inline radius rather than a concentric one
             expect([iconRect.left - cardRect.left, iconRect.top - cardRect.top]).toEqual([17, 17]);
+        });
+    });
+});
+
+/** Each theme's class with the theme stylesheets it is built from, in the order its entry point imports them. */
+const THEMES: [string, string[]][] = [
+    ["cpd-theme-light", [lightTheme]],
+    ["cpd-theme-dark", [lightTheme, darkTheme]],
+];
+
+describe("Settings dialog tab selection", () => {
+    beforeAll(() => {
+        // Each theme's variables apply within its own class, as each theme is a separate stylesheet in the app
+        const themed = THEMES.map(
+            ([theme, sources]) =>
+                `.${theme} { ${toBrowserCss(tabbedViewStyles + settingsDialogStyles, ...sources, fontSizes)} }`,
+        ).join("\n");
+        stylesheet = document.createElement("style");
+        stylesheet.textContent = `
+            @layer compound-tokens, shared-components, app-web;
+            @layer compound-tokens {
+                ${compoundBase} ${compoundSemantic}
+                ${compoundLightTheme} ${compoundLightSemantic} ${compoundDarkTheme} ${compoundDarkSemantic}
+            }
+            @layer shared-components { ${telementTokens} }
+            @layer app-web {
+                body { margin: 0; }
+                ${themed}
+            }
+        `;
+        document.head.append(stylesheet);
+    });
+
+    afterAll(() => {
+        stylesheet.remove();
+    });
+
+    afterEach(async () => {
+        await userEvent.unhover(document.body);
+        document.body.innerHTML = "";
+    });
+
+    /** Renders the dialog inside a container of the theme, as the app's root carries the theme's class. */
+    function renderInTheme(theme: string, alertTabs?: string[]): HTMLElement {
+        renderSettingsDialog({ responsive: false, alertTabs });
+        const container = document.createElement("div");
+        container.className = theme;
+        container.append(...document.body.childNodes);
+        document.body.append(container);
+        return container;
+    }
+
+    function tab(name: string): HTMLElement {
+        return document.querySelector<HTMLElement>(`[data-testid="settings-tab-${name}"]`)!;
+    }
+
+    describe.each(THEMES.map(([theme]) => theme))("in %s", (theme) => {
+        it("marks the selected tab with the room list's selection plate, its label and icon in white", () => {
+            const container = renderInTheme(theme);
+            const selected = settledStyle(tab("Account"));
+            const onSelection = tokenColor("--tl-color-on-selection", container);
+
+            expect(selected.backgroundColor).toBe(tokenColor("--tl-color-bg-selection", container));
+            expect(selected.color).toBe(onSelection);
+            expect(getComputedStyle(tab("Account").querySelector("svg")!).color).toBe(onSelection);
+            expect(settledStyle(tab("Sessions")).backgroundColor).toBe("rgba(0, 0, 0, 0)");
+        });
+
+        it("fills a hovered tab in the room list's hover gray, and darkens the selected plate on hover", async () => {
+            const container = renderInTheme(theme);
+
+            await userEvent.hover(tab("Sessions"));
+            const hovered = settledStyle(tab("Sessions"));
+            expect(hovered.backgroundColor).toBe(tokenColor("--cpd-color-bg-action-tertiary-hovered", container));
+            expect(hovered.color).toBe(tokenColor("--cpd-color-text-primary", container));
+
+            await userEvent.hover(tab("Account"));
+            const selected = settledStyle(tab("Account"));
+            expect(selected.backgroundColor).toBe(tokenColor("--tl-color-bg-selection-hovered", container));
+            expect(selected.color).toBe(tokenColor("--tl-color-on-selection", container));
+        });
+
+        it("draws the alert dot in white on the selected tab, and red on the others", () => {
+            const container = renderInTheme(theme, ["Account", "Notifications"]);
+            const dot = (name: string): string => getComputedStyle(tab(name), "::after").backgroundColor;
+
+            expect(dot("Account")).toBe(tokenColor("--tl-color-on-selection", container));
+            expect(dot("Notifications")).toBe(tokenColor("--cpd-color-icon-critical-primary", container));
         });
     });
 });
