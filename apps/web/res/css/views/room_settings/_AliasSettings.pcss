@@ -18,3 +18,12 @@ Please see LICENSE files in the repository root for full details.
         display: none;
     }
 }
+
+/* Telement: the publish toggle starts 12px under the main address field, measured on the toggle, which Compound
+   centers on its label's line, 1.25px under the line's top, rather than 9px under it through the list's 8px gap */
+.mx_SettingsFieldset_content > .mx_Field + .mx_RoomPublishSetting {
+    margin-top: calc(
+        var(--cpd-space-3x) - var(--cpd-space-2x) -
+            (var(--cpd-font-size-body-md) * var(--cpd-font-line-height-regular) - var(--cpd-space-5x)) / 2
+    );
+}

@@ -87,7 +87,7 @@ export default class RoomPublishSetting extends React.PureComponent<IProps, ISta
         const enabled = canSetCanonicalAlias && (isRoomPublishable || this.state.isRoomPublished);
 
         return (
-            <Form.Root onSubmit={onSubmitPreventDefault}>
+            <Form.Root className="mx_RoomPublishSetting" onSubmit={onSubmitPreventDefault}>
                 <SettingsToggleInput
                     name="room-publish"
                     checked={this.state.isRoomPublished}
