@@ -55,7 +55,7 @@ const UNBREAKABLE_SUMMARY = "@whatsapp_491512345678901234:matrix.bridged-network
 function summary(layout: string, expanded: boolean, text: string): string {
     const toggle =
         `<div aria-expanded="${expanded}" role="button" tabindex="0" class="mx_AccessibleButton ` +
-        `mx_GenericEventListSummary_toggle mx_AccessibleButton_hasKind mx_AccessibleButton_kind_link_inline">` +
+        `mx_GenericEventListSummary_toggle mx_AccessibleButton_hasKind mx_AccessibleButton_kind_link">` +
         `${expanded ? "Collapse" : "Expand"}</div>`;
     const body = expanded
         ? `<div class="mx_GenericEventListSummary_spacer">&nbsp;</div><ol class="mx_GenericEventListSummary_unstyledList"></ol>`
@@ -181,6 +181,16 @@ describe("GenericEventListSummary styles", () => {
             const [expand, collapse] = document.querySelectorAll(".mx_GenericEventListSummary_toggle");
 
             expect(getComputedStyle(collapse).font).toBe(getComputedStyle(expand).font);
+        });
+
+        it("labels the toggle in sentence case, as a text button without an underline", () => {
+            document.body.innerHTML = wrap(summary("LAYOUT", false, SHORT_SUMMARY) + summary("LAYOUT", true, ""));
+
+            for (const toggle of document.querySelectorAll(".mx_GenericEventListSummary_toggle")) {
+                const style = getComputedStyle(toggle);
+                expect(style.textTransform).toBe("none");
+                expect(style.textDecorationLine).toBe("none");
+            }
         });
     });
 });

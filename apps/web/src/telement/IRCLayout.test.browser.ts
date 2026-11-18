@@ -60,8 +60,8 @@ const PICTURE = `
 /** A collapsed summary of membership events, as GenericEventListSummary renders it. */
 const SUMMARY = `
     <li class="mx_GenericEventListSummary" data-expanded="false" data-layout="irc">
-        <button class="mx_AccessibleButton mx_GenericEventListSummary_toggle mx_AccessibleButton_hasKind mx_AccessibleButton_kind_link_inline" aria-expanded="false">
-            expand
+        <button class="mx_AccessibleButton mx_GenericEventListSummary_toggle mx_AccessibleButton_hasKind mx_AccessibleButton_kind_link" aria-expanded="false">
+            Expand
         </button>
         <div class="mx_EventTile_line">
             <div class="mx_EventTile_info">

@@ -120,7 +120,7 @@ const GenericEventListSummary: React.FC<IProps> = ({
             data-testid={testId}
         >
             <AccessibleButton
-                kind="link_inline"
+                kind="link"
                 className="mx_GenericEventListSummary_toggle"
                 onClick={toggleExpanded}
                 aria-expanded={expanded}
