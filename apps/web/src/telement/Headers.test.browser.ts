@@ -250,6 +250,19 @@ describe("Telement's headers", () => {
             expect(header.right - button("Threads").getBoundingClientRect().right).toBe(12);
         });
 
+        it("keeps its background under the pointer, over its buttons as over the room's name", async () => {
+            render(h("div", { style: { width: "900px" } }, roomHeader(true)));
+            const header = document.querySelector<HTMLElement>(".mx_RoomHeader")!;
+            const canvas = tokenColor("--cpd-color-bg-canvas-default", header);
+
+            expect(getComputedStyle(header).backgroundColor).toBe(canvas);
+            for (const target of [button("Voice call"), document.querySelector(".mx_RoomHeader_infoWrapper")!]) {
+                await userEvent.hover(target);
+                expect(getComputedStyle(header).backgroundColor).toBe(canvas);
+            }
+            expect(getComputedStyle(header).transitionDuration).toBe("0s");
+        });
+
         it("makes the face pile a 36px pill with its avatars 8px from its top, bottom and start", () => {
             render(h("div", { style: { width: "900px" } }, roomHeader(true)));
 

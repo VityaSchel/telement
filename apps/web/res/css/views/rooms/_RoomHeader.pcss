@@ -13,7 +13,6 @@ Please see LICENSE files in the repository root for full details.
     padding: 0 var(--cpd-space-3x);
     border-bottom: 1px solid $separator;
     background-color: $background;
-    transition: all 0.2s ease;
 
     button:has(svg.mx_RoomHeader_toggled) {
         /* For enhanced visibility under contrast control */
@@ -28,10 +27,6 @@ Please see LICENSE files in the repository root for full details.
         block-size: var(--tl-control-size);
         padding: calc((var(--tl-control-size) - var(--cpd-space-6x)) / 2);
     }
-}
-
-.mx_RoomHeader:hover {
-    background-color: $header-panel-bg-hover;
 }
 
 .mx_RoomHeader_infoWrapper {
