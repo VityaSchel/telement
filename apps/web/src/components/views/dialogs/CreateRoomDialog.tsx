@@ -17,6 +17,7 @@ import React, {
 } from "react";
 import { type Room, RoomType, JoinRule, Preset, Visibility } from "matrix-js-sdk/src/matrix";
 import { Form, SettingsToggleInput } from "@vector-im/compound-web";
+import { ChevronDownIcon } from "@vector-im/compound-design-tokens/assets/web/icons";
 
 import SdkConfig from "../../../SdkConfig";
 import withValidation, { type IFieldState, type IValidationResult } from "../elements/Validation";
@@ -479,6 +480,7 @@ export default class CreateRoomDialog extends React.Component<IProps, IState> {
                             <details onToggle={this.onDetailsToggled} className="mx_CreateRoomDialog_details">
                                 <summary className="mx_CreateRoomDialog_details_summary">
                                     {this.state.detailsOpen ? _t("action|hide_advanced") : _t("action|show_advanced")}
+                                    <ChevronDownIcon className="mx_CreateRoomDialog_details_chevron" aria-hidden />
                                 </summary>
                                 <SettingsToggleInput
                                     name="unfederated"

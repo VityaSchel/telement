@@ -9,12 +9,16 @@ Please see LICENSE files in the repository root for full details.
 .mx_CreateRoomDialog_details {
     margin-top: 15px;
 
+    /* Telement: a disclosure button, without the underline standalone text buttons don't have (TELEMENT.md, "Radius and
+       spacing"), its chevron after the label turning up while the details are open */
     .mx_CreateRoomDialog_details_summary {
         list-style: none;
+        display: flex;
+        align-items: center;
+        gap: var(--cpd-space-1x);
         font-weight: var(--cpd-font-weight-semibold);
         cursor: pointer;
         color: var(--cpd-color-text-primary);
-        text-decoration: underline;
         width: fit-content;
 
         /* list-style doesn't do it for webkit */
@@ -25,6 +29,17 @@ Please see LICENSE files in the repository root for full details.
         &:not(:focus-visible) {
             outline: none;
         }
+    }
+
+    .mx_CreateRoomDialog_details_chevron {
+        flex-shrink: 0;
+        inline-size: 20px;
+        block-size: 20px;
+        transition: transform 0.1s linear;
+    }
+
+    &[open] .mx_CreateRoomDialog_details_chevron {
+        transform: rotate(180deg);
     }
 
     > div {
@@ -102,9 +117,10 @@ Please see LICENSE files in the repository root for full details.
         gap: var(--cpd-space-4x);
     }
 
+    /* Telement: help text across the fields' width, in the size of a toggle's description */
     p {
-        margin: 0 85px 0 0;
-        font-size: $font-12px;
+        margin: 0;
+        font: var(--cpd-font-body-sm-regular);
     }
 }
 
