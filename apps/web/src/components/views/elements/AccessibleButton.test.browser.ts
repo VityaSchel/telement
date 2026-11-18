@@ -181,19 +181,27 @@ describe("AccessibleButton styles", () => {
         expect(settledStyle(element("primary")).backgroundColor).toBe(before);
     });
 
-    it.each(["link", "link_inline", "danger_inline", "content_inline"])(
-        "keeps the %s kind an underlined link without padding or a minimum height",
-        (kind) => {
-            render(`<p style="margin: 0">Lost your password? ${accessibleButton(kind, "Reset it")}</p>`);
-            const link = element(kind);
-            const style = getComputedStyle(link);
+    it.each([
+        ["link", "none"],
+        ["link_inline", "underline"],
+        ["danger_inline", "underline"],
+        ["content_inline", "underline"],
+    ])("keeps the %s kind a link without padding or a minimum height, with text-decoration %s", (kind, decoration) => {
+        render(`<p style="margin: 0">Lost your password? ${accessibleButton(kind, "Reset it")}</p>`);
+        const link = element(kind);
+        const style = getComputedStyle(link);
 
-            expect(style.padding).toBe("0px");
-            expect(style.minBlockSize).not.toBe("36px");
-            expect(link.getBoundingClientRect().height).toBeLessThan(36);
-            expect(style.textDecorationLine).toBe("underline");
-        },
-    );
+        expect(style.padding).toBe("0px");
+        expect(style.minBlockSize).not.toBe("36px");
+        expect(link.getBoundingClientRect().height).toBeLessThan(36);
+        expect(style.textDecorationLine).toBe(decoration);
+    });
+
+    it.each(["link", "link_inline"])("colors the %s kind with the accent", (kind) => {
+        render(accessibleButton(kind, "Reset it"));
+
+        expect(getComputedStyle(element(kind)).color).toBe(lightColor("--tl-accent-900"));
+    });
 
     it.each(["icon", "icon_primary", "icon_primary_outline"])("keeps the %s kind a 32px circle", (kind) => {
         render(accessibleButton(kind, '<svg width="18" height="18"></svg>'));
