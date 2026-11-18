@@ -34,6 +34,8 @@ import textualEventViewStyles from "../../../../packages/shared-components/src/r
 // eslint-disable-next-line no-restricted-imports
 import disambiguatedProfileStyles from "../../../../packages/shared-components/src/room/timeline/event-tile/EventTileView/DisambiguatedProfile/DisambiguatedProfile.module.css?raw";
 // eslint-disable-next-line no-restricted-imports
+import eventTileBubbleStyles from "../../../../packages/shared-components/src/room/timeline/event-tile/EventTileView/EventTileBubble/EventTileBubble.module.css?raw";
+// eslint-disable-next-line no-restricted-imports
 import readMarkerStyles from "../../../../packages/shared-components/src/room/timeline/ReadMarker/ReadMarker.module.css?raw";
 // The package doesn't export its token stylesheet on its own
 // eslint-disable-next-line no-restricted-imports
@@ -42,6 +44,7 @@ import commonStyles from "../../res/css/_common.pcss?raw";
 import fontSizes from "../../res/css/_font-sizes.pcss?raw";
 import roomViewStyles from "../../res/css/structures/_RoomView.pcss?raw";
 import baseAvatarStyles from "../../res/css/views/avatars/_BaseAvatar.pcss?raw";
+import cryptoEventStyles from "../../res/css/views/messages/_common_CryptoEvent.pcss?raw";
 import textualEventStyles from "../../res/css/views/messages/_TextualEvent.pcss?raw";
 import eventTileStyles from "../../res/css/views/rooms/_EventTile.pcss?raw";
 import ircLayoutStyles from "../../res/css/views/rooms/_IRCLayout.pcss?raw";
@@ -162,6 +165,40 @@ const INTRO = `
     </li>
 `;
 
+/** A notice card, such as the one about encryption, as EventTileBubble renders it. */
+const notice = (title: string, subtitle: string): string => `
+    <div class="EventTileBubble_container mx_EventTileBubble mx_cryptoEvent">
+        <svg width="16" height="16"></svg>
+        <div class="EventTileBubble_title">${title}</div>
+        <div class="EventTileBubble_subtitle">${subtitle}</div>
+    </div>
+`;
+
+/** The intro of a room that isn't encrypted, its warning card above it, as NewRoomIntro renders it. */
+const UNENCRYPTED_INTRO = INTRO.replace(
+    '<li class="mx_NewRoomIntro">',
+    `<li class="mx_NewRoomIntro">${notice(
+        "End-to-end encryption isn't enabled",
+        "Your private messages are normally encrypted, but this room isn't. Enable encryption in settings.",
+    )}`,
+);
+
+/** A row whose card is its content, as EventTileView lays out "Encryption enabled": no avatar, read receipts after. */
+const NOTICE_ROW = `
+    <li class="root mx_EventTile layoutBubble stateBubbleContainer stateLastInSection hasReceiptSlot" data-testid="event-tile">
+        <div class="line mx_EventTile_line">
+            ${slot("Timestamp", '<a class="mx_MessageTimestamp content">12:41</a>')}
+            ${slot("Body", notice("Encryption enabled", "Messages in this room are end-to-end encrypted."))}
+        </div>
+        ${slot("Receipt", RECEIPTS)}
+    </li>
+`;
+
+/** A date separator as TimelineSeparator lays it out: a pill centered in a row as wide as the timeline's content. */
+const DATE_SEPARATOR = `
+    <li><div role="separator" style="display: flex; justify-content: center"><span class="pill">Today</span></div></li>
+`;
+
 function typing(people: string[]): string {
     return `
         <li class="mx_WhoIsTypingTile" aria-atomic="true">
@@ -248,6 +285,7 @@ describe("Timeline shell", () => {
                 ${moduleCss(textualBodyStyles, "TextualBody")}
                 ${moduleCss(decryptionFailureStyles, "DecryptionFailureBodyView")}
                 ${moduleCss(textualEventViewStyles, "TextualEventView")}
+                ${moduleCss(eventTileBubbleStyles, "EventTileBubble")}
                 ${moduleCss(readMarkerStyles, "ReadMarker")}
                 ${moduleCss(disambiguatedProfileStyles, "DisambiguatedProfile")}
             }
@@ -258,6 +296,7 @@ describe("Timeline shell", () => {
                 ${toBrowserCss(roomViewStyles, commonStyles, fontSizes, lightTheme)}
                 ${toBrowserCss(eventTileStyles, fontSizes, lightTheme)}
                 ${toBrowserCss(textualEventStyles, lightTheme)}
+                ${toBrowserCss(cryptoEventStyles)}
                 ${toBrowserCss(baseAvatarStyles)}
                 ${toBrowserCss(ircLayoutStyles, fontSizes, lightTheme)}
                 ${toBrowserCss(readReceiptGroupStyles, fontSizes, lightTheme)}
@@ -506,6 +545,16 @@ describe("Timeline shell", () => {
                 expect(avatar.height).toBe(30);
             },
         );
+
+        it("centers a notice row's card, such as the encryption one, under the date separators", () => {
+            render("bubble", DATE_SEPARATOR, NOTICE_ROW);
+            const pill = box(document.querySelector(".pill")!);
+            const card = box(document.querySelector(".mx_cryptoEvent")!);
+
+            expect(Math.abs(centerX(card) - centerX(pill))).toBeLessThanOrEqual(0.5);
+            // Its read receipts still end at the timeline's content edge
+            expect(box(document.querySelector(".mx_ReadReceiptGroup_button")!).right).toBe(contentEnd());
+        });
 
         /** A message that couldn't be decrypted, as EventTileView lays it out with its padlock, under a text bubble. */
         function renderUndecryptable(reply = ""): { plain: Element; tile: Element } {
@@ -779,6 +828,21 @@ describe("Timeline shell", () => {
                 expect(box(document.querySelector(".mx_NewRoomIntro")!).left).toBe(message.left);
                 expect(box(document.querySelector(".mx_NewRoomIntro > p")!).left).toBe(message.left);
                 expect(textBox(document.querySelector(".mx_WhoIsTypingTile_label")!).left).toBe(message.left);
+            },
+        );
+
+        it.each(["bubble", "group", "irc"] as const)(
+            "centers the warning of a room that isn't encrypted under the date separators in the %s layout",
+            (layout) => {
+                render(layout, DATE_SEPARATOR, UNENCRYPTED_INTRO, row(layout, text("First message in the room")));
+                const pill = box(document.querySelector(".pill")!);
+                const card = box(document.querySelector(".mx_cryptoEvent")!);
+
+                expect(Math.abs(centerX(card) - centerX(pill))).toBeLessThanOrEqual(0.5);
+                // The rest of the intro still starts where the text of a message does
+                expect(box(document.querySelector(".mx_NewRoomIntro > p")!).left).toBe(
+                    bodyText(document.querySelector(".root")!).left,
+                );
             },
         );
 

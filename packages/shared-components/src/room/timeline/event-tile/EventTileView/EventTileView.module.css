@@ -1613,8 +1613,12 @@
         }
     }
 
-    /* Bubble-container events are legacy shells rather than message bubbles. */
+    /* Bubble-container events are legacy shells rather than message bubbles. Their cards (encryption, room creation,
+       verification) are centered on the timeline, as the date separators are, so the row has the end's margin at both
+       ends. */
     &.stateBubbleContainer {
+        --event-tile-bubble-margin-inline-start: var(--event-tile-bubble-margin-inline-end);
+
         margin-block: 0;
     }
 
