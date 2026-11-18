@@ -276,6 +276,22 @@ describe("Telement's headers", () => {
             );
             expect(header.right - pile.right).toBe(12);
         });
+
+        it.each(["cpd-theme-light", "cpd-theme-dark"])(
+            "fills the toggled face pile with the accent, apart from its gray hover (%s)",
+            async (theme) => {
+                render(h("div", { style: { width: "900px" } }, roomHeader(true)), theme);
+                const pile = document.querySelector<HTMLElement>(".mx_FacePile")!;
+                await userEvent.hover(pile);
+                const hover = getComputedStyle(pile).backgroundColor;
+
+                pile.classList.add("mx_FacePile_toggled");
+                const toggled = getComputedStyle(pile);
+                expect(toggled.backgroundColor).toBe(tokenColor("--tl-accent-400", pile));
+                expect(toggled.backgroundColor).not.toBe(hover);
+                expect(toggled.color).toBe(tokenColor("--cpd-color-text-action-accent", pile));
+            },
+        );
     });
 
     describe("right panel card header", () => {
