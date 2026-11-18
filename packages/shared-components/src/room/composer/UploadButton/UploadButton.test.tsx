@@ -42,6 +42,21 @@ describe("UploadButton", () => {
         await userEvent.click(screen.getByRole("menuitem", { name: "Fun Button" }));
         expect(onUploadOptionSelected).toHaveBeenCalledWith("fun");
     });
+    it("centers the menu on the button unless asked to line it up with the button's start", async () => {
+        const { rerender } = render(<Default />);
+        const button = screen.getByRole("button", { name: "Attachment" });
+
+        await userEvent.click(button);
+        expect(await screen.findByRole("menu")).toHaveAttribute("data-align", "center");
+        await userEvent.keyboard("[Escape]");
+
+        rerender(<Default menuAlign="start" />);
+        await userEvent.click(button);
+        expect(await screen.findByRole("menu")).toHaveAttribute("data-align", "start");
+        await expect
+            .poll(() => screen.getByRole("menu").getBoundingClientRect().left)
+            .toBe(button.getBoundingClientRect().left);
+    });
     it("can ctrl click to get the first option", async () => {
         userEvent.setup();
         const onUploadOptionSelected = fn();

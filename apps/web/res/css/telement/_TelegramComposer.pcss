@@ -26,3 +26,16 @@ Please see LICENSE files in the repository root for full details.
     width: var(--cpd-space-6x);
     height: var(--cpd-space-6x);
 }
+
+/*
+ * Compound opens the paperclip's menu 8px above the paperclip and has no option to change that. On a one-line plain
+ * composer the paperclip sits below the composer's top border by half of the row height it doesn't fill. The row
+ * height is --MessageComposer-oneLineHeight in _MessageComposer.pcss, which the menu can't read because it is rendered
+ * outside the composer. Lifting the menu by that much leaves it 8px above the border, as the autocomplete is. Radix
+ * measures the fixed wrapper around the menu, so the margin moves the menu.
+ */
+.mx_TelementAttachMenu[data-side="top"] {
+    margin-block-end: calc(
+        var(--cpd-border-width-1) + (2 * var(--cpd-space-4x) + $font-18px - var(--tl-control-size)) / 2
+    );
+}

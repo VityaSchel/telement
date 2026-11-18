@@ -41,11 +41,22 @@ export interface UploadButtonViewActions {
 export function UploadButton({
     vm,
     defaultOpen = false,
+    menuAlign,
+    menuClassName,
     ...rootButtonProps
 }: PropsWithChildren<
-    { vm: ViewModel<UploadButtonViewSnapshot, UploadButtonViewActions>; defaultOpen?: boolean } & ComponentProps<
-        typeof IconButton
-    >
+    {
+        vm: ViewModel<UploadButtonViewSnapshot, UploadButtonViewActions>;
+        defaultOpen?: boolean;
+        /**
+         * The edge of the button that the menu lines up with. The menu is centered on the button by default.
+         */
+        menuAlign?: ComponentProps<typeof Menu>["align"];
+        /**
+         * CSS classes for the menu.
+         */
+        menuClassName?: string;
+    } & ComponentProps<typeof IconButton>
 >): ReactElement {
     const i18n = useI18n();
     const [open, setOpen] = useState(defaultOpen);
@@ -92,6 +103,8 @@ export function UploadButton({
     return (
         <Menu
             side="top"
+            align={menuAlign}
+            className={menuClassName}
             title={i18n.translate("common|attachment")}
             showTitle={false}
             trigger={trigger}

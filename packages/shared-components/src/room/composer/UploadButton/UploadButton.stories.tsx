@@ -5,7 +5,7 @@
  * Please see LICENSE files in the repository root for full details.
  */
 
-import React, { type JSX } from "react";
+import React, { type ComponentProps, type JSX } from "react";
 import { type StoryObj, type Meta } from "@storybook/react-vite";
 import { fn } from "storybook/test";
 import { AttachmentIcon, ReactionIcon } from "@vector-im/compound-design-tokens/assets/web/icons";
@@ -14,15 +14,20 @@ import { UploadButton, type UploadButtonViewActions, type UploadButtonViewSnapsh
 import { useMockedViewModel } from "../../../core/viewmodel";
 import { withViewDocs } from "../../../../.storybook/withViewDocs";
 
+type UploadButtonWrapperProps = UploadButtonViewSnapshot &
+    UploadButtonViewActions &
+    Pick<ComponentProps<typeof UploadButton>, "menuAlign"> & { defaultOpen: boolean };
+
 const UploadButtonWrapperImpl = ({
     onUploadOptionSelected,
     defaultOpen,
+    menuAlign,
     ...rest
-}: UploadButtonViewSnapshot & UploadButtonViewActions & { defaultOpen: boolean }): JSX.Element => {
+}: UploadButtonWrapperProps): JSX.Element => {
     const vm = useMockedViewModel(rest, {
         onUploadOptionSelected,
     });
-    return <UploadButton defaultOpen={defaultOpen} vm={vm} />;
+    return <UploadButton defaultOpen={defaultOpen} menuAlign={menuAlign} vm={vm} />;
 };
 
 const UploadButtonWrapper = withViewDocs(UploadButtonWrapperImpl, UploadButton);

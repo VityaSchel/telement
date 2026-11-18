@@ -100,7 +100,15 @@ export function AttachButton({
 
     return (
         <>
-            <UploadButton vm={vm} className="mx_TelementAttachButton" size="36px" />
+            {/* The paperclip is at the composer's start, so its menu lines up with it rather than spilling over the
+                room list. The class lifts the menu off the composer's border (_TelegramComposer.pcss). */}
+            <UploadButton
+                vm={vm}
+                className="mx_TelementAttachButton"
+                size="36px"
+                menuAlign="start"
+                menuClassName="mx_TelementAttachMenu"
+            />
             <input
                 ref={photoOrVideoInput}
                 type="file"

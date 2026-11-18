@@ -7,6 +7,8 @@ Please see LICENSE files in the repository root for full details.
 
 import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
 import compoundTokens from "@vector-im/compound-design-tokens/assets/web/css/cpd-common-base.css?raw";
+import compoundSemantic from "@vector-im/compound-design-tokens/assets/web/css/cpd-common-semantic.css?raw";
+import compoundLightTheme from "@vector-im/compound-design-tokens/assets/web/css/cpd-theme-light-base.css?raw";
 
 // The package doesn't export its token stylesheet on its own
 // eslint-disable-next-line no-restricted-imports
@@ -44,7 +46,7 @@ const richTextField = (html: string): string => `
 function renderComposerRow(richText: boolean, dir = "ltr", html = "Hello"): void {
     document.body.innerHTML = `
         <div
-            class="mx_MessageComposer${richText ? " mx_MessageComposer_wysiwyg" : ""}"
+            class="cpd-theme-light mx_MessageComposer${richText ? " mx_MessageComposer_wysiwyg" : ""}"
             dir="${dir}"
             style="width: 640px"
         >
@@ -70,6 +72,22 @@ function gapBetween(a: DOMRect, b: DOMRect): number {
     return Math.max(b.left - a.right, a.left - b.right);
 }
 
+/**
+ * Opens the paperclip's menu as Compound's Menu places it on the trigger's top side: Radix puts the menu in a fixed
+ * wrapper, measures the wrapper and sets its bottom 8px above the trigger.
+ */
+function openAttachMenu(trigger: DOMRect): DOMRect {
+    const wrapper = document.createElement("div");
+    wrapper.style.cssText = "position: fixed; inset-inline-start: 0; inset-block-start: 0";
+    wrapper.innerHTML = `
+        <div class="mx_TelementAttachMenu" role="menu" data-side="top" style="block-size: 136px; inline-size: 208px"></div>
+    `;
+    document.body.append(wrapper);
+    const top = trigger.top - 8 - wrapper.getBoundingClientRect().height;
+    wrapper.style.transform = `translate(${trigger.left}px, ${top}px)`;
+    return box(".mx_TelementAttachMenu");
+}
+
 let stylesheet: HTMLStyleElement;
 
 describe("Telegram composer buttons", () => {
@@ -77,12 +95,14 @@ describe("Telegram composer buttons", () => {
         stylesheet = document.createElement("style");
         stylesheet.textContent = `
             ${compoundTokens}
+            ${compoundSemantic}
+            ${compoundLightTheme}
             ${telementTokens}
             ${toBrowserCss(messageComposerStyles, fontSizes)}
             ${toBrowserCss(sendMessageComposerStyles, fontSizes)}
             ${toBrowserCss(sendWysiwygComposerStyles, fontSizes)}
             ${toBrowserCss(editorStyles, commonStyles, fontSizes)}
-            ${telegramComposerStyles}
+            ${toBrowserCss(telegramComposerStyles, fontSizes)}
         `;
         document.head.append(stylesheet);
     });
@@ -140,6 +160,16 @@ describe("Telegram composer buttons", () => {
             fromStart: icon.left - wrapper.left,
             fromEnd: wrapper.right - actionIcon.right,
         }).toEqual({ toField: 16, fromStart: 16, fromEnd: 16 });
+    });
+
+    it("opens the paperclip's menu 8px above the composer's top border, like the autocomplete", () => {
+        renderComposerRow(false);
+        const composer = box(".mx_MessageComposer_wrapper");
+
+        const menu = openAttachMenu(box(".mx_TelementAttachButton"));
+
+        expect(getComputedStyle(document.querySelector(".mx_MessageComposer_wrapper")!).borderTopWidth).toBe("1px");
+        expect(composer.top - menu.bottom).toBe(8);
     });
 
     it.each([
