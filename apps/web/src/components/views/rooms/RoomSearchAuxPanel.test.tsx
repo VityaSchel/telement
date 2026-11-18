@@ -83,4 +83,15 @@ describe("RoomSearchAuxPanel", () => {
         screen.getByRole("button", { name: "Cancel" }).click();
         expect(onCancelClick).toHaveBeenCalled();
     });
+
+    it("shows the scope switch as a text button and closes with a plain 36px icon button, not a red one", () => {
+        render(<RoomSearchAuxPanel isRoomEncrypted={false} onSearchScopeChange={vi.fn()} onCancelClick={vi.fn()} />);
+
+        expect(screen.getByText("Search all rooms")).toHaveClass("mx_RoomSearchAuxPanel_scopeButton");
+        const cancel = screen.getByRole("button", { name: "Cancel" });
+        // Compound's destructive icon button would draw the cross in red, kept for actions that destroy something
+        expect(cancel.className).not.toMatch(/destructive/);
+        expect(cancel.style.getPropertyValue("--cpd-icon-button-size")).toBe("var(--tl-control-size)");
+        expect(cancel.style.padding).toBe("var(--cpd-space-1-5x)");
+    });
 });

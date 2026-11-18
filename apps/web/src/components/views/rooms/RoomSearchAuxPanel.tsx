@@ -53,6 +53,7 @@ const RoomSearchAuxPanel: React.FC<Props> = ({ searchInfo, isRoomEncrypted, onSe
             </div>
             <div className="mx_RoomSearchAuxPanel_buttons">
                 <Link
+                    className="mx_RoomSearchAuxPanel_scopeButton"
                     onClick={() => onSearchScopeChange(scope === SearchScope.Room ? SearchScope.All : SearchScope.Room)}
                     kind="primary"
                 >
@@ -60,13 +61,16 @@ const RoomSearchAuxPanel: React.FC<Props> = ({ searchInfo, isRoomEncrypted, onSe
                         ? _t("room|search|this_room_button")
                         : _t("room|search|all_rooms_button")}
                 </Link>
+                {/* Closing the search destroys nothing, so it is the gray 36px close button of the right panel's
+                    cards, around a 24px icon */}
                 <IconButton
                     onClick={onCancelClick}
-                    destructive
+                    size="var(--tl-control-size)"
+                    style={{ padding: "var(--cpd-space-1-5x)" }}
                     tooltip={_t("action|cancel")}
                     aria-label={_t("action|cancel")}
                 >
-                    <CloseIcon width="20px" height="20px" />
+                    <CloseIcon />
                 </IconButton>
             </div>
         </div>

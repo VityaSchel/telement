@@ -61,4 +61,10 @@ Please see LICENSE files in the repository root for full details.
         align-items: center;
         flex-shrink: 0;
     }
+
+    /* "Search all rooms" stands on its own, so it is a text button in the accent, without a link's underline */
+    .mx_RoomSearchAuxPanel_scopeButton {
+        color: var(--cpd-color-text-action-accent);
+        text-decoration: none;
+    }
 }
