@@ -1342,7 +1342,8 @@ describe("App controls", () => {
             expect(cornerRadii(get(".mx_BetaCard"))).toEqual({ x: 12, y: 12 });
             expect(box(pill).height).toBe(24);
             expect(cornerRadii(pill)).toEqual({ x: 12, y: 12 });
-            expect(padding(pill)).toBe("4px 8px 4px 8px");
+            // Its capitals in the middle of the 24px pill, trimmed to their height
+            expect(padding(pill)).toBe("0px 8px 0px 8px");
         });
 
         it("rounds the verification options like cards", () => {

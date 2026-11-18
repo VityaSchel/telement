@@ -104,16 +104,21 @@ Please see LICENSE files in the repository root for full details.
     }
 }
 
+/* Telement: an accent badge, white on the accent fill, which dark themes deepen for it (telement/tokens.css), with
+   badge text (11px semibold) trimmed to its capitals, so they sit in the middle of the 24px pill */
 .mx_BetaCard_betaPill {
-    background-color: $accent-alt;
-    padding: var(--cpd-space-1x) var(--cpd-space-2x);
+    box-sizing: border-box;
+    background-color: var(--cpd-color-bg-accent-rest);
+    block-size: var(--cpd-space-6x);
+    padding: 0 var(--cpd-space-2x);
     border-radius: var(--tl-radius-control);
     text-transform: uppercase;
-    font-size: $font-12px;
-    font-weight: var(--cpd-font-weight-semibold);
-    line-height: 16px;
-    color: $button-primary-fg-color;
-    display: inline-block;
+    font: var(--cpd-font-body-xs-semibold);
+    line-height: 1cap;
+    text-box: trim-both cap alphabetic;
+    color: var(--tl-color-on-accent);
+    display: inline-flex;
+    align-items: center;
     vertical-align: text-bottom;
     word-break: keep-all; /* avoid multiple lines on CJK language */
 
