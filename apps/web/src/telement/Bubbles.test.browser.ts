@@ -1087,16 +1087,28 @@ describe("Bubble layout", () => {
     });
 
     describe("links", () => {
-        it("are the accent, in formatted text and in linkified text, in either bubble", () => {
-            const link = '<a href="https://telegram.org">telegram.org</a>';
-            const formatted = `<div class="mx_EventTile_content"><div class="mx_EventTile_body markdown-body"><p>See ${link}</p></div></div>`;
-            const linked = `<div class="mx_EventTile_content"><div class="mx_EventTile_body LinkedText_container">See ${link}</div></div>`;
-            render(tile(formatted), tile(linked), tile(formatted, { own: true }), tile(linked, { own: true }));
+        const link = '<a href="https://telegram.org">telegram.org</a>';
+        const formatted = `<div class="mx_EventTile_content"><div class="mx_EventTile_body markdown-body"><p>See ${link}</p></div></div>`;
+        const linked = `<div class="mx_EventTile_content"><div class="mx_EventTile_body LinkedText_container">See ${link}</div></div>`;
+
+        it("are the accent in other people's bubbles, in formatted text and in linkified text", () => {
+            render(tile(formatted), tile(linked));
             const links = all("a[href]");
 
-            expect(links).toHaveLength(4);
+            expect(links).toHaveLength(2);
             for (const element of links) {
                 expect(getComputedStyle(element).color).toBe(tokenColor("--tl-accent-900", element));
+            }
+        });
+
+        it("are white and underlined in your own, whose fill is the accent", () => {
+            render(tile(formatted, { own: true }), tile(linked, { own: true }));
+            const links = all("a[href]");
+
+            expect(links).toHaveLength(2);
+            for (const element of links) {
+                expect(getComputedStyle(element).color).toBe("rgb(255, 255, 255)");
+                expect(getComputedStyle(element).textDecorationLine).toBe("underline");
             }
         });
     });

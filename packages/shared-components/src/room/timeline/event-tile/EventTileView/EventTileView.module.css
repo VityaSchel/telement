@@ -41,7 +41,8 @@
     --event-tile-bubble-margin-inline-start: 49px;
     --event-tile-bubble-margin-inline-end: 60px;
     --event-tile-bubble-other-background: var(--cpd-color-gray-300);
-    --event-tile-bubble-self-background: var(--cpd-color-green-300);
+    --event-tile-bubble-self-background: var(--tl-color-bg-bubble-own);
+    --event-tile-bubble-self-highlighted-background: var(--tl-color-bg-bubble-own-highlighted);
     --event-tile-bubble-hover-background: var(--cpd-color-bg-subtle-primary);
 
     /* Shared preview, action-bar, bubble, and interaction values. */
@@ -1579,6 +1580,228 @@
     &.stateOwnEvent .slotThreadInfo {
         margin-inline-start: auto;
         margin-inline-end: var(--event-tile-bubble-line-margin-inline-end);
+    }
+
+    /* A selected bubble of your own, jumped to or right-clicked, takes the highlighted fill, as in Telegram. */
+    &.stateOwnEvent.stateSelected > .line {
+        --event-tile-bubble-self-background: var(--event-tile-bubble-self-highlighted-background);
+    }
+
+    /* What your own bubble holds is drawn for its accent fill rather than the page: the colors the timeline's content
+       takes from Compound's roles point at white and translucent white here, as a floating surface points them at its
+       own fills (_common.pcss). An accent fill in the bubble turns white with the bubble's color on it, as your own
+       reaction does in Telegram. Only the slots inside the fill take them: the action bar and the read receipts float
+       outside it, and a message drawn without a bubble (large emoji, a picture without a caption, an emote, a map)
+       keeps the page's colors. */
+    &.stateOwnEvent.stateHasReply:not(
+            .stateNoBubble,
+            .stateInfo,
+            .stateBubbleContainer,
+            .stateLeftAlignedBubble,
+            .stateAlignedBetweenBubbles
+        )
+        > .line:not(.lineMedia),
+    &.stateOwnEvent:not(
+            .stateHasReply,
+            .stateNoBubble,
+            .stateInfo,
+            .stateBubbleContainer,
+            .stateLeftAlignedBubble,
+            .stateAlignedBetweenBubbles
+        )
+        > .line:not(.lineMedia, :has(> .slotBody > :global(.mx_EventTile_content) :global(.mx_EventTile_bigEmoji))),
+    &.stateOwnEvent
+        > .lineMedia:has(
+            > .slotBody
+                > :global(.mx_EventTile_content)
+                > :is(:global(.mx_ImageBody), :global(.mx_MVideoBody))
+                + :global(.mx_EventTile_caption)
+        ),
+    &.stateOwnEvent
+        > .lineMedia:has(
+            > .slotBody > :is(:global(.mx_MAudioBody), :global(.mx_MVoiceMessageBody), :global(.mx_MFileBody)),
+            > .slotBody
+                > :global(.mx_EventTile_content)
+                > :is(
+                    :global(.mx_MAudioBody),
+                    :global(.mx_MVoiceMessageBody),
+                    :global(.mx_MFileBody),
+                    :global(.mx_EventTile_content),
+                    :only-child
+                )
+        ) {
+        /* The page's colors, for what floats out of the bubble over the page */
+        --event-tile-page-text-primary: var(--cpd-color-text-primary);
+        --event-tile-page-text-secondary: var(--cpd-color-text-secondary);
+        --event-tile-page-icon-primary: var(--cpd-color-icon-primary);
+        --event-tile-page-icon-secondary: var(--cpd-color-icon-secondary);
+        --event-tile-page-icon-tertiary: var(--cpd-color-icon-tertiary);
+        --event-tile-page-border-interactive-primary: var(--cpd-color-border-interactive-primary);
+        --event-tile-page-border-interactive-secondary: var(--cpd-color-border-interactive-secondary);
+        --event-tile-page-bg-canvas-default: var(--cpd-color-bg-canvas-default);
+        --event-tile-page-bg-subtle-primary: var(--cpd-color-bg-subtle-primary);
+        --event-tile-page-bg-subtle-secondary: var(--cpd-color-bg-subtle-secondary);
+
+        > :is(.slotTimestamp, .slotPadlock, .slotReplyChain, .slotBody, .slotFooter) {
+            --cpd-color-text-primary: var(--tl-color-on-bubble-own);
+            --cpd-color-text-secondary: var(--tl-color-on-bubble-own-secondary);
+            --cpd-color-text-action-primary: var(--tl-color-on-bubble-own);
+            --cpd-color-text-action-accent: var(--tl-color-on-bubble-own);
+            --cpd-color-text-link-external: var(--tl-color-on-bubble-own);
+            --cpd-color-text-critical-primary: var(--tl-color-on-bubble-own);
+            --cpd-color-text-badge-accent: var(--tl-color-on-bubble-own);
+            --cpd-color-text-on-solid-primary: var(--event-tile-bubble-self-background);
+            /* The quoted sender's name and line */
+            --cpd-color-text-decorative-1: var(--tl-color-on-bubble-own);
+            --cpd-color-text-decorative-2: var(--tl-color-on-bubble-own);
+            --cpd-color-text-decorative-3: var(--tl-color-on-bubble-own);
+            --cpd-color-text-decorative-4: var(--tl-color-on-bubble-own);
+            --cpd-color-text-decorative-5: var(--tl-color-on-bubble-own);
+            --cpd-color-text-decorative-6: var(--tl-color-on-bubble-own);
+            --cpd-color-icon-primary: var(--tl-color-on-bubble-own);
+            --cpd-color-icon-secondary: var(--tl-color-on-bubble-own-secondary);
+            --cpd-color-icon-tertiary: var(--tl-color-on-bubble-own-secondary);
+            --cpd-color-icon-quaternary: var(--tl-color-separator-bubble-own);
+            --cpd-color-icon-accent-primary: var(--tl-color-on-bubble-own);
+            --cpd-color-icon-accent-tertiary: var(--tl-color-on-bubble-own);
+            --cpd-color-icon-critical-primary: var(--tl-color-on-bubble-own);
+            --cpd-color-icon-on-solid-primary: var(--event-tile-bubble-self-background);
+            --cpd-color-bg-canvas-default: var(--event-tile-bubble-self-background);
+            /* A file's icon, and the mention of yourself, which would be red on blue */
+            --cpd-color-bg-decorative-1: var(--tl-color-bg-bubble-own-subtle-hovered);
+            --cpd-color-bg-decorative-2: var(--tl-color-bg-bubble-own-subtle-hovered);
+            --cpd-color-bg-decorative-3: var(--tl-color-bg-bubble-own-subtle-hovered);
+            --cpd-color-bg-decorative-4: var(--tl-color-bg-bubble-own-subtle-hovered);
+            --cpd-color-bg-decorative-5: var(--tl-color-bg-bubble-own-subtle-hovered);
+            --cpd-color-bg-decorative-6: var(--tl-color-bg-bubble-own-subtle-hovered);
+            --cpd-color-bg-critical-primary: var(--tl-color-on-bubble-own);
+            --cpd-color-bg-critical-hovered: var(--tl-color-on-bubble-own-secondary);
+            --cpd-color-bg-subtle-primary: var(--tl-color-bg-bubble-own-subtle-hovered);
+            --cpd-color-bg-subtle-secondary: var(--tl-color-bg-bubble-own-subtle);
+            --cpd-color-bg-badge-accent: var(--tl-color-bg-bubble-own-subtle);
+            --cpd-color-bg-accent-rest: var(--tl-color-on-bubble-own);
+            --cpd-color-bg-accent-hovered: var(--tl-color-on-bubble-own-secondary);
+            --cpd-color-bg-accent-pressed: var(--tl-color-on-bubble-own-secondary);
+            --cpd-color-bg-action-primary-rest: var(--tl-color-on-bubble-own);
+            --cpd-color-bg-action-primary-hovered: var(--tl-color-on-bubble-own-secondary);
+            --cpd-color-bg-action-primary-pressed: var(--tl-color-on-bubble-own-secondary);
+            --cpd-color-border-interactive-primary: var(--tl-color-on-bubble-own-secondary);
+            --cpd-color-border-interactive-secondary: var(--tl-color-separator-bubble-own);
+            --cpd-color-border-accent-primary: var(--tl-color-on-bubble-own);
+            --cpd-color-border-focused: var(--tl-color-on-bubble-own);
+            --tl-color-on-accent: var(--event-tile-bubble-self-background);
+            /* Grays the app's message styles name directly: lines and tracks, the tertiary text and the translucent
+               fills that sit one step over whatever is behind them */
+            --cpd-color-gray-400: var(--tl-color-separator-bubble-own);
+            --cpd-color-gray-600: var(--tl-color-separator-bubble-own);
+            --cpd-color-gray-800: var(--tl-color-on-bubble-own-secondary);
+            --cpd-color-alpha-gray-300: var(--tl-color-bg-bubble-own-subtle);
+            --cpd-color-alpha-gray-400: var(--tl-color-bg-bubble-own-subtle-hovered);
+
+            color: var(--tl-color-on-bubble-own);
+
+            &::selection,
+            ::selection {
+                background-color: var(--tl-color-bg-bubble-own-text-selection);
+                color: var(--tl-color-on-bubble-own);
+            }
+
+            /* A mention is a white pill here, so the person icon of someone who isn't in the room takes the bubble's
+               color, as the pill's name does */
+            :global(.mx_Pill) {
+                --cpd-color-text-secondary: var(--event-tile-bubble-self-background);
+            }
+        }
+
+        /* The reply quote's sender, line and text are all white, as in Telegram */
+        > .slotReplyChain {
+            --cpd-color-text-secondary: var(--tl-color-on-bubble-own);
+        }
+
+        /* Secondary white on a translucent white fill drops under 3:1 in light themes, so what sits on one is white: a
+           code block's line numbers, a link preview's description, the pinned badge (the footer's child beside the
+           reactions toolbar), and the play icon of a voice or audio message, whose waveform and times stay secondary */
+        > .slotBody :is(:global(.markdown-body) pre, :global(.mx_TextualBody_urlPreviews)),
+        > .slotFooter > :not([role="toolbar"]) {
+            --cpd-color-text-secondary: var(--tl-color-on-bubble-own);
+            --cpd-color-icon-secondary: var(--tl-color-on-bubble-own);
+        }
+
+        > .slotBody :is(:global(.mx_MVoiceMessageBody), :global(.mx_MAudioBody)) {
+            --cpd-color-icon-secondary: var(--tl-color-on-bubble-own);
+        }
+
+        /* Hovered, hidden media's placeholder takes the page's color, which here is the bubble's, so it would vanish
+           into it. It takes the other translucent fill instead: the fainter one in the body, where it rests on the
+           lighter one, and the lighter one in a reply's thumbnail, where it rests on the fainter one. */
+        > .slotBody :global(.mx_ImageBody) {
+            --cpd-color-bg-canvas-default: var(--tl-color-bg-bubble-own-subtle);
+        }
+
+        > .slotReplyChain :global(.mx_MImageReplyBody) {
+            --cpd-color-bg-canvas-default: var(--tl-color-bg-bubble-own-subtle-hovered);
+        }
+
+        /* Formatted text's links, code, tables and rules have github-markdown-css's and highlight.js's colors, a code
+           block's buttons the dark theme's own gray and a quote's line the border color (secondary white here), from
+           the app's later cascade layer, which only important declarations in this layer override. Links are white and
+           underlined, as the accent they'd be elsewhere is the bubble's color; code is plain white, as syntax colors
+           don't read on blue. A quote's line is white, as the reply quote's is, while its text stays the secondary
+           white. */
+        > .slotBody :global(.markdown-body) {
+            a[href]:not(:global(.mx_Pill)) {
+                text-decoration: underline !important;
+            }
+
+            blockquote::before {
+                border-inline-start-color: var(--tl-color-on-bubble-own) !important;
+            }
+
+            pre,
+            pre [class*="hljs-"] {
+                color: inherit !important;
+            }
+
+            tr,
+            tr:nth-child(2n) {
+                background-color: transparent !important;
+            }
+
+            :is(tr, th, td) {
+                border-color: var(--tl-color-separator-bubble-own) !important;
+            }
+
+            hr {
+                background-color: var(--tl-color-separator-bubble-own) !important;
+            }
+
+            :global(.mx_EventTile_button) svg {
+                color: var(--tl-color-on-bubble-own) !important;
+            }
+        }
+
+        /* An edit composer's field is drawn in the page's color, which here is the bubble's, so it takes the
+           translucent fill to still show as a field. */
+        > .slotBody :is(:global(.mx_EditMessageComposer), :global(.mx_EditWysiwygComposer)) {
+            --cpd-color-bg-canvas-default: var(--tl-color-bg-bubble-own-subtle);
+        }
+
+        /* Its autocomplete and formatting bar float over the page, above the bubble, so they take the page's colors
+           back. The autocomplete's fills are a floating surface's (_common.pcss), which win from the app's layer. */
+        > .slotBody :is(:global(.mx_Autocomplete), :global(.mx_MessageComposerFormatBar)) {
+            --cpd-color-text-primary: var(--event-tile-page-text-primary);
+            --cpd-color-text-secondary: var(--event-tile-page-text-secondary);
+            --cpd-color-icon-primary: var(--event-tile-page-icon-primary);
+            --cpd-color-icon-secondary: var(--event-tile-page-icon-secondary);
+            --cpd-color-icon-tertiary: var(--event-tile-page-icon-tertiary);
+            --cpd-color-border-interactive-primary: var(--event-tile-page-border-interactive-primary);
+            --cpd-color-border-interactive-secondary: var(--event-tile-page-border-interactive-secondary);
+            --cpd-color-bg-canvas-default: var(--event-tile-page-bg-canvas-default);
+            --cpd-color-bg-subtle-primary: var(--event-tile-page-bg-subtle-primary);
+            --cpd-color-bg-subtle-secondary: var(--event-tile-page-bg-subtle-secondary);
+
+            color: var(--cpd-color-text-primary);
+        }
     }
 
     /* Hovering a message draws no band behind it, as in Telegram; a selected or highlighted message keeps one. */

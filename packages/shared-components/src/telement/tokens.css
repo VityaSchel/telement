@@ -222,6 +222,63 @@ Please see LICENSE files in the repository root for full details.
 }
 
 /*
+ * Your own bubbles, filled like Telegram for macOS's day and night themes: the accent in light themes and the night
+ * theme's muted blue, the dark selection plate, in dark ones, both with white text, 4.1:1 and 5.7:1. High contrast
+ * themes take a deeper blue, where white is at least 7:1, as it is on their text selection. A selected bubble, jumped
+ * to or right-clicked, takes Telegram's highlighted fill. What the bubble holds is white, secondary text and icons are
+ * Telegram's #effaff at 80% (opaque in high contrast), and fills and lines in it are translucent white, so they read
+ * on the plain and the highlighted bubble alike. A fill is one step lighter than the bubble, as a gray fill is one step
+ * from the page, so the darker bubbles take less white.
+ */
+:root,
+[class*="cpd-theme-"] {
+    --tl-color-bg-bubble-own: var(--tl-accent-900);
+    --tl-color-bg-bubble-own-highlighted: #4b7bad;
+    --tl-color-bg-bubble-own-subtle: rgb(255 255 255 / 12%);
+    --tl-color-bg-bubble-own-subtle-hovered: rgb(255 255 255 / 20%);
+    --tl-color-bg-bubble-own-text-selection: #6da8d6;
+    --tl-color-on-bubble-own: #ffffff;
+    --tl-color-on-bubble-own-secondary: rgb(239 250 255 / 80%);
+    --tl-color-separator-bubble-own: rgb(255 255 255 / 35%);
+}
+
+.cpd-theme-dark.cpd-theme-dark {
+    --tl-color-bg-bubble-own: var(--tl-color-bg-selection);
+    --tl-color-bg-bubble-own-highlighted: #5079a1;
+    --tl-color-bg-bubble-own-subtle: rgb(255 255 255 / 10%);
+    --tl-color-bg-bubble-own-subtle-hovered: rgb(255 255 255 / 16%);
+    --tl-color-bg-bubble-own-text-selection: #355a80;
+}
+
+.cpd-theme-light-hc.cpd-theme-light-hc {
+    --tl-color-bg-bubble-own: var(--tl-accent-1000);
+    --tl-color-bg-bubble-own-highlighted: var(--tl-accent-1100);
+    --tl-color-bg-bubble-own-subtle: rgb(255 255 255 / 8%);
+    --tl-color-bg-bubble-own-subtle-hovered: rgb(255 255 255 / 14%);
+    --tl-color-bg-bubble-own-text-selection: var(--tl-accent-1300);
+    --tl-color-on-bubble-own-secondary: #effaff;
+}
+
+.cpd-theme-dark-hc.cpd-theme-dark-hc {
+    --tl-color-bg-bubble-own: var(--tl-color-bg-selection);
+    --tl-color-bg-bubble-own-highlighted: var(--tl-color-bg-selection-hovered);
+    --tl-color-bg-bubble-own-subtle: rgb(255 255 255 / 8%);
+    --tl-color-bg-bubble-own-subtle-hovered: rgb(255 255 255 / 14%);
+    --tl-color-bg-bubble-own-text-selection: #1e4266;
+    --tl-color-on-bubble-own-secondary: #effaff;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --tl-color-bg-bubble-own: var(--tl-color-bg-selection);
+        --tl-color-bg-bubble-own-highlighted: #5079a1;
+        --tl-color-bg-bubble-own-subtle: rgb(255 255 255 / 10%);
+        --tl-color-bg-bubble-own-subtle-hovered: rgb(255 255 255 / 16%);
+        --tl-color-bg-bubble-own-text-selection: #355a80;
+    }
+}
+
+/*
  * Floating surfaces: menus, pickers, autocomplete, dropdowns and dialogs. Shadows barely show on near-black, so in dark
  * themes they are one gray step lighter than the page, Compound's raised canvas, and the fills and separators inside
  * them one step further, so that hovered, selected and disabled rows, fields and separators still show. Light themes
