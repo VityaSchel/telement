@@ -8,18 +8,7 @@ Please see LICENSE files in the repository root for full details.
 
 import React, { useEffect, useState, type JSX } from "react";
 import classNames from "classnames";
-import {
-    MenuItem,
-    Separator,
-    ToggleMenuItem,
-    Text,
-    Badge,
-    Heading,
-    IconButton,
-    Link,
-    Search,
-    Form,
-} from "@vector-im/compound-web";
+import { MenuItem, Separator, ToggleMenuItem, Text, Badge, Heading, IconButton, Link } from "@vector-im/compound-web";
 import UserAddIcon from "@vector-im/compound-design-tokens/assets/web/icons/user-add";
 import LinkIcon from "@vector-im/compound-design-tokens/assets/web/icons/link";
 import SettingsIcon from "@vector-im/compound-design-tokens/assets/web/icons/settings";
@@ -38,7 +27,14 @@ import ErrorIcon from "@vector-im/compound-design-tokens/assets/web/icons/error"
 import ErrorSolidIcon from "@vector-im/compound-design-tokens/assets/web/icons/error-solid";
 import ChevronDownIcon from "@vector-im/compound-design-tokens/assets/web/icons/chevron-down";
 import { JoinRule, type Room } from "matrix-js-sdk/src/matrix";
-import { Box, Flex, HistoryVisibilityBadge, LinkedText, StatusTextView } from "@element-hq/web-shared-components";
+import {
+    Box,
+    Flex,
+    HistoryVisibilityBadge,
+    LinkedText,
+    SearchFieldView,
+    StatusTextView,
+} from "@element-hq/web-shared-components";
 
 import BaseCard from "./BaseCard.tsx";
 import { _t } from "../../../languageHandler";
@@ -205,22 +201,23 @@ const RoomSummaryCardView: React.FC<IProps> = ({
         </header>
     );
 
+    // Telement's search pill, with its own clear button where Compound's Search would show the browser's
     const header = onSearchChange && (
-        <Form.Root className="mx_RoomSummaryCard_search" onSubmit={(e) => e.preventDefault()}>
-            <Search
-                placeholder={_t("room|search|placeholder")}
-                name="room_message_search"
-                onChange={(e) => {
-                    setSearchValue(e.currentTarget.value);
-                    onSearchChange(e.currentTarget.value);
-                }}
-                value={searchValue}
-                className="mx_no_textinput"
-                ref={vm.searchInputRef}
-                autoFocus={focusRoomSearch}
-                onKeyDown={vm.onUpdateSearchInput}
-            />
-        </Form.Root>
+        <SearchFieldView
+            className="mx_RoomSummaryCard_search"
+            placeholder={_t("room|search|placeholder")}
+            name="room_message_search"
+            // A search field to assistive technology, as the browser's search input was
+            role="searchbox"
+            onChange={(value) => {
+                setSearchValue(value);
+                onSearchChange(value);
+            }}
+            value={searchValue}
+            ref={vm.searchInputRef}
+            autoFocus={focusRoomSearch}
+            onKeyDown={vm.onUpdateSearchInput}
+        />
     );
 
     return (

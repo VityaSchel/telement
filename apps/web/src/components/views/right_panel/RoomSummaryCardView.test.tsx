@@ -185,6 +185,21 @@ describe("<RoomSummaryCard />", () => {
             expect(onSearchChange).toHaveBeenCalledWith("test query");
             expect(searchInput).toHaveValue("test query");
         });
+
+        it("is the search pill with its own clear button, not the browser's", async () => {
+            const user = userEvent.setup();
+            const onSearchChange = vi.fn();
+            const { getByRole } = getComponent({ onSearchChange });
+
+            const searchInput = getByRole("searchbox", { name: "Search messages…" });
+            expect(searchInput).not.toHaveAttribute("type", "search");
+            await user.type(searchInput, "lunch");
+            await user.click(getByRole("button", { name: "Clear search" }));
+
+            expect(searchInput).toHaveValue("");
+            expect(searchInput).toHaveFocus();
+            expect(onSearchChange).toHaveBeenLastCalledWith("");
+        });
     });
 
     it("opens room file panel on button click", () => {
