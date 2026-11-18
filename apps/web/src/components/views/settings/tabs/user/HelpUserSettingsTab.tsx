@@ -104,7 +104,7 @@ export default class HelpUserSettingsTab extends React.Component<EmptyObject, IS
         return (
             <SettingsSubsection heading={_t("common|credits")}>
                 <SettingsSubsectionText>
-                    <ul>
+                    <ul className="mx_HelpUserSettingsTab_credits">
                         <li>
                             {_t(
                                 "credits|default_cover_photo",
@@ -229,8 +229,9 @@ export default class HelpUserSettingsTab extends React.Component<EmptyObject, IS
                                 {cryptoVersion}
                                 <br />
                             </CopyableText>
-                            {updateButton}
                         </SettingsSubsectionText>
+                        {/* Telement: outside the text, so the subsection puts it 16px under the versions */}
+                        {updateButton}
                     </SettingsSubsection>
                     {this.renderLegal()}
                     {this.renderCredits()}

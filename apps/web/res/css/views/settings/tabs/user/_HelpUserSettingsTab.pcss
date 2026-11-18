@@ -10,3 +10,16 @@ Please see LICENSE files in the repository root for full details.
 .mx_HelpUserSettingsTab_accessTokenDetails {
     width: fit-content;
 }
+
+/* Telement: the list starts right under its heading, as other subsections' content does, with the bullets in a 20px
+   indent rather than the browser's 40px */
+.mx_HelpUserSettingsTab_credits {
+    margin: 0;
+    padding-inline-start: var(--cpd-space-5x);
+}
+
+/* Telement: copy fields have no margins of their own (_CopyableText.pcss), so the access token's keeps 8px clear of the
+   warning above it, as a fieldset's items are apart */
+.mx_HelpUserSettingsTab_accessTokenDetails ~ .mx_CopyableText_border {
+    margin-block-start: var(--cpd-space-2x);
+}
