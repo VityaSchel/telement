@@ -42,10 +42,11 @@ Please see LICENSE files in the repository root for full details.
         }
     }
 
+    /* Telement: a dialog footer's gap between the buttons, and 16px under the topic, the form's 12px gap included */
     .mx_RoomProfileSettings_buttons {
         display: flex;
-        gap: var(--cpd-space-4x);
-        margin-top: 10px; /* 18px is already accounted for by the <p> above the buttons */
+        gap: var(--buttons-dialog-gap-column);
+        margin-top: calc(var(--cpd-space-4x) - var(--cpd-space-3x));
         margin-bottom: var(--cpd-space-7x);
     }
 }

@@ -13,11 +13,11 @@ Please see LICENSE files in the repository root for full details.
     justify-content: center;
 }
 
-.mx_UserSettingsDialog_title {
-    /* Override default dialog font style */
-    font: var(--cpd-font-heading-md-regular) !important;
+/* Telement: the dialog title's size and line (_common.pcss), with only the tab's name in regular weight */
+.mx_Dialog_header > .mx_UserSettingsDialog_title {
+    font-weight: var(--cpd-font-weight-regular);
 
     .mx_UserSettingsDialog_title_strong {
-        font: var(--cpd-font-heading-md-semibold);
+        font-weight: var(--cpd-font-weight-semibold);
     }
 }

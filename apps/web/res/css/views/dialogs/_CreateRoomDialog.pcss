@@ -63,17 +63,16 @@ Please see LICENSE files in the repository root for full details.
 }
 
 .mx_CreateRoomDialog {
+    /* Telement: a form dialog, 480px with the dialog's 24px padding (TELEMENT.md, "Colors, type and components"). The
+       footer keeps the 24px every dialog has above its buttons (_common.pcss) */
     &.mx_Dialog_fixedWidth {
-        width: 450px;
+        width: calc(480px - 2 * var(--cpd-space-6x));
     }
 
-    .mx_Dialog_content {
-        margin-bottom: 40px;
-    }
-
+    /* Telement: the one secondary text color, rather than the legacy blue-gray */
     p,
     .mx_Field_input label {
-        color: $muted-fg-color;
+        color: var(--cpd-color-text-secondary);
     }
 
     .mx_SettingsFlag {

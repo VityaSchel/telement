@@ -69,8 +69,8 @@ const VERIFY_EMAIL = `
         aria-label="Close dialog">${closeIcon}</div>
 `;
 
-/** Content taller than the viewport, filling the body's full width so that it reaches into the corners. */
-const TALL_CONTENT = '<div id="tall" style="height: 2000px; margin-inline: -40px"></div>';
+/** Content taller than the viewport, filling the body's full width, over its 24px padding, into the corners. */
+const TALL_CONTENT = '<div id="tall" style="height: 2000px; margin-inline: -24px"></div>';
 
 /** A layer that the body's overflow doesn't clip, being fixed: it covers the viewport wherever the body lets it show. */
 const FIXED_LAYER = '<div id="layer" style="position: fixed; inset: 0"></div>';

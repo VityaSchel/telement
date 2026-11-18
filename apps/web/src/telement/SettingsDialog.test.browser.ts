@@ -34,7 +34,7 @@ const TAB_NAMES = ["Account", "Sessions", "Appearance", "Notifications"];
 
 /**
  * A settings dialog as BaseDialog, UserSettingsDialog and TabbedView render it, with the first tab selected. The
- * dialog's 40px inline padding, where its title starts, is _common.pcss's .mx_Dialog padding.
+ * dialog's padding, where its title starts, is _common.pcss's .mx_Dialog padding.
  *
  * @param responsive - Whether the tabs collapse to their icons in a narrow window.
  * @param alertTabs - The tabs showing the red dot, as the Encryption tab does until recovery is set up.
@@ -56,8 +56,8 @@ function renderSettingsDialog({
             </li>`,
     ).join("");
     document.body.innerHTML = `
-        <div class="mx_Dialog mx_UserSettingsDialog" style="position: relative; box-sizing: border-box; width: 900px; height: 600px; padding: 32px 40px">
-            <div class="mx_Dialog_header"><h1 class="mx_Dialog_title" style="margin: 0; font-size: 24px">Settings</h1></div>
+        <div class="mx_Dialog mx_UserSettingsDialog" style="position: relative; box-sizing: border-box; width: 900px; height: 600px; padding: 16px 24px 24px">
+            <div class="mx_Dialog_header"><h1 class="mx_Dialog_title" style="margin: 0">Settings</h1></div>
             <div class="mx_TabbedView mx_TabbedView_tabsOnLeft ${responsive ? "mx_TabbedView_responsive" : ""}">
                 <ul class="mx_TabbedView_tabLabels" role="tablist">${tabs}</ul>
                 <div class="mx_TabbedView_tabPanel"><div class="mx_TabbedView_tabPanelContent"></div></div>
@@ -85,6 +85,7 @@ describe("Settings dialogs", () => {
             @layer app-web {
                 body { margin: 0; }
                 ${toBrowserCss(tabbedViewStyles, lightTheme, fontSizes)}
+                ${toBrowserCss(settingsDialogStyles, lightTheme, fontSizes)}
                 ${toBrowserCss(themeChoicePanelStyles, lightTheme, fontSizes)}
                 ${toBrowserCss(deviceSecurityCardStyles, lightTheme, fontSizes)}
             }

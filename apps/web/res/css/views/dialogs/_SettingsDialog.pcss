@@ -11,18 +11,24 @@ Please see LICENSE files in the repository root for full details.
 .mx_SpaceSettingsDialog,
 .mx_SpacePreferencesDialog {
     width: 90vw;
-    max-width: 980px;
+    /* Telement: 980px with the dialog's 24px padding (TELEMENT.md, "Colors, type and components") */
+    max-width: calc(980px - 2 * var(--cpd-space-6x));
     /* set the height too since tabbed view scrolls itself. */
     height: 80vh;
 
+    /* Telement: the tabs and their panel start 16px under the title's line at every font size, as a dialog's content
+       does (_common.pcss), their 8px top margin included. The tabs' icons sit 8px inside their pills, on the title's
+       24px edge */
     .mx_TabbedView {
-        top: 90px;
+        top: calc(var(--cpd-space-4x) + var(--dialog-title-line-height) + var(--cpd-space-4x) - var(--cpd-space-2x));
+        padding-inline-start: calc(var(--cpd-space-6x) - var(--cpd-space-2x));
     }
 
     .mx_TabbedView .mx_SettingsTab {
         box-sizing: border-box;
         min-width: 580px;
-        padding-right: 100px;
+        /* Telement: the content ends on the dialog's 24px edge */
+        padding-inline-end: var(--cpd-space-6x);
         display: flex;
         flex-direction: column;
 

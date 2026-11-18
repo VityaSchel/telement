@@ -345,6 +345,12 @@ summary {
 .mx_Dialog_wrapper > .mx_Dialog_border {
     /* .mx_Dialog_cancelButton, from customisedCancelButton's width and padding */
     --dialog-close-button-size: calc(20px + 2 * var(--cpd-space-1x));
+    /* .mx_Dialog_title's line in Compound's heading-sm: as tall as the close button, so the two are centered on one
+       line, and taller when a larger font needs it. Settings dialogs place their tabs under it (_SettingsDialog.pcss) */
+    --dialog-title-line-height: max(
+        var(--dialog-close-button-size),
+        var(--cpd-font-line-height-tight) * var(--cpd-font-size-heading-sm)
+    );
 
     border-radius: calc(var(--dialog-close-button-size) / 2 + var(--cpd-space-4x) + var(--cpd-space-3x));
     /* Compound's frame in light themes. A dark dialog's body is raised a step (floatingSurface), so its frame is too,
@@ -357,7 +363,9 @@ summary {
     color: $light-fg-color;
     font-size: $font-15px;
     position: relative;
-    padding: var(--cpd-space-8x) var(--cpd-space-10x);
+    /* Telement's dialog anatomy (TELEMENT.md, "Colors, type and components"): everything on a 24px edge, with the
+       title's line starting where the close button does, 16px from the top */
+    padding: var(--cpd-space-4x) var(--cpd-space-6x) var(--cpd-space-6x);
     box-sizing: border-box;
     overflow-y: auto;
     border-radius: calc(var(--dialog-close-button-size) / 2 + var(--cpd-space-4x));
@@ -495,7 +503,7 @@ summary {
     display: inline-block;
     width: 100%;
     box-sizing: border-box;
-    letter-spacing: var(--cpd-font-letter-spacing-heading-lg);
+    letter-spacing: var(--cpd-font-letter-spacing-heading-sm);
 
     &.danger {
         color: $alert;
@@ -505,8 +513,17 @@ summary {
 .mx_Dialog_header {
     position: relative;
     padding: 0;
-    padding-inline-end: 20px; /* Reserve room for the close button */
+    /* Keep the title 8px clear of the close button, which sits 16px from the end, inside the dialog's 24px padding */
+    padding-inline-end: calc(
+        var(--dialog-close-button-size) + var(--cpd-space-4x) + var(--cpd-space-2x) - var(--cpd-space-6x)
+    );
     margin-bottom: var(--cpd-space-2x);
+
+    /* Compound's heading-sm (20px semibold) over the larger heading BaseDialog asks for */
+    > .mx_Dialog_title {
+        font: var(--cpd-font-heading-sm-semibold);
+        line-height: var(--dialog-title-line-height);
+    }
 
     &.mx_Dialog_headerWithButton > .mx_Dialog_title {
         text-align: center;
@@ -541,14 +558,16 @@ summary {
 }
 
 .mx_Dialog_content {
-    margin: 24px 0 68px;
+    /* 16px under the title, and the footer's 24px above the buttons */
+    margin: var(--cpd-space-4x) 0 var(--cpd-space-6x);
     font: var(--cpd-font-body-md-regular);
     color: $primary-content;
     word-wrap: break-word;
 }
 
 .mx_Dialog_buttons {
-    margin-top: var(--cpd-space-5x);
+    /* The same 24px above the footer whether or not .mx_Dialog_content, whose bottom margin it meets, comes first */
+    margin-top: var(--cpd-space-6x);
     margin-inline-start: auto;
     text-align: right;
 
@@ -640,7 +659,6 @@ summary {
     color: var(--cpd-color-text-on-solid-primary);
     background-color: var(--cpd-color-bg-action-primary-rest);
     border-color: var(--cpd-color-bg-action-primary-rest);
-    min-width: 156px;
 }
 
 .mx_Dialog button.mx_LegacyDialogButton.danger,
@@ -662,7 +680,6 @@ summary {
     color: var(--cpd-color-text-primary);
     background-color: var(--cpd-color-bg-action-secondary-rest);
     border-color: var(--cpd-color-border-interactive-secondary);
-    min-width: 156px;
 }
 
 .mx_Dialog button.mx_LegacyDialogButton:disabled,

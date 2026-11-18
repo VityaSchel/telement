@@ -179,23 +179,32 @@ describe("Legacy dialog button styles", () => {
         document.body.innerHTML = "";
     });
 
-    it.each(["cancel", "primary"])("gives the footer's %s button Compound's md geometry and keeps its width", (id) => {
-        render(footer());
-        const button = element(id);
-        const style = getComputedStyle(button);
+    it.each(["cancel", "primary"])(
+        "gives the footer's %s button Compound's md geometry, as wide as its label",
+        (id) => {
+            render(footer());
+            const button = element(id);
+            const style = getComputedStyle(button);
 
-        expect(button.getBoundingClientRect().height).toBe(36);
-        expect(style.borderTopWidth).toBe("1px");
-        expect([style.paddingTop, style.paddingRight, style.paddingBottom, style.paddingLeft]).toEqual([
-            "3px",
-            "19px",
-            "3px",
-            "19px",
-        ]);
-        expect(parseFloat(style.borderTopLeftRadius)).toBeGreaterThanOrEqual(18);
-        expect(style.fontWeight).toBe("600");
-        expect(button.getBoundingClientRect().width).toBe(156);
-    });
+            expect(button.getBoundingClientRect().height).toBe(36);
+            expect(style.borderTopWidth).toBe("1px");
+            expect([style.paddingTop, style.paddingRight, style.paddingBottom, style.paddingLeft]).toEqual([
+                "3px",
+                "19px",
+                "3px",
+                "19px",
+            ]);
+            expect(parseFloat(style.borderTopLeftRadius)).toBeGreaterThanOrEqual(18);
+            expect(style.fontWeight).toBe("600");
+            // No 156px minimum (TELEMENT.md, "Colors, type and components")
+            const label = document.createRange();
+            label.selectNodeContents(button);
+            expect(button.getBoundingClientRect().width).toBeCloseTo(
+                label.getBoundingClientRect().width + 2 * (19 + 1),
+                0,
+            );
+        },
+    );
 
     it.each(FOOTER_CASES)("colors $name like Compound's Button on hover", async ({ html, id, hover }) => {
         render(html);
