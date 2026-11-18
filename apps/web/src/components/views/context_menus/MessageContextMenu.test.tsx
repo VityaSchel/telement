@@ -10,7 +10,7 @@ Please see LICENSE files in the repository root for full details.
 
 import React from "react";
 import { describe, it, expect, beforeEach, afterEach, afterAll, vi, type MockInstance } from "vitest";
-import { act, fireEvent, render, type RenderResult, screen, waitFor } from "test-utils-rtl";
+import { act, fireEvent, render, type RenderResult, screen, waitFor, within } from "test-utils-rtl";
 import {
     EventStatus,
     MatrixEvent,
@@ -906,6 +906,16 @@ describe("MessageContextMenu", () => {
             const picker = (await screen.findByLabelText("Emoji picker")).closest(".mx_ContextualMenu_wrapper");
             expect(picker).toHaveStyle({ left: "120px", top: "80px" });
             expect(screen.getByTestId("mx_MessageContextMenu")).toHaveClass("mx_MessageQuickReactions_menu_hidden");
+        });
+
+        it("opens the full picker without its own, different, row of quick reactions", async () => {
+            createRightClickMenuWithContent(createMessageEventContent("hello"), { canReact: true });
+
+            await userEvent.click(screen.getByRole("menuitem", { name: "React" }));
+
+            const picker = await screen.findByLabelText("Emoji picker");
+            expect(within(picker).queryByRole("toolbar", { name: "Quick Reactions" })).toBeNull();
+            expect(within(picker).queryByText("Quick Reactions")).toBeNull();
         });
 
         it("moves along the quick reactions with the left and right keys, and between them and the menu's items with up and down", () => {

@@ -946,7 +946,13 @@ export default class MessageContextMenu extends React.Component<IProps, IState> 
                     managed={false}
                     focusLock
                 >
-                    <ReactionPicker mxEvent={mxEvent} onFinished={this.onCloseReactionPicker} reactions={reactions} />
+                    {/* Without the picker's own quick reactions: the menu's, a different set, just opened it */}
+                    <ReactionPicker
+                        mxEvent={mxEvent}
+                        onFinished={this.onCloseReactionPicker}
+                        reactions={reactions}
+                        showQuickReactions={false}
+                    />
                 </ContextMenu>
             );
         }

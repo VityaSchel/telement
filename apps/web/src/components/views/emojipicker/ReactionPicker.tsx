@@ -21,6 +21,11 @@ interface IProps {
     mxEvent: MatrixEvent;
     reactions?: Relations | null | undefined;
     onFinished(): void;
+    /**
+     * Whether the picker ends with its own row of quick reactions. Defaults to true; the message menu turns it off, as
+     * its own quick reactions open the picker.
+     */
+    showQuickReactions?: boolean;
 }
 
 interface IState {
@@ -130,6 +135,7 @@ class ReactionPicker extends React.Component<IProps, IState> {
                 isEmojiDisabled={this.isEmojiDisabled}
                 onFinished={this.props.onFinished}
                 selectedEmojis={this.state.selectedEmojis}
+                showQuickReactions={this.props.showQuickReactions}
             />
         );
     }
