@@ -504,6 +504,57 @@ describe("Right panel", () => {
     });
 
     describe("pinned messages", () => {
+        /** PinnedMessagesCard with one pinned message, as PinnedEventTile renders it. */
+        function renderPinnedMessage(): HTMLElement {
+            document.body.innerHTML = `
+                <div class="mx_BaseCard mx_PinnedMessagesCard" style="width: ${CARD_WIDTH}px">
+                    <div class="mx_PinnedMessagesCard_wrapper" role="list">
+                        <div class="mx_PinnedEventTile" role="listitem">
+                            <div>${html(createElement(Avatar, { id: "@alice:example.org", name: "Alice", size: "32px", className: "mx_PinnedEventTile_senderAvatar" }))}</div>
+                            <div class="mx_PinnedEventTile_wrapper">
+                                <div class="mx_PinnedEventTile_top">
+                                    <span class="mx_PinnedEventTile_sender">Alice</span>
+                                    ${html(createElement(IconButton, { "size": "24px", "aria-label": "Open menu" }, createElement(OverflowHorizontalIcon)))}
+                                </div>
+                                <div class="mx_EventTile_content">The second one</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            return document.querySelector(".mx_PinnedMessagesCard")!;
+        }
+
+        it("puts the sender's name 8px after the avatar, as the member list does", () => {
+            const card = renderPinnedMessage();
+            const avatar = card.querySelector(".mx_PinnedEventTile_senderAvatar")!.getBoundingClientRect();
+
+            expect(textOf(card.querySelector(".mx_PinnedEventTile_sender")!).getBoundingClientRect().left).toBe(
+                avatar.right + 8,
+            );
+            expect(insets(textOf(card.querySelector(".mx_EventTile_content")!), card).start).toBe(
+                CONTENT_EDGE + 32 + 8,
+            );
+        });
+
+        it("draws the menu's … as a 24px icon in a 36px button that hangs over the sender's line, unclipped", () => {
+            const card = renderPinnedMessage();
+            const button = card.querySelector<HTMLElement>(".mx_PinnedEventTile_top > button")!;
+            const box = button.getBoundingClientRect();
+            const icon = button.querySelector("svg")!.getBoundingClientRect();
+            const top = card.querySelector(".mx_PinnedEventTile_top")!.getBoundingClientRect();
+            const wrapper = card.querySelector(".mx_PinnedEventTile_wrapper")!;
+
+            expect([box.width, box.height]).toEqual([36, 36]);
+            expect([icon.width, icon.height]).toEqual([24, 24]);
+            expect([icon.left - box.left, icon.top - box.top]).toEqual([6, 6]);
+            // The sender's line keeps the height of the 24px button it had, and the button is centered on it
+            expect(top.height).toBe(24);
+            expect(box.top + box.height / 2).toBe(top.top + top.height / 2);
+            expect(getComputedStyle(wrapper).overflowY).toBe("visible");
+            expect(insets(button, card).end).toBe(CONTENT_EDGE);
+        });
+
         it("puts the pinned messages and their separators on the card's 12px content edge", () => {
             const tile = `
                 <div class="mx_PinnedEventTile" role="listitem">

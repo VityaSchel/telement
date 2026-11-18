@@ -8,7 +8,8 @@ Please see LICENSE files in the repository root for full details.
 
 .mx_PinnedEventTile {
     display: flex;
-    gap: var(--cpd-space-4x);
+    /* The member list's gap between a 32px avatar and the name */
+    gap: var(--cpd-space-2x);
     align-items: flex-start;
 
     .mx_PinnedEventTile_wrapper {
@@ -17,15 +18,26 @@ Please see LICENSE files in the repository root for full details.
         gap: var(--cpd-space-1x);
         /* Remove avatar width and space between the avatar and the wrapper */
         /* We need it to make the location fit */
-        width: calc(100% - var(--cpd-space-4x) - 32px);
-        /* Prevent a long sender name to overflow the tile */
-        overflow: hidden;
+        width: calc(100% - var(--cpd-space-2x) - 32px);
+        /* Prevent a long sender name to overflow the tile. Clipped only sideways, so that the menu button can hang
+           above and below the sender's line. */
+        overflow-x: clip;
 
         .mx_PinnedEventTile_top {
             display: flex;
             gap: var(--cpd-space-1x);
             justify-content: space-between;
             align-items: center;
+
+            /* The menu's "…" is a 24px icon in a 36px button, as the right panel's other controls are. PinnedEventTile
+               sizes the button 24px, so the box is set here; it hangs 6px over and under the sender's line, so the
+               name and the message keep their places. */
+            > button {
+                inline-size: var(--tl-control-size);
+                block-size: var(--tl-control-size);
+                padding: calc((var(--tl-control-size) - var(--cpd-space-6x)) / 2);
+                margin-block: calc((var(--cpd-space-6x) - var(--tl-control-size)) / 2);
+            }
 
             .mx_PinnedEventTile_sender {
                 text-overflow: ellipsis;
