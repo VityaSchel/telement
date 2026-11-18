@@ -68,16 +68,17 @@ Please see LICENSE files in the repository root for full details.
                     margin-top: calc(var(--cpd-space-3x) * -1);
                 }
 
-                /**
-                 * Add margin to center the bubble
-                 */
                 &:has([data-event-layout="bubble"]) {
-                    /**
-                     * Add the layout margin and the margin to vertically center the bubble
-                     */
-                    margin-top: var(--cpd-space-6x);
-                    margin-right: 34px;
+                    /* Telement: no margin of its own, so that the preview's margin puts the bubble as far below the
+                       separator and above the card's bottom as its tail is from the card's end */
                     flex-shrink: 1;
+
+                    /* Telement: your own bubble sits at the card's end, as your messages do in the timeline, with its
+                       tail ending at the card's inset. The timeline's column for read receipts has no place here. The
+                       fallback, the tail's width, is for stylelint, which doesn't read the tile's own variables. */
+                    .mx_EventTile_line {
+                        margin-inline-end: var(--event-tile-bubble-tail-width, var(--cpd-space-1-5x));
+                    }
                 }
 
                 &:has([data-event-layout="irc"]) {

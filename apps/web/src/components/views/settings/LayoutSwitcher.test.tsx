@@ -48,7 +48,7 @@ describe("<LayoutSwitcher />", () => {
         expect(asFragment()).toMatchSnapshot();
     });
 
-    it("should show each preview as a message on its own, which bubbles round at every corner", async () => {
+    it("should show each preview as a message on its own, the last of its run", async () => {
         const { container } = await renderLayoutSwitcher();
         const previews = container.querySelectorAll('[data-testid="event-tile"]');
 
