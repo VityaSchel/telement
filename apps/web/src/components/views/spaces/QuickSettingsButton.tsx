@@ -8,7 +8,7 @@ Please see LICENSE files in the repository root for full details.
 
 import React from "react";
 import classNames from "classnames";
-import { SettingsSolidIcon } from "@vector-im/compound-design-tokens/assets/web/icons";
+import { SettingsIcon } from "@vector-im/compound-design-tokens/assets/web/icons";
 import { IconButton, Text, Tooltip } from "@vector-im/compound-web";
 
 import { _t } from "../../../languageHandler";
@@ -29,7 +29,7 @@ const QuickSettingsButton: React.FC<{
             onClick={() => defaultDispatcher.dispatch({ action: Action.ViewUserSettings })}
         >
             <>
-                <SettingsSolidIcon />
+                <SettingsIcon />
                 {/* This is dirty, but we need to add the label to the indicator icon */}
                 {!isPanelCollapsed && (
                     <Text className="mx_QuickSettingsButton_label" as="span" size="md" title={_t("common|settings")}>

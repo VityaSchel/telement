@@ -10,6 +10,7 @@
 
 import { vi, describe, it, expect, beforeAll } from "vitest";
 import React, { type ComponentProps } from "react";
+import ThreadsIcon from "@vector-im/compound-design-tokens/assets/web/icons/threads";
 import { render, screen } from "test-utils-rtl";
 import userEvent from "@testing-library/user-event";
 import { stubClient } from "test-utils";
@@ -182,6 +183,14 @@ describe("ThreadsActivityCentre", () => {
         const { container } = renderTAC({ displayButtonLabel: true });
         expect(getTACButton()).toBeInTheDocument();
         expect(getTACDescription(container)).toBeInTheDocument();
+    });
+
+    it("should draw the button with Compound's outline threads icon", () => {
+        renderTAC();
+        const drawn = getTACButton().querySelector("svg")!;
+
+        const { container: outline } = render(<ThreadsIcon />);
+        expect(drawn.innerHTML).toBe(outline.querySelector("svg")!.innerHTML);
     });
 
     it("should render the threads activity centre menu when the button is clicked", async () => {

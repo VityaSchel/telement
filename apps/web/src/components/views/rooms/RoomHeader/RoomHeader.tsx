@@ -9,12 +9,12 @@ Please see LICENSE files in the repository root for full details.
 
 import React, { type JSX, useCallback, useContext, useState } from "react";
 import { Text, Button, IconButton, Menu, MenuItem, Tooltip } from "@vector-im/compound-web";
-import VideoCallIcon from "@vector-im/compound-design-tokens/assets/web/icons/video-call-solid";
-import VoiceCallIcon from "@vector-im/compound-design-tokens/assets/web/icons/voice-call-solid";
+import VideoCallIcon from "@vector-im/compound-design-tokens/assets/web/icons/video-call";
+import VoiceCallIcon from "@vector-im/compound-design-tokens/assets/web/icons/voice-call";
 import CloseCallIcon from "@vector-im/compound-design-tokens/assets/web/icons/close";
-import ThreadsIcon from "@vector-im/compound-design-tokens/assets/web/icons/threads-solid";
-import RoomInfoIcon from "@vector-im/compound-design-tokens/assets/web/icons/info-solid";
-import NotificationsIcon from "@vector-im/compound-design-tokens/assets/web/icons/notifications-solid";
+import ThreadsIcon from "@vector-im/compound-design-tokens/assets/web/icons/threads";
+import RoomInfoIcon from "@vector-im/compound-design-tokens/assets/web/icons/info";
+import NotificationsIcon from "@vector-im/compound-design-tokens/assets/web/icons/notifications";
 import VerifiedIcon from "@vector-im/compound-design-tokens/assets/web/icons/verified";
 import ErrorIcon from "@vector-im/compound-design-tokens/assets/web/icons/error-solid";
 import PublicIcon from "@vector-im/compound-design-tokens/assets/web/icons/public";

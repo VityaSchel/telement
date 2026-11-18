@@ -10,6 +10,7 @@ Please see LICENSE files in the repository root for full details.
 
 import { afterEach, describe, expect, it, vi } from "vitest";
 import React from "react";
+import { SettingsIcon } from "@vector-im/compound-design-tokens/assets/web/icons";
 import { act, render, screen, waitFor } from "test-utils-rtl";
 import userEvent from "@testing-library/user-event";
 import { type Capabilities } from "matrix-js-sdk/src/matrix";
@@ -46,6 +47,14 @@ describe("QuickSettingsButton", () => {
         await userEvent.click(screen.getByRole("button", { name: "Settings" }));
 
         expect(dispatchSpy).toHaveBeenCalledWith({ action: Action.ViewUserSettings });
+    });
+
+    it("draws Compound's outline settings icon", () => {
+        render(<QuickSettingsButton isPanelCollapsed={true} />);
+        const drawn = screen.getByRole("button", { name: "Settings" }).querySelector("svg")!;
+
+        const { container: outline } = render(<SettingsIcon />);
+        expect(drawn.innerHTML).toBe(outline.querySelector("svg")!.innerHTML);
     });
 
     it("shows its label when the panel is expanded", () => {

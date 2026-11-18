@@ -22,9 +22,9 @@ import {
     OverflowHorizontalIcon,
     PinSolidIcon,
     PopOutIcon,
-    ThreadsSolidIcon,
-    VideoCallSolidIcon,
-    VoiceCallSolidIcon,
+    ThreadsIcon,
+    VideoCallIcon,
+    VoiceCallIcon,
     ZoomInIcon,
 } from "@vector-im/compound-design-tokens/assets/web/icons";
 import compoundBase from "@vector-im/compound-design-tokens/assets/web/css/cpd-common-base.css?raw";
@@ -96,9 +96,9 @@ function roomHeader(facePile: boolean): ReactNode {
             { className: "mx_RoomHeader_infoWrapper", type: "button" },
             h("div", { className: "mx_RoomHeader_info", style: { flex: 1 } }, "Room"),
         ),
-        h(IconButton, { "aria-label": "Video call" }, h(VideoCallSolidIcon)),
-        h(IconButton, { "aria-label": "Voice call" }, h(VoiceCallSolidIcon)),
-        h(IconButton, { "aria-label": "Threads", "indicator": "default" }, h(ThreadsSolidIcon)),
+        h(IconButton, { "aria-label": "Video call" }, h(VideoCallIcon)),
+        h(IconButton, { "aria-label": "Voice call" }, h(VoiceCallIcon)),
+        h(IconButton, { "aria-label": "Threads", "indicator": "default" }, h(ThreadsIcon)),
         facePile &&
             h(
                 Text,
