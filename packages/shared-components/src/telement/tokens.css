@@ -222,11 +222,15 @@ Please see LICENSE files in the repository root for full details.
 }
 
 /*
- * Floating surfaces: menus, pickers, autocomplete, dropdowns and dialogs. Shadows don't show on near-black, so in dark
+ * Floating surfaces: menus, pickers, autocomplete, dropdowns and dialogs. Shadows barely show on near-black, so in dark
  * themes they are one gray step lighter than the page, Compound's raised canvas, and the fills and separators inside
- * them one step further, so that hovered and selected rows, fields and separators still show. Light themes keep
- * Compound's colors. These name Compound's grays rather than its color roles, because a floating surface points those
- * roles at these tokens.
+ * them one step further, so that hovered, selected and disabled rows, fields and separators still show. Light themes
+ * keep Compound's colors. These name Compound's grays rather than its color roles, because a floating surface points
+ * those roles at these tokens.
+ *
+ * The raised gray is also the incoming bubble's, so a menu over a bubble would only have its border to set it apart:
+ * in dark themes the menus' shadow is much darker than in light ones. A dialog's Glass frame rises with the dialog, so
+ * that it stays lighter than the dialog's body and still reads as a frame.
  */
 :root,
 [class*="cpd-theme-"] {
@@ -235,7 +239,10 @@ Please see LICENSE files in the repository root for full details.
     --tl-color-bg-floating-pressed: var(--cpd-color-alpha-gray-300);
     --tl-color-bg-floating-subtle-secondary: var(--cpd-color-gray-300);
     --tl-color-bg-floating-subtle-primary: var(--cpd-color-gray-400);
+    --tl-color-bg-floating-disabled: var(--cpd-color-gray-200);
+    --tl-color-bg-floating-frame: var(--cpd-color-alpha-gray-400);
     --tl-color-separator-floating: var(--cpd-color-gray-400);
+    --tl-shadow-floating: 0 4px 24px rgb(0 0 0 / 10%);
 }
 
 .cpd-theme-dark.cpd-theme-dark,
@@ -245,7 +252,10 @@ Please see LICENSE files in the repository root for full details.
     --tl-color-bg-floating-pressed: var(--cpd-color-gray-500);
     --tl-color-bg-floating-subtle-secondary: var(--cpd-color-gray-400);
     --tl-color-bg-floating-subtle-primary: var(--cpd-color-gray-500);
+    --tl-color-bg-floating-disabled: var(--cpd-color-gray-400);
+    --tl-color-bg-floating-frame: var(--cpd-color-alpha-gray-600);
     --tl-color-separator-floating: var(--cpd-color-gray-500);
+    --tl-shadow-floating: 0 4px 16px rgb(0 0 0 / 50%);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -255,6 +265,9 @@ Please see LICENSE files in the repository root for full details.
         --tl-color-bg-floating-pressed: var(--cpd-color-gray-500);
         --tl-color-bg-floating-subtle-secondary: var(--cpd-color-gray-400);
         --tl-color-bg-floating-subtle-primary: var(--cpd-color-gray-500);
+        --tl-color-bg-floating-disabled: var(--cpd-color-gray-400);
+        --tl-color-bg-floating-frame: var(--cpd-color-alpha-gray-600);
         --tl-color-separator-floating: var(--cpd-color-gray-500);
+        --tl-shadow-floating: 0 4px 16px rgb(0 0 0 / 50%);
     }
 }

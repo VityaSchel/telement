@@ -9,7 +9,7 @@ import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
 import { userEvent } from "vitest/browser";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { CheckboxInput, MenuTitle, RadioInput, ToggleInput } from "@vector-im/compound-web";
+import { CheckboxInput, Glass, MenuTitle, RadioInput, ToggleInput } from "@vector-im/compound-web";
 import { OverflowHorizontalIcon, ReactionIcon } from "@vector-im/compound-design-tokens/assets/web/icons";
 import compoundBase from "@vector-im/compound-design-tokens/assets/web/css/cpd-common-base.css?raw";
 import compoundSemantic from "@vector-im/compound-design-tokens/assets/web/css/cpd-common-semantic.css?raw";
@@ -28,15 +28,22 @@ import compoundStyles from "@vector-im/compound-web/dist/style.css?raw";
 import telementTokens from "../../../../packages/shared-components/src/telement/tokens.css?raw";
 import commonStyles from "../../res/css/_common.pcss?raw";
 import fontSizes from "../../res/css/_font-sizes.pcss?raw";
+import autocompleteInputStyles from "../../res/css/structures/_AutocompleteInput.pcss?raw";
 import contextualMenuStyles from "../../res/css/structures/_ContextualMenu.pcss?raw";
 import genericDropdownMenuStyles from "../../res/css/structures/_GenericDropdownMenu.pcss?raw";
 import kebabContextMenuStyles from "../../res/css/components/views/context_menus/_KebabContextMenu.pcss?raw";
 import iconizedContextMenuStyles from "../../res/css/views/context_menus/_IconizedContextMenu.pcss?raw";
 import compoundOverrides from "../../res/css/telement/_CompoundOverrides.pcss?raw";
+import spotlightDialogStyles from "../../res/css/views/dialogs/_SpotlightDialog.pcss?raw";
 import dropdownStyles from "../../res/css/views/elements/_Dropdown.pcss?raw";
+import styledRadioButtonStyles from "../../res/css/views/elements/_StyledRadioButton.pcss?raw";
 import toggleSwitchStyles from "../../res/css/views/elements/_ToggleSwitch.pcss?raw";
+import baseCardStyles from "../../res/css/views/right_panel/_BaseCard.pcss?raw";
 import autocompleteStyles from "../../res/css/views/rooms/_Autocomplete.pcss?raw";
 import presenceLabelStyles from "../../res/css/views/rooms/_PresenceLabel.pcss?raw";
+import joinRuleSettingsStyles from "../../res/css/views/settings/_JoinRuleSettings.pcss?raw";
+import roomProfileSettingsStyles from "../../res/css/views/settings/_RoomProfileSettings.pcss?raw";
+import userProfileSettingsStyles from "../../res/css/views/settings/_UserProfileSettings.pcss?raw";
 import lightTheme from "../../res/themes/light/css/_light.pcss?raw";
 import darkTheme from "../../res/themes/dark/css/_dark.pcss?raw";
 import lightHighContrastTheme from "../../res/themes/light-high-contrast/css/_light-high-contrast.pcss?raw";
@@ -68,12 +75,19 @@ const APP_STYLES =
     kebabContextMenuStyles +
     presenceLabelStyles +
     commonStyles +
+    autocompleteInputStyles +
     contextualMenuStyles +
     iconizedContextMenuStyles +
     genericDropdownMenuStyles +
+    spotlightDialogStyles +
     autocompleteStyles +
     dropdownStyles +
+    styledRadioButtonStyles +
     toggleSwitchStyles +
+    baseCardStyles +
+    joinRuleSettingsStyles +
+    roomProfileSettingsStyles +
+    userProfileSettingsStyles +
     compoundOverrides;
 
 /**
@@ -123,6 +137,26 @@ function contrast(a: string, b: string): number {
     const [lighter, darker] = [luminance(a), luminance(b)].sort((x, y) => y - x);
     return (lighter + 0.05) / (darker + 0.05);
 }
+
+/** The `rgb()` color the screen shows for `rgb()` or `rgba()` colors painted over each other, the bottom one first. */
+function composite(bottom: string, ...layers: string[]): string {
+    const channels = (color: string): number[] => color.match(/\d+(\.\d+)?/g)!.map(Number);
+    const result = channels(bottom).slice(0, 3);
+    for (const layer of layers) {
+        const [r, g, b, alpha = 1] = channels(layer);
+        [r, g, b].forEach((channel, i) => (result[i] = alpha * channel + (1 - alpha) * result[i]));
+    }
+    return `rgb(${result.join(", ")})`;
+}
+
+/** Compound's own menu class, so that a menu drawn with it has Compound's shadow for Telement's to replace. */
+const COMPOUND_MENU_CLASS = compoundStyles.match(/\.(_menu_[\da-z]+_\d+)\s*\{/)![1];
+
+/** Compound's menu shadow, which light themes keep, and the much darker one menus have in dark themes. */
+const FLOATING_SHADOW = {
+    light: "rgba(0, 0, 0, 0.1) 0px 4px 24px 0px",
+    dark: "rgba(0, 0, 0, 0.5) 0px 4px 16px 0px",
+};
 
 let stylesheet: HTMLStyleElement;
 
@@ -286,6 +320,7 @@ describe("Telement's chrome colors", () => {
                       "--cpd-color-bg-action-tertiary-selected": color("--cpd-color-gray-500"),
                       "--cpd-color-bg-subtle-secondary": color("--cpd-color-gray-400"),
                       "--cpd-color-bg-subtle-primary": color("--cpd-color-gray-500"),
+                      "--cpd-color-bg-canvas-disabled": color("--cpd-color-gray-400"),
                       "--cpd-color-separator-primary": color("--cpd-color-gray-500"),
                   }
                 : Object.fromEntries(
@@ -298,6 +333,7 @@ describe("Telement's chrome colors", () => {
                           "--cpd-color-bg-action-tertiary-selected",
                           "--cpd-color-bg-subtle-secondary",
                           "--cpd-color-bg-subtle-primary",
+                          "--cpd-color-bg-canvas-disabled",
                           "--cpd-color-separator-primary",
                       ].map((token) => [token, color(token)]),
                   );
@@ -327,6 +363,161 @@ describe("Telement's chrome colors", () => {
                         { "background": raised, "--cpd-color-bg-canvas-default": raised, ...fills },
                     ]),
                 ),
+            );
+        });
+
+        it("sets menus, pickers and the autocomplete off what they cover with a shadow, much darker in dark themes", () => {
+            // A raised dark menu is the incoming bubble's gray, so over a bubble only its shadow and border show its edge
+            const container = render(
+                theme,
+                `<div class="mx_ContextualMenu" data-menu="menu"></div>
+                <div class="mx_ContextualMenu_wrapper mx_BaseCard_header_title">
+                    <div class="mx_ContextualMenu" data-menu="right panel menu"></div>
+                </div>
+                <div class="mx_Autocomplete" data-menu="autocomplete"></div>
+                <div class="mx_AutocompleteInput_matches" data-menu="invite suggestions"></div>
+                <div class="${COMPOUND_MENU_CLASS}" role="menu" data-menu="compound menu"></div>`,
+            );
+            const menus = [...container.querySelectorAll<HTMLElement>("[data-menu]")];
+            const shadow = isDark(theme) ? FLOATING_SHADOW.dark : FLOATING_SHADOW.light;
+
+            expect(
+                Object.fromEntries(menus.map((menu) => [menu.dataset.menu, getComputedStyle(menu).boxShadow])),
+            ).toEqual(Object.fromEntries(menus.map((menu) => [menu.dataset.menu, shadow])));
+        });
+
+        it("keeps a dialog's Glass frame apart from the dialog's body, which dark themes raise", () => {
+            const container = render(
+                theme,
+                `<div class="mx_Dialog_background"></div>
+                <div class="mx_Dialog_wrapper">
+                    ${renderToStaticMarkup(
+                        createElement(Glass, {
+                            className: "mx_Dialog_border",
+                            children: createElement("div", { className: "mx_Dialog" }),
+                        }),
+                    )}
+                </div>`,
+            );
+            const page = tokenColor("--cpd-color-bg-canvas-default", container);
+            const backdrop = getComputedStyle(container.querySelector(".mx_Dialog_background")!).backgroundColor;
+            const frame = getComputedStyle(container.querySelector(".mx_Dialog_border")!).backgroundColor;
+            const body = getComputedStyle(container.querySelector(".mx_Dialog")!).backgroundColor;
+
+            // Light themes keep Compound's frame
+            expect(frame).toBe(
+                tokenColor(isDark(theme) ? "--cpd-color-alpha-gray-600" : "--cpd-color-alpha-gray-400", container),
+            );
+            // The frame shows over the dimmed page at least as far from the body as before dark dialogs were raised
+            expect(contrast(composite(page, backdrop, frame), body)).toBeGreaterThanOrEqual(1.2);
+        });
+
+        it("keeps a disabled switch's track on the same side of a dialog's gray as of the page's", () => {
+            const toggles =
+                renderToStaticMarkup(createElement(ToggleInput, { disabled: true })) +
+                `<div class="mx_ToggleSwitch"><div class="mx_ToggleSwitch_ball"></div></div>`;
+            const container = render(theme, `<div>${toggles}</div><div class="mx_Dialog">${toggles}</div>`);
+            const [page, dialog] = [...container.children] as HTMLElement[];
+            const tracks = (scope: HTMLElement): string[] =>
+                [scope.querySelector("input + div")!, scope.querySelector(".mx_ToggleSwitch")!].map(
+                    (track) => getComputedStyle(track).backgroundColor,
+                );
+            const side = (track: string, surface: string): number => Math.sign(luminance(track) - luminance(surface));
+            const pageGray = tokenColor("--cpd-color-bg-canvas-default", container);
+            const dialogGray = getComputedStyle(dialog).backgroundColor;
+
+            // Compound's disabled fill is a step lighter than a dark page, so it is a step lighter than a dark dialog too
+            expect(tracks(dialog)).toEqual(
+                tracks(page).map((track) => (isDark(theme) ? tokenColor("--cpd-color-gray-400", container) : track)),
+            );
+            expect(tracks(dialog).map((track) => side(track, dialogGray))).toEqual(
+                tracks(page).map((track) => side(track, pageGray)),
+            );
+        });
+
+        it("draws the settings' profile and join rule dividers in a dialog as its other separators", () => {
+            const settings = `
+                <form class="mx_RoomProfileSettings" data-divider="room profile"></form>
+                <div class="mx_UserProfileSettings" data-divider="account profile"></div>
+                <label class="mx_StyledRadioButton mx_JoinRuleSettings_radioButton"></label>
+                <span>Anyone can find and join.</span>
+                <label class="mx_StyledRadioButton mx_JoinRuleSettings_radioButton" data-divider="join rule"></label>
+            `;
+            const container = render(theme, `<div>${settings}</div><div class="mx_Dialog">${settings}</div>`);
+            const [page, dialog] = [...container.children] as HTMLElement[];
+            const dividers = (scope: HTMLElement): Record<string, string> =>
+                Object.fromEntries(
+                    [...scope.querySelectorAll<HTMLElement>("[data-divider]")].map((divider) => [
+                        divider.dataset.divider,
+                        getComputedStyle(divider)[divider.matches("label") ? "borderTopColor" : "borderBottomColor"],
+                    ]),
+                );
+            const all = (color: string): Record<string, string> => ({
+                "room profile": color,
+                "account profile": color,
+                "join rule": color,
+            });
+
+            expect(dividers(page)).toEqual(all(tokenColor("--cpd-color-separator-primary", container)));
+            expect(dividers(dialog)).toEqual(all(tokenColor("--cpd-color-separator-primary", dialog)));
+            expect(tokenColor("--cpd-color-separator-primary", dialog)).toBe(
+                tokenColor(isDark(theme) ? "--cpd-color-gray-500" : "--cpd-color-separator-primary", container),
+            );
+        });
+
+        it("draws the legacy radio's checked ring and dot, which have nothing white on them, in the accent", () => {
+            const container = render(
+                theme,
+                `<div class="mx_Dialog">
+                    <label class="mx_StyledRadioButton mx_StyledRadioButton_enabled mx_StyledRadioButton_outlined
+                        mx_StyledRadioButton_checked">
+                        <input type="radio" checked />
+                        <div><div></div></div>
+                        <div class="mx_StyledRadioButton_content">Noisy</div>
+                        <div class="mx_StyledRadioButton_spacer"></div>
+                    </label>
+                </div>`,
+            );
+            const radio = container.querySelector<HTMLElement>(".mx_StyledRadioButton")!;
+            const ring = radio.querySelector("input + div")!;
+            const accent = tokenColor("--tl-accent-900", container);
+
+            expect({
+                ring: getComputedStyle(ring).borderTopColor,
+                dot: getComputedStyle(ring.firstElementChild!).backgroundColor,
+                outline: getComputedStyle(radio).borderTopColor,
+            }).toEqual({ ring: accent, dot: accent, outline: accent });
+        });
+
+        it("fills the search dialog's selected recent room with the subtle fill, a step further in a dark dialog", () => {
+            const container = render(
+                theme,
+                `<div class="mx_Dialog_wrapper mx_SpotlightDialog_wrapper">
+                    <div class="mx_Dialog_border">
+                        <div class="mx_Dialog">
+                            <div class="mx_SpotlightDialog" role="dialog">
+                                <div class="mx_SpotlightDialog_searchBox mx_textinput"><input type="text" /></div>
+                                <div id="mx_SpotlightDialog_content" role="listbox">
+                                    <div class="mx_SpotlightDialog_section mx_SpotlightDialog_recentlyViewed">
+                                        <div>
+                                            <div class="mx_SpotlightDialog_option" role="option" aria-selected="true">
+                                                Design
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>`,
+            );
+            // The options show which is selected only while the search field has the focus
+            container.querySelector("input")!.focus();
+            const option = container.querySelector(".mx_SpotlightDialog_option")!;
+
+            // Light themes keep the gray it had; a dark theme's raised dialog moves it a step further, as the dialog
+            expect(getComputedStyle(option).backgroundColor).toBe(
+                tokenColor(isDark(theme) ? "--cpd-color-gray-500" : "--cpd-color-gray-400", container),
             );
         });
     });

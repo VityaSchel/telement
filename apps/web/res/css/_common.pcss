@@ -32,11 +32,14 @@ Please see LICENSE files in the repository root for full details.
 
 /* A menu, picker, dropdown or dialog: one gray step lighter than the page in dark themes (telement/tokens.css). What it
    holds in the page's colors, such as a menu item at rest or a field's floated label, takes its color, and the hover,
-   pressed and subtle fills and the separators inside it move one step further. */
+   pressed, subtle and disabled fills and the separators inside it move one step further. Menus and pickers also take
+   the floating shadow (--tl-shadow-floating). Dropdowns and dialogs clip to their corners, which would cut it off; a
+   dialog has its Glass frame instead. */
 @define-mixin floatingSurface {
     background-color: var(--tl-color-bg-floating);
 
     --cpd-color-bg-canvas-default: var(--tl-color-bg-floating);
+    --cpd-color-bg-canvas-disabled: var(--tl-color-bg-floating-disabled);
     --cpd-color-bg-action-secondary-rest: var(--tl-color-bg-floating);
     --cpd-color-bg-action-secondary-hovered: var(--tl-color-bg-floating-hovered);
     --cpd-color-bg-action-secondary-pressed: var(--tl-color-bg-floating-pressed);
@@ -344,6 +347,9 @@ summary {
     --dialog-close-button-size: calc(20px + 2 * var(--cpd-space-1x));
 
     border-radius: calc(var(--dialog-close-button-size) / 2 + var(--cpd-space-4x) + var(--cpd-space-3x));
+    /* Compound's frame in light themes. A dark dialog's body is raised a step (floatingSurface), so its frame is too,
+       or the two would be the same gray and the body's edge would disappear */
+    background-color: var(--tl-color-bg-floating-frame);
 }
 
 .mx_Dialog {

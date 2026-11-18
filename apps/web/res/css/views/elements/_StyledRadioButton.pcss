@@ -13,7 +13,9 @@ Please see LICENSE files in the repository root for full details.
 
 .mx_StyledRadioButton {
     $radio-circle-color: var(--cpd-color-border-interactive-primary);
-    $active-radio-circle-color: var(--cpd-color-bg-accent-rest);
+    /* Telement: the checked ring and dot have nothing white on them, so they are drawn in the accent, as lines are,
+       rather than in the deeper fill that dark themes put white on (telement/tokens.css) */
+    $active-radio-circle-color: var(--cpd-color-border-accent-primary);
     position: relative;
 
     display: flex;
@@ -120,5 +122,6 @@ Please see LICENSE files in the repository root for full details.
 }
 
 .mx_StyledRadioButton_checked {
-    border-color: var(--cpd-color-bg-accent-rest);
+    /* Telement: a line, so the accent, like the ring above */
+    border-color: var(--cpd-color-border-accent-primary);
 }

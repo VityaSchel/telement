@@ -7,7 +7,9 @@ Please see LICENSE files in the repository root for full details.
 */
 
 .mx_UserProfileSettings {
-    border-bottom: 1px solid $quinary-content;
+    /* Telement: Compound's separator rather than a fixed gray, so that a dark theme's raised dialogs (_common.pcss)
+       move it a step further, as they do their other separators */
+    border-bottom: 1px solid var(--cpd-color-separator-primary);
 
     h2 {
         margin: var(--cpd-space-4x) 0;

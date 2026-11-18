@@ -236,9 +236,11 @@ Please see LICENSE files in the repository root for full details.
             overflow: hidden;
             text-overflow: ellipsis;
 
+            /* Telement: Compound's subtle fill rather than a fixed gray, so that in a dark theme's raised dialog
+               (_common.pcss) it is a step further too and the selected option still stands out */
             &:hover,
             &[aria-selected="true"] {
-                background-color: var(--mx_SpotlightDialog_option_selectedBgColor, $quinary-content);
+                background-color: var(--mx_SpotlightDialog_option_selectedBgColor, var(--cpd-color-bg-subtle-primary));
             }
         }
 

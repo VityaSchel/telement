@@ -106,9 +106,11 @@ Please see LICENSE files in the repository root for full details.
     }
 }
 
-/* Every Compound menu is a floating surface like the app's menus (_common.pcss), and its title's line a separator */
+/* Every Compound menu is a floating surface with the floating shadow, like the app's menus (_common.pcss), and its
+   title's line a separator */
 :is([class^="_menu_"], [class*=" _menu_"])[role="menu"] {
     @mixin floatingSurface;
+    box-shadow: var(--tl-shadow-floating);
 
     [class*="_menu-title_"] {
         border-block-end-color: var(--cpd-color-separator-primary);
