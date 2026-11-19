@@ -54,7 +54,8 @@ export function ComposeMenuView({ vm }: ComposeMenuViewProps): JSX.Element {
             onOpenChange={setOpen}
             showTitle={false}
             title={_t("action|open_menu")}
-            align="start"
+            // The button ends the room list's header, so the menu ends with it and stays over the list
+            align="end"
             trigger={button}
         >
             <MenuItem Icon={ChatIcon} label={_t("action|start_chat")} onSelect={vm.createChatRoom} hideChevron />

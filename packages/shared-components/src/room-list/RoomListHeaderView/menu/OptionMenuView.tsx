@@ -49,7 +49,8 @@ export function OptionMenuView({ vm }: OptionMenuViewProps): JSX.Element {
             onOpenChange={setOpen}
             title={_t("room_list|room_options")}
             showTitle={false}
-            align="start"
+            // The button sits at the room list's end, so the menu ends with it and stays over the list
+            align="end"
             trigger={
                 <IconButton
                     tooltip={_t("room_list|room_options")}

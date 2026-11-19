@@ -12,8 +12,9 @@ import "@vector-im/compound-web/dist/style.css";
 import "../telement/tokens.css";
 import React from "react";
 import { composeStories } from "@storybook/react-vite";
-import { render, screen } from "@test-utils";
+import { render, screen, waitFor } from "@test-utils";
 import { beforeAll, describe, expect, it } from "vitest";
+import { userEvent } from "vitest/browser";
 
 import * as headerStories from "./RoomListHeaderView/RoomListHeaderView.stories";
 import * as searchStories from "./RoomListSearchView/RoomListSearchView.stories";
@@ -62,6 +63,23 @@ describe("Room list panel content edge", () => {
         expect(rect(header).bottom - rect(buttons[0]).bottom).toBe(EDGE);
         expect(rect(buttons[0]).top - rect(header).top).toBe(EDGE);
     });
+
+    it.each(["Room Options", "New"])(
+        "opens the header's %s menu ending with its button, over the room list instead of across its edge",
+        async (name) => {
+            const panel = renderInPanel(<Header />);
+            const button = screen.getByRole("button", { name });
+
+            await userEvent.click(button);
+            const menu = await screen.findByRole("menu");
+            await Promise.all(menu.getAnimations().map((animation) => animation.finished));
+
+            await waitFor(() => expect(rect(menu).right).toBeCloseTo(rect(button).right, 0));
+            expect(rect(menu).left).toBeGreaterThanOrEqual(panel.left);
+            // Compound's gap under the button
+            expect(rect(menu).top - rect(button).bottom).toBeCloseTo(8, 0);
+        },
+    );
 
     it("makes the header's start chat button a 36px control on the content edge too", () => {
         const panel = renderInPanel(<NoComposeMenu />);
