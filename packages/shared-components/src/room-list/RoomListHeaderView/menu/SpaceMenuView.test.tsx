@@ -6,7 +6,7 @@
  */
 
 import React from "react";
-import { render, screen } from "@test-utils";
+import { render, screen, within } from "@test-utils";
 import userEvent from "@testing-library/user-event";
 import { vi, describe, it, afterEach, expect } from "vitest";
 
@@ -38,6 +38,20 @@ describe("<SpaceMenuView />", () => {
         expect(screen.getByRole("menuitem", { name: "Invite" })).toBeInTheDocument();
         expect(screen.getByRole("menuitem", { name: "Preferences" })).toBeInTheDocument();
         expect(screen.getByRole("menuitem", { name: "Space settings" })).toBeInTheDocument();
+    });
+
+    it("starts the menu with its first item, without a title row repeating the space's name it opens from", async () => {
+        const user = userEvent.setup();
+
+        const vm = new MockedViewModel(defaultSnapshot);
+        render(<SpaceMenuView vm={vm} />);
+
+        await user.click(screen.getByRole("button", { name: "Open space menu" }));
+
+        const menu = screen.getByRole("menu");
+        expect(within(menu).queryByRole("heading")).not.toBeInTheDocument();
+        expect(menu).not.toHaveTextContent(defaultSnapshot.title);
+        expect(within(menu).getAllByRole("menuitem")[0]).toHaveAccessibleName("Space home");
     });
 
     it("should hide invite option when canInviteInSpace is false", async () => {

@@ -28,7 +28,8 @@ interface SpaceMenuViewProps {
 /**
  * A menu component that provides space-specific actions.
  * Displays a dropdown menu with options to navigate to space home, invite users,
- * access preferences, and manage space settings.
+ * access preferences, and manage space settings. It opens from the space's name in the header, so it names the space
+ * only to assistive technology, without a title row repeating it.
  *
  * @example
  * ```tsx
@@ -45,6 +46,7 @@ export function SpaceMenuView({ vm }: SpaceMenuViewProps): JSX.Element {
             open={open}
             onOpenChange={setOpen}
             title={title}
+            showTitle={false}
             align="start"
             trigger={
                 <IconButton
