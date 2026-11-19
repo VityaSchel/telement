@@ -6,25 +6,29 @@ Please see LICENSE files in the repository root for full details.
 */
 
 /*
- * The message menu with Telegram's quick reactions: a pill of reactions 4px above the menu's list, each its own floating
- * surface. The menu's box holds both and draws neither, so that the menu keeps the pill inside the window too. The list
- * is at least as wide as the pill, as Telegram's pill never reaches past its menu (AppMenuController.swift).
+ * The message menu with Telegram's quick reactions: a pill of reactions 8px above the menu's list, each its own floating
+ * surface, as Telegram's sits about 7px above its menu. The menu's box holds both and draws neither, so that the menu
+ * keeps the pill inside the window too. The list is at least as wide as the pill, as Telegram's pill never reaches past
+ * its menu (AppMenuController.swift).
+ *
+ * The box casts one shadow for both. With a shadow each, the list's fell on the pill above it, darkening the pill's
+ * lower edge and the gap into a dark line. A drop shadow follows the outline of both and stays behind them.
  */
 .mx_ContextualMenu.mx_MessageQuickReactions_menu {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    gap: var(--tl-inset-menu);
+    gap: var(--cpd-space-2x);
     border: none;
     border-radius: 0;
     background: none;
     box-shadow: none;
+    filter: var(--tl-shadow-floating-filter);
 
     > :is(.mx_MessageQuickReactions, .mx_IconizedContextMenu) {
-        /* The menu's own surface (_ContextualMenu.pcss) */
+        /* The menu's own surface (_ContextualMenu.pcss), without its shadow */
         border: var(--cpd-border-width-1) solid var(--cpd-color-border-interactive-secondary);
         background-color: var(--cpd-color-bg-canvas-default);
-        box-shadow: var(--tl-shadow-floating);
     }
 
     > .mx_IconizedContextMenu {
@@ -39,10 +43,14 @@ Please see LICENSE files in the repository root for full details.
     visibility: hidden;
 }
 
-/* The reactions are round 32px buttons, inset from the pill's edge as the menu's items are from the menu's */
+/*
+ * A capsule of round 32px buttons, inset 4px from its top and bottom as the menu's items are from the menu's edge, and
+ * 8px from its ends, so that the emoji at its ends keep as clear of its curve as of its top and bottom
+ */
 .mx_MessageQuickReactions {
     display: flex;
-    padding: calc(var(--tl-inset-menu) - var(--cpd-border-width-1));
+    padding-block: calc(var(--tl-inset-menu) - var(--cpd-border-width-1));
+    padding-inline: calc(var(--cpd-space-2x) - var(--cpd-border-width-1));
     border-radius: var(--tl-radius-control);
 }
 
@@ -94,8 +102,15 @@ Please see LICENSE files in the repository root for full details.
     }
 }
 
-.mx_MessageQuickReactions_more svg {
-    inline-size: 20px;
-    block-size: 20px;
-    color: var(--cpd-color-icon-secondary);
+.mx_MessageQuickReactions_more {
+    /* Narrower than the reactions, as the chevron is: in a 32px cell its end of the pill looked emptier than the
+       start. Its highlight is a capsule rather than an oval. */
+    inline-size: var(--cpd-space-6x);
+    border-radius: calc(var(--cpd-space-6x) / 2);
+
+    svg {
+        inline-size: 20px;
+        block-size: 20px;
+        color: var(--cpd-color-icon-secondary);
+    }
 }

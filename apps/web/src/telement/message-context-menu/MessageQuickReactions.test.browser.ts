@@ -6,7 +6,7 @@ Please see LICENSE files in the repository root for full details.
 */
 
 import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
-import { userEvent } from "vitest/browser";
+import { page, userEvent } from "vitest/browser";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { ChevronDownIcon, CopyIcon } from "@vector-im/compound-design-tokens/assets/web/icons";
@@ -92,6 +92,24 @@ function render(theme: string, html: string, dir = "ltr"): HTMLElement {
 const part = (container: HTMLElement, name: string): HTMLElement => container.querySelector(`[data-${name}]`)!;
 const rectOf = (element: Element): DOMRect => element.getBoundingClientRect();
 
+/** The page as drawn, to read the color of a pixel at a point in CSS pixels as "r g b". */
+async function screenshot(): Promise<(x: number, y: number) => string> {
+    const image = new Image();
+    image.src = `data:image/png;base64,${await page.screenshot({ base64: true, save: false })}`;
+    await image.decode();
+    const canvas = document.createElement("canvas");
+    canvas.width = image.width;
+    canvas.height = image.height;
+    const context = canvas.getContext("2d")!;
+    context.drawImage(image, 0, 0);
+    const scale = image.width / document.documentElement.clientWidth;
+    return (x, y) =>
+        context
+            .getImageData(x * scale, y * scale, 1, 1)
+            .data.slice(0, 3)
+            .join(" ");
+}
+
 let stylesheet: HTMLStyleElement;
 
 describe("The message menu's quick reactions", () => {
@@ -120,13 +138,14 @@ describe("The message menu's quick reactions", () => {
         document.body.innerHTML = "";
     });
 
-    it.each(["ltr", "rtl"])("sit 4px above the menu's list, as wide, at its start, in its box (%s)", (dir) => {
+    it.each(["ltr", "rtl"])("sit 8px above the menu's list, as wide, at its start, in its box (%s)", (dir) => {
         const container = render("cpd-theme-light", menuHtml(), dir);
         const box = rectOf(part(container, "box"));
         const pill = rectOf(part(container, "pill"));
         const list = rectOf(part(container, "list"));
 
-        expect(list.top - pill.bottom).toBe(4);
+        // Telegram's sit about 7px above its menu
+        expect(list.top - pill.bottom).toBe(8);
         // The box is what the menu keeps inside the window, so it holds both
         expect(pill.top).toBe(box.top);
         expect(list.bottom).toBe(box.bottom);
@@ -164,23 +183,42 @@ describe("The message menu's quick reactions", () => {
         expect(gaps).toEqual([0, 0, 0, 0, 0, 0]);
     });
 
-    it("are a 40px pill of round 32px buttons, inset 4px from its edge as the menu's items are", () => {
+    it("are a 40px capsule of round 32px buttons, 4px from its top and bottom and 8px from its ends", () => {
         const container = render("cpd-theme-light", menuHtml());
         const pill = part(container, "pill");
         const buttons = [...pill.children] as HTMLElement[];
+        const reactions = buttons.slice(0, -1);
+        const more = buttons.at(-1)!;
         const pillRect = rectOf(pill);
 
         expect(buttons).toHaveLength(7);
         expect(pillRect.height).toBe(40);
         expect(cornerRadii(pill)).toEqual({ x: 20, y: 20 });
-        expect(rectOf(buttons[0]).left - pillRect.left).toBe(4);
-        expect(pillRect.right - rectOf(buttons[6]).right).toBe(4);
-        for (const button of buttons) {
+        expect(rectOf(buttons[0]).left - pillRect.left).toBe(8);
+        expect(pillRect.right - rectOf(more).right).toBe(8);
+        for (const button of reactions) {
             const rect = rectOf(button);
             expect([rect.width, rect.height]).toEqual([32, 32]);
             expect(rect.top - pillRect.top).toBe(4);
             expect(cornerRadii(button)).toEqual({ x: 16, y: 16 });
         }
+        // The button to all reactions is as narrow as its chevron allows, its highlight a capsule
+        const moreRect = rectOf(more);
+        expect([moreRect.width, moreRect.height]).toEqual([24, 32]);
+        expect(moreRect.top - pillRect.top).toBe(4);
+        expect(cornerRadii(more)).toEqual({ x: 12, y: 12 });
+    });
+
+    it("end with the chevron about as far from the pill's edge as the first emoji is from its start", () => {
+        const container = render("cpd-theme-light", menuHtml());
+        const pill = rectOf(part(container, "pill"));
+        const first = part(container, "pill").querySelector(".mx_MessageQuickReactions_reaction")!;
+        const chevron = part(container, "pill").querySelector(".mx_MessageQuickReactions_more path")!;
+        // The emoji is as wide as its font size, centered in its button
+        const emojiStart = rectOf(first).left + (rectOf(first).width - 20) / 2 - pill.left;
+        const chevronEnd = pill.right - rectOf(chevron).right;
+
+        expect(Math.abs(chevronEnd - emojiStart)).toBeLessThanOrEqual(2);
     });
 
     it("draw each emoji at the emoji picker's size, centered in its button", () => {
@@ -206,7 +244,7 @@ describe("The message menu's quick reactions", () => {
     });
 
     describe.each(THEMES.map(([theme]) => theme))("in %s", (theme) => {
-        it("draw the pill and the list each as a menu, and nothing around them", () => {
+        it("draw the pill and the list each as a menu's surface, with one shadow around both", () => {
             const plain = render(theme, menuHtml({ withReactions: false }));
             const plainMenu = getComputedStyle(part(plain, "box"));
             const container = render(theme, menuHtml());
@@ -218,12 +256,28 @@ describe("The message menu's quick reactions", () => {
             for (const surface of [part(container, "pill"), part(container, "list")]) {
                 const style = getComputedStyle(surface);
                 expect(style.backgroundColor).toBe(plainMenu.backgroundColor);
-                expect(style.boxShadow).toBe(plainMenu.boxShadow);
+                expect(style.boxShadow).toBe("none");
                 expect(`${style.borderTopWidth} ${style.borderTopStyle} ${style.borderTopColor}`).toBe(
                     `${plainMenu.borderTopWidth} ${plainMenu.borderTopStyle} ${plainMenu.borderTopColor}`,
                 );
             }
             expect(getComputedStyle(part(container, "list")).borderRadius).toBe(plainMenu.borderRadius);
+            // The box casts the menu's shadow as a drop shadow, whose blur is a standard deviation: half of
+            // box-shadow's blur radius
+            const [color, x, y, blur] = plainMenu.boxShadow.match(/^(rgba?\([^)]*\)) (\S+) (\S+) (\S+)/)!.slice(1);
+            expect(box.filter).toBe(`drop-shadow(${color} ${x} ${y} ${parseFloat(blur) / 2}px)`);
+        });
+
+        it("keep the list's shadow off the pill", async () => {
+            const container = render(theme, menuHtml());
+            const pill = rectOf(part(container, "pill"));
+            const surface = getComputedStyle(part(container, "pill")).backgroundColor.match(/\d+/g)!.join(" ");
+            // Between two reactions that are not the user's own, inside the pill's padding at its top and bottom
+            const x = rectOf(part(container, "pill").children[3]).left;
+            const pixel = await screenshot();
+
+            expect(pixel(x, pill.top + 2)).toBe(surface);
+            expect(pixel(x, pill.bottom - 2)).toBe(surface);
         });
 
         it("fill the user's own reactions as their reactions under a message, and highlight others as menu items", async () => {

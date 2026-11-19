@@ -288,6 +288,9 @@ Please see LICENSE files in the repository root for full details.
  * The raised gray is also the incoming bubble's, so a menu over a bubble would only have its border to set it apart:
  * in dark themes the menus' shadow is much darker than in light ones. A dialog's Glass frame rises with the dialog, so
  * that it stays lighter than the dialog's body and still reads as a frame.
+ *
+ * The filter is the same shadow for surfaces that cast one together, such as the quick reactions and the message menu
+ * below them. drop-shadow() takes its blur as a standard deviation, which is half of box-shadow's blur radius.
  */
 :root,
 [class*="cpd-theme-"] {
@@ -300,6 +303,7 @@ Please see LICENSE files in the repository root for full details.
     --tl-color-bg-floating-frame: var(--cpd-color-alpha-gray-400);
     --tl-color-separator-floating: var(--cpd-color-gray-400);
     --tl-shadow-floating: 0 4px 24px rgb(0 0 0 / 10%);
+    --tl-shadow-floating-filter: drop-shadow(0 4px 12px rgb(0 0 0 / 10%));
 }
 
 .cpd-theme-dark.cpd-theme-dark,
@@ -313,6 +317,7 @@ Please see LICENSE files in the repository root for full details.
     --tl-color-bg-floating-frame: var(--cpd-color-alpha-gray-600);
     --tl-color-separator-floating: var(--cpd-color-gray-500);
     --tl-shadow-floating: 0 4px 16px rgb(0 0 0 / 50%);
+    --tl-shadow-floating-filter: drop-shadow(0 4px 8px rgb(0 0 0 / 50%));
 }
 
 @media (prefers-color-scheme: dark) {
@@ -326,5 +331,6 @@ Please see LICENSE files in the repository root for full details.
         --tl-color-bg-floating-frame: var(--cpd-color-alpha-gray-600);
         --tl-color-separator-floating: var(--cpd-color-gray-500);
         --tl-shadow-floating: 0 4px 16px rgb(0 0 0 / 50%);
+        --tl-shadow-floating-filter: drop-shadow(0 4px 8px rgb(0 0 0 / 50%));
     }
 }
