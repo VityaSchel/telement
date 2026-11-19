@@ -6,12 +6,9 @@ SPDX-License-Identifier: AGPL-3.0-only OR GPL-3.0-only OR LicenseRef-Element-Com
 Please see LICENSE files in the repository root for full details.
 */
 
-.mx_SidebarUserSettingsTab_homeAllRoomsCheckbox {
-    margin-left: 24px;
-
-    & + div {
-        margin-left: 48px;
-    }
+/* Telement: Show all rooms belongs to Home, so it is indented under Home's toggle */
+.mx_SidebarUserSettingsTab_homeAllRoomsToggle {
+    margin-inline-start: var(--cpd-space-6x);
 }
 
 .mx_SidebarUserSettingsTab_icon {
@@ -20,6 +17,6 @@ Please see LICENSE files in the repository root for full details.
     margin-bottom: auto;
 }
 
-.mx_SidebarUserSettingsTab_checkbox label {
+.mx_SidebarUserSettingsTab_toggle label {
     display: flex;
 }

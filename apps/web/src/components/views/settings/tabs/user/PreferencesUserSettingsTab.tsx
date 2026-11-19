@@ -123,8 +123,6 @@ export default class PreferencesUserSettingsTab extends React.Component<EmptyObj
     // Telement: previews are always on and sections always off, so the section only shows if a setting is added here
     private static ROOM_LIST_SETTINGS: BooleanSettingKey[] = [];
 
-    private static SPACES_SETTINGS: BooleanSettingKey[] = ["Spaces.allRoomsInHome"];
-
     private static KEYBINDINGS_SETTINGS: BooleanSettingKey[] = ["ctrlFForSearch"];
 
     private static PRESENCE_SETTINGS: BooleanSettingKey[] = ["sendReadReceipts", "sendTypingNotifications"];
@@ -285,10 +283,6 @@ export default class PreferencesUserSettingsTab extends React.Component<EmptyObj
                             {this.renderGroup(PreferencesUserSettingsTab.ROOM_LIST_SETTINGS, SettingLevel.ACCOUNT)}
                         </SettingsSubsection>
                     )}
-
-                    <SettingsSubsection heading={_t("common|spaces")} formWrap>
-                        {this.renderGroup(PreferencesUserSettingsTab.SPACES_SETTINGS, SettingLevel.ACCOUNT)}
-                    </SettingsSubsection>
 
                     <SettingsSubsection
                         heading={_t("settings|preferences|keyboard_heading")}

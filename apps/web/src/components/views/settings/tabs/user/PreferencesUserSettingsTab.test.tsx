@@ -77,6 +77,13 @@ describe("PreferencesUserSettingsTab", () => {
         }
     });
 
+    it("leaves showing all rooms in Home to the Sidebar tab, where the other spaces to show are", () => {
+        renderTab();
+
+        expect(screen.queryByRole("heading", { name: "Spaces" })).not.toBeInTheDocument();
+        expect(screen.queryByRole("switch", { name: "Show all rooms in Home" })).not.toBeInTheDocument();
+    });
+
     it("should search and select a user timezone", async () => {
         renderTab();
 

@@ -6,13 +6,14 @@ SPDX-License-Identifier: AGPL-3.0-only OR GPL-3.0-only OR LicenseRef-Element-Com
 Please see LICENSE files in the repository root for full details.
 */
 
-import React, { type ChangeEvent, useMemo } from "react";
+import React, { type ChangeEvent, type ReactNode, useId, useMemo } from "react";
+import { HelpMessage, InlineField, Label, ToggleInput } from "@vector-im/compound-web";
 import { VideoCallSolidIcon, HomeSolidIcon } from "@vector-im/compound-design-tokens/assets/web/icons";
+import classNames from "classnames";
 
 import { _t } from "../../../../../languageHandler";
 import SettingsStore from "../../../../../settings/SettingsStore";
 import { SettingLevel } from "../../../../../settings/SettingLevel";
-import StyledCheckbox from "../../../elements/StyledCheckbox";
 import { useSettingValue } from "../../../../../hooks/useSettings";
 import { MetaSpace } from "../../../../../stores/spaces";
 import SettingsTab from "../SettingsTab";
@@ -26,6 +27,37 @@ export const onMetaSpaceChangeFactory = (metaSpace: MetaSpace) => async (e: Chan
         ...currentValue,
         [metaSpace]: e.target.checked,
     });
+};
+
+interface SidebarToggleProps {
+    /** The toggle's label, which may start with the space's icon. */
+    "label": ReactNode;
+    /** What the space shows, under the label. */
+    "description": ReactNode;
+    "checked": boolean;
+    "disabled"?: boolean;
+    "onChange": (event: ChangeEvent<HTMLInputElement>) => void;
+    "className"?: string;
+    "data-testid"?: string;
+}
+
+/**
+ * One of the spaces to show, as a toggle like every other on/off setting (Compound's SettingsToggleInput, whose label
+ * can't hold the space's icon).
+ */
+const SidebarToggle: React.FC<SidebarToggleProps> = ({ label, description, className, ...inputProps }) => {
+    const id = useId();
+    const descriptionId = useId();
+    return (
+        <InlineField
+            className={classNames("mx_SidebarUserSettingsTab_toggle", className)}
+            name={id}
+            control={<ToggleInput id={id} aria-describedby={descriptionId} {...inputProps} />}
+        >
+            <Label htmlFor={id}>{label}</Label>
+            <HelpMessage id={descriptionId}>{description}</HelpMessage>
+        </InlineField>
+    );
 };
 
 const SidebarUserSettingsTab: React.FC = () => {
@@ -52,47 +84,49 @@ const SidebarUserSettingsTab: React.FC = () => {
                 <SettingsSubsection
                     heading={_t("settings|sidebar|metaspaces_subsection")}
                     description={_t("settings|sidebar|spaces_explainer")}
+                    formWrap
                 >
-                    <StyledCheckbox
+                    <SidebarToggle
                         checked={!!homeEnabled}
                         onChange={onMetaSpaceChangeFactory(MetaSpace.Home)}
-                        className="mx_SidebarUserSettingsTab_checkbox"
                         disabled={homeEnabled}
+                        label={
+                            <>
+                                <HomeSolidIcon className="mx_SidebarUserSettingsTab_icon" />
+                                {_t("common|home")}
+                            </>
+                        }
                         description={_t("settings|sidebar|metaspaces_home_description")}
-                    >
-                        <HomeSolidIcon className="mx_SidebarUserSettingsTab_icon" />
-                        {_t("common|home")}
-                    </StyledCheckbox>
+                    />
 
-                    <StyledCheckbox
+                    <SidebarToggle
                         checked={allRoomsInHome}
                         disabled={!homeEnabled}
                         onChange={onAllRoomsInHomeToggle}
-                        className="mx_SidebarUserSettingsTab_checkbox mx_SidebarUserSettingsTab_homeAllRoomsCheckbox"
-                        data-testid="mx_SidebarUserSettingsTab_homeAllRoomsCheckbox"
+                        className="mx_SidebarUserSettingsTab_homeAllRoomsToggle"
+                        data-testid="mx_SidebarUserSettingsTab_homeAllRoomsToggle"
+                        label={_t("settings|sidebar|metaspaces_home_all_rooms")}
                         description={_t("settings|sidebar|metaspaces_home_all_rooms_description")}
-                    >
-                        {_t("settings|sidebar|metaspaces_home_all_rooms")}
-                    </StyledCheckbox>
+                    />
 
-                    <StyledCheckbox
+                    <SidebarToggle
                         checked={!!orphansEnabled}
                         onChange={onMetaSpaceChangeFactory(MetaSpace.Orphans)}
-                        className="mx_SidebarUserSettingsTab_checkbox"
+                        label={_t("settings|sidebar|metaspaces_orphans")}
                         description={_t("settings|sidebar|metaspaces_orphans_description")}
-                    >
-                        {_t("settings|sidebar|metaspaces_orphans")}
-                    </StyledCheckbox>
+                    />
                     {SettingsStore.getValue("feature_video_rooms") && (
-                        <StyledCheckbox
+                        <SidebarToggle
                             checked={!!videoRoomsEnabled}
                             onChange={onMetaSpaceChangeFactory(MetaSpace.VideoRooms)}
-                            className="mx_SidebarUserSettingsTab_checkbox"
+                            label={
+                                <>
+                                    <VideoCallSolidIcon className="mx_SidebarUserSettingsTab_icon" />
+                                    {_t("settings|sidebar|metaspaces_video_rooms")}
+                                </>
+                            }
                             description={conferenceSubsectionText}
-                        >
-                            <VideoCallSolidIcon className="mx_SidebarUserSettingsTab_icon" />
-                            {_t("settings|sidebar|metaspaces_video_rooms")}
-                        </StyledCheckbox>
+                        />
                     )}
                 </SettingsSubsection>
             </SettingsSection>

@@ -46,6 +46,24 @@ describe("<SidebarUserSettingsTab />", () => {
         spySettingsStore.mockRestore();
     });
 
+    it("shows every space as a switch, described by what it shows, like every other on/off setting", () => {
+        vi.spyOn(SettingsStore, "getValue").mockImplementation((settingName) => {
+            if (settingName === "Spaces.enabledMetaSpaces") return { [MetaSpace.Home]: true };
+            return settingName === "feature_video_rooms";
+        });
+        render(<SidebarUserSettingsTab />);
+
+        expect(screen.queryAllByRole("checkbox")).toHaveLength(0);
+        expect(screen.getAllByRole("switch")).toHaveLength(4);
+        const home = screen.getByRole("switch", { name: "Home" });
+        expect(home).toBeChecked();
+        expect(home).toBeDisabled();
+        expect(home).toHaveAccessibleDescription("Home is useful for getting an overview of everything.");
+        expect(screen.getByRole("switch", { name: "Show all rooms" })).toHaveAccessibleDescription(
+            "Show all your rooms in Home, even if they're in a space.",
+        );
+    });
+
     it("toggles all rooms in home setting", async () => {
         vi.spyOn(SettingsStore, "getValue").mockImplementation((settingName) => {
             if (settingName === "Spaces.enabledMetaSpaces") {
@@ -58,7 +76,7 @@ describe("<SidebarUserSettingsTab />", () => {
         });
         render(<SidebarUserSettingsTab />);
 
-        fireEvent.click(screen.getByTestId("mx_SidebarUserSettingsTab_homeAllRoomsCheckbox"));
+        fireEvent.click(screen.getByTestId("mx_SidebarUserSettingsTab_homeAllRoomsToggle"));
 
         await flushPromises();
         expect(SettingsStore.setValue).toHaveBeenCalledWith("Spaces.allRoomsInHome", null, SettingLevel.ACCOUNT, true);
@@ -76,6 +94,6 @@ describe("<SidebarUserSettingsTab />", () => {
         });
         render(<SidebarUserSettingsTab />);
 
-        expect(screen.getByTestId("mx_SidebarUserSettingsTab_homeAllRoomsCheckbox")).toBeDisabled();
+        expect(screen.getByTestId("mx_SidebarUserSettingsTab_homeAllRoomsToggle")).toBeDisabled();
     });
 });
