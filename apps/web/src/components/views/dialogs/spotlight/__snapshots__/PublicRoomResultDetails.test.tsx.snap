@@ -49,12 +49,6 @@ exports[`PublicRoomResultDetails > Public room results 2`] = `
       >
         alias-from-aliases
       </span>
-      <span
-        class="mx_SpotlightDialog_result_publicRoomAlias"
-        id="description-id"
-      >
-        room-id
-      </span>
     </div>
     <div
       class="mx_SpotlightDialog_result_publicRoomDescription"
@@ -119,12 +113,6 @@ exports[`PublicRoomResultDetails > Public room results 4`] = `
       >
         with an overly long name that will be truncated for sure, you can't say anything...
       </span>
-      <span
-        class="mx_SpotlightDialog_result_publicRoomAlias"
-        id="description-id"
-      >
-        room-id
-      </span>
     </div>
     <div
       class="mx_SpotlightDialog_result_publicRoomDescription"
@@ -159,12 +147,6 @@ exports[`PublicRoomResultDetails > Public room results 5`] = `
         id="label-id"
       >
         Unnamed Room
-      </span>
-      <span
-        class="mx_SpotlightDialog_result_publicRoomAlias"
-        id="description-id"
-      >
-        room-id
       </span>
     </div>
     <div

@@ -46,9 +46,12 @@ export function PublicRoomResultDetails({ room, labelId, descriptionId, detailsI
                 <span id={labelId} className="mx_SpotlightDialog_result_publicRoomName">
                     {name}
                 </span>
-                <span id={descriptionId} className="mx_SpotlightDialog_result_publicRoomAlias">
-                    {room.canonical_alias ?? room.room_id}
-                </span>
+                {/* Telement: only an alias, which people can read and share; a raw room ID means nothing to them */}
+                {room.canonical_alias && (
+                    <span id={descriptionId} className="mx_SpotlightDialog_result_publicRoomAlias">
+                        {room.canonical_alias}
+                    </span>
+                )}
             </div>
             <div id={detailsId} className="mx_SpotlightDialog_result_publicRoomDescription">
                 <span className="mx_SpotlightDialog_result_publicRoomMemberCount">

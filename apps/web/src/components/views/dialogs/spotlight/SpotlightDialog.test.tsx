@@ -250,6 +250,23 @@ describe("Spotlight Dialog", () => {
             });
         });
 
+        it("draws a public room as a two-line row with a 36px avatar, described by no raw room ID", async () => {
+            render(<SpotlightDialog initialFilter={Filter.PublicRooms} onFinished={() => null} />);
+            vi.advanceTimersByTime(200);
+            await flushPromisesWithFakeTimers();
+
+            const option = await waitFor(() => {
+                const result = document.querySelector<HTMLElement>("li.mx_SpotlightDialog_result_multiline");
+                expect(result).not.toBeNull();
+                return result!;
+            });
+            expect(
+                option.querySelector<HTMLElement>(".mx_BaseAvatar")!.style.getPropertyValue("--cpd-avatar-size"),
+            ).toBe("36px");
+            expect(option).not.toHaveAttribute("aria-describedby");
+            expect(option).not.toHaveTextContent(testPublicRoom.room_id);
+        });
+
         it("with people filter", async () => {
             render(
                 <SpotlightDialog

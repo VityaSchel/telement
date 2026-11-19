@@ -528,4 +528,47 @@ describe("SpotlightDialog styles", () => {
         // The first tile's highlight is inset as the options' are
         expect(tiles[0].getBoundingClientRect().left - dialog.left).toBe(16);
     });
+
+    it("draws a public room as a 52px two-line row, its 36px avatar 8px from three sides and its button centered", () => {
+        document.body.innerHTML = spotlightDialog(["↓", "↑"]);
+        // A public room's result as SpotlightDialog and PublicRoomResultDetails draw it, with a 36px md button
+        element(".mx_SpotlightDialog_results > div").innerHTML = `
+            <li class="mx_AccessibleButton mx_SpotlightDialog_option mx_SpotlightDialog_result_multiline" role="option"
+                aria-selected="true">
+                <span class="mx_BaseAvatar mx_SearchResultAvatar" style="display: block"></span>
+                <div class="mx_SpotlightDialog_result_publicRoomDetails">
+                    <div class="mx_SpotlightDialog_result_publicRoomHeader">
+                        <span class="mx_SpotlightDialog_result_publicRoomName">Public lounge</span>
+                        <span class="mx_SpotlightDialog_result_publicRoomAlias">#lounge:example.org</span>
+                    </div>
+                    <div class="mx_SpotlightDialog_result_publicRoomDescription">
+                        <span class="mx_SpotlightDialog_result_publicRoomMemberCount">2 Members</span>
+                    </div>
+                </div>
+                <div class="mx_SpotlightDialog_option--endAdornment">
+                    <kbd class="mx_SpotlightDialog_enterPrompt" aria-hidden="true">↵</kbd>
+                    <div class="mx_AccessibleButton mx_AccessibleButton_hasKind mx_AccessibleButton_kind_primary_outline"
+                        role="button" style="display: inline-flex; align-items: center; box-sizing: border-box;
+                        block-size: 36px">View</div>
+                </div>
+            </li>`;
+        const row = element(".mx_SpotlightDialog_result_multiline").getBoundingClientRect();
+        const avatar = element(".mx_SearchResultAvatar").getBoundingClientRect();
+        const details = element(".mx_SpotlightDialog_result_publicRoomDetails").getBoundingClientRect();
+
+        expect(row.height).toBe(52);
+        expect([avatar.width, avatar.height]).toEqual([36, 36]);
+        expect([avatar.left - row.left, avatar.top - row.top, row.bottom - avatar.bottom]).toEqual([8, 8, 8]);
+        // The name's 24px line and the details' 20px one, centered with 4px above and below
+        expect([details.height, details.top - row.top]).toEqual([44, 4]);
+        for (const selector of [".mx_AccessibleButton_kind_primary_outline", ".mx_SpotlightDialog_enterPrompt"]) {
+            expect(centre(element(selector).getBoundingClientRect())).toBeCloseTo(centre(row), 0);
+        }
+        for (const selector of [
+            ".mx_SpotlightDialog_result_publicRoomAlias",
+            ".mx_SpotlightDialog_result_publicRoomDescription",
+        ]) {
+            expect(getComputedStyle(element(selector)).fontSize).toBe("13px");
+        }
+    });
 });

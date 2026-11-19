@@ -299,17 +299,32 @@ Please see LICENSE files in the repository root for full details.
                     align-items: flex-start;
                 }
 
+                /* Telement: a public room is a 52px two-line row, like the two-line rows of menus and the Forward
+                   dialog: its 36px avatar 8px from the row's start, top and bottom, and its name and details, 44px
+                   together, centered on the row with the button */
                 &.mx_SpotlightDialog_result_multiline {
-                    align-items: flex-start;
+                    align-items: center;
+                    padding-block: var(--cpd-space-1x);
+                    min-block-size: 52px;
+                    box-sizing: border-box;
+
+                    > .mx_BaseAvatar {
+                        width: 36px;
+                        height: 36px;
+                        margin-block: var(--cpd-space-1x);
+                    }
+
+                    .mx_SpotlightDialog_option--endAdornment {
+                        align-items: center;
+                    }
 
                     .mx_AccessibleButton {
                         padding: var(--cpd-space-1x) var(--cpd-space-5x);
                         /* Ends where the other options' last key or button does, at the option's padding */
-                        margin: 2px 0 2px var(--cpd-space-1x);
+                        margin: 0 0 0 var(--cpd-space-1x);
                     }
 
                     .mx_SpotlightDialog_enterPrompt {
-                        margin-top: 9px;
                         margin-right: var(--cpd-space-2x);
                     }
                 }
@@ -353,11 +368,12 @@ Please see LICENSE files in the repository root for full details.
                             text-overflow: ellipsis;
                         }
                         .mx_SpotlightDialog_result_publicRoomAlias {
-                            /* $secondary-content, not $tertiary-content: at 12px this has to meet WCAG AA
+                            /* $secondary-content, not $tertiary-content: at 13px this has to meet WCAG AA
                                (4.5:1) against the dialog background, and tertiary is 3.5:1 in the light
                                and dark themes. */
                             color: $secondary-content;
-                            font-size: $font-12px;
+                            /* Telement: Compound's small body size, as 12px isn't one of its sizes */
+                            font-size: var(--cpd-font-size-body-sm);
                             margin-left: var(--cpd-space-2x);
                             overflow: hidden;
                             text-overflow: ellipsis;
@@ -365,7 +381,7 @@ Please see LICENSE files in the repository root for full details.
                     }
                     .mx_SpotlightDialog_result_publicRoomDescription {
                         color: $secondary-content;
-                        font-size: $font-12px;
+                        font-size: var(--cpd-font-size-body-sm);
                         white-space: normal;
                         word-wrap: break-word;
                         line-height: $font-20px;

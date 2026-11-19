@@ -36,6 +36,25 @@ describe("PublicRoomResultDetails", () => {
         expect(asFragment()).toMatchSnapshot();
     });
 
+    it("shows the room's alias beside its name, and nothing for a room without one rather than its raw ID", () => {
+        const room = (alias?: string): IPublicRoomsChunkRoom => ({
+            room_id: "!lnlRtuTD3uL3DS16HLBzzzwHDLzHy:example.org",
+            name: "Lounge",
+            canonical_alias: alias,
+            world_readable: true,
+            guest_can_join: false,
+            num_joined_members: 2,
+        });
+        const details = (chunk: IPublicRoomsChunkRoom): HTMLElement =>
+            render(<PublicRoomResultDetails room={chunk} labelId="label" descriptionId="alias" detailsId="details" />)
+                .container;
+
+        expect(details(room("#lounge:example.org")).querySelector("#alias")).toHaveTextContent("#lounge:example.org");
+        const withoutAlias = details(room());
+        expect(withoutAlias.querySelector("#alias")).toBeNull();
+        expect(withoutAlias).not.toHaveTextContent("!lnlRtuTD3uL3DS16HLBzzzwHDLzHy");
+    });
+
     it.each([
         { canonical_alias: "canonical-alias" },
         { aliases: ["alias-from-aliases"] },

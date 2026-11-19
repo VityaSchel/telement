@@ -101,6 +101,8 @@ import { Filter } from "./Filter";
 const MAX_RECENT_SEARCHES = 10;
 const SECTION_LIMIT = 50; // only show 50 results per section for performance reasons
 const AVATAR_SIZE = "24px";
+// Telement: a public room is a two-line row, with the larger avatar of two-line rows (_SpotlightDialog.pcss)
+const PUBLIC_ROOM_AVATAR_SIZE = "36px";
 
 interface IProps {
     initialText?: string;
@@ -740,7 +742,12 @@ const SpotlightDialog: React.FC<IProps> = ({ initialText = "", initialFilter = n
                             </AccessibleButton>
                         }
                         aria-labelledby={`mx_SpotlightDialog_button_result_${result.publicRoom.room_id}_name`}
-                        aria-describedby={`mx_SpotlightDialog_button_result_${result.publicRoom.room_id}_alias`}
+                        aria-describedby={
+                            // Telement: PublicRoomResultDetails shows an alias only, so only a room with one has it
+                            result.publicRoom.canonical_alias
+                                ? `mx_SpotlightDialog_button_result_${result.publicRoom.room_id}_alias`
+                                : undefined
+                        }
                         aria-details={`mx_SpotlightDialog_button_result_${result.publicRoom.room_id}_details`}
                     >
                         <RoomAvatar
@@ -751,7 +758,7 @@ const SpotlightDialog: React.FC<IProps> = ({ initialText = "", initialFilter = n
                                 avatarUrl: result.publicRoom.avatar_url,
                                 roomType: result.publicRoom.room_type,
                             }}
-                            size={AVATAR_SIZE}
+                            size={PUBLIC_ROOM_AVATAR_SIZE}
                         />
                         <PublicRoomResultDetails
                             room={result.publicRoom}
