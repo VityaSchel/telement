@@ -1428,4 +1428,59 @@ describe("Timeline shell", () => {
             expect(label.left - icon.right).toBe(8);
         });
     });
+
+    describe("the end of a message search's results", () => {
+        /**
+         * RoomSearchView's results: the line that ends them, then a result as SearchResultTile renders it, a list of
+         * its date separator and its message.
+         */
+        function renderSearchResults(marker: string, { dir = "ltr", compact = false } = {}): HTMLElement {
+            document.body.innerHTML = `
+                <div class="${compact ? "mx_MatrixChat_useCompactLayout" : ""}" dir="${dir}">
+                    <div class="mx_RoomView_body cpd-theme-light" data-layout="bubble" style="width: 880px; height: 700px; font-family: Inter">
+                        <div class="mx_ScrollPanel mx_RoomView_searchResultsPanel mx_RoomView_messagePanel">
+                            <div class="mx_RoomView_messageListWrapper">
+                                <ol class="mx_RoomView_MessageList">
+                                    <li class="mx_RoomView_scrollheader"></li>
+                                    <li><h2 class="mx_RoomView_topMarker">${marker}</h2></li>
+                                    <li><ol>${DATE_SEPARATOR}${row("bubble", text("Can you check the dark theme?"))}</ol></li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            return document.querySelector<HTMLElement>(".mx_RoomView_topMarker")!;
+        }
+
+        it.each(["No more results", "No results"])(
+            "writes %s as a line of 13px secondary text, without a pill",
+            (marker) => {
+                const line = renderSearchResults(marker);
+                const style = getComputedStyle(line);
+
+                expect(style.fontSize).toBe("13px");
+                expect(style.fontWeight).toBe("400");
+                expect(style.color).toBe(tokenColor("--cpd-color-text-secondary", line));
+                expect(style.backgroundColor).toBe("rgba(0, 0, 0, 0)");
+                expect(style.borderRadius).toBe("0px");
+            },
+        );
+
+        it.each([false, true])(
+            "spaces the line 8px above and below, as the date pills, in the compact layout: %s",
+            (compact) => {
+                const style = getComputedStyle(renderSearchResults("No more results", { compact }));
+
+                expect([style.marginTop, style.marginBottom]).toEqual(["8px", "8px"]);
+            },
+        );
+
+        it.each(["ltr", "rtl"])("centers the line on the results' date pills in %s text", (dir) => {
+            const line = textBox(renderSearchResults("No more results", { dir }));
+            const pill = box(document.querySelector(".pill")!);
+
+            expect(Math.abs(centerX(line) - centerX(pill))).toBeLessThanOrEqual(0.5);
+        });
+    });
 });

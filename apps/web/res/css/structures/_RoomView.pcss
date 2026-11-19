@@ -160,6 +160,18 @@ Please see LICENSE files in the repository root for full details.
         text-decoration: none;
         color: inherit;
     }
+
+    /* The end of the results, "No more results" or "No results", is a line of secondary text rather than a heading,
+       spaced like the date pills in every layout, the compact one included. It is centered over the results as their
+       date pills are: each result is a list with the browser's 40px start padding, which the line takes too. */
+    .mx_RoomView_MessageList h2.mx_RoomView_topMarker {
+        margin: var(--cpd-space-2x) 0;
+        padding-inline-start: 40px;
+        font: var(--cpd-font-body-sm-regular);
+        letter-spacing: var(--cpd-font-letter-spacing-body-sm);
+        color: var(--cpd-color-text-secondary);
+        text-align: center;
+    }
 }
 
 .mx_RoomView_empty {
