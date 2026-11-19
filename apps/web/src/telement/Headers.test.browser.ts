@@ -361,6 +361,17 @@ describe("Telement's headers", () => {
             },
         );
 
+        it.each(["cpd-theme-light", "cpd-theme-dark"])(
+            "names the card in the primary text color at 15px semibold, like the room's name in the room header (%s)",
+            (theme) => {
+                render(rightPanel(h("div", { className: "mx_BaseCard" }, cardHeader())), theme);
+                const title = getComputedStyle(document.querySelector(".mx_BaseCard_header_title_heading")!);
+
+                expect(title.color).toBe(tokenColor("--cpd-color-text-primary", document.querySelector("aside")!));
+                expect([title.fontSize, title.fontWeight]).toEqual(["15px", "600"]);
+            },
+        );
+
         it("draws WidgetCard's options button like ThreadView's: its icon, and the disc on hover", async () => {
             render(
                 rightPanel(
