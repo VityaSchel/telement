@@ -357,6 +357,9 @@ export default class ThreadView extends React.Component<IProps, IState> {
         const threadRelation = this.threadRelation;
 
         let timeline: JSX.Element | null;
+        // ThreadView doesn't support IRC layout at this time
+        const layout = this.state.layout === Layout.Bubble ? Layout.Bubble : Layout.Group;
+
         if (this.state.thread) {
             if (this.props.initialEvent && this.props.initialEvent.getRoomId() !== this.state.thread.roomId) {
                 logger.warn(
@@ -366,8 +369,6 @@ export default class ThreadView extends React.Component<IProps, IState> {
                     this.props.initialEvent.getId(),
                 );
             }
-
-            const layout = this.state.layout === Layout.Bubble ? Layout.Bubble : Layout.Group;
 
             timeline = (
                 <>
@@ -382,7 +383,6 @@ export default class ThreadView extends React.Component<IProps, IState> {
                             sendReadReceiptOnLoad={true}
                             timelineSet={this.state.thread.timelineSet}
                             showUrlPreview={this.context.showUrlPreview}
-                            // ThreadView doesn't support IRC layout at this time
                             layout={layout}
                             hideThreadedMessages={false}
                             hidden={false}
@@ -427,7 +427,9 @@ export default class ThreadView extends React.Component<IProps, IState> {
                         onKeyDown={this.onKeyDown}
                     >
                         <Measured breakpoint={400} sensor={this.card} onMeasurement={this.onMeasurement} />
-                        <div className="mx_ThreadView_timelinePanelWrapper">{timeline}</div>
+                        <div className="mx_ThreadView_timelinePanelWrapper" data-layout={layout}>
+                            {timeline}
+                        </div>
 
                         {ContentMessages.sharedInstance().getCurrentUploads(threadRelation).length > 0 && (
                             <UploadBar room={this.props.room} relation={threadRelation} />

@@ -104,6 +104,21 @@ function tokenColor(token: string): string {
     return color;
 }
 
+/**
+ * Where the baseline of an element's last line of text is: an empty inline-block at the end of its text sits on it.
+ * The element's children move into a span that holds it, so it is read last.
+ */
+function baselineOf(selector: string): number {
+    const element = document.querySelector(selector)!;
+    const text = document.createElement("span");
+    text.append(...element.childNodes);
+    const probe = document.createElement("span");
+    probe.style.cssText = "display: inline-block; width: 0; height: 0";
+    text.append(probe);
+    element.append(text);
+    return probe.getBoundingClientRect().bottom;
+}
+
 let stylesheet: HTMLStyleElement;
 let unloadInter: () => void;
 
@@ -247,12 +262,28 @@ describe("A poll in the bubble layout", () => {
             const time = box(".mx_MessageTimestamp");
 
             expect(new Set(lines.map((rect) => rect.bottom)).size).toBeGreaterThan(1);
-            expect(time.bottom).toBe(summary.bottom);
+            expect(box(".slotTimestamp").bottom).toBe(summary.bottom);
             // The timestamp's 8px gap from the text before it, however the summary's words wrap
             expect(time.left - textEnd).toBeGreaterThanOrEqual(8);
             expect(time.left - Math.max(...lastLine.map((rect) => rect.right))).toBeGreaterThanOrEqual(8);
+            expect(
+                Math.abs(baselineOf(".mx_MessageTimestamp") - baselineOf(".mx_MPollBody_totalVotes")),
+            ).toBeLessThanOrEqual(0.5);
         },
     );
+
+    it.each(["", "20px"])("puts the timestamp on its vote summary's baseline at the root font size %s", (fontSize) => {
+        document.documentElement.style.fontSize = fontSize;
+        try {
+            render("bubble");
+
+            expect(
+                Math.abs(baselineOf(".mx_MessageTimestamp") - baselineOf(".mx_MPollBody_totalVotes")),
+            ).toBeLessThanOrEqual(0.5);
+        } finally {
+            document.documentElement.style.fontSize = "";
+        }
+    });
 
     it("shows its bars' track in a translucent gray, which reads on the other's and the own bubble's color", () => {
         render("bubble");

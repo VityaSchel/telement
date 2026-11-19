@@ -117,6 +117,20 @@ Please see LICENSE files in the repository root for full details.
         content-visibility: visible;
     }
 
+    /* In bubbles the thread's content sits 12px from the panel's sides, as the room's does (_EventBubbleTile.pcss), so
+       that the avatars, the bubbles and your own bubbles' tails line up the same way in both. As in the room, the list
+       doesn't stretch 6px under the scrollbar: where the scrollbar takes no room, as macOS draws it, it would bring the
+       tails 6px closer to the panel's end than the room's are. */
+    .mx_ThreadView_timelinePanelWrapper[data-layout="bubble"] {
+        .mx_RoomView_messageListWrapper {
+            width: auto;
+        }
+
+        .mx_RoomView_MessageList {
+            padding-inline: var(--cpd-space-3x);
+        }
+    }
+
     /* The lists of threads and of notifications put a row's highlight 4px from the card's edges and its content 8px
        inside the highlight, as the other cards' rows do. The list doesn't stretch 6px under the scrollbar, which made
        up for the always shown 8px scrollbar of 2022: its end is 4px from the scrollbar where one takes room, and from

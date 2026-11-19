@@ -30,6 +30,7 @@
     --event-tile-bubble-tail-width: var(--cpd-space-1-5x);
     --event-tile-bubble-tail-height: var(--cpd-space-4x);
     --event-tile-bubble-avatar-gap: var(--cpd-space-2x);
+    --event-tile-bubble-avatar-size: 32px;
     --event-tile-bubble-gap: var(--cpd-space-1x);
     --event-tile-bubble-gutter: var(--cpd-space-3x);
     --event-tile-bubble-padding-block: var(--cpd-space-2x);
@@ -964,6 +965,17 @@
         padding-inline-end: calc(var(--event-tile-timestamp-text-width) + var(--event-tile-timestamp-gap));
     }
 
+    /* The timestamp's box holds a line of the vote summary's size (_MPollBody.pcss), an empty one before the time, and
+       the time stands on its baseline, which is the summary's, rather than below it */
+    .line:not(:has(> .slotFooter:not(:empty))):has(> .slotBody > :global(.mx_MPollBody)) > .slotTimestamp {
+        align-items: baseline;
+        font-size: 0.75rem;
+
+        &::before {
+            content: "\200b";
+        }
+    }
+
     /* A group that ends in its "Show more" button has room for the timestamp beside the button. */
     .line:not(.lineEmote, :has(> .slotFooter:not(:empty)))
         > .slotBody
@@ -1328,6 +1340,15 @@
                     ) /
                     2
             );
+            /* A line in the size's font, which the time stands on, so that it shares the size's baseline rather than
+               sitting below it. The line is an empty one before the time. */
+            height: auto;
+            align-items: baseline;
+            font: var(--cpd-font-body-sm-regular);
+
+            &::before {
+                content: "\200b";
+            }
         }
     }
 
@@ -1908,7 +1929,10 @@
     /* An emote's row is padded to the avatar's height, so that the avatar beside a one-line emote stays inside the row,
        clear of anything drawn between two rows, like the read marker. */
     &.stateEmote:has(> .slotAvatar):not(.stateOwnEvent) {
-        padding-block: calc((30px - var(--event-tile-bubble-line-height)) / 2 - var(--event-tile-body-padding, 1px));
+        padding-block: calc(
+            (var(--event-tile-bubble-avatar-size) - var(--event-tile-bubble-line-height)) / 2 -
+                var(--event-tile-body-padding, 1px)
+        );
     }
 
     /* A message of only emoji, which Element draws large, has no bubble, as in Telegram: the emoji stand on the
@@ -2042,28 +2066,40 @@
         }
     }
 
-    /* Informational bubble rows are metadata rows, not message bubbles. */
+    /* Informational bubble rows ("Alice joined the room") are metadata rows, not message bubbles. A row starts on the
+       bubble column with its 14px avatar, centered on the text's first line, and its text ends with the time, 8px after
+       it on its last line, as a bubble's last line ends with its time. The row's line height is the text's, which the
+       avatar's and the time's boxes take too, so that both center on a line of the text. */
     &.stateInfo {
         --event-tile-body-padding: 0;
+        --event-tile-info-margin-inline-start: calc(
+            var(--event-tile-bubble-margin-inline-start) + var(--event-tile-bubble-line-margin-inline-start)
+        );
 
         display: flex;
-        align-items: center;
+        align-items: flex-start;
         justify-content: flex-start;
         margin-block: 0;
-        margin-inline-end: 0;
+        margin-inline: var(--event-tile-info-margin-inline-start) 0;
         /* 3px above and below the 14px avatar, as in the IRC layout, so that a read marker between two rows, which
            paints 1px into each, stays 2px clear of the avatar and clear of the text's descenders */
         padding-block: var(--cpd-space-0-5x);
+        line-height: normal;
+
+        /* The band starts one avatar gap before the bubble column and ends at the content edge, as other rows' do */
+        &::before {
+            inset-inline: calc(-1 * (var(--event-tile-info-margin-inline-start) + var(--event-tile-bubble-avatar-gap)))
+                0;
+        }
 
         .slotAvatar {
             order: -1;
             display: inline-flex;
             align-items: center;
             width: 14px;
-            height: 14px;
+            height: 1lh;
             margin-inline-end: var(--event-tile-bubble-gap);
             flex-shrink: 0;
-            line-height: 1;
         }
 
         .slotAvatar > *,
@@ -2074,8 +2110,9 @@
         }
 
         /* The line ends at the row's end, beside the avatar, and keeps the bubble rows' 60px free for the read
-           receipts there. */
+           receipts there. Its text and time flow as one paragraph. */
         .line {
+            display: block;
             box-sizing: border-box;
             width: 100%;
             min-width: 0;
@@ -2084,19 +2121,25 @@
             padding-block: 0;
             padding-inline: 0 60px;
             background: transparent;
+            line-height: inherit;
         }
 
-        /* The timestamp's box is a bubble line tall, centered on the shorter row, with the time centered in it. */
-        .slotTimestamp {
-            inset-block: auto;
-            inset-inline: -77px auto;
-            align-self: center;
+        /* Text in a block of its own (TextualEventView and most other bodies) flows inline, so that the time can follow
+           its last line. A hidden event's source is laid out as a row of its own, and keeps it. */
+        .line > .slotBody > div:not(:global(.mx_ViewSourceEvent)) {
+            display: inline;
+        }
+
+        .line > :is(.slotTimestamp, .slotPadlock) {
+            position: static;
+            display: inline-flex;
             align-items: center;
+            height: 1lh;
+            vertical-align: top;
         }
 
-        .slotPadlock {
-            margin-inline-start: 0;
-            align-self: center;
+        .line > .slotTimestamp {
+            margin-inline-start: var(--cpd-space-2x);
         }
 
         /* The row itself reaches the content edge, where the read receipts end. */
@@ -2104,9 +2147,15 @@
             inset-inline-end: 0;
         }
 
-        /* ThreadView's hidden-event rows retain the legacy bubble body inset. */
-        &.shapeThread {
-            --event-tile-body-padding: 1px;
+        .line > .slotPadlock {
+            margin-inline-end: var(--event-tile-bubble-gap);
+        }
+
+        /* A hidden event's source fills the line, with the time at the end of its last line */
+        .line:has(> .slotBody > :global(.mx_ViewSourceEvent)) {
+            display: flex;
+            align-items: flex-end;
+            gap: 0;
         }
     }
 
@@ -2143,16 +2192,26 @@
             margin-block-start: var(--cpd-space-2x);
         }
 
+        /* An undecryptable informational row ends with its time too, 8px after the text */
         &.stateInfo .line {
-            gap: 0 9px;
+            gap: 0;
             align-items: center;
             grid-template:
-                "shield source" auto
-                / auto 1fr;
+                "shield source time" auto
+                / auto minmax(0, max-content) 1fr;
+        }
+
+        &.stateInfo .slotPadlock {
+            margin-inline-end: 9px;
         }
 
         &.stateInfo .slotBody > * {
             grid-area: source;
+        }
+
+        &.stateInfo .line > .slotTimestamp {
+            grid-area: time;
+            justify-self: start;
         }
     }
 }
@@ -2189,6 +2248,7 @@
         }
 
         &.stateInfo {
+            --event-tile-thread-margin-inline-start: var(--event-tile-info-margin-inline-start);
             --event-tile-thread-margin-inline-end: 0px;
         }
 
@@ -2352,33 +2412,28 @@
     }
 
     &.stateInfo {
-        .senderDetails .slotAvatar {
-            position: absolute;
-            inset-block-start: 50%;
-            transform: translateY(-50%);
-            margin-block-start: -2px;
-            margin-block-end: 0;
-        }
-
-        .line {
-            padding-inline-start: 0;
-            line-height: 0.75rem;
-
-            .slotBody {
-                width: auto;
-                font-size: 0.75rem;
-            }
-        }
-
         &.layoutGroup,
         &.layoutIrc {
             padding-top: 0;
 
+            .senderDetails .slotAvatar {
+                position: absolute;
+                inset-block-start: 50%;
+                transform: translateY(-50%);
+                margin-block-start: -2px;
+                margin-block-end: 0;
+            }
+
             /* The generic thread gutter follows the state-specific reset above.
-               Restore it for grouped timelines; bubble info events intentionally
-               retain the zero line padding. */
+               Restore it for grouped timelines. */
             .line {
                 padding-inline-start: var(--event-tile-thread-spacing-inline-start);
+                line-height: 0.75rem;
+
+                .slotBody {
+                    width: auto;
+                    font-size: 0.75rem;
+                }
             }
 
             &.layoutGroup .senderDetails .slotAvatar {
@@ -2400,31 +2455,14 @@
             }
         }
 
-        /* As in the room, the time sits 77px before the text, which is where the row starts, and the avatar sits
-           beside the text, both centered on the row. */
+        /* As in the room: the row starts on the bubble column with its avatar beside the text's first line, and the
+           text ends with the time. The avatar is in the sender details above the line, which give it to the row. */
         &.layoutBubble {
-            .senderDetails .slotAvatar {
-                inset-inline-start: calc(
-                    var(--event-tile-thread-spacing-inline-start) + 14px + 6px + var(--event-tile-body-padding, 1px) -
-                        14px - var(--event-tile-bubble-gap)
-                );
-                margin-block-start: 0;
-            }
+            flex-direction: row;
+            align-items: flex-start;
 
-            .slotTimestamp {
-                inset-inline-start: 0;
-            }
-
-            .line .slotBody {
-                margin-inline-start: calc(var(--event-tile-thread-spacing-inline-start) + 14px + 6px);
-            }
-
-            /* Bubble body slots are display: contents, so their margin is not
-               rendered. Apply the state-info slot offset to each rendered
-               body, while preserving the slot wrapper's styling contract. */
-            .line .slotBody > * {
-                width: auto;
-                margin-inline-start: calc(var(--event-tile-thread-spacing-inline-start) + 14px + 6px);
+            .senderDetails {
+                display: contents;
             }
         }
     }

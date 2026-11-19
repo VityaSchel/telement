@@ -108,7 +108,8 @@ export function getEventTileSenderProfileState({
     const isCall = isCallInvite || ElementCallEventType.matches(eventType) || isRtcNotification;
 
     // In bubbles, as in Telegram, the sender's name heads a run of their messages and their avatar sits beside the
-    // run's last bubble. The file list, room creation, cards and calls follow the rules below.
+    // run's last bubble, 32px in the room as in the thread, one of the app's avatar sizes. The file list, room
+    // creation, cards and calls follow the rules below.
     if (
         layout === Layout.Bubble &&
         timelineRenderingType !== TimelineRenderingType.File &&
@@ -116,8 +117,7 @@ export function getEventTileSenderProfileState({
         !isBubbleMessage &&
         !isCall
     ) {
-        const avatarSize = timelineRenderingType === TimelineRenderingType.Thread ? "32px" : "30px";
-        return { avatarSize: lastInSection ? avatarSize : null, needsSenderProfile: !continuation };
+        return { avatarSize: lastInSection ? "32px" : null, needsSenderProfile: !continuation };
     }
 
     if (timelineRenderingType === TimelineRenderingType.Thread && !continuation) {

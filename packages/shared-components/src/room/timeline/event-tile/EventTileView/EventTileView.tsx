@@ -88,6 +88,9 @@ export function EventTileView({
     // Reactions sit at the bottom of the bubble, before the time, as in Telegram. Messages drawn without a bubble, such
     // as an emote or a picture without a caption, keep them under the message.
     const footerInLine = avatarFollowsLine && !root.state.noBubble && !timestampOverMedia;
+    // In bubbles an informational row ends its text with its time, as a bubble ends its last line, so the time follows
+    // the text instead of preceding it.
+    const timestampEndsText = layout === "bubble" && !!root.state.info;
 
     const lineClassName = classNames(styles.line, classNameOverrides?.line, {
         [styles.lineMedia]: lineState?.media,
@@ -277,9 +280,10 @@ export function EventTileView({
             {!avatarFollowsLine && renderSlot("avatar")}
             <div id={root.id} data-testid="event-tile-line" className={lineClassName}>
                 {renderSlot("contextMenu")}
-                {renderLineTimestamp()}
+                {!timestampEndsText && renderLineTimestamp()}
                 {renderSlots("padlock", "replyChain")}
                 {renderBody()}
+                {timestampEndsText && renderLineTimestamp()}
                 {renderSlot("actionBar")}
                 {footerInLine && renderSlot("footer")}
             </div>

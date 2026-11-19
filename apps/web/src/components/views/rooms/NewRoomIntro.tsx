@@ -15,7 +15,7 @@ import { EventTileBubble, LinkedText } from "@element-hq/web-shared-components";
 import DMRoomMap from "../../../utils/DMRoomMap";
 import { _t, _td } from "../../../languageHandler";
 import AccessibleButton, { type ButtonEvent } from "../elements/AccessibleButton";
-import MiniAvatarUploader, { AVATAR_SIZE } from "../elements/MiniAvatarUploader";
+import MiniAvatarUploader from "../elements/MiniAvatarUploader";
 import RoomAvatar from "../avatars/RoomAvatar";
 import defaultDispatcher from "../../../dispatcher/dispatcher";
 import { type ViewUserPayload } from "../../../dispatcher/payloads/ViewUserPayload";
@@ -31,6 +31,9 @@ import { useScopedRoomContext } from "../../../contexts/ScopedRoomContext.tsx";
 import { useTopic } from "../../../hooks/room/useTopic";
 import { topicToHtml } from "../../../HtmlUtils";
 import { SDKContext } from "../../../contexts/SDKContext.ts";
+
+/** One of the app's avatar sizes, rather than the 52px the home page shares with the uploader. */
+const AVATAR_SIZE = "48px";
 
 function hasExpectedEncryptionSettings(matrixClient: MatrixClient, room: Room): boolean {
     const isEncrypted: boolean = matrixClient.isRoomEncrypted(room.roomId);

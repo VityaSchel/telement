@@ -171,6 +171,19 @@ describe("NewRoomIntro", () => {
         });
     });
 
+    it.each([
+        ["a DM", true],
+        ["a room", false],
+    ])("draws the avatar of %s at 48px, one of the app's avatar sizes", (_name, dm) => {
+        if (dm) vi.spyOn(DMRoomMap.shared(), "getUserIdForRoomId").mockReturnValue(userId);
+        const room = new Room(roomId, client, client.getSafeUserId());
+        room.name = "test_room";
+        renderNewRoomIntro(client, room);
+
+        const avatar = document.querySelector<HTMLElement>(".mx_NewRoomIntro .mx_BaseAvatar")!;
+        expect(avatar.style.getPropertyValue("--cpd-avatar-size")).toBe("48px");
+    });
+
     describe("unencrypted room warning", () => {
         it("should end the sentence after the link to the encryption settings", () => {
             const room = new Room(roomId, client, userId);

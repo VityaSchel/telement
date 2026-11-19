@@ -65,7 +65,7 @@ Please see LICENSE files in the repository root for full details.
 
 /* In bubbles the label starts where the text in a bubble does, as the intro does (see _NewRoomIntro.pcss). The last
    avatar is centered on the message avatars, which end 8px before the bubbles: the row's 49px margin, less the bubble's
-   9px outset, the 8px and half their 30px. More avatars stack towards the start. */
+   9px outset, the 8px and half their 32px. More avatars stack towards the start. */
 .mx_RoomView_body[data-layout="bubble"] {
     .mx_WhoIsTypingTile {
         margin-left: 0;
@@ -73,7 +73,7 @@ Please see LICENSE files in the repository root for full details.
 
     .mx_WhoIsTypingTile_avatars {
         --WhoIsTypingTile_bubble-label-inset: calc(49px - 9px + var(--cpd-space-3x) + 1px);
-        --WhoIsTypingTile_bubble-avatar-center: calc(49px - 9px - var(--cpd-space-2x) - 30px / 2);
+        --WhoIsTypingTile_bubble-avatar-center: calc(49px - 9px - var(--cpd-space-2x) - 32px / 2);
 
         box-sizing: border-box;
         flex-basis: var(--WhoIsTypingTile_bubble-label-inset);

@@ -49,6 +49,9 @@ import fontSizes from "../../res/css/_font-sizes.pcss?raw";
 import roomViewStyles from "../../res/css/structures/_RoomView.pcss?raw";
 import baseAvatarStyles from "../../res/css/views/avatars/_BaseAvatar.pcss?raw";
 import cryptoEventStyles from "../../res/css/views/messages/_common_CryptoEvent.pcss?raw";
+import threadPanelStyles from "../../res/css/views/right_panel/_ThreadPanel.pcss?raw";
+import eventBubbleTileStyles from "../../res/css/views/rooms/_EventBubbleTile.pcss?raw";
+import genericEventListSummaryStyles from "../../res/css/views/elements/_GenericEventListSummary.pcss?raw";
 import textualEventStyles from "../../res/css/views/messages/_TextualEvent.pcss?raw";
 import eventTileStyles from "../../res/css/views/rooms/_EventTile.pcss?raw";
 import ircLayoutStyles from "../../res/css/views/rooms/_IRCLayout.pcss?raw";
@@ -175,7 +178,7 @@ function row(layout: Layout, body: string, options: RowOptions = {}): string {
     const avatarFollowsLine = layout === "bubble" && !info && !fullWidth;
     const avatarSlot =
         (avatarFollowsLine ? last : first) || info || layout === "irc"
-            ? slot("Avatar", avatar(info || layout === "irc" ? 14 : 30, name))
+            ? slot("Avatar", avatar(info || layout === "irc" ? 14 : layout === "bubble" ? 32 : 30, name))
             : "";
     const lock = padlock ? slot("Padlock", PADLOCK) : "";
     const footer = options.footer ? slot("Footer", options.footer) : "";
@@ -188,7 +191,12 @@ function row(layout: Layout, body: string, options: RowOptions = {}): string {
     // In bubbles a message's reactions end its bubble; a message drawn without one keeps them under it
     const footerInLine =
         avatarFollowsLine && !states.includes("stateNoBubble") && !lineClass.includes("lineTimestampOverMedia");
-    const line = `<div class="line mx_EventTile_line ${lineClass}">${timestamp}${lock}${slot("Body", body)}${footerInLine ? footer : ""}</div>`;
+    // In bubbles an informational row's time follows its text
+    const content =
+        layout === "bubble" && info
+            ? `${lock}${slot("Body", body)}${timestamp}`
+            : `${timestamp}${lock}${slot("Body", body)}`;
+    const line = `<div class="line mx_EventTile_line ${lineClass}">${content}${footerInLine ? footer : ""}</div>`;
     const after = footerInLine ? "" : footer;
     return avatarFollowsLine
         ? `${open}${sender}${line}${avatarSlot}${after}${threadInfo}${receipt}</li>`
@@ -297,6 +305,26 @@ function lineMiddles(element: Element): number[] {
     return lines.map((line) => (line.top + line.bottom) / 2);
 }
 
+/** The box of each line of an element's text, from its first line to its last. */
+function lineBoxes(element: Element): DOMRect[] {
+    const range = document.createRange();
+    range.selectNodeContents(element);
+    const lines: DOMRect[] = [];
+    for (const rect of range.getClientRects()) {
+        if (rect.width === 0) continue;
+        const line = lines.find((other) => Math.abs(other.top - rect.top) < 3);
+        if (!line) lines.push(DOMRect.fromRect(rect));
+        else {
+            const left = Math.min(line.left, rect.left);
+            const right = Math.max(line.right, rect.right);
+            line.x = left;
+            line.width = right - left;
+            line.height = Math.max(line.bottom, rect.bottom) - line.top;
+        }
+    }
+    return lines;
+}
+
 const middle = (rect: DOMRect): number => (rect.top + rect.bottom) / 2;
 const centerX = (rect: DOMRect): number => (rect.left + rect.right) / 2;
 
@@ -341,6 +369,9 @@ describe("Timeline shell", () => {
                 ${toBrowserCss(commonStyles, commonStyles, fontSizes, lightTheme)}
                 ${toBrowserCss(roomViewStyles, commonStyles, fontSizes, lightTheme)}
                 ${toBrowserCss(eventTileStyles, fontSizes, lightTheme)}
+                ${toBrowserCss(genericEventListSummaryStyles, fontSizes, lightTheme)}
+                ${toBrowserCss(eventBubbleTileStyles, fontSizes, lightTheme)}
+                ${toBrowserCss(threadPanelStyles, fontSizes, lightTheme)}
                 ${toBrowserCss(textualEventStyles, lightTheme)}
                 ${toBrowserCss(cryptoEventStyles)}
                 ${toBrowserCss(baseAvatarStyles)}
@@ -366,6 +397,13 @@ describe("Timeline shell", () => {
     });
 
     describe("in the bubble layout", () => {
+        it.each(["group", "irc"] as const)("keeps the timeline's 18px inset in the %s layout", (layout) => {
+            render(layout, row(layout, text("Morning")));
+            const list = getComputedStyle(document.querySelector(".mx_RoomView_MessageList")!);
+
+            expect([list.paddingLeft, list.paddingRight]).toEqual(["18px", "18px"]);
+        });
+
         it("puts 12px between sections and 2px between the bubbles of one", () => {
             render(
                 "bubble",
@@ -487,7 +525,7 @@ describe("Timeline shell", () => {
                 const picture = last.querySelector(".slotAvatar > *")!;
 
                 expect(first.querySelector(".slotAvatar")).toBeNull();
-                expect([box(picture).width, box(picture).height]).toEqual([30, 30]);
+                expect([box(picture).width, box(picture).height]).toEqual([32, 32]);
                 expect(line.left - box(picture).right).toBe(8);
                 expect(box(picture).bottom).toBe(line.bottom);
                 expect(box(picture).left).toBeGreaterThanOrEqual(
@@ -512,7 +550,7 @@ describe("Timeline shell", () => {
             const [others, own, ownInfo] = all(".root");
             const marker = box(document.querySelector(".ReadMarker_line")!);
 
-            expect(box(others.querySelector(".slotAvatar > *")!).width).toBe(30);
+            expect(box(others.querySelector(".slotAvatar > *")!).width).toBe(32);
             expect(getComputedStyle(own.querySelector(".slotAvatar")!).display).toBe("none");
             for (const element of own.querySelectorAll("*")) {
                 const rect = box(element);
@@ -681,8 +719,8 @@ describe("Timeline shell", () => {
                 render("bubble", row("bubble", '<div style="height: 60px"></div>', { states: [state] }));
                 const avatar = box(document.querySelector(".slotAvatar > *")!);
 
-                expect(avatar.width).toBe(30);
-                expect(avatar.height).toBe(30);
+                expect(avatar.width).toBe(32);
+                expect(avatar.height).toBe(32);
             },
         );
 
@@ -763,6 +801,94 @@ describe("Timeline shell", () => {
             expect(contentEnd() - textEnd).toBeGreaterThanOrEqual(60);
             expect(textEnd).toBeLessThan(receipts.left);
         });
+
+        describe("an informational row", () => {
+            const SHORT = "Alice joined the room";
+
+            it.each([
+                ["that fits on a line", SHORT],
+                ["that wraps", LONG_TEXT],
+            ])("ends its text %s with its time, 8px after its last line and centered on it", (_name, words) => {
+                render("bubble", row("bubble", event("bubble", words), { states: ["stateInfo"] }));
+                const tile = document.querySelector(".root")!;
+                const lines = lineBoxes(tile.querySelector(".mx_TextualEvent")!);
+                const time = timeOf(tile);
+
+                expect(lines.length).toBe(words === SHORT ? 1 : 2);
+                expect(time.left - lines.at(-1)!.right).toBeCloseTo(8, 0);
+                expect(Math.abs(middle(time) - middle(lines.at(-1)!))).toBeLessThanOrEqual(0.5);
+            });
+
+            it("draws its time in the bubbles' time style: 11px, in the secondary text color", () => {
+                render(
+                    "bubble",
+                    row("bubble", text("Morning")),
+                    row("bubble", event("bubble", SHORT), { states: ["stateInfo"] }),
+                );
+                const [bubbleTime, time] = all(".mx_MessageTimestamp").map((element) => getComputedStyle(element));
+
+                expect(time.fontSize).toBe("11px");
+                expect(time.fontSize).toBe(bubbleTime.fontSize);
+                expect(time.color).toBe(bubbleTime.color);
+                expect(time.color).toBe(tokenColor("--cpd-color-text-secondary", document.querySelector(".root")!));
+            });
+
+            it("starts on the bubble column, its 14px avatar where other people's bubbles start and its text 4px after it", () => {
+                render(
+                    "bubble",
+                    row("bubble", text("Morning everyone")),
+                    row("bubble", event("bubble", SHORT), { states: ["stateInfo"] }),
+                );
+                const [message, info] = all(".root");
+                const avatar = box(info.querySelector(".slotAvatar > *")!);
+
+                expect(avatar.width).toBe(14);
+                expect(avatar.left).toBe(box(message.querySelector(".line")!).left);
+                expect(bodyText(info).left - avatar.right).toBe(4);
+            });
+
+            it.each([
+                ["another person's", false],
+                ["your own", true],
+            ])("puts the avatar of %s row that wraps on its first line", (_name, own) => {
+                render("bubble", row("bubble", event("bubble", LONG_TEXT), { own, states: ["stateInfo"] }));
+                const tile = document.querySelector(".root")!;
+                const lines = lineBoxes(tile.querySelector(".mx_TextualEvent")!);
+                const avatar = box(tile.querySelector(".slotAvatar > *")!);
+
+                expect(lines.length).toBe(2);
+                expect(Math.abs(middle(avatar) - middle(lines[0]))).toBeLessThanOrEqual(0.5);
+            });
+
+            it("ends its text with its time on the left in a timeline laid out right to left", () => {
+                render("bubble", row("bubble", event("bubble", LONG_TEXT), { states: ["stateInfo"] }));
+                document.querySelector(".mx_RoomView_body")!.setAttribute("dir", "rtl");
+                const tile = document.querySelector(".root")!;
+                const lines = lineBoxes(tile.querySelector(".mx_TextualEvent")!);
+                const avatar = box(tile.querySelector(".slotAvatar > *")!);
+
+                expect(lines.at(-1)!.left - timeOf(tile).right).toBeCloseTo(8, 0);
+                expect(avatar.left).toBeGreaterThan(lines[0].right);
+            });
+
+            it("lines a collapsed summary of such rows up with them", () => {
+                render(
+                    "bubble",
+                    `<li class="mx_GenericEventListSummary" data-expanded="false" data-layout="bubble">
+                        <div class="mx_AccessibleButton mx_GenericEventListSummary_toggle" role="button" aria-expanded="false">Expand</div>
+                        <div class="mx_EventTile_line"><div class="mx_EventTile_info">
+                            <span class="mx_GenericEventListSummary_avatars">${avatar(14)}</span>
+                            <span class="mx_TextualEvent mx_GenericEventListSummary_summary">Alice joined and left</span>
+                        </div></div>
+                    </li>`,
+                    row("bubble", event("bubble", SHORT), { states: ["stateInfo"] }),
+                );
+
+                expect(box(document.querySelector(".mx_GenericEventListSummary_avatars > *")!).left).toBe(
+                    box(document.querySelector(".root .slotAvatar > *")!).left,
+                );
+            });
+        });
     });
 
     describe("in the thread panel's bubble layout", () => {
@@ -788,7 +914,7 @@ describe("Timeline shell", () => {
             const sender = own || info || !first ? "" : slot("Sender", profile("bubble", "Alice"));
             // Another person's avatar follows the line of the last message of their run, as in the room; an
             // informational row keeps its own beside its text
-            const avatarSlot = own ? "" : slot("Avatar", avatar(info ? 14 : 32));
+            const avatarSlot = own && !info ? "" : slot("Avatar", avatar(info ? 14 : 32));
             return `
                 <li class="${classes.join(" ")}" data-testid="event-tile">
                     <div class="senderDetails">${info ? avatarSlot : ""}${sender}</div>
@@ -800,14 +926,31 @@ describe("Timeline shell", () => {
             `;
         }
 
-        /** ThreadView's timeline in a 380px right panel. */
+        /** ThreadView's timeline in a 380px right panel, marked with the layout it shows. */
         function renderThread(...items: string[]): void {
             document.body.innerHTML = `
                 <div class="mx_ThreadView mx_ThreadPanel cpd-theme-light" style="width: 380px; font-family: Inter">
-                    <ol class="mx_RoomView_MessageList" style="padding: 8px">${items.join("")}</ol>
+                    <div class="mx_ThreadView_timelinePanelWrapper" data-layout="bubble">
+                        <div class="mx_ScrollPanel mx_RoomView_messagePanel">
+                            <div class="mx_RoomView_messageListWrapper">
+                                <ol class="mx_RoomView_MessageList">${items.join("")}</ol>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             `;
         }
+
+        it("insets its content 12px from the panel's start, as the room does: other people's avatars start there and their bubbles 40px further", () => {
+            renderThread(threadRow(text("Morning")));
+            const panel = box(document.querySelector(".mx_ThreadView")!);
+
+            expect(box(document.querySelector(".slotAvatar > *")!).left - panel.left).toBe(12);
+            expect(box(document.querySelector(".line")!).left - panel.left).toBe(52);
+            expect(parseFloat(getComputedStyle(document.querySelector(".mx_RoomView_MessageList")!).paddingRight)).toBe(
+                12,
+            );
+        });
 
         it("ends the read receipts at the panel's content edge, wherever the bubble ends", () => {
             renderThread(
@@ -864,28 +1007,24 @@ describe("Timeline shell", () => {
         });
 
         it.each([
-            ["that fits on a line", "Alice changed the room name to Fifth floor"],
-            ["that wraps", LONG_TEXT],
+            ["that fits on a line", "Alice changed the room name to Fifth floor", false],
+            ["that wraps", LONG_TEXT, false],
+            ["of your own that wraps", LONG_TEXT, true],
         ])(
-            "shows the time of an informational row %s in the panel, placed as in the room and centered on the row",
-            (_name, body) => {
-                render("bubble", row("bubble", event("bubble", body), { states: ["stateInfo"] }));
-                const room = document.querySelector(".root")!;
-                const inRoom = {
-                    time: bodyText(room).left - timeOf(room).left,
-                    avatar: bodyText(room).left - box(room.querySelector(".slotAvatar > *")!).right,
-                };
-                renderThread(threadRow(event("bubble", body), { info: true }));
-                const tile = document.querySelector(".root")!;
-                const text = bodyText(tile);
+            "lays out an informational row %s as in the room: on the bubble column, its avatar on the first line and its time 8px after the last",
+            (_name, body, own) => {
+                renderThread(threadRow(text("Morning")), threadRow(event("bubble", body), { info: true, own }));
+                const [message, tile] = all(".root");
+                const lines = lineBoxes(tile.querySelector(".mx_TextualEvent")!);
                 const time = timeOf(tile);
                 const avatar = box(tile.querySelector(".slotAvatar > *")!);
 
-                expect(time.left).toBeGreaterThanOrEqual(box(document.querySelector(".mx_ThreadView")!).left);
-                expect(text.left - time.left).toBe(inRoom.time);
-                expect(text.left - avatar.right).toBe(inRoom.avatar);
-                expect(Math.abs(middle(time) - middle(text))).toBeLessThanOrEqual(0.5);
-                expect(Math.abs(middle(avatar) - middle(text))).toBeLessThanOrEqual(0.5);
+                expect(avatar.width).toBe(14);
+                expect(avatar.left).toBe(box(message.querySelector(".line")!).left);
+                expect(bodyText(tile).left - avatar.right).toBe(4);
+                expect(Math.abs(middle(avatar) - middle(lines[0]))).toBeLessThanOrEqual(0.5);
+                expect(time.left - lines.at(-1)!.right).toBeCloseTo(8, 0);
+                expect(Math.abs(middle(time) - middle(lines.at(-1)!))).toBeLessThanOrEqual(0.5);
             },
         );
 

@@ -14,6 +14,17 @@ Please see LICENSE files in the repository root for full details.
         max-width: 1200px;
         margin: 0 auto;
     }
+
+    /* The timeline's content sits 12px from its sides, the room header's content edge, as in the thread view
+       (_ThreadPanel.pcss): other people's 32px avatars start there, 8px before their bubbles, and your own bubbles'
+       tails end there. */
+    .mx_RoomView_MessageList {
+        padding-inline: var(--cpd-space-3x);
+    }
+
+    .mx_NewTimelinePanel .mx_TimelineView_tile {
+        padding-inline: var(--cpd-space-3x);
+    }
 }
 
 .mx_GenericEventListSummary[data-layout="bubble"] {
@@ -22,8 +33,10 @@ Please see LICENSE files in the repository root for full details.
     --cornerRadius: 12px;
     --maxWidth: 70%;
 
-    /* Generic event list summaries still use the legacy bubble variables. */
-    --EventTile_bubble-margin-inline-start: 49px;
+    /* Generic event list summaries still use the legacy bubble variables. A summary starts on the bubble column, as
+       the informational rows it stands for do: the rows' 49px margin, less the bubble's 9px overhang. It reaches the
+       content edge, as those rows do, since bubbles keep no column for read receipts there. */
+    --EventTile_bubble-margin-inline-start: calc(49px - 9px);
     --EventTile_bubble-margin-inline-end: 60px;
 
     margin-inline-start: var(--EventTile_bubble-margin-inline-start);

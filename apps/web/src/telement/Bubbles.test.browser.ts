@@ -315,22 +315,18 @@ function avatar(clickable: boolean, size = 14): string {
     );
 }
 
-/** An informational row ("Alice joined the room"). */
+/** An informational row ("Alice joined the room"), whose time follows its text in bubbles. */
 function infoRow(layout: "layoutBubble" | "layoutGroup", clickable: boolean): string {
+    const body = '<div class="slotBody"><div class="mx_TextualEvent">Alice joined the room</div></div>';
     return `
         <li class="root mx_EventTile ${layout} stateInfo" data-testid="event-tile">
             <div class="slotAvatar">${avatar(clickable)}</div>
-            <div class="line mx_EventTile_line">
-                ${timestamp}<div class="slotBody"><div class="mx_TextualEvent">Alice joined the room</div></div>
-            </div>
+            <div class="line mx_EventTile_line">${layout === "layoutBubble" ? body + timestamp : timestamp + body}</div>
         </li>
     `;
 }
 
-/**
- * Another person's message in the given states, the last of their run, with their avatar beside its bubble: 30px in the
- * room, 32px in the thread view.
- */
+/** Another person's message in the given states, the last of their run, with their 32px avatar beside its bubble. */
 function lastOfRun(states: string[], thread = false): string {
     const classes = ["root", "mx_EventTile", thread && "shapeThread", "layoutBubble", "stateLastInSection", ...states];
     return `
@@ -338,7 +334,7 @@ function lastOfRun(states: string[], thread = false): string {
             <div class="line mx_EventTile_line">
                 ${timestamp}<div class="slotBody">${plain("Can you check the dark theme as well?")}</div>
             </div>
-            <div class="slotAvatar">${avatar(false, thread ? 32 : 30)}</div>
+            <div class="slotAvatar">${avatar(false, 32)}</div>
         </li>
     `;
 }
@@ -391,6 +387,20 @@ function textBoxes(element: Element): DOMRect[] {
         boxes.push(...Array.from(range.getClientRects()).filter((rect) => rect.width > 0));
     }
     return boxes;
+}
+
+/**
+ * Where the baseline of an element's last line of text is: an empty inline-block at the end of its text sits on it.
+ * The element's children move into a span that holds it, so it is read last.
+ */
+function baselineOf(element: Element): number {
+    const text = document.createElement("span");
+    text.append(...element.childNodes);
+    const probe = document.createElement("span");
+    probe.style.cssText = "display: inline-block; width: 0; height: 0";
+    text.append(probe);
+    element.append(text);
+    return probe.getBoundingClientRect().bottom;
 }
 
 function overlaps(a: DOMRect, b: DOMRect): boolean {
@@ -936,11 +946,29 @@ describe("Bubble layout", () => {
                 expect(bubble.right - box(cardOf(line)).right).toBe(12);
                 expect(bubble.right - time.right).toBe(12);
                 expect(timeSlot.bottom).toBe(size.line.bottom);
-                expect(timeSlot.height).toBe(18);
+                expect(timeSlot.height).toBe(size.line.height);
                 // The size's line runs to the card's end and keeps the time's room and its 8px gap free
                 expect(size.line.right).toBe(box(cardOf(line)).right);
                 expect(time.left - size.textEnd).toBeGreaterThanOrEqual(8);
                 expect(time.left - size.text.right).toBeGreaterThanOrEqual(8);
+            },
+        );
+
+        it.each(["", "20px", "36px"])(
+            "puts the time on the baseline of the file's size at the root font size %s",
+            (fontSize) => {
+                document.documentElement.style.fontSize = fontSize;
+                try {
+                    render(tile(file("annual-report.pdf"), { lineClass: "lineMedia" }));
+                    const [line] = all(".line");
+                    const time = baselineOf(line.querySelector(".slotTimestamp > *")!);
+
+                    expect(
+                        Math.abs(time - baselineOf(line.querySelector(".MediaPreviewComponents_body")!)),
+                    ).toBeLessThanOrEqual(0.5);
+                } finally {
+                    document.documentElement.style.fontSize = "";
+                }
             },
         );
 

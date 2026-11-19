@@ -257,7 +257,8 @@ const createStoryAvatar = (
     if (!showSenderAndAvatar) return undefined;
 
     const label = isOwnEvent ? "A" : "B";
-    const size = sizeOverride ?? (layout === "irc" ? "14px" : "30px");
+    // The app's sizes: 32px beside bubbles, 30px in the modern layout
+    const size = sizeOverride ?? (layout === "irc" ? "14px" : layout === "bubble" ? "32px" : "30px");
     return <StoryMemberAvatar label={label} size={size} />;
 };
 

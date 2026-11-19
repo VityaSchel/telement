@@ -531,12 +531,10 @@ describe("EventTileViewModel", () => {
         expect(snapshot.sender.viewUserOnClick).toBe(true);
     });
 
-    it.each([
-        [TimelineRenderingType.Room, "30px"],
-        [TimelineRenderingType.Thread, "32px"],
-    ])(
-        "puts the sender on the first message of a run and the avatar on the last in bubbles in the %s timeline",
-        (timelineRenderingType, avatarSize) => {
+    it.each([TimelineRenderingType.Room, TimelineRenderingType.Thread])(
+        "puts the sender on the first message of a run and its 32px avatar on the last in bubbles in the %s timeline",
+        (timelineRenderingType) => {
+            const avatarSize = "32px";
             const profileState = (continuation: boolean, isLastInSection: boolean): unknown =>
                 EventTileViewModel.createSnapshot(
                     makeProps({

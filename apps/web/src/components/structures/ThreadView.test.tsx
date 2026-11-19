@@ -37,6 +37,8 @@ import { ScopedRoomContextProvider } from "../../contexts/ScopedRoomContext.tsx"
 import { TimelineRenderingType } from "../../contexts/RoomContext.ts";
 import { type ComposerInsertPayload, ComposerType } from "../../dispatcher/payloads/ComposerInsertPayload.ts";
 import { SDKContext } from "../../contexts/SDKContext.ts";
+import SettingsStore from "../../settings/SettingsStore";
+import { Layout } from "../../settings/enums/Layout";
 
 describe("ThreadView", () => {
     const ROOM_ID = "!roomId:example.org";
@@ -202,6 +204,31 @@ describe("ThreadView", () => {
 
         unmount();
         await waitFor(() => expect(SDKContextClass.instance.roomViewStore.getThreadId()).toBeNull());
+    });
+
+    it.each([
+        [Layout.Bubble, "bubble"],
+        [Layout.Group, "group"],
+        [Layout.IRC, "group"],
+    ])("marks its timeline with the layout it shows when the %s layout is chosen", async (chosen, shown) => {
+        const getValue = SettingsStore.getValue.bind(SettingsStore);
+        const spy = vi
+            .spyOn(SettingsStore, "getValue")
+            .mockImplementation(((name: string, ...args: unknown[]) =>
+                name === "layout"
+                    ? chosen
+                    : getValue(name as never, ...(args as []))) as typeof SettingsStore.getValue);
+
+        try {
+            const { container } = await getComponent();
+
+            expect(container.querySelector(".mx_ThreadView_timelinePanelWrapper")).toHaveAttribute(
+                "data-layout",
+                shown,
+            );
+        } finally {
+            spy.mockRestore();
+        }
     });
 
     it("clears highlight message in the room view store", async () => {

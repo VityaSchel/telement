@@ -166,6 +166,15 @@ const groupRootSlotOrder = [
 /** In bubbles a message's reactions are at the bottom of its bubble, so they end the line. */
 const bubbleLineSlotOrder = [...groupLineSlotOrder, "event-tile-slot-footer"];
 
+/** In bubbles an informational row's time follows its text, at the end of its last line. */
+const bubbleInfoLineSlotOrder = [
+    "styling-contract-contextMenu",
+    "event-tile-slot-padlock",
+    "event-tile-slot-replyChain",
+    "event-tile-slot-body",
+    "event-tile-slot-timestamp",
+    "event-tile-slot-actionBar",
+];
 /** In bubbles a message's avatar sits beside the bottom of its bubble, so it follows the line. */
 const bubbleMessageRootSlotOrder = [
     "event-tile-slot-sender",
@@ -205,6 +214,7 @@ const ircRootSlotOrder = [
 
 const shellPlacementMatrix = [
     { name: "informational", rootState: { info: true }, lineState: {}, layout: "group" },
+    { name: "informational in bubble layout", rootState: { info: true }, lineState: {}, layout: "bubble" },
     { name: "bubble container in group layout", rootState: { bubbleContainer: true }, lineState: {}, layout: "group" },
     {
         name: "bubble container in bubble layout",
@@ -370,7 +380,13 @@ describe("EventTileView", () => {
                 !["info", "bubbleContainer", "leftAlignedBubble"].some((state) => state in rootState);
             const hasBubble = isBubbleMessage && !("noBubble" in rootState);
             const lineSlotOrder =
-                layout === "irc" ? ircLineSlotOrder : hasBubble ? bubbleLineSlotOrder : groupLineSlotOrder;
+                layout === "irc"
+                    ? ircLineSlotOrder
+                    : hasBubble
+                      ? bubbleLineSlotOrder
+                      : layout === "bubble" && "info" in rootState
+                        ? bubbleInfoLineSlotOrder
+                        : groupLineSlotOrder;
             const rootSlotOrder =
                 layout === "irc"
                     ? ircRootSlotOrder
