@@ -11,6 +11,7 @@ import EventEmitter from "node:events";
 import { vi, describe, it, expect, beforeEach, afterEach, type Mock } from "vitest";
 import {
     ClientEvent,
+    EventStatus,
     EventType,
     type MatrixClient,
     MatrixEvent,
@@ -497,6 +498,21 @@ describe("RoomListItemViewModel", () => {
 
             expect(readUpTo).toHaveBeenCalledWith(preview.event);
             expect(viewModel.getSnapshot().lastMessageState).toBe("read");
+        });
+
+        it("should turn the clock into a check once the server confirms the user's own last message", async () => {
+            const preview = previewOf("On my way");
+            preview.event.setStatus(EventStatus.SENDING);
+            vi.spyOn(MessagePreviewStore.instance, "getPreviewForRoom").mockResolvedValue(preview);
+            vi.spyOn(room, "getUsersReadUpTo").mockReturnValue([matrixClient.getSafeUserId()]);
+            viewModel = new RoomListItemViewModel({ room, client: matrixClient });
+            await flushPromises();
+            expect(viewModel.getSnapshot().lastMessageState).toBe("sending");
+
+            preview.event.setStatus(null);
+            room.emit(RoomEvent.LocalEchoUpdated, preview.event, room, "~local", EventStatus.SENDING);
+
+            expect(viewModel.getSnapshot().lastMessageState).toBe("sent");
         });
 
         it("should show no check for someone else's last message", async () => {

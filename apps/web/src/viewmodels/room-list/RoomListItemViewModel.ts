@@ -132,8 +132,10 @@ export class RoomListItemViewModel
             props.client.off(RoomMemberEvent.Typing, this.onTyping);
         });
 
-        // A receipt can show that another member read the user's last message
+        // A receipt can show that another member read the user's last message, and the server confirming it turns the
+        // clock into a check without changing the preview's text, so the preview store says nothing then
         this.disposables.trackListener(props.room, RoomEvent.Receipt, this.refreshLastMessageState);
+        this.disposables.trackListener(props.room, RoomEvent.LocalEchoUpdated, this.refreshLastMessageState);
         this.disposables.track(onDraftChanged(props.room.roomId, this.onDraftChanged));
 
         // Load message preview asynchronously (sync data is already complete)
