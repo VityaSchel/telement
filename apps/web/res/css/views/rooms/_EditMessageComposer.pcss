@@ -6,25 +6,41 @@ SPDX-License-Identifier: AGPL-3.0-only OR GPL-3.0-only OR LicenseRef-Element-Com
 Please see LICENSE files in the repository root for full details.
 */
 
-.mx_EditMessageComposer {
-    --EditMessageComposer-padding-inline: 3px;
+/* Telement: the link previews' bar 8px above the field, their boxes on the bubble's padding as a control's box is on its
+   container's edge, without the 1px a bubble's text keeps around it for tall glyphs (EventTileView.module.css) */
+.mx_EditMessageComposerWrapper {
+    display: flex;
+    flex-direction: column;
+    gap: var(--cpd-space-2x);
+    padding: 0;
+}
 
+.mx_EditMessageComposer {
     display: flex;
     flex-direction: column;
     max-width: 100%; /* disable overflow */
     width: auto;
-    gap: 5px;
-    padding: 3px var(--EditMessageComposer-padding-inline);
+    /* Telement: the field and the buttons 8px apart on the bubble's own padding, with none of their own, so the field
+       starts and ends where the bubble's text does */
+    gap: var(--cpd-space-2x);
+    padding: 0;
 
+    /* Telement: the field spec (TELEMENT.md, "Colors, type and components"): a 1px border with 8px corners, one line
+       36px tall with its text 12px inside, a darker border on hover and the accent when focused. In your own bubble the
+       bubble points these colors at its translucent whites (EventTileView.module.css) */
     .mx_BasicMessageComposer_input {
-        border-radius: 4px;
-        border: solid 1px $primary-hairline-color;
+        border-radius: var(--tl-radius-row);
+        border: solid var(--cpd-border-width-1) var(--cpd-color-border-interactive-secondary);
         background-color: $background;
         max-height: 200px;
-        padding: 3px 6px;
+        padding: calc((var(--tl-control-size) - 2 * var(--cpd-border-width-1) - 1lh) / 2) var(--cpd-space-3x);
+
+        &:hover {
+            border-color: var(--cpd-color-border-interactive-hovered);
+        }
 
         &:focus {
-            border-color: var(--cpd-color-border-interactive-primary);
+            border-color: var(--cpd-color-border-focused);
         }
     }
 
@@ -32,7 +48,7 @@ Please see LICENSE files in the repository root for full details.
         display: flex;
         flex-flow: row wrap-reverse; /* display "Save" over "Cancel" */
         justify-content: flex-end;
-        gap: 5px;
+        gap: var(--cpd-space-2x);
         margin-inline-start: auto;
 
         .mx_AccessibleButton {
