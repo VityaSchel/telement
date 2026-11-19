@@ -5,14 +5,31 @@ SPDX-License-Identifier: AGPL-3.0-only OR GPL-3.0-only OR LicenseRef-Element-Com
 Please see LICENSE files in the repository root for full details.
 */
 
+/* A row like room info's, without dividers between the tiles: the highlight 4px from the panel's edges and rounded by
+   8, what the tile holds 8px inside it, so on the card's 12px content edge at both ends, and the avatar 12px from the
+   top and bottom. A tile focused with the keyboard is highlighted as on hover, with the focus ring inside the
+   highlight. */
 .mx_MemberTileView {
     display: flex;
-    /* The avatar 12px from the top, the bottom (the border included) and the start: what the tile holds sits on the
-       card's 12px content edge at both ends */
-    padding: var(--cpd-space-3x) var(--cpd-space-3x) calc(var(--cpd-space-3x) - var(--cpd-border-width-1));
+    margin-inline: var(--tl-inset-menu);
+    padding: var(--cpd-space-3x) var(--cpd-space-2x);
     box-sizing: border-box;
     height: 56px;
-    border-bottom: var(--cpd-border-width-1) solid var(--cpd-color-gray-300);
+    border-radius: var(--tl-radius-row);
+
+    &:hover,
+    &:focus-visible {
+        background: var(--cpd-color-bg-action-secondary-hovered);
+    }
+
+    &:active {
+        background: var(--cpd-color-bg-action-secondary-pressed);
+    }
+
+    &:focus-visible {
+        outline: var(--cpd-border-width-2) solid var(--cpd-color-border-focused);
+        outline-offset: calc(-1 * var(--cpd-border-width-2));
+    }
 
     .mx_MemberTileView_left,
     .mx_MemberTileView_right {

@@ -135,7 +135,22 @@ function renderUserInfo(dir = "ltr"): HTMLElement {
     return document.querySelector(".mx_UserInfo")!;
 }
 
-/** MemberListView: MemberListHeaderView's search field, invite button and count, then a member tile. */
+/** MemberTileView: the tile in the wrapper that MemberTileView puts around it. */
+const memberTile = (name: string, tabIndex: number): string => `
+    <div>
+        <div class="mx_AccessibleButton mx_MemberTileView" role="option" tabindex="${tabIndex}">
+            <div class="mx_MemberTileView_left">
+                <div class="mx_MemberTileView_avatar">
+                    ${html(createElement(Avatar, { id: `@${name.toLowerCase()}:example.org`, name, size: "32px" }))}
+                </div>
+                <div class="mx_MemberTileView_name">${name}</div>
+            </div>
+            <div class="mx_MemberTileView_right"><svg width="16" height="16"></svg></div>
+        </div>
+    </div>
+`;
+
+/** MemberListView: MemberListHeaderView's search field, invite button and count, then two member tiles. */
 function renderMemberList(dir = "ltr"): HTMLElement {
     const search = html(
         createElement(
@@ -167,17 +182,7 @@ function renderMemberList(dir = "ltr"): HTMLElement {
     document.body.innerHTML = `
         <div class="mx_BaseCard mx_MemberListView" dir="${dir}" style="width: ${CARD_WIDTH}px">
             <form>${header}</form>
-            <div role="listbox">
-                <div class="mx_AccessibleButton mx_MemberTileView" role="option" tabindex="0">
-                    <div class="mx_MemberTileView_left">
-                        <div class="mx_MemberTileView_avatar">
-                            ${html(createElement(Avatar, { id: "@alice:example.org", name: "Alice", size: "32px" }))}
-                        </div>
-                        <div class="mx_MemberTileView_name">Alice</div>
-                    </div>
-                    <div class="mx_MemberTileView_right"><svg width="16" height="16"></svg></div>
-                </div>
-            </div>
+            <div role="listbox">${memberTile("Alice", 0)}${memberTile("Bob", -1)}</div>
         </div>
     `;
     return document.querySelector(".mx_MemberListView")!;
@@ -432,7 +437,7 @@ describe("Right panel", () => {
                 const tileBox = tile.getBoundingClientRect();
                 const avatarBox = avatar.getBoundingClientRect();
 
-                // MemberListView lays the tiles out as 56px rows, their 1px border at the bottom included
+                // MemberListView lays the tiles out as 56px rows
                 expect(tileBox.height).toBe(56);
                 expect(avatarBox.height).toBe(32);
                 expect([avatarBox.top - tileBox.top, tileBox.bottom - avatarBox.bottom]).toEqual([12, 12]);
@@ -440,6 +445,32 @@ describe("Right panel", () => {
                 expect(insets(card.querySelector(".mx_MemberTileView_right svg")!, card).end).toBe(CONTENT_EDGE);
             },
         );
+
+        it.each(["ltr", "rtl"])(
+            "highlights the tiles like room info's rows, 4px from the panel's edges and rounded by 8, with no dividers between them (%s)",
+            async (dir) => {
+                const card = renderMemberList(dir);
+                const tiles = [...card.querySelectorAll<HTMLElement>(".mx_MemberTileView")];
+
+                for (const tile of tiles) {
+                    expect(insets(tile, card)).toEqual({ start: 4, end: 4 });
+                    expect(cornerRadii(tile)).toEqual({ x: 8, y: 8 });
+                    expect(getComputedStyle(tile).borderBottomStyle).toBe("none");
+                    expect(settledStyle(tile).backgroundColor).toBe("rgba(0, 0, 0, 0)");
+                }
+                expect(tiles[1].getBoundingClientRect().top).toBe(tiles[0].getBoundingClientRect().bottom);
+                await userEvent.hover(tiles[1]);
+                expect(settledStyle(tiles[1]).backgroundColor).toBe(hoverColor("primary"));
+                await userEvent.unhover(tiles[1]);
+            },
+        );
+
+        it("draws the keyboard focus ring inside the focused tile, highlighted as on hover", async () => {
+            const tile = renderMemberList().querySelector<HTMLElement>(".mx_MemberTileView")!;
+
+            expect(await keyboardFocusRing(tile)).toBe("solid 2px -2px");
+            expect(await keyboardFocusBackground(tile)).toBe(hoverColor("primary"));
+        });
     });
 
     describe("extensions", () => {
