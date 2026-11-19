@@ -6,30 +6,33 @@ SPDX-License-Identifier: AGPL-3.0-only OR GPL-3.0-only OR LicenseRef-Element-Com
 Please see LICENSE files in the repository root for full details.
 */
 
+/* Telement: the options are rows on a card (_common.pcss), drawn like the Security tab's join rules
+   (_JoinRuleSettings.pcss): the radio at the start, the label 12px after it in semibold, its description under it in
+   a toggle's description size and color, and each row 16px above its label's line and below its description, between
+   separators */
 .mx_NotificationSettingsTab_notificationsSection {
-    width: 360px;
+    @mixin settingsGroupCard;
+    padding-block: 0;
 
     .mx_StyledRadioButton {
-        flex-direction: row-reverse;
-        color: $primary-content;
-        font-size: $font-15px;
-        line-height: $font-18px;
-        font-weight: var(--cpd-font-weight-semibold);
-        margin-top: 16px;
-        position: relative;
-        align-items: center;
+        padding-block: var(--cpd-space-4x);
 
-        input + div {
-            margin-top: 8px;
+        & + .mx_StyledRadioButton {
+            border-top: 1px solid var(--cpd-color-separator-primary);
         }
 
-        .mx_NotificationSettingsTab_microCopy {
-            color: $secondary-content;
-            font-weight: normal;
-            font-size: $font-12px;
-            line-height: $font-15px;
-            margin-right: 32px;
+        .mx_StyledRadioButton_content {
+            display: block;
+            margin-inline: var(--cpd-space-3x) 0;
+            font: var(--cpd-font-body-md-semibold);
+            color: $primary-content;
         }
+    }
+
+    .mx_NotificationSettingsTab_microCopy {
+        margin-top: var(--cpd-space-1x);
+        font: var(--cpd-font-body-sm-regular);
+        color: $secondary-content;
     }
 }
 

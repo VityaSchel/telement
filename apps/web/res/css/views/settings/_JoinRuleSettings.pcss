@@ -44,9 +44,10 @@ Please see LICENSE files in the repository root for full details.
 /* Telement: each option is a row 16px above its label and below its description, the label 12px after the 20px
    radio and the description under the label, 4px below it in the size and color of a toggle's description. The rows
    space themselves, so a fieldset's gap between its items (_SettingsFieldset.pcss) doesn't come between a label and its
-   description, or under a description before the separator */
+   description, or under a description before the separator, and its card adds no padding above and below them */
 .mx_SettingsFieldset_content:has(> .mx_JoinRuleSettings_radioButton) {
     gap: 0;
+    padding-block: 0;
 }
 
 .mx_JoinRuleSettings_radioButton {
