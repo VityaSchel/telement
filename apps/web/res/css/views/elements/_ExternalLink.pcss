@@ -10,6 +10,12 @@ Please see LICENSE files in the repository root for full details.
     color: $links;
 }
 
+/* Telement: underlined like every link in a sentence (_AccessibleButton.pcss), its icon telling it leaves the app. As
+   specific as the theme's rule that drops the underline of links (_mods.pcss), which comes before the components. */
+a.mx_ExternalLink:any-link {
+    text-decoration: underline;
+}
+
 .mx_ExternalLink_icon {
     display: inline-block;
     width: $font-11px;

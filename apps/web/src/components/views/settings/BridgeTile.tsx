@@ -18,6 +18,7 @@ import BaseAvatar from "../avatars/BaseAvatar";
 import SettingsStore from "../../../settings/SettingsStore";
 import { isUrlPermitted } from "../../../HtmlUtils";
 import { mediaFromMxc } from "../../../customisations/Media";
+import ExternalLink from "../elements/ExternalLink";
 
 interface IProps {
     ev: MatrixEvent;
@@ -134,11 +135,7 @@ export default class BridgeTile extends React.PureComponent<IProps> {
             const networkName = network.displayname || network.id;
             let networkLink = <span>{networkName}</span>;
             if (typeof network.external_url === "string" && isUrlPermitted(network.external_url)) {
-                networkLink = (
-                    <a href={network.external_url} target="_blank" rel="noreferrer noopener">
-                        {networkName}
-                    </a>
-                );
+                networkLink = <ExternalLink href={network.external_url}>{networkName}</ExternalLink>;
             }
             networkItem = _t(
                 "labs|bridge_state_workspace",
@@ -151,11 +148,7 @@ export default class BridgeTile extends React.PureComponent<IProps> {
 
         let channelLink = <span>{channelName}</span>;
         if (typeof channel.external_url === "string" && isUrlPermitted(channel.external_url)) {
-            channelLink = (
-                <a href={channel.external_url} target="_blank" rel="noreferrer noopener">
-                    {channelName}
-                </a>
-            );
+            channelLink = <ExternalLink href={channel.external_url}>{channelName}</ExternalLink>;
         }
 
         const id = this.props.ev.getId();

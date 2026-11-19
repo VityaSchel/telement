@@ -70,6 +70,19 @@ describe("<DeviceDetails />", () => {
         expect(container).toMatchSnapshot();
     });
 
+    it("links another session to its page on the account's server as a link that leaves the app", () => {
+        const { getByTestId } = render(
+            getComponent({ accountManagementEndpoint: "https://auth.example.org/account", isCurrentDevice: false }),
+        );
+        const link = getByTestId("device-detail-sign-out-cta");
+
+        expect(link).toHaveTextContent("Manage");
+        expect(link.getAttribute("href")).toContain("https://auth.example.org/account");
+        expect(link).toHaveAttribute("target", "_blank");
+        expect(link).toHaveClass("mx_ExternalLink");
+        expect(link.querySelector(".mx_ExternalLink_icon")).not.toBeNull();
+    });
+
     it("disables sign out button while sign out is pending", () => {
         const device = {
             ...baseDevice,

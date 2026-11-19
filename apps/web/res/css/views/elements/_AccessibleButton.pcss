@@ -220,13 +220,15 @@ Please see LICENSE files in the repository root for full details.
         color: $primary-content;
     }
 
-    /* Only links inside a sentence are underlined, to tell them from the text around them; a link that stands on its
-       own is a text button */
+    /* Only links inside a sentence are underlined, to tell them from the text around them, and they keep the
+       sentence's weight, like the app's other links (_ExternalLink.pcss); a link that stands on its own is a text
+       button, semibold and not underlined */
     &.mx_AccessibleButton_kind_link_inline,
     &.mx_AccessibleButton_kind_danger_inline,
     &.mx_AccessibleButton_kind_content_inline {
         display: inline;
         text-decoration: underline;
+        font-weight: inherit;
     }
 
     /* Every button is disabled the way Compound's Button is, for the kind each of these stands for: filled kinds, red

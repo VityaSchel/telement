@@ -16,6 +16,7 @@ import { SettingLevel } from "../../../../../settings/SettingLevel";
 import SdkConfig from "../../../../../SdkConfig";
 import BetaCard from "../../../beta/BetaCard";
 import SettingsFlag from "../../../elements/SettingsFlag";
+import ExternalLink from "../../../elements/ExternalLink";
 import { type FeatureSettingKey, type LabGroup, labGroupNames } from "../../../../../settings/Settings";
 import { EnhancedMap } from "../../../../../utils/maps";
 import { SettingsSection } from "../../shared/SettingsSection";
@@ -108,17 +109,11 @@ export default class LabsUserSettingsTab extends React.Component<EmptyObject> {
                                     "labs|experimental_description",
                                     {},
                                     {
-                                        a: (sub) => {
-                                            return (
-                                                <a
-                                                    href="https://github.com/vector-im/element-web/blob/develop/docs/labs.md"
-                                                    rel="noreferrer noopener"
-                                                    target="_blank"
-                                                >
-                                                    {sub}
-                                                </a>
-                                            );
-                                        },
+                                        a: (sub) => (
+                                            <ExternalLink href="https://github.com/vector-im/element-web/blob/develop/docs/labs.md">
+                                                {sub}
+                                            </ExternalLink>
+                                        ),
                                     },
                                 )}
                             </SettingsSubsectionText>

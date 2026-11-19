@@ -11,6 +11,7 @@ import { type Room, type MatrixClient, type MatrixEvent } from "matrix-js-sdk/sr
 
 import { _t } from "../../../../../languageHandler";
 import BridgeTile from "../../BridgeTile";
+import ExternalLink from "../../../elements/ExternalLink";
 import SettingsTab from "../SettingsTab";
 import { SettingsSection } from "../../shared/SettingsSection";
 import MatrixClientContext from "../../../../../contexts/MatrixClientContext";
@@ -60,11 +61,7 @@ export default class BridgeSettingsTab extends React.Component<IProps> {
                             {
                                 // TODO: We don't have this link yet: this will prevent the translators
                                 // having to re-translate the string when we do.
-                                a: (sub) => (
-                                    <a href={BRIDGES_LINK} target="_blank" rel="noreferrer noopener">
-                                        {sub}
-                                    </a>
-                                ),
+                                a: (sub) => <ExternalLink href={BRIDGES_LINK}>{sub}</ExternalLink>,
                             },
                         )}
                     </p>
@@ -82,11 +79,7 @@ export default class BridgeSettingsTab extends React.Component<IProps> {
                         {
                             // TODO: We don't have this link yet: this will prevent the translators
                             // having to re-translate the string when we do.
-                            a: (sub) => (
-                                <a href={BRIDGES_LINK} target="_blank" rel="noreferrer noopener">
-                                    {sub}
-                                </a>
-                            ),
+                            a: (sub) => <ExternalLink href={BRIDGES_LINK}>{sub}</ExternalLink>,
                         },
                     )}
                 </p>

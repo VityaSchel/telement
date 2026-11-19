@@ -53,4 +53,14 @@ describe("<LabsUserSettingsTab />", () => {
         const labsSections = container.getElementsByClassName("mx_SettingsSubsection");
         expect(labsSections).toHaveLength(8);
     });
+
+    it("links the labs documentation as a link that leaves the app", () => {
+        SdkConfig.add({ show_labs_settings: true });
+        render(getComponent());
+        const link = screen.getByRole("link", { name: "Learn more" });
+
+        expect(link).toHaveAttribute("href", "https://github.com/vector-im/element-web/blob/develop/docs/labs.md");
+        expect(link).toHaveClass("mx_ExternalLink");
+        expect(link.querySelector(".mx_ExternalLink_icon")).not.toBeNull();
+    });
 });

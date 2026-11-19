@@ -13,6 +13,7 @@ import { type IPusher, PUSHER_ENABLED, type LocalNotificationSettings } from "ma
 import { formatDate } from "../../../../DateUtils";
 import { _t } from "../../../../languageHandler";
 import AccessibleButton from "../../elements/AccessibleButton";
+import ExternalLink from "../../elements/ExternalLink";
 import Spinner from "../../elements/Spinner";
 import ToggleSwitch from "../../elements/ToggleSwitch";
 import { DeviceDetailHeading } from "./DeviceDetailHeading";
@@ -173,20 +174,17 @@ const DeviceDetails: React.FC<Props> = ({
             )}
             <section className="mx_DeviceDetails_section">
                 {accountManagementEndpoint && !isCurrentDevice ? (
-                    <AccessibleButton
-                        element="a"
-                        onClick={null}
-                        kind="link_inline"
+                    // Telement: the account's page opens outside the app, so this is drawn as the links that leave it
+                    <ExternalLink
                         href={getManageDeviceUrl(
                             accountManagementEndpoint,
                             accountManagementActionsSupported,
                             device.device_id,
                         )}
-                        target="_blank"
                         data-testid="device-detail-sign-out-cta"
                     >
-                        <span className="mx_DeviceDetails_signOutButtonContent">{_t("settings|sessions|manage")}</span>
-                    </AccessibleButton>
+                        {_t("settings|sessions|manage")}
+                    </ExternalLink>
                 ) : (
                     <AccessibleButton
                         onClick={onSignOutDevice}

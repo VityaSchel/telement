@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback } from "react";
-import { InlineSpinner, Link, Root, SettingsToggleInput } from "@vector-im/compound-web";
+import { InlineSpinner, Root, SettingsToggleInput } from "@vector-im/compound-web";
 
 import type { FormEvent } from "react";
 import { SettingsSection } from "../shared/SettingsSection";
@@ -14,6 +14,7 @@ import { _t } from "../../../../languageHandler";
 import { SettingsHeader } from "../SettingsHeader";
 import { useKeyStoragePanelViewModel } from "../../../viewmodels/settings/encryption/KeyStoragePanelViewModel";
 import SdkConfig from "../../../../SdkConfig";
+import ExternalLink from "../../elements/ExternalLink";
 
 interface Props {
     /**
@@ -55,11 +56,7 @@ export const KeyStoragePanel: React.FC<Props> = ({ onKeyStorageDisableClick }) =
                 />
             }
             subHeading={_t("settings|encryption|key_storage|description", undefined, {
-                a: (sub) => (
-                    <Link href={SdkConfig.get("help_key_storage_url")} target="_blank">
-                        {sub}
-                    </Link>
-                ),
+                a: (sub) => <ExternalLink href={SdkConfig.get("help_key_storage_url")}>{sub}</ExternalLink>,
             })}
         >
             <Root className="mx_KeyStoragePanel_toggleRow">
