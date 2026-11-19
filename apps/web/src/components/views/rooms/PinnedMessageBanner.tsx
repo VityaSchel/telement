@@ -102,7 +102,7 @@ export function PinnedMessageBanner({ room, permalinkCreator }: PinnedMessageBan
             >
                 <div className="mx_PinnedMessageBanner_content" id={id}>
                     <Indicators count={eventCount} currentIndex={currentEventIndex} />
-                    <PinIcon width="20px" height="20px" className="mx_PinnedMessageBanner_PinIcon" />
+                    <PinIcon width="16px" height="16px" className="mx_PinnedMessageBanner_PinIcon" />
                     {!isSinglePinnedEvent && (
                         <div className="mx_PinnedMessageBanner_title" data-testid="banner-counter">
                             {_t(

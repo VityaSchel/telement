@@ -13,7 +13,8 @@
     gap: var(--cpd-space-4x);
     /* 64px = 63px + 1px from the bottom border */
     height: 63px;
-    padding: 0 var(--cpd-space-4x);
+    /* The room header's content edge, so that the accent line sits under the header's avatar */
+    padding: 0 var(--cpd-space-3x);
 
     background-color: var(--cpd-color-bg-canvas-default);
     border-bottom: 1px solid var(--cpd-color-gray-400);
@@ -25,6 +26,8 @@
         color: inherit;
         background: transparent;
         border: none;
+        /* A <button>, which the browser would pad */
+        padding: 0;
         text-align: start;
         cursor: pointer;
 
@@ -63,10 +66,17 @@
             }
         }
 
+        /* Tilted and 16px like the room list's pin, padded to the 20px of the other icons */
         .mx_PinnedMessageBanner_PinIcon {
             grid-area: pinIcon;
             align-self: center;
+            margin: var(--cpd-space-0-5x);
             fill: var(--cpd-color-icon-secondary-alpha);
+            transform: rotate(45deg);
+
+            &:dir(rtl) {
+                transform: rotate(-45deg);
+            }
         }
 
         .mx_PinnedMessageBanner_title {

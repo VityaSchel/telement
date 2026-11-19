@@ -106,6 +106,17 @@ describe("<PinnedMessageBanner />", () => {
         expect(asFragment()).toMatchSnapshot();
     });
 
+    it("draws the pin at 16px, as the room list does", async () => {
+        vi.spyOn(pinnedEventHooks, "usePinnedEvents").mockReturnValue([event1.getId()!]);
+        vi.spyOn(pinnedEventHooks, "useSortedFetchedPinnedEvents").mockReturnValue([event1]);
+
+        const { container } = renderBanner();
+
+        await expect(screen.findByText("First pinned message")).resolves.toBeVisible();
+        const pin = container.querySelector(".mx_PinnedMessageBanner_PinIcon")!;
+        expect([pin.getAttribute("width"), pin.getAttribute("height")]).toEqual(["16px", "16px"]);
+    });
+
     it("should render 2 pinned event", async () => {
         vi.spyOn(pinnedEventHooks, "usePinnedEvents").mockReturnValue([event1.getId()!, event2.getId()!]);
         vi.spyOn(pinnedEventHooks, "useSortedFetchedPinnedEvents").mockReturnValue([event1, event2]);
