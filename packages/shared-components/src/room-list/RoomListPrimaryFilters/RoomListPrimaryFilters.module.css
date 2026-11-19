@@ -44,6 +44,20 @@
     text-box: trim-both cap alphabetic;
 }
 
+/*
+ * The chevron is outlined like the chips beside it, with their hover border; Compound's icon button gives it their hover
+ * fill. The container's class outranks Compound's border reset where its stylesheet comes later, as in unit tests.
+ */
+.roomListPrimaryFilters .iconButton {
+    border: var(--cpd-border-width-1) solid var(--cpd-color-border-interactive-secondary);
+}
+
+@media (hover) {
+    .roomListPrimaryFilters .iconButton:hover {
+        border-color: var(--cpd-color-border-interactive-primary);
+    }
+}
+
 /* IconButton styles for chevron */
 .iconButton svg {
     transition: transform 0.1s linear;

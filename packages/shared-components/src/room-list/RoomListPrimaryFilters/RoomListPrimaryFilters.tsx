@@ -76,14 +76,13 @@ export const RoomListPrimaryFilters = memo(function RoomListPrimaryFilters({
         >
             {displayChevron && (
                 <IconButton
-                    kind="secondary"
                     aria-expanded={isExpanded}
                     aria-controls={id}
                     className={styles.iconButton}
                     aria-label={isExpanded ? _t("room_list|collapse_filters") : _t("room_list|expand_filters")}
                     size="28px"
-                    // Whole pixels around a 20px icon, where Compound pads a 28px button by 3.5px
-                    style={{ padding: "var(--cpd-space-1x)" }}
+                    // Whole pixels around a 20px icon inside the outline, where Compound pads a 28px button by 3.5px
+                    style={{ padding: "calc(var(--cpd-space-1x) - var(--cpd-border-width-1))" }}
                     onClick={() => setIsExpanded((expanded) => !expanded)}
                 >
                     <ChevronDownIcon />

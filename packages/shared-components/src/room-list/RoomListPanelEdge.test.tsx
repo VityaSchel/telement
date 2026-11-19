@@ -118,6 +118,35 @@ describe("Room list panel content edge", () => {
         }
     });
 
+    it("outlines the filters' chevron like the chips beside it, with their hover border and fill", async () => {
+        renderInPanel(<Filters />);
+        const chip = screen.getByRole("option", { name: "Rooms" });
+        const chevron = screen.getByRole("button", { name: "Expand filter list" });
+        const glyph = chevron.querySelector("svg")!;
+        const outline = (element: Element): string => {
+            const style = getComputedStyle(element);
+            return `${style.borderTopWidth} ${style.borderTopStyle} ${style.borderTopColor} ${style.backgroundColor}`;
+        };
+        const iconColor = document.createElement("span");
+        iconColor.style.color = "var(--cpd-color-icon-secondary)";
+        document.body.append(iconColor);
+
+        expect(chip.getAttribute("aria-selected")).toBe("false");
+        expect(outline(chevron)).toBe(outline(chip));
+        expect(getComputedStyle(chevron).backgroundColor).toBe("rgba(0, 0, 0, 0)");
+        expect(getComputedStyle(glyph).color).toBe(getComputedStyle(iconColor).color);
+        iconColor.remove();
+        // The 20px glyph stays 4px from every edge of the 28px circle, its outline included
+        expect([rect(glyph).left - rect(chevron).left, rect(glyph).top - rect(chevron).top]).toEqual([4, 4]);
+        expect(rect(chevron).width).toBe(28);
+
+        await userEvent.hover(chip);
+        const chipHover = outline(chip);
+        await userEvent.hover(chevron);
+        expect(outline(chevron)).toBe(chipHover);
+        await userEvent.unhover(chevron);
+    });
+
     it("puts the filters' labels in the middle of the chips, by their cap height", () => {
         renderInPanel(<Filters />);
 
