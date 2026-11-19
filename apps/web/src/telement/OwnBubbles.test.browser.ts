@@ -368,14 +368,14 @@ const REACTIONS = `
     </div>
 `;
 
-/** A file as PreviewFileBody renders it, its icon in MediaPreviewGroupView's decorative color. */
+/** A file as PreviewFileBody renders it, its icon in the media icon's color (icons.tsx). */
 const FILE = `
     <div class="mx_EventTile_content">
         <div class="MediaPreviewGroupView_container">
             <div class="MediaPreviewTile_tile">
                 <div class="MediaPreviewTile_below">
                     <div class="MediaPreviewComponents_leftGroup">
-                        <div class="MediaPreviewComponents_icon">${icon(DocumentIcon, { style: { color: "var(--cpd-color-text-decorative-4)" } })}</div>
+                        <div class="MediaPreviewComponents_icon">${icon(DocumentIcon, { style: { color: "var(--tl-color-on-media-icon)" } })}</div>
                         <div class="MediaPreviewComponents_textContent">
                             <div class="MediaPreviewComponents_header">annual-report.pdf</div>
                             <p class="MediaPreviewComponents_body">2.3 MB</p>
@@ -738,15 +738,23 @@ describe("Your own bubbles", () => {
             expect(color(list.querySelector(".MediaPreviewComponents_button svg"))).toBe(theme.secondary);
         });
 
-        it("draws a voice message's play icon in white on its translucent circle, and its waveform and duration in the secondary white", () => {
-            const list = render(tile(VOICE, { lineClass: "lineMedia" }));
+        it("draws a voice message's play button as a white circle with the bubble's blue glyph, as Telegram does, and its waveform and duration in the secondary white", () => {
+            const list = render(
+                tile(VOICE, { lineClass: "lineMedia" }),
+                tile(VOICE, { lineClass: "lineMedia", states: ["stateSelected"] }),
+            );
             const [played, rest] = list.querySelectorAll(".mx_Waveform_bar");
+            const [play, selectedPlay] = list.querySelectorAll(".PlayPauseButton_button");
 
             expect(fill(list.querySelector(".line"))).toBe(theme.fill);
-            const play = list.querySelector(".PlayPauseButton_button")!;
-            expect(color(play.querySelector("svg"))).toBe(WHITE);
-            expect(channels(fill(play)).slice(0, 3)).toEqual([255, 255, 255]);
-            expect(contrast(WHITE, composite(fill(play), theme.fill))).toBeGreaterThanOrEqual(3);
+            expect(fill(play)).toBe(WHITE);
+            expect(color(play.querySelector("svg"))).toBe(theme.fill);
+            // A glyph, not text: 3:1 on the circle
+            expect(contrast(theme.fill, WHITE)).toBeGreaterThanOrEqual(3);
+            // A selected bubble's glyph takes its highlighted blue with it
+            expect(fill(selectedPlay)).toBe(WHITE);
+            expect(fill(selectedPlay.closest(".line"))).toBe(theme.highlighted);
+            expect(color(selectedPlay.querySelector("svg"))).toBe(theme.highlighted);
             expect(fill(played)).toBe(theme.secondary);
             expect(fill(rest)).toBe(tokenColor("--tl-color-separator-bubble-own", list));
             expect(color(list.querySelector(".mx_Clock"))).toBe(theme.secondary);

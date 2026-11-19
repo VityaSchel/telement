@@ -1547,7 +1547,6 @@
         grid-column: 1 / -1;
     }
 
-
     /* A padlock stays beside the message, in a column of its own, rather than on a line above it. */
     &:not(.stateHasReply, .stateEncryptionFailure)
         .line:not(.lineMedia):has(> .slotFooter:not(:empty)):has(> .slotPadlock) {
@@ -1719,13 +1718,7 @@
             --cpd-color-icon-critical-primary: var(--tl-color-on-bubble-own);
             --cpd-color-icon-on-solid-primary: var(--event-tile-bubble-self-background);
             --cpd-color-bg-canvas-default: var(--event-tile-bubble-self-background);
-            /* A file's icon, and the mention of yourself, which would be red on blue */
-            --cpd-color-bg-decorative-1: var(--tl-color-bg-bubble-own-subtle-hovered);
-            --cpd-color-bg-decorative-2: var(--tl-color-bg-bubble-own-subtle-hovered);
-            --cpd-color-bg-decorative-3: var(--tl-color-bg-bubble-own-subtle-hovered);
-            --cpd-color-bg-decorative-4: var(--tl-color-bg-bubble-own-subtle-hovered);
-            --cpd-color-bg-decorative-5: var(--tl-color-bg-bubble-own-subtle-hovered);
-            --cpd-color-bg-decorative-6: var(--tl-color-bg-bubble-own-subtle-hovered);
+            /* The mention of yourself, which would be red on blue */
             --cpd-color-bg-critical-primary: var(--tl-color-on-bubble-own);
             --cpd-color-bg-critical-hovered: var(--tl-color-on-bubble-own-secondary);
             --cpd-color-bg-subtle-primary: var(--tl-color-bg-bubble-own-subtle-hovered);
@@ -1742,6 +1735,15 @@
             --cpd-color-border-accent-primary: var(--tl-color-on-bubble-own);
             --cpd-color-border-focused: var(--tl-color-on-bubble-own);
             --tl-color-on-accent: var(--event-tile-bubble-self-background);
+            /* A file's icon keeps a translucent white fill with a white glyph rather than the accent's white fill, and
+               its translucent white edge, and the played part of a recording is the secondary white. The play button
+               is a white circle with the bubble's blue as its glyph, as in Telegram's Day and Night themes. */
+            --tl-color-bg-media-icon: var(--tl-color-bg-bubble-own-subtle-hovered);
+            --tl-color-on-media-icon: var(--tl-color-on-bubble-own);
+            --tl-color-border-media-icon: var(--tl-color-separator-bubble-own);
+            --tl-color-bg-media-play: var(--tl-color-on-bubble-own);
+            --tl-color-on-media-play: var(--event-tile-bubble-self-background);
+            --tl-color-media-played: var(--tl-color-on-bubble-own-secondary);
             /* Grays the app's message styles name directly: lines and tracks, the tertiary text and the translucent
                fills that sit one step over whatever is behind them */
             --cpd-color-gray-400: var(--tl-color-separator-bubble-own);
@@ -1771,14 +1773,9 @@
         }
 
         /* Secondary white on a translucent white fill drops under 3:1 in light themes, so what sits on one is white: a
-           code block's line numbers, a link preview's description, and the play icon of a voice or audio message, whose
-           waveform and times stay secondary */
+           code block's line numbers and a link preview's description */
         > .slotBody :is(:global(.markdown-body) pre, :global(.mx_TextualBody_urlPreviews)) {
             --cpd-color-text-secondary: var(--tl-color-on-bubble-own);
-            --cpd-color-icon-secondary: var(--tl-color-on-bubble-own);
-        }
-
-        > .slotBody :is(:global(.mx_MVoiceMessageBody), :global(.mx_MAudioBody)) {
             --cpd-color-icon-secondary: var(--tl-color-on-bubble-own);
         }
 

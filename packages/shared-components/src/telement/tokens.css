@@ -279,6 +279,24 @@ Please see LICENSE files in the repository root for full details.
 }
 
 /*
+ * Voice, audio and file messages, as in Telegram: the play button and a file's or link's icon square are filled with
+ * the accent and hold a white glyph, and the played part of a voice message's waveform or an audio's seek bar is a
+ * line in the accent. The icon square has no edge on the accent. Your own bubbles point these at their translucent
+ * white fill and edge, white and secondary white (EventTileView.module.css), so they keep showing on the bubble's blue.
+ * The play button has its own pair, as your own bubbles draw it as Telegram does: a white circle with the bubble's blue
+ * as its glyph.
+ */
+:root,
+[class*="cpd-theme-"] {
+    --tl-color-bg-media-icon: var(--cpd-color-bg-accent-rest);
+    --tl-color-on-media-icon: var(--tl-color-on-accent);
+    --tl-color-border-media-icon: transparent;
+    --tl-color-bg-media-play: var(--tl-color-bg-media-icon);
+    --tl-color-on-media-play: var(--tl-color-on-media-icon);
+    --tl-color-media-played: var(--cpd-color-icon-accent-primary);
+}
+
+/*
  * Floating surfaces: menus, pickers, autocomplete, dropdowns and dialogs. Shadows barely show on near-black, so in dark
  * themes they are one gray step lighter than the page, Compound's raised canvas, and the fills and separators inside
  * them one step further, so that hovered, selected and disabled rows, fields and separators still show. Light themes

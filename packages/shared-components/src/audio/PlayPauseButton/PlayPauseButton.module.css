@@ -12,7 +12,12 @@
     min-width: 32px;
     min-height: 32px;
     border-radius: 32px;
-    background-color: var(--cpd-color-bg-subtle-primary);
+    /* Telegram's play button: a white glyph on the accent, and in your own bubbles the bubble's blue on white
+       (telement/tokens.css). Compound's icon button colors the glyph with these two roles, at rest and when hovered or
+       pressed. */
+    --cpd-color-icon-primary: var(--tl-color-on-media-play);
+    --cpd-color-icon-secondary: var(--tl-color-on-media-play);
+    background-color: var(--tl-color-bg-media-play);
     padding: var(--cpd-space-1-5x);
     box-sizing: border-box;
 }
@@ -24,4 +29,11 @@
 
 .button[disabled] svg {
     opacity: 0.5;
+}
+
+/* Forced colors drop the fill but keep the glyph's own color, so a white or blue glyph could vanish into the page */
+@media (forced-colors: active) {
+    .button {
+        --tl-color-on-media-play: ButtonText;
+    }
 }

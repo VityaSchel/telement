@@ -60,7 +60,7 @@ exports[`<UploadConfirmDialog /> > should display image preview 1`] = `
                     <svg
                       fill="currentColor"
                       height="1em"
-                      style="color: var(--cpd-color-text-decorative-4);"
+                      style="color: var(--tl-color-on-media-icon);"
                       viewBox="0 0 24 24"
                       width="1em"
                       xmlns="http://www.w3.org/2000/svg"

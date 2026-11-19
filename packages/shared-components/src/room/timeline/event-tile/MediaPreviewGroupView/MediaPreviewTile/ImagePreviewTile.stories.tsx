@@ -24,7 +24,7 @@ const meta = {
         imageSize: "banner",
         icon: <DocumentIcon />,
         onClick: () => {},
-        color: "#4200A6",
+        color: "var(--tl-color-on-media-icon)",
         header: "annual-report.pdf",
         body: "2.3 MB",
         buttons: [

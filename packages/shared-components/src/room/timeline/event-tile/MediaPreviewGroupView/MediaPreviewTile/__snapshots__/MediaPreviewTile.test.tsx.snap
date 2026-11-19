@@ -29,7 +29,7 @@ exports[`ImagePreviewTile > renders the default story with its image 1`] = `
             <svg
               fill="currentColor"
               height="1em"
-              style="color: rgb(66, 0, 166);"
+              style="color: var(--tl-color-on-media-icon);"
               viewBox="0 0 24 24"
               width="1em"
               xmlns="http://www.w3.org/2000/svg"
@@ -160,7 +160,7 @@ exports[`TextPreviewTile > renders the default story 1`] = `
             <svg
               fill="currentColor"
               height="1em"
-              style="color: rgb(66, 0, 166);"
+              style="color: var(--tl-color-on-media-icon);"
               viewBox="0 0 24 24"
               width="1em"
               xmlns="http://www.w3.org/2000/svg"

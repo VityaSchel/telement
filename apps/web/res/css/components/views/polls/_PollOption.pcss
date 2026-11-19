@@ -59,23 +59,15 @@ Please see LICENSE files in the repository root for full details.
 }
 
 .mx_PollOption_checked {
-    .mx_PollOption_popularityBackground {
-        .mx_PollOption_popularityAmount {
-            background-color: var(--cpd-color-icon-primary);
-        }
-    }
-
-    /* override checked radio button styling to show checkmark instead */
+    /* override checked radio button styling to show checkmark instead. Your choice keeps the radio's accent fill
+       (_StyledRadioButton.pcss), as in Telegram, with the check white on it. */
     .mx_StyledRadioButton_checked {
         input[type="radio"]:checked + div {
-            border-color: var(--cpd-color-icon-primary);
-            background-color: var(--cpd-color-icon-primary);
-
             div {
                 background: none;
 
                 svg {
-                    color: var(--cpd-color-icon-on-solid-primary);
+                    color: var(--tl-color-on-accent);
                     width: 12px;
                     height: 12px;
                     margin: -2px;
@@ -86,18 +78,12 @@ Please see LICENSE files in the repository root for full details.
     }
 }
 
+/* An ended poll's radios are disabled, so the winner's check takes the accent back from the disabled gray */
 .mx_PollOption_ended.mx_PollOption_checked {
-    .mx_PollOption_popularityBackground {
-        .mx_PollOption_popularityAmount {
-            background-color: var(--cpd-color-icon-accent-tertiary);
-        }
-    }
-
-    /* override checked radio button styling to show checkmark instead */
     .mx_StyledRadioButton_checked {
         input[type="radio"]:checked + div {
-            border-color: var(--cpd-color-icon-accent-tertiary);
-            background-color: var(--cpd-color-icon-accent-tertiary);
+            border-color: var(--cpd-color-bg-accent-rest);
+            background-color: var(--cpd-color-bg-accent-rest);
         }
     }
 }
@@ -115,10 +101,13 @@ Please see LICENSE files in the repository root for full details.
     background-color: $system;
     margin-top: var(--cpd-space-2x);
 
+    /* Every option's result is a bar in the accent on the gray track, as in Telegram. Nothing white sits on it, so it
+       is a line's accent rather than a fill's: the fill's deeper step in dark themes would barely show on dark high
+       contrast's track. */
     .mx_PollOption_popularityAmount {
         width: 0%;
         height: 8px;
         border-radius: 8px;
-        background-color: var(--cpd-color-icon-primary);
+        background-color: var(--cpd-color-icon-accent-primary);
     }
 }

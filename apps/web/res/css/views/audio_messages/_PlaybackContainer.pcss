@@ -109,4 +109,10 @@ Please see LICENSE files in the repository root for full details.
 .mx_MVoiceMessageBody .mx_VoiceMessagePrimaryContainer {
     padding-block: calc(var(--cpd-space-2x) - 1px);
     padding-inline-start: calc(var(--cpd-space-2x) - 1px);
+
+    /* The played part of a voice message is the accent, as in Telegram (telement/tokens.css). Only in the timeline:
+       the composer's live recording marks every bar as played. */
+    .mx_Waveform .mx_Waveform_bar.mx_Waveform_bar_100pct {
+        background-color: var(--tl-color-media-played);
+    }
 }

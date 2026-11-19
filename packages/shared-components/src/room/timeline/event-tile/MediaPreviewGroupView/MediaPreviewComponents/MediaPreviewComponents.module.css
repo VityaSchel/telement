@@ -55,13 +55,22 @@
 
     /* Concentric with the card or bubble around it, 8 to 12px in: max(radius - inset, 4px) is 4 in every layout */
     border-radius: var(--tl-radius-inline);
-    border: 1px solid var(--cpd-color-icon-quaternary);
-    background-color: var(--cpd-color-bg-decorative-4);
+    /* Telegram's file icon: the accent with a white glyph (telement/tokens.css and icons.tsx). Its edge only shows in
+       your own bubbles and in forced colors. */
+    border: 1px solid var(--tl-color-border-media-icon);
+    background-color: var(--tl-color-bg-media-icon);
 
     svg {
         display: block;
         height: var(--cpd-space-6x);
         width: var(--cpd-space-6x);
+    }
+}
+
+/* Forced colors drop the accent fill but keep the glyph's own color, so a white glyph would vanish into the page */
+@media (forced-colors: active) {
+    .icon {
+        --tl-color-on-media-icon: CanvasText;
     }
 }
 

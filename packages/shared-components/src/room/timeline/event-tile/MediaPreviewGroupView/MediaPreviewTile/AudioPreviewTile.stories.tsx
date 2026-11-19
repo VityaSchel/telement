@@ -22,7 +22,7 @@ const meta = {
         audio: demoAudio,
         icon: <DocumentIcon />,
         onClick: () => {},
-        color: "#4200A6",
+        color: "var(--tl-color-on-media-icon)",
         header: "voice-message.mp3",
         body: "1.1 MB",
         buttons: [

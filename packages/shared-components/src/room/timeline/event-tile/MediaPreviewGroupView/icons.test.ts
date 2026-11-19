@@ -11,10 +11,10 @@ import { describe, expect, it } from "vitest";
 import { attachmentIcon, linkIcon } from "./icons";
 
 describe("icons", () => {
-    it("returns a decorative file icon for attachments", () => {
+    it("returns a file icon in the media icon's white for attachments", () => {
         const { icon, color } = attachmentIcon("image/png");
 
-        expect(color).toEqual("var(--cpd-color-text-decorative-4)");
+        expect(color).toEqual("var(--tl-color-on-media-icon)");
         const { container } = render(icon);
         expect(container.querySelector("svg")).toBeInTheDocument();
     });
@@ -26,10 +26,10 @@ describe("icons", () => {
         expect(withoutMime.innerHTML).toEqual(withMime.innerHTML);
     });
 
-    it("returns a decorative link icon for URL previews", () => {
+    it("returns a link icon in the media icon's white for URL previews", () => {
         const { icon, color } = linkIcon();
 
-        expect(color).toEqual("var(--cpd-color-text-decorative-4)");
+        expect(color).toEqual("var(--tl-color-on-media-icon)");
         const { container } = render(icon);
         expect(container.querySelector("svg")).toBeInTheDocument();
     });
