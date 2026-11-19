@@ -157,6 +157,7 @@ export const Tabs: React.FC<Props> = ({
             {categories.map((category) => {
                 const classes = classNames(styles.anchor, {
                     [styles.anchorSelected]: category.id === selectedCategory,
+                    [styles.anchorWithIcon]: !!category.Icon,
                 });
                 return (
                     <button
@@ -181,7 +182,7 @@ export const Tabs: React.FC<Props> = ({
                         // instead.
                         aria-controls={pickerBodyId}
                     >
-                        {category.emoji}
+                        {category.Icon ? <category.Icon aria-hidden /> : category.emoji}
                     </button>
                 );
             })}

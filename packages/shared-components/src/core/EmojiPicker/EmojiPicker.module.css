@@ -79,7 +79,8 @@
         cursor: pointer;
     }
 
-    &:disabled {
+    /* An emoji keeps its own colors, so a disabled one is faded */
+    &:disabled:not(.anchorWithIcon) {
         filter: opacity(0.3);
     }
 
@@ -90,6 +91,30 @@
     &:focus-visible {
         outline: 2px solid var(--cpd-color-border-focused);
         outline-offset: -2px;
+    }
+}
+
+/*
+ * Frequently Used is Compound's outline history icon rather than an emoji, so it takes the icon colors of an icon
+ * button: secondary, primary when hovered, and the disabled color while there are no recent emoji yet. Its circle is
+ * drawn about as big as the emoji beside it.
+ */
+.anchorWithIcon {
+    color: var(--cpd-color-icon-secondary);
+
+    &:not(:disabled):hover {
+        color: var(--cpd-color-icon-primary);
+    }
+
+    &:disabled {
+        color: var(--cpd-color-icon-disabled);
+    }
+
+    svg {
+        display: block;
+        width: 24px;
+        height: 24px;
+        margin-inline: auto;
     }
 }
 

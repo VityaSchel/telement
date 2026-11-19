@@ -132,7 +132,7 @@ describe("ComposerDrawerView", () => {
             </ComposerDrawerView>,
         );
         // The first category, in the corner
-        const category = await screen.findByRole("tab", { name: "🕒" });
+        const category = await screen.findByRole("tab", { name: "Frequently Used" });
 
         const drawer = screen.getByRole("tab", { name: "Emoji" }).parentElement!.parentElement!;
         const categoryBox = category.getBoundingClientRect();

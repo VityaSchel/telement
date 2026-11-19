@@ -54,7 +54,7 @@ describe("EmojiPicker", function () {
     it("should disable the recent category when no recent emojis", () => {
         render(<EmojiPicker onChoose={() => false} onFinished={vi.fn()} />);
 
-        const recentTab = screen.getByRole("tab", { name: "🕒" });
+        const recentTab = screen.getByRole("tab", { name: "Frequently Used" });
         expect(recentTab).toBeDisabled();
     });
 
@@ -68,7 +68,7 @@ describe("EmojiPicker", function () {
     it("should enable and select the recent category when recent emojis are supplied", () => {
         render(<EmojiPicker onChoose={() => false} onFinished={vi.fn()} recentEmojis={RECENT_EMOJIS} />);
 
-        const recentTab = screen.getByRole("tab", { name: "🕒" });
+        const recentTab = screen.getByRole("tab", { name: "Frequently Used" });
         expect(recentTab).toBeEnabled();
         expect(recentTab).toHaveAttribute("aria-selected", "true");
     });
@@ -399,7 +399,7 @@ describe("EmojiPicker", function () {
         it("focuses the selected category itself when the host asks for it", async () => {
             render(<EmojiPicker onChoose={vi.fn()} onFinished={vi.fn()} recentEmojis={RECENT_EMOJIS} autoFocus />);
 
-            await waitFor(() => expect(screen.getByRole("tab", { name: "🕒" })).toHaveFocus());
+            await waitFor(() => expect(screen.getByRole("tab", { name: "Frequently Used" })).toHaveFocus());
             expect(screen.getByRole("textbox", { name: "Search" })).not.toHaveFocus();
 
             // Only when it opens: selecting another category leaves focus where the user put it
@@ -415,8 +415,8 @@ describe("EmojiPicker", function () {
         it("asks the focus lock of the menu it opens in to focus the selected category", async () => {
             await renderAndWait(RECENT_EMOJIS);
 
-            expect(getAutofocusedTabs()).toEqual([screen.getByRole("tab", { name: "🕒" })]);
-            expect(screen.getByRole("tab", { name: "🕒" })).toHaveAttribute("data-autofocus", "true");
+            expect(getAutofocusedTabs()).toEqual([screen.getByRole("tab", { name: "Frequently Used" })]);
+            expect(screen.getByRole("tab", { name: "Frequently Used" })).toHaveAttribute("data-autofocus", "true");
 
             await userEvent.click(screen.getByRole("tab", { name: "🐕" }));
             await waitFor(() => expect(getAutofocusedTabs()).toEqual([screen.getByRole("tab", { name: "🐕" })]));
@@ -632,6 +632,34 @@ describe("EmojiPicker", function () {
             expect(parseFloat(pickerStyle.borderTopLeftRadius)).toBe(tabBox.height / 2 + inset);
             expect(pickerStyle.borderTopLeftRadius).toBe("26px");
             expect(pickerStyle.borderTopRightRadius).toBe("26px");
+        });
+
+        it.each([
+            ["while there are no recent emoji, in the disabled icon color", undefined, "--cpd-color-icon-disabled"],
+            ["with recent emoji, in the secondary icon color", RECENT_EMOJIS, "--cpd-color-icon-secondary"],
+        ])("draws Frequently Used as Compound's history icon %s, centered in its circle", async (_, recent, color) => {
+            await renderAndWait(recent);
+            const tab = screen.getByRole("tab", { name: "Frequently Used" });
+            const icon = tab.querySelector("svg")!;
+            const tabBox = tab.getBoundingClientRect();
+            const iconBox = icon.getBoundingClientRect();
+
+            expect(tab.textContent).toBe("");
+            expect(icon).toHaveAttribute("aria-hidden", "true");
+            expect(getComputedStyle(icon).color).toBe(colorOf(`var(${color})`));
+            // Not faded, unlike a disabled emoji
+            expect(getComputedStyle(tab).filter).toBe("none");
+            expect([iconBox.width, iconBox.height]).toEqual([24, 24]);
+            expect(iconBox.left - tabBox.left).toBe(tabBox.right - iconBox.right);
+            expect(iconBox.top - tabBox.top).toBe(tabBox.bottom - iconBox.bottom);
+        });
+
+        it("fades the emoji of a category that has nothing matching the search", async () => {
+            const { input } = await renderAndWait();
+            await userEvent.type(input, "pizza");
+
+            await waitFor(() => expect(screen.getByRole("tab", { name: "🐕" })).toBeDisabled());
+            expect(getComputedStyle(screen.getByRole("tab", { name: "🐕" })).filter).toBe("opacity(0.3)");
         });
 
         it("highlights a category tab as a circle on hover and keyboard focus", async () => {
@@ -902,7 +930,7 @@ describe("EmojiPicker", function () {
         it("selects the first category left by a query that doesn't scroll the picker", async () => {
             const { scroller, input } = await renderAndWait(RECENT_EMOJIS);
             expect(scroller.scrollTop).toBe(0);
-            expect(screen.getByRole("tab", { name: "🕒" })).toHaveAttribute("aria-selected", "true");
+            expect(screen.getByRole("tab", { name: "Frequently Used" })).toHaveAttribute("aria-selected", "true");
 
             await userEvent.click(input);
             await userEvent.keyboard("cat");
@@ -912,7 +940,7 @@ describe("EmojiPicker", function () {
                 expect(screen.getByRole("tab", { name: "😀" })).toHaveAttribute("aria-selected", "true"),
             );
             expect(screen.getByRole("tab", { name: "😀" })).toBeEnabled();
-            expect(screen.getByRole("tab", { name: "🕒" })).toBeDisabled();
+            expect(screen.getByRole("tab", { name: "Frequently Used" })).toBeDisabled();
 
             // The selected category stays reachable with Shift+Tab, before the search field
             await userEvent.tab({ shift: true });

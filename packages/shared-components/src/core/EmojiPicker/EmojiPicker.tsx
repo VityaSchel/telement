@@ -7,10 +7,21 @@
  * Please see LICENSE files in the repository root for full details.
  */
 
-import React, { type Dispatch, useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
+import React, {
+    type ComponentType,
+    type Dispatch,
+    type SVGProps,
+    useCallback,
+    useEffect,
+    useId,
+    useMemo,
+    useRef,
+    useState,
+} from "react";
 import { DATA_BY_CATEGORY, getEmojiFromUnicode, type Emoji as IEmoji } from "@matrix-org/emojibase-bindings";
 import { Virtuoso, type Components, type VirtuosoHandle } from "react-virtuoso";
 import { Heading } from "@vector-im/compound-web";
+import { HistoryIcon } from "@vector-im/compound-design-tokens/assets/web/icons";
 import classNames from "classnames";
 
 import { _t, _td } from "../i18n/i18n";
@@ -36,7 +47,7 @@ export const EMOJI_HEIGHT = 35;
 export const EMOJIS_PER_ROW = 8;
 
 const CATEGORY_CONFIG: Category[] = [
-    { id: "recent", untranslatedName: _td("emoji|category_frequently_used"), emoji: "🕒" },
+    { id: "recent", untranslatedName: _td("emoji|category_frequently_used"), Icon: HistoryIcon },
     { id: "people", untranslatedName: _td("emoji|category_smileys_people"), emoji: "😀" },
     { id: "nature", untranslatedName: _td("emoji|category_animals_nature"), emoji: "🐕" },
     { id: "foods", untranslatedName: _td("emoji|category_food_drink"), emoji: "🍎" },
@@ -53,7 +64,9 @@ export interface Category {
     id: CategoryKey;
     untranslatedName: TranslationKey;
     // Emoji to show in the header for this category
-    emoji: string;
+    emoji?: string;
+    // Outline icon to show in the header instead of an emoji, for a category that no single emoji stands for
+    Icon?: ComponentType<SVGProps<SVGSVGElement>>;
 }
 
 /**
