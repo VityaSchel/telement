@@ -14,6 +14,9 @@ import { SettingsHeader } from "../SettingsHeader";
 
 export interface SettingsSectionProps extends HTMLAttributes<HTMLDivElement> {
     heading?: string | React.ReactNode;
+    /**
+     * Help for the section, shown under its content, as Telegram puts help under a group of settings.
+     */
     subHeading?: string | React.ReactNode;
     children?: React.ReactNode;
     legacy?: boolean;
@@ -85,18 +88,13 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
                 mx_SettingsSection_newUi: !legacy,
             })}
         >
-            {heading &&
-                (subHeading ? (
-                    <div className="mx_SettingsSection_header">
-                        <SectionHeading heading={heading} legacy={legacy} level={level} />
-                        {subHeading}
-                    </div>
-                ) : (
-                    <SectionHeading heading={heading} legacy={legacy} level={level} />
-                ))}
+            {heading && <SectionHeading heading={heading} legacy={legacy} level={level} />}
             <HeadingLevelContext.Provider value={heading ? ((level + 1) as HeadingLevel) : level}>
-                {legacy ? <div className="mx_SettingsSection_subSections">{children}</div> : children}
+                <div className={legacy ? "mx_SettingsSection_subSections" : "mx_SettingsSection_content"}>
+                    {children}
+                </div>
             </HeadingLevelContext.Provider>
+            {heading && subHeading && <div className="mx_SettingsSection_help">{subHeading}</div>}
         </div>
     );
 };

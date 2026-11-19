@@ -8,13 +8,16 @@ Please see LICENSE files in the repository root for full details.
 
 import classNames from "classnames";
 import React, { type HTMLAttributes, useContext } from "react";
-import { Form, Separator } from "@vector-im/compound-web";
+import { Form } from "@vector-im/compound-web";
 
 import { SettingsSubsectionHeading } from "./SettingsSubsectionHeading";
 import { HeadingLevelContext } from "./SettingsSection.tsx";
 
 export interface SettingsSubsectionProps extends HTMLAttributes<HTMLDivElement> {
     heading?: string | React.ReactNode;
+    /**
+     * Help for the subsection, shown under its content, as Telegram puts help under a group of settings.
+     */
     description?: string | React.ReactNode;
     children?: React.ReactNode;
     // when true content will be justify-items: stretch, which will make items within the section stretch to full width.
@@ -60,23 +63,21 @@ export const SettingsSubsection: React.FC<SettingsSubsectionProps> = ({
             ) : (
                 <>{heading}</>
             )}
-            {!!description && (
-                <div className="mx_SettingsSubsection_description">
-                    <SettingsSubsectionText>{description}</SettingsSubsectionText>
-                </div>
-            )}
             {!!children && (
                 <div
                     className={classNames("mx_SettingsSubsection_content", {
                         mx_SettingsSubsection_contentStretch: !!stretchContent,
-                        mx_SettingsSubsection_noHeading: !heading && !description,
                         mx_SettingsSubsection_content_newUi: !legacy,
                     })}
                 >
                     {children}
                 </div>
             )}
-            {!legacy && <Separator />}
+            {!!description && (
+                <div className="mx_SettingsSubsection_description">
+                    <SettingsSubsectionText>{description}</SettingsSubsectionText>
+                </div>
+            )}
         </div>
     );
 

@@ -39,15 +39,6 @@ exports[`<SpaceSettingsVisibilityTab /> > for a public space > renders addresses
               Access
             </legend>
             <div
-              class="mx_SettingsFieldset_description"
-            >
-              <div
-                class="mx_SettingsSubsection_text"
-              >
-                Decide who can view and join mock-space.
-              </div>
-            </div>
-            <div
               class="mx_SettingsFieldset_content"
             >
               <label
@@ -166,6 +157,15 @@ exports[`<SpaceSettingsVisibilityTab /> > for a public space > renders addresses
                 </p>
               </form>
             </div>
+            <div
+              class="mx_SettingsFieldset_description"
+            >
+              <div
+                class="mx_SettingsSubsection_text"
+              >
+                Decide who can view and join mock-space.
+              </div>
+            </div>
           </fieldset>
           <div
             class="mx_SettingsSection"
@@ -187,15 +187,6 @@ exports[`<SpaceSettingsVisibilityTab /> > for a public space > renders addresses
                 >
                   Published Addresses
                 </legend>
-                <div
-                  class="mx_SettingsFieldset_description"
-                >
-                  <div
-                    class="mx_SettingsSubsection_text"
-                  >
-                    Published addresses can be used by anyone at any account provider to join your space. To publish an address, it needs to be set as a local address first.
-                  </div>
-                </div>
                 <div
                   class="mx_SettingsFieldset_content"
                 >
@@ -291,6 +282,15 @@ exports[`<SpaceSettingsVisibilityTab /> > for a public space > renders addresses
                     <div />
                   </div>
                 </div>
+                <div
+                  class="mx_SettingsFieldset_description"
+                >
+                  <div
+                    class="mx_SettingsSubsection_text"
+                  >
+                    Published addresses can be used by anyone at any account provider to join your space. To publish an address, it needs to be set as a local address first.
+                  </div>
+                </div>
               </fieldset>
               <fieldset
                 class="mx_SettingsFieldset"
@@ -301,15 +301,6 @@ exports[`<SpaceSettingsVisibilityTab /> > for a public space > renders addresses
                 >
                   Local Addresses
                 </legend>
-                <div
-                  class="mx_SettingsFieldset_description"
-                >
-                  <div
-                    class="mx_SettingsSubsection_text"
-                  >
-                    Set addresses for this space so users can find this space through your account provider (matrix.org)
-                  </div>
-                </div>
                 <div
                   class="mx_SettingsFieldset_content"
                 >
@@ -378,6 +369,15 @@ exports[`<SpaceSettingsVisibilityTab /> > for a public space > renders addresses
                     </div>
                   </details>
                 </div>
+                <div
+                  class="mx_SettingsFieldset_description"
+                >
+                  <div
+                    class="mx_SettingsSubsection_text"
+                  >
+                    Set addresses for this space so users can find this space through your account provider (matrix.org)
+                  </div>
+                </div>
               </fieldset>
             </div>
           </div>
@@ -416,15 +416,6 @@ exports[`<SpaceSettingsVisibilityTab /> > renders container 1`] = `
             >
               Access
             </legend>
-            <div
-              class="mx_SettingsFieldset_description"
-            >
-              <div
-                class="mx_SettingsSubsection_text"
-              >
-                Decide who can view and join mock-space.
-              </div>
-            </div>
             <div
               class="mx_SettingsFieldset_content"
             >
@@ -532,6 +523,15 @@ exports[`<SpaceSettingsVisibilityTab /> > renders container 1`] = `
                   </strong>
                 </p>
               </form>
+            </div>
+            <div
+              class="mx_SettingsFieldset_description"
+            >
+              <div
+                class="mx_SettingsSubsection_text"
+              >
+                Decide who can view and join mock-space.
+              </div>
             </div>
           </fieldset>
         </div>

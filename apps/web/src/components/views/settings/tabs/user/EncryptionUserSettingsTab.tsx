@@ -7,7 +7,7 @@
 
 import { logger } from "matrix-js-sdk/src/logger";
 import React, { type JSX, useState } from "react";
-import { Button, Separator } from "@vector-im/compound-web";
+import { Button } from "@vector-im/compound-web";
 import ComputerIcon from "@vector-im/compound-design-tokens/assets/web/icons/computer";
 
 import SettingsTab from "../SettingsTab";
@@ -107,17 +107,13 @@ export function EncryptionUserSettingsTab({ initialState = "main" }: Readonly<Pr
                     content = (
                         <>
                             <KeyStoragePanel onKeyStorageDisableClick={() => setState("key_storage_delete")} />
-                            <Separator kind="section" />
                             {/* We only show the "Recovery" panel if key storage is enabled.*/}
                             {isBackupEnabled && (
-                                <>
-                                    <RecoveryPanel
-                                        onChangeRecoveryKeyClick={(setupNewKey) =>
-                                            setupNewKey ? setState("set_recovery_key") : setState("change_recovery_key")
-                                        }
-                                    />
-                                    <Separator kind="section" />
-                                </>
+                                <RecoveryPanel
+                                    onChangeRecoveryKeyClick={(setupNewKey) =>
+                                        setupNewKey ? setState("set_recovery_key") : setState("change_recovery_key")
+                                    }
+                                />
                             )}
                             <AdvancedPanel onResetIdentityClick={() => setState("reset_identity_compromised")} />
                         </>

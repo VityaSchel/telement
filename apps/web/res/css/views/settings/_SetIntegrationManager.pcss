@@ -6,13 +6,41 @@ SPDX-License-Identifier: AGPL-3.0-only OR GPL-3.0-only OR LicenseRef-Element-Com
 Please see LICENSE files in the repository root for full details.
 */
 
+/* Telement: a group of settings (_common.pcss): the heading and the manager's name one label, the toggle on a card and
+   the two texts help under it. The gap the tab gives its forms (_SettingsTab.pcss) would also separate them */
+.mx_SettingsTab .mx_SetIntegrationManager {
+    gap: 0;
+}
+
 .mx_SetIntegrationManager {
+    > .mx_SettingsFlag {
+        margin: 0;
+    }
+
     .mx_SetIntegrationManager_heading_manager {
+        @mixin settingsGroupLabel;
         display: flex;
         align-items: center;
         flex-wrap: wrap;
         column-gap: var(--cpd-space-1x);
+
+        > * {
+            font: inherit;
+            letter-spacing: inherit;
+            color: inherit;
+            margin: 0;
+        }
     }
+
+    .mx_SetIntegrationManager_toggle {
+        @mixin settingsGroupCard;
+    }
+
+    .mx_SettingsSubsection_text {
+        @mixin settingsGroupHelp;
+        box-sizing: border-box;
+    }
+
     form {
         margin-top: var(--cpd-space-3x);
     }

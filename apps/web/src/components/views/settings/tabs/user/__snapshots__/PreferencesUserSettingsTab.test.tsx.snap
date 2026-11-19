@@ -142,25 +142,6 @@ exports[`PreferencesUserSettingsTab > should render 1`] = `
                 </h2>
               </div>
               <div
-                class="mx_SettingsSubsection_description"
-              >
-                <div
-                  class="mx_SettingsSubsection_text"
-                >
-                  <span>
-                    To view all keyboard shortcuts, 
-                    <div
-                      class="mx_AccessibleButton mx_AccessibleButton_hasKind mx_AccessibleButton_kind_link_inline"
-                      role="button"
-                      tabindex="0"
-                    >
-                      click here
-                    </div>
-                    .
-                  </span>
-                </div>
-              </div>
-              <div
                 class="mx_SettingsSubsection_content"
               >
                 <div
@@ -194,6 +175,25 @@ exports[`PreferencesUserSettingsTab > should render 1`] = `
                       Use Ctrl + F to search timeline
                     </label>
                   </div>
+                </div>
+              </div>
+              <div
+                class="mx_SettingsSubsection_description"
+              >
+                <div
+                  class="mx_SettingsSubsection_text"
+                >
+                  <span>
+                    To view all keyboard shortcuts, 
+                    <div
+                      class="mx_AccessibleButton mx_AccessibleButton_hasKind mx_AccessibleButton_kind_link_inline"
+                      role="button"
+                      tabindex="0"
+                    >
+                      click here
+                    </div>
+                    .
+                  </span>
                 </div>
               </div>
             </div>
@@ -348,15 +348,6 @@ exports[`PreferencesUserSettingsTab > should render 1`] = `
                 </h2>
               </div>
               <div
-                class="mx_SettingsSubsection_description"
-              >
-                <div
-                  class="mx_SettingsSubsection_text"
-                >
-                  Share your activity and status with others.
-                </div>
-              </div>
-              <div
                 class="mx_SettingsSubsection_content"
               >
                 <div
@@ -430,6 +421,15 @@ exports[`PreferencesUserSettingsTab > should render 1`] = `
                       Send typing notifications
                     </label>
                   </div>
+                </div>
+              </div>
+              <div
+                class="mx_SettingsSubsection_description"
+              >
+                <div
+                  class="mx_SettingsSubsection_text"
+                >
+                  Share your activity and status with others.
                 </div>
               </div>
             </div>
@@ -796,15 +796,6 @@ exports[`PreferencesUserSettingsTab > should render 1`] = `
                 </h2>
               </div>
               <div
-                class="mx_SettingsSubsection_description"
-              >
-                <div
-                  class="mx_SettingsSubsection_text"
-                >
-                  Shows information about links underneath messages
-                </div>
-              </div>
-              <div
                 class="mx_SettingsSubsection_content"
               >
                 <div
@@ -869,6 +860,15 @@ exports[`PreferencesUserSettingsTab > should render 1`] = `
                       Enable previews in encrypted rooms
                     </label>
                   </div>
+                </div>
+              </div>
+              <div
+                class="mx_SettingsSubsection_description"
+              >
+                <div
+                  class="mx_SettingsSubsection_text"
+                >
+                  Shows information about links underneath messages
                 </div>
               </div>
             </div>
@@ -1547,12 +1547,6 @@ exports[`PreferencesUserSettingsTab > should render 1`] = `
                 </div>
               </form>
             </div>
-            <div
-              class="_separator"
-              data-kind="primary"
-              data-orientation="horizontal"
-              role="separator"
-            />
           </div>
           <form
             class="_root"

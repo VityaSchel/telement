@@ -138,12 +138,6 @@ exports[`AppearanceUserSettingsTab > should render 1`] = `
                 </div>
               </form>
             </div>
-            <div
-              class="_separator"
-              data-kind="primary"
-              data-orientation="horizontal"
-              role="separator"
-            />
           </div>
           <div
             class="mx_SettingsSubsection mx_SettingsSubsection_newUi"
@@ -544,12 +538,6 @@ exports[`AppearanceUserSettingsTab > should render 1`] = `
                 </div>
               </form>
             </div>
-            <div
-              class="_separator"
-              data-kind="primary"
-              data-orientation="horizontal"
-              role="separator"
-            />
           </div>
           <div
             class="mx_SettingsSubsection"
@@ -722,7 +710,7 @@ exports[`AppearanceUserSettingsTab > should render 1`] = `
             class="mx_SettingsSubsection"
           >
             <div
-              class="mx_SettingsSubsection_content mx_SettingsSubsection_noHeading"
+              class="mx_SettingsSubsection_content"
             >
               <div
                 aria-expanded="false"

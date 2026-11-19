@@ -17,25 +17,21 @@ Please see LICENSE files in the repository root for full details.
     box-sizing: content-box;
 }
 
+/* Telement: a fieldset is a group of settings like a subsection: its legend a label above its card and its description
+   help under it (_common.pcss). Inside another group's card it keeps the label and the help, without a card of its own */
 .mx_SettingsFieldset_legend {
+    @mixin settingsGroupLabel;
     /* Reset the browser default <legend> styling */
-    padding-inline: unset;
     border: none;
-    font: var(--cpd-font-heading-md-semibold);
-    font-weight: var(--cpd-font-weight-semibold);
     display: block;
-    color: $primary-content;
-    margin-bottom: 10px;
-    margin-top: 12px;
 }
 
 .mx_SettingsFieldset_description {
+    @mixin settingsGroupHelp;
     display: block;
-    margin-top: 0;
-    margin-bottom: 10px;
 
     p {
-        margin-top: 10px;
+        margin-top: var(--cpd-space-2x);
         margin-bottom: 0;
 
         &:first-child {
@@ -45,6 +41,7 @@ Please see LICENSE files in the repository root for full details.
 }
 
 .mx_SettingsFieldset_content {
+    @mixin settingsGroupCard;
     display: flex;
     flex-direction: column;
     gap: var(--cpd-space-2x);
@@ -55,4 +52,11 @@ Please see LICENSE files in the repository root for full details.
     > :is(.mx_Field, :has(.mx_Field), .mx_AutocompleteInput) + :is(.mx_Field, :has(.mx_Field)) {
         margin-top: calc(var(--cpd-space-4x) - var(--cpd-space-2x));
     }
+}
+
+:is(.mx_SettingsSubsection_content, .mx_SettingsFieldset_content) .mx_SettingsFieldset_content {
+    background-color: transparent;
+    border-radius: 0;
+    padding: 0;
+    outline: none;
 }

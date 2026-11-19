@@ -15,19 +15,19 @@ exports[`<SettingsSubsection /> > renders with plain text description 1`] = `
       </h2>
     </div>
     <div
+      class="mx_SettingsSubsection_content"
+    >
+      <div>
+        test settings content
+      </div>
+    </div>
+    <div
       class="mx_SettingsSubsection_description"
     >
       <div
         class="mx_SettingsSubsection_text"
       >
         This describes the subsection
-      </div>
-    </div>
-    <div
-      class="mx_SettingsSubsection_content"
-    >
-      <div>
-        test settings content
       </div>
     </div>
   </div>
@@ -74,6 +74,13 @@ exports[`<SettingsSubsection /> > renders with react element description 1`] = `
       </h2>
     </div>
     <div
+      class="mx_SettingsSubsection_content"
+    >
+      <div>
+        test settings content
+      </div>
+    </div>
+    <div
       class="mx_SettingsSubsection_description"
     >
       <div
@@ -87,13 +94,6 @@ exports[`<SettingsSubsection /> > renders with react element description 1`] = `
             link
           </a>
         </p>
-      </div>
-    </div>
-    <div
-      class="mx_SettingsSubsection_content"
-    >
-      <div>
-        test settings content
       </div>
     </div>
   </div>

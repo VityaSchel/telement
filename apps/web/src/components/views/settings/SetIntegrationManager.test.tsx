@@ -57,6 +57,16 @@ describe("SetIntegrationManager", () => {
 
         expect(screen.getByTestId("mx_SetIntegrationManager")).toMatchSnapshot();
     });
+    it("puts the toggle before what explains it, as a group's card comes before its help", () => {
+        vi.spyOn(SettingsStore, "getValue").mockImplementation((settingName) => settingName === UIFeature.Widgets);
+
+        render(getComponent());
+
+        const toggle = screen.getByRole("switch", { name: "Enable the integration manager" });
+        const explanation = screen.getByText(/Integration managers receive configuration data/);
+        expect(toggle.compareDocumentPosition(explanation) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+        expect(toggle.closest(".mx_SetIntegrationManager_toggle")).toBeInTheDocument();
+    });
     it("should update integrations provisioning on toggle", () => {
         vi.spyOn(SettingsStore, "getValue").mockImplementation((settingName) => settingName === UIFeature.Widgets);
         vi.spyOn(SettingsStore, "setValue").mockResolvedValue(undefined);

@@ -27,15 +27,6 @@ exports[`<SidebarUserSettingsTab /> > renders sidebar settings with guest spa ur
               </h2>
             </div>
             <div
-              class="mx_SettingsSubsection_description"
-            >
-              <div
-                class="mx_SettingsSubsection_text"
-              >
-                Spaces are ways to group rooms and people. Alongside the spaces you're in, you can use some pre-built ones too.
-              </div>
-            </div>
-            <div
               class="mx_SettingsSubsection_content"
             >
               <form
@@ -282,6 +273,15 @@ exports[`<SidebarUserSettingsTab /> > renders sidebar settings with guest spa ur
                 </div>
               </form>
             </div>
+            <div
+              class="mx_SettingsSubsection_description"
+            >
+              <div
+                class="mx_SettingsSubsection_text"
+              >
+                Spaces are ways to group rooms and people. Alongside the spaces you're in, you can use some pre-built ones too.
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -315,15 +315,6 @@ exports[`<SidebarUserSettingsTab /> > renders sidebar settings without guest spa
               >
                 Spaces to show
               </h2>
-            </div>
-            <div
-              class="mx_SettingsSubsection_description"
-            >
-              <div
-                class="mx_SettingsSubsection_text"
-              >
-                Spaces are ways to group rooms and people. Alongside the spaces you're in, you can use some pre-built ones too.
-              </div>
             </div>
             <div
               class="mx_SettingsSubsection_content"
@@ -571,6 +562,15 @@ exports[`<SidebarUserSettingsTab /> > renders sidebar settings without guest spa
                   </div>
                 </div>
               </form>
+            </div>
+            <div
+              class="mx_SettingsSubsection_description"
+            >
+              <div
+                class="mx_SettingsSubsection_text"
+              >
+                Spaces are ways to group rooms and people. Alongside the spaces you're in, you can use some pre-built ones too.
+              </div>
             </div>
           </div>
         </div>

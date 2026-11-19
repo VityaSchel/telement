@@ -425,26 +425,29 @@ describe("Dialogs", () => {
             expect(box("[data-testid=body]").right - box("[data-testid=profile]").right).toBe(24);
         });
 
-        it("starts every tab's first line where the tabs start, with or without a heading", () => {
+        it("starts the tab's pane where the tabs start, and its first line 16px into it, with or without a heading", () => {
             renderSettings(section("profile", "Profile"));
-            expect(box("[data-testid=profile] .mx_Heading_h3").top).toBe(firstTab().top);
+            expect(box(".mx_TabbedView_tabPanel").top).toBe(firstTab().top);
+            expect(box("[data-testid=profile] .mx_Heading_h3").top - box(".mx_TabbedView_tabPanel").top).toBe(16);
             document.body.innerHTML = "";
 
             renderSettings(section("headingless"));
-            expect(box("[data-testid=headingless] .mx_SettingsSubsection").top).toBe(firstTab().top);
+            expect(
+                box("[data-testid=headingless] .mx_SettingsSubsection").top - box(".mx_TabbedView_tabPanel").top,
+            ).toBe(16);
         });
 
-        it("keeps a heading's subsections 16px under it and sections the tab's 32px apart", () => {
+        it("keeps a heading's subsections 8px under its label and sections 24px apart, as Telegram's groups", () => {
             renderSettings(section("profile", "Profile") + section("account", "Account"));
 
             expect(
                 box("[data-testid=profile] .mx_SettingsSubsection").top -
                     box("[data-testid=profile] .mx_Heading_h3").bottom,
-            ).toBe(16);
+            ).toBe(8);
             expect(
                 box("[data-testid=account] .mx_Heading_h3").top -
                     box("[data-testid=profile] .mx_SettingsSubsection").bottom,
-            ).toBe(32);
+            ).toBe(24);
         });
 
         it("spaces the room profile's Cancel and Save like a footer, 16px under the topic", () => {

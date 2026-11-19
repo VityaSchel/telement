@@ -59,6 +59,39 @@ Please see LICENSE files in the repository root for full details.
     outline-offset: -2px;
 }
 
+/* Settings are grouped as in Telegram's settings: each group's rows sit on a 12px card on the tab's gray pane, under a
+   13px secondary label and over 13px secondary help, both on the card's content edge, 16px in. The dialog title is the
+   only large heading. A label or help inside a card, such as a fieldset's in a subsection's card, sits on that card's
+   content edge instead (--settings-group-inset). */
+@define-mixin settingsGroupLabel {
+    font: var(--cpd-font-body-sm-regular);
+    letter-spacing: var(--cpd-font-letter-spacing-body-sm);
+    color: var(--cpd-color-text-secondary);
+    margin: 0 0 var(--cpd-space-2x);
+    padding: 0 var(--settings-group-inset, var(--cpd-space-4x));
+}
+
+@define-mixin settingsGroupCard {
+    /* What the card holds in the dialog's own color, such as a field, takes the card's (telement/tokens.css) */
+    --cpd-color-bg-canvas-default: var(--tl-color-bg-settings-card);
+    --settings-group-inset: 0;
+    background-color: var(--tl-color-bg-settings-card);
+    border-radius: var(--tl-radius-bubble);
+    padding: var(--cpd-space-3x) var(--cpd-space-4x);
+    box-sizing: border-box;
+    /* Visible in high contrast themes, and in forced colors, which drop the fill */
+    outline: 1px solid var(--tl-color-border-settings-card);
+    outline-offset: -1px;
+}
+
+@define-mixin settingsGroupHelp {
+    font: var(--cpd-font-body-sm-regular);
+    letter-spacing: var(--cpd-font-letter-spacing-body-sm);
+    color: var(--cpd-color-text-secondary);
+    margin: var(--cpd-space-2x) 0 0;
+    padding: 0 var(--settings-group-inset, var(--cpd-space-4x));
+}
+
 :root {
     --container-border-width: 8px;
     --container-gap-width: 8px; /* only even numbers should be used because otherwise we get 0.5px margin values. */

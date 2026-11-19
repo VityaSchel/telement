@@ -24,11 +24,22 @@ Please see LICENSE files in the repository root for full details.
         padding-inline-start: calc(var(--cpd-space-6x) - var(--cpd-space-2x));
     }
 
+    /* Telement: the tab's content sits on Telegram's gray settings pane (_common.pcss), which runs from the tabs' top to
+       the dialog's end and bottom edges. It starts 16px before the content's edge, so that the cards start on that edge
+       and their content 16px in, and its corner by the tabs is rounded like the cards */
+    .mx_TabbedView_tabsOnLeft .mx_TabbedView_tabPanel {
+        margin-inline-start: calc(280px - var(--cpd-space-4x));
+        background-color: var(--tl-color-bg-settings-pane);
+        border-start-start-radius: var(--tl-radius-bubble);
+        overflow: hidden;
+    }
+
     .mx_TabbedView .mx_SettingsTab {
         box-sizing: border-box;
         min-width: 580px;
-        /* Telement: the content ends on the dialog's 24px edge */
-        padding-inline-end: var(--cpd-space-6x);
+        /* Telement: the content ends on the dialog's 24px edge, and starts 16px inside the pane */
+        padding-block-start: var(--cpd-space-4x);
+        padding-inline: var(--cpd-space-4x) var(--cpd-space-6x);
         display: flex;
         flex-direction: column;
 
@@ -64,6 +75,11 @@ Please see LICENSE files in the repository root for full details.
         .mx_SettingsDialog_tabLabelsAlert::after {
             right: var(--cpd-space-1x);
             top: var(--cpd-space-1x);
+        }
+
+        /* Telement: the pane keeps 16px before the content when the tabs are only their icons (_TabbedView.pcss) */
+        .mx_TabbedView_tabsOnLeft.mx_TabbedView_responsive .mx_TabbedView_tabPanel {
+            margin-inline-start: calc(var(--tl-control-size) + var(--cpd-space-8x) - var(--cpd-space-4x));
         }
     }
 }

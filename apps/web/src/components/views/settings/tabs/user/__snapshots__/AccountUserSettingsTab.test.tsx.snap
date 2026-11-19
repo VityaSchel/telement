@@ -204,15 +204,6 @@ exports[`<AccountUserSettingsTab /> > deactivate account > should render section
         </h3>
       </div>
       <div
-        class="mx_SettingsSubsection_description"
-      >
-        <div
-          class="mx_SettingsSubsection_text"
-        >
-          Deactivating your account is a permanent action — be careful!
-        </div>
-      </div>
-      <div
         class="mx_SettingsSubsection_content"
       >
         <div
@@ -221,6 +212,15 @@ exports[`<AccountUserSettingsTab /> > deactivate account > should render section
           tabindex="0"
         >
           Deactivate Account
+        </div>
+      </div>
+      <div
+        class="mx_SettingsSubsection_description"
+      >
+        <div
+          class="mx_SettingsSubsection_text"
+        >
+          Deactivating your account is a permanent action — be careful!
         </div>
       </div>
     </div>

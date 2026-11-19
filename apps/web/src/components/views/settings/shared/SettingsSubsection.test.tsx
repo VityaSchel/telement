@@ -10,7 +10,7 @@ Please see LICENSE files in the repository root for full details.
 
 import React from "react";
 import { describe, it, expect } from "vitest";
-import { render } from "test-utils-rtl";
+import { render, screen } from "test-utils-rtl";
 
 import { SettingsSubsection } from "./SettingsSubsection";
 
@@ -50,5 +50,19 @@ describe("<SettingsSubsection />", () => {
         );
         const { container } = render(getComponent({ description }));
         expect(container).toMatchSnapshot();
+    });
+
+    it("puts the description under the content, as help under a group of settings", () => {
+        const { container } = render(getComponent({ description: "This describes the subsection" }));
+        const content = container.querySelector(".mx_SettingsSubsection_content")!;
+
+        expect(content.nextElementSibling).toHaveClass("mx_SettingsSubsection_description");
+        expect(content.nextElementSibling).toHaveTextContent("This describes the subsection");
+    });
+
+    it("draws no separator under a new-style subsection", () => {
+        render(getComponent({ legacy: false }));
+
+        expect(screen.queryByRole("separator")).not.toBeInTheDocument();
     });
 });

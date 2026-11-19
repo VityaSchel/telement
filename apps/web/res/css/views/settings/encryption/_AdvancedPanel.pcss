@@ -14,13 +14,14 @@
     width: 100%;
     align-items: start;
 
+    /* Telement: a label inside the Advanced card, like a fieldset's in a settings group (_SettingsFieldset.pcss), with
+       no line under it */
     .mx_EncryptionDetails_session_title,
     .mx_OtherSettings_title {
-        font: var(--cpd-font-body-lg-semibold);
-        padding-bottom: var(--cpd-space-2x);
-        border-bottom: 1px solid var(--cpd-color-gray-400);
-        width: 100%;
+        @mixin settingsGroupLabel;
         margin: 0;
+        padding: 0;
+        width: 100%;
     }
 }
 

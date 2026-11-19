@@ -400,12 +400,6 @@ exports[`<LayoutSwitcher /> > should render 1`] = `
         </div>
       </form>
     </div>
-    <div
-      class="_separator"
-      data-kind="primary"
-      data-orientation="horizontal"
-      role="separator"
-    />
   </div>
 </DocumentFragment>
 `;

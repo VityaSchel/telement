@@ -193,12 +193,6 @@ exports[`<ThemeChoicePanel /> > custom theme > should display custom theme 1`] =
         </div>
       </form>
     </div>
-    <div
-      class="_separator"
-      data-kind="primary"
-      data-orientation="horizontal"
-      role="separator"
-    />
   </div>
 </DocumentFragment>
 `;
@@ -396,12 +390,6 @@ exports[`<ThemeChoicePanel /> > custom theme > should render the custom theme se
         </div>
       </form>
     </div>
-    <div
-      class="_separator"
-      data-kind="primary"
-      data-orientation="horizontal"
-      role="separator"
-    />
   </div>
 </DocumentFragment>
 `;
@@ -566,12 +554,6 @@ exports[`<ThemeChoicePanel /> > renders the theme choice UI 1`] = `
         </div>
       </form>
     </div>
-    <div
-      class="_separator"
-      data-kind="primary"
-      data-orientation="horizontal"
-      role="separator"
-    />
   </div>
 </DocumentFragment>
 `;

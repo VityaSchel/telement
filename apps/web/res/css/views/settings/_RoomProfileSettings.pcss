@@ -6,11 +6,8 @@ SPDX-License-Identifier: AGPL-3.0-only OR GPL-3.0-only OR LicenseRef-Element-Com
 Please see LICENSE files in the repository root for full details.
 */
 
+/* Telement: on its section's card (_SettingsSection.pcss), with no line under it */
 .mx_RoomProfileSettings {
-    /* Telement: Compound's separator rather than a fixed gray, so that a dark theme's raised dialogs (_common.pcss)
-       move it a step further, as they do their other separators */
-    border-bottom: 1px solid var(--cpd-color-separator-primary);
-
     .mx_RoomProfileSettings_profile {
         display: flex;
 
@@ -47,6 +44,5 @@ Please see LICENSE files in the repository root for full details.
         display: flex;
         gap: var(--buttons-dialog-gap-column);
         margin-top: calc(var(--cpd-space-4x) - var(--cpd-space-3x));
-        margin-bottom: var(--cpd-space-7x);
     }
 }

@@ -12,19 +12,19 @@ exports[`<SettingsFieldset /> > renders fieldset with plain text description 1`]
       Who can read history?
     </legend>
     <div
+      class="mx_SettingsFieldset_content"
+    >
+      <div>
+        test
+      </div>
+    </div>
+    <div
       class="mx_SettingsFieldset_description"
     >
       <div
         class="mx_SettingsSubsection_text"
       >
         Changes to who can read history.
-      </div>
-    </div>
-    <div
-      class="mx_SettingsFieldset_content"
-    >
-      <div>
-        test
       </div>
     </div>
   </fieldset>
@@ -43,6 +43,13 @@ exports[`<SettingsFieldset /> > renders fieldset with react description 1`] = `
       Who can read history?
     </legend>
     <div
+      class="mx_SettingsFieldset_content"
+    >
+      <div>
+        test
+      </div>
+    </div>
+    <div
       class="mx_SettingsFieldset_description"
     >
       <div
@@ -56,13 +63,6 @@ exports[`<SettingsFieldset /> > renders fieldset with react description 1`] = `
         >
           a link
         </a>
-      </div>
-    </div>
-    <div
-      class="mx_SettingsFieldset_content"
-    >
-      <div>
-        test
       </div>
     </div>
   </fieldset>

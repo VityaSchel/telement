@@ -352,3 +352,36 @@ Please see LICENSE files in the repository root for full details.
         --tl-shadow-floating-filter: drop-shadow(0 4px 8px rgb(0 0 0 / 50%));
     }
 }
+
+/*
+ * Settings dialogs, grouped as Telegram's settings are: a tab's content sits on a gray pane, and each group of rows on
+ * a card in the dialog's own color, so that what a card holds (fields, hover and pressed fills, separators) keeps the
+ * colors it has elsewhere in the dialog. Light themes put the white cards on Compound's subtle gray, dark themes on the
+ * page's canvas, a step below the raised dialog, as Telegram's night theme puts its cards on a darker background. High
+ * contrast themes also outline the cards.
+ */
+:root,
+[class*="cpd-theme-"] {
+    --tl-color-bg-settings-pane: var(--cpd-color-gray-300);
+    --tl-color-bg-settings-card: var(--tl-color-bg-floating);
+    --tl-color-border-settings-card: transparent;
+}
+
+.cpd-theme-light-hc.cpd-theme-light-hc {
+    --tl-color-border-settings-card: var(--cpd-color-border-interactive-secondary);
+}
+
+.cpd-theme-dark.cpd-theme-dark,
+.cpd-theme-dark-hc.cpd-theme-dark-hc {
+    --tl-color-bg-settings-pane: var(--cpd-color-theme-bg);
+}
+
+.cpd-theme-dark-hc.cpd-theme-dark-hc {
+    --tl-color-border-settings-card: var(--cpd-color-border-interactive-secondary);
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --tl-color-bg-settings-pane: var(--cpd-color-theme-bg);
+    }
+}

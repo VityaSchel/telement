@@ -48,15 +48,6 @@ exports[`<MjolnirUserSettingsTab /> > renders correctly when user has no ignored
               </h2>
             </div>
             <div
-              class="mx_SettingsSubsection_description"
-            >
-              <div
-                class="mx_SettingsSubsection_text"
-              >
-                Your personal ban list holds all the users/servers you personally don't want to see messages from. After ignoring your first user/server, a new room will show up in your room list named 'My Ban List' - stay in this room to keep the ban list in effect.
-              </div>
-            </div>
-            <div
               class="mx_SettingsSubsection_content"
             >
               <i>
@@ -90,6 +81,15 @@ exports[`<MjolnirUserSettingsTab /> > renders correctly when user has no ignored
                 </div>
               </form>
             </div>
+            <div
+              class="mx_SettingsSubsection_description"
+            >
+              <div
+                class="mx_SettingsSubsection_text"
+              >
+                Your personal ban list holds all the users/servers you personally don't want to see messages from. After ignoring your first user/server, a new room will show up in your room list named 'My Ban List' - stay in this room to keep the ban list in effect.
+              </div>
+            </div>
           </div>
           <div
             class="mx_SettingsSubsection"
@@ -102,23 +102,6 @@ exports[`<MjolnirUserSettingsTab /> > renders correctly when user has no ignored
               >
                 Subscribed lists
               </h2>
-            </div>
-            <div
-              class="mx_SettingsSubsection_description"
-            >
-              <div
-                class="mx_SettingsSubsection_text"
-              >
-                <strong
-                  class="warning"
-                >
-                  Subscribing to a ban list will cause you to join it!
-                </strong>
-                 
-                <span>
-                  If this isn't what you want, please use a different tool to ignore users.
-                </span>
-              </div>
             </div>
             <div
               class="mx_SettingsSubsection_content"
@@ -153,6 +136,23 @@ exports[`<MjolnirUserSettingsTab /> > renders correctly when user has no ignored
                   Subscribe
                 </div>
               </form>
+            </div>
+            <div
+              class="mx_SettingsSubsection_description"
+            >
+              <div
+                class="mx_SettingsSubsection_text"
+              >
+                <strong
+                  class="warning"
+                >
+                  Subscribing to a ban list will cause you to join it!
+                </strong>
+                 
+                <span>
+                  If this isn't what you want, please use a different tool to ignore users.
+                </span>
+              </div>
             </div>
           </div>
         </div>

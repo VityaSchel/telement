@@ -323,13 +323,14 @@ describe.each(THEMES.map(([theme]) => theme))("Settings content in %s", (theme) 
             );
         }
 
-        it("starts the version box and the credits list as far under their headings as other content", () => {
+        it("starts the version box and the credits list as far under their labels as other content", () => {
             renderHelp();
             const underHeading = (id: string, content: string): number =>
                 box(content).top - box(`#${id} .mx_SettingsSubsectionHeading`).bottom;
 
             const expected = underHeading("advanced", "#homeserver");
-            expect(expected).toBe(24);
+            // The label's 8px over its card and the card's 12px padding
+            expect(expected).toBe(20);
             expect(underHeading("versions", "#copy")).toBe(expected);
             expect(underHeading("credits", "#bullet")).toBe(expected);
         });
@@ -357,8 +358,13 @@ describe.each(THEMES.map(([theme]) => theme))("Settings content in %s", (theme) 
         it("puts Check for update 16px under the versions and indents the credits' bullets 20px", () => {
             renderHelp();
 
+            const card = document.querySelector("#credits .mx_SettingsSubsection_content")!;
+
             expect(box("#update").top - box("#copy").bottom).toBe(16);
-            expect(box("#bullet").left - box("#credits .mx_SettingsSubsection_content").left).toBe(20);
+            expect(
+                box("#bullet").left -
+                    (card.getBoundingClientRect().left + parseFloat(getComputedStyle(card).paddingLeft)),
+            ).toBe(20);
         });
     });
 
@@ -560,23 +566,24 @@ describe.each(THEMES.map(([theme]) => theme))("Settings content in %s", (theme) 
         });
     });
 
-    it("draws a new-style section's heading in the primary text color, its subheader in the secondary", () => {
+    it("draws a new-style section's heading as its group's label and its subheader as the help under its card", () => {
         const container = render(
             theme,
             `<div class="mx_SettingsSection mx_SettingsSection_newUi">
-                <div class="mx_SettingsSection_header">
-                    <h2 class="mx_SettingsHeader" id="heading">Device not verified</h2>
-                    <div id="subheader">Verify this device to access all messages</div>
-                </div>
+                <h2 class="mx_SettingsHeader" id="heading">Device not verified</h2>
+                <div class="mx_SettingsSection_content" id="card"><button>Verify this device</button></div>
+                <div class="mx_SettingsSection_help" id="subheader">Verify this device to access all messages</div>
             </div>`,
         );
+        const secondary = tokenColor("--cpd-color-text-secondary", container);
 
-        expect(getComputedStyle(document.querySelector("#heading")!).color).toBe(
-            tokenColor("--cpd-color-text-primary", container),
-        );
-        expect(getComputedStyle(document.querySelector("#subheader")!).color).toBe(
-            tokenColor("--cpd-color-text-secondary", container),
-        );
+        for (const id of ["#heading", "#subheader"]) {
+            const style = getComputedStyle(document.querySelector(id)!);
+            expect([style.fontSize, style.fontWeight, style.color]).toEqual(["13px", "400", secondary]);
+        }
+        expect(box("#card").top - box("#heading").bottom).toBe(8);
+        expect(box("#subheader").top - box("#card").bottom).toBe(8);
+        expect(cornerRadii(document.querySelector("#card")!)).toEqual({ x: 12, y: 12 });
     });
 
     it("puts the Roles tab's stacked fields 16px apart, the user search and nested power selectors included", () => {

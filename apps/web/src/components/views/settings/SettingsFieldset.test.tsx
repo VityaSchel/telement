@@ -42,4 +42,12 @@ describe("<SettingsFieldset />", () => {
         );
         expect(getComponent({ description }).asFragment()).toMatchSnapshot();
     });
+
+    it("puts the description under the content, as help under a group of settings", () => {
+        const { container } = getComponent({ description: "Changes to who can read history." });
+        const content = container.querySelector(".mx_SettingsFieldset_content")!;
+
+        expect(content.nextElementSibling).toHaveClass("mx_SettingsFieldset_description");
+        expect(content.previousElementSibling).toHaveClass("mx_SettingsFieldset_legend");
+    });
 });

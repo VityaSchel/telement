@@ -7,12 +7,18 @@ Please see LICENSE files in the repository root for full details.
 */
 
 .mx_SettingsSubsectionHeading {
+    @mixin settingsGroupLabel;
     display: flex;
     flex-direction: row;
+    align-items: center;
 
     gap: var(--cpd-space-2x);
 }
 
-.mx_SettingsSubsectionHeading_heading {
+/* Telement: the group's label (_common.pcss), whatever heading level the subsection's nesting gives it */
+.mx_SettingsSubsectionHeading .mx_SettingsSubsectionHeading_heading {
     flex: 1 1 100%;
+    font: inherit;
+    letter-spacing: inherit;
+    color: inherit;
 }

@@ -17,31 +17,58 @@ Please see LICENSE files in the repository root for full details.
         color: $links;
     }
 
+    /* Telement: a section's heading is a group label like its subsections' (_common.pcss), at any heading level */
+    > :is(h1, h2, h3, h4, h5, h6) {
+        @mixin settingsGroupLabel;
+    }
+
     &.mx_SettingsSection_newUi {
         display: flex;
         flex-direction: column;
-        gap: var(--cpd-space-6x);
-        align-items: start;
     }
+}
 
-    .mx_SettingsSection_header {
-        display: flex;
-        flex-direction: column;
-        gap: var(--cpd-space-3x);
-        color: var(--cpd-color-text-secondary);
-    }
+/* Telement: a new-style section is one group, its content on a card */
+.mx_SettingsSection_content {
+    @mixin settingsGroupCard;
+    display: flex;
+    flex-direction: column;
+    gap: var(--cpd-space-6x);
+    align-items: start;
+}
+
+/* Telement: the section's subheading is help under its groups, as Telegram puts it under a card */
+.mx_SettingsSection_help {
+    @mixin settingsGroupHelp;
 }
 
 .mx_SettingsSection_subSections {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
-    gap: var(--cpd-space-8x);
-
-    /* Telement: 16px under the section's heading only, so that a section without one starts its first line where the
-       tabs start, as one with a heading does, and sections are the tab's 32px apart (_SettingsTab.pcss) */
+    /* Telement: groups are the tab's 24px apart (_SettingsTab.pcss), the heading's label keeping its own 8px */
+    gap: var(--cpd-space-6x);
     margin: 0;
 
-    &:not(:first-child) {
-        margin-block-start: var(--cpd-space-4x);
+    /* Telement: what a section holds outside groups of its own (subsections, fieldsets, nested sections and beta
+       cards) sits on a card too. Without such groups, as in a list of toggles, the whole content is one card, its rows
+       as far apart as a subsection's; otherwise each piece is a card of its own, such as a toggle above subsections.
+       Only as specific as a class, so that a piece drawing its card itself, such as the room's notification options,
+       can change it */
+    &:where(:not(:empty, :has(.mx_SettingsSubsection, .mx_SettingsFieldset, .mx_SettingsSection, .mx_BetaCard))) {
+        @mixin settingsGroupCard;
+        gap: var(--cpd-space-4x);
+    }
+
+    &:where(:has(.mx_SettingsSubsection, .mx_SettingsFieldset, .mx_SettingsSection, .mx_BetaCard))
+        > :where(
+            :not(
+                .mx_SettingsSubsection,
+                .mx_SettingsFieldset,
+                .mx_SettingsSection,
+                .mx_BetaCard,
+                :has(.mx_SettingsSubsection, .mx_SettingsFieldset, .mx_SettingsSection, .mx_BetaCard)
+            )
+        ) {
+        @mixin settingsGroupCard;
     }
 }

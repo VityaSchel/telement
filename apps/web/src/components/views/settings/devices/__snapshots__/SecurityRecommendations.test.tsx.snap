@@ -16,15 +16,6 @@ exports[`<SecurityRecommendations /> > renders both cards when user has both unv
       </h2>
     </div>
     <div
-      class="mx_SettingsSubsection_description"
-    >
-      <div
-        class="mx_SettingsSubsection_text"
-      >
-        Improve your account security by following these recommendations.
-      </div>
-    </div>
-    <div
       class="mx_SettingsSubsection_content"
     >
       <div
@@ -136,6 +127,15 @@ exports[`<SecurityRecommendations /> > renders both cards when user has both unv
             </div>
           </div>
         </div>
+      </div>
+    </div>
+    <div
+      class="mx_SettingsSubsection_description"
+    >
+      <div
+        class="mx_SettingsSubsection_text"
+      >
+        Improve your account security by following these recommendations.
       </div>
     </div>
   </div>
@@ -158,15 +158,6 @@ exports[`<SecurityRecommendations /> > renders inactive devices section when use
       </h2>
     </div>
     <div
-      class="mx_SettingsSubsection_description"
-    >
-      <div
-        class="mx_SettingsSubsection_text"
-      >
-        Improve your account security by following these recommendations.
-      </div>
-    </div>
-    <div
       class="mx_SettingsSubsection_content"
     >
       <div
@@ -280,6 +271,15 @@ exports[`<SecurityRecommendations /> > renders inactive devices section when use
         </div>
       </div>
     </div>
+    <div
+      class="mx_SettingsSubsection_description"
+    >
+      <div
+        class="mx_SettingsSubsection_text"
+      >
+        Improve your account security by following these recommendations.
+      </div>
+    </div>
   </div>
 </div>
 `;
@@ -298,15 +298,6 @@ exports[`<SecurityRecommendations /> > renders unverified devices section when u
       >
         Security recommendations
       </h2>
-    </div>
-    <div
-      class="mx_SettingsSubsection_description"
-    >
-      <div
-        class="mx_SettingsSubsection_text"
-      >
-        Improve your account security by following these recommendations.
-      </div>
     </div>
     <div
       class="mx_SettingsSubsection_content"
@@ -420,6 +411,15 @@ exports[`<SecurityRecommendations /> > renders unverified devices section when u
             </div>
           </div>
         </div>
+      </div>
+    </div>
+    <div
+      class="mx_SettingsSubsection_description"
+    >
+      <div
+        class="mx_SettingsSubsection_text"
+      >
+        Improve your account security by following these recommendations.
       </div>
     </div>
   </div>

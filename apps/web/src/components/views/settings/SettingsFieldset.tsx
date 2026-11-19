@@ -14,18 +14,21 @@ import { SettingsSubsectionText } from "./shared/SettingsSubsection";
 interface Props extends HTMLAttributes<HTMLFieldSetElement> {
     // section title
     legend: string | ReactNode;
+    /**
+     * Help for the fieldset, shown under its content, as Telegram puts help under a group of settings.
+     */
     description?: string | ReactNode;
 }
 
 const SettingsFieldset: React.FC<Props> = ({ legend, className, children, description, ...rest }) => (
     <fieldset {...rest} className={classNames("mx_SettingsFieldset", className)}>
         <legend className="mx_SettingsFieldset_legend">{legend}</legend>
+        <div className="mx_SettingsFieldset_content">{children}</div>
         {description && (
             <div className="mx_SettingsFieldset_description">
                 <SettingsSubsectionText>{description}</SettingsSubsectionText>
             </div>
         )}
-        <div className="mx_SettingsFieldset_content">{children}</div>
     </fieldset>
 );
 

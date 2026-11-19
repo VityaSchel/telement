@@ -88,7 +88,13 @@ Please see LICENSE files in the repository root for full details.
 .mx_SettingsTab_sections {
     display: grid;
     grid-template-columns: 1fr;
-    gap: var(--cpd-space-8x);
+    /* Telement: groups of settings are 24px apart, as Telegram's cards are */
+    gap: var(--cpd-space-6x);
 
     padding-bottom: var(--cpd-space-4x);
+
+    /* Telement: also when a form holds the tab's sections, as in Voice & Video, rather than the gap of a form's rows */
+    > form:has(> .mx_SettingsSection) {
+        gap: var(--cpd-space-6x);
+    }
 }

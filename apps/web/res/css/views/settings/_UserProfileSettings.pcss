@@ -6,18 +6,16 @@ SPDX-License-Identifier: AGPL-3.0-only OR GPL-3.0-only OR LicenseRef-Element-Com
 Please see LICENSE files in the repository root for full details.
 */
 
+/* Telement: on its section's card (_SettingsSection.pcss), with no line under it and its rows 16px apart, as a
+   subsection's are */
 .mx_UserProfileSettings {
-    /* Telement: Compound's separator rather than a fixed gray, so that a dark theme's raised dialogs (_common.pcss)
-       move it a step further, as they do their other separators */
-    border-bottom: 1px solid var(--cpd-color-separator-primary);
-
     h2 {
         margin: var(--cpd-space-4x) 0;
     }
 
     .mx_UserProfileSettings_profile {
         display: flex;
-        margin-top: var(--cpd-space-6x);
+        margin-top: var(--cpd-space-4x);
         gap: 16px;
 
         .mx_UserProfileSettings_profile_displayName {
@@ -49,8 +47,7 @@ Please see LICENSE files in the repository root for full details.
     }
 
     .mx_UserProfileSettings_profile_buttons {
-        margin-top: var(--cpd-space-8x);
-        margin-bottom: var(--cpd-space-8x);
+        margin-top: var(--cpd-space-4x);
     }
 
     .mx_UserProfileSettings_accountmanageIcon {

@@ -25,24 +25,7 @@ exports[`SetIntegrationManager > should render manage integrations sections 1`] 
     </div>
   </div>
   <div
-    class="mx_SettingsSubsection_text"
-    id="mx_SetIntegrationManager_BodyText"
-  >
-    <span>
-      Use an integration manager 
-      <strong>
-        (scalar.vector.im)
-      </strong>
-       to manage bots, widgets, and sticker packs.
-    </span>
-  </div>
-  <div
-    class="mx_SettingsSubsection_text"
-  >
-    Integration managers receive configuration data, and can modify widgets, send room invites, and set power levels on your behalf.
-  </div>
-  <div
-    class="_inline-field"
+    class="_inline-field mx_SetIntegrationManager_toggle"
   >
     <div
       class="_inline-field-control"
@@ -71,6 +54,23 @@ exports[`SetIntegrationManager > should render manage integrations sections 1`] 
         Enable the integration manager
       </label>
     </div>
+  </div>
+  <div
+    class="mx_SettingsSubsection_text"
+    id="mx_SetIntegrationManager_BodyText"
+  >
+    <span>
+      Use an integration manager 
+      <strong>
+        (scalar.vector.im)
+      </strong>
+       to manage bots, widgets, and sticker packs.
+    </span>
+  </div>
+  <div
+    class="mx_SettingsSubsection_text"
+  >
+    Integration managers receive configuration data, and can modify widgets, send room invites, and set power levels on your behalf.
   </div>
 </form>
 `;

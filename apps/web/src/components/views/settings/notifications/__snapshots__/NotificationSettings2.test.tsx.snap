@@ -155,15 +155,6 @@ exports[`<Notifications /> > correctly handles the loading/disabled state 1`] = 
             </h2>
           </div>
           <div
-            class="mx_SettingsSubsection_description"
-          >
-            <div
-              class="mx_SettingsSubsection_text"
-            >
-              This setting will be applied by default to all your rooms.
-            </div>
-          </div>
-          <div
             class="mx_SettingsSubsection_content"
           >
             <label
@@ -234,6 +225,15 @@ exports[`<Notifications /> > correctly handles the loading/disabled state 1`] = 
               />
             </label>
           </div>
+          <div
+            class="mx_SettingsSubsection_description"
+          >
+            <div
+              class="mx_SettingsSubsection_text"
+            >
+              This setting will be applied by default to all your rooms.
+            </div>
+          </div>
         </div>
         <div
           class="mx_SettingsSubsection"
@@ -246,15 +246,6 @@ exports[`<Notifications /> > correctly handles the loading/disabled state 1`] = 
             >
               Play a sound for
             </h2>
-          </div>
-          <div
-            class="mx_SettingsSubsection_description"
-          >
-            <div
-              class="mx_SettingsSubsection_text"
-            >
-              Applied by default to all rooms on all devices.
-            </div>
           </div>
           <div
             class="mx_SettingsSubsection_content"
@@ -429,6 +420,15 @@ exports[`<Notifications /> > correctly handles the loading/disabled state 1`] = 
                   </div>
                 </div>
               </form>
+            </div>
+          </div>
+          <div
+            class="mx_SettingsSubsection_description"
+          >
+            <div
+              class="mx_SettingsSubsection_text"
+            >
+              Applied by default to all rooms on all devices.
             </div>
           </div>
         </div>
@@ -630,30 +630,6 @@ exports[`<Notifications /> > correctly handles the loading/disabled state 1`] = 
             >
               Mentions and Keywords
             </h2>
-          </div>
-          <div
-            class="mx_SettingsSubsection_description"
-          >
-            <div
-              class="mx_SettingsSubsection_text"
-            >
-              <span>
-                Show a badge 
-                <div
-                  class="mx_NotificationSettings2_notificationBadge _notificationBadge _visible _notification _badge2Char"
-                  data-badge-type="badge_2char"
-                  data-notification-level="notification"
-                  data-testid="notification-badge"
-                >
-                  <span
-                    class="_count"
-                  >
-                    1
-                  </span>
-                </div>
-                 when keywords are used in a room.
-              </span>
-            </div>
           </div>
           <div
             class="mx_SettingsSubsection_content"
@@ -976,6 +952,30 @@ exports[`<Notifications /> > correctly handles the loading/disabled state 1`] = 
               </div>
             </form>
           </div>
+          <div
+            class="mx_SettingsSubsection_description"
+          >
+            <div
+              class="mx_SettingsSubsection_text"
+            >
+              <span>
+                Show a badge 
+                <div
+                  class="mx_NotificationSettings2_notificationBadge _notificationBadge _visible _notification _badge2Char"
+                  data-badge-type="badge_2char"
+                  data-notification-level="notification"
+                  data-testid="notification-badge"
+                >
+                  <span
+                    class="_count"
+                  >
+                    1
+                  </span>
+                </div>
+                 when keywords are used in a room.
+              </span>
+            </div>
+          </div>
         </div>
         <div
           class="mx_SettingsSubsection mx_SettingsSubsection_newUi"
@@ -1020,12 +1020,6 @@ exports[`<Notifications /> > correctly handles the loading/disabled state 1`] = 
               class="mx_SettingsIndent"
             />
           </div>
-          <div
-            class="_separator"
-            data-kind="primary"
-            data-orientation="horizontal"
-            role="separator"
-          />
         </div>
         <div
           class="mx_SettingsSubsection"
@@ -1213,15 +1207,6 @@ exports[`<Notifications /> > matches the snapshot 1`] = `
             </h2>
           </div>
           <div
-            class="mx_SettingsSubsection_description"
-          >
-            <div
-              class="mx_SettingsSubsection_text"
-            >
-              This setting will be applied by default to all your rooms.
-            </div>
-          </div>
-          <div
             class="mx_SettingsSubsection_content"
           >
             <label
@@ -1289,6 +1274,15 @@ exports[`<Notifications /> > matches the snapshot 1`] = `
               />
             </label>
           </div>
+          <div
+            class="mx_SettingsSubsection_description"
+          >
+            <div
+              class="mx_SettingsSubsection_text"
+            >
+              This setting will be applied by default to all your rooms.
+            </div>
+          </div>
         </div>
         <div
           class="mx_SettingsSubsection"
@@ -1301,15 +1295,6 @@ exports[`<Notifications /> > matches the snapshot 1`] = `
             >
               Play a sound for
             </h2>
-          </div>
-          <div
-            class="mx_SettingsSubsection_description"
-          >
-            <div
-              class="mx_SettingsSubsection_text"
-            >
-              Applied by default to all rooms on all devices.
-            </div>
           </div>
           <div
             class="mx_SettingsSubsection_content"
@@ -1481,6 +1466,15 @@ exports[`<Notifications /> > matches the snapshot 1`] = `
                   </div>
                 </div>
               </form>
+            </div>
+          </div>
+          <div
+            class="mx_SettingsSubsection_description"
+          >
+            <div
+              class="mx_SettingsSubsection_text"
+            >
+              Applied by default to all rooms on all devices.
             </div>
           </div>
         </div>
@@ -1679,30 +1673,6 @@ exports[`<Notifications /> > matches the snapshot 1`] = `
             >
               Mentions and Keywords
             </h2>
-          </div>
-          <div
-            class="mx_SettingsSubsection_description"
-          >
-            <div
-              class="mx_SettingsSubsection_text"
-            >
-              <span>
-                Show a badge 
-                <div
-                  class="mx_NotificationSettings2_notificationBadge _notificationBadge _visible _notification _badge2Char"
-                  data-badge-type="badge_2char"
-                  data-notification-level="notification"
-                  data-testid="notification-badge"
-                >
-                  <span
-                    class="_count"
-                  >
-                    1
-                  </span>
-                </div>
-                 when keywords are used in a room.
-              </span>
-            </div>
           </div>
           <div
             class="mx_SettingsSubsection_content"
@@ -2236,6 +2206,30 @@ exports[`<Notifications /> > matches the snapshot 1`] = `
               </div>
             </form>
           </div>
+          <div
+            class="mx_SettingsSubsection_description"
+          >
+            <div
+              class="mx_SettingsSubsection_text"
+            >
+              <span>
+                Show a badge 
+                <div
+                  class="mx_NotificationSettings2_notificationBadge _notificationBadge _visible _notification _badge2Char"
+                  data-badge-type="badge_2char"
+                  data-notification-level="notification"
+                  data-testid="notification-badge"
+                >
+                  <span
+                    class="_count"
+                  >
+                    1
+                  </span>
+                </div>
+                 when keywords are used in a room.
+              </span>
+            </div>
+          </div>
         </div>
         <div
           class="mx_SettingsSubsection mx_SettingsSubsection_newUi"
@@ -2336,12 +2330,6 @@ exports[`<Notifications /> > matches the snapshot 1`] = `
               </div>
             </div>
           </div>
-          <div
-            class="_separator"
-            data-kind="primary"
-            data-orientation="horizontal"
-            role="separator"
-          />
         </div>
         <div
           class="mx_SettingsSubsection mx_SettingsSubsection_newUi"
@@ -2364,12 +2352,6 @@ exports[`<Notifications /> > matches the snapshot 1`] = `
               </li>
             </ul>
           </div>
-          <div
-            class="_separator"
-            data-kind="primary"
-            data-orientation="horizontal"
-            role="separator"
-          />
         </div>
         <div
           class="mx_SettingsSubsection"

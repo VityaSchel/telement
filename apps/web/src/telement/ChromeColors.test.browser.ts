@@ -42,8 +42,6 @@ import baseCardStyles from "../../res/css/views/right_panel/_BaseCard.pcss?raw";
 import autocompleteStyles from "../../res/css/views/rooms/_Autocomplete.pcss?raw";
 import presenceLabelStyles from "../../res/css/views/rooms/_PresenceLabel.pcss?raw";
 import joinRuleSettingsStyles from "../../res/css/views/settings/_JoinRuleSettings.pcss?raw";
-import roomProfileSettingsStyles from "../../res/css/views/settings/_RoomProfileSettings.pcss?raw";
-import userProfileSettingsStyles from "../../res/css/views/settings/_UserProfileSettings.pcss?raw";
 import lightTheme from "../../res/themes/light/css/_light.pcss?raw";
 import darkTheme from "../../res/themes/dark/css/_dark.pcss?raw";
 import lightHighContrastTheme from "../../res/themes/light-high-contrast/css/_light-high-contrast.pcss?raw";
@@ -86,8 +84,6 @@ const APP_STYLES =
     toggleSwitchStyles +
     baseCardStyles +
     joinRuleSettingsStyles +
-    roomProfileSettingsStyles +
-    userProfileSettingsStyles +
     compoundOverrides;
 
 /**
@@ -435,10 +431,8 @@ describe("Telement's chrome colors", () => {
             );
         });
 
-        it("draws the settings' profile and join rule dividers in a dialog as its other separators", () => {
+        it("draws the settings' join rule dividers in a dialog as its other separators", () => {
             const settings = `
-                <form class="mx_RoomProfileSettings" data-divider="room profile"></form>
-                <div class="mx_UserProfileSettings" data-divider="account profile"></div>
                 <label class="mx_StyledRadioButton mx_JoinRuleSettings_radioButton"></label>
                 <span>Anyone can find and join.</span>
                 <label class="mx_StyledRadioButton mx_JoinRuleSettings_radioButton" data-divider="join rule"></label>
@@ -449,14 +443,10 @@ describe("Telement's chrome colors", () => {
                 Object.fromEntries(
                     [...scope.querySelectorAll<HTMLElement>("[data-divider]")].map((divider) => [
                         divider.dataset.divider,
-                        getComputedStyle(divider)[divider.matches("label") ? "borderTopColor" : "borderBottomColor"],
+                        getComputedStyle(divider).borderTopColor,
                     ]),
                 );
-            const all = (color: string): Record<string, string> => ({
-                "room profile": color,
-                "account profile": color,
-                "join rule": color,
-            });
+            const all = (color: string): Record<string, string> => ({ "join rule": color });
 
             expect(dividers(page)).toEqual(all(tokenColor("--cpd-color-separator-primary", container)));
             expect(dividers(dialog)).toEqual(all(tokenColor("--cpd-color-separator-primary", dialog)));
