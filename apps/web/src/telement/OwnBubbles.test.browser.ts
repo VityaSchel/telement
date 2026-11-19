@@ -7,7 +7,7 @@ Please see LICENSE files in the repository root for full details.
 
 import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
 import { userEvent } from "vitest/browser";
-import { createElement } from "react";
+import { type ComponentType, createElement, type SVGProps } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { IconButton } from "@vector-im/compound-web";
 import {
@@ -45,6 +45,10 @@ import hljsDark from "highlight.js/styles/atom-one-dark.min.css?raw";
 import eventTileViewStyles from "../../../../packages/shared-components/src/room/timeline/event-tile/EventTileView/EventTileView.module.css?raw";
 // eslint-disable-next-line no-restricted-imports
 import messageTimestampViewStyles from "../../../../packages/shared-components/src/room/timeline/event-tile/timestamp/MessageTimestampView/MessageTimestampView.module.css?raw";
+// eslint-disable-next-line no-restricted-imports
+import messageStatusViewStyles from "../../../../packages/shared-components/src/telement/room/timeline/MessageStatusView/MessageStatusView.module.css?raw";
+// eslint-disable-next-line no-restricted-imports
+import { DoubleCheckIcon } from "../../../../packages/shared-components/src/telement/core/icons/DoubleCheckIcon";
 // eslint-disable-next-line no-restricted-imports
 import textualBodyStyles from "../../../../packages/shared-components/src/room/timeline/event-tile/body/TextualBodyView/TextualBody.module.css?raw";
 // eslint-disable-next-line no-restricted-imports
@@ -255,7 +259,7 @@ function contrast(first: string, second: string): number {
     return (lighter + 0.05) / (darker + 0.05);
 }
 
-const icon = (Icon: typeof CopyIcon, props: Record<string, unknown> = {}): string =>
+const icon = (Icon: ComponentType<SVGProps<SVGSVGElement>>, props: Record<string, unknown> = {}): string =>
     renderToStaticMarkup(createElement(Icon, { width: 20, height: 20, ...props }));
 
 const plain = (text: string): string =>
@@ -273,25 +277,44 @@ interface TileOptions {
     footer?: string;
     /** What EventTileView renders beside the content in the line, outside the bubble's fill. */
     actionBar?: string;
+    /** Telegram's checks or the failed mark, which EventTileView puts after the time. */
+    status?: "read" | "failed";
+}
+
+/** The status after the time, as MessageStatusView renders it in its slot. */
+function statusSlot(status: "read" | "failed"): string {
+    const glyph = status === "read" ? DoubleCheckIcon : ErrorSolidIcon;
+    return `<div class="slotStatus"><span class="MessageStatusView_status MessageStatusView_${status}" role="img">${icon(glyph, { className: "MessageStatusView_icon" })}</span></div>`;
 }
 
 /** An EventTileView, in the bubble layout unless told otherwise, the last of its sender's run, as the room timeline
  * renders it. */
 function tile(
     body: string,
-    { own = true, layout = "Bubble", states = [], lineClass = "", reply, padlock, footer, actionBar }: TileOptions = {},
+    {
+        own = true,
+        layout = "Bubble",
+        states = [],
+        lineClass = "",
+        reply,
+        padlock,
+        footer,
+        actionBar,
+        status,
+    }: TileOptions = {},
 ): string {
     const classes = [
         `layout${layout}`,
         own && "stateOwnEvent",
         reply && "stateHasReply",
+        status && "hasStatusSlot",
         "stateLastInSection",
         ...states,
     ];
     return `
         <li class="root mx_EventTile ${classes.filter(Boolean).join(" ")}">
             <div class="line mx_EventTile_line ${lineClass}">
-                <div class="slotTimestamp"><a class="mx_MessageTimestamp content">12:48</a></div>
+                <div class="slotTimestamp"><a class="mx_MessageTimestamp content">12:48</a>${status ? statusSlot(status) : ""}</div>
                 ${padlock ? `<div class="slotPadlock">${padlock}</div>` : ""}
                 ${reply ? `<div class="slotReplyChain"><div class="mx_ReplyChain_wrapper">${reply}</div></div>` : ""}
                 <div class="slotBody">${body}</div>
@@ -473,6 +496,7 @@ describe("Your own bubbles", () => {
                 ${telementTokens}
                 ${eventTileViewStyles.replace(/:global\(([^)]*)\)/g, "$1")}
                 ${messageTimestampViewStyles}
+                ${moduleCss(messageStatusViewStyles, "MessageStatusView")}
                 ${moduleCss(textualBodyStyles, "TextualBody")}
                 ${moduleCss(linkedTextStyles, "LinkedText")}
                 ${moduleCss(mediaPreviewGroupViewStyles, "MediaPreviewGroupView")}
@@ -556,6 +580,29 @@ describe("Your own bubbles", () => {
             }
             expect(contrast(composite(theme.secondary, theme.fill), theme.fill)).toBeGreaterThanOrEqual(
                 theme.minimumContrast > 5 ? 4 : 3,
+            );
+        });
+
+        it("draws the read checks after the time in its secondary white, and the failed mark in white rather than red", () => {
+            const list = render(tile(plain("Read"), { status: "read" }), tile(plain("Not sent"), { status: "failed" }));
+            const [read, failed] = list.querySelectorAll(".MessageStatusView_status svg");
+
+            expect(color(read)).toBe(theme.secondary);
+            expect(color(read)).toBe(color(list.querySelector(".mx_MessageTimestamp")));
+            expect(color(failed)).toBe(WHITE);
+        });
+
+        it("draws the checks of your own emote, which has no bubble, in the page's time color", () => {
+            const list = render(
+                tile(plain("waves"), {
+                    states: ["stateNoBubble", "stateEmote"],
+                    lineClass: "lineEmote",
+                    status: "read",
+                }),
+            );
+
+            expect(color(list.querySelector(".MessageStatusView_status svg"))).toBe(
+                tokenColor("--cpd-color-text-secondary", list),
             );
         });
 
@@ -857,8 +904,7 @@ describe("Your own bubbles", () => {
                     <div class="senderDetails"></div>
                     <div class="line mx_EventTile_line">
                         <div class="slotBody">${plain("In the thread")}</div>
-                        <div class="slotTimestamp"><a class="mx_MessageTimestamp content">12:48</a></div>
-                        <div class="slotReceipt"><div class="receipt">Seen</div></div>
+                        <div class="slotTimestamp"><a class="mx_MessageTimestamp content">12:48</a>${statusSlot("read")}</div>
                     </div>
                 </li>
             `);
@@ -866,7 +912,7 @@ describe("Your own bubbles", () => {
             expect(fill(list.querySelector(".line"))).toBe(theme.fill);
             expect(color(list.querySelector(".mx_EventTile_body"))).toBe(WHITE);
             expect(color(list.querySelector(".mx_MessageTimestamp"))).toBe(theme.secondary);
-            expect(color(list.querySelector(".receipt"))).toBe(tokenColor("--cpd-color-text-primary", list));
+            expect(color(list.querySelector(".MessageStatusView_status svg"))).toBe(theme.secondary);
         });
 
         it.each(["Group", "Irc"] as const)(

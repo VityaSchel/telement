@@ -108,8 +108,8 @@ test.describe("Key backup reset from elsewhere", () => {
         // Should be the message we sent plus the room creation event
         await expect(page.locator(".mx_EventTile")).toHaveCount(2);
         await expect(
-            page.locator(".mx_RoomView_MessageList > .mx_EventTile").last().getByRole("status"),
-        ).toHaveAccessibleName("Your message was sent");
+            page.locator(".mx_RoomView_MessageList > .mx_EventTile").last().getByRole("img", { name: "Sent" }),
+        ).toBeVisible();
 
         // Wait for it to try uploading the key
         await page.clock.fastForward(20000);

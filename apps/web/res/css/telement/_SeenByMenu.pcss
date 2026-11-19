@@ -1,0 +1,56 @@
+/*
+Copyright 2026 Viktor Shchelochkov
+
+SPDX-License-Identifier: AGPL-3.0-only OR GPL-3.0-only
+Please see LICENSE files in the repository root for full details.
+*/
+
+/*
+ * Telegram's "Seen by" item of the message menu (SeenByMenuItem.tsx). The face pile of the latest readers' 20px avatars
+ * ends the item on the menu's 16px content edge, 8px after the label.
+ */
+.mx_IconizedContextMenu .mx_IconizedContextMenu_optionList .mx_SeenByMenuItem .mx_SeenByMenuItem_faces {
+    flex-shrink: 0;
+    margin-inline-start: var(--cpd-space-2x);
+}
+
+/* At most 320px wide, which SeenByMenuItem allows for when it chooses the side to open the submenu on */
+.mx_ContextualMenu.mx_SeenByMenu_submenu {
+    box-sizing: border-box;
+    max-inline-size: 320px;
+}
+
+/* The submenu meets the message menu's edge on either side; a menu opening leftwards is otherwise 16px further in */
+.mx_ContextualMenu.mx_SeenByMenu_submenu.mx_ContextualMenu_right {
+    right: 0;
+}
+
+/*
+ * The submenu of readers has the shared menu rows: 32px, the reader's 20px avatar where an icon would be, 10px before
+ * the name, and the time they read at the end, on the 16px content edge. Its width follows the longest row, up to the
+ * point where names are cut short, and a long list scrolls inside the menu's corners.
+ */
+.mx_IconizedContextMenu.mx_SeenByMenu {
+    box-sizing: border-box;
+    max-inline-size: 100%;
+    max-block-size: min(420px, 60vh);
+    overflow-y: auto;
+    border-radius: calc(var(--tl-radius-menu) - var(--cpd-border-width-1));
+
+    .mx_IconizedContextMenu_optionList .mx_SeenByMenu_reader {
+        .mx_BaseAvatar {
+            flex-shrink: 0;
+        }
+
+        .mx_BaseAvatar + .mx_IconizedContextMenu_label {
+            padding-inline-start: var(--tl-menu-icon-gap);
+        }
+    }
+
+    .mx_SeenByMenu_time {
+        flex-shrink: 0;
+        margin-inline-start: var(--cpd-space-4x);
+        font: var(--cpd-font-body-sm-regular);
+        color: var(--cpd-color-text-secondary);
+    }
+}

@@ -19,9 +19,9 @@ async function uploadFile(app: ElementAppPage, sampleFile: string) {
     await app.composerUploadFiles("room", getSampleFilePath(sampleFile));
     // Wait until the file is sent
     await expect(app.page.locator(".mx_RoomView_statusArea_expanded")).not.toBeVisible();
-    await expect(app.page.locator(".mx_RoomView_body .mx_EventTile").last().getByRole("status")).toHaveAccessibleName(
-        "Your message was sent",
-    );
+    await expect(
+        app.page.locator(".mx_RoomView_body .mx_EventTile").last().getByRole("img", { name: "Sent" }),
+    ).toBeVisible();
 }
 
 test.describe("FilePanel", () => {

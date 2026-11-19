@@ -52,6 +52,8 @@ import Resend from "../../../Resend";
 import { setMediaVisibility } from "../../../utils/media/mediaVisibility";
 import { MediaPreviewValue } from "../../../@types/media_preview";
 import * as recent from "../../../emojipicker/recent";
+import { formatDate } from "../../../DateUtils";
+import { type IReadReceiptProps } from "../rooms/EventTile";
 
 vi.mock("../../../utils/strings", () => ({
     getSelectedText: vi.fn(),
@@ -939,6 +941,120 @@ describe("MessageContextMenu", () => {
             fireEvent.keyDown(copyText, { key: "ArrowUp" });
             expect(screen.getByRole("menuitem", { name: "React" })).toHaveFocus();
             expect(onFinished).not.toHaveBeenCalled();
+        });
+    });
+
+    describe("seen by", () => {
+        const reader = (name: string, minute: number): IReadReceiptProps[] => [
+            { userId: `@${name}:example.org`, roomMember: null, ts: new Date(2026, 10, 18, 19, minute).getTime() },
+        ];
+        const bob = reader("bob", 34);
+        const carol = reader("carol", 30);
+        const readers = [...bob, ...carol];
+
+        const seenByItem = (): HTMLElement => screen.getByRole("menuitem", { name: "Seen by 2 people" });
+        const menus = (): HTMLElement[] => screen.getAllByRole("menu");
+
+        function openSubmenu(): HTMLElement {
+            fireEvent.click(seenByItem());
+            return menus().at(-1)!;
+        }
+
+        it("tops the menu with how many have read your message, and their faces at the item's end", () => {
+            createMenuWithContent(createMessageEventContent("hello"), { rightClick: true, seenBy: readers });
+            const [first] = within(menus()[0]).getAllByRole("menuitem");
+
+            expect(first).toBe(seenByItem());
+            expect(first).toHaveAttribute("aria-haspopup", "menu");
+            expect(first).toHaveAttribute("aria-expanded", "false");
+            expect(first.querySelectorAll(".mx_SeenByMenuItem_faces .mx_BaseAvatar")).toHaveLength(2);
+        });
+
+        it("shows the faces of the three latest readers only", () => {
+            const four = [...reader("dan", 40), ...reader("eve", 39), ...bob, ...carol];
+            createMenuWithContent(createMessageEventContent("hello"), { rightClick: true, seenBy: four });
+            const faces = screen.getByRole("menuitem", { name: "Seen by 4 people" }).querySelectorAll(".mx_BaseAvatar");
+
+            expect(faces).toHaveLength(3);
+        });
+
+        it.each([
+            ["nobody else has read the message", []],
+            ["the timeline doesn't say who has", undefined],
+        ])("has no item when %s", (_name, seenBy) => {
+            createMenuWithContent(createMessageEventContent("hello"), { rightClick: true, seenBy });
+
+            expect(screen.queryByRole("menuitem", { name: /^Seen by/ })).not.toBeInTheDocument();
+        });
+
+        it("opens a submenu of the readers, most recent first, each with when they read it", () => {
+            createMenuWithContent(createMessageEventContent("hello"), { rightClick: true, seenBy: readers });
+            const submenu = openSubmenu();
+            const rows = within(submenu).getAllByRole("menuitem");
+
+            expect(menus()).toHaveLength(2);
+            expect(seenByItem()).toHaveAttribute("aria-expanded", "true");
+            expect(rows.map((row) => row.getAttribute("aria-label"))).toEqual([
+                "@bob:example.org",
+                "@carol:example.org",
+            ]);
+            expect(rows[0]).toHaveTextContent(formatDate(new Date(bob[0].ts)));
+            expect(rows[0].querySelector(".mx_BaseAvatar")).not.toBeNull();
+        });
+
+        it("opens the submenu on hover and closes it when the pointer moves to another item", () => {
+            createMenuWithContent(createMessageEventContent("hello"), { rightClick: true, seenBy: readers });
+            fireEvent.mouseEnter(seenByItem());
+
+            expect(menus()).toHaveLength(2);
+
+            fireEvent.pointerOver(screen.getByRole("menuitem", { name: "Copy text" }));
+
+            expect(menus()).toHaveLength(1);
+        });
+
+        it("opens the submenu on the right arrow, which leaves the menu open", () => {
+            const onFinished = vi.fn();
+            createMenuWithContent(createMessageEventContent("hello"), {
+                rightClick: true,
+                seenBy: readers,
+                onFinished,
+            });
+            fireEvent.keyDown(seenByItem(), { key: "ArrowRight" });
+
+            expect(menus()).toHaveLength(2);
+            expect(onFinished).not.toHaveBeenCalled();
+        });
+
+        it.each(["Escape", "ArrowLeft"])("closes only the submenu on %s", (key) => {
+            const onFinished = vi.fn();
+            createMenuWithContent(createMessageEventContent("hello"), {
+                rightClick: true,
+                seenBy: readers,
+                onFinished,
+            });
+            const submenu = openSubmenu();
+            fireEvent.keyDown(within(submenu).getAllByRole("menuitem")[0], { key });
+
+            expect(menus()).toHaveLength(1);
+            expect(onFinished).not.toHaveBeenCalled();
+        });
+
+        it("opens a reader's profile and closes the menu when they are chosen", () => {
+            const onFinished = vi.fn();
+            createMenuWithContent(createMessageEventContent("hello"), {
+                rightClick: true,
+                seenBy: readers,
+                onFinished,
+            });
+            fireEvent.click(within(openSubmenu()).getByRole("menuitem", { name: "@carol:example.org" }));
+
+            expect(dispatcher.dispatch).toHaveBeenCalledWith({
+                action: Action.ViewUser,
+                member: { userId: "@carol:example.org" },
+                push: false,
+            });
+            expect(onFinished).toHaveBeenCalled();
         });
     });
 

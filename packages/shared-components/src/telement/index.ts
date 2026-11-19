@@ -8,6 +8,8 @@ Please see LICENSE files in the repository root for full details.
 import "./tokens.css";
 
 export * from "./room/timeline/VideoNoteBodyView";
+export * from "./room/timeline/MessageStatusView";
 export * from "./room/composer/ComposerDrawerView";
 export * from "./core/SearchFieldView";
+export * from "./core/icons/DoubleCheckIcon";
 export * from "./media/VideoLightboxView";

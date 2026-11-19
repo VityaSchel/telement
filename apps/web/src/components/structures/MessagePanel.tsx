@@ -15,6 +15,7 @@ import {
     EventStatus,
     type MatrixEvent,
     EventType,
+    Direction,
 } from "matrix-js-sdk/src/matrix";
 import { logger } from "matrix-js-sdk/src/logger";
 import { isSupportedReceiptType } from "matrix-js-sdk/src/utils";
@@ -54,6 +55,7 @@ import { CreationGrouper } from "./grouper/CreationGrouper";
 import { _t } from "../../languageHandler";
 import { getLateEventInfo } from "./grouper/LateEventGrouper";
 import { isEligibleForSpecialReceipt } from "../../viewmodels/room/timeline/event-tile/EventTileReceiptState";
+import { getSeenByOwnEvents } from "../../viewmodels/room/timeline/event-tile/EventTileSeenBy";
 import { DateSeparatorWrapper } from "./DateSeparatorWrapper";
 
 const CONTINUATION_MAX_INTERVAL = 5 * 60 * 1000; // 5 minutes
@@ -238,6 +240,10 @@ export default class MessagePanel extends React.Component<IProps, IState> {
     // for ease of passing the data around since it's computed in one pass
     // over all events.
     private readReceiptsByEvent: Map<string, IReadReceiptProps[]> = new Map();
+
+    // Telement: who has read each of your own messages in the bubble layout, recomputed with the receipts above. Your
+    // own bubbles show it as Telegram's read checks and in the "Seen by" item of their menu, in place of the receipts.
+    private seenByEvent: Map<string, IReadReceiptProps[]> = new Map();
 
     // Track read receipts by user ID. For each user ID we've ever shown a
     // a read receipt for, we store an object:
@@ -666,6 +672,15 @@ export default class MessagePanel extends React.Component<IProps, IState> {
         if (this.props.showReadReceipts) {
             this.readReceiptsByEvent = this.getReadReceiptsByShownEvent(events);
         }
+        this.seenByEvent = new Map();
+        if (this.props.showReadReceipts && this.props.layout === Layout.Bubble) {
+            const shownEvents = events.filter(({ shouldShow }) => shouldShow).map(({ event }) => event);
+            this.seenByEvent = getSeenByOwnEvents(
+                shownEvents.map((event) => ({ eventId: event.getId()!, isOwn: event.getSender() === userId })),
+                this.readReceiptsByEvent,
+                this.getReadReceiptsAfter(shownEvents.at(-1)),
+            );
+        }
 
         let grouper: BaseGrouper | null = null;
 
@@ -807,6 +822,7 @@ export default class MessagePanel extends React.Component<IProps, IState> {
                 resizeObserver={this.resizeObserver}
                 readReceipts={readReceipts}
                 readReceiptMap={this.readReceiptMap}
+                seenBy={this.seenByEvent.get(eventId)}
                 showUrlPreview={this.props.showUrlPreview}
                 checkUnmounting={this.isUnmounting}
                 eventSendStatus={mxEv.getAssociatedStatus() ?? undefined}
@@ -890,6 +906,37 @@ export default class MessagePanel extends React.Component<IProps, IState> {
                 ts: r.data ? r.data.ts : 0,
             });
         });
+        return receipts;
+    }
+
+    /**
+     * Telement: the read receipts on the messages after the newest one shown, which the room has loaded but the
+     * timeline doesn't show, as when a room opens at its first unread message or after you scroll back. Their readers
+     * have read every message shown, which the read checks of your own messages in bubbles count.
+     */
+    private getReadReceiptsAfter(newestShownEvent: MatrixEvent | undefined): IReadReceiptProps[] {
+        const eventId = newestShownEvent?.getId();
+        const { room } = this.props;
+        if (!eventId || !room) return [];
+        const timelineSet = this.context.threadId
+            ? room.getThread(this.context.threadId)?.timelineSet
+            : room.getUnfilteredTimelineSet();
+
+        let timeline = timelineSet?.getTimelineForEvent(eventId) ?? null;
+        let events = timeline?.getEvents() ?? [];
+        // The newest message shown is usually the last one loaded, so look for it from the end
+        let index = events.length;
+        while (index > 0 && events[index - 1].getId() !== eventId) index--;
+
+        const receipts: IReadReceiptProps[] = [];
+        while (timeline) {
+            for (; index < events.length; index++) {
+                receipts.push(...(this.getReadReceiptsForEvent(events[index]) ?? []));
+            }
+            timeline = timeline.getNeighbouringTimeline(Direction.Forward);
+            events = timeline?.getEvents() ?? [];
+            index = 0;
+        }
         return receipts;
     }
 

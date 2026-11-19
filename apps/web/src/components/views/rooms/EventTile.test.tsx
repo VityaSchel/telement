@@ -507,6 +507,77 @@ describe("EventTile", () => {
             expect(queryByRole("status", { name: "Your message was sent" })).toBeNull();
             expect(getByRole("group", { name: "Seen by 1 person" })).toBeInTheDocument();
         });
+
+        describe("in the bubble layout", () => {
+            const bob = { userId: "@bob:example.org", roomMember: null, ts: 1234 };
+            // The checks follow the time, which a message has only with its timestamp
+            const ownMessage = (): MatrixEvent => makeOwnMessage({ ts: 1234 });
+
+            it("shows two checks after the time of your own message someone has read, and no receipts", () => {
+                const ownEvent = ownMessage();
+                const { getByRole, queryByRole } = getComponent({
+                    mxEvent: ownEvent,
+                    layout: Layout.Bubble,
+                    lastSuccessful: true,
+                    showReadReceipts: true,
+                    readReceipts: [bob],
+                    seenBy: [bob],
+                });
+
+                expect(
+                    getByRole("img", { name: "Read" }).closest("[data-testid='event-tile-slot-timestamp']"),
+                ).not.toBe(null);
+                expect(queryByRole("group", { name: "Seen by 1 person" })).toBeNull();
+                expect(queryByRole("status")).toBeNull();
+            });
+
+            it("shows one check on every message of your own nobody else has read yet", () => {
+                const { getByRole } = getComponent({ mxEvent: ownMessage(), layout: Layout.Bubble, seenBy: [] });
+
+                expect(getByRole("img", { name: "Sent" })).toBeInTheDocument();
+            });
+
+            it.each([
+                [EventStatus.SENDING, "Sending"],
+                [EventStatus.ENCRYPTING, "Sending"],
+                [EventStatus.NOT_SENT, "Failed to send"],
+            ])("shows the %s status of your own message after its time", (eventSendStatus, label) => {
+                const ownEvent = ownMessage();
+                ownEvent.setStatus(eventSendStatus);
+                const { getByRole, queryByRole } = getComponent({
+                    mxEvent: ownEvent,
+                    layout: Layout.Bubble,
+                    eventSendStatus,
+                });
+
+                expect(getByRole("img", { name: label })).toBeInTheDocument();
+                expect(queryByRole("status")).toBeNull();
+            });
+
+            it("shows neither checks nor receipts on other people's messages", () => {
+                const { queryByRole } = getComponent({
+                    layout: Layout.Bubble,
+                    showReadReceipts: true,
+                    readReceipts: [bob],
+                });
+
+                expect(queryByRole("group", { name: "Seen by 1 person" })).toBeNull();
+                expect(queryByRole("img", { name: /^(Read|Sent)$/ })).toBeNull();
+            });
+
+            it.each([Layout.Group, Layout.IRC])("keeps the receipts, without checks, in the %s layout", (layout) => {
+                const { getByRole, queryByRole } = getComponent({
+                    mxEvent: ownMessage(),
+                    layout,
+                    showReadReceipts: true,
+                    readReceipts: [bob],
+                    seenBy: [bob],
+                });
+
+                expect(getByRole("group", { name: "Seen by 1 person" })).toBeInTheDocument();
+                expect(queryByRole("img", { name: "Read" })).toBeNull();
+            });
+        });
     });
 
     describe("reactions and footer", () => {
@@ -718,6 +789,36 @@ describe("EventTile", () => {
             fireEvent.contextMenu(getLine(container), { clientX: 1, clientY: 2 });
 
             expect(await screen.findByTestId("mx_MessageContextMenu")).toBeInTheDocument();
+        });
+
+        it.each([
+            [
+                "lists who has read your own message, which shows two checks",
+                [{ userId: "@bob:example.org", roomMember: null, ts: 1 }],
+                1,
+            ],
+            ["has no Seen by item while nobody else has read it", [], 0],
+        ])("%s in the bubble layout", async (_name, seenBy, items) => {
+            const { container } = getComponent({
+                mxEvent: makeOwnMessage({ ts: 1234 }),
+                layout: Layout.Bubble,
+                seenBy,
+            });
+
+            fireEvent.contextMenu(getLine(container), { clientX: 1, clientY: 2 });
+
+            expect(await screen.findByTestId("mx_MessageContextMenu")).toBeInTheDocument();
+            expect(screen.queryAllByRole("menuitem", { name: "Seen by 1 person" })).toHaveLength(items);
+        });
+
+        it("has no Seen by item in the modern layout, whose receipts list who has read the message", async () => {
+            const seenBy = [{ userId: "@bob:example.org", roomMember: null, ts: 1 }];
+            const { container } = getComponent({ mxEvent: makeOwnMessage({ ts: 1234 }), seenBy });
+
+            fireEvent.contextMenu(getLine(container), { clientX: 1, clientY: 2 });
+
+            expect(await screen.findByTestId("mx_MessageContextMenu")).toBeInTheDocument();
+            expect(screen.queryByRole("menuitem", { name: "Seen by 1 person" })).toBeNull();
         });
 
         it("renders the message context menu when the row outside the event line is right-clicked", async () => {

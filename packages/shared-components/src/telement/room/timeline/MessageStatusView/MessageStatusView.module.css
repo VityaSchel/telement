@@ -1,0 +1,35 @@
+/*
+Copyright 2026 Viktor Shchelochkov
+
+SPDX-License-Identifier: AGPL-3.0-only OR GPL-3.0-only
+Please see LICENSE files in the repository root for full details.
+*/
+
+/* A 16px box, the room list's slot for its checks. The checks take the color of the text around them, which is the
+   time's where they follow it. */
+.status {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    inline-size: 16px;
+    block-size: 16px;
+}
+
+.icon {
+    display: block;
+    inline-size: 100%;
+    block-size: 100%;
+}
+
+/* Compound's clock and error mark fill their box, unlike the checks' small glyph: at 12px they look as big, as the room
+   list's clock does */
+.sending .icon,
+.failed .icon {
+    inline-size: 12px;
+    block-size: 12px;
+}
+
+.failed {
+    color: var(--cpd-color-icon-critical-primary);
+}

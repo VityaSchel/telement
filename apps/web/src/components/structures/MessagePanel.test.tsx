@@ -33,6 +33,7 @@ import {
 import MessagePanel, { shouldFormContinuation } from "./MessagePanel";
 import { MainGrouper } from "./grouper/MainGrouper";
 import SettingsStore from "../../settings/SettingsStore";
+import { Layout } from "../../settings/enums/Layout";
 import RoomContext, { type RoomContextType, TimelineRenderingType } from "../../contexts/RoomContext";
 import DMRoomMap from "../../utils/DMRoomMap";
 import type ResizeNotifier from "../../utils/ResizeNotifier";
@@ -1003,6 +1004,62 @@ describe("MessagePanel", function () {
         expect(tiles.length).toEqual(2);
         expect(within(tiles[0] as HTMLElement).queryByRole("status")).not.toBeInTheDocument();
         expect(within(tiles[1] as HTMLElement).queryByRole("status")).not.toBeInTheDocument();
+    });
+
+    describe("in the bubble layout", () => {
+        /** Two messages of your own around one of someone else's, which @other:user has read. */
+        function renderReadConversation(showReadReceipts = true): HTMLElement[] {
+            client.getRoom.mockImplementation((id) => (id === room.roomId ? room : null));
+            const events = [
+                TestUtilsMatrix.mkMessage({ event: true, room: room.roomId, user: client.getSafeUserId(), ts: 2000 }),
+                TestUtilsMatrix.mkMessage({ event: true, room: room.roomId, user: "@other:user", ts: 2001 }),
+                TestUtilsMatrix.mkMessage({ event: true, room: room.roomId, user: client.getSafeUserId(), ts: 2002 }),
+            ];
+            room.addReceiptToStructure(events[1].getId()!, ReceiptType.Read, "@other:user", { ts: 2001 }, true);
+            const { container } = render(
+                getComponent({ events, showReadReceipts, layout: Layout.Bubble }),
+                clientAndSDKContextRenderOptions(client, sdkContext),
+            );
+            return [...container.getElementsByClassName("mx_EventTile")] as HTMLElement[];
+        }
+
+        it("shows two checks on your own messages someone has read past, one on those they haven't, and no receipts", () => {
+            const [read, theirs, unread] = renderReadConversation();
+
+            expect(within(read).getByRole("img", { name: "Read" })).toBeInTheDocument();
+            expect(within(theirs).queryByRole("img")).not.toBeInTheDocument();
+            expect(within(unread).getByRole("img", { name: "Sent" })).toBeInTheDocument();
+            expect(within(theirs).queryByRole("group", { name: "Seen by 1 person" })).not.toBeInTheDocument();
+            expect(within(unread).queryByRole("status")).not.toBeInTheDocument();
+        });
+
+        it("shows one check when read receipts are turned off", () => {
+            const [read] = renderReadConversation(false);
+
+            expect(within(read).getByRole("img", { name: "Sent" })).toBeInTheDocument();
+        });
+
+        it("shows two checks on your own message read past by someone whose receipt is on a later message the room has loaded but the timeline doesn't show", () => {
+            client.getRoom.mockImplementation((id) => (id === room.roomId ? room : null));
+            const own = TestUtilsMatrix.mkMessage({
+                event: true,
+                room: room.roomId,
+                user: client.getSafeUserId(),
+                ts: 3000,
+            });
+            const later = TestUtilsMatrix.mkMessage({ event: true, room: room.roomId, user: "@other:user", ts: 3001 });
+            // The room has loaded both, but the timeline shows only the first
+            for (const event of [own, later]) {
+                room.getUnfilteredTimelineSet().addLiveEvent(event, { addToState: false });
+            }
+            room.addReceiptToStructure(later.getId()!, ReceiptType.Read, "@other:user", { ts: 3000 }, true);
+            const { container } = render(
+                getComponent({ events: [own], showReadReceipts: true, layout: Layout.Bubble }),
+                clientAndSDKContextRenderOptions(client, sdkContext),
+            );
+
+            expect(within(container).getByRole("img", { name: "Read" })).toBeInTheDocument();
+        });
     });
 });
 

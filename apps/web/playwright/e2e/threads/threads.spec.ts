@@ -105,14 +105,15 @@ test.describe("Threads", () => {
         // Enable the bubble layout
         await app.settings.setValue("layout", null, SettingLevel.DEVICE, Layout.Bubble);
 
+        // Telement: bubbles show no read receipts; your own message, which the bot has read past, has two checks
         locator = page.locator(".mx_ThreadView .mx_EventTile").last();
-        // TODO: remove this after fixing the issue of ReadReceiptGroup being hidden on the bubble layout
-        // See: https://github.com/vector-im/element-web/issues/23569
-        await expect(locator.locator(".mx_ReadReceiptGroup .mx_BaseAvatar")).toBeAttached();
-        // Make sure the avatar inside ReadReceiptGroup is visible on bubble layout
-        // TODO: enable this after fixing the issue of ReadReceiptGroup being hidden on the bubble layout
-        // See: https://github.com/vector-im/element-web/issues/23569
-        // expect(locator.locator(".mx_ReadReceiptGroup .mx_BaseAvatar")).toBeVisible();
+        await expect(locator.locator(".mx_ReadReceiptGroup")).toHaveCount(0);
+        await expect(
+            page
+                .locator(".mx_ThreadView .mx_EventTile")
+                .filter({ hasText: "Hello Mr. Bot" })
+                .getByRole("img", { name: "Read" }),
+        ).toBeVisible();
 
         // Re-enable the group layout
         await app.settings.setValue("layout", null, SettingLevel.DEVICE, Layout.Group);
@@ -457,9 +458,12 @@ test.describe("Threads", () => {
             await textbox.fill("Please come here");
             await textbox.press("Enter");
             // Wait until the reply is sent
-            await expect(locator.locator(".mx_EventTile").last().getByRole("status")).toHaveAccessibleName(
-                "Your message was sent",
-            );
+            await expect(
+                locator
+                    .locator(".mx_EventTile")
+                    .last()
+                    .getByRole("img", { name: /^(Sent|Read)$/ }),
+            ).toBeVisible();
 
             // Take a snapshot of reply to the shared location
             await page.addStyleTag({ content: css });

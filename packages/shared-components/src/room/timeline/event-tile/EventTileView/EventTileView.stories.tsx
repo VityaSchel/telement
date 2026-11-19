@@ -29,6 +29,7 @@ import { E2ePadlock, E2ePadlockIcon } from "./E2ePadlock";
 import { DisambiguatedProfileView } from "./DisambiguatedProfile";
 import { ActionBarAction, ActionBarView } from "../actions/ActionBarView";
 import { MessageTimestampView } from "../timestamp/MessageTimestampView";
+import { MessageStatusView } from "../../../../telement/room/timeline/MessageStatusView";
 import { ReactionsRowView } from "../reactions/ReactionsRow";
 import { ReactionsRowButtonView } from "../reactions/ReactionsRowButton";
 import { type ReactionsRowButtonTooltipViewModel } from "../reactions/ReactionsRowButtonTooltip";
@@ -1066,6 +1067,7 @@ const resolveStoryPresentation = (
 
 const createRoomStorySlots = ({
     isOwnEvent,
+    layout,
     slots,
     sender,
     avatar,
@@ -1073,12 +1075,25 @@ const createRoomStorySlots = ({
     showActionBar,
 }: {
     isOwnEvent: boolean;
+    layout: EventLayout;
     slots: EventTileViewProps["slots"];
     sender?: React.ReactNode;
     avatar?: React.ReactNode;
     timestamp?: React.ReactNode;
     showActionBar: boolean;
 }): EventTileViewProps["slots"] => {
+    // In bubbles the application shows no read receipts: your own messages have Telegram's checks after their time.
+    if (layout === "bubble") {
+        return {
+            ...slots,
+            receipt: undefined,
+            status: isOwnEvent ? <MessageStatusView status="read" /> : undefined,
+            sender,
+            avatar,
+            timestamp,
+            actionBar: showActionBar ? slots.actionBar : undefined,
+        };
+    }
     const baseSlots = isOwnEvent
         ? slots
         : {
@@ -1183,6 +1198,7 @@ function EventTileViewStoryContent({
             shape === "Room"
                 ? createRoomStorySlots({
                       isOwnEvent,
+                      layout,
                       slots: tileSlots,
                       sender,
                       avatar,

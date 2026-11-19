@@ -10,6 +10,7 @@ import { userEvent } from "vitest/browser";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { Avatar } from "@vector-im/compound-web";
+import { CheckIcon } from "@vector-im/compound-design-tokens/assets/web/icons";
 import compoundBase from "@vector-im/compound-design-tokens/assets/web/css/cpd-common-base.css?raw";
 import compoundSemantic from "@vector-im/compound-design-tokens/assets/web/css/cpd-common-semantic.css?raw";
 import compoundLightTheme from "@vector-im/compound-design-tokens/assets/web/css/cpd-theme-light-base.css?raw";
@@ -25,6 +26,10 @@ import compoundStyles from "@vector-im/compound-web/dist/style.css?raw";
 import eventTileViewStyles from "../../../../packages/shared-components/src/room/timeline/event-tile/EventTileView/EventTileView.module.css?raw";
 // eslint-disable-next-line no-restricted-imports
 import messageTimestampViewStyles from "../../../../packages/shared-components/src/room/timeline/event-tile/timestamp/MessageTimestampView/MessageTimestampView.module.css?raw";
+// eslint-disable-next-line no-restricted-imports
+import messageStatusViewStyles from "../../../../packages/shared-components/src/telement/room/timeline/MessageStatusView/MessageStatusView.module.css?raw";
+// eslint-disable-next-line no-restricted-imports
+import { DoubleCheckIcon } from "../../../../packages/shared-components/src/telement/core/icons/DoubleCheckIcon";
 // eslint-disable-next-line no-restricted-imports
 import textualBodyStyles from "../../../../packages/shared-components/src/room/timeline/event-tile/body/TextualBodyView/TextualBody.module.css?raw";
 // eslint-disable-next-line no-restricted-imports
@@ -122,6 +127,27 @@ const RECEIPTS = `
     </div>
 `;
 
+/** Telegram's checks for your own message, as MessageStatusView renders them in the status slot after the time. */
+function status(state: "sent" | "read" = "read"): string {
+    const icon = renderToStaticMarkup(
+        createElement(state === "read" ? DoubleCheckIcon : CheckIcon, {
+            "className": "MessageStatusView_icon",
+            "aria-hidden": true,
+        }),
+    );
+    return slot(
+        "Status",
+        `<span class="MessageStatusView_status MessageStatusView_${state}" role="img" aria-label="${state}">${icon}</span>`,
+    );
+}
+
+/** The time with the checks after it, as the time's slot holds them for your own message. */
+const timeWithStatus = (state?: "sent" | "read"): string =>
+    slot("Timestamp", `<a class="mx_MessageTimestamp content">12:41</a>${status(state)}`);
+
+/** The middle of the first check that a status's icon draws, which is the middle of both. */
+const checkMiddle = (tile: Element): number => middle(box(tile.querySelector(".slotStatus svg > path")!));
+
 /** The text of an informational row ("Alice joined the room"), as TextualEventView renders it. */
 const event = (layout: Layout, body: string): string =>
     `<div class="mx_TextualEvent TextualEventView_textualEvent" data-event-layout="${layout}">${body}</div>`;
@@ -142,6 +168,8 @@ interface RowOptions {
     footer?: string;
     threadInfo?: string;
     receipt?: boolean;
+    /** Telegram's checks after the time, as the bubble layout shows them on your own messages. */
+    status?: boolean;
     /** No sender row, as for an emote, or the sender as DisambiguatedProfileView renders it. */
     sender?: "none" | "profile";
 }
@@ -162,10 +190,14 @@ function row(layout: Layout, body: string, options: RowOptions = {}): string {
         !first && "stateContinuation",
         last && "stateLastInSection",
         options.receipt && "hasReceiptSlot",
+        options.status && "hasStatusSlot",
         ...states,
     ].filter(Boolean);
     const name = own ? "Viktor" : "Alice";
-    const timestamp = slot("Timestamp", '<a class="mx_MessageTimestamp content">12:41</a>');
+    const timestamp = slot(
+        "Timestamp",
+        `<a class="mx_MessageTimestamp content">12:41</a>${options.status ? status() : ""}`,
+    );
     const senderMarkup =
         options.sender === "profile"
             ? profile(layout, name)
@@ -235,14 +267,13 @@ const UNENCRYPTED_INTRO = INTRO.replace(
     )}`,
 );
 
-/** A row whose card is its content, as EventTileView lays out "Encryption enabled": no avatar, read receipts after. */
+/** A row whose card is its content, as EventTileView lays out "Encryption enabled": no avatar. */
 const NOTICE_ROW = `
-    <li class="root mx_EventTile layoutBubble stateBubbleContainer stateLastInSection hasReceiptSlot" data-testid="event-tile">
+    <li class="root mx_EventTile layoutBubble stateBubbleContainer stateLastInSection" data-testid="event-tile">
         <div class="line mx_EventTile_line">
             ${slot("Timestamp", '<a class="mx_MessageTimestamp content">12:41</a>')}
             ${slot("Body", notice("Encryption enabled", "Messages in this room are end-to-end encrypted."))}
         </div>
-        ${slot("Receipt", RECEIPTS)}
     </li>
 `;
 
@@ -354,6 +385,7 @@ describe("Timeline shell", () => {
                 ${telementTokens}
                 ${eventTileViewStyles.replace(/:global\(([^)]*)\)/g, "$1")}
                 ${messageTimestampViewStyles}
+                ${moduleCss(messageStatusViewStyles, "MessageStatusView")}
                 ${moduleCss(textualBodyStyles, "TextualBody")}
                 ${moduleCss(decryptionFailureStyles, "DecryptionFailureBodyView")}
                 ${moduleCss(textualEventViewStyles, "TextualEventView")}
@@ -397,6 +429,17 @@ describe("Timeline shell", () => {
     });
 
     describe("in the bubble layout", () => {
+        it("insets the timeline's content 12px from its sides: other people's avatars start there, their bubbles 40px further, and your own bubbles' tails end there", () => {
+            render("bubble", row("bubble", text("Morning")), row("bubble", text("Hi"), { own: true, status: true }));
+            const list = box(document.querySelector(".mx_RoomView_MessageList")!);
+            const [, own] = all(".line");
+            const tail = parseFloat(getComputedStyle(own, "::after").width);
+
+            expect(box(document.querySelector(".slotAvatar > *")!).left - list.left).toBe(12);
+            expect(box(document.querySelector(".line")!).left - list.left).toBe(52);
+            expect(list.right - (box(own).right + tail)).toBe(12);
+        });
+
         it.each(["group", "irc"] as const)("keeps the timeline's 18px inset in the %s layout", (layout) => {
             render(layout, row(layout, text("Morning")));
             const list = getComputedStyle(document.querySelector(".mx_RoomView_MessageList")!);
@@ -730,8 +773,6 @@ describe("Timeline shell", () => {
             const card = box(document.querySelector(".mx_cryptoEvent")!);
 
             expect(Math.abs(centerX(card) - centerX(pill))).toBeLessThanOrEqual(0.5);
-            // Its read receipts still end at the timeline's content edge
-            expect(box(document.querySelector(".mx_ReadReceiptGroup_button")!).right).toBe(contentEnd());
         });
 
         /** A message that couldn't be decrypted, as EventTileView lays it out with its padlock, under a text bubble. */
@@ -776,30 +817,111 @@ describe("Timeline shell", () => {
             );
         });
 
-        it.each<[string, RowOptions]>([
-            ["another's message", {}],
-            ["your own message", { own: true }],
-            ["an informational row", { states: ["stateInfo"] }],
-        ])("ends the read receipts of %s at the timeline's content edge", (_name, options) => {
+        it.each<[string, RowOptions, number]>([
+            // As far as your own bubble's tail reaches past its row
+            ["another's message", {}, 18],
+            ["your own message", { own: true, status: true }, 18],
+            ["an informational row", { states: ["stateInfo"] }, 0],
+        ])("keeps no column for read receipts at the end of %s", (_name, options, margin) => {
             const body = options.states ? event("bubble", "Alice joined the room") : text("Hello");
-            render("bubble", row("bubble", body, { ...options, receipt: true }));
-            const button = document.querySelector(".mx_ReadReceiptGroup_button")!;
+            render("bubble", row("bubble", body, options));
 
-            expect(box(button).right).toBe(contentEnd());
+            expect(contentEnd() - box(document.querySelector(".root")!).right).toBe(margin);
+            expect(document.querySelector(".mx_ReadReceiptGroup")).toBeNull();
         });
 
-        it("keeps the text of an informational row clear of its read receipts", () => {
+        it("runs the text of an informational row to the timeline's content edge, with its time on its last line", () => {
             // Short words fill each line to within a word of its end
             const body = event("bubble", `Alice changed the topic to ${"ab ".repeat(120)}`);
-            render("bubble", row("bubble", body, { states: ["stateInfo"], receipt: true }));
-            const receipts = box(document.querySelector(".mx_ReadReceiptGroup_button")!);
+            render("bubble", row("bubble", body, { states: ["stateInfo"] }));
             const range = document.createRange();
             range.selectNodeContents(document.querySelector(".mx_TextualEvent")!);
             const textEnd = Math.max(...[...range.getClientRects()].map((rect) => rect.right));
 
-            // The 60px the rows of messages keep free at the end for the receipts
-            expect(contentEnd() - textEnd).toBeGreaterThanOrEqual(60);
-            expect(textEnd).toBeLessThan(receipts.left);
+            expect(contentEnd() - textEnd).toBeGreaterThanOrEqual(0);
+            expect(contentEnd() - textEnd).toBeLessThan(30);
+            expect(timeOf(document.querySelector(".root")!).right).toBeLessThanOrEqual(contentEnd());
+        });
+
+        it("lets other people's bubbles grow into the end margin the read receipts had", () => {
+            render("bubble", row("bubble", text(LONG_TEXT)));
+            const list = document.querySelector(".mx_RoomView_MessageList")!;
+            const contentWidth = box(list).width - 2 * parseFloat(getComputedStyle(list).paddingLeft);
+            const line = box(document.querySelector(".line")!);
+
+            // 70% of the row, which starts 49px in and ends 18px from the content edge, and the bubble's padding
+            expect(line.width).toBeCloseTo((contentWidth - 49 - 18) * 0.7 + 24, 0);
+        });
+
+        describe("Telegram's checks on your own messages", () => {
+            const tileOf = (): Element => document.querySelector(".root")!;
+
+            it("follow the time 2px after it, in a 16px box ending in the bubble's padding corner", () => {
+                render("bubble", row("bubble", text("Yes, from ten"), { own: true, status: true }));
+                const checks = box(document.querySelector(".MessageStatusView_status")!);
+                const time = box(document.querySelector(".mx_MessageTimestamp")!);
+
+                expect([checks.width, checks.height]).toEqual([16, 16]);
+                expect(checks.left - time.right).toBe(2);
+                expect(box(document.querySelector(".line")!).right - checks.right).toBe(12);
+            });
+
+            it.each<[string, string, RowOptions]>([
+                ["a text bubble", text("Yes, from ten"), {}],
+                ["a bubble ending in reactions", text("Lunch?"), { footer: reactions(["🔥", 1]) }],
+                [
+                    "an emote",
+                    '<div class="mx_MEmoteBody mx_EventTile_content TextualBody_root TextualBody_emote" dir="auto">*&nbsp;<button class="TextualBody_emoteSender" type="button">Viktor</button>&nbsp;<span class="mx_EventTile_body translate" dir="auto">waves</span></div>',
+                    { states: ["stateEmote", "stateNoBubble"], lineClass: "lineEmote", sender: "none" },
+                ],
+                ["large emoji", bigEmoji("👍"), {}],
+            ])("center on the digits of the time of %s", (_name, body, options) => {
+                render("bubble", row("bubble", body, { ...options, own: true, status: true }));
+
+                expect(Math.abs(checkMiddle(tileOf()) - middle(timeOf(tileOf())))).toBeLessThanOrEqual(0.5);
+            });
+
+            it("keep every last line of your own message clear of the time and themselves", () => {
+                // Messages a narrow letter longer each, so that one of them ends where only the time would fit beside it
+                render(
+                    "bubble",
+                    ...Array.from({ length: 60 }, (_, index) =>
+                        row("bubble", text(`ok ${"i".repeat(index)}`), { own: true, status: true, first: false }),
+                    ),
+                );
+
+                for (const tile of all(".root")) {
+                    const lines = lineBoxes(tile.querySelector(".mx_EventTile_body")!);
+                    const last = lines.at(-1)!;
+                    const end = box(tile.querySelector(".MessageStatusView_status")!);
+                    const time = timeOf(tile);
+
+                    const sharesTimeLine = last.top < time.bottom && time.top < last.bottom;
+
+                    expect(sharesTimeLine && last.right > time.left).toBe(false);
+                    expect(end.left).toBeGreaterThanOrEqual(time.right);
+                }
+            });
+
+            it("sit on the time's badge over a picture, after the time, in its white", () => {
+                render(
+                    "bubble",
+                    `<li class="root mx_EventTile layoutBubble stateOwnEvent stateLastInSection hasStatusSlot">
+                        <div class="line mx_EventTile_line lineMedia lineTimestampOverMedia">
+                            ${slot("Body", `<div style="width: 240px; height: 160px"></div>${timeWithStatus()}`)}
+                        </div>
+                    </li>`,
+                );
+                const badge = document.querySelector(".slotTimestamp")!;
+                const checks = box(document.querySelector(".MessageStatusView_status")!);
+
+                expect(getComputedStyle(badge).backgroundColor).toBe("rgba(0, 0, 0, 0.55)");
+                expect(box(badge).right - checks.right).toBe(8);
+                expect(Math.abs(checkMiddle(tileOf()) - middle(timeOf(tileOf())))).toBeLessThanOrEqual(0.5);
+                expect(getComputedStyle(document.querySelector(".MessageStatusView_status svg")!).color).toBe(
+                    "rgb(255, 255, 255)",
+                );
+            });
         });
 
         describe("an informational row", () => {
@@ -892,21 +1014,14 @@ describe("Timeline shell", () => {
     });
 
     describe("in the thread panel's bubble layout", () => {
-        /** ReadReceiptGroup for `readers` people, as wide as ReadReceiptGroup makes it for them. */
-        const receipts = (readers: number): string => `
-            <div class="mx_ReadReceiptGroup" role="group" aria-label="Read receipts">
-                <div class="mx_AccessibleButton mx_ReadReceiptGroup_button" role="button" tabindex="0">
-                    <span class="mx_ReadReceiptGroup_container" style="width: ${readers * 10 + 6}px"></span>
-                </div>
-            </div>
-        `;
-
-        /** A message in ThreadView, whose Thread shape puts the read receipts in the line. */
+        /** A message in ThreadView, your own with Telegram's checks after its time. */
         function threadRow(
             body: string,
-            { own = false, info = false, readers = 2, first = true, last = true } = {},
+            { own = false, info = false, first = true, last = true } = {},
         ): string {
-            const classes = ["root", "mx_EventTile", "shapeThread", "layoutBubble", "hasReceiptSlot"];
+            const withStatus = own && !info;
+            const classes = ["root", "mx_EventTile", "shapeThread", "layoutBubble"];
+            if (withStatus) classes.push("hasStatusSlot");
             if (own) classes.push("stateOwnEvent");
             if (info) classes.push("stateInfo");
             if (!first) classes.push("stateContinuation");
@@ -919,7 +1034,7 @@ describe("Timeline shell", () => {
                 <li class="${classes.join(" ")}" data-testid="event-tile">
                     <div class="senderDetails">${info ? avatarSlot : ""}${sender}</div>
                     <div class="line mx_EventTile_line">
-                        ${slot("Body", body)}${slot("Timestamp", '<a class="mx_MessageTimestamp content">12:41</a>')}${slot("Receipt", receipts(readers))}
+                        ${slot("Body", body)}${slot("Timestamp", `<a class="mx_MessageTimestamp content">12:41</a>${withStatus ? status() : ""}`)}
                     </div>
                     ${!info && last ? avatarSlot : ""}
                 </li>
@@ -952,23 +1067,27 @@ describe("Timeline shell", () => {
             );
         });
 
-        it("ends the read receipts at the panel's content edge, wherever the bubble ends", () => {
+        it("ends your own bubbles' tails at the panel's content edge, 12px from its end where the scrollbar takes no room, as in the room", () => {
             renderThread(
-                threadRow(text("Short")),
-                threadRow(text("A much longer message that wraps in the thread panel, over two lines or more")),
                 threadRow(text("Yes, from ten"), { own: true }),
-                threadRow(event("bubble", "Alice changed the room name to Fifth floor"), { info: true }),
+                threadRow(text("A reply of my own that wraps in the thread panel, over two lines or more"), {
+                    own: true,
+                }),
             );
+            const panel = box(document.querySelector(".mx_ThreadView")!);
 
-            for (const button of all(".mx_ReadReceiptGroup_button")) expect(box(button).right).toBe(contentEnd());
+            for (const line of all(".line")) {
+                expect(box(line).right + parseFloat(getComputedStyle(line, "::after").width)).toBe(contentEnd());
+            }
+            expect(panel.right - contentEnd()).toBe(12);
         });
 
-        it("ends other people's rows the panel's 36px before its content edge, and your own the room's 60px", () => {
+        it("ends other people's rows the panel's 36px before its content edge, and your own the room's 18px", () => {
             renderThread(threadRow(text("Short")), threadRow(text("Yes, from ten"), { own: true }));
             const [others, own] = all(".root");
 
             expect(contentEnd() - box(others).right).toBe(36);
-            expect(contentEnd() - box(own).right).toBe(60);
+            expect(contentEnd() - box(own).right).toBe(18);
         });
 
         it("starts other people's bubbles where they do in the room, with their avatar 8px before the last one, level with its bottom", () => {
@@ -992,18 +1111,15 @@ describe("Timeline shell", () => {
             expect(picture.left).toBeGreaterThanOrEqual(contentStart);
         });
 
-        // As in the room: the bubble keeps clear of up to three readers, its text and time of four
-        it.each([
-            [2, ".line"],
-            [3, ".line"],
-            [4, ".mx_MessageTimestamp"],
-        ])("keeps your own bubble clear of %i readers' receipts", (readers, selector) => {
-            renderThread(threadRow(text("A reply of my own that wraps in the thread panel"), { own: true, readers }));
-            const button = box(document.querySelector(".mx_ReadReceiptGroup_button")!);
+        it("follows the time of your own reply with its checks, in the bubble's corner and centered on the time", () => {
+            renderThread(threadRow(text("A reply of my own that wraps in the thread panel"), { own: true }));
+            const tile = document.querySelector(".root")!;
+            const checks = box(tile.querySelector(".MessageStatusView_status")!);
 
-            expect(button.right).toBe(contentEnd());
-            expect(box(document.querySelector(selector)!).right).toBeLessThanOrEqual(button.left);
-            expect(bodyText(document.querySelector(".root")!).right).toBeLessThan(button.left);
+            expect(checks.left - box(tile.querySelector(".mx_MessageTimestamp")!).right).toBe(2);
+            expect(box(tile.querySelector(".line")!).right - checks.right).toBe(12);
+            expect(Math.abs(checkMiddle(tile) - middle(timeOf(tile)))).toBeLessThanOrEqual(0.5);
+            expect(document.querySelector(".mx_ReadReceiptGroup")).toBeNull();
         });
 
         it.each([
@@ -1028,13 +1144,14 @@ describe("Timeline shell", () => {
             },
         );
 
-        it("keeps the text of an informational row clear of its read receipts", () => {
+        it("runs the text of an informational row to the panel's content edge", () => {
             renderThread(threadRow(event("bubble", `Alice changed the topic to ${"ab ".repeat(60)}`), { info: true }));
             const range = document.createRange();
             range.selectNodeContents(document.querySelector(".mx_TextualEvent")!);
             const textEnd = Math.max(...[...range.getClientRects()].map((rect) => rect.right));
 
-            expect(textEnd).toBeLessThan(box(document.querySelector(".mx_ReadReceiptGroup_button")!).left);
+            expect(contentEnd() - textEnd).toBeGreaterThanOrEqual(0);
+            expect(contentEnd() - textEnd).toBeLessThan(30);
         });
     });
 

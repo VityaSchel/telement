@@ -175,6 +175,7 @@ const bubbleInfoLineSlotOrder = [
     "event-tile-slot-timestamp",
     "event-tile-slot-actionBar",
 ];
+
 /** In bubbles a message's avatar sits beside the bottom of its bubble, so it follows the line. */
 const bubbleMessageRootSlotOrder = [
     "event-tile-slot-sender",
@@ -1025,7 +1026,18 @@ describe("EventTileView placement", () => {
         const { left, right, top, height } = tile.getBoundingClientRect();
 
         expect(document.elementFromPoint(left - 20, top + height / 2)).toBe(tile);
-        expect(document.elementFromPoint(right + 20, top + height / 2)).toBe(tile);
+        // The end margin is as wide as your own bubble's tail reaches past the row
+        expect(document.elementFromPoint(right + 10, top + height / 2)).toBe(tile);
+    });
+
+    it("keeps no column for read receipts at the end of a bubble row: your own bubble's tail ends at the content edge", () => {
+        renderTiles("bubble", { state: { isOwnEvent: true, lastInSection: true }, slots: { body: textBody("Hello") } });
+        const list = document.querySelector("ol")!.getBoundingClientRect();
+        const line = screen.getByTestId("event-tile-line");
+        const tail = parseFloat(getComputedStyle(line, "::after").width);
+
+        expect(tail).toBe(6);
+        expect(line.getBoundingClientRect().right + tail).toBe(list.right);
     });
 
     it.each(["bubble", "group"] as const)(
@@ -1697,6 +1709,103 @@ describe("EventTileView placement", () => {
             renderTiles("group", { slots: { body: emojiBody("👍") } });
 
             expect(getComputedStyle(time()).backgroundColor).toBe(TRANSPARENT);
+        });
+    });
+
+    describe("the status of your own message", () => {
+        const status = <span data-testid="status" style={{ display: "block", width: 16, height: 16 }} />;
+        const statusRect = (): DOMRect => screen.getByTestId("status").getBoundingClientRect();
+        const timeRect = (): DOMRect => screen.getByText("23:59").getBoundingClientRect();
+        const own = { isOwnEvent: true, lastInSection: true };
+
+        it("puts the status after the time, in the time's slot", () => {
+            renderTiles("bubble", { state: own, slots: { body: textBody("Hello"), status } });
+            const timestampSlot = screen.getByTestId("event-tile-slot-timestamp");
+
+            expect(
+                Array.from(timestampSlot.children).map(
+                    (child) => child.getAttribute("data-testid") ?? child.textContent,
+                ),
+            ).toEqual(["23:59", "event-tile-slot-status"]);
+            expect(screen.getByTestId("event-tile")).toHaveClass(styles.hasStatusSlot);
+        });
+
+        it("shows no status where the time is hidden", () => {
+            renderTiles("bubble", { state: own, slots: { body: textBody("Hello"), timestamp: undefined, status } });
+
+            expect(screen.queryByTestId("status")).not.toBeInTheDocument();
+            expect(screen.getByTestId("event-tile")).not.toHaveClass(styles.hasStatusSlot);
+        });
+
+        it("draws the status 2px after the time, as tall as the time's line and centered on it", () => {
+            renderTiles("bubble", { state: own, slots: { body: textBody("Hello"), status } });
+            const slot = screen.getByTestId("event-tile-slot-status").getBoundingClientRect();
+            const time = timeRect();
+
+            expect(slot.left - time.right).toBe(2);
+            expect(slot.height).toBe(time.height);
+            expect(slot.top + slot.height / 2).toBe(time.top + time.height / 2);
+            expect(statusRect().top + 8).toBe(time.top + time.height / 2);
+        });
+
+        it("ends the time and its status in the bubble's padding corner", () => {
+            renderTiles("bubble", { state: own, slots: { body: textBody("Hello"), status } });
+            const line = screen.getByTestId("event-tile-line").getBoundingClientRect();
+
+            expect(line.right - statusRect().right).toBe(12);
+        });
+
+        it("keeps every last line of a text bubble clear of the time and the status after it", () => {
+            // Messages a narrow letter longer each, so that one of them ends where only the time would fit beside it
+            const tiles = Array.from({ length: 60 }, (_, index) => ({
+                state: own,
+                slots: { body: textBody(`ok ${"i".repeat(index)}`), status },
+            }));
+            renderTiles("bubble", ...tiles);
+
+            for (const tile of screen.getAllByTestId("event-tile")) {
+                const last = lastLineOf(tile.querySelector(".mx_EventTile_body")!);
+                const time = tile
+                    .querySelector("[data-testid='event-tile-slot-timestamp'] > span")!
+                    .getBoundingClientRect();
+                const checks = tile.querySelector("[data-testid='status']")!.getBoundingClientRect();
+                const overlaps = (box: DOMRect): boolean =>
+                    last.top < box.bottom && box.top < last.bottom && last.right > box.left;
+
+                expect(overlaps(time) || overlaps(checks)).toBe(false);
+            }
+        });
+
+        it("puts the status on the badge over a picture, after the time", () => {
+            renderTiles("bubble", {
+                state: own,
+                line: { media: true, timestampOverMedia: true },
+                slots: { body: <div data-testid="picture" style={{ width: 160, height: 120 }} />, status },
+            });
+            const badge = screen.getByTestId("event-tile-slot-timestamp");
+            const box = badge.getBoundingClientRect();
+
+            expect(badge.parentElement).toBe(screen.getByTestId("event-tile-slot-body"));
+            expect(box.right - statusRect().right).toBe(8);
+            expect(getComputedStyle(screen.getByTestId("event-tile-slot-status")).color).toBe("rgb(255, 255, 255)");
+        });
+
+        it("keeps a picture wide enough for its badge with the status", () => {
+            renderTiles("bubble", {
+                state: own,
+                line: { media: true, timestampOverMedia: true },
+                slots: { body: <div data-testid="picture" style={{ width: 1, height: 1 }} />, status },
+            });
+            const minWidth = getComputedStyle(screen.getByTestId("event-tile-line")).getPropertyValue(
+                "--image-body-min-width",
+            );
+            const probe = document.createElement("div");
+            probe.style.width = minWidth;
+            document.body.append(probe);
+
+            // The time's room, the status's 18px and the badge's padding and inset, 8px on each side
+            expect(probe.getBoundingClientRect().width).toBe(30 + 18 + 32);
+            probe.remove();
         });
     });
 });

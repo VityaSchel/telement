@@ -242,6 +242,12 @@
         }
     },
     "telement": {
+        "message_status": {
+            "failed": "Failed to send",
+            "read": "Read",
+            "sending": "Sending",
+            "sent": "Sent"
+        },
         "room_list": {
             "a11y": {
                 "pinned": "Pinned"

@@ -39,9 +39,7 @@ test.describe("Audio player", { tag: ["@no-firefox", "@no-webkit"] }, () => {
 
         // Wait until the file is sent
         await expect(app.page.locator(".mx_RoomView_statusArea_expanded")).not.toBeVisible();
-        await expect(app.page.locator(".mx_EventTile").last().getByRole("status")).toHaveAccessibleName(
-            "Your message was sent",
-        );
+        await expect(app.page.locator(".mx_EventTile").last().getByRole("img", { name: "Sent" })).toBeVisible();
         // wait for the tile to finish loading
         await expect(app.page.getByTestId("audio-player-name").last().filter({ hasText: sampleFile })).toBeVisible();
     };

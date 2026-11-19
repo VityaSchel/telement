@@ -700,11 +700,14 @@ test.describe("Timeline", () => {
             // Upload a file from the message composer
             await app.composerUploadFiles("room", getSampleFilePath("matrix-org-client-versions.json"));
 
-            // Wait until the file is sent
+            // Wait until the file is sent: bubbles, the default layout, mark it with Telegram's checks after its time
             await expect(page.locator(".mx_RoomView_statusArea_expanded")).not.toBeVisible();
-            await expect(page.locator(".mx_EventTile").last().getByRole("status")).toHaveAccessibleName(
-                "Your message was sent",
-            );
+            await expect(
+                page
+                    .locator(".mx_EventTile")
+                    .last()
+                    .getByRole("img", { name: /^(Sent|Read)$/ }),
+            ).toBeVisible();
 
             // Assert that the file size is displayed in kibibytes (1024 bytes), not kilobytes (1000 bytes)
             // See: https://github.com/vector-im/element-web/issues/24866
@@ -1112,9 +1115,13 @@ test.describe("Timeline", () => {
             // Assert that 'reply2' was sent
             await expect(page.locator(".mx_RoomView_body .mx_EventTile").last().getByText(reply2)).toBeVisible();
 
-            await expect(page.locator(".mx_EventTile").last().getByRole("status")).toHaveAccessibleName(
-                "Your message was sent",
-            );
+            // Bubbles, the default layout, mark your sent message with Telegram's checks after its time
+            await expect(
+                page
+                    .locator(".mx_EventTile")
+                    .last()
+                    .getByRole("img", { name: /^(Sent|Read)$/ }),
+            ).toBeVisible();
 
             // Exclude timestamp and read marker from snapshot
             const screenshotOptions = {
@@ -1273,7 +1280,8 @@ test.describe("Timeline", () => {
                 await expect(page.locator(".mx_NewRoomIntro .mx_BaseAvatar")).toBeVisible();
                 const lastEventTileBubble = page.locator(".mx_EventTile").last();
                 await expect(lastEventTileBubble.locator(".mx_MTextBody").first()).toBeVisible();
-                await expect(lastEventTileBubble.getByRole("status")).toHaveAccessibleName("Your message was sent");
+                // Bubbles have no read receipts: your sent message has Telegram's checks after its time
+                await expect(lastEventTileBubble.getByRole("img", { name: /^(Sent|Read)$/ })).toBeVisible();
                 await expect(page.locator(".mx_ScrollPanel")).toMatchScreenshot(
                     "long-strings-with-reply-bubble-layout.png",
                     screenshotOptions,

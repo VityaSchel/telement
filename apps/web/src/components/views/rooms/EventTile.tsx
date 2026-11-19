@@ -33,10 +33,12 @@ import { logger } from "matrix-js-sdk/src/logger";
 import { uniqueId } from "lodash";
 import {
     EventTileView,
+    MessageStatusView,
     NotificationBadgeView,
     useCreateAutoDisposedViewModel,
     TileErrorView,
     type EventTileRenderingMode,
+    type MessageStatus,
 } from "@element-hq/web-shared-components";
 import { copyPlainTextToClipboard } from "@element-hq/element-web-shared-utils";
 
@@ -83,6 +85,7 @@ import {
     getEventTileReceiptState,
     type EventTileReceiptState,
 } from "../../../viewmodels/room/timeline/event-tile/EventTileReceiptState";
+import { getEventTileMessageStatus } from "../../../viewmodels/room/timeline/event-tile/EventTileMessageStatus";
 import {
     getEventTileThread,
     getEventTileThreadState,
@@ -199,6 +202,12 @@ export interface EventTileProps {
 
     /** Opaque read receipt animation state keyed by user ID. */
     readReceiptMap?: { [userId: string]: IReadReceiptPosition };
+
+    /**
+     * Telement: the people other than the user who have read up to this message or past it, most recent first. In the
+     * bubble layout, the user's own message shows them as Telegram's read checks and in the "Seen by" item of its menu.
+     */
+    seenBy?: IReadReceiptProps[];
 
     /** Returns whether the parent panel is unmounting and tile work should be skipped. */
     checkUnmounting?: () => boolean;
@@ -369,6 +378,21 @@ export class UnwrappedEventTile extends React.Component<EventTileProps, IState> 
             ownUserId: client.getSafeUserId(),
             lastSuccessful: this.props.lastSuccessful,
             eventSendStatus: this.props.eventSendStatus,
+            timelineRenderingType: this.context.timelineRenderingType,
+        });
+    }
+
+    /** Telement: Telegram's checks after the time of the user's own message, which only bubbles show. */
+    private get messageStatus(): MessageStatus | undefined {
+        if (this.props.layout !== Layout.Bubble) return undefined;
+        const client = MatrixClientPeg.safeGet();
+
+        return getEventTileMessageStatus({
+            mxEvent: this.props.mxEvent,
+            ownUserId: client.getSafeUserId(),
+            hasRoom: !!client.getRoom(this.props.mxEvent.getRoomId()),
+            eventSendStatus: this.props.eventSendStatus,
+            readerCount: this.props.seenBy?.length ?? 0,
             timelineRenderingType: this.context.timelineRenderingType,
         });
     }
@@ -588,8 +612,8 @@ export class UnwrappedEventTile extends React.Component<EventTileProps, IState> 
                 return false;
             }
 
-            // need to deep-compare readReceipts
-            if (key === "readReceipts") {
+            // need to deep-compare readReceipts, and who has read the message, whose read times its menu shows
+            if (key === "readReceipts" || key === "seenBy") {
                 const rA = objA[key];
                 const rB = objB[key];
                 if (rA === rB) {
@@ -609,6 +633,9 @@ export class UnwrappedEventTile extends React.Component<EventTileProps, IState> 
                     }
                     // one has a member set and the other doesn't?
                     if (rA[j].roomMember !== rB[j].roomMember) {
+                        return false;
+                    }
+                    if (key === "seenBy" && rA[j].ts !== rB[j].ts) {
                         return false;
                     }
                 }
@@ -988,6 +1015,8 @@ export class UnwrappedEventTile extends React.Component<EventTileProps, IState> 
                 link={this.state.interaction.contextMenu.link}
                 loadImage={imageSrc ? (): Promise<Blob> => this.loadContextMenuImage(imageSrc) : undefined}
                 getRelationsForEvent={this.props.getRelationsForEvent}
+                // Who has read the message, which its menu lists when its checks say it is read
+                seenBy={this.messageStatus === "read" ? this.props.seenBy : undefined}
             />
         );
     }
@@ -1084,11 +1113,15 @@ export class UnwrappedEventTile extends React.Component<EventTileProps, IState> 
             timestamp ??
             (eventTileRenderState.timestamp.displayState.useIRCLayout ? <span aria-hidden="true" /> : undefined);
 
-        // Receipt slots.
+        // Receipt slots. Bubbles show no read receipts: the user's own messages have Telegram's checks after their
+        // time instead, and their menu lists who has read them.
         const receiptState = this.receiptState;
         const isFileShape = eventTileRenderState.root.shape === "File";
+        const messageStatus = this.messageStatus;
+        const status = messageStatus ? <MessageStatusView status={messageStatus} /> : undefined;
         const receipt =
             !isFileShape &&
+            this.props.layout !== Layout.Bubble &&
             (this.props.showReadReceipts ||
                 receiptState.shouldShowSentReceipt ||
                 receiptState.shouldShowSendingReceipt) ? (
@@ -1204,6 +1237,7 @@ export class UnwrappedEventTile extends React.Component<EventTileProps, IState> 
                     sender,
                     body,
                     timestamp: timestampSlot,
+                    status,
                     padlock,
                     replyChain,
                     actionBar,

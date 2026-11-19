@@ -17,7 +17,8 @@ import { readSampleFileSync } from "../../sample-files";
 const MEDIA_FILE = readSampleFileSync("riot.png", null);
 
 async function waitForMessageSentStatus(msgTile: Locator): Promise<void> {
-    await expect(msgTile.getByRole("status")).toHaveAccessibleName("Your message was sent");
+    // Telement: bubbles mark your own sent message with Telegram's checks after its time
+    await expect(msgTile.getByRole("img", { name: /^(Sent|Read)$/ })).toBeVisible();
 }
 
 async function sendMessage(page: Page, message: string): Promise<Locator> {

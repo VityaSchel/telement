@@ -111,6 +111,7 @@ export interface EventTileViewClassNames {
     slotReceipt?: string;
     slotReplyChain?: string;
     slotSender?: string;
+    slotStatus?: string;
     slotThreadInfo?: string;
     slotTimestamp?: string;
 }
@@ -125,6 +126,11 @@ export interface EventTileViewSlots {
     body: React.ReactNode;
     /** Timestamp rendered by the shell according to the current layout. */
     timestamp?: React.ReactNode;
+    /**
+     * The status of the user's own message, such as Telegram's read checks. The shell puts it after the timestamp, in
+     * the timestamp's slot, and shows it only with a timestamp.
+     */
+    status?: React.ReactNode;
     /** Padlock rendered by the shell according to the current layout. */
     padlock?: React.ReactNode;
     /** Reply chain rendered above the event body. */

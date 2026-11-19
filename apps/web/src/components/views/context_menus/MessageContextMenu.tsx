@@ -70,7 +70,7 @@ import RoomContext, { TimelineRenderingType } from "../../../contexts/RoomContex
 import EndPollDialog from "../dialogs/EndPollDialog";
 import { isPollEnded } from "../messages/MPollBody";
 import { type ViewRoomPayload } from "../../../dispatcher/payloads/ViewRoomPayload";
-import { type GetRelationsForEvent, type IEventTileOps } from "../rooms/EventTile";
+import { type GetRelationsForEvent, type IEventTileOps, type IReadReceiptProps } from "../rooms/EventTile";
 import { type OpenForwardDialogPayload } from "../../../dispatcher/payloads/OpenForwardDialogPayload";
 import { type OpenReportEventDialogPayload } from "../../../dispatcher/payloads/OpenReportEventDialogPayload";
 import { createMapSiteLinkFromEvent } from "../../../utils/location";
@@ -89,6 +89,7 @@ import { shouldDisplayReply } from "../../../utils/Reply";
 import { checkMediaSavingAllowed, saveMediaAs } from "../../../telement/media/saveMediaAs";
 import { MessageQuickReactions } from "../../../telement/message-context-menu/MessageQuickReactions";
 import { getMessageText } from "../../../telement/message-context-menu/getMessageText";
+import { SeenByMenuItem } from "../../../telement/message-context-menu/SeenByMenuItem";
 
 interface IReplyInThreadButton {
     mxEvent: MatrixEvent;
@@ -152,6 +153,9 @@ interface IProps extends MenuProps {
     loadImage?(): Promise<Blob>;
 
     getRelationsForEvent?: GetRelationsForEvent;
+
+    // Telement: who other than the user has read the user's own message, most recent first, for a "Seen by" item
+    seenBy?: IReadReceiptProps[];
 }
 
 interface IState {
@@ -487,6 +491,7 @@ export default class MessageContextMenu extends React.Component<IProps, IState> 
         delete other.getRelationsForEvent;
         delete other.permalinkCreator;
         delete other.loadImage;
+        delete other.seenBy;
 
         const eventStatus = mxEvent.status;
         const unsentReactionsCount = this.getUnsentReactions().length;
@@ -872,6 +877,16 @@ export default class MessageContextMenu extends React.Component<IProps, IState> 
             );
         }
 
+        // Telement: who has read the message, at the top of the menu as in Telegram's
+        let seenByItemsList: JSX.Element | undefined;
+        if (this.props.seenBy?.length) {
+            seenByItemsList = (
+                <IconizedContextMenuOptionList>
+                    <SeenByMenuItem readers={this.props.seenBy} onFinished={this.closeMenu} />
+                </IconizedContextMenuOptionList>
+            );
+        }
+
         let nativeItemsList: JSX.Element | undefined;
         if (copyButton || quoteButton || copyImageButton || saveAsButton || copyLinkButton) {
             nativeItemsList = (
@@ -970,6 +985,7 @@ export default class MessageContextMenu extends React.Component<IProps, IState> 
                         mx_MessageQuickReactions_menu_hidden: this.state.reactionPickerDisplayed,
                     })}
                 >
+                    {seenByItemsList}
                     {sendItemsList}
                     {nativeItemsList}
                     {quickItemsList}

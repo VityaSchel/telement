@@ -51,6 +51,7 @@ export function EventTileView({
             sender: { style: styles.slotSender, className: "slotSender" },
             body: { style: styles.slotBody, className: "slotBody" },
             timestamp: { style: styles.slotTimestamp, className: "slotTimestamp" },
+            status: { style: styles.slotStatus, className: "slotStatus" },
             padlock: { style: styles.slotPadlock, className: "slotPadlock" },
             replyChain: { style: styles.slotReplyChain, className: "slotReplyChain" },
             actionBar: { style: styles.slotActionBar, className: "slotActionBar" },
@@ -80,6 +81,8 @@ export function EventTileView({
         slotNames.map((slotName) => renderSlot(slotName));
 
     const hasReceiptSlot = isRenderableSlot(slots.receipt);
+    // The status of your own message follows its time, so it shows only where the time does
+    const hasStatusSlot = isRenderableSlot(slots.status) && isRenderableSlot(slots.timestamp);
     const timestampOverMedia = !!lineState?.timestampOverMedia;
     // In bubbles a message's avatar sits beside the bottom of its bubble, so it follows the line. Informational and
     // full-width rows keep it before their content.
@@ -98,6 +101,21 @@ export function EventTileView({
         [styles.lineTimestampOverMedia]: timestampOverMedia,
     });
 
+    // The status sits in the time's slot, after the time, so that it goes wherever the time goes:
+    // the bubble's corner, the badge over a picture or the end of an emote's line.
+    const renderTimestamp = (): React.ReactNode =>
+        renderSlot(
+            "timestamp",
+            hasStatusSlot ? (
+                <>
+                    {slots.timestamp}
+                    {hasStatusSlot && renderSlot("status")}
+                </>
+            ) : (
+                slots.timestamp
+            ),
+        );
+
     // A timestamp drawn over the media sits inside the body slot, so that it follows the media's own size.
     const renderBody = (): React.ReactNode =>
         timestampOverMedia
@@ -105,11 +123,11 @@ export function EventTileView({
                   "body",
                   <>
                       {slots.body}
-                      {renderSlot("timestamp")}
+                      {renderTimestamp()}
                   </>,
               )
             : renderSlot("body");
-    const renderLineTimestamp = (): React.ReactNode => (timestampOverMedia ? null : renderSlot("timestamp"));
+    const renderLineTimestamp = (): React.ReactNode => (timestampOverMedia ? null : renderTimestamp());
 
     const renderRoot = (
         children: React.ReactNode,
@@ -122,6 +140,7 @@ export function EventTileView({
             className={classNames(styles.root, classNameOverrides?.root, {
                 [styles.stateOwnEvent]: root.state.isOwnEvent,
                 [styles.hasReceiptSlot]: hasReceiptSlot,
+                [styles.hasStatusSlot]: hasStatusSlot,
                 [styles.stateInfo]: root.state?.info,
                 [styles.stateBubbleContainer]: root.state?.bubbleContainer,
                 [styles.stateLeftAlignedBubble]: root.state?.leftAlignedBubble,
