@@ -12,6 +12,7 @@ import { flushSync } from "react-dom";
 import { renderToStaticMarkup } from "react-dom/server";
 import { createRoot, type Root } from "react-dom/client";
 import { Avatar, Menu, MenuItem, NavBar, NavItem, Text, TooltipProvider } from "@vector-im/compound-web";
+import { ThreadsIcon } from "@vector-im/compound-design-tokens/assets/web/icons";
 import compoundBase from "@vector-im/compound-design-tokens/assets/web/css/cpd-common-base.css?raw";
 import compoundSemantic from "@vector-im/compound-design-tokens/assets/web/css/cpd-common-semantic.css?raw";
 import compoundLightTheme from "@vector-im/compound-design-tokens/assets/web/css/cpd-theme-light-base.css?raw";
@@ -38,7 +39,35 @@ import { settledStyle, tokenColor } from "../test/telement/computedStyle";
 let stylesheet: HTMLStyleElement;
 let root: Root | undefined;
 
-/** ThreadsActivityCentre's open menu: the tabs, then a row per thread as ThreadsActivityCentreThreadRow renders it. */
+/**
+ * What ThreadsActivityCentre shows without threads: Compound's threads icon over the caption, in a column that Flex
+ * centers.
+ */
+const emptyState = (caption: string): ReturnType<typeof createElement> =>
+    createElement(
+        "div",
+        {
+            className: "mx_ThreadsActivityCentre_emptyState",
+            style: {
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "var(--cpd-space-4x)",
+            },
+        },
+        createElement(ThreadsIcon, { "className": "mx_ThreadsActivityCentre_emptyIcon", "aria-hidden": true }),
+        createElement(
+            Text,
+            { as: "div", size: "sm", weight: "regular", className: "mx_ThreadsActivityCentre_emptyCaption" },
+            caption,
+        ),
+    );
+
+/**
+ * ThreadsActivityCentre's open menu: the tabs, then a row per thread as ThreadsActivityCentreThreadRow renders it, or
+ * the empty state when there are none.
+ */
 async function renderActivityCentre(rooms: string[]): Promise<HTMLElement> {
     const row = (room: string): ReturnType<typeof createElement> =>
         createElement(
@@ -98,7 +127,9 @@ async function renderActivityCentre(rooms: string[]): Promise<HTMLElement> {
                         createElement(
                             "div",
                             { key: "rows", role: "tabpanel", className: "mx_ThreadsActivityCentre_rows" },
-                            rooms.map(row),
+                            rooms.length
+                                ? rooms.map(row)
+                                : emptyState("You don't have unread threads you've participated in."),
                         ),
                     ],
                 }),
@@ -240,6 +271,35 @@ describe("Thread menus", () => {
             expect(row.matches(":focus-visible")).toBe(true);
             const style = getComputedStyle(row);
             expect(`${style.outlineStyle} ${style.outlineWidth} ${style.outlineOffset}`).toBe("solid 2px -2px");
+        });
+
+        it("keeps its height without threads and centers the threads icon in a 56px tile over the caption in it", async () => {
+            const menu = await renderActivityCentre([]);
+            const list = menu.querySelector<HTMLElement>(".mx_ThreadsActivityCentre_rows")!;
+            const icon = menu.querySelector<SVGElement>(".mx_ThreadsActivityCentre_emptyIcon")!;
+            const caption = menu.querySelector<HTMLElement>(".mx_ThreadsActivityCentre_emptyCaption")!;
+            const listBox = list.getBoundingClientRect();
+            const listBottom = listBox.bottom - parseFloat(getComputedStyle(list).paddingBottom);
+            const iconBox = icon.getBoundingClientRect();
+            const captionBox = caption.getBoundingClientRect();
+            const centerX = (box: DOMRect): number => (box.left + box.right) / 2;
+            const iconStyle = getComputedStyle(icon);
+
+            expect(getComputedStyle(list).height).toBe("432px");
+            expect(Math.abs(iconBox.top - listBox.top - (listBottom - captionBox.bottom))).toBeLessThanOrEqual(0.5);
+            expect(Math.abs(centerX(iconBox) - centerX(listBox))).toBeLessThanOrEqual(0.5);
+            expect(Math.abs(centerX(captionBox) - centerX(listBox))).toBeLessThanOrEqual(0.5);
+            expect(captionBox.top - iconBox.bottom).toBe(16);
+
+            expect([iconBox.width, iconBox.height]).toEqual([56, 56]);
+            expect(cornerRadii(icon)).toEqual({ x: 8, y: 8 });
+            expect(iconStyle.backgroundColor).toBe(tokenColor("--cpd-color-alpha-gray-300", menu));
+            expect(iconStyle.paddingTop).toBe("12px");
+            expect(iconStyle.color).toBe(tokenColor("--cpd-color-icon-secondary", menu));
+
+            expect(getComputedStyle(caption).fontSize).toBe("13px");
+            expect(getComputedStyle(caption).textAlign).toBe("center");
+            expect(getComputedStyle(caption).color).toBe(tokenColor("--cpd-color-text-secondary", menu));
         });
 
         it("highlights the row focused with the keyboard as on hover, as the other menus do", async () => {

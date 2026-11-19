@@ -195,8 +195,28 @@
     }
 }
 
-.mx_ThreadsActivityCentre_emptyCaption {
-    /* Typography comes from the Compound Text component. */
+/* With no threads to list, the list keeps its height and holds an icon and a caption in its middle, as the right panel's
+   empty states do: Compound's threads icon in a 56px tile, 16px above the caption, both inside the tabs' 16px edge. */
+.mx_ThreadsActivityCentre_emptyState {
+    block-size: 100%;
+    box-sizing: border-box;
     padding: var(--cpd-space-3x) var(--cpd-space-4x);
+    text-align: center;
+}
+
+.mx_ThreadsActivityCentre_emptyIcon {
+    flex-shrink: 0;
+    inline-size: 56px;
+    block-size: 56px;
+    box-sizing: border-box;
+    padding: var(--cpd-space-3x);
+    border-radius: var(--tl-radius-row);
+    background-color: var(--cpd-color-alpha-gray-300);
+    color: var(--cpd-color-icon-secondary);
+}
+
+.mx_ThreadsActivityCentre_emptyCaption {
+    /* Typography comes from the Compound Text component. A narrower measure keeps the centered caption compact. */
+    max-inline-size: 280px;
     color: var(--cpd-color-text-secondary);
 }

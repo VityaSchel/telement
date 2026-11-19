@@ -8,7 +8,8 @@
 
 import React, { type JSX, useState } from "react";
 import { Menu, MenuItem, NavBar, NavItem, Text } from "@vector-im/compound-web";
-import { NotificationDecoration, type NotificationDecorationData } from "@element-hq/web-shared-components";
+import ThreadsIcon from "@vector-im/compound-design-tokens/assets/web/icons/threads";
+import { Flex, NotificationDecoration, type NotificationDecorationData } from "@element-hq/web-shared-components";
 
 import { ThreadsActivityCentreButton } from "./ThreadsActivityCentreButton";
 import { _t } from "../../../../languageHandler";
@@ -134,9 +135,18 @@ export function ThreadsActivityCentre({ displayButtonLabel }: ThreadsActivityCen
                         />
                     ))}
                     {activeThreads.length === 0 && (
-                        <Text as="div" size="sm" weight="regular" className="mx_ThreadsActivityCentre_emptyCaption">
-                            {activeEmptyCaption}
-                        </Text>
+                        <Flex
+                            className="mx_ThreadsActivityCentre_emptyState"
+                            direction="column"
+                            align="center"
+                            justify="center"
+                            gap="var(--cpd-space-4x)"
+                        >
+                            <ThreadsIcon className="mx_ThreadsActivityCentre_emptyIcon" aria-hidden />
+                            <Text as="div" size="sm" weight="regular" className="mx_ThreadsActivityCentre_emptyCaption">
+                                {activeEmptyCaption}
+                            </Text>
+                        </Flex>
                     )}
                 </div>
             </Menu>

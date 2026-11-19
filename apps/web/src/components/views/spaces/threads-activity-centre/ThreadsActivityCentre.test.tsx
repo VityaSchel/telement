@@ -321,6 +321,21 @@ describe("ThreadsActivityCentre", () => {
         );
     });
 
+    it("should show Compound's outline threads icon above the caption, hidden from screen readers", async () => {
+        cli.getVisibleRooms = vi.fn().mockReturnValue([]);
+        renderTAC();
+        await userEvent.click(getTACButton());
+
+        const emptyState = screen.getByRole("menu").querySelector(".mx_ThreadsActivityCentre_emptyState")!;
+        const [icon, caption] = emptyState.children;
+        const { container: outline } = render(<ThreadsIcon />);
+        expect(icon).toHaveClass("mx_ThreadsActivityCentre_emptyIcon");
+        expect(icon).toHaveAttribute("aria-hidden", "true");
+        expect(icon.innerHTML).toBe(outline.querySelector("svg")!.innerHTML);
+        expect(caption).toHaveClass("mx_ThreadsActivityCentre_emptyCaption");
+        expect(caption).toHaveTextContent("You don't have unread threads you've participated in.");
+    });
+
     it("should block Ctrl/CMD + k shortcut", async () => {
         cli.getVisibleRooms = vi.fn().mockReturnValue([roomWithHighlight]);
 
