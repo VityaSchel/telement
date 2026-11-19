@@ -17,14 +17,17 @@ Please see LICENSE files in the repository root for full details.
     border-radius: 1.5rem;
     padding: 2px;
 
-    background-color: var(--cpd-color-bg-canvas-disabled);
-    border: 1px solid var(--cpd-color-border-disabled);
+    /* Telement: drawn as Compound's switch is (_CompoundOverrides.pcss, telement/tokens.css), its track filled with the
+       separator gray when off rather than outlined, and its knob white with a soft shadow in both states. The border
+       stays, in the track's color, for forced colors. */
+    background-color: var(--cpd-color-separator-primary);
+    border: 1px solid var(--cpd-color-separator-primary);
     cursor: not-allowed;
 
     &.mx_ToggleSwitch_enabled {
         cursor: pointer;
-        background-color: var(--cpd-color-bg-canvas-default);
-        border: var(--cpd-border-width-1) solid var(--cpd-color-border-interactive-primary);
+        background-color: var(--tl-color-bg-switch-off, var(--cpd-color-separator-primary));
+        border: var(--cpd-border-width-1) solid var(--tl-color-bg-switch-off, var(--cpd-color-separator-primary));
 
         &.mx_ToggleSwitch_on {
             background-color: var(--cpd-color-bg-accent-rest);
@@ -32,7 +35,8 @@ Please see LICENSE files in the repository root for full details.
         }
 
         > .mx_ToggleSwitch_ball {
-            background-color: var(--cpd-color-icon-secondary);
+            background-color: var(--tl-color-on-accent);
+            box-shadow: var(--tl-shadow-switch-knob);
         }
     }
 

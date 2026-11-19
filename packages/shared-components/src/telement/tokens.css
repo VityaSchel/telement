@@ -385,3 +385,20 @@ Please see LICENSE files in the repository root for full details.
         --tl-color-bg-settings-pane: var(--cpd-color-theme-bg);
     }
 }
+
+/*
+ * Switches are drawn as Telegram's (_CompoundOverrides.pcss, _ToggleSwitch.pcss): when off, the track is filled with
+ * the separator gray of the surface the switch is on rather than outlined, and the knob is white with a soft shadow, as
+ * when on. That gray is under 3:1 against the page, as in Telegram, so high contrast themes fill the track with
+ * Compound's outline color instead, 3:1 or more against the page and the settings cards. Elsewhere the track's color is
+ * left to the surface, as dialogs and menus raise their separator (floatingSurface in _common.pcss).
+ */
+:root,
+[class*="cpd-theme-"] {
+    --tl-shadow-switch-knob: 0 1px 3px rgb(0 0 0 / 25%), 0 0 1px rgb(0 0 0 / 20%);
+}
+
+.cpd-theme-light-hc.cpd-theme-light-hc,
+.cpd-theme-dark-hc.cpd-theme-dark-hc {
+    --tl-color-bg-switch-off: var(--cpd-color-border-interactive-primary);
+}

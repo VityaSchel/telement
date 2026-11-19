@@ -422,13 +422,111 @@ describe("Telement's chrome colors", () => {
             const pageGray = tokenColor("--cpd-color-bg-canvas-default", container);
             const dialogGray = getComputedStyle(dialog).backgroundColor;
 
-            // Compound's disabled fill is a step lighter than a dark page, so it is a step lighter than a dark dialog too
+            // The separator a disabled track is filled with is a step lighter than a dark page, so a dark dialog raises it
             expect(tracks(dialog)).toEqual(
-                tracks(page).map((track) => (isDark(theme) ? tokenColor("--cpd-color-gray-400", container) : track)),
+                tracks(page).map((track) => (isDark(theme) ? tokenColor("--cpd-color-gray-500", container) : track)),
             );
             expect(tracks(dialog).map((track) => side(track, dialogGray))).toEqual(
                 tracks(page).map((track) => side(track, pageGray)),
             );
+        });
+
+        /** Compound's switch and the legacy one, off and on, enabled and disabled, on the page and in a dialog. */
+        function renderSwitches(): { page: HTMLElement; dialog: HTMLElement } {
+            const legacy = (classes: string): string =>
+                `<div class="mx_ToggleSwitch ${classes}"><div class="mx_ToggleSwitch_ball"></div></div>`;
+            const switches = [
+                renderToStaticMarkup(createElement(ToggleInput, { "aria-label": "off" })),
+                renderToStaticMarkup(createElement(ToggleInput, { "aria-label": "on", "defaultChecked": true })),
+                renderToStaticMarkup(createElement(ToggleInput, { "aria-label": "disabled off", "disabled": true })),
+                renderToStaticMarkup(
+                    createElement(ToggleInput, {
+                        "aria-label": "disabled on",
+                        "disabled": true,
+                        "defaultChecked": true,
+                    }),
+                ),
+                legacy("mx_ToggleSwitch_enabled"),
+                legacy("mx_ToggleSwitch_enabled mx_ToggleSwitch_on"),
+                legacy(""),
+                legacy("mx_ToggleSwitch_on"),
+            ].join("");
+            const container = render(theme, `<div>${switches}</div><div class="mx_Dialog">${switches}</div>`);
+            const [page, dialog] = [...container.children] as HTMLElement[];
+            return { page, dialog };
+        }
+
+        /** The track and knob of each switch in `scope`, in the order renderSwitches() draws them. */
+        function switchParts(scope: HTMLElement): { track: HTMLElement; knob: CSSStyleDeclaration }[] {
+            const compound = [...scope.querySelectorAll<HTMLElement>("input[role='switch'] + div")].map((track) => ({
+                track,
+                knob: getComputedStyle(track, "::after"),
+            }));
+            const legacy = [...scope.querySelectorAll<HTMLElement>(".mx_ToggleSwitch")].map((track) => ({
+                track,
+                knob: getComputedStyle(track.querySelector(".mx_ToggleSwitch_ball")!),
+            }));
+            return [...compound, ...legacy];
+        }
+
+        it("fills an off switch's track with the separator gray, Compound's outline gray in high contrast", () => {
+            const { page, dialog } = renderSwitches();
+
+            for (const scope of [page, dialog]) {
+                // A dialog's color is also the settings cards' (telement/tokens.css)
+                const surface =
+                    scope === dialog
+                        ? getComputedStyle(dialog).backgroundColor
+                        : tokenColor("--cpd-color-bg-canvas-default", scope);
+                const fill = tokenColor(
+                    theme.endsWith("-hc") ? "--cpd-color-border-interactive-primary" : "--cpd-color-separator-primary",
+                    scope,
+                );
+                const [compoundOff, , , , legacyOff] = switchParts(scope);
+
+                for (const { track } of [compoundOff, legacyOff]) {
+                    const style = getComputedStyle(track);
+                    expect(style.backgroundColor).toBe(fill);
+                    // The border stays for forced colors, in the track's color
+                    expect([style.borderTopWidth, style.borderTopColor]).toEqual(["1px", fill]);
+                    // Telegram's track is under 3:1, so high contrast themes have the outline's 3:1 instead
+                    expect(contrast(fill, surface)).toBeGreaterThanOrEqual(theme.endsWith("-hc") ? 3 : 1.2);
+                }
+            }
+        });
+
+        it("draws a white knob with a soft shadow on an enabled switch, off and on alike", () => {
+            const { page, dialog } = renderSwitches();
+
+            for (const scope of [page, dialog]) {
+                const [compoundOff, compoundOn, , , legacyOff, legacyOn] = switchParts(scope);
+                for (const { knob } of [compoundOff, compoundOn, legacyOff, legacyOn]) {
+                    expect(knob.backgroundColor).toBe("rgb(255, 255, 255)");
+                    expect(knob.boxShadow).toBe(
+                        "rgba(0, 0, 0, 0.25) 0px 1px 3px 0px, rgba(0, 0, 0, 0.2) 0px 0px 1px 0px",
+                    );
+                }
+            }
+        });
+
+        it("keeps a disabled switch's knob flat, in Compound's disabled gray when off, on the filled track", () => {
+            const { page, dialog } = renderSwitches();
+
+            for (const scope of [page, dialog]) {
+                const separator = tokenColor("--cpd-color-separator-primary", scope);
+                const disabledGray = tokenColor("--cpd-color-bg-action-primary-disabled", scope);
+                const [, , compoundOff, compoundOn, , , legacyOff, legacyOn] = switchParts(scope);
+
+                for (const { track, knob } of [compoundOff, legacyOff]) {
+                    expect(getComputedStyle(track).backgroundColor).toBe(separator);
+                    expect(getComputedStyle(track).borderTopColor).toBe(separator);
+                    expect([knob.backgroundColor, knob.boxShadow]).toEqual([disabledGray, "none"]);
+                }
+                for (const { track, knob } of [compoundOn, legacyOn]) {
+                    expect(getComputedStyle(track).backgroundColor).toBe(disabledGray);
+                    expect([knob.backgroundColor, knob.boxShadow]).toEqual(["rgb(255, 255, 255)", "none"]);
+                }
+            }
         });
 
         it("draws the settings' join rule dividers in a dialog as its other separators", () => {

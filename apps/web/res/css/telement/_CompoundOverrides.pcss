@@ -127,6 +127,27 @@ input + [class^="_ui_"] {
 }
 
 /*
+ * Compound's switch, drawn as Telegram's (telement/tokens.css): when off, its track is filled with the separator gray
+ * instead of outlined and its knob is white, as when on, and the knob has a soft shadow in both states. The border
+ * stays, in the track's color, so that forced colors still outline the track. A disabled switch keeps Compound's
+ * disabled knob and checked track, with the off track filled with the separator and the knob flat.
+ */
+input[role="switch"]:not(:checked, [readonly]) + [class^="_ui_"] {
+    background: var(--tl-color-bg-switch-off, var(--cpd-color-separator-primary));
+    border-color: var(--tl-color-bg-switch-off, var(--cpd-color-separator-primary));
+}
+
+input[role="switch"]:not([disabled], [readonly]) + [class^="_ui_"]::after {
+    --dot-color: var(--tl-color-on-accent);
+    box-shadow: var(--tl-shadow-switch-knob);
+}
+
+input[role="switch"][disabled]:not(:checked) + [class^="_ui_"] {
+    background: var(--cpd-color-separator-primary);
+    border-color: var(--cpd-color-separator-primary);
+}
+
+/*
  * Compound's info alert is drawn in its base blues rather than the info tokens, which follow the accent
  * (telement/tokens.css), so it showed a second blue beside the accent. The element type keeps this ahead of
  * Compound's rule where Compound's stylesheet comes later (shared-components tests).
