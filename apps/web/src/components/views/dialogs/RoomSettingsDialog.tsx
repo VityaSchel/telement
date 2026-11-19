@@ -222,22 +222,35 @@ class RoomSettingsDialog extends React.Component<IProps, IState> {
         return tabs as NonEmptyArray<Tab<RoomSettingsTab>>;
     }
 
-    public render(): React.ReactNode {
+    /**
+     * The dialog's title, "<room name>: <tab>" as the user settings dialog titles itself "Settings: <tab>", with the
+     * room's name in the stronger weight. When the active tab isn't available, TabbedView shows none and the title is
+     * the room's name alone.
+     */
+    private renderTitle(tabs: Tab<RoomSettingsTab>[]): React.ReactNode {
         const roomName = this.state.room.name;
+        const activeTab = tabs.find((tab) => tab.id === this.state.activeTabId);
+        if (!activeTab) return roomName;
+        return _t(
+            "room_settings|dialog_title",
+            { roomName, tabName: _t(activeTab.label) },
+            { strong: (sub) => <span className="mx_RoomSettingsDialog_title_strong">{sub}</span> },
+        );
+    }
+
+    public render(): React.ReactNode {
+        const tabs = this.getTabs();
         return (
             <SDKContext.Provider value={this.props.sdkContext}>
                 <BaseDialog
                     className="mx_RoomSettingsDialog"
                     hasCancel={true}
                     onFinished={this.props.onFinished}
-                    title={_t("room_settings|title", { roomName })}
+                    title={this.renderTitle(tabs)}
+                    titleClass="mx_RoomSettingsDialog_title"
                 >
                     <div className="mx_SettingsDialog_content">
-                        <TabbedView
-                            tabs={this.getTabs()}
-                            activeTabId={this.state.activeTabId}
-                            onChange={this.onTabChange}
-                        />
+                        <TabbedView tabs={tabs} activeTabId={this.state.activeTabId} onChange={this.onTabChange} />
                     </div>
                 </BaseDialog>
             </SDKContext.Provider>

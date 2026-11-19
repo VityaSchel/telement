@@ -147,7 +147,7 @@ export default class AdvancedRoomSettingsTab extends React.Component<IProps, ISt
 
         return (
             <SettingsTab>
-                <SettingsSection heading={_t("common|advanced")}>
+                <SettingsSection>
                     <SettingsSubsection
                         heading={
                             room.isSpaceRoom()

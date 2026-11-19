@@ -83,13 +83,33 @@ describe("<RoomSettingsDialog />", () => {
     });
 
     it("updates when roomId prop changes", () => {
-        const { rerender, getByText } = getComponent(undefined, roomId);
+        const { rerender } = getComponent(undefined, roomId);
 
-        expect(getByText(`Room Settings - ${room.name}`)).toBeInTheDocument();
+        expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(`${room.name}: General`);
 
         rerender(<RoomSettingsDialog roomId={room2.roomId} onFinished={vi.fn()} sdkContext={sdkContext} />);
 
-        expect(getByText(`Room Settings - ${room2.name}`)).toBeInTheDocument();
+        expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(`${room2.name}: General`);
+    });
+
+    it("titles itself like the user settings dialog: the room's name in the strong part, then the tab's name", () => {
+        getComponent();
+        const title = screen.getByRole("heading", { level: 1 });
+
+        expect(title).toHaveClass("mx_RoomSettingsDialog_title");
+        expect(title.querySelector(".mx_RoomSettingsDialog_title_strong")).toHaveTextContent(`${room.name}:`);
+        expect(screen.getByRole("dialog")).toHaveAccessibleName(`${room.name}: General`);
+
+        fireEvent.click(screen.getByText("Polls"));
+        expect(title).toHaveTextContent(`${room.name}: Polls`);
+    });
+
+    it.each(["General", "Notifications"])("doesn't repeat the %s tab's name as a heading in its content", (tabName) => {
+        getComponent();
+        fireEvent.click(screen.getByRole("tab", { name: tabName }));
+
+        expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(`${room.name}: ${tabName}`);
+        expect(screen.queryByRole("heading", { name: tabName, level: 2 })).not.toBeInTheDocument();
     });
 
     describe("Settings tabs", () => {

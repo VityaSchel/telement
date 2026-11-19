@@ -457,7 +457,7 @@ export default class RolesRoomSettingsTab extends React.Component<IProps, RolesR
 
         return (
             <SettingsTab>
-                <SettingsSection heading={_t("room_settings|permissions|title")}>
+                <SettingsSection>
                     {privilegedUsersSection}
                     {canChangeLevels && <AddPrivilegedUsers room={room} defaultUserLevel={defaultUserLevel} />}
                     {mutedUsersSection}

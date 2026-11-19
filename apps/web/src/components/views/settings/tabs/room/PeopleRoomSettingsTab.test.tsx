@@ -51,9 +51,9 @@ describe("PeopleRoomSettingsTab", () => {
     const getGroup = () => screen.getByRole("group", { name: "Asking to join" });
     const getParagraph = () => document.querySelector("p");
 
-    it("renders a heading", () => {
+    it("leaves the tab's name to the dialog's title rather than repeating it as a heading", () => {
         getComponent(room);
-        expect(screen.getByRole("heading")).toHaveTextContent("People");
+        expect(screen.queryByRole("heading")).not.toBeInTheDocument();
     });
 
     it('renders a group "asking to join"', () => {

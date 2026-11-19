@@ -95,7 +95,7 @@ export default class BridgeSettingsTab extends React.Component<IProps> {
 
         return (
             <SettingsTab>
-                <SettingsSection heading={_t("room_settings|bridges|title")}>{content}</SettingsSection>
+                <SettingsSection>{content}</SettingsSection>
             </SettingsTab>
         );
     }

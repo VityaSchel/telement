@@ -163,7 +163,7 @@ export default class NotificationsSettingsTab extends React.Component<IProps, IS
 
         return (
             <SettingsTab>
-                <SettingsSection heading={_t("notifications|enable_prompt_toast_title")}>
+                <SettingsSection>
                     <div className="mx_NotificationSettingsTab_notificationsSection">
                         <StyledRadioGroup
                             name="roomNotificationSetting"

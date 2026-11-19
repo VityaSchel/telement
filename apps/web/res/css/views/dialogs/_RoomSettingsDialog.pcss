@@ -13,3 +13,13 @@ Please see LICENSE files in the repository root for full details.
     margin: 0 auto;
     padding-right: 80px;
 }
+
+/* Telement: titled like the user settings dialog (_UserSettingsDialog.pcss), the room's name in semibold before the
+   tab's name in regular weight */
+.mx_Dialog_header > .mx_RoomSettingsDialog_title {
+    font-weight: var(--cpd-font-weight-regular);
+
+    .mx_RoomSettingsDialog_title_strong {
+        font-weight: var(--cpd-font-weight-semibold);
+    }
+}

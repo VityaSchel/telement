@@ -114,7 +114,7 @@ interface Props {
 export const VoipRoomSettingsTab: React.FC<Props> = ({ room }) => {
     return (
         <SettingsTab>
-            <SettingsSection heading={_t("settings|voip|title")}>
+            <SettingsSection>
                 <Form.Root
                     onSubmit={(evt) => {
                         evt.preventDefault();

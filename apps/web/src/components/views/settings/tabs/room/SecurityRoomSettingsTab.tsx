@@ -544,7 +544,7 @@ export default class SecurityRoomSettingsTab extends React.Component<IProps, ISt
                         evt.stopPropagation();
                     }}
                 >
-                    <SettingsSection heading={_t("room_settings|security|title")}>
+                    <SettingsSection>
                         <SettingsFieldset legend={_t("settings|security|encryption_section")}>
                             {isEncryptionLoading ? (
                                 <InlineSpinner />

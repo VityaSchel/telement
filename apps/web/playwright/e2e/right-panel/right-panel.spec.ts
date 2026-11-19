@@ -110,7 +110,7 @@ test.describe("RightPanel", () => {
 
             await page.getByRole("menuitem", { name: "Settings" }).click();
             await expect(page.locator(".mx_RoomSettingsDialog")).toBeVisible();
-            await expect(page.locator(".mx_Dialog_title").getByText("Room Settings - " + ROOM_NAME)).toBeVisible();
+            await expect(page.locator(".mx_Dialog_title")).toHaveText(`${ROOM_NAME}: General`);
         });
 
         test("should handle viewing files", async ({ page, app }) => {

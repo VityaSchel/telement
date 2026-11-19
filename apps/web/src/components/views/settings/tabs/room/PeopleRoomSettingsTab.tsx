@@ -142,7 +142,7 @@ export const PeopleRoomSettingsTab: FC<{ room: Room }> = ({ room }) => {
 
     return (
         <SettingsTab>
-            <SettingsSection heading={_t("common|people")}>
+            <SettingsSection>
                 <SettingsFieldset legend={_t("room_settings|people|knock_section")}>
                     {knockMembers.length ? (
                         knockMembers.map((knockMember) => (

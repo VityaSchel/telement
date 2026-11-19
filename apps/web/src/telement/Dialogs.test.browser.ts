@@ -22,6 +22,7 @@ import spacePillButtonStyles from "../../res/css/structures/_SpacePillButton.pcs
 import tabbedViewStyles from "../../res/css/structures/_TabbedView.pcss?raw";
 import createRoomDialogStyles from "../../res/css/views/dialogs/_CreateRoomDialog.pcss?raw";
 import inviteDialogStyles from "../../res/css/views/dialogs/_InviteDialog.pcss?raw";
+import roomSettingsDialogStyles from "../../res/css/views/dialogs/_RoomSettingsDialog.pcss?raw";
 import settingsDialogStyles from "../../res/css/views/dialogs/_SettingsDialog.pcss?raw";
 import unpinAllDialogStyles from "../../res/css/views/dialogs/_UnpinAllDialog.pcss?raw";
 import userSettingsDialogStyles from "../../res/css/views/dialogs/_UserSettingsDialog.pcss?raw";
@@ -42,6 +43,7 @@ const APP_STYLES = [
     tabbedViewStyles,
     createRoomDialogStyles,
     inviteDialogStyles,
+    roomSettingsDialogStyles,
     settingsDialogStyles,
     unpinAllDialogStyles,
     userSettingsDialogStyles,
@@ -395,6 +397,19 @@ describe("Dialogs", () => {
             expect([title.fontSize, title.fontWeight]).toEqual(["20px", "400"]);
             expect(getComputedStyle(get(".mx_UserSettingsDialog_title_strong")).fontWeight).toBe("600");
             expect(middle(box(".mx_Dialog_title"))).toBe(middle(box(".mx_Dialog_cancelButton")));
+        });
+
+        it("titles the room settings dialog the same way, the room's name in semibold before the tab's in regular", () => {
+            renderDialog(
+                "mx_RoomSettingsDialog",
+                `<span class="mx_RoomSettingsDialog_title_strong">Design team:</span> General`,
+                "",
+                "mx_RoomSettingsDialog_title",
+            );
+            const title = getComputedStyle(get(".mx_Dialog_title"));
+
+            expect([title.fontSize, title.fontWeight]).toEqual(["20px", "400"]);
+            expect(getComputedStyle(get(".mx_RoomSettingsDialog_title_strong")).fontWeight).toBe("600");
         });
 
         it("starts the tabs 16px under the title, their icons on its edge", () => {

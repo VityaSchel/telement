@@ -2087,6 +2087,7 @@
             "title": "Bridges"
         },
         "delete_avatar_label": "Delete avatar",
+        "dialog_title": "<strong>%(roomName)s:</strong> %(tabName)s",
         "general": {
             "alias_field_has_domain_invalid": "Missing domain separator e.g. (:domain.org)",
             "alias_field_has_localpart_invalid": "Missing room name or separator e.g. (my-room:domain.org)",
@@ -2271,7 +2272,6 @@
             "strict_encryption": "Only send messages to verified users.",
             "title": "Security & Privacy"
         },
-        "title": "Room Settings - %(roomName)s",
         "upload_avatar_label": "Upload avatar",
         "visibility": {
             "alias_section": "Address",
