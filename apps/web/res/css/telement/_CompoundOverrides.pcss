@@ -99,10 +99,11 @@ Please see LICENSE files in the repository root for full details.
         }
     }
 
-    /* A title reads like a separator's label: 12px from the menu's top, its text where the items' content starts */
+    /* A title is a row as tall as the items, its line included, which spans the item highlights like a separator. Its
+       text starts where the items' content does, centered above the line. */
     > [class*="_menu-title_"] {
         margin: 0 var(--tl-inset-menu) var(--tl-menu-separator-spacing);
-        padding: var(--cpd-space-2x) var(--cpd-space-3x) calc(var(--cpd-space-2x) - var(--cpd-border-width-1));
+        padding: calc((var(--tl-menu-row-size) - 1lh - var(--cpd-border-width-1)) / 2) var(--cpd-space-3x);
     }
 }
 

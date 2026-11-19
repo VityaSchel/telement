@@ -11,7 +11,7 @@ import { createElement, type ReactNode } from "react";
 import { flushSync } from "react-dom";
 import { createRoot, type Root } from "react-dom/client";
 import { Menu, MenuItem, MenuTitle, RadioMenuItem, Separator, TooltipProvider } from "@vector-im/compound-web";
-import { AttachmentIcon, ImageIcon, PollsIcon } from "@vector-im/compound-design-tokens/assets/web/icons";
+import { AttachmentIcon, CheckIcon, ImageIcon, PollsIcon } from "@vector-im/compound-design-tokens/assets/web/icons";
 import compoundBase from "@vector-im/compound-design-tokens/assets/web/css/cpd-common-base.css?raw";
 import compoundSemantic from "@vector-im/compound-design-tokens/assets/web/css/cpd-common-semantic.css?raw";
 import compoundLightTheme from "@vector-im/compound-design-tokens/assets/web/css/cpd-theme-light-base.css?raw";
@@ -25,8 +25,11 @@ import compoundOverrides from "../../res/css/telement/_CompoundOverrides.pcss?ra
 let stylesheet: HTMLStyleElement;
 let root: Root | undefined;
 
-/** Renders an open Compound menu with real Compound components, so the hashed class names are compound-web's. */
-async function renderMenu(children: ReactNode[]): Promise<HTMLElement> {
+/**
+ * Renders an open Compound menu with real Compound components, so the hashed class names are compound-web's. With
+ * `title`, the menu shows its title above the children, as the space menu does.
+ */
+async function renderMenu(children: ReactNode[], title?: string): Promise<HTMLElement> {
     const container = document.createElement("div");
     document.body.append(container);
     root = createRoot(container);
@@ -38,8 +41,8 @@ async function renderMenu(children: ReactNode[]): Promise<HTMLElement> {
                 createElement(Menu, {
                     open: true,
                     onOpenChange: () => {},
-                    title: "Attachment",
-                    showTitle: false,
+                    title: title ?? "Attachment",
+                    showTitle: title !== undefined,
                     trigger: createElement("button", { type: "button" }, "Open"),
                     align: "start",
                     children,
@@ -146,23 +149,41 @@ describe("Compound's menus", () => {
         expect(below.top - separator.bottom).toBe(2);
     });
 
-    it("puts a title's text where the items' content starts, 12px from the top, and centers radios on their rows", async () => {
-        const menu = await renderMenu([
-            createElement(MenuTitle, { key: "title", title: "Sort" }),
-            createElement(RadioMenuItem, { key: "a", label: "Activity", checked: true, onSelect: () => {} }),
-            createElement(RadioMenuItem, { key: "b", label: "A-Z", checked: false, onSelect: () => {} }),
-        ]);
+    // The sort menu puts a title of its own first, the space menu shows the menu's
+    it.each([
+        ["a title item", false],
+        ["the menu's own title", true],
+    ])("puts %s in a 32px row like the items, its text where the items' content starts", async (_, ownTitle) => {
+        const options = [item("Latest activity"), item("A-Z")];
+        const menu = ownTitle
+            ? await renderMenu(options, "Studio")
+            : await renderMenu([createElement(MenuTitle, { key: "title", title: "Sort" }), ...options]);
         const edge = menu.getBoundingClientRect();
         const title = menu.querySelector("h3")!;
         const text = document.createRange();
         text.selectNodeContents(title);
         const titleBox = title.getBoundingClientRect();
+        const style = getComputedStyle(title);
 
-        expect(text.getBoundingClientRect().left - edge.left).toBe(16);
-        expect(titleBox.top - edge.top + parseFloat(getComputedStyle(title).paddingTop)).toBe(12);
-        // Its line spans the item highlights, like a separator, 2px above the first item
+        // Inset from the menu's top as the items are, and as tall as them with its line, which spans the item
+        // highlights like a separator, 2px above the first item
+        expect(titleBox.top - edge.top).toBe(4);
+        expect(titleBox.height).toBe(32);
         expect(titleBox.left - edge.left).toBe(4);
+        expect(edge.right - titleBox.right).toBe(4);
+        expect(style.borderBottomWidth).toBe("1px");
         expect(rows(menu)[0].getBoundingClientRect().top - titleBox.bottom).toBe(2);
+        // Its line of text in the middle of the row above the line
+        expect(style.paddingTop).toBe(style.paddingBottom);
+        expect(text.getBoundingClientRect().left - edge.left).toBe(16);
+    });
+
+    it("centers radios on their rows, 16px from the menu's edge", async () => {
+        const menu = await renderMenu([
+            createElement(RadioMenuItem, { key: "a", label: "Activity", checked: true, onSelect: () => {} }),
+            createElement(RadioMenuItem, { key: "b", label: "A-Z", checked: false, onSelect: () => {} }),
+        ]);
+        const edge = menu.getBoundingClientRect();
         for (const row of rows(menu)) {
             const rect = row.getBoundingClientRect();
             const radio = row.querySelector(":scope > div")!.getBoundingClientRect();
@@ -170,6 +191,37 @@ describe("Compound's menus", () => {
             expect(radio.top + radio.height / 2).toBe(rect.top + rect.height / 2);
             expect(radio.left - edge.left).toBe(16);
         }
+    });
+
+    it("marks the chosen option with a check at its end, 16px from the menu's edge, as Telegram does", async () => {
+        // The sort menu's options (OptionMenuView), which are radio items without the radio
+        const option = (label: string, checked: boolean): ReactNode =>
+            createElement(
+                MenuItem,
+                {
+                    "key": label,
+                    "role": "menuitemradio",
+                    "aria-checked": checked,
+                    label,
+                    "onSelect": () => {},
+                    "hideChevron": true,
+                },
+                checked ? createElement(CheckIcon, { width: 16, height: 16 }) : null,
+            );
+        const menu = await renderMenu([option("Latest activity", true), option("A-Z", false)]);
+        const edge = menu.getBoundingClientRect();
+        const [chosen, other] = rows(menu);
+
+        for (const row of [chosen, other]) {
+            expect(row.getBoundingClientRect().height).toBe(32);
+            // The labels start on the 16px edge, as those of other items without an icon
+            expect(row.querySelector("span")!.getBoundingClientRect().left - edge.left).toBe(16);
+        }
+        const rowBox = chosen.getBoundingClientRect();
+        const check = chosen.querySelector("svg")!.getBoundingClientRect();
+        expect(edge.right - check.right).toBe(16);
+        expect(check.top + check.height / 2).toBe(rowBox.top + rowBox.height / 2);
+        expect(other.querySelector("svg")).toBeNull();
     });
 
     it("draws the keyboard focus ring inside the focused item's highlight", async () => {

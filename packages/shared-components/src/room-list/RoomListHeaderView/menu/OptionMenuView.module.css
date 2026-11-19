@@ -9,3 +9,10 @@
     /* For first title, there is already enough space at the top */
     margin-top: 0;
 }
+
+/* The active option's check at the item's end, a menu icon's size in the text color, as in Telegram's menus */
+.check {
+    inline-size: var(--cpd-space-4x);
+    block-size: var(--cpd-space-4x);
+    color: var(--cpd-color-text-primary);
+}
