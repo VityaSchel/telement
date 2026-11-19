@@ -57,6 +57,8 @@
         .userId {
             color: var(--cpd-color-text-secondary);
             text-align: center;
+            /* Telement: drawn as typed (telement/tokens.css) */
+            font-feature-settings: var(--tl-font-feature-settings-identifier);
         }
 
         .createAccount {

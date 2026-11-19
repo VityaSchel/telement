@@ -71,9 +71,10 @@
 }
 
 /* A pill row's description, such as a user ID or room address, ends where the row's content does, like what ends a
-   menu item */
+   menu item, and is drawn as typed (telement/tokens.css) */
 .mx_Autocomplete_Completion_pill .mx_Autocomplete_Completion_description {
     text-align: end;
+    font-feature-settings: var(--tl-font-feature-settings-identifier);
 }
 
 .mx_Autocomplete_Completion_container_pill {

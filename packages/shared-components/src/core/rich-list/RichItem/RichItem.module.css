@@ -78,6 +78,11 @@
     line-height: var(--cpd-font-line-height-tight);
 }
 
+/* Telement: the description, a person's ID where the app lists people, is drawn as typed (telement/tokens.css) */
+.description {
+    font-feature-settings: var(--tl-font-feature-settings-identifier);
+}
+
 /* A white check on the accent fill, which is deeper in dark themes (telement/tokens.css), in the avatar's 36px */
 .checkmark {
     grid-area: avatar;

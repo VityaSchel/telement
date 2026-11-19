@@ -27,6 +27,8 @@
         color: var(--cpd-color-text-secondary);
         font-size: var(--cpd-font-size-body-sm);
         margin-inline-start: 5px;
+        /* Telement: drawn as typed (telement/tokens.css) */
+        font-feature-settings: var(--tl-font-feature-settings-identifier);
     }
 
     .userStatus {

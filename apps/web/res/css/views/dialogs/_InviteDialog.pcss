@@ -24,6 +24,8 @@ Please see LICENSE files in the repository root for full details.
 
     .mx_InviteDialog_editor {
         flex: 1;
+        /* Telement: the addresses typed and picked are drawn as typed (telement/tokens.css) */
+        font-feature-settings: var(--tl-font-feature-settings-identifier);
     }
 
     .mx_InviteDialog_goButton {
@@ -292,6 +294,8 @@ Please see LICENSE files in the repository root for full details.
         .mx_InviteDialog_tile_nameStack_userId {
             font-size: $font-12px;
             color: $muted-fg-color;
+            /* Telement: drawn as typed (telement/tokens.css) */
+            font-feature-settings: var(--tl-font-feature-settings-identifier);
         }
     }
 }

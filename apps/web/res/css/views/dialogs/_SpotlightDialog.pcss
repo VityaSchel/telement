@@ -377,6 +377,8 @@ Please see LICENSE files in the repository root for full details.
                             margin-left: var(--cpd-space-2x);
                             overflow: hidden;
                             text-overflow: ellipsis;
+                            /* Telement: drawn as typed (telement/tokens.css) */
+                            font-feature-settings: var(--tl-font-feature-settings-identifier);
                         }
                     }
                     .mx_SpotlightDialog_result_publicRoomDescription {
@@ -492,6 +494,9 @@ Please see LICENSE files in the repository root for full details.
         .mx_SpotlightDialog_result_details {
             margin-left: var(--cpd-space-2x);
             margin-right: var(--cpd-space-2x);
+            /* Telement: for a person or a public room, their user ID or room address, drawn as typed
+               (telement/tokens.css) */
+            font-feature-settings: var(--tl-font-feature-settings-identifier);
             /* See .mx_SpotlightDialog_result_publicRoomAlias: 12px text needs 4.5:1 at rest too. */
             color: $secondary-content;
             font-size: $font-12px;

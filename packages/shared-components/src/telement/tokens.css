@@ -31,6 +31,16 @@ Please see LICENSE files in the repository root for full details.
 }
 
 /*
+ * Identifiers are drawn as typed: Matrix user and room IDs, room addresses, server names, usernames, copyable values and
+ * code. The body turns Inter's contextual alternates on (_common.pcss), which draw an "x" between digits as a
+ * multiplication sign (element-web issue #25538), so these turn them off, as Compound's text fields do, and keep the
+ * body's kerning and ligatures. font-variant-ligatures can't do it: the body's font-feature-settings would override it.
+ */
+:root {
+    --tl-font-feature-settings-identifier: "kern" 1, "liga" 1, "calt" 0;
+}
+
+/*
  * Telegram's accent in place of Compound's green: Telegram for macOS's #2481cc in light themes and #2ea6ff in dark
  * ones, at step 900 of a 14-step scale built like Compound's blue one: each step keeps the OKLCH lightness and chroma
  * profile of Compound's blue, moved to Telegram's hue and anchor. High contrast themes move the anchor as far as

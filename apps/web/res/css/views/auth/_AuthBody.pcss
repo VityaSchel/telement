@@ -122,6 +122,9 @@ Please see LICENSE files in the repository root for full details.
 
     .mx_Field input {
         box-sizing: border-box;
+        /* Telement: what the sign-in and registration fields take, usernames, email addresses, phone numbers and keys,
+           is drawn as typed (telement/tokens.css) */
+        font-feature-settings: var(--tl-font-feature-settings-identifier);
     }
 
     .mx_Field_select::before {

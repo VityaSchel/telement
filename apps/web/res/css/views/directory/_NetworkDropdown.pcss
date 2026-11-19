@@ -26,6 +26,13 @@ Please see LICENSE files in the repository root for full details.
     }
 }
 
+/* Telement: server names, in the menu and on the button that opens it in the search dialog, are drawn as typed
+   (telement/tokens.css) */
+.mx_NetworkDropdown_wrapper .mx_ContextualMenu,
+.mx_SpotlightDialog_options .mx_GenericDropdownMenu_button {
+    font-feature-settings: var(--tl-font-feature-settings-identifier);
+}
+
 .mx_NetworkDropdown_removeServer {
     position: relative;
     display: inline-block;

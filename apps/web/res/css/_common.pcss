@@ -194,6 +194,8 @@ pre,
 code {
     font-family: $monospace-font-family;
     font-size: 100% !important;
+    /* Telement: code is drawn as typed, without the body's contextual alternates (telement/tokens.css) */
+    font-feature-settings: var(--tl-font-feature-settings-identifier);
 }
 
 .error,
