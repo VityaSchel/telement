@@ -1,0 +1,10 @@
+{
+    "emoji|category_frequently_used": "Frequently used",
+    "member_list|count": {
+        "one": "%(count)s member",
+        "other": "%(count)s members"
+    },
+    "room_settings|security|title": "Security & privacy",
+    "settings|voip|title": "Voice & video",
+    "setting|help_about|dialog_title": "<strong>Settings:</strong> Help & about"
+}
