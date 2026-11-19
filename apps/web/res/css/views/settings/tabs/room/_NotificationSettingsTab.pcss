@@ -36,6 +36,29 @@ Please see LICENSE files in the repository root for full details.
     }
 }
 
+/* Telement: the sound's name is regular text in the line's secondary color, and the prompt for a new sound a 15px
+   semibold label 8px above its buttons */
+.mx_NotificationSettingsTab_sounds {
+    .mx_SettingsTab_subsectionText {
+        margin-block: 0 var(--cpd-space-3x);
+
+        code {
+            font: inherit;
+            color: inherit;
+            background: none;
+        }
+    }
+
+    h4 {
+        font: var(--cpd-font-body-md-semibold);
+        margin: 0 0 var(--cpd-space-2x);
+    }
+
+    .mx_SettingsFlag {
+        margin: 0;
+    }
+}
+
 input[type="file"].mx_NotificationSound_soundUpload {
     display: none;
 }

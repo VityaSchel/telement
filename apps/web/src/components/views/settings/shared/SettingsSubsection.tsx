@@ -41,6 +41,7 @@ export const SettingsSubsectionText: React.FC<HTMLAttributes<HTMLDivElement>> = 
 );
 
 export const SettingsSubsection: React.FC<SettingsSubsectionProps> = ({
+    className,
     heading,
     description,
     children,
@@ -54,7 +55,7 @@ export const SettingsSubsection: React.FC<SettingsSubsectionProps> = ({
     const content = (
         <div
             {...rest}
-            className={classNames("mx_SettingsSubsection", {
+            className={classNames("mx_SettingsSubsection", className, {
                 mx_SettingsSubsection_newUi: !legacy,
             })}
         >

@@ -65,4 +65,10 @@ describe("<SettingsSubsection />", () => {
 
         expect(screen.queryByRole("separator")).not.toBeInTheDocument();
     });
+
+    it("keeps the class name it is given", () => {
+        const { container } = render(getComponent({ className: "mx_NotificationSettingsTab_sounds" }));
+
+        expect(container.firstElementChild).toHaveClass("mx_SettingsSubsection", "mx_NotificationSettingsTab_sounds");
+    });
 });

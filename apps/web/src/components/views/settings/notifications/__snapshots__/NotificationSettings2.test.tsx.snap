@@ -978,7 +978,7 @@ exports[`<Notifications /> > correctly handles the loading/disabled state 1`] = 
           </div>
         </div>
         <div
-          class="mx_SettingsSubsection mx_SettingsSubsection_newUi"
+          class="mx_SettingsSubsection mx_NotificationPusherSettings mx_SettingsSubsection_newUi"
         >
           <div
             class="mx_SettingsSubsectionHeading"
@@ -2232,7 +2232,7 @@ exports[`<Notifications /> > matches the snapshot 1`] = `
           </div>
         </div>
         <div
-          class="mx_SettingsSubsection mx_SettingsSubsection_newUi"
+          class="mx_SettingsSubsection mx_NotificationPusherSettings mx_SettingsSubsection_newUi"
         >
           <div
             class="mx_SettingsSubsectionHeading"

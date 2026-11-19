@@ -76,4 +76,12 @@ describe("NotificationSettingsTab", () => {
 
         await expect(screen.findByText("http://this.is.a.url/server/custom-sound-123")).resolves.toBeVisible();
     });
+
+    it("leaves the tab's name to the dialog's title, and offers Browse… as an outline button in the Sounds group", () => {
+        const { container } = renderTab();
+
+        expect(screen.queryByRole("heading", { name: "Notifications" })).not.toBeInTheDocument();
+        expect(container.querySelector(".mx_SettingsSubsection")).toHaveClass("mx_NotificationSettingsTab_sounds");
+        expect(screen.getByRole("button", { name: "Browse…" })).toHaveClass("mx_AccessibleButton_kind_primary_outline");
+    });
 });

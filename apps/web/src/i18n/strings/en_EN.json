@@ -2137,7 +2137,7 @@
             "topic_field_label": "Room Topic"
         },
         "notifications": {
-            "browse_button": "Browse",
+            "browse_button": "Browse…",
             "custom_sound_prompt": "Set a new custom sound",
             "notification_sound": "Notification sound",
             "settings_link": "Get notifications as set up in your <a>settings</a>",

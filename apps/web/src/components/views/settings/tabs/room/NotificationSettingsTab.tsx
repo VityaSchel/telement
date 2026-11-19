@@ -244,7 +244,10 @@ export default class NotificationsSettingsTab extends React.Component<IProps, IS
                         />
                     </div>
 
-                    <SettingsSubsection heading={_t("room_settings|notifications|sounds_section")}>
+                    <SettingsSubsection
+                        heading={_t("room_settings|notifications|sounds_section")}
+                        className="mx_NotificationSettingsTab_sounds"
+                    >
                         <div>
                             <div className="mx_SettingsTab_subsectionText">
                                 <span>
@@ -282,7 +285,7 @@ export default class NotificationsSettingsTab extends React.Component<IProps, IS
                             <AccessibleButton
                                 className="mx_NotificationSound_browse"
                                 onClick={this.triggerUploader}
-                                kind="primary"
+                                kind="primary_outline"
                             >
                                 {_t("room_settings|notifications|browse_button")}
                             </AccessibleButton>
