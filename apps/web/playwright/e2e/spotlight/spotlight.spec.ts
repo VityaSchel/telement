@@ -350,7 +350,7 @@ test.describe("Spotlight", () => {
             "Start a group chat",
         );
         await spotlight.dialog.locator("#mx_SpotlightDialog_button_startGroupChat").click();
-        await expect(page.getByRole("dialog")).toContainText("Direct Messages");
+        await expect(page.getByRole("dialog")).toContainText("Direct messages");
     });
 
     test("should close spotlight after starting a DM", async ({ page, app, bot1 }) => {

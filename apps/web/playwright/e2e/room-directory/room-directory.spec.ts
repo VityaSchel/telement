@@ -31,14 +31,14 @@ test.describe("Room Directory", () => {
             await app.settings.openRoomSettings();
 
             // First add a local address `gaming`
-            const localAddresses = page.locator(".mx_SettingsFieldset", { hasText: "Local Addresses" });
+            const localAddresses = page.locator(".mx_SettingsFieldset", { hasText: "Local addresses" });
             await localAddresses.getByRole("textbox").fill("gaming");
             await expect(page.getByText("This address is available to use")).toBeVisible();
             await localAddresses.getByRole("button", { name: "Add" }).click();
             await expect(localAddresses.getByText(`#gaming:${user.homeServer}`)).toHaveClass("mx_EditableItem_item");
 
             // Publish into the public rooms directory
-            const publishedAddresses = page.locator(".mx_SettingsFieldset", { hasText: "Published Addresses" });
+            const publishedAddresses = page.locator(".mx_SettingsFieldset", { hasText: "Published addresses" });
             await expect(publishedAddresses.locator("#canonicalAlias")).toHaveValue(`#gaming:${user.homeServer}`);
             const checkbox = publishedAddresses.getByRole("switch", {
                 name: `Publish this room to the public in ${user.homeServer}'s room directory?`,

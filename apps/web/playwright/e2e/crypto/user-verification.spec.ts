@@ -69,12 +69,12 @@ test.describe("User verification", () => {
         // it should contain the details of the requesting user
         await expect(toast.getByText(`Bob (${bob.credentials!.userId})`)).toBeVisible();
         // Accept
-        await toast.getByRole("button", { name: "Verify User" }).click();
+        await toast.getByRole("button", { name: "Verify user" }).click();
 
         // Wait for the QR code to be rendered. If we don't do this, then the QR code can be rendered just as
         // Playwright tries to click the "Verify by emoji" button, which seems to make it miss the button.
         // (richvdh: I thought Playwright was supposed to be resilient to such things, but empirically not.)
-        await expect(page.getByAltText("QR Code")).toBeVisible();
+        await expect(page.getByAltText("QR code")).toBeVisible();
 
         // request verification by emoji
         await page.locator("#mx_RightPanel").getByRole("button", { name: "Verify by emoji" }).click();
@@ -120,12 +120,12 @@ test.describe("User verification", () => {
 
         // Accept verification via toast
         const toast = await getToast(page, "Verification requested");
-        await toast.getByRole("button", { name: "Verify User" }).click();
+        await toast.getByRole("button", { name: "Verify user" }).click();
 
         // Wait for the QR code to be rendered. If we don't do this, then the QR code can be rendered just as
         // Playwright tries to click the "Verify by emoji" button, which seems to make it miss the button.
         // (richvdh: I thought Playwright was supposed to be resilient to such things, but empirically not.)
-        await expect(page.getByAltText("QR Code")).toBeVisible();
+        await expect(page.getByAltText("QR code")).toBeVisible();
 
         // request verification by emoji
         await page.locator("#mx_RightPanel").getByRole("button", { name: "Verify by emoji" }).click();

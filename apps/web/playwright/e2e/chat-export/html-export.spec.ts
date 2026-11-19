@@ -114,7 +114,7 @@ test.describe("HTML Export", () => {
             ).toBeVisible();
 
             await app.toggleRoomInfoPanel();
-            await page.getByRole("menuitem", { name: "Export Chat" }).click();
+            await page.getByRole("menuitem", { name: "Export chat" }).click();
 
             const downloadPromise = page.waitForEvent("download");
             await page.getByRole("button", { name: "Export", exact: true }).click();

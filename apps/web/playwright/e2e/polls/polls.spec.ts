@@ -37,7 +37,7 @@ test.describe("Polls", () => {
             await optionIdLocator.scrollIntoViewIfNeeded();
             await optionIdLocator.fill(value);
         }
-        await page.locator(".mx_Dialog").getByRole("button", { name: "Create Poll" }).click();
+        await page.locator(".mx_Dialog").getByRole("button", { name: "Create poll" }).click();
     };
 
     const getPollTile = (page: Page, pollId: string, optLocator?: Locator): Locator => {

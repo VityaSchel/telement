@@ -20,7 +20,7 @@ export class Spotlight {
     constructor(private page: Page) {}
 
     public async open() {
-        this.root = this.page.locator('[role=dialog][aria-label="Search Dialog"]');
+        this.root = this.page.locator('[role=dialog][aria-label="Search dialog"]');
         const isSpotlightAlreadyOpen = !!(await this.root.count());
         if (isSpotlightAlreadyOpen) {
             // Close dialog if it is already open

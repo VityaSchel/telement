@@ -35,7 +35,7 @@ test.describe("Account user settings tab", () => {
 
         const profile = uut.locator(".mx_UserProfileSettings_profile");
         await profile.scrollIntoViewIfNeeded();
-        await expect(profile.getByRole("textbox", { name: "Display Name" })).toHaveValue(USER_NAME);
+        await expect(profile.getByRole("textbox", { name: "Display name" })).toHaveValue(USER_NAME);
 
         // Assert that a userId is rendered
         await expect(uut.getByLabel("Username")).toHaveText(user.userId);
@@ -48,14 +48,14 @@ test.describe("Account user settings tab", () => {
         await accountSection.scrollIntoViewIfNeeded();
         // Assert that input areas for changing a password exists
         await expect(accountSection.getByLabel("Current password")).toBeVisible();
-        await expect(accountSection.getByLabel("New Password")).toBeVisible();
+        await expect(accountSection.getByLabel("New password")).toBeVisible();
         await expect(accountSection.getByLabel("Confirm password")).toBeVisible();
 
         // Check email addresses area
         const emailAddresses = uut.getByTestId("mx_AccountEmailAddresses");
         await emailAddresses.scrollIntoViewIfNeeded();
         // Assert that an input area for a new email address is rendered
-        await expect(emailAddresses.getByRole("textbox", { name: "Email Address" })).toBeVisible();
+        await expect(emailAddresses.getByRole("textbox", { name: "Email address" })).toBeVisible();
         // Assert the add button is visible
         await expect(emailAddresses.getByRole("button", { name: "Add" })).toBeVisible();
 
@@ -63,14 +63,14 @@ test.describe("Account user settings tab", () => {
         const phoneNumbers = uut.getByTestId("mx_AccountPhoneNumbers");
         await phoneNumbers.scrollIntoViewIfNeeded();
         // Assert that an input area for a new phone number is rendered
-        await expect(phoneNumbers.getByRole("textbox", { name: "Phone Number" })).toBeVisible();
+        await expect(phoneNumbers.getByRole("textbox", { name: "Phone number" })).toBeVisible();
         // Assert that the add button is rendered
         await expect(phoneNumbers.getByRole("button", { name: "Add" })).toBeVisible();
 
         // Assert the account deactivation button is displayed
         const accountManagementSection = uut.getByTestId("account-management-section");
         await accountManagementSection.scrollIntoViewIfNeeded();
-        await expect(accountManagementSection.getByRole("button", { name: "Deactivate Account" })).toHaveClass(
+        await expect(accountManagementSection.getByRole("button", { name: "Deactivate account" })).toHaveClass(
             /mx_AccessibleButton_kind_danger/,
         );
 
@@ -151,7 +151,7 @@ test.describe("Account user settings tab", () => {
         const accountPhoneNumbers = uut.getByTestId("mx_AccountPhoneNumbers");
         await accountPhoneNumbers.scrollIntoViewIfNeeded();
         // Assert that an input area for a new phone number is rendered
-        await expect(accountPhoneNumbers.getByRole("textbox", { name: "Phone Number" })).toBeVisible();
+        await expect(accountPhoneNumbers.getByRole("textbox", { name: "Phone number" })).toBeVisible();
 
         // Check a new phone number dropdown menu
         const dropdown = accountPhoneNumbers.locator(".mx_PhoneNumbers_country");
@@ -160,13 +160,13 @@ test.describe("Account user settings tab", () => {
         await expect(dropdown.getByText(/\+1/)).toBeVisible();
 
         // Click the button to display the dropdown menu
-        await dropdown.getByRole("button", { name: "Country Dropdown" }).click();
+        await dropdown.getByRole("button", { name: "Country dropdown" }).click();
 
         // Assert that the option for calling code of the United Kingdom is visible
         await expect(dropdown.getByRole("option", { name: /United Kingdom/ })).toBeVisible();
 
         // Click again to close the dropdown
-        await dropdown.getByRole("button", { name: "Country Dropdown" }).click();
+        await dropdown.getByRole("button", { name: "Country dropdown" }).click();
 
         // Assert that the default value is rendered again
         await expect(dropdown.getByText(/\+1/)).toBeVisible();
@@ -178,7 +178,7 @@ test.describe("Account user settings tab", () => {
         // Change the diaplay name to USER_NAME_NEW
         const displayNameInput = uut
             .locator(".mx_SettingsTab .mx_UserProfileSettings")
-            .getByRole("textbox", { name: "Display Name" });
+            .getByRole("textbox", { name: "Display name" });
         await displayNameInput.fill(USER_NAME_NEW);
         await displayNameInput.press("Enter");
 
@@ -225,7 +225,7 @@ test.describe("Account user settings tab", () => {
         );
 
         const phoneSection = page.getByTestId("mx_AccountPhoneNumbers");
-        await phoneSection.getByRole("textbox", { name: "Phone Number" }).fill("07700900000");
+        await phoneSection.getByRole("textbox", { name: "Phone number" }).fill("07700900000");
         await phoneSection.getByRole("button", { name: "Add" }).click();
 
         await phoneSection

@@ -172,7 +172,7 @@ export class Helpers {
     async assertPinnedMessagesList(messages: string[]) {
         const rightPanel = this.getRightPanel();
         await expect(rightPanel.getByRole("heading", { name: "Pinned messages" })).toHaveText(
-            `${messages.length} Pinned messages`,
+            `${messages.length} pinned messages`,
         );
 
         const list = rightPanel.getByRole("list");

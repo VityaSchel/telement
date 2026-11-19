@@ -69,7 +69,7 @@ test.describe("Composer", () => {
                     await expect(page.getByRole("textbox").getByText("/devtools")).toBeVisible();
                     // Send the message and check the devtools dialog appeared, then close it
                     await page.getByRole("button", { name: "Send message" }).click();
-                    await expect(page.getByRole("dialog").getByText("Developer Tools")).toBeVisible();
+                    await expect(page.getByRole("dialog").getByText("Developer tools")).toBeVisible();
                     await page.getByRole("button", { name: "Close dialog" }).click();
 
                     // Typing a command that takes arguments (/spoiler) and selecting with enter works

@@ -29,13 +29,13 @@ test.describe("Search section of the room list", () => {
         const searchSection = getSearchSection(page);
         await searchSection.getByRole("button", { name: "Search", exact: false }).click();
         // The spotlight should be displayed
-        await expect(page.getByRole("dialog", { name: "Search Dialog" })).toBeVisible();
+        await expect(page.getByRole("dialog", { name: "Search dialog" })).toBeVisible();
     });
 
     test("should open the room directory when the search button is clicked", async ({ page, app, user }) => {
         const searchSection = getSearchSection(page);
         await searchSection.getByRole("button", { name: "Explore rooms" }).click();
-        const dialog = page.getByRole("dialog", { name: "Search Dialog" });
+        const dialog = page.getByRole("dialog", { name: "Search dialog" });
         // The room directory should be displayed
         await expect(dialog).toBeVisible();
         // The public room filter should be displayed
@@ -45,7 +45,7 @@ test.describe("Search section of the room list", () => {
     /** Open the spotlight, search for `name` and pick the first result. */
     async function pickRoomFromSpotlight(page: Page, name: string): Promise<void> {
         await getSearchSection(page).getByRole("button", { name: "Search", exact: false }).click();
-        const dialog = page.getByRole("dialog", { name: "Search Dialog" });
+        const dialog = page.getByRole("dialog", { name: "Search dialog" });
         await dialog.getByRole("textbox", { name: "Search" }).fill(name);
         await dialog.getByRole("option", { name }).first().click();
         await expect(dialog).not.toBeVisible();

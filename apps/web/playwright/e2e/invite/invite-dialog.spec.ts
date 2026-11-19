@@ -104,7 +104,7 @@ test.describe("Invite dialog", function () {
             const other = page.locator(".mx_InviteDialog_other");
             // Assert that the header is rendered
             await expect(
-                other.locator(".mx_Dialog_header .mx_Dialog_title").getByText("Direct Messages"),
+                other.locator(".mx_Dialog_header .mx_Dialog_title").getByText("Direct messages"),
             ).toBeVisible();
 
             // Assert that the bar is rendered

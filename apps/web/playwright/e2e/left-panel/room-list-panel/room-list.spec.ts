@@ -66,7 +66,7 @@ test.describe("Room list", () => {
         test("should open the context menu", { tag: "@screenshot" }, async ({ page, app, user }) => {
             const roomListView = getRoomList(page);
             await roomListView.getByRole("option", { name: "Open room room29" }).click({ button: "right" });
-            await expect(page.getByRole("menu", { name: "More Options" })).toBeVisible();
+            await expect(page.getByRole("menu", { name: "More options" })).toBeVisible();
         });
 
         test("should pin a room to the top of the list", async ({ page }) => {
@@ -97,7 +97,7 @@ test.describe("Room list", () => {
             await roomItem.hover();
 
             await expect(roomItem).toMatchScreenshot("room-list-item-hover.png");
-            let roomItemMenu = roomItem.getByRole("button", { name: "More Options" });
+            let roomItemMenu = roomItem.getByRole("button", { name: "More options" });
             await roomItemMenu.click();
             await expect(page).toMatchScreenshot("room-list-item-open-more-options.png");
 
@@ -107,7 +107,7 @@ test.describe("Room list", () => {
             // Check that the room is pinned
             roomItem = roomListView.getByRole("option", { name: "Open room room29" });
             await roomItem.hover();
-            roomItemMenu = roomItem.getByRole("button", { name: "More Options" });
+            roomItemMenu = roomItem.getByRole("button", { name: "More options" });
             await roomItemMenu.click();
             await expect(page.getByRole("menuitem", { name: "Unpin" })).toBeVisible();
             // It should show the invite dialog
@@ -131,7 +131,7 @@ test.describe("Room list", () => {
             await expect(roomItem).toMatchScreenshot("room-list-item-hover.png");
             // Like Telegram, the notification options are in the room's menu rather than on the room
             await expect(roomItem.getByRole("button", { name: "Notification options" })).toHaveCount(0);
-            let roomItemMenu = roomItem.getByRole("button", { name: "More Options" });
+            let roomItemMenu = roomItem.getByRole("button", { name: "More options" });
             await roomItemMenu.click();
             await page.getByRole("menuitem", { name: "Notifications" }).click();
 
@@ -159,7 +159,7 @@ test.describe("Room list", () => {
             await expect(roomItem.getByTestId("muted-icon")).toBeVisible();
             await expect(roomItem).toMatchScreenshot("room-list-item-hover-silent.png");
 
-            roomItemMenu = roomItem.getByRole("button", { name: "More Options" });
+            roomItemMenu = roomItem.getByRole("button", { name: "More options" });
             await roomItemMenu.click();
             await page.getByRole("menuitem", { name: "Notifications" }).click();
 

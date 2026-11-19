@@ -73,7 +73,7 @@ test.describe("Forgot Password", () => {
 
             await page.getByRole("button", { name: "Next" }).click();
 
-            await page.getByRole("textbox", { name: "New Password", exact: true }).fill(credentials.password!);
+            await page.getByRole("textbox", { name: "New password", exact: true }).fill(credentials.password!);
             await page.getByRole("textbox", { name: "Confirm new password", exact: true }).fill(credentials.password!);
 
             await page.getByRole("button", { name: "Reset password" }).click();

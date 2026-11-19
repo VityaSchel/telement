@@ -21,7 +21,7 @@ test.describe("Voice & Video room settings tab", () => {
         // Execute client actions before setting, as the setting will force a reload.
         await app.client.createRoom({ name: roomName });
         await app.viewRoomByName(roomName);
-        settings = await app.settings.openRoomSettings("Voice & Video");
+        settings = await app.settings.openRoomSettings("Voice & video");
     });
 
     test(

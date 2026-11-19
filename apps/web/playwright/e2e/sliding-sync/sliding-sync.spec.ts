@@ -56,7 +56,7 @@ test.describe("Sliding Sync", () => {
     }
 
     function getRoomOptionsMenu(page: Page): Locator {
-        return page.getByRole("button", { name: "Room Options" });
+        return page.getByRole("button", { name: "Room options" });
     }
 
     function getFilterExpandButton(page: Page): Locator {

@@ -114,6 +114,6 @@ test.describe("Key backup reset from elsewhere", () => {
         // Wait for it to try uploading the key
         await page.clock.fastForward(20000);
 
-        await expect(page.getByRole("heading", { level: 1, name: "New Recovery Method" })).toBeVisible();
+        await expect(page.getByRole("heading", { level: 1, name: "New recovery method" })).toBeVisible();
     });
 });

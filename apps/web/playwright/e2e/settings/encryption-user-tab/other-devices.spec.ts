@@ -125,7 +125,7 @@ test.describe("Other people's devices section in Encryption tab", () => {
         await inviteBobToNewRoom(alicePage, aliceElementApp, bobCredentials, bobElementApp);
 
         // Alice configures her client to blacklist unverified users in this room.
-        const dialog = await aliceElementApp.settings.openRoomSettings("Security & Privacy");
+        const dialog = await aliceElementApp.settings.openRoomSettings("Security & privacy");
         await dialog.getByRole("switch", { name: "Only send messages to verified users." }).click();
         await aliceElementApp.settings.closeDialog();
 
@@ -177,7 +177,7 @@ test.describe("Other people's devices section in Encryption tab", () => {
         await inviteBobToNewRoom(alicePage, aliceElementApp, bobCredentials, bobElementApp);
 
         // Alice configures her client to allow sending to unverified users in this room.
-        dialog = await aliceElementApp.settings.openRoomSettings("Security & Privacy");
+        dialog = await aliceElementApp.settings.openRoomSettings("Security & privacy");
         await dialog.getByRole("switch", { name: "Only send messages to verified users." }).click();
         await aliceElementApp.settings.closeDialog();
 

@@ -38,7 +38,7 @@ test.describe("Dehydration", () => {
     test("Verify device and reset creates dehydrated device", async ({ page, user, credentials, app }, workerInfo) => {
         // Verify the device by resetting the identity key, and then set up recovery (which will create SSSS, and dehydrated device)
 
-        const securityTab = await app.settings.openUserSettings("Security & Privacy");
+        const securityTab = await app.settings.openUserSettings("Security & privacy");
         await expect(securityTab.getByText("Offline device enabled")).not.toBeVisible();
 
         await app.closeDialog();

@@ -30,7 +30,7 @@ export function getPrimaryFilters(page: Page): Locator {
  * @param page
  */
 export function getRoomOptionsMenu(page: Page): Locator {
-    return page.getByRole("button", { name: "Room Options" });
+    return page.getByRole("button", { name: "Room options" });
 }
 
 /**

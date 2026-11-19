@@ -27,7 +27,7 @@ test.describe("Consent", () => {
 
         const dialog = page.locator(".mx_QuestionDialog");
         // Accept terms & conditions
-        await expect(dialog.getByRole("heading", { name: "Terms and Conditions" })).toBeVisible();
+        await expect(dialog.getByRole("heading", { name: "Terms and conditions" })).toBeVisible();
         await page.getByRole("button", { name: "Review terms and conditions" }).click();
 
         const newPage = await newPagePromise;

@@ -38,7 +38,7 @@ test.describe("Share dialog", () => {
         await rightPanel.getByRole("option", { name: user.displayName }).click();
         await rightPanel.getByRole("button", { name: "Share profile" }).click();
 
-        const dialog = page.getByRole("dialog", { name: "Share User" });
+        const dialog = page.getByRole("dialog", { name: "Share user" });
         await expect(dialog.getByText(`https://matrix.to/#/${user.userId}`)).toBeVisible();
         await expect(dialog).toMatchScreenshot("share-dialog-user.png", {
             // QRCode changes at every run
@@ -54,7 +54,7 @@ test.describe("Share dialog", () => {
         await timelineMessage.click({ button: "right" });
         await page.getByRole("menuitem", { name: "Share" }).click();
 
-        const dialog = page.getByRole("dialog", { name: "Share Room Message" });
+        const dialog = page.getByRole("dialog", { name: "Share room message" });
         await expect(dialog.getByRole("checkbox", { name: "Link to selected message" })).toBeChecked();
         await expect(dialog).toMatchScreenshot("share-dialog-event.png", {
             // QRCode and url changes at every run

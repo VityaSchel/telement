@@ -357,7 +357,7 @@ export async function disableKeyBackup(app: ElementAppPage): Promise<void> {
 }
 
 /**
- * Go through the "Set up Secure Backup" dialog (aka the `CreateSecretStorageDialog`).
+ * Go through the "Set up secure backup" dialog (aka the `CreateSecretStorageDialog`).
  *
  * Assumes the dialog is already open for some reason (see also {@link enableKeyBackup}).
  *
@@ -374,10 +374,10 @@ export async function completeCreateSecretStorageDialog(
 ): Promise<string> {
     const currentDialogLocator = page.locator(".mx_Dialog");
 
-    await expect(currentDialogLocator.getByRole("heading", { name: "Set up Secure Backup" })).toBeVisible();
-    // "Generate a Recovery Key" is selected by default
+    await expect(currentDialogLocator.getByRole("heading", { name: "Set up secure backup" })).toBeVisible();
+    // "Generate a recovery key" is selected by default
     await currentDialogLocator.getByRole("button", { name: "Continue", exact: true }).click();
-    await expect(currentDialogLocator.getByRole("heading", { name: "Save your Recovery Key" })).toBeVisible();
+    await expect(currentDialogLocator.getByRole("heading", { name: "Save your recovery key" })).toBeVisible();
     await currentDialogLocator.getByRole("button", { name: "Copy", exact: true }).click();
     // copy the recovery key to use it later
     const recoveryKey = await page.evaluate(() => navigator.clipboard.readText());
@@ -393,9 +393,9 @@ export async function completeCreateSecretStorageDialog(
     }
 
     // Either way, we end up at a success dialog:
-    await expect(currentDialogLocator.getByRole("heading", { name: "Secure Backup successful" })).toBeVisible();
+    await expect(currentDialogLocator.getByRole("heading", { name: "Secure backup successful" })).toBeVisible();
     await currentDialogLocator.getByRole("button", { name: "Done", exact: true }).click();
-    await expect(currentDialogLocator.getByText("Secure Backup successful")).not.toBeVisible();
+    await expect(currentDialogLocator.getByText("Secure backup successful")).not.toBeVisible();
 
     return recoveryKey;
 }
@@ -527,7 +527,7 @@ export const verify = async (app: ElementAppPage, bob: Bot) => {
     await page.locator(".mx_RightPanel").getByRole("menuitem", { name: "People" }).click();
     await roomInfo.getByText("Bob").click();
     await roomInfo.getByRole("button", { name: "Verify" }).click();
-    await roomInfo.getByRole("button", { name: "Start Verification" }).click();
+    await roomInfo.getByRole("button", { name: "Start verification" }).click();
 
     // this requires creating a DM, so can take a while. Give it a longer timeout.
     await roomInfo.getByRole("button", { name: "Verify by emoji" }).click({ timeout: 30000 });
@@ -561,7 +561,7 @@ export const verifyApp = async (
     await aliceElementApp.page.locator(".mx_RightPanel").getByRole("menuitem", { name: "People" }).click();
     await aliceRoomInfo.getByText("Bob").click();
     await aliceRoomInfo.getByRole("button", { name: "Verify" }).click();
-    await aliceRoomInfo.getByRole("button", { name: "Start Verification" }).click();
+    await aliceRoomInfo.getByRole("button", { name: "Start verification" }).click();
 
     // Navigate to the DM created by Alice and accept the invite
     const oldRoomId = await bobElementApp.getCurrentRoomIdFromUrl();

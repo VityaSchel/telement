@@ -51,7 +51,7 @@ test.describe("Create Knock Room", () => {
 
         const roomId = await app.getCurrentRoomIdFromUrl();
 
-        await app.settings.openRoomSettings("Security & Privacy");
+        await app.settings.openRoomSettings("Security & privacy");
 
         const settingsGroup = page.getByRole("group", { name: "Access" });
         await expect(settingsGroup.getByRole("radio", { name: "Invite only" })).toBeChecked();

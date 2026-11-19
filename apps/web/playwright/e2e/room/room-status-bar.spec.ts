@@ -80,7 +80,7 @@ test.describe("Room Status Bar", () => {
             await composer.fill("Hello!");
             await composer.press("Enter");
             await page
-                .getByRole("dialog", { name: "Terms and Conditions" })
+                .getByRole("dialog", { name: "Terms and conditions" })
                 .getByRole("button", { name: "Dismiss" })
                 .click();
             const banner = page.getByRole("region", { name: "Room status bar" });

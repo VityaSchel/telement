@@ -53,7 +53,7 @@ test.describe("RightPanel", () => {
                 await app.settings.openRoomSettings();
 
                 // Set a local room address
-                const localAddresses = page.locator(".mx_SettingsFieldset", { hasText: "Local Addresses" });
+                const localAddresses = page.locator(".mx_SettingsFieldset", { hasText: "Local addresses" });
                 await localAddresses.getByRole("textbox").fill(ROOM_ADDRESS_LONG);
                 await expect(page.getByText("This address is available to use")).toBeVisible();
                 await localAddresses.getByRole("button", { name: "Add" }).click();
@@ -94,7 +94,7 @@ test.describe("RightPanel", () => {
         test("should handle viewing export chat", async ({ page, app }) => {
             await viewRoomSummaryByName(page, app, ROOM_NAME);
 
-            await page.getByRole("menuitem", { name: "Export Chat" }).click();
+            await page.getByRole("menuitem", { name: "Export chat" }).click();
             await expect(page.locator(".mx_ExportDialog")).toBeVisible();
         });
 

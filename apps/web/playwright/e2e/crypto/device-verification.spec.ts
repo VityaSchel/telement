@@ -335,7 +335,7 @@ test.describe("Device verification", { tag: "@no-webkit" }, () => {
 
 /** Extract the qrcode out of an on-screen html element */
 async function readQrCode(base: Locator) {
-    const qrCode = base.locator('[alt="QR Code"]');
+    const qrCode = base.locator('[alt="QR code"]');
     const imageData = await qrCode.evaluate<
         {
             colorSpace: PredefinedColorSpace;

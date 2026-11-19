@@ -36,7 +36,7 @@ test.describe("Roles & Permissions room settings tab", () => {
             room_version: "11",
         });
         await app.viewRoomByName(roomName);
-        settings = await app.settings.openRoomSettings("Security & Privacy");
+        settings = await app.settings.openRoomSettings("Security & privacy");
     });
 
     test(
@@ -97,7 +97,7 @@ test.describe("Roles & Permissions room settings tab", () => {
             await settingsGroupHistory.getByText("Anyone").click();
 
             // De-op ourselves
-            await app.settings.switchTab("Roles & Permissions");
+            await app.settings.switchTab("Roles & permissions");
 
             // Wait for the permissions list to be visible
             await expect(settings.getByRole("group", { name: "Permissions", exact: true })).toBeVisible();
@@ -120,7 +120,7 @@ test.describe("Roles & Permissions room settings tab", () => {
                 timeline.getByText("Alice changed the power level of Alice from Admin to Moderator."),
             ).toBeInViewport();
 
-            settings = await app.settings.openRoomSettings("Security & Privacy");
+            settings = await app.settings.openRoomSettings("Security & privacy");
 
             await settingsGroupAccess.getByText("Invite only").click();
             // Element should have automatically set the room to "sharing" history visibility

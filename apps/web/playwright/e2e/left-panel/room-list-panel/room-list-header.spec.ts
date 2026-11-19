@@ -28,7 +28,7 @@ test.describe("Header section of the room list", () => {
 
         // Start chat should open the direct messages dialog
         await page.getByRole("menuitem", { name: "Start chat" }).click();
-        await expect(page.getByRole("heading", { name: "Direct Messages" })).toBeVisible();
+        await expect(page.getByRole("heading", { name: "Direct messages" })).toBeVisible();
         await app.closeDialog();
 
         // New room should open the room creation dialog

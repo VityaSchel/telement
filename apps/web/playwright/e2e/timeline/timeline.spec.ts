@@ -766,7 +766,7 @@ test.describe("Timeline", () => {
                 await page.getByRole("menuitem", { name: "Settings" }).click();
 
                 // Set a room topic to render a TextualEvent
-                await page.getByRole("textbox", { name: "Room Topic" }).type(`This is a room for ${stringToSearch}.`);
+                await page.getByRole("textbox", { name: "Room topic" }).type(`This is a room for ${stringToSearch}.`);
                 await page.getByRole("button", { name: "Save" }).click();
 
                 await app.closeDialog();
@@ -1020,20 +1020,20 @@ test.describe("Timeline", () => {
             await app.viewRoomById(room.roomId);
             const composer = app.getComposer();
 
-            await composer.getByRole("button", { name: "Voice Message" }).click();
+            await composer.getByRole("button", { name: "Voice message" }).click();
             // Record an empty message
             await page.waitForTimeout(2000);
             await composer.getByRole("button", { name: "Send voice message" }).click();
 
             await expect(page.locator(".mx_RoomView_body .mx_MVoiceMessageBody")).toHaveCount(1);
-            await expect(composer.getByRole("button", { name: "Voice Message" })).toBeVisible();
+            await expect(composer.getByRole("button", { name: "Voice message" })).toBeVisible();
         });
 
         test("can reply with a voice message", async ({ page, app, room }) => {
             await viewRoomSendMessageAndSetupReply(page, app, room.roomId);
             const composer = app.getComposer();
 
-            await composer.getByRole("button", { name: "Voice Message" }).click();
+            await composer.getByRole("button", { name: "Voice message" }).click();
             // Record an empty message
             await page.waitForTimeout(3000);
             await composer.getByRole("button", { name: "Send voice message" }).click();

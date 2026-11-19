@@ -22,7 +22,7 @@ test.describe("Roles & Permissions room settings tab", () => {
     test.beforeEach(async ({ user, app }) => {
         await app.client.createRoom({ name: roomName, room_version: "11" });
         await app.viewRoomByName(roomName);
-        settings = await app.settings.openRoomSettings("Roles & Permissions");
+        settings = await app.settings.openRoomSettings("Roles & permissions");
     });
 
     test("should be able to change the role of a user", async ({ page, app, user, axe }) => {
@@ -52,7 +52,7 @@ test.describe("Roles & Permissions room settings tab", () => {
 
         // Reload and check Alice is still Moderator (50)
         await page.reload();
-        settings = await app.settings.openRoomSettings("Roles & Permissions");
+        settings = await app.settings.openRoomSettings("Roles & permissions");
         combobox = privilegedUserSection.getByRole("combobox", { name: user.userId });
         await expect(combobox).toHaveValue("50");
 
