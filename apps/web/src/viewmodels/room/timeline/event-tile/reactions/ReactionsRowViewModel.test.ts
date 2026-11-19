@@ -20,6 +20,7 @@ describe("ReactionsRowViewModel", () => {
             isActionable: true,
             reactionGroupCount: 10,
             canReact: true,
+            hasAddReactionButton: true,
             addReactionButtonActive: false,
             ...overrides,
         });
@@ -57,6 +58,35 @@ describe("ReactionsRowViewModel", () => {
         const vm = createVm();
 
         vm.setCanReact(false);
+
+        expect(vm.getSnapshot().showAddReactionButton).toBe(false);
+    });
+
+    it("shows no add-reaction button in a row that has none, as in bubbles, even where the user can react", () => {
+        const vm = createVm({ hasAddReactionButton: false });
+
+        expect(vm.getSnapshot().showAddReactionButton).toBe(false);
+
+        vm.setCanReact(false);
+        vm.setCanReact(true);
+
+        expect(vm.getSnapshot().showAddReactionButton).toBe(false);
+    });
+
+    it("updates the add-reaction button when the layout gains or drops it", () => {
+        const vm = createVm();
+
+        vm.setHasAddReactionButton(false);
+        expect(vm.getSnapshot().showAddReactionButton).toBe(false);
+
+        vm.setHasAddReactionButton(true);
+        expect(vm.getSnapshot().showAddReactionButton).toBe(true);
+    });
+
+    it("keeps the add-reaction button hidden from a user who can't react when the layout gains it", () => {
+        const vm = createVm({ canReact: false, hasAddReactionButton: false });
+
+        vm.setHasAddReactionButton(true);
 
         expect(vm.getSnapshot().showAddReactionButton).toBe(false);
     });

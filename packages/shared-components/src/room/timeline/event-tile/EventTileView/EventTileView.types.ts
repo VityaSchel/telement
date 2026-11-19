@@ -108,6 +108,7 @@ export interface EventTileViewClassNames {
     slotNotificationRoomLabel?: string;
     slotNotificationBadge?: string;
     slotPadlock?: string;
+    slotPin?: string;
     slotReceipt?: string;
     slotReplyChain?: string;
     slotSender?: string;
@@ -131,6 +132,11 @@ export interface EventTileViewSlots {
      * the timestamp's slot, and shows it only with a timestamp.
      */
     status?: React.ReactNode;
+    /**
+     * The mark of a pinned message, such as Telegram's pin. The shell puts it before the timestamp, in the timestamp's
+     * slot, and shows it only with a timestamp.
+     */
+    pin?: React.ReactNode;
     /** Padlock rendered by the shell according to the current layout. */
     padlock?: React.ReactNode;
     /** Reply chain rendered above the event body. */

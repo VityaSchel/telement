@@ -10,7 +10,7 @@ import { userEvent } from "vitest/browser";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { Avatar } from "@vector-im/compound-web";
-import { CheckIcon } from "@vector-im/compound-design-tokens/assets/web/icons";
+import { CheckIcon, PinSolidIcon } from "@vector-im/compound-design-tokens/assets/web/icons";
 import compoundBase from "@vector-im/compound-design-tokens/assets/web/css/cpd-common-base.css?raw";
 import compoundSemantic from "@vector-im/compound-design-tokens/assets/web/css/cpd-common-semantic.css?raw";
 import compoundLightTheme from "@vector-im/compound-design-tokens/assets/web/css/cpd-theme-light-base.css?raw";
@@ -30,6 +30,8 @@ import messageTimestampViewStyles from "../../../../packages/shared-components/s
 import messageStatusViewStyles from "../../../../packages/shared-components/src/telement/room/timeline/MessageStatusView/MessageStatusView.module.css?raw";
 // eslint-disable-next-line no-restricted-imports
 import { DoubleCheckIcon } from "../../../../packages/shared-components/src/telement/core/icons/DoubleCheckIcon";
+// eslint-disable-next-line no-restricted-imports
+import pinnedMarkViewStyles from "../../../../packages/shared-components/src/telement/room/timeline/PinnedMarkView/PinnedMarkView.module.css?raw";
 // eslint-disable-next-line no-restricted-imports
 import textualBodyStyles from "../../../../packages/shared-components/src/room/timeline/event-tile/body/TextualBodyView/TextualBody.module.css?raw";
 // eslint-disable-next-line no-restricted-imports
@@ -98,7 +100,7 @@ const bigEmoji = (emoji: string): string =>
 
 /**
  * A reactions row as ReactionsRowView renders it in a bubble, each reaction an emoji, its count and whether it is the
- * reader's own, with the add-reaction button hidden until the message is hovered.
+ * reader's own. Bubbles have no add-reaction button.
  */
 function reactions(...items: Array<[emoji: string, count: number, own?: boolean]>): string {
     const chips = items.map(
@@ -112,9 +114,6 @@ function reactions(...items: Array<[emoji: string, count: number, own?: boolean]
     return `
         <div class="mx_ReactionsRow ReactionsRow_reactionsRow" role="toolbar" aria-label="Reactions">
             ${chips.join("")}
-            <button type="button" class="ReactionsRow_addReactionButton" aria-label="Add reaction">
-                <svg width="16" height="16"></svg>
-            </button>
         </div>
     `;
 }
@@ -145,6 +144,14 @@ function status(state: "sent" | "read" = "read"): string {
 const timeWithStatus = (state?: "sent" | "read"): string =>
     slot("Timestamp", `<a class="mx_MessageTimestamp content">12:41</a>${status(state)}`);
 
+/** Telegram's pin of a pinned message, as PinnedMarkView renders it in the pin's slot before the time. */
+const PIN = slot(
+    "Pin",
+    `<span class="PinnedMarkView_mark" role="img" aria-label="Pinned message">${renderToStaticMarkup(
+        createElement(PinSolidIcon, { "className": "PinnedMarkView_icon", "aria-hidden": true }),
+    )}</span>`,
+);
+
 /** The middle of the first check that a status's icon draws, which is the middle of both. */
 const checkMiddle = (tile: Element): number => middle(box(tile.querySelector(".slotStatus svg > path")!));
 
@@ -170,6 +177,8 @@ interface RowOptions {
     receipt?: boolean;
     /** Telegram's checks after the time, as the bubble layout shows them on your own messages. */
     status?: boolean;
+    /** Telegram's pin before the time, as the bubble layout marks a pinned message. */
+    pinned?: boolean;
     /** No sender row, as for an emote, or the sender as DisambiguatedProfileView renders it. */
     sender?: "none" | "profile";
 }
@@ -191,12 +200,13 @@ function row(layout: Layout, body: string, options: RowOptions = {}): string {
         last && "stateLastInSection",
         options.receipt && "hasReceiptSlot",
         options.status && "hasStatusSlot",
+        options.pinned && "hasPinSlot",
         ...states,
     ].filter(Boolean);
     const name = own ? "Viktor" : "Alice";
     const timestamp = slot(
         "Timestamp",
-        `<a class="mx_MessageTimestamp content">12:41</a>${options.status ? status() : ""}`,
+        `${options.pinned ? PIN : ""}<a class="mx_MessageTimestamp content">12:41</a>${options.status ? status() : ""}`,
     );
     const senderMarkup =
         options.sender === "profile"
@@ -386,6 +396,7 @@ describe("Timeline shell", () => {
                 ${eventTileViewStyles.replace(/:global\(([^)]*)\)/g, "$1")}
                 ${messageTimestampViewStyles}
                 ${moduleCss(messageStatusViewStyles, "MessageStatusView")}
+                ${moduleCss(pinnedMarkViewStyles, "PinnedMarkView")}
                 ${moduleCss(textualBodyStyles, "TextualBody")}
                 ${moduleCss(decryptionFailureStyles, "DecryptionFailureBodyView")}
                 ${moduleCss(textualEventViewStyles, "TextualEventView")}
@@ -924,6 +935,98 @@ describe("Timeline shell", () => {
             });
         });
 
+        describe("Telegram's pin on pinned messages", () => {
+            const tileOf = (): Element => document.querySelector(".root")!;
+            const pinOf = (tile: Element): DOMRect => box(tile.querySelector(".PinnedMarkView_mark")!);
+
+            it.each<[string, RowOptions]>([
+                ["another's message", {}],
+                ["your own message", { own: true, status: true }],
+            ])("puts a 12px pin 4px before the time of %s, centered on its line, in its color", (_name, options) => {
+                render("bubble", row("bubble", text("The plan for Monday"), { ...options, pinned: true }));
+                const pin = pinOf(tileOf());
+                const time = box(document.querySelector(".mx_MessageTimestamp")!);
+
+                expect([pin.width, pin.height]).toEqual([12, 12]);
+                expect(time.left - pin.right).toBe(4);
+                expect(Math.abs(middle(pin) - middle(time))).toBeLessThanOrEqual(0.5);
+                expect(getComputedStyle(document.querySelector(".PinnedMarkView_mark svg")!).color).toBe(
+                    getComputedStyle(document.querySelector(".mx_MessageTimestamp")!).color,
+                );
+            });
+
+            it("keeps the time in the bubble's padding corner, with the pin before it and the checks after it", () => {
+                render("bubble", row("bubble", text("The plan for Monday"), { own: true, status: true, pinned: true }));
+                const checks = box(document.querySelector(".MessageStatusView_status")!);
+                const time = box(document.querySelector(".mx_MessageTimestamp")!);
+
+                expect(box(document.querySelector(".line")!).right - checks.right).toBe(12);
+                expect(checks.left - time.right).toBe(2);
+                expect(time.left - pinOf(tileOf()).right).toBe(4);
+            });
+
+            it("keeps every last line of a pinned message clear of the pin and the time", () => {
+                // Messages a narrow letter longer each, so that one of them ends where only the time would fit beside it
+                render(
+                    "bubble",
+                    ...Array.from({ length: 60 }, (_, index) =>
+                        row("bubble", text(`ok ${"i".repeat(index)}`), { pinned: true, first: false }),
+                    ),
+                );
+
+                for (const tile of all(".root")) {
+                    const last = lineBoxes(tile.querySelector(".mx_EventTile_body")!).at(-1)!;
+                    const pin = pinOf(tile);
+
+                    expect(last.top < pin.bottom && pin.top < last.bottom && last.right > pin.left).toBe(false);
+                }
+            });
+
+            it.each([
+                ["another's", false],
+                ["your own", true],
+            ])(
+                "ends the reactions' row of %s pinned message with the pin and the time, nothing between them and the reactions",
+                (_name, own) => {
+                    render(
+                        "bubble",
+                        row("bubble", text("Lunch?"), {
+                            own,
+                            pinned: true,
+                            footer: reactions(["👀", 2, true], ["🎉", 1]),
+                        }),
+                    );
+                    const chips = all(".ReactionsRowButton_reactionsRowButton").map(box);
+                    const pin = pinOf(tileOf());
+                    const time = box(document.querySelector(".mx_MessageTimestamp")!);
+
+                    // The 8px the row keeps before the time's room, and what the time's text is narrower than its 30px
+                    expect(pin.left - chips.at(-1)!.right).toBeCloseTo(8 + 30 - time.width, 0);
+                    expect(Math.abs(middle(pin) - middle(chips.at(-1)!))).toBeLessThanOrEqual(0.5);
+                    expect(chips[1].left - chips[0].right).toBe(4);
+                },
+            );
+
+            it("puts the pin on the time's badge over a picture, 8px from its start, in its white", () => {
+                render(
+                    "bubble",
+                    `<li class="root mx_EventTile layoutBubble stateLastInSection hasPinSlot">
+                        <div class="line mx_EventTile_line lineMedia lineTimestampOverMedia">
+                            ${slot("Body", `<div style="width: 240px; height: 160px"></div>${slot("Timestamp", `${PIN}<a class="mx_MessageTimestamp content">12:41</a>`)}`)}
+                        </div>
+                    </li>`,
+                );
+                const badge = box(document.querySelector(".slotTimestamp")!);
+                const pin = pinOf(tileOf());
+
+                expect(pin.left - badge.left).toBe(8);
+                expect(Math.abs(middle(pin) - middle(badge))).toBeLessThanOrEqual(0.5);
+                expect(getComputedStyle(document.querySelector(".PinnedMarkView_mark svg")!).color).toBe(
+                    "rgb(255, 255, 255)",
+                );
+            });
+        });
+
         describe("an informational row", () => {
             const SHORT = "Alice joined the room";
 
@@ -1014,14 +1117,15 @@ describe("Timeline shell", () => {
     });
 
     describe("in the thread panel's bubble layout", () => {
-        /** A message in ThreadView, your own with Telegram's checks after its time. */
+        /** A message in ThreadView, your own with Telegram's checks after its time, a pinned one with the pin before it. */
         function threadRow(
             body: string,
-            { own = false, info = false, first = true, last = true } = {},
+            { own = false, info = false, first = true, last = true, pinned = false } = {},
         ): string {
             const withStatus = own && !info;
             const classes = ["root", "mx_EventTile", "shapeThread", "layoutBubble"];
             if (withStatus) classes.push("hasStatusSlot");
+            if (pinned) classes.push("hasPinSlot");
             if (own) classes.push("stateOwnEvent");
             if (info) classes.push("stateInfo");
             if (!first) classes.push("stateContinuation");
@@ -1034,7 +1138,7 @@ describe("Timeline shell", () => {
                 <li class="${classes.join(" ")}" data-testid="event-tile">
                     <div class="senderDetails">${info ? avatarSlot : ""}${sender}</div>
                     <div class="line mx_EventTile_line">
-                        ${slot("Body", body)}${slot("Timestamp", `<a class="mx_MessageTimestamp content">12:41</a>${withStatus ? status() : ""}`)}
+                        ${slot("Body", body)}${slot("Timestamp", `${pinned ? PIN : ""}<a class="mx_MessageTimestamp content">12:41</a>${withStatus ? status() : ""}`)}
                     </div>
                     ${!info && last ? avatarSlot : ""}
                 </li>
@@ -1120,6 +1224,20 @@ describe("Timeline shell", () => {
             expect(box(tile.querySelector(".line")!).right - checks.right).toBe(12);
             expect(Math.abs(checkMiddle(tile) - middle(timeOf(tile)))).toBeLessThanOrEqual(0.5);
             expect(document.querySelector(".mx_ReadReceiptGroup")).toBeNull();
+        });
+
+        it.each([
+            ["another's", false],
+            ["your own", true],
+        ])("puts the pin of %s pinned reply 4px before its time, centered on it", (_name, own) => {
+            renderThread(threadRow(text("A pinned reply that wraps in the thread panel"), { own, pinned: true }));
+            const tile = document.querySelector(".root")!;
+            const pin = box(tile.querySelector(".PinnedMarkView_mark")!);
+            const time = box(tile.querySelector(".mx_MessageTimestamp")!);
+
+            expect(time.left - pin.right).toBe(4);
+            expect(Math.abs(middle(pin) - middle(time))).toBeLessThanOrEqual(0.5);
+            expect(lineBoxes(tile.querySelector(".mx_EventTile_body")!).at(-1)!.right).toBeLessThanOrEqual(pin.left);
         });
 
         it.each([

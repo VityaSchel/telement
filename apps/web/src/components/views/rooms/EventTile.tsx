@@ -35,6 +35,7 @@ import {
     EventTileView,
     MessageStatusView,
     NotificationBadgeView,
+    PinnedMarkView,
     useCreateAutoDisposedViewModel,
     TileErrorView,
     type EventTileRenderingMode,
@@ -1151,7 +1152,7 @@ export class UnwrappedEventTile extends React.Component<EventTileProps, IState> 
         ) : undefined;
 
         // Preview body.
-        const { hasFooter, showMainPinnedMessageBadge, showBubblePinnedMessageBadge } = eventTileRenderState.footer;
+        const { hasFooter, showMainPinnedMessageBadge, showPinBeforeTimestamp } = eventTileRenderState.footer;
         const isPreview = this.isPreview;
         const room = this.getPreviewRoom();
         const body = isPreview ? (
@@ -1183,9 +1184,9 @@ export class UnwrappedEventTile extends React.Component<EventTileProps, IState> 
                 pinnedMessageBadgeAriaDescribedBy={this.id}
                 placement={eventTileRenderState.footer.showInIrcLayout ? "irc" : "default"}
                 showMainPinnedMessageBadge={showMainPinnedMessageBadge}
-                showBubblePinnedMessageBadge={showBubblePinnedMessageBadge}
             />
         ) : undefined;
+        const pin = showPinBeforeTimestamp ? <PinnedMarkView /> : undefined;
 
         // Thread info slots.
         const shouldRenderThreadInfo = isPreview
@@ -1238,6 +1239,7 @@ export class UnwrappedEventTile extends React.Component<EventTileProps, IState> 
                     body,
                     timestamp: timestampSlot,
                     status,
+                    pin,
                     padlock,
                     replyChain,
                     actionBar,

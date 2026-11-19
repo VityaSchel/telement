@@ -1,0 +1,29 @@
+/*
+Copyright 2026 Viktor Shchelochkov
+
+SPDX-License-Identifier: AGPL-3.0-only OR GPL-3.0-only
+Please see LICENSE files in the repository root for full details.
+*/
+
+/* A 12px box, smaller than the read checks' 16px, as Telegram's pin by the time is. The pin takes the color of the
+   text around it, which is the time's where it comes before it. */
+.mark {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    inline-size: 12px;
+    block-size: 12px;
+}
+
+/* Tilted towards the text that follows it, as the room list's pin is */
+.icon {
+    display: block;
+    inline-size: 100%;
+    block-size: 100%;
+    transform: rotate(45deg);
+}
+
+.icon:dir(rtl) {
+    transform: rotate(-45deg);
+}

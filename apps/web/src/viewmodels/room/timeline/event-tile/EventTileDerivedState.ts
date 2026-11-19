@@ -321,8 +321,8 @@ export interface FooterDisplayState {
     hasFooter: boolean;
     /** Whether the main footer position should render the pinned message badge. */
     showMainPinnedMessageBadge: boolean;
-    /** Whether the bubble footer position should render the pinned message badge. */
-    showBubblePinnedMessageBadge: boolean;
+    /** Whether the time should be preceded by Telegram's pin, which marks a pinned message in place of the badge. */
+    showPinBeforeTimestamp: boolean;
 }
 
 /** The EventTile footer display state for the current derived state. */
@@ -333,9 +333,13 @@ export function getFooterDisplayState({
     layout,
     isOwnEvent,
 }: FooterDisplayStateInput): FooterDisplayState {
+    // Bubbles mark a pinned message with a pin before its time, as Telegram does, so the badge takes no row of its own
+    const showPinBeforeTimestamp = hasPinnedMessageBadge && layout === Layout.Bubble;
+    const hasPinnedMessageBadgeInFooter = hasPinnedMessageBadge && !showPinBeforeTimestamp;
+
     return {
-        hasFooter: (hasReactionsRow && hasReactions) || hasPinnedMessageBadge,
-        showMainPinnedMessageBadge: hasPinnedMessageBadge && (layout === Layout.Group || !isOwnEvent),
-        showBubblePinnedMessageBadge: hasPinnedMessageBadge && layout === Layout.Bubble && isOwnEvent,
+        hasFooter: (hasReactionsRow && hasReactions) || hasPinnedMessageBadgeInFooter,
+        showMainPinnedMessageBadge: hasPinnedMessageBadgeInFooter && (layout === Layout.Group || !isOwnEvent),
+        showPinBeforeTimestamp,
     };
 }

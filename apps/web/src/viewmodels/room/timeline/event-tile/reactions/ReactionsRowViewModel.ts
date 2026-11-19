@@ -30,6 +30,11 @@ export interface ReactionsRowViewModelProps {
      */
     canReact: boolean;
     /**
+     * Whether the row has an add-reaction button. The bubble layout has none, as in Telegram: reactions come from the
+     * quick reactions in the message menu, and the keyboard toolbar keeps its React button.
+     */
+    hasAddReactionButton: boolean;
+    /**
      * Whether the add-reaction context menu is currently open.
      */
     addReactionButtonActive?: boolean;
@@ -59,7 +64,7 @@ export class ReactionsRowViewModel
     > => ({
         isVisible: props.isActionable && props.reactionGroupCount > 0,
         showAllButtonVisible: props.reactionGroupCount > MAX_ITEMS_WHEN_LIMITED + 1 && !props.showAll,
-        showAddReactionButton: props.canReact,
+        showAddReactionButton: props.canReact && props.hasAddReactionButton,
         addReactionButtonActive: !!props.addReactionButtonActive,
     });
 
@@ -111,7 +116,16 @@ export class ReactionsRowViewModel
             canReact,
         };
 
-        this.snapshot.merge({ showAddReactionButton: canReact });
+        this.snapshot.merge({ showAddReactionButton: canReact && this.props.hasAddReactionButton });
+    }
+
+    public setHasAddReactionButton(hasAddReactionButton: boolean): void {
+        this.props = {
+            ...this.props,
+            hasAddReactionButton,
+        };
+
+        this.snapshot.merge({ showAddReactionButton: this.props.canReact && hasAddReactionButton });
     }
 
     public setAddReactionButtonActive(addReactionButtonActive: boolean): void {

@@ -12,6 +12,7 @@ import {
     ReactionsRowButtonView,
     ReactionsRowView,
     useCreateAutoDisposedViewModel,
+    useEventPresentation,
     useViewModel,
 } from "@element-hq/web-shared-components";
 
@@ -132,6 +133,8 @@ export function ReactionsRowAdapter({
     reactions,
 }: Readonly<ReactionsRowAdapterProps>): JSX.Element | null {
     const roomContext = useContext(RoomContext);
+    const { layout } = useEventPresentation();
+    const hasAddReactionButton = layout !== "bubble";
     const userId = roomContext.room?.client.getUserId() ?? undefined;
     const [reactionGroups, setReactionGroups] = useState<ReactionGroup[]>(() => getReactionGroups(reactions));
     const [myReactions, setMyReactions] = useState<MatrixEvent[] | null>(() => getMyReactions(reactions, userId));
@@ -142,6 +145,7 @@ export function ReactionsRowAdapter({
         isActionable: isContentActionable(mxEvent),
         reactionGroupCount: reactionGroups.length,
         canReact: roomContext.canReact,
+        hasAddReactionButton,
         addReactionButtonActive: false,
     });
 
@@ -176,6 +180,10 @@ export function ReactionsRowAdapter({
             setMenuDisplayed(false);
         }
     }, [roomContext.canReact, menuDisplayed, vm]);
+
+    useEffect(() => {
+        vm.setHasAddReactionButton(hasAddReactionButton);
+    }, [hasAddReactionButton, vm]);
 
     useEffect(() => {
         vm.setAddReactionHandlers({

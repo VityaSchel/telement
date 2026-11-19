@@ -1423,14 +1423,14 @@ describe("EventTileView placement", () => {
         });
     });
 
-    /** A reactions row of 24px chips, as ReactionsRowView lays it out, with its hidden add-reaction button. */
+    /** A reactions row of 24px chips, as ReactionsRowView lays it out in bubbles: with no add-reaction button. */
     const reactions = (count: number, chipWidth = 40): React.ReactElement => (
         <ReactionsRowView
             vm={
                 new MockViewModel<ReactionsRowViewSnapshot>({
                     ariaLabel: "Reactions",
                     isVisible: true,
-                    showAddReactionButton: true,
+                    showAddReactionButton: false,
                     addReactionButtonLabel: "Add reaction",
                 })
             }
@@ -1448,9 +1448,7 @@ describe("EventTileView placement", () => {
     const lineBox = (): DOMRect => screen.getByTestId("event-tile-line").getBoundingClientRect();
     const rowBox = (): DOMRect => screen.getByRole("toolbar", { name: "Reactions" }).getBoundingClientRect();
     const messageBox = (): DOMRect => document.querySelector(".mx_EventTile_content")!.getBoundingClientRect();
-    /** The add-reaction button, hidden until the message is hovered, so it has no accessible name to find it by. */
-    const addReactionBox = (): DOMRect =>
-        document.querySelector("[aria-label='Add reaction']")!.getBoundingClientRect();
+    const lastChipBox = (): DOMRect => screen.getAllByTestId("chip").at(-1)!.getBoundingClientRect();
 
     describe("reactions in the bubble layout", () => {
         const setDirection = (dir: "ltr" | "rtl"): void => document.querySelector("ol")!.setAttribute("dir", dir);
@@ -1478,18 +1476,15 @@ describe("EventTileView placement", () => {
                 expect(line.bottom - row.bottom).toBeCloseTo(8, 1);
                 expect(line.right - time.right).toBeCloseTo(12, 1);
                 expect(middle(time)).toBeCloseTo(middle(row), 1);
-                expect(time.left).toBeGreaterThanOrEqual(addReactionBox().right);
+                expect(time.left).toBeGreaterThanOrEqual(lastChipBox().right);
             },
         );
 
         it("makes the bubble as wide as its reactions and the time need when they are wider than the message", () => {
             renderTiles("bubble", { slots: { body: textBody("Ok"), footer: reactions(2) } });
-            const addReaction = document.querySelector("[aria-label='Add reaction']")!;
-            const reactionsEnd =
-                addReaction.getBoundingClientRect().right + parseFloat(getComputedStyle(addReaction).marginRight);
 
-            // An 8px gap and the time's 30px, then the bubble's padding
-            expect(lineBox().right - reactionsEnd).toBeCloseTo(8 + 30 + 12, 1);
+            // An 8px gap after the last reaction and the time's 30px, then the bubble's padding
+            expect(lineBox().right - lastChipBox().right).toBeCloseTo(8 + 30 + 12, 1);
             expect(lineBox().left).toBeCloseTo(rowBox().left - 12, 1);
         });
 
@@ -1505,46 +1500,27 @@ describe("EventTileView placement", () => {
             expect(getComputedStyle(reacted, "::after").float).toBe("none");
         });
 
-        // The bubble's content is 203.7px wide here: four 40px chips to a line, then the add-reaction button, 32px with
-        // its margins
+        // The bubble's content is 233.1px wide here: five 40px chips and their 4px gaps to a line
         it("ends the last line of reactions that wrap with the time when it fits there, as in Telegram", () => {
-            renderTiles("bubble", { slots: { body: textBody("Lunch?"), footer: reactions(5) } });
+            renderTiles("bubble", { slots: { body: textBody("Lunch?"), footer: reactions(6) } });
             const chips = screen.getAllByTestId("chip").map((chip) => chip.getBoundingClientRect());
             const time = timestampRect();
 
             expect(chips.at(-1)!.top).toBeGreaterThan(chips[0].top);
             expect(middle(time)).toBeCloseTo(middle(chips.at(-1)!), 1);
-            expect(time.left).toBeGreaterThanOrEqual(addReactionBox().right);
+            expect(time.left).toBeGreaterThanOrEqual(lastChipBox().right);
             expect(lineBox().bottom - time.bottom).toBeCloseTo(8, 1);
         });
 
         it("gives the time a line of its own under reactions that fill theirs", () => {
-            // Three 48px chips and the add-reaction button make a 188px line, with no room left for the time
-            renderTiles("bubble", { slots: { body: textBody("Lunch?"), footer: reactions(3, 48) } });
+            // Four 52px chips and their gaps make a 220px line, with no room left for the time
+            renderTiles("bubble", { slots: { body: textBody("Lunch?"), footer: reactions(4, 52) } });
             const chips = screen.getAllByTestId("chip").map((chip) => chip.getBoundingClientRect());
             const time = timestampRect();
 
-            expect(addReactionBox().top).toBe(chips[0].top);
+            expect(chips.at(-1)!.top).toBe(chips[0].top);
             expect(time.top).toBeGreaterThanOrEqual(chips[0].bottom);
             expect(lineBox().bottom - time.bottom).toBeCloseTo(8, 1);
-        });
-
-        it("keeps the time clear of a pinned badge that ends the reactions", () => {
-            renderTiles("bubble", {
-                slots: {
-                    body: textBody("Ok"),
-                    footer: (
-                        <>
-                            {reactions(1)}
-                            <span data-testid="pinned" style={{ display: "inline-block", width: 60, height: 24 }} />
-                        </>
-                    ),
-                },
-            });
-
-            expect(timestampRect().left).toBeGreaterThanOrEqual(
-                screen.getByTestId("pinned").getBoundingClientRect().right,
-            );
         });
 
         it("starts them at the bubble's start and ends their row with the time in right-to-left text", () => {
@@ -1556,7 +1532,7 @@ describe("EventTileView placement", () => {
 
             expect(line.right - row.right).toBeCloseTo(12, 1);
             expect(time.left - line.left).toBeCloseTo(12, 1);
-            expect(time.right).toBeLessThanOrEqual(addReactionBox().left);
+            expect(time.right).toBeLessThanOrEqual(lastChipBox().left);
             expect(middle(time)).toBeCloseTo(middle(row), 1);
         });
 
@@ -1691,8 +1667,6 @@ describe("EventTileView placement", () => {
             // The footer's 8px gap, less what the badge's medium digits are wider than the time's room
             expect(badge.left - chips.at(-1)!.right).toBeGreaterThan(6);
             expect(badge.left - chips.at(-1)!.right).toBeLessThanOrEqual(8);
-            // Hidden until the message is hovered, so it has no accessible name to find it by
-            expect(getComputedStyle(document.querySelector("[aria-label='Add reaction']")!).order).toBe("-1");
         });
 
         it("keeps the bubble around emoji under a quoted reply", () => {
@@ -1805,6 +1779,117 @@ describe("EventTileView placement", () => {
 
             // The time's room, the status's 18px and the badge's padding and inset, 8px on each side
             expect(probe.getBoundingClientRect().width).toBe(30 + 18 + 32);
+            probe.remove();
+        });
+    });
+
+    describe("the pin of a pinned message", () => {
+        const pin = <span data-testid="pin" style={{ display: "block", width: 12, height: 12 }} />;
+        const status = <span data-testid="status" style={{ display: "block", width: 16, height: 16 }} />;
+        const pinRect = (): DOMRect => screen.getByTestId("pin").getBoundingClientRect();
+        const timeRect = (): DOMRect => screen.getByText("23:59").getBoundingClientRect();
+        const slotOrder = (): Array<string | null> =>
+            Array.from(screen.getByTestId("event-tile-slot-timestamp").children).map(
+                (child) => child.getAttribute("data-testid") ?? child.textContent,
+            );
+
+        it("puts the pin before the time, in the time's slot", () => {
+            renderTiles("bubble", { slots: { body: textBody("Hello"), pin } });
+
+            expect(slotOrder()).toEqual(["event-tile-slot-pin", "23:59"]);
+            expect(screen.getByTestId("event-tile")).toHaveClass(styles.hasPinSlot);
+        });
+
+        it("puts the pin before the time and the status after it", () => {
+            renderTiles("bubble", { state: { isOwnEvent: true }, slots: { body: textBody("Hello"), pin, status } });
+
+            expect(slotOrder()).toEqual(["event-tile-slot-pin", "23:59", "event-tile-slot-status"]);
+        });
+
+        it("shows no pin where the time is hidden", () => {
+            renderTiles("bubble", { slots: { body: textBody("Hello"), timestamp: undefined, pin } });
+
+            expect(screen.queryByTestId("pin")).not.toBeInTheDocument();
+            expect(screen.getByTestId("event-tile")).not.toHaveClass(styles.hasPinSlot);
+        });
+
+        it.each(["ltr", "rtl"] as const)(
+            "draws the pin 4px before the time in %s text, as tall as the time's line and centered on it",
+            (dir) => {
+                renderTiles("bubble", { slots: { body: textBody("Hello"), pin } });
+                document.querySelector("ol")!.setAttribute("dir", dir);
+                const slot = screen.getByTestId("event-tile-slot-pin").getBoundingClientRect();
+                const time = timeRect();
+
+                expect(dir === "ltr" ? time.left - slot.right : slot.left - time.right).toBe(4);
+                expect(slot.height).toBe(time.height);
+                expect(slot.top + slot.height / 2).toBe(time.top + time.height / 2);
+                expect(pinRect().top + 6).toBe(time.top + time.height / 2);
+            },
+        );
+
+        it("ends the time in the bubble's padding corner, with the pin before it", () => {
+            renderTiles("bubble", { slots: { body: textBody("Hello"), pin } });
+            const line = screen.getByTestId("event-tile-line").getBoundingClientRect();
+
+            expect(line.right - timeRect().right).toBe(12);
+            expect(pinRect().right).toBeLessThan(timeRect().left);
+        });
+
+        it("draws the pin in the time's secondary color", () => {
+            renderTiles("bubble", { slots: { body: textBody("Hello"), pin } });
+            const probe = document.createElement("span");
+            probe.style.color = "var(--cpd-color-text-secondary)";
+            screen.getByTestId("event-tile-line").append(probe);
+
+            expect(getComputedStyle(screen.getByTestId("event-tile-slot-pin")).color).toBe(
+                getComputedStyle(probe).color,
+            );
+        });
+
+        it("keeps every last line of a text bubble clear of the pin and the time", () => {
+            // Messages a narrow letter longer each, so that one of them ends where only the time would fit beside it
+            const tiles = Array.from({ length: 60 }, (_, index) => ({
+                slots: { body: textBody(`ok ${"i".repeat(index)}`), pin },
+            }));
+            renderTiles("bubble", ...tiles);
+
+            for (const tile of screen.getAllByTestId("event-tile")) {
+                const last = lastLineOf(tile.querySelector(".mx_EventTile_body")!);
+                const mark = tile.querySelector("[data-testid='pin']")!.getBoundingClientRect();
+                const overlaps = (box: DOMRect): boolean =>
+                    last.top < box.bottom && box.top < last.bottom && last.right > box.left;
+
+                expect(overlaps(mark)).toBe(false);
+            }
+        });
+
+        it("puts the pin on the badge over a picture, before the time, in its white", () => {
+            renderTiles("bubble", {
+                line: { media: true, timestampOverMedia: true },
+                slots: { body: <div style={{ width: 160, height: 120 }} />, pin },
+            });
+            const badge = screen.getByTestId("event-tile-slot-timestamp");
+
+            expect(badge.parentElement).toBe(screen.getByTestId("event-tile-slot-body"));
+            expect(pinRect().left - badge.getBoundingClientRect().left).toBe(8);
+            expect(getComputedStyle(screen.getByTestId("event-tile-slot-pin")).color).toBe("rgb(255, 255, 255)");
+        });
+
+        it("keeps a picture wide enough for its badge with the pin", () => {
+            renderTiles("bubble", {
+                line: { media: true, timestampOverMedia: true },
+                slots: { body: <div style={{ width: 1, height: 1 }} />, pin },
+            });
+            const minWidth = getComputedStyle(screen.getByTestId("event-tile-line")).getPropertyValue(
+                "--image-body-min-width",
+            );
+            const probe = document.createElement("div");
+            probe.style.width = minWidth;
+            document.body.append(probe);
+
+            // The time's room, the pin's 16px and the badge's padding and inset, 8px on each side
+            expect(probe.getBoundingClientRect().width).toBe(30 + 16 + 32);
             probe.remove();
         });
     });

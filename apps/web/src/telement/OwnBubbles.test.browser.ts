@@ -20,7 +20,6 @@ import {
     LockSolidIcon,
     PinSolidIcon,
     PlaySolidIcon,
-    ReactionAddIcon,
     UserSolidIcon,
 } from "@vector-im/compound-design-tokens/assets/web/icons";
 import compoundBase from "@vector-im/compound-design-tokens/assets/web/css/cpd-common-base.css?raw";
@@ -78,7 +77,7 @@ import playPauseStyles from "../../../../packages/shared-components/src/audio/Pl
 // eslint-disable-next-line no-restricted-imports
 import imageBodyViewStyles from "../../../../packages/shared-components/src/room/timeline/event-tile/body/MImageBodyView/ImageBodyView.module.css?raw";
 // eslint-disable-next-line no-restricted-imports
-import pinnedBadgeStyles from "../../../../packages/shared-components/src/room/timeline/event-tile/EventTileView/PinnedMessageBadge/PinnedMessageBadge.module.css?raw";
+import pinnedMarkViewStyles from "../../../../packages/shared-components/src/telement/room/timeline/PinnedMarkView/PinnedMarkView.module.css?raw";
 // eslint-disable-next-line no-restricted-imports
 import telementTokens from "../../../../packages/shared-components/src/telement/tokens.css?raw";
 import commonStyles from "../../res/css/_common.pcss?raw";
@@ -279,7 +278,12 @@ interface TileOptions {
     actionBar?: string;
     /** Telegram's checks or the failed mark, which EventTileView puts after the time. */
     status?: "read" | "failed";
+    /** Telegram's pin of a pinned message, which EventTileView puts before the time. */
+    pinned?: boolean;
 }
+
+/** The pin before the time, as PinnedMarkView renders it in its slot. */
+const PIN_SLOT = `<div class="slotPin"><span class="PinnedMarkView_mark" role="img">${icon(PinSolidIcon, { className: "PinnedMarkView_icon" })}</span></div>`;
 
 /** The status after the time, as MessageStatusView renders it in its slot. */
 function statusSlot(status: "read" | "failed"): string {
@@ -301,6 +305,7 @@ function tile(
         footer,
         actionBar,
         status,
+        pinned,
     }: TileOptions = {},
 ): string {
     const classes = [
@@ -308,13 +313,14 @@ function tile(
         own && "stateOwnEvent",
         reply && "stateHasReply",
         status && "hasStatusSlot",
+        pinned && "hasPinSlot",
         "stateLastInSection",
         ...states,
     ];
     return `
         <li class="root mx_EventTile ${classes.filter(Boolean).join(" ")}">
             <div class="line mx_EventTile_line ${lineClass}">
-                <div class="slotTimestamp"><a class="mx_MessageTimestamp content">12:48</a>${status ? statusSlot(status) : ""}</div>
+                <div class="slotTimestamp">${pinned ? PIN_SLOT : ""}<a class="mx_MessageTimestamp content">12:48</a>${status ? statusSlot(status) : ""}</div>
                 ${padlock ? `<div class="slotPadlock">${padlock}</div>` : ""}
                 ${reply ? `<div class="slotReplyChain"><div class="mx_ReplyChain_wrapper">${reply}</div></div>` : ""}
                 <div class="slotBody">${body}</div>
@@ -350,10 +356,7 @@ const CODE = `
     </div>
 `;
 
-/** The pinned badge, which EventTileFooter puts beside the reactions row in a bubble. */
-const PINNED = `<div class="PinnedMessageBadge_pinnedMessageBadge" tabindex="0">${icon(PinSolidIcon, { width: 16, height: 16 })}Pinned</div>`;
-
-/** A reactions row in a bubble: your own reaction first, then another, then the add-reaction button. */
+/** A reactions row in a bubble, which has no add-reaction button: your own reaction first, then another. */
 const REACTIONS = `
     <div class="mx_ReactionsRow ReactionsRow_reactionsRow" role="toolbar">
         <button type="button" class="ReactionsRowButton_reactionsRowButton ReactionsRowButton_reactionsRowButtonSelected ReactionsRowButton_reactionsRowButtonInBubble" data-reaction="own">
@@ -362,7 +365,6 @@ const REACTIONS = `
         <button type="button" class="ReactionsRowButton_reactionsRowButton ReactionsRowButton_reactionsRowButtonInBubble" data-reaction="other">
             <span class="ReactionsRowButton_reactionsRowButtonContent">👍</span><span class="ReactionsRowButton_reactionsRowButtonCount">12</span>
         </button>
-        <button type="button" class="ReactionsRow_addReactionButton ReactionsRow_addReactionButtonVisible">${icon(ReactionAddIcon, { width: 16, height: 16 })}</button>
     </div>
 `;
 
@@ -511,7 +513,7 @@ describe("Your own bubbles", () => {
                 ${moduleCss(decryptionFailureStyles, "DecryptionFailureBodyView")}
                 ${moduleCss(playPauseStyles, "PlayPauseButton")}
                 ${moduleCss(imageBodyViewStyles, "ImageBodyView")}
-                ${moduleCss(pinnedBadgeStyles, "PinnedMessageBadge")}
+                ${moduleCss(pinnedMarkViewStyles, "PinnedMarkView")}
             }
             @layer app-web { ${themed} }
         `;
@@ -689,8 +691,8 @@ describe("Your own bubbles", () => {
             expect(color(quote)).toBe(theme.secondary);
         });
 
-        it("fills your own reaction white with the bubble's color, and others' and the pinned badge translucent white with white", () => {
-            const list = render(tile(plain("Shipping it today"), { footer: REACTIONS + PINNED }));
+        it("fills your own reaction white with the bubble's color, and others' translucent white with white", () => {
+            const list = render(tile(plain("Shipping it today"), { footer: REACTIONS }));
             const own = list.querySelector('[data-reaction="own"]')!;
             const other = list.querySelector('[data-reaction="other"]')!;
 
@@ -699,13 +701,29 @@ describe("Your own bubbles", () => {
             expect(channels(fill(other)).slice(0, 3)).toEqual([255, 255, 255]);
             expect(channels(fill(other))[3]).toBeLessThan(0.25);
             expect(color(other)).toBe(WHITE);
-            expect(color(list.querySelector(".ReactionsRow_addReactionButton"))).toBe(theme.secondary);
+        });
 
-            const badge = list.querySelector(".PinnedMessageBadge_pinnedMessageBadge")!;
-            expect(channels(fill(badge)).slice(0, 3)).toEqual([255, 255, 255]);
-            expect(color(badge)).toBe(WHITE);
-            expect(getComputedStyle(badge.querySelector("svg")!).fill).toBe(WHITE);
-            expect(contrast(WHITE, composite(fill(badge), theme.fill))).toBeGreaterThanOrEqual(3);
+        it("draws the pin of a pinned message before the time in the time's secondary white, under reactions too", () => {
+            const list = render(
+                tile(plain("Shipping it today"), { pinned: true }),
+                tile(plain("Lunch?"), { pinned: true, footer: REACTIONS }),
+            );
+
+            for (const pin of list.querySelectorAll(".PinnedMarkView_mark svg")) {
+                const time = pin.closest(".slotTimestamp")!.querySelector(".mx_MessageTimestamp");
+                expect(color(pin)).toBe(theme.secondary);
+                expect(color(pin)).toBe(color(time));
+            }
+        });
+
+        it("draws the pin of your own pinned emote, which has no bubble, in the page's time color", () => {
+            const list = render(
+                tile(plain("waves"), { states: ["stateNoBubble", "stateEmote"], lineClass: "lineEmote", pinned: true }),
+            );
+
+            expect(color(list.querySelector(".PinnedMarkView_mark svg"))).toBe(
+                tokenColor("--cpd-color-text-secondary", list),
+            );
         });
 
         it("keeps a file's icon, name, size and download button legible", () => {

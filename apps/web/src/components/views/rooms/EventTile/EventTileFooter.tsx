@@ -22,7 +22,6 @@ interface EventTileFooterProps {
     pinnedMessageBadgeAriaDescribedBy: string;
     placement: "default" | "irc";
     showMainPinnedMessageBadge?: boolean;
-    showBubblePinnedMessageBadge?: boolean;
 }
 
 /** Renders the pinned-message badge and reactions row for an EventTile. */
@@ -36,7 +35,6 @@ export function EventTileFooter({
     pinnedMessageBadgeAriaDescribedBy,
     placement,
     showMainPinnedMessageBadge,
-    showBubblePinnedMessageBadge,
 }: Readonly<EventTileFooterProps>): JSX.Element | null {
     if (!hasFooter) {
         return null;
@@ -67,7 +65,6 @@ export function EventTileFooter({
         <>
             {showMainPinnedMessageBadge && pinnedMessageBadge}
             {reactionsRow}
-            {showBubblePinnedMessageBadge && pinnedMessageBadge}
         </>
     );
 }

@@ -142,7 +142,10 @@ function video(width: number, height: number): string {
     `;
 }
 
-/** A reactions row of the given number of reactions as ReactionsRowView renders it in a bubble, the first your own. */
+/**
+ * A reactions row of the given number of reactions as ReactionsRowView renders it in a bubble, the first your own.
+ * Bubbles have no add-reaction button.
+ */
 function reactions(count: number): string {
     const chips = Array.from(
         { length: count },
@@ -156,9 +159,6 @@ function reactions(count: number): string {
     return `
         <div class="mx_ReactionsRow ReactionsRow_reactionsRow" role="toolbar" aria-label="Reactions">
             ${chips.join("")}
-            <button type="button" class="ReactionsRow_addReactionButton" aria-label="Add reaction">
-                <svg width="16" height="16"></svg>
-            </button>
         </div>
     `;
 }

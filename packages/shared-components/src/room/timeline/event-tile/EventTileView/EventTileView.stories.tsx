@@ -602,12 +602,12 @@ const StoryThreadListActionBar = (): React.ReactElement => {
 const useStoryReactionTooltipVm = (caption: string): ReactionsRowButtonTooltipViewModel =>
     useMockedViewModel({ formattedSenders: "Alice Example and Bob Example", caption }, {});
 
-const StoryFooter = (): React.ReactElement => {
+const StoryFooter = ({ addReactionButton = true }: { addReactionButton?: boolean }): React.ReactElement => {
     const vm = useMockedViewModel(
         {
             ariaLabel: "Reactions",
             isVisible: true,
-            showAddReactionButton: true,
+            showAddReactionButton: addReactionButton,
             addReactionButtonLabel: "Add reaction",
             addReactionButtonVisible: true,
         },
@@ -1083,9 +1083,11 @@ const createRoomStorySlots = ({
     showActionBar: boolean;
 }): EventTileViewProps["slots"] => {
     // In bubbles the application shows no read receipts: your own messages have Telegram's checks after their time.
+    // Their reactions have no add-reaction button either, as the message menu's quick reactions add them.
     if (layout === "bubble") {
         return {
             ...slots,
+            footer: slots.footer ? <StoryFooter addReactionButton={false} /> : undefined,
             receipt: undefined,
             status: isOwnEvent ? <MessageStatusView status="read" /> : undefined,
             sender,

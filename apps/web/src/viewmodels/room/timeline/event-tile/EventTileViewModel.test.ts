@@ -689,13 +689,48 @@ describe("EventTileViewModel", () => {
         expect(groupSnapshot.footer).toMatchObject({
             hasFooter: true,
             showMainPinnedMessageBadge: true,
-            showBubblePinnedMessageBadge: false,
+            showPinBeforeTimestamp: false,
         });
+        // Bubbles mark a pinned message with a pin before its time instead of a badge, so it needs no footer
         expect(bubbleSnapshot.footer).toMatchObject({
+            hasFooter: false,
+            showMainPinnedMessageBadge: false,
+            showPinBeforeTimestamp: true,
+        });
+    });
+
+    it.each([
+        ["your own", true],
+        ["another person's", false],
+    ])("puts the pin before the time of %s pinned message in bubbles, beside its reactions", (_name, isOwnEvent) => {
+        const snapshot = EventTileViewModel.createSnapshot(
+            makeProps({
+                display: { layout: Layout.Bubble },
+                footer: { isOwnEvent, hasReactionsRow: true, hasReactions: true, hasPinnedMessageBadge: true },
+            }),
+        );
+
+        expect(snapshot.footer).toEqual({
             hasFooter: true,
             showMainPinnedMessageBadge: false,
-            showBubblePinnedMessageBadge: true,
+            showPinBeforeTimestamp: true,
         });
+    });
+
+    it.each([Layout.Group, Layout.IRC])("keeps the pinned badge and no pin in the %s layout", (layout) => {
+        const snapshot = EventTileViewModel.createSnapshot(
+            makeProps({ display: { layout }, footer: { hasPinnedMessageBadge: true } }),
+        );
+
+        expect(snapshot.footer).toMatchObject({ hasFooter: true, showPinBeforeTimestamp: false });
+    });
+
+    it("puts no pin before the time of a message that isn't pinned", () => {
+        const snapshot = EventTileViewModel.createSnapshot(
+            makeProps({ display: { layout: Layout.Bubble }, footer: { hasPinnedMessageBadge: false } }),
+        );
+
+        expect(snapshot.footer.showPinBeforeTimestamp).toBe(false);
     });
 
     it("derives footer render placement for default layouts", () => {

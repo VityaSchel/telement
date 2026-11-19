@@ -52,6 +52,7 @@ export function EventTileView({
             body: { style: styles.slotBody, className: "slotBody" },
             timestamp: { style: styles.slotTimestamp, className: "slotTimestamp" },
             status: { style: styles.slotStatus, className: "slotStatus" },
+            pin: { style: styles.slotPin, className: "slotPin" },
             padlock: { style: styles.slotPadlock, className: "slotPadlock" },
             replyChain: { style: styles.slotReplyChain, className: "slotReplyChain" },
             actionBar: { style: styles.slotActionBar, className: "slotActionBar" },
@@ -83,6 +84,8 @@ export function EventTileView({
     const hasReceiptSlot = isRenderableSlot(slots.receipt);
     // The status of your own message follows its time, so it shows only where the time does
     const hasStatusSlot = isRenderableSlot(slots.status) && isRenderableSlot(slots.timestamp);
+    // So does the pin of a pinned message, which precedes the time
+    const hasPinSlot = isRenderableSlot(slots.pin) && isRenderableSlot(slots.timestamp);
     const timestampOverMedia = !!lineState?.timestampOverMedia;
     // In bubbles a message's avatar sits beside the bottom of its bubble, so it follows the line. Informational and
     // full-width rows keep it before their content.
@@ -101,13 +104,14 @@ export function EventTileView({
         [styles.lineTimestampOverMedia]: timestampOverMedia,
     });
 
-    // The status sits in the time's slot, after the time, so that it goes wherever the time goes:
+    // The status sits in the time's slot, after the time, and the pin before it, so that they go wherever the time goes:
     // the bubble's corner, the badge over a picture or the end of an emote's line.
     const renderTimestamp = (): React.ReactNode =>
         renderSlot(
             "timestamp",
-            hasStatusSlot ? (
+            hasStatusSlot || hasPinSlot ? (
                 <>
+                    {hasPinSlot && renderSlot("pin")}
                     {slots.timestamp}
                     {hasStatusSlot && renderSlot("status")}
                 </>
@@ -141,6 +145,7 @@ export function EventTileView({
                 [styles.stateOwnEvent]: root.state.isOwnEvent,
                 [styles.hasReceiptSlot]: hasReceiptSlot,
                 [styles.hasStatusSlot]: hasStatusSlot,
+                [styles.hasPinSlot]: hasPinSlot,
                 [styles.stateInfo]: root.state?.info,
                 [styles.stateBubbleContainer]: root.state?.bubbleContainer,
                 [styles.stateLeftAlignedBubble]: root.state?.leftAlignedBubble,

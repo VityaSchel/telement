@@ -77,9 +77,10 @@
     --event-tile-timestamp-text-width: 1.875rem;
     --event-tile-timestamp-gap: var(--cpd-space-2x);
     --event-tile-timestamp-gutter: calc(var(--event-tile-timestamp-text-width) + 2 * var(--event-tile-timestamp-gap));
-    /* The room the status of your own message (its read checks) takes after the time in the bubble layout. Each row, a
-       quoted reply's too, starts without it. */
+    /* The room the status of your own message (its read checks) takes after the time, and the pin of a pinned message
+       before it, in the bubble layout. Each row, a quoted reply's too, starts without them. */
     --event-tile-status-width: 0px;
+    --event-tile-pin-width: 0px;
 
     position: relative;
     flex-shrink: 0;
@@ -211,7 +212,8 @@
    load keeps the plain time. So do large emoji, which have no bubble behind their time (see the bubble layout). */
 .root:not(.layoutIrc) .line.lineTimestampOverMedia {
     --image-body-min-width: calc(
-        var(--event-tile-timestamp-text-width) + var(--event-tile-status-width) + 4 * var(--cpd-space-2x)
+        var(--event-tile-timestamp-text-width) + var(--event-tile-status-width) + var(--event-tile-pin-width) + 4 *
+            var(--cpd-space-2x)
     );
 }
 
@@ -837,8 +839,10 @@
     --event-tile-content-inline-end: 0;
     --image-body-min-width: calc(1.8rem + 2 * var(--event-tile-bubble-gutter));
     --image-body-min-height: calc(1.8rem + 2 * var(--event-tile-bubble-gutter));
-    /* How wide the time is with the status of your own message after it */
-    --event-tile-timestamp-width: calc(var(--event-tile-timestamp-text-width) + var(--event-tile-status-width));
+    /* How wide the time is with the status of your own message after it and the pin of a pinned message before it */
+    --event-tile-timestamp-width: calc(
+        var(--event-tile-timestamp-text-width) + var(--event-tile-status-width) + var(--event-tile-pin-width)
+    );
     /* The timestamp sits in the bubble's padding rather than one gap in. */
     --event-tile-timestamp-gutter: calc(
         var(--event-tile-bubble-padding-inline) + var(--event-tile-timestamp-width) + var(--event-tile-timestamp-gap)
@@ -1437,10 +1441,16 @@
         --event-tile-status-width: calc(var(--cpd-space-0-5x) + 16px);
     }
 
-    /* The status's box is the time's line, so that the slot lines it up as it does the time, whether it aligns it at
-       the bottom, in the middle or on a baseline: the empty text gives it the time's baseline. The checks are centered
-       in it, on the middle of the time's digits. */
-    .line .slotTimestamp > .slotStatus {
+    /* A pinned message has Telegram's 12px pin 4px before its time, in the time's color, rather than a badge among its
+       reactions. */
+    &.hasPinSlot {
+        --event-tile-pin-width: calc(12px + var(--cpd-space-1x));
+    }
+
+    /* The status's and the pin's boxes are the time's line, so that the slot lines them up as it does the time, whether
+       it aligns them at the bottom, in the middle or on a baseline: the empty text gives them the time's baseline. The
+       checks and the pin are centered in them, on the middle of the time's digits. */
+    .line .slotTimestamp > :is(.slotStatus, .slotPin) {
         display: inline-flex;
         align-items: center;
         block-size: 1lh;
@@ -1454,8 +1464,12 @@
         margin-inline-start: var(--cpd-space-0-5x);
     }
 
+    .line .slotTimestamp > .slotPin {
+        margin-inline-end: var(--cpd-space-1x);
+    }
+
     /* Below the badges' white, which their rules give what the slot holds */
-    .line .slotTimestamp > :where(.slotStatus) {
+    .line .slotTimestamp > :where(.slotStatus, .slotPin) {
         color: var(--cpd-color-text-secondary);
     }
 
@@ -1521,31 +1535,18 @@
         padding-inline-end: var(--event-tile-bubble-padding-inline);
     }
 
-    /* 8px under the message, with the gap the line puts between its parts */
+    /* 8px under the message, with the gap the line puts between its parts. The reactions (ReactionsRowView's toolbar),
+       all the footer holds here as a pinned message has its pin by the time, keep room for the time at the end of their
+       last line, so that the time shares it when they wrap, as in Telegram. */
     .line > .slotFooter {
+        --event-tile-reactions-end-space: calc(var(--cpd-space-2x) + var(--event-tile-bubble-timestamp-width));
+
         flex-wrap: wrap;
         margin: calc(var(--cpd-space-2x) - var(--event-tile-bubble-gap)) 0 0;
         /* A row of its own where the line is a grid */
         grid-column: 1 / -1;
     }
 
-    .line > .slotFooter::after {
-        content: "";
-        flex: none;
-        inline-size: var(--event-tile-bubble-timestamp-width);
-        block-size: var(--cpd-space-6x);
-    }
-
-    /* Reactions (ReactionsRowView's toolbar) that end the footer keep that room at the end of their own last line
-       instead, so that the time shares it when they wrap, as in Telegram. A pinned badge after them keeps the
-       footer's. */
-    .line > .slotFooter:has(> [role="toolbar"]:last-child) {
-        --event-tile-reactions-end-space: calc(var(--cpd-space-2x) + var(--event-tile-bubble-timestamp-width));
-
-        &::after {
-            content: none;
-        }
-    }
 
     /* A padlock stays beside the message, in a column of its own, rather than on a line above it. */
     &:not(.stateHasReply, .stateEncryptionFailure)
@@ -1770,10 +1771,9 @@
         }
 
         /* Secondary white on a translucent white fill drops under 3:1 in light themes, so what sits on one is white: a
-           code block's line numbers, a link preview's description, the pinned badge (the footer's child beside the
-           reactions toolbar), and the play icon of a voice or audio message, whose waveform and times stay secondary */
-        > .slotBody :is(:global(.markdown-body) pre, :global(.mx_TextualBody_urlPreviews)),
-        > .slotFooter > :not([role="toolbar"]) {
+           code block's line numbers, a link preview's description, and the play icon of a voice or audio message, whose
+           waveform and times stay secondary */
+        > .slotBody :is(:global(.markdown-body) pre, :global(.mx_TextualBody_urlPreviews)) {
             --cpd-color-text-secondary: var(--tl-color-on-bubble-own);
             --cpd-color-icon-secondary: var(--tl-color-on-bubble-own);
         }
@@ -2004,8 +2004,6 @@
 
         > .slotFooter {
             justify-content: flex-end;
-
-            --event-tile-reactions-add-button-order: -1;
         }
     }
 

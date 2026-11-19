@@ -644,15 +644,79 @@ describe("EventTile", () => {
             expect(getTile(container).querySelector(':scope > [data-testid="event-tile-slot-footer"]')).toBeNull();
         });
 
-        it("renders a bubble footer for an own pinned message", () => {
+        it.each([
+            ["your own", true],
+            ["another person's", false],
+        ])("marks %s pinned message in bubbles with a pin before its time rather than a footer", (_name, own) => {
             vi.spyOn(PinningUtils, "isPinned").mockReturnValue(true);
-            const ownEvent = makeOwnMessage();
-            const { container } = getComponent({ mxEvent: ownEvent, layout: Layout.Bubble });
-            const footer = container.querySelector('[data-testid="event-tile-slot-footer"]');
+            // The pin goes with the time, which a message shows once it has a timestamp
+            mxEvent = own ? makeOwnMessage({ ts: 1234 }) : makeTimestampedMessage();
+            const { container } = getComponent({ layout: Layout.Bubble });
+            const timestampSlot = getByTestId(container, "event-tile-slot-timestamp");
+            const pin = screen.getByRole("img", { name: "Pinned message" });
 
-            expect(footer).not.toBeNull();
-            expect(footer).toHaveTextContent("Pinned message");
+            expect(timestampSlot.firstElementChild).toBe(getByTestId(container, "event-tile-slot-pin"));
+            expect(getByTestId(container, "event-tile-slot-pin")).toContainElement(pin);
+            expect(container.querySelector('[data-testid="event-tile-slot-footer"]')).toBeNull();
+            expect(screen.queryByText("Pinned message")).not.toBeInTheDocument();
         });
+
+        it("puts the reactions of a pinned message in bubbles in a footer of their own, with the pin by the time", () => {
+            vi.spyOn(PinningUtils, "isPinned").mockReturnValue(true);
+            mxEvent = makeTimestampedMessage();
+            const reaction = makeReactionEvent(room.roomId, mxEvent.getId()!, "@bob:example.org", "👍");
+            const getRelationsForEvent = vi.fn().mockReturnValue(makeRelations(new Map([["👍", [reaction]]])));
+            const { container } = getComponent(
+                { layout: Layout.Bubble, showReactions: true, getRelationsForEvent },
+                TimelineRenderingType.Room,
+                { canReact: true },
+            );
+            const footer = getByTestId(container, "event-tile-slot-footer");
+
+            expect(footer.children).toHaveLength(1);
+            expect(footer.firstElementChild).toHaveAttribute("role", "toolbar");
+            expect(getByTestId(container, "event-tile-slot-timestamp")).toContainElement(
+                screen.getByRole("img", { name: "Pinned message" }),
+            );
+        });
+
+        it("puts no pin before the time of a message that isn't pinned", () => {
+            vi.spyOn(PinningUtils, "isPinned").mockReturnValue(false);
+            mxEvent = makeTimestampedMessage();
+            const { container } = getComponent({ layout: Layout.Bubble });
+
+            expect(getByTestId(container, "event-tile-slot-timestamp")).toBeInTheDocument();
+
+            expect(screen.queryByRole("img", { name: "Pinned message" })).not.toBeInTheDocument();
+        });
+
+        it("has no add-reaction button among the reactions in bubbles, as in Telegram", () => {
+            const reaction = makeReactionEvent(room.roomId, mxEvent.getId()!, "@bob:example.org", "👍");
+            const getRelationsForEvent = vi.fn().mockReturnValue(makeRelations(new Map([["👍", [reaction]]])));
+            getComponent(
+                { layout: Layout.Bubble, showReactions: true, getRelationsForEvent },
+                TimelineRenderingType.Room,
+                {
+                    canReact: true,
+                },
+            );
+
+            expect(screen.getByRole("button", { name: /@bob:example\.org reacted with 👍/ })).toBeInTheDocument();
+            expect(screen.queryByRole("button", { name: "Add reaction" })).not.toBeInTheDocument();
+        });
+
+        it.each([Layout.Group, Layout.IRC])(
+            "keeps the add-reaction button among the reactions in the %s layout",
+            (layout) => {
+                const reaction = makeReactionEvent(room.roomId, mxEvent.getId()!, "@bob:example.org", "👍");
+                const getRelationsForEvent = vi.fn().mockReturnValue(makeRelations(new Map([["👍", [reaction]]])));
+                getComponent({ layout, showReactions: true, getRelationsForEvent }, TimelineRenderingType.Room, {
+                    canReact: true,
+                });
+
+                expect(screen.getByRole("button", { name: "Add reaction" })).toBeInTheDocument();
+            },
+        );
 
         it("renders relation groups and deduplicates reactions from the same sender", () => {
             const bobReaction1 = makeReactionEvent(room.roomId, mxEvent.getId()!, "@bob:example.org", "👍");
@@ -1098,15 +1162,20 @@ describe("EventTile", () => {
     });
 
     describe("EventTile renderingType: default", () => {
-        it.each([[Layout.Group], [Layout.Bubble], [Layout.IRC]])(
-            "should display the pinned message badge",
-            async (layout) => {
-                vi.spyOn(PinningUtils, "isPinned").mockReturnValue(true);
-                getComponent({ layout });
+        it.each([[Layout.Group], [Layout.IRC]])("should display the pinned message badge", async (layout) => {
+            vi.spyOn(PinningUtils, "isPinned").mockReturnValue(true);
+            getComponent({ layout });
 
-                expect(screen.getByText("Pinned message")).toBeInTheDocument();
-            },
-        );
+            expect(screen.getByText("Pinned message")).toBeInTheDocument();
+        });
+
+        it("should mark a pinned message with a pin in the bubble layout", async () => {
+            vi.spyOn(PinningUtils, "isPinned").mockReturnValue(true);
+            mxEvent = makeTimestampedMessage();
+            getComponent({ layout: Layout.Bubble });
+
+            expect(screen.getByRole("img", { name: "Pinned message" })).toBeInTheDocument();
+        });
 
         it("uses the current room member when current profiles are enabled", async () => {
             const senderId = mxEvent.getSender()!;
