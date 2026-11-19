@@ -25,6 +25,7 @@ import sendMessageComposerStyles from "../../../res/css/views/rooms/_SendMessage
 import sendWysiwygComposerStyles from "../../../res/css/views/rooms/wysiwyg_composer/_SendWysiwygComposer.pcss?raw";
 import editorStyles from "../../../res/css/views/rooms/wysiwyg_composer/components/_Editor.pcss?raw";
 import telegramComposerStyles from "../../../res/css/telement/_TelegramComposer.pcss?raw";
+import replyPreviewStyles from "../../../res/css/views/rooms/_ReplyPreview.pcss?raw";
 import emojiButtonStyles from "../../../res/css/views/rooms/_EmojiButton.pcss?raw";
 import lightTheme from "../../../res/themes/light/css/_light.pcss?raw";
 import { toBrowserCss } from "../../test/telement/browserCss";
@@ -111,6 +112,7 @@ describe("Telegram composer buttons", () => {
             ${toBrowserCss(sendWysiwygComposerStyles, fontSizes)}
             ${toBrowserCss(editorStyles, commonStyles, fontSizes)}
             ${toBrowserCss(telegramComposerStyles, fontSizes)}
+            ${replyPreviewStyles}
         `;
         document.head.append(stylesheet);
     });
@@ -121,6 +123,33 @@ describe("Telegram composer buttons", () => {
 
     afterEach(() => {
         document.body.innerHTML = "";
+    });
+
+    it("puts the reply bar's quote line on the paperclip's drawn glyph, which starts inside its icon", () => {
+        renderComposerRow(false);
+        // The paperclip's own glyph, as UploadButton draws it, rather than an empty icon
+        document.querySelector(".mx_TelementAttachButton svg")!.outerHTML = renderToStaticMarkup(
+            createElement(AttachmentIcon, { width: 20, height: 20 }),
+        );
+        // ReplyPreview's bar, which MessageComposer puts above its row
+        document.querySelector(".mx_MessageComposer_row")!.insertAdjacentHTML(
+            "beforebegin",
+            `
+                <div class="mx_ReplyPreview">
+                    <div class="mx_ReplyPreview_section">
+                        <div class="mx_ReplyPreview_header"><span class="mx_ReplyPreview_title">Reply to Alice</span></div>
+                        <div>Hello there</div>
+                    </div>
+                </div>
+            `,
+        );
+        const section = document.querySelector(".mx_ReplyPreview_section")!;
+        const line = getComputedStyle(section, "::before");
+        const glyph = box(".mx_TelementAttachButton svg path");
+
+        expect(glyph.left - box(".mx_TelementAttachButton svg").left).toBe(5);
+        expect(line.left).toBe("0px");
+        expect(Math.abs(section.getBoundingClientRect().left - glyph.left)).toBeLessThanOrEqual(0.5);
     });
 
     it("keeps the formatting button's 24px icon on a control-sized target, like the other composer buttons", () => {

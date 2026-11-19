@@ -6,12 +6,14 @@ SPDX-License-Identifier: AGPL-3.0-only OR GPL-3.0-only OR LicenseRef-Element-Com
 Please see LICENSE files in the repository root for full details.
 */
 
-/* A flat bar at the top of the composer, as in Telegram. The quote line lines up with the attach button's icon and the
-   cancel icon with the icons on the right: all of them sit 16px in from the composer's sides. */
+/* A flat bar at the top of the composer, as in Telegram. The quote line sits on the paperclip's drawn glyph, which
+   starts 5px into its 20px icon (6 of its 24 units), and the cancel icon lines up with the icons on the right: the
+   icons' boxes sit 16px in from the composer's sides. */
 .mx_ReplyPreview {
     max-height: 50vh;
     overflow: auto;
-    padding: var(--cpd-space-2x) var(--cpd-space-1x) 0 var(--cpd-space-2x);
+    padding-block: var(--cpd-space-2x) 0;
+    padding-inline: calc(var(--cpd-space-2x) + 5px) var(--cpd-space-1x);
 
     /* The spacing of the reply quote inside messages (mx_ReplyChain), with its line in the sender's color, which the
        mx_Username_color class sets as the text color. */
