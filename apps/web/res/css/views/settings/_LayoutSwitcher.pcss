@@ -32,11 +32,11 @@ Please see LICENSE files in the repository root for full details.
              */
             gap: calc(var(--cpd-space-2x) + var(--cpd-space-0-5x));
             align-items: center;
-        }
-
-        .mxLayoutSwitcher_LayoutSelector_LayoutRadio_inline,
-        .mxLayoutSwitcher_LayoutSelector_LayoutRadio_EventTilePreview {
-            margin: var(--cpd-space-3x);
+            /* Telement: a 44px header like the theme chips (_ThemeChoicePanel.pcss), its 1px separator included, with
+               the radio 12px from the card's top and start, its 1px border included. The row is as tall as the radio,
+               so the label's taller line doesn't push it down */
+            margin: calc(var(--cpd-space-3x) - 1px);
+            block-size: 20px;
         }
 
         /**
@@ -44,6 +44,7 @@ Please see LICENSE files in the repository root for full details.
          * Tweak also hover style and remove action bar
          */
         .mxLayoutSwitcher_LayoutSelector_LayoutRadio_EventTilePreview {
+            margin: var(--cpd-space-3x);
             pointer-events: none;
 
             .mx_EventTile {

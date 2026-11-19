@@ -8,7 +8,7 @@ Please see LICENSE files in the repository root for full details.
 import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { Field, Label, Root } from "@vector-im/compound-web";
+import { Field, Label, RadioControl, Root } from "@vector-im/compound-web";
 import compoundBase from "@vector-im/compound-design-tokens/assets/web/css/cpd-common-base.css?raw";
 import compoundSemantic from "@vector-im/compound-design-tokens/assets/web/css/cpd-common-semantic.css?raw";
 import compoundLightTheme from "@vector-im/compound-design-tokens/assets/web/css/cpd-theme-light-base.css?raw";
@@ -96,7 +96,7 @@ describe("The layout switcher's bubble preview", () => {
         document.body.innerHTML = "";
     });
 
-    it("puts your own bubble at the card's end, its tail as far from that end as the option's label is from the start", () => {
+    it("puts your own bubble at the card's end, its tail as far inside the border as the radio is from the card's edge", () => {
         renderBubbleOption();
         const card = document.querySelector(".mxLayoutSwitcher_LayoutSelector_LayoutRadio")!;
         const label = document.querySelector(".mxLayoutSwitcher_LayoutSelector_LayoutRadio_inline")!;
@@ -108,8 +108,43 @@ describe("The layout switcher's bubble preview", () => {
         const tailEnd = bubble.getBoundingClientRect().right - parseFloat(tail.right);
 
         expect(tail.width).toBe("6px");
-        expect(cardEnd - tailEnd).toBe(label.getBoundingClientRect().left - cardStart);
+        // The header's radio is 12px from the card's edge, its border included, as on the theme chips
+        expect(cardEnd - tailEnd).toBe(label.getBoundingClientRect().left - card.getBoundingClientRect().left);
         expect(bubble.getBoundingClientRect().left - cardStart).toBeGreaterThan(cardEnd - tailEnd);
+    });
+
+    it("heads the card with a 44px row, the radio 12px from the card's top and start, as the theme chips", () => {
+        document.body.innerHTML = `<div class="cpd-theme-light" style="width: 307px">${renderToStaticMarkup(
+            createElement(
+                Root,
+                { className: "mx_LayoutSwitcher_LayoutSelector" },
+                createElement(
+                    Field,
+                    { name: "layout", className: "mxLayoutSwitcher_LayoutSelector_LayoutRadio" },
+                    createElement(
+                        Label,
+                        {},
+                        createElement(
+                            "div",
+                            { className: "mxLayoutSwitcher_LayoutSelector_LayoutRadio_inline" },
+                            createElement(RadioControl, { name: "layout", value: "bubble" }),
+                            createElement("span", {}, "Message bubbles"),
+                        ),
+                        createElement("hr", { className: "mxLayoutSwitcher_LayoutSelector_LayoutRadio_separator" }),
+                    ),
+                ),
+            ),
+        )}</div>`;
+        const card = document.querySelector(".mxLayoutSwitcher_LayoutSelector_LayoutRadio")!.getBoundingClientRect();
+        const radio = document.querySelector("input")!.getBoundingClientRect();
+        const separator = document
+            .querySelector(".mxLayoutSwitcher_LayoutSelector_LayoutRadio_separator")!
+            .getBoundingClientRect();
+
+        expect(separator.bottom - card.top).toBe(44);
+        expect([radio.width, radio.height]).toEqual([20, 20]);
+        expect([radio.left - card.left, radio.top - card.top]).toEqual([12, 12]);
+        expect(separator.top - radio.bottom).toBe(radio.top - card.top - 1);
     });
 
     it("puts your own bubble as far below the separator and above the card's bottom as its tail is from the card's end", () => {

@@ -137,7 +137,7 @@ describe("Settings dialogs", () => {
     });
 
     describe("theme choices", () => {
-        it("are 44px chips rounded as rows, with the radio 12px from their top, bottom and start", () => {
+        it("are 44px pills, concentric with the radio 12px from their top, bottom and start", () => {
             document.body.innerHTML = renderToStaticMarkup(
                 createElement(
                     Root,
@@ -166,7 +166,8 @@ describe("Settings dialogs", () => {
             for (const chip of chips) {
                 const rect = chip.getBoundingClientRect();
                 expect(rect.height).toBe(44);
-                expect(cornerRadii(chip)).toEqual({ x: 8, y: 8 });
+                // The radio's 10px radius and the 12px around it
+                expect(cornerRadii(chip)).toEqual({ x: 22, y: 22 });
                 const radio = chip.querySelector("input")!.getBoundingClientRect();
                 expect([radio.width, radio.height]).toEqual([20, 20]);
                 // From the chip's outer edge, its 1px border included
