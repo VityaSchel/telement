@@ -85,6 +85,22 @@ Please see LICENSE files in the repository root for full details.
                 height: 100%;
                 border-radius: 4px;
             }
+
+            /* Telement: a beta's dark illustration (BetaCard.tsx) replaces the light one in dark themes, where the light
+               one would be the brightest thing in the dialog. Hidden, it isn't loaded. */
+            .mx_BetaCard_columns_image_dark {
+                display: none;
+            }
+
+            :is(.cpd-theme-dark, .cpd-theme-dark-hc) & {
+                .mx_BetaCard_columns_image:has(+ .mx_BetaCard_columns_image_dark) {
+                    display: none;
+                }
+
+                .mx_BetaCard_columns_image_dark {
+                    display: inline;
+                }
+            }
         }
     }
 

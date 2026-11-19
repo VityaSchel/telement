@@ -56,6 +56,7 @@ import BlockInvitesConfigController from "./controllers/BlockInvitesConfigContro
 import RequiresSettingsController from "./controllers/RequiresSettingsController.ts";
 import { type NotificationSound } from "../Notifier.ts";
 import VideoRoomsBetaImage from "../../res/img/betas/video_rooms.png";
+import VideoRoomsBetaDarkImage from "../../res/img/betas/video_rooms_dark.png";
 
 export const defaultWatchManager = new WatchManager();
 
@@ -169,6 +170,8 @@ export interface IBaseSetting<T extends SettingValueType = SettingValueType> {
         caption: () => ReactNode;
         faq?: (enabled: boolean) => ReactNode;
         image?: string; // require(...)
+        /** The image in dark themes, where it would otherwise be the brightest thing on the card. */
+        darkImage?: string;
         extraSettings?: BooleanSettingKey[];
         requiresRefresh?: boolean;
     };
@@ -404,6 +407,7 @@ export const SETTINGS: Settings = {
                 </>
             ),
             image: VideoRoomsBetaImage,
+            darkImage: VideoRoomsBetaDarkImage,
             requiresRefresh: true,
         },
     },

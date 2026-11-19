@@ -60,7 +60,7 @@ const BetaCard: React.FC<IProps> = ({ title: titleOverride, featureId }) => {
     const [busy, setBusy] = useState(false);
     if (!info) return null; // Beta is invalid/disabled
 
-    const { title, caption, faq, image, extraSettings, requiresRefresh } = info;
+    const { title, caption, faq, image, darkImage, extraSettings, requiresRefresh } = info;
 
     let refreshWarning: string | undefined;
     if (requiresRefresh) {
@@ -111,6 +111,15 @@ const BetaCard: React.FC<IProps> = ({ title: titleOverride, featureId }) => {
                 </div>
                 <div className="mx_BetaCard_columns_image_wrapper">
                     <img className="mx_BetaCard_columns_image" src={image} alt="" />
+                    {/* Telement: dark themes show this one instead (_BetaCard.pcss) */}
+                    {darkImage && (
+                        <img
+                            className="mx_BetaCard_columns_image mx_BetaCard_columns_image_dark"
+                            src={darkImage}
+                            alt=""
+                            loading="lazy"
+                        />
+                    )}
                 </div>
             </div>
             {extraSettings && value && (

@@ -39,4 +39,33 @@ describe("<BetaCard />", () => {
         render(<BetaCard featureId={featureId} />);
         expect(screen.getByRole("button", { name: "Leave the beta" })).toBeInTheDocument();
     });
+
+    it("draws the dark illustration after the light one, for dark themes to swap them, loading it only when shown", () => {
+        vi.mocked(SettingsStore).getBetaInfo.mockReturnValue({
+            title: "title" as TranslationKey,
+            caption: () => "caption",
+            image: "light.png",
+            darkImage: "dark.png",
+        });
+        const { container } = render(<BetaCard featureId={featureId} />);
+        const images = [...container.querySelectorAll(".mx_BetaCard_columns_image_wrapper > img")];
+
+        expect(
+            images.map((image) => [image.className, image.getAttribute("src"), image.getAttribute("loading")]),
+        ).toEqual([
+            ["mx_BetaCard_columns_image", "light.png", null],
+            ["mx_BetaCard_columns_image mx_BetaCard_columns_image_dark", "dark.png", "lazy"],
+        ]);
+    });
+
+    it("draws only the light illustration when a beta has no dark one", () => {
+        vi.mocked(SettingsStore).getBetaInfo.mockReturnValue({
+            title: "title" as TranslationKey,
+            caption: () => "caption",
+            image: "light.png",
+        });
+        const { container } = render(<BetaCard featureId={featureId} />);
+
+        expect(container.querySelectorAll(".mx_BetaCard_columns_image_wrapper > img")).toHaveLength(1);
+    });
 });

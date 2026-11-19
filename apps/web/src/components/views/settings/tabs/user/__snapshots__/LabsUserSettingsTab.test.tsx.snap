@@ -89,6 +89,12 @@ exports[`<LabsUserSettingsTab /> > renders settings marked as beta as beta cards
             class="mx_BetaCard_columns_image"
             src="/res/img/betas/video_rooms.png"
           />
+          <img
+            alt=""
+            class="mx_BetaCard_columns_image mx_BetaCard_columns_image_dark"
+            loading="lazy"
+            src="/res/img/betas/video_rooms_dark.png"
+          />
         </div>
       </div>
     </div>
