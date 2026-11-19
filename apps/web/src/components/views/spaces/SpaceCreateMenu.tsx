@@ -27,7 +27,12 @@ import {
     type ICreateRoomOpts,
 } from "matrix-js-sdk/src/matrix";
 import { logger } from "matrix-js-sdk/src/logger";
-import { LockSolidIcon, PublicIcon, ChevronLeftIcon } from "@vector-im/compound-design-tokens/assets/web/icons";
+import {
+    LockSolidIcon,
+    PublicIcon,
+    ChevronLeftIcon,
+    CloseIcon,
+} from "@vector-im/compound-design-tokens/assets/web/icons";
 
 import { _t } from "../../../languageHandler";
 import ContextMenu, { ChevronFace } from "../../structures/ContextMenu";
@@ -351,6 +356,16 @@ const SpaceCreateMenu: React.FC<{
             focusLock={true}
         >
             {body}
+            {/* Telement: it dims the app like a dialog, so it closes like one, from the button on its title's line */}
+            <AccessibleButton
+                onClick={onFinished}
+                className="mx_Dialog_cancelButton"
+                title={_t("action|close")}
+                aria-label={_t("dialog_close_label")}
+                placement="bottom"
+            >
+                <CloseIcon />
+            </AccessibleButton>
         </ContextMenu>
     );
 };

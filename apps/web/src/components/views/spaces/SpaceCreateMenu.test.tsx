@@ -58,6 +58,21 @@ describe("<SpaceCreateMenu />", () => {
         expect(asFragment()).toMatchSnapshot();
     });
 
+    it("closes from the close button on its title's line, as a dialog does, at either step", async () => {
+        const onFinished = vi.fn();
+        const { getByRole, getByText } = render(
+            <SpaceCreateMenu onFinished={onFinished} />,
+            withClientContextRenderOptions(client),
+        );
+
+        await userEvent.click(getByRole("button", { name: "Close dialog" }));
+        expect(onFinished).toHaveBeenCalledTimes(1);
+
+        await userEvent.click(getByText("Public"));
+        await userEvent.click(getByRole("button", { name: "Close dialog" }));
+        expect(onFinished).toHaveBeenCalledTimes(2);
+    });
+
     it("should be able to create a public space", async () => {
         const onFinished = vi.fn();
         client.createRoom.mockResolvedValue({ room_id: "!room:id" });
