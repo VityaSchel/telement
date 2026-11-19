@@ -10,7 +10,7 @@ import "@vector-im/compound-web/dist/style.css";
 import "../../telement/tokens.css";
 import React from "react";
 import { composeStories } from "@storybook/react-vite";
-import { render, screen, waitFor } from "@test-utils";
+import { render, screen, waitFor, within } from "@test-utils";
 import { describe, it, expect } from "vitest";
 import { userEvent } from "vitest/browser";
 
@@ -62,6 +62,28 @@ describe("User menu insets", () => {
         expect(edge.right - separator.right).toBe(4);
         expect(items[0].getBoundingClientRect().top - separator.bottom).toBe(4);
     });
+
+    it.each([true, false])(
+        "keeps the name, the status (shown: %s) and the Matrix ID 4px apart, 8px under the avatar",
+        async (showUserStatus) => {
+            render(<Open showUserStatus={showUserStatus} />);
+            const menu = await screen.findByRole("menu");
+            await Promise.all(menu.getAnimations().map((animation) => animation.finished));
+            const name = within(menu).getByText(Open.args.displayName!);
+            const status = name.nextElementSibling;
+            const lines = [name, ...(status ? [status] : []), within(menu).getByTestId("userId")];
+
+            expect(Boolean(status)).toBe(showUserStatus);
+            expect(name.getBoundingClientRect().top - name.previousElementSibling!.getBoundingClientRect().bottom).toBe(
+                8,
+            );
+            for (const [index, line] of lines.entries()) {
+                if (index === 0) continue;
+                const gap = line.getBoundingClientRect().top - lines[index - 1].getBoundingClientRect().bottom;
+                expect(gap).toBeCloseTo(4, 1);
+            }
+        },
+    );
 
     it("ends the hover chevron's drawing 16px from the menu's edge", async () => {
         render(<Open />);

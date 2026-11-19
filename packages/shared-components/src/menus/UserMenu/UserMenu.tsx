@@ -160,7 +160,16 @@ export function UserMenuView({ vm, className }: UserMenuViewProps): JSX.Element 
                 className={styles.container}
             >
                 <section className={classNames(styles.profile, styles.profilePrimary)}>
-                    {showAvatar && <Avatar id={userId} name={displayName} type="round" size="64px" src={avatarUrl} />}
+                    {showAvatar && (
+                        <Avatar
+                            className={styles.avatar}
+                            id={userId}
+                            name={displayName}
+                            type="round"
+                            size="64px"
+                            src={avatarUrl}
+                        />
+                    )}
                     <Text
                         className={classNames(styles.displayname, styles.constrainedText)}
                         type="body"
