@@ -64,14 +64,7 @@ const SettingsDropdown = ({
             <label className="mx_SettingsDropdown_label" htmlFor={id}>
                 <span className="mx_SettingsDropdown_labelText">{label}</span>
             </label>
-            <Dropdown
-                id={id}
-                onOptionChange={onOptionChange}
-                menuWidth={360} // matches CSS width
-                value={value}
-                disabled={disabled}
-                label={label}
-            >
+            <Dropdown id={id} onOptionChange={onOptionChange} value={value} disabled={disabled} label={label}>
                 {options}
             </Dropdown>
         </div>

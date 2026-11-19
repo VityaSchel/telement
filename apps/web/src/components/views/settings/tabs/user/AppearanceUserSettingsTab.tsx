@@ -95,7 +95,7 @@ export default class AppearanceUserSettingsTab extends React.Component<EmptyObje
             );
         }
         return (
-            <SettingsSubsection>
+            <SettingsSubsection stretchContent>
                 {toggle}
                 {advanced}
             </SettingsSubsection>

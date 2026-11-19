@@ -59,12 +59,27 @@ Please see LICENSE files in the repository root for full details.
         gap: var(--cpd-space-6x);
     }
 
+    /* Telement: like every other field, a dropdown spans the card (Telegram's rows span the pane), with its hint under
+       it spaced as Compound's form fields. The label floats on the dropdown's border (Dropdown's showLabel) */
     .mx_SettingsSubsection_dropdown {
-        min-width: 360px;
-        /* The dropdown and the hint under it, spaced as Compound's form fields. Telement: the label floats on the
-           dropdown's border (Dropdown's showLabel) rather than sitting above it */
+        justify-self: stretch;
         display: flex;
         flex-direction: column;
         gap: var(--cpd-space-1x);
+
+        .mx_Dropdown_input {
+            box-sizing: border-box;
+            width: 100%;
+        }
+    }
+
+    /* Telement: so does a copy field with a label, such as the room's ID */
+    .mx_CopyableText_field {
+        justify-self: stretch;
+
+        > .mx_CopyableText {
+            box-sizing: border-box;
+            width: 100%;
+        }
     }
 }
