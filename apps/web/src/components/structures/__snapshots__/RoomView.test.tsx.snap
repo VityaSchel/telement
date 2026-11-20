@@ -607,6 +607,8 @@ exports[`RoomView > for a local room > in state NEW > should match the snapshot 
               class="mx_MessageComposer_actions"
             >
               <div
+                aria-expanded="false"
+                aria-haspopup="true"
                 aria-label="Emoji"
                 class="mx_AccessibleButton mx_MessageComposer_button"
                 role="button"
@@ -1005,6 +1007,8 @@ exports[`RoomView > for a local room > in state NEW > that is encrypted > should
               class="mx_MessageComposer_actions"
             >
               <div
+                aria-expanded="false"
+                aria-haspopup="true"
                 aria-label="Emoji"
                 class="mx_AccessibleButton mx_MessageComposer_button"
                 role="button"
@@ -1405,6 +1409,8 @@ exports[`RoomView > for a local room > in state NEW > that is encrypted > should
               class="mx_MessageComposer_actions"
             >
               <div
+                aria-expanded="false"
+                aria-haspopup="true"
                 aria-label="Emoji"
                 class="mx_AccessibleButton mx_MessageComposer_button"
                 role="button"
@@ -2040,6 +2046,8 @@ exports[`RoomView > should hide the header when hideHeader=true 1`] = `
                 class="mx_MessageComposer_actions"
               >
                 <div
+                  aria-expanded="false"
+                  aria-haspopup="true"
                   aria-label="Emoji"
                   class="mx_AccessibleButton mx_MessageComposer_button"
                   role="button"
@@ -2533,6 +2541,8 @@ exports[`RoomView > should hide the pinned message banner when hidePinnedMessage
                 class="mx_MessageComposer_actions"
               >
                 <div
+                  aria-expanded="false"
+                  aria-haspopup="true"
                   aria-label="Emoji"
                   class="mx_AccessibleButton mx_MessageComposer_button"
                   role="button"
@@ -3026,6 +3036,8 @@ exports[`RoomView > should hide the right panel when hideRightPanel=true 1`] = `
                 class="mx_MessageComposer_actions"
               >
                 <div
+                  aria-expanded="false"
+                  aria-haspopup="true"
                   aria-label="Emoji"
                   class="mx_AccessibleButton mx_MessageComposer_button"
                   role="button"
@@ -3782,6 +3794,8 @@ exports[`RoomView > should not display the timeline when the room encryption is 
                 class="mx_MessageComposer_actions"
               >
                 <div
+                  aria-expanded="false"
+                  aria-haspopup="true"
                   aria-label="Emoji"
                   class="mx_AccessibleButton mx_MessageComposer_button"
                   role="button"
@@ -4355,6 +4369,8 @@ exports[`RoomView > video rooms > should render joined video room view 1`] = `
                     class="mx_MessageComposer_actions"
                   >
                     <div
+                      aria-expanded="false"
+                      aria-haspopup="true"
                       aria-label="Emoji"
                       class="mx_AccessibleButton mx_MessageComposer_button"
                       role="button"

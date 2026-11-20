@@ -56,6 +56,20 @@ describe("ComposerDrawerButton", () => {
         expect(addEmoji).toHaveBeenCalledWith("😀");
     });
 
+    it("tells assistive technologies that it opens the drawer, and whether it is open", async () => {
+        renderButton(true);
+        const button = screen.getByRole("button", { name: "Emoji" });
+        expect(button).toHaveAttribute("aria-haspopup", "true");
+        expect(button).toHaveAttribute("aria-expanded", "false");
+
+        await userEvent.click(button);
+        expect(button).toHaveAttribute("aria-expanded", "true");
+
+        await userEvent.keyboard("[Escape]");
+        await waitFor(() => expect(screen.queryByRole("tablist")).toBeNull());
+        expect(button).toHaveAttribute("aria-expanded", "false");
+    });
+
     it("focuses the element the emoji picker marks, before its own selected tab", async () => {
         renderButton(true);
 

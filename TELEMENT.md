@@ -182,7 +182,7 @@ that carry the same fixes, as of 2026-11-20:
 | #35983–#35989                 | `git log --grep pull/<N>`                                                          | open                                         |
 | #35990                        | "Disable every AccessibleButton kind the way Compound disables its Button…"        | open; Telement fixes the bug its own way     |
 | #35991, #35992, #35994–#35996 | `git log --grep pull/<N>`                                                          | open                                         |
-| #35993                        | none                                                                               | open; #35993 misses Telement's drawer button |
+| #35993                        | `git log --grep pull/<N>`                                                          | open; Telement fixes it in its drawer button |
 
 ## Changing upstream code
 

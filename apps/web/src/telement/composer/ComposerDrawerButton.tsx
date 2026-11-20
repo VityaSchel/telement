@@ -115,6 +115,8 @@ export function ComposerDrawerButton({ menuPosition, ...drawerProps }: ComposerD
                 onClick={onClick}
                 title={_t("common|emoji")}
                 inputRef={button}
+                aria-haspopup={true}
+                aria-expanded={menuDisplayed}
             >
                 <ReactionIcon />
             </CollapsibleButton>
