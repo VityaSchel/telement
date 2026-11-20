@@ -179,9 +179,10 @@ that carry the same fixes, as of 2026-11-20:
 | #35845, #35846                | 45456fb2da, 3522d6cdc5; #35845 also the user avatar commit, #35846 also 89400a168f | open                                         |
 | #35847–#35851, #35853, #35855 | 15cf3387ba                                                                         | split from #35844; #35853 merged upstream    |
 | #35854                        | efe6f11062                                                                         | open                                         |
-| #35983–#35989, #35994–#35996  | `git log --grep pull/<N>`                                                          | open                                         |
+| #35983–#35989                 | `git log --grep pull/<N>`                                                          | open                                         |
 | #35990                        | "Disable every AccessibleButton kind the way Compound disables its Button…"        | open; Telement fixes the bug its own way     |
-| #35991–#35993                 | none                                                                               | open; #35993 misses Telement's drawer button |
+| #35991, #35994–#35996         | `git log --grep pull/<N>`                                                          | open                                         |
+| #35992, #35993                | none                                                                               | open; #35993 misses Telement's drawer button |
 
 ## Changing upstream code
 
