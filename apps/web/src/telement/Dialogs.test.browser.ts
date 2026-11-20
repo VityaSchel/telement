@@ -20,7 +20,9 @@ import fontSizes from "../../res/css/_font-sizes.pcss?raw";
 import lightTheme from "../../res/themes/light/css/_light.pcss?raw";
 import spacePillButtonStyles from "../../res/css/structures/_SpacePillButton.pcss?raw";
 import tabbedViewStyles from "../../res/css/structures/_TabbedView.pcss?raw";
+import addExistingToSpaceDialogStyles from "../../res/css/views/dialogs/_AddExistingToSpaceDialog.pcss?raw";
 import createRoomDialogStyles from "../../res/css/views/dialogs/_CreateRoomDialog.pcss?raw";
+import createSubspaceDialogStyles from "../../res/css/views/dialogs/_CreateSubspaceDialog.pcss?raw";
 import inviteDialogStyles from "../../res/css/views/dialogs/_InviteDialog.pcss?raw";
 import roomSettingsDialogStyles from "../../res/css/views/dialogs/_RoomSettingsDialog.pcss?raw";
 import settingsDialogStyles from "../../res/css/views/dialogs/_SettingsDialog.pcss?raw";
@@ -41,7 +43,9 @@ const APP_STYLES = [
     commonStyles,
     spacePillButtonStyles,
     tabbedViewStyles,
+    addExistingToSpaceDialogStyles,
     createRoomDialogStyles,
+    createSubspaceDialogStyles,
     inviteDialogStyles,
     roomSettingsDialogStyles,
     settingsDialogStyles,
@@ -231,6 +235,46 @@ describe("Dialogs", () => {
             expect([title.height, getComputedStyle(get(".mx_Dialog_title")).fontSize]).toEqual([28, "20px"]);
             expect(middle(title)).toBe(middle(box(".mx_Dialog_cancelButton")));
         });
+    });
+
+    describe("space dialogs titled with their space", () => {
+        /** SubspaceSelector in BaseDialog's title, as Create a space (CreateSubspaceDialog) and Add existing rooms draw it. */
+        function renderSpaceDialog(className: string, title: string): void {
+            renderDialog(
+                className,
+                `<div class="mx_SubspaceSelector">
+                    <span class="mx_BaseAvatar" style="display: inline-block; width: 40px; height: 40px"></span>
+                    <div>
+                        <h1 data-testid="title">${title}</h1>
+                        <div class="mx_SubspaceSelector_onlySpace" data-testid="space">Studio</div>
+                    </div>
+                </div>`,
+                `<div class="mx_Dialog_content"></div>`,
+                "",
+                false,
+            );
+        }
+
+        it.each([
+            ["mx_CreateSubspaceDialog", "Create a space"],
+            ["mx_AddExistingToSpaceDialog", "Add existing rooms"],
+        ])(
+            "titles %s in Compound's heading-sm on the close button's line, the avatar on the 24px edge",
+            (className, title) => {
+                renderSpaceDialog(className, title);
+                const body = box("[data-testid=body]");
+                const heading = box("[data-testid=title]");
+                const style = getComputedStyle(get("[data-testid=title]"));
+                const space = getComputedStyle(get("[data-testid=space]"));
+
+                expect([style.fontSize, style.fontWeight, style.lineHeight]).toEqual(["20px", "600", "28px"]);
+                expect(heading.top - body.top).toBe(16);
+                expect(middle(heading)).toBe(middle(box(".mx_Dialog_cancelButton")));
+                expect(box(".mx_BaseAvatar").left - body.left).toBe(24);
+                expect(heading.left - box(".mx_BaseAvatar").right).toBe(16);
+                expect([space.fontSize, space.fontWeight]).toEqual(["15px", "400"]);
+            },
+        );
     });
 
     describe("fields", () => {

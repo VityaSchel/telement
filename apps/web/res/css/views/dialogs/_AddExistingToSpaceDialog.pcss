@@ -136,18 +136,22 @@ Please see LICENSE files in the repository root for full details.
     }
 }
 
+/* Telement: the dialog's title (Create a space, Add existing rooms), with the space's avatar before it on the dialog's
+   24px edge. The title is a dialog title (_common.pcss): Compound's heading-sm on a line as tall as the close button,
+   so that the two are centered on one line, with the space under it in body text */
 .mx_SubspaceSelector {
     display: flex;
 
     .mx_BaseAvatar {
-        margin: auto 16px auto 5px;
+        margin-block: auto;
+        margin-inline: 0 var(--cpd-space-4x);
     }
 
     > div {
         > h1 {
-            font-weight: var(--cpd-font-weight-semibold);
-            font-size: $font-18px;
-            line-height: $font-22px;
+            font: var(--cpd-font-heading-sm-semibold);
+            letter-spacing: var(--cpd-font-letter-spacing-heading-sm);
+            line-height: var(--dialog-title-line-height);
             margin: 0;
         }
     }
@@ -160,8 +164,7 @@ Please see LICENSE files in the repository root for full details.
             flex: unset;
             height: unset;
             color: $secondary-content;
-            font-size: $font-15px;
-            line-height: $font-24px;
+            font: var(--cpd-font-body-md-regular);
 
             .mx_BaseAvatar {
                 display: none;
@@ -185,8 +188,7 @@ Please see LICENSE files in the repository root for full details.
 
     .mx_SubspaceSelector_onlySpace {
         color: $secondary-content;
-        font-size: $font-15px;
-        line-height: $font-24px;
+        font: var(--cpd-font-body-md-regular);
     }
 }
 
