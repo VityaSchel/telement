@@ -26,14 +26,23 @@
 }
 
 .mx_EncryptionDetails {
+    /* Telement: the session's ID and key are a table of rows drawn as a menu's rows are: each row reaches 4px from the
+       card's edge, rounded concentrically with it, and pads its text back onto the card's 16px content edge, 8px above
+       and below. Every other row is filled with the card's subtle gray, which upstream's gray 200 hardly differed from */
     .mx_EncryptionDetails_session {
         display: flex;
         flex-direction: column;
-        gap: var(--cpd-space-4x);
         width: 100%;
+
+        > .mx_EncryptionDetails_session_title {
+            margin-block-end: var(--cpd-space-2x);
+        }
 
         > div {
             display: flex;
+            margin-inline: calc(var(--tl-inset-menu) - var(--cpd-space-4x));
+            padding: var(--cpd-space-2x) calc(var(--cpd-space-4x) - var(--tl-inset-menu));
+            border-radius: var(--tl-radius-row);
 
             > span {
                 width: 50%;
@@ -42,7 +51,7 @@
         }
 
         > div:nth-child(odd) {
-            background-color: var(--cpd-color-gray-200);
+            background-color: var(--cpd-color-bg-subtle-secondary);
         }
     }
 

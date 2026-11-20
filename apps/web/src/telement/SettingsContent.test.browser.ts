@@ -46,6 +46,7 @@ import imageSizePanelStyles from "../../res/css/views/settings/_ImageSizePanel.p
 import joinRuleSettingsStyles from "../../res/css/views/settings/_JoinRuleSettings.pcss?raw";
 import keyboardShortcutStyles from "../../res/css/views/settings/_KeyboardShortcut.pcss?raw";
 import settingsFieldsetStyles from "../../res/css/views/settings/_SettingsFieldset.pcss?raw";
+import advancedPanelStyles from "../../res/css/views/settings/encryption/_AdvancedPanel.pcss?raw";
 import settingsHeaderStyles from "../../res/css/views/settings/_SettingsHeader.pcss?raw";
 import settingsSectionStyles from "../../res/css/views/settings/tabs/_SettingsSection.pcss?raw";
 import settingsTabStyles from "../../res/css/views/settings/tabs/_SettingsTab.pcss?raw";
@@ -76,6 +77,7 @@ const APP_STYLES = [
     settingsSubsectionHeadingStyles,
     settingsHeaderStyles,
     settingsFieldsetStyles,
+    advancedPanelStyles,
     autocompleteInputStyles,
     helpTabStyles,
     keyboardTabStyles,
@@ -318,6 +320,38 @@ describe.each(THEMES.map(([theme]) => theme))("Settings content in %s", (theme) 
         expect(input.top).toBeGreaterThanOrEqual(label.bottom + 8);
         expect(card.bottom - input.bottom).toBe(12);
         expect(input.width).toBe(card.width - 32);
+    });
+
+    it("draws the encryption details as rows 4px from the card's edge, their text on its 16px edge, 8px above and below", () => {
+        const container = render(
+            theme,
+            `<div class="mx_SettingsSection_content" id="card">
+                <div class="mx_EncryptionDetails">
+                    <div class="mx_EncryptionDetails_session">
+                        <h3 class="mx_EncryptionDetails_session_title" id="title">Encryption details</h3>
+                        <div id="id-row"><span id="id-label">Session ID:</span><span>ZQJLABSBRL</span></div>
+                        <div id="key-row"><span id="key-label">Session key:</span><span id="key">UevnplOqEMHJabLsBNsPU7qUKwbo5SvTg0+oo2mPS/A</span></div>
+                    </div>
+                </div>
+            </div>`,
+        );
+        const card = box("#card");
+
+        for (const row of ["#id-row", "#key-row"]) {
+            const rowBox = box(row);
+            expect([rowBox.left - card.left, card.right - rowBox.right]).toEqual([4, 4]);
+            expect(cornerRadii(document.querySelector(row)!)).toEqual({ x: 8, y: 8 });
+        }
+        expect(textStart("#id-label") - card.left).toBe(16);
+        expect(textStart("#key-label") - card.left).toBe(16);
+        expect(textStart("#title") - card.left).toBe(16);
+        expect(box("#id-label").top - box("#id-row").top).toBe(8);
+        expect(box("#key-row").bottom - box("#key").bottom).toBe(8);
+        expect(box("#id-row").top - box("#title").bottom).toBe(8);
+        expect(box("#key-row").top).toBe(box("#id-row").bottom);
+        expect(getComputedStyle(document.querySelector("#key-row")!).backgroundColor).toBe(
+            tokenColor("--cpd-color-bg-subtle-secondary", container),
+        );
     });
 
     it("bands the other sessions' header 4px from the card's edge like a menu row, the sessions on its 16px edge", () => {
