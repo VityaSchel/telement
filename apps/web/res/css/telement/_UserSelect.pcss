@@ -1,0 +1,60 @@
+/*
+Copyright 2026 Viktor Shchelochkov
+
+SPDX-License-Identifier: AGPL-3.0-only OR GPL-3.0-only
+Please see LICENSE files in the repository root for full details.
+*/
+
+/*
+Telement's text selection, set once for the whole app like its cursors (_Cursor.pcss): as in a native app, the text on
+controls can't be selected, so double-clicking a button or dragging a selection across the app highlights none of
+them, while messages, fields and composers stay selectable. What a control holds follows it.
+
+Controls inside message text are part of the message and stay selectable, like a revealed spoiler or a summary in
+formatted text. Links are not controls here, so links in messages and reply quotes stay selectable.
+*/
+:where(
+    :is(
+        button,
+        label,
+        option,
+        select,
+        summary,
+        [role="button"],
+        [role="checkbox"],
+        [role="gridcell"],
+        [role="menuitem"],
+        [role="menuitemcheckbox"],
+        [role="menuitemradio"],
+        [role="option"],
+        [role="radio"],
+        [role="slider"],
+        [role="switch"],
+        [role="tab"],
+        [role="treeitem"],
+        .mx_AccessibleButton
+    ):not(.mx_EventTile_body *)
+) {
+    user-select: none;
+}
+
+/* Text fields and composers stay selectable when they sit inside a control, such as a search field's label. */
+:where(button, label, [role="button"], [role="option"], .mx_AccessibleButton)
+    :where(
+        input:not(
+            [type="button"],
+            [type="checkbox"],
+            [type="color"],
+            [type="file"],
+            [type="hidden"],
+            [type="image"],
+            [type="radio"],
+            [type="range"],
+            [type="reset"],
+            [type="submit"]
+        ),
+        textarea,
+        [contenteditable]:not([contenteditable="false"])
+    ) {
+    user-select: text;
+}
