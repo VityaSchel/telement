@@ -40,6 +40,7 @@ import accessibleButtonStyles from "../../res/css/views/elements/_AccessibleButt
 import copyableTextStyles from "../../res/css/views/elements/_CopyableText.pcss?raw";
 import dropdownStyles from "../../res/css/views/elements/_Dropdown.pcss?raw";
 import fieldStyles from "../../res/css/views/elements/_Field.pcss?raw";
+import settingsDropdownStyles from "../../res/css/views/elements/_SettingsDropdown.pcss?raw";
 import styledRadioButtonStyles from "../../res/css/views/elements/_StyledRadioButton.pcss?raw";
 import imageSizePanelStyles from "../../res/css/views/settings/_ImageSizePanel.pcss?raw";
 import joinRuleSettingsStyles from "../../res/css/views/settings/_JoinRuleSettings.pcss?raw";
@@ -65,6 +66,7 @@ const APP_STYLES = [
     accessibleButtonStyles,
     fieldStyles,
     dropdownStyles,
+    settingsDropdownStyles,
     copyableTextStyles,
     styledRadioButtonStyles,
     headingStyles,
@@ -290,6 +292,32 @@ describe.each(THEMES.map(([theme]) => theme))("Settings content in %s", (theme) 
         expect(Math.abs((label.top + label.bottom) / 2 - (input.top + 0.5))).toBeLessThanOrEqual(0.5);
         expect(textStart("#label")).toBe(textStart("#value"));
         expect(getComputedStyle(document.querySelector("#label")!).fontSize).toBe("11px");
+    });
+
+    it("puts a labelled settings dropdown, such as the desktop app's start-up one, 8px under its label", () => {
+        render(
+            theme,
+            `<div class="mx_SettingsSubsection_content" id="card">
+                <div class="mx_SettingsDropdown">
+                    <label class="mx_SettingsDropdown_label" for="autolaunch">
+                        <span class="mx_SettingsDropdown_labelText" id="label">Open Telement when you log in to your computer</span>
+                    </label>
+                    <div class="mx_Dropdown">
+                        <div class="mx_AccessibleButton mx_Dropdown_input mx_no_textinput" role="button" id="autolaunch">
+                            <div class="mx_Dropdown_option">No</div>
+                        </div>
+                    </div>
+                </div>
+            </div>`,
+        );
+        const label = textRange("#label").getBoundingClientRect();
+        const input = box("#autolaunch");
+        const card = box("#card");
+
+        expect(input.top - box(".mx_SettingsDropdown_label").bottom).toBe(8);
+        expect(input.top).toBeGreaterThanOrEqual(label.bottom + 8);
+        expect(card.bottom - input.bottom).toBe(12);
+        expect(input.width).toBe(card.width - 32);
     });
 
     it("bands the other sessions' header 4px from the card's edge like a menu row, the sessions on its 16px edge", () => {
