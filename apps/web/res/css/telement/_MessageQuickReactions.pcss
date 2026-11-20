@@ -44,13 +44,13 @@ Please see LICENSE files in the repository root for full details.
 }
 
 /*
- * A capsule of round 32px buttons, inset 4px from its top and bottom as the menu's items are from the menu's edge, and
- * 8px from its ends, so that the emoji at its ends keep as clear of its curve as of its top and bottom
+ * A capsule of round 32px buttons, inset 4px from every edge as the menu's items are from the menu's edge. The buttons
+ * at its ends are then concentric with its round ends, so the first emoji is as far from the start as from the top and
+ * bottom (10px), and the chevron is centered in the other end like the emoji in theirs.
  */
 .mx_MessageQuickReactions {
     display: flex;
-    padding-block: calc(var(--tl-inset-menu) - var(--cpd-border-width-1));
-    padding-inline: calc(var(--cpd-space-2x) - var(--cpd-border-width-1));
+    padding: calc(var(--tl-inset-menu) - var(--cpd-border-width-1));
     border-radius: var(--tl-radius-control);
 }
 
@@ -103,11 +103,6 @@ Please see LICENSE files in the repository root for full details.
 }
 
 .mx_MessageQuickReactions_more {
-    /* Narrower than the reactions, as the chevron is: in a 32px cell its end of the pill looked emptier than the
-       start. Its highlight is a capsule rather than an oval. */
-    inline-size: var(--cpd-space-6x);
-    border-radius: calc(var(--cpd-space-6x) / 2);
-
     svg {
         inline-size: 20px;
         block-size: 20px;

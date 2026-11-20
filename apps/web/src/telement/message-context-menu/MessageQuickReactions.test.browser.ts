@@ -183,43 +183,49 @@ describe("The message menu's quick reactions", () => {
         expect(gaps).toEqual([0, 0, 0, 0, 0, 0]);
     });
 
-    it("are a 40px capsule of round 32px buttons, 4px from its top and bottom and 8px from its ends", () => {
-        const container = render("cpd-theme-light", menuHtml());
+    it.each(["ltr", "rtl"])("are a 40px capsule of round 32px buttons, 4px from every edge (%s)", (dir) => {
+        const container = render("cpd-theme-light", menuHtml(), dir);
         const pill = part(container, "pill");
         const buttons = [...pill.children] as HTMLElement[];
-        const reactions = buttons.slice(0, -1);
-        const more = buttons.at(-1)!;
         const pillRect = rectOf(pill);
+        const [first, last] = dir === "ltr" ? [buttons[0], buttons.at(-1)!] : [buttons.at(-1)!, buttons[0]];
 
         expect(buttons).toHaveLength(7);
         expect(pillRect.height).toBe(40);
         expect(cornerRadii(pill)).toEqual({ x: 20, y: 20 });
-        expect(rectOf(buttons[0]).left - pillRect.left).toBe(8);
-        expect(pillRect.right - rectOf(more).right).toBe(8);
-        for (const button of reactions) {
+        expect(rectOf(first).left - pillRect.left).toBe(4);
+        expect(pillRect.right - rectOf(last).right).toBe(4);
+        // The button to all reactions is a reaction's cell too, so every button is 32px after the previous one
+        for (const button of buttons) {
             const rect = rectOf(button);
             expect([rect.width, rect.height]).toEqual([32, 32]);
             expect(rect.top - pillRect.top).toBe(4);
             expect(cornerRadii(button)).toEqual({ x: 16, y: 16 });
         }
-        // The button to all reactions is as narrow as its chevron allows, its highlight a capsule
-        const moreRect = rectOf(more);
-        expect([moreRect.width, moreRect.height]).toEqual([24, 32]);
-        expect(moreRect.top - pillRect.top).toBe(4);
-        expect(cornerRadii(more)).toEqual({ x: 12, y: 12 });
     });
 
-    it("end with the chevron about as far from the pill's edge as the first emoji is from its start", () => {
-        const container = render("cpd-theme-light", menuHtml());
-        const pill = rectOf(part(container, "pill"));
-        const first = part(container, "pill").querySelector(".mx_MessageQuickReactions_reaction")!;
-        const chevron = part(container, "pill").querySelector(".mx_MessageQuickReactions_more path")!;
-        // The emoji is as wide as its font size, centered in its button
-        const emojiStart = rectOf(first).left + (rectOf(first).width - 20) / 2 - pill.left;
-        const chevronEnd = pill.right - rectOf(chevron).right;
+    it.each(["ltr", "rtl"])(
+        "center the first emoji and the chevron in the capsule's round ends, the emoji as far from the start as from the top (%s)",
+        (dir) => {
+            const container = render("cpd-theme-light", menuHtml(), dir);
+            const pill = rectOf(part(container, "pill"));
+            const first = rectOf(part(container, "pill").querySelector(".mx_MessageQuickReactions_reaction")!);
+            const chevron = rectOf(part(container, "pill").querySelector(".mx_MessageQuickReactions_more path")!);
+            const fromStart = (rect: DOMRect): number =>
+                dir === "ltr" ? rect.left - pill.left : pill.right - rect.right;
+            const fromEnd = (rect: DOMRect): number =>
+                dir === "ltr" ? pill.right - rect.right : rect.left - pill.left;
+            // The emoji is as tall and as wide as its font size, centered in its button
+            const emojiStart = fromStart(first) + (first.width - 20) / 2;
+            const emojiTop = first.top + (first.height - 20) / 2 - pill.top;
+            const radius = pill.height / 2;
 
-        expect(Math.abs(chevronEnd - emojiStart)).toBeLessThanOrEqual(2);
-    });
+            expect(emojiStart).toBe(emojiTop);
+            expect(fromStart(first) + first.width / 2).toBe(radius);
+            expect(Math.abs(fromEnd(chevron) + chevron.width / 2 - radius)).toBeLessThanOrEqual(0.5);
+            expect(Math.abs(chevron.top + chevron.height / 2 - (pill.top + radius))).toBeLessThanOrEqual(1);
+        },
+    );
 
     it("draw each emoji at the emoji picker's size, centered in its button", () => {
         const container = render("cpd-theme-light", menuHtml());
