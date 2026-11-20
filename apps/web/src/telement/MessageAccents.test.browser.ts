@@ -76,6 +76,11 @@ interface Theme {
     line: string;
     /** The contrast white has on the fill at least: about 4:1, and about 7:1 in high contrast. */
     minimumContrast: number;
+    /**
+     * A checked radio's ring: the fill, except in dark high contrast, whose deeper fill is under 3:1 on the bubble, so
+     * the ring takes the accent's border color (telement/tokens.css).
+     */
+    radioRing: string;
 }
 
 /** Dark high contrast is the dark theme on a system that asks for more contrast. */
@@ -86,6 +91,7 @@ const THEMES: Theme[] = [
         fill: "rgb(36, 129, 204)",
         line: "rgb(36, 129, 204)",
         minimumContrast: 4,
+        radioRing: "rgb(36, 129, 204)",
     },
     {
         name: "cpd-theme-dark",
@@ -93,6 +99,7 @@ const THEMES: Theme[] = [
         fill: "rgb(1, 131, 211)",
         line: "rgb(46, 166, 255)",
         minimumContrast: 4,
+        radioRing: "rgb(1, 131, 211)",
     },
     {
         name: "cpd-theme-light-hc",
@@ -100,6 +107,7 @@ const THEMES: Theme[] = [
         fill: "rgb(1, 93, 156)",
         line: "rgb(1, 93, 156)",
         minimumContrast: 6.8,
+        radioRing: "rgb(1, 93, 156)",
     },
     {
         name: "cpd-theme-dark-hc",
@@ -107,6 +115,7 @@ const THEMES: Theme[] = [
         fill: "rgb(1, 93, 151)",
         line: "rgb(159, 209, 254)",
         minimumContrast: 6.8,
+        radioRing: "rgb(159, 209, 254)",
     },
 ];
 
@@ -393,7 +402,8 @@ describe("Voice, audio, poll and file controls", () => {
             const radio = chosen.querySelector("input + div")!;
 
             expect(fill(radio)).toBe(theme.fill);
-            expect(getComputedStyle(radio).borderTopColor).toBe(theme.fill);
+            expect(getComputedStyle(radio).borderTopColor).toBe(theme.radioRing);
+            expect(contrast(theme.radioRing, fill(list.querySelector(".line")))).toBeGreaterThanOrEqual(3);
             expect(getComputedStyle(radio.querySelector("svg")!).color).toBe(WHITE);
             // Nothing white sits on a bar, so it is a line's accent, which stays clear of the bubble in every theme
             for (const bar of list.querySelectorAll(".mx_PollOption_popularityAmount")) {

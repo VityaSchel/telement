@@ -570,13 +570,16 @@ describe("Telement's chrome colors", () => {
             const ring = radio.querySelector("input + div")!;
             const accent = tokenColor("--tl-accent-900", container);
             const fill = tokenColor("--cpd-color-bg-accent-rest", container);
+            // Dark high contrast's deeper fill is under 3:1 against dark surfaces, so its ring is the accent's border
+            const edge =
+                theme === "cpd-theme-dark-hc" ? tokenColor("--cpd-color-border-accent-primary", container) : fill;
 
             expect({
                 ring: getComputedStyle(ring).borderTopColor,
                 fill: getComputedStyle(ring).backgroundColor,
                 dot: getComputedStyle(ring.firstElementChild!).backgroundColor,
                 outline: getComputedStyle(radio).borderTopColor,
-            }).toEqual({ ring: fill, fill, dot: tokenColor("--tl-color-on-accent", container), outline: accent });
+            }).toEqual({ ring: edge, fill, dot: tokenColor("--tl-color-on-accent", container), outline: accent });
         });
 
         it("fills the search dialog's selected recent room with the subtle fill, a step further in a dark dialog", () => {

@@ -412,3 +412,18 @@ Please see LICENSE files in the repository root for full details.
 .cpd-theme-dark-hc.cpd-theme-dark-hc {
     --tl-color-bg-switch-off: var(--cpd-color-border-interactive-primary);
 }
+
+/*
+ * Dark high contrast deepens the accent fill so that white on it is 7:1, which leaves a checked radio's disc under 3:1
+ * against the dark surfaces it sits on, such as the settings cards. There, its ring takes the accent's border color, as a
+ * selected choice card's ring does (_CompoundOverrides.pcss, _StyledRadioButton.pcss). Elsewhere, including in a
+ * theme chip that shows another theme inside it, the ring is the fill.
+ */
+:root,
+[class*="cpd-theme-"] {
+    --tl-color-border-radio-checked: initial;
+}
+
+.cpd-theme-dark-hc.cpd-theme-dark-hc {
+    --tl-color-border-radio-checked: var(--cpd-color-border-accent-primary);
+}

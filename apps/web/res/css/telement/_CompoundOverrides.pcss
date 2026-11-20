@@ -127,6 +127,20 @@ input + [class^="_ui_"] {
 }
 
 /*
+ * A checked radio's ring, where Telement gives it a color of its own (dark high contrast, telement/tokens.css), and
+ * Compound's rest and hovered fill elsewhere, as Compound draws it.
+ */
+input[type="radio"]:not([disabled], [readonly], [data-invalid]):checked + [class^="_ui_"] {
+    border-color: var(--tl-color-border-radio-checked, var(--cpd-color-bg-accent-rest));
+}
+
+@media (hover) {
+    input[type="radio"]:not([disabled], [readonly], [data-invalid]):checked:hover + [class^="_ui_"] {
+        border-color: var(--tl-color-border-radio-checked, var(--cpd-color-bg-accent-hovered));
+    }
+}
+
+/*
  * Compound's switch, drawn as Telegram's (telement/tokens.css): when off, its track is filled with the separator gray
  * instead of outlined and its knob is white, as when on, and the knob has a soft shadow in both states. The border
  * stays, in the track's color, so that forced colors still outline the track. A disabled switch keeps Compound's

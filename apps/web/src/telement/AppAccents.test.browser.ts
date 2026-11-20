@@ -29,6 +29,8 @@ import telementTokens from "../../../../packages/shared-components/src/telement/
 import commonStyles from "../../res/css/_common.pcss?raw";
 import fontSizes from "../../res/css/_font-sizes.pcss?raw";
 import createRoomDialogStyles from "../../res/css/views/dialogs/_CreateRoomDialog.pcss?raw";
+import styledRadioButtonStyles from "../../res/css/views/elements/_StyledRadioButton.pcss?raw";
+import compoundOverrides from "../../res/css/telement/_CompoundOverrides.pcss?raw";
 import emptyStateStyles from "../../res/css/views/right_panel/_EmptyState.pcss?raw";
 import pinnedMessagesCardStyles from "../../res/css/views/right_panel/_PinnedMessagesCard.pcss?raw";
 import userInfoStyles from "../../res/css/views/right_panel/_UserInfo.pcss?raw";
@@ -64,6 +66,8 @@ const APP_STYLES = [
     pinnedMessagesCardStyles,
     createRoomDialogStyles,
     emptyStateStyles,
+    styledRadioButtonStyles,
+    compoundOverrides,
     // A dialog's surface, raised a gray step in dark themes, as .mx_Dialog is (_common.pcss)
     ".raised { @mixin floatingSurface; }",
     // A settings group's card on that surface (_SettingsSubsection.pcss)
@@ -329,6 +333,21 @@ describe.each(THEMES.map(([theme]) => theme))("Telement's accents in %s", (theme
 
                 expect(contrast(getComputedStyle(large).outlineColor, card)).toBeGreaterThanOrEqual(3);
                 expect(contrast(getComputedStyle(normal).outlineColor, card)).toBeGreaterThanOrEqual(3);
+            });
+
+            it("ring Compound's and the legacy radios 3:1 or more against the card, checked or not", () => {
+                const card = renderOnCard(layoutCards() + imageSizeCards());
+                const rings = [
+                    ...document.querySelectorAll(
+                        ".mxLayoutSwitcher_LayoutSelector_LayoutRadio input + [class^='_ui_']",
+                    ),
+                    ...document.querySelectorAll(".mx_StyledRadioButton input + div"),
+                ];
+
+                expect(rings).toHaveLength(4);
+                for (const ring of rings) {
+                    expect(contrast(getComputedStyle(ring).borderTopColor, card)).toBeGreaterThanOrEqual(3);
+                }
             });
         });
 

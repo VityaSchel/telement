@@ -83,7 +83,8 @@ Please see LICENSE files in the repository root for full details.
 
         &:checked {
             & + div {
-                border-color: var(--cpd-color-bg-accent-rest);
+                /* Telement: a ring of its own where Telement gives it one (telement/tokens.css) */
+                border-color: var(--tl-color-border-radio-checked, var(--cpd-color-bg-accent-rest));
                 background-color: var(--cpd-color-bg-accent-rest);
 
                 & > div {
@@ -129,7 +130,7 @@ Please see LICENSE files in the repository root for full details.
             }
 
             &:checked + div {
-                border-color: var(--cpd-color-bg-accent-hovered);
+                border-color: var(--tl-color-border-radio-checked, var(--cpd-color-bg-accent-hovered));
                 background-color: var(--cpd-color-bg-accent-hovered);
             }
         }
