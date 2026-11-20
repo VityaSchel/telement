@@ -42,7 +42,8 @@ Please see LICENSE files in the repository root for full details.
         padding: calc(var(--cpd-space-5x) - var(--cpd-border-width-1));
 
         &.mx_Toast_hasIcon {
-            svg {
+            /* Only the toast's own icon: the close button and the body draw icons of their own sizes */
+            > svg {
                 width: 20px;
                 height: 20px;
                 grid-column: 1;
