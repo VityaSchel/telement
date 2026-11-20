@@ -6,9 +6,11 @@ Please see LICENSE files in the repository root for full details.
 */
 
 import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
+import { userEvent } from "vitest/browser";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { Avatar, Text } from "@vector-im/compound-web";
+import { VisibilityOnIcon } from "@vector-im/compound-design-tokens/assets/web/icons";
 import compoundBase from "@vector-im/compound-design-tokens/assets/web/css/cpd-common-base.css?raw";
 import compoundSemantic from "@vector-im/compound-design-tokens/assets/web/css/cpd-common-semantic.css?raw";
 import compoundLightTheme from "@vector-im/compound-design-tokens/assets/web/css/cpd-theme-light-base.css?raw";
@@ -23,6 +25,8 @@ import eventTileViewStyles from "../../../../packages/shared-components/src/room
 import messageTimestampViewStyles from "../../../../packages/shared-components/src/room/timeline/event-tile/timestamp/MessageTimestampView/MessageTimestampView.module.css?raw";
 // eslint-disable-next-line no-restricted-imports
 import imageBodyViewStyles from "../../../../packages/shared-components/src/room/timeline/event-tile/body/MImageBodyView/ImageBodyView.module.css?raw";
+// eslint-disable-next-line no-restricted-imports
+import hiddenMediaPlaceholderStyles from "../../../../packages/shared-components/src/room/timeline/event-tile/body/HiddenMediaPlaceholder/HiddenMediaPlaceholder.module.css?raw";
 // eslint-disable-next-line no-restricted-imports
 import videoBodyViewStyles from "../../../../packages/shared-components/src/room/timeline/event-tile/body/MVideoBodyView/VideoBodyView.module.css?raw";
 // eslint-disable-next-line no-restricted-imports
@@ -166,6 +170,9 @@ function reactions(count: number): string {
 const PICTURE = picture(240, 160);
 const VIDEO = video(240, 135);
 
+/** The eye before the label of hidden media's placeholder. */
+const EYE = renderToStaticMarkup(createElement(VisibilityOnIcon));
+
 /** A picture hidden by the media preview setting, as ImageBodyView renders it. */
 const HIDDEN_PICTURE = `
     <div class="mx_ImageBody ImageBodyView_root">
@@ -174,13 +181,49 @@ const HIDDEN_PICTURE = `
             <div class="ImageBodyView_mediaContent">
                 <div style="width: 240px; height: 160px">
                     <button type="button" class="ImageBodyView_hiddenButton">
-                        <div class="ImageBodyView_hiddenButtonContent"><span>Show image</span></div>
+                        <div class="ImageBodyView_hiddenButtonContent">${EYE}<span>Show image</span></div>
                     </button>
                 </div>
             </div>
         </div>
     </div>
 `;
+
+/** A video hidden by the media preview setting, as VideoBodyView renders it. */
+const HIDDEN_VIDEO = `
+    <span class="mx_MVideoBody VideoBodyView_root">
+        <div class="mx_MVideoBody_container VideoBodyView_container"
+            style="width: 240px; max-width: 100%; max-height: 135px; aspect-ratio: 240 / 135">
+            <button type="button" class="VideoBodyView_hiddenButton">
+                <div class="VideoBodyView_hiddenButtonContent">${EYE}<span>Show video</span></div>
+            </button>
+        </div>
+    </span>
+`;
+
+/** A sticker hidden by the media preview setting, as MStickerBody renders it with HiddenMediaPlaceholder. */
+const HIDDEN_STICKER = `
+    <div class="mx_MImageBody">
+        <div class="mx_MStickerBody_wrapper">
+            <div class="mx_MImageBody_thumbnail_container" style="max-height: 128px; max-width: 128px; aspect-ratio: 1">
+                <div></div>
+                <div style="max-height: 128px; max-width: 128px">
+                    <div style="width: 128px; height: 128px">
+                        <button type="button" class="HiddenMediaPlaceholder_button">
+                            <span class="HiddenMediaPlaceholder_content">${EYE.replace("<svg", '<svg class="HiddenMediaPlaceholder_icon"')}<span>Show image</span></span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+`;
+
+const HIDDEN_MEDIA: Array<[string, string]> = [
+    ["picture", HIDDEN_PICTURE],
+    ["video", HIDDEN_VIDEO],
+    ["sticker", HIDDEN_STICKER],
+];
 
 /** A picture that failed to load, as ImageBodyView renders it: a line of text in place of the frame. */
 const FAILED_PICTURE = `
@@ -422,6 +465,7 @@ describe("Bubble layout", () => {
                 ${messageTimestampViewStyles}
                 ${moduleCss(imageBodyViewStyles, "ImageBodyView")}
                 ${moduleCss(videoBodyViewStyles, "VideoBodyView")}
+                ${moduleCss(hiddenMediaPlaceholderStyles, "HiddenMediaPlaceholder")}
                 ${moduleCss(textualBodyStyles, "TextualBody")}
                 ${moduleCss(mediaPreviewGroupViewStyles, "MediaPreviewGroupView")}
                 ${moduleCss(mediaPreviewTileStyles, "MediaPreviewTile")}
@@ -448,8 +492,55 @@ describe("Bubble layout", () => {
         stylesheet.remove();
     });
 
-    afterEach(() => {
+    afterEach(async () => {
+        await userEvent.unhover(document.body);
         document.body.innerHTML = "";
+    });
+
+    describe("media hidden by the media preview setting", () => {
+        const fill = (element: Element): string => getComputedStyle(element).backgroundColor;
+
+        it.each(HIDDEN_MEDIA)(
+            "fills a hidden %s's placeholder on the page a step darker while hovered, not with the page's color",
+            async (_name, media) => {
+                render(tile(media, { lineClass: "lineMedia lineTimestampOverMedia" }));
+                const button = document.querySelector("button")!;
+
+                expect(fill(button)).toBe(tokenColor("--cpd-color-bg-subtle-secondary", button));
+                await userEvent.hover(button);
+                expect(fill(button)).toBe(tokenColor("--cpd-color-bg-subtle-primary", button));
+                expect(fill(button)).not.toBe(tokenColor("--cpd-color-bg-canvas-default", button));
+            },
+        );
+
+        it.each(HIDDEN_MEDIA)("puts the eye of a hidden %s 8px before its label, in the accent", (_name, media) => {
+            render(tile(media, { lineClass: "lineMedia lineTimestampOverMedia" }));
+            const button = document.querySelector("button")!;
+            const icon = button.querySelector("svg")!;
+
+            expect(box(icon.nextElementSibling!).left - box(icon).right).toBe(8);
+            expect(getComputedStyle(icon.parentElement!).color).toBe(
+                tokenColor("--cpd-color-text-action-accent", button),
+            );
+        });
+
+        it.each(HIDDEN_MEDIA)(
+            "labels a hidden %s in the app's 13px body-sm medium type, as a hidden video note, not the browser's button font",
+            (_name, media) => {
+                render(tile(media, { lineClass: "lineMedia lineTimestampOverMedia" }));
+                const label = document.querySelector("button svg + span")!;
+                const type = document.createElement("span");
+                type.style.font = "var(--cpd-font-body-sm-medium)";
+                document.querySelector("ol")!.append(type);
+                const [actual, expected] = [label, type].map((element) => {
+                    const { fontFamily, fontSize, fontWeight, lineHeight } = getComputedStyle(element);
+                    return { fontFamily, fontSize, fontWeight, lineHeight };
+                });
+
+                expect(actual).toEqual(expected);
+                expect(actual.fontSize).toBe("13px");
+            },
+        );
     });
 
     describe("a captioned picture or video", () => {
@@ -586,16 +677,28 @@ describe("Bubble layout", () => {
         });
 
         it.each([
-            ["another's", false],
-            ["an own", true],
-        ])("sets hidden media's placeholder apart from %s bubble", (_name, own) => {
-            render(captioned(HIDDEN_PICTURE, "Hidden picture", { own }));
-            const [line] = all(".line");
+            ["a picture", "another's", HIDDEN_PICTURE, false],
+            ["a picture", "an own", HIDDEN_PICTURE, true],
+            ["a video", "another's", HIDDEN_VIDEO, false],
+            ["a video", "an own", HIDDEN_VIDEO, true],
+        ])(
+            "sets the placeholder of hidden %s apart from %s bubble, also when hovered",
+            async (_kind, _name, media, own) => {
+                render(captioned(media, "Hidden media", { own }));
+                const [line] = all(".line");
+                const button = line.querySelector("button")!;
+                const bubble = getComputedStyle(line).backgroundColor;
 
-            expect(getComputedStyle(line.querySelector("button")!).backgroundColor).not.toBe(
-                getComputedStyle(line).backgroundColor,
-            );
-        });
+                const rest = getComputedStyle(button).backgroundColor;
+                await userEvent.hover(button);
+                const hovered = getComputedStyle(button).backgroundColor;
+
+                for (const fill of [rest, hovered]) {
+                    expect(fill).not.toBe(bubble);
+                    expect(fill).not.toBe("rgba(0, 0, 0, 0)");
+                }
+            },
+        );
 
         it("keeps the media flush with a padlock, which sits at the start of the caption's last line", () => {
             render(

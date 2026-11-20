@@ -17,6 +17,8 @@
     text-align: center;
     cursor: pointer;
     background-color: var(--cpd-color-bg-subtle-secondary);
+    /* The app's 13px type, as a hidden picture's label, rather than the browser's own button font */
+    font: var(--cpd-font-body-sm-medium);
 }
 
 .button:hover,
@@ -24,11 +26,12 @@
     background-color: var(--cpd-color-bg-canvas-default);
 }
 
+/* The icon sits a button's 8px before its label, as in a hidden picture or video */
 .content {
     color: var(--cpd-color-text-action-accent);
     display: inline-flex;
     align-items: center;
-    gap: var(--cpd-space-1x);
+    gap: var(--cpd-space-2x);
 }
 
 .icon {

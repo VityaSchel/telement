@@ -101,6 +101,8 @@
     text-align: center;
     cursor: pointer;
     background-color: var(--cpd-color-bg-subtle-secondary);
+    /* The app's 13px type, as a hidden video note's label, rather than the browser's own button font */
+    font: var(--cpd-font-body-sm-medium);
 }
 
 .hiddenButton:hover,
@@ -108,8 +110,10 @@
     background-color: var(--cpd-color-bg-canvas-default);
 }
 
+/* The icon sits a button's 8px before its label */
 .hiddenButtonContent {
     display: flex;
+    gap: var(--cpd-space-2x);
     color: var(--cpd-color-text-action-accent);
 }
 

@@ -1012,6 +1012,19 @@
         max-width: var(--event-tile-bubble-line-max-width);
     }
 
+    /* Hovered, hidden media's placeholder takes the page's color, which sets it apart from the hover band of the other
+       layouts. Here a row has no band, and media without a caption has no bubble, so the placeholder would vanish into
+       the page and leave its label floating; it takes the next gray instead. A caption's bubble is handled below. */
+    .lineMedia:not(:has(:global(.mx_EventTile_caption)))
+        :is(
+            :global(.mx_ImageBody_container),
+            :global(.mx_MVideoBody_container),
+            :global(.mx_MImageBody_thumbnail_container)
+        )
+        button:is(:hover, :focus-visible) {
+        background-color: var(--cpd-color-bg-subtle-primary);
+    }
+
     /* Cards and media round to the bubble's corner here, and to 8 (the app's --MBody-border-radius) in the other
        layouts: pictures, videos, stickers, players, maps, link previews, file cards, call tiles and event cards all
        read this radius. Media quoted in the reply chain keeps its own. */
@@ -1789,7 +1802,7 @@
         /* Hovered, hidden media's placeholder takes the page's color, which here is the bubble's, so it would vanish
            into it. It takes the other translucent fill instead: the fainter one in the body, where it rests on the
            lighter one, and the lighter one in a reply's thumbnail, where it rests on the fainter one. */
-        > .slotBody :global(.mx_ImageBody) {
+        > .slotBody :is(:global(.mx_ImageBody), :global(.mx_MVideoBody)) {
             --cpd-color-bg-canvas-default: var(--tl-color-bg-bubble-own-subtle);
         }
 
