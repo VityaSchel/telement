@@ -14,7 +14,9 @@ Please see LICENSE files in the repository root for full details.
     gap: var(--cpd-space-4x) !important;
 
     .mx_ThemeChoicePanel_themeSelector {
-        border: 1px solid var(--cpd-color-border-interactive-secondary);
+        /* Telement: Compound's outline gray, 3:1 or more against the card in every theme, as an unselected chip is
+           drawn by its border alone when it shows the dialog's own theme */
+        border: 1px solid var(--cpd-color-border-interactive-primary);
         /* Telement: a pill, as chips are, concentric with the radio: its 10px radius and the 12px around it */
         border-radius: var(--tl-radius-control);
         /* 44px tall, with the radio 12px from the chip's top, bottom and start, the 1px border included, and the label

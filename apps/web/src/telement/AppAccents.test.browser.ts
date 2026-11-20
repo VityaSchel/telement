@@ -66,6 +66,8 @@ const APP_STYLES = [
     emptyStateStyles,
     // A dialog's surface, raised a gray step in dark themes, as .mx_Dialog is (_common.pcss)
     ".raised { @mixin floatingSurface; }",
+    // A settings group's card on that surface (_SettingsSubsection.pcss)
+    ".card { @mixin settingsGroupCard; }",
 ].join("\n");
 
 const TRANSPARENT = "rgba(0, 0, 0, 0)";
@@ -126,8 +128,8 @@ function glyphColor(button: Element): string {
     return getComputedStyle(button.querySelector("svg path")!).fill;
 }
 
-/** The theme chips as ThemeChoicePanel renders them, each in the theme it shows, the first one selected. */
-function themeChips(): string {
+/** The theme chips as ThemeChoicePanel renders them, each in the theme it shows, the `selected` one selected. */
+function themeChips(selected = 0): string {
     return markup(
         h(
             Root,
@@ -135,14 +137,19 @@ function themeChips(): string {
             [
                 ["Light", "cpd-theme-light"],
                 ["Dark", "cpd-theme-dark"],
+                ["High contrast", "cpd-theme-light"],
             ].map(([name, theme], index) =>
                 h(
                     InlineField,
                     {
                         key: name,
                         name: "themeSelector",
-                        className: `mx_ThemeChoicePanel_themeSelector ${theme} ${index === 0 ? "mx_ThemeChoicePanel_themeSelector_enabled" : ""}`,
-                        control: h(RadioControl, { name: "themeSelector", value: name, defaultChecked: index === 0 }),
+                        className: `mx_ThemeChoicePanel_themeSelector ${theme} ${index === selected ? "mx_ThemeChoicePanel_themeSelector_enabled" : ""}`,
+                        control: h(RadioControl, {
+                            name: "themeSelector",
+                            value: name,
+                            defaultChecked: index === selected,
+                        }),
                     },
                     h(Label, { className: "mx_ThemeChoicePanel_themeSelector_Label" }, name),
                 ),
@@ -211,9 +218,33 @@ function colorParts(color: string): { rgb: number[]; alpha: number } {
     return { rgb: [r, g, b], alpha };
 }
 
+/** WCAG's contrast ratio between two opaque colors. */
+function contrast(a: string, b: string): number {
+    const luminance = (color: string): number => {
+        const [r, g, b] = colorParts(color).rgb.map((channel) => {
+            const c = channel / 255;
+            return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+        });
+        return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    };
+    const [lighter, darker] = [luminance(a), luminance(b)].sort((x, y) => y - x);
+    return (lighter + 0.05) / (darker + 0.05);
+}
+
+/** The color of a choice's radio ring: Compound's radio's ring, which is its fill once checked. */
+function radioEdge(choice: Element): string {
+    return getComputedStyle(choice.querySelector("input + [class^='_ui_']")!).borderTopColor;
+}
+
+/** What a theme chip is filled with, or the card's fill where the chip lets it through. */
+function chipFill(chip: Element, card: string): string {
+    const fill = getComputedStyle(chip).backgroundColor;
+    return fill === TRANSPARENT ? card : fill;
+}
+
 describe.each(THEMES.map(([theme]) => theme))("Telement's accents in %s", (theme) => {
     describe("settings choices drawn as cards", () => {
-        it("ring the selected theme chip in the accent of the theme it shows, the other keeping a field's border", () => {
+        it("ring the selected theme chip in the accent of the theme it shows, the other edged in Compound's outline gray", () => {
             render(theme, themeChips());
             const [selected, other] = [...document.querySelectorAll<HTMLElement>(".mx_ThemeChoicePanel_themeSelector")];
             const ring = getComputedStyle(selected);
@@ -222,7 +253,7 @@ describe.each(THEMES.map(([theme]) => theme))("Telement's accents in %s", (theme
             expect(ring.outlineColor).toBe(tokenColor("--cpd-color-border-accent-primary", selected));
             expect(getComputedStyle(other).outlineStyle).toBe("none");
             expect(getComputedStyle(other).borderTopColor).toBe(
-                tokenColor("--cpd-color-border-interactive-secondary", other),
+                tokenColor("--cpd-color-border-interactive-primary", other),
             );
         });
 
@@ -238,7 +269,7 @@ describe.each(THEMES.map(([theme]) => theme))("Telement's accents in %s", (theme
             expect(radioInset(selected)).toEqual(radioInset(other));
         });
 
-        it("ring the selected layout in the accent, the other keeping a field's border", () => {
+        it("ring the selected layout in the accent, the other edged in Compound's outline gray", () => {
             const container = render(theme, layoutCards());
             const [modern, bubbles] = [
                 ...document.querySelectorAll<HTMLElement>(".mxLayoutSwitcher_LayoutSelector_LayoutRadio"),
@@ -249,8 +280,56 @@ describe.each(THEMES.map(([theme]) => theme))("Telement's accents in %s", (theme
             expect(ring.outlineColor).toBe(tokenColor("--cpd-color-border-accent-primary", container));
             expect(getComputedStyle(modern).outlineStyle).toBe("none");
             expect(getComputedStyle(modern).borderTopColor).toBe(
-                tokenColor("--cpd-color-border-interactive-secondary", container),
+                tokenColor("--cpd-color-border-interactive-primary", container),
             );
+        });
+
+        describe("on a settings card", () => {
+            /** Renders `html` on a settings card on the dialog's surface, and returns the card's fill. */
+            function renderOnCard(html: string): string {
+                render(theme, `<div class="raised"><div class="card">${html}</div></div>`);
+                return getComputedStyle(document.querySelector(".card")!).backgroundColor;
+            }
+
+            /** The chip selected while the theme shows: Dark for dark high contrast, a system setting over Dark. */
+            const selectedChip = { "cpd-theme-light": 0, "cpd-theme-dark": 1, "cpd-theme-light-hc": 2 }[theme] ?? 1;
+
+            it("edge the unselected theme chips, and their radios, 3:1 or more against the card and the chip", () => {
+                const card = renderOnCard(themeChips(selectedChip));
+
+                for (const chip of document.querySelectorAll<HTMLElement>(
+                    ".mx_ThemeChoicePanel_themeSelector:not(.mx_ThemeChoicePanel_themeSelector_enabled)",
+                )) {
+                    expect(contrast(getComputedStyle(chip).borderTopColor, card)).toBeGreaterThanOrEqual(3);
+                    expect(contrast(radioEdge(chip), chipFill(chip, card))).toBeGreaterThanOrEqual(3);
+                }
+            });
+
+            it("ring the selected theme chip, and fill its radio, 3:1 or more against the card and the chip", () => {
+                const card = renderOnCard(themeChips(selectedChip));
+                const chip = document.querySelector<HTMLElement>(".mx_ThemeChoicePanel_themeSelector_enabled")!;
+
+                expect(contrast(getComputedStyle(chip).outlineColor, card)).toBeGreaterThanOrEqual(3);
+                expect(contrast(radioEdge(chip), chipFill(chip, card))).toBeGreaterThanOrEqual(3);
+            });
+
+            it("edge and ring the layout cards 3:1 or more against the card", () => {
+                const card = renderOnCard(layoutCards());
+                const [modern, bubbles] = [
+                    ...document.querySelectorAll<HTMLElement>(".mxLayoutSwitcher_LayoutSelector_LayoutRadio"),
+                ];
+
+                expect(contrast(getComputedStyle(modern).borderTopColor, card)).toBeGreaterThanOrEqual(3);
+                expect(contrast(getComputedStyle(bubbles).outlineColor, card)).toBeGreaterThanOrEqual(3);
+            });
+
+            it("edge and ring the image size drawings 3:1 or more against the card", () => {
+                const card = renderOnCard(imageSizeCards());
+                const [normal, large] = [...document.querySelectorAll<SVGElement>(".mx_ImageSizePanel_size")];
+
+                expect(contrast(getComputedStyle(large).outlineColor, card)).toBeGreaterThanOrEqual(3);
+                expect(contrast(getComputedStyle(normal).outlineColor, card)).toBeGreaterThanOrEqual(3);
+            });
         });
 
         it("move the ring to the layout chosen next", () => {
@@ -264,7 +343,7 @@ describe.each(THEMES.map(([theme]) => theme))("Telement's accents in %s", (theme
             expect(getComputedStyle(bubbles).outlineStyle).toBe("none");
         });
 
-        it("ring the selected image size's drawing in the accent, the other drawing edged with a field's border", () => {
+        it("ring the selected image size's drawing in the accent, the other drawing edged in Compound's outline gray", () => {
             const container = render(theme, `<div class="raised">${imageSizeCards()}</div>`);
             const [normal, large] = [...document.querySelectorAll<SVGElement>(".mx_ImageSizePanel_size")];
             const ring = getComputedStyle(normal);
@@ -274,7 +353,7 @@ describe.each(THEMES.map(([theme]) => theme))("Telement's accents in %s", (theme
             expect(ring.outlineColor).toBe(tokenColor("--cpd-color-border-accent-primary", container));
             // Over the drawing's own 1px edge, along its 8px corners
             expect([edge.outlineStyle, edge.outlineWidth, edge.outlineOffset]).toEqual(["solid", "1px", "-1px"]);
-            expect(edge.outlineColor).toBe(tokenColor("--cpd-color-border-interactive-secondary", container));
+            expect(edge.outlineColor).toBe(tokenColor("--cpd-color-border-interactive-primary", container));
             expect([ring.borderTopLeftRadius, edge.borderBottomRightRadius]).toEqual(["8px", "8px"]);
         });
     });
