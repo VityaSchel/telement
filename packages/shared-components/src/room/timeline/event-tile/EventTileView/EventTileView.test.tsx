@@ -1639,13 +1639,15 @@ describe("EventTileView placement", () => {
             expect(time().getBoundingClientRect().left).toBeCloseTo(line().getBoundingClientRect().left, 1);
         });
 
-        it("puts the badge at the end of the reactions' row, 4px under the emoji", () => {
+        it("puts the badge at the end of the reactions' row, 8px under the emoji", () => {
             renderTiles("bubble", { slots: { body: emojiBody("👍"), footer: reactions(1) } });
             const box = lineBox();
             const badge = time().getBoundingClientRect();
             const row = rowBox();
 
-            expect(row.top - messageBox().bottom).toBeCloseTo(4, 1);
+            // The emoji's box is the 48px emoji, without the leading of their 57px line
+            expect(messageBox().top).toBeCloseTo(box.top - 4.5, 1);
+            expect(row.top - (box.top + 48)).toBeCloseTo(8, 1);
             expect(row.left).toBeCloseTo(box.left, 1);
             expect(badge.right).toBeCloseTo(box.right, 1);
             expect(middle(badge)).toBeCloseTo(middle(row), 1);

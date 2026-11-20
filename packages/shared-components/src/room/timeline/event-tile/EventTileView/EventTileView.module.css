@@ -1996,6 +1996,16 @@
         padding: 0;
         background: transparent;
 
+        /* The emoji are the message's whole box, as a picture without a caption is: they start and end where the
+           bubble would, without the text's 1px inset, and the leading of their line (48px emoji on a 57px line, in
+           EventContentBody) goes above the first line and under the last. So they sit 2px from the bubbles of their run
+           as bubbles do, the badge's bottom is level with theirs, and reactions are 8px under them as under a bubble's
+           text. */
+        > .slotBody > :global(.mx_EventTile_content) {
+            margin-block: calc((48px - 57px) / 2);
+            padding: 0;
+        }
+
         > .slotTimestamp {
             inset-block-end: 0;
             inset-inline-end: 0;
@@ -2004,11 +2014,6 @@
         /* The badge is 20px tall, centered on the reactions' 24px row */
         &:has(> .slotFooter:not(:empty)) > .slotTimestamp {
             inset-block-end: var(--cpd-space-0-5x);
-        }
-
-        /* 4px under the emoji, whose line already leaves room under them */
-        > .slotFooter {
-            margin-block-start: 0;
         }
     }
 

@@ -524,6 +524,63 @@ describe("Timeline shell", () => {
             expect(box(badge).left).toBeGreaterThanOrEqual(emoji.right);
         });
 
+        /** Large emoji as TextualBodyView renders them in a bubble timeline: plain, or with "(edited)" after them. */
+        const largeEmoji = (emoji: string, edited = false): string => {
+            const body = `<${edited ? "span" : "div"} class="mx_EventTile_body mx_EventTile_bigEmoji translate" dir="auto">${emoji}</${edited ? "span" : "div"}>`;
+            return `<div class="mx_MTextBody mx_EventTile_content TextualBody_root TextualBody_text" data-event-layout="bubble">${
+                edited
+                    ? `<div data-textual-body-annotation-wrapper>${body}<button type="button" class="mx_EventTile_edited">(edited)</button></div>`
+                    : body
+            }</div>`;
+        };
+
+        it.each([
+            ["another's", false, false],
+            ["your own", true, false],
+            ["an edited", false, true],
+        ])("makes %s large emoji the message's whole box, where the bubble would be", (_name, own, edited) => {
+            render("bubble", row("bubble", largeEmoji("👍", edited), { own }));
+            const line = box(document.querySelector(".line")!);
+            const content = box(document.querySelector(".mx_EventTile_content")!);
+            const badge = box(document.querySelector(".slotTimestamp")!);
+
+            // The 48px emoji without the leading of their 57px line, nor the 1px inset of a bubble's text
+            expect(line.height).toBe(48);
+            expect([content.top, content.bottom]).toEqual([line.top - 4.5, line.bottom + 4.5]);
+            expect(own ? content.right : content.left).toBe(own ? line.right : line.left);
+            // The badge's bottom is level with the emoji's
+            expect(badge.bottom).toBe(line.bottom);
+        });
+
+        it.each([
+            ["another's", false],
+            ["your own", true],
+        ])("keeps %s large emoji 2px from the bubbles of their run, as bubbles are", (_name, own) => {
+            render(
+                "bubble",
+                row("bubble", text("Look at this"), { own, last: false }),
+                row("bubble", largeEmoji("🎉"), { own, first: false, last: false }),
+                row("bubble", text("Nice, right?"), { own, first: false }),
+            );
+            const [before, , after] = all(".line").map(box);
+            // The 48px emoji in the middle of their 57px line
+            const content = box(all(".mx_EventTile_content")[1]);
+            const emoji = { top: content.top + 4.5, bottom: content.bottom - 4.5 };
+
+            expect(emoji.top - before.bottom).toBe(2);
+            expect(after.top - emoji.bottom).toBe(2);
+        });
+
+        it("puts reactions 8px under large emoji, as under a bubble's text, with the badge centered on their row", () => {
+            render("bubble", row("bubble", largeEmoji("🔥"), { footer: reactions(["😁", 1]) }));
+            const content = box(document.querySelector(".mx_EventTile_content")!);
+            const chips = box(document.querySelector(".mx_ReactionsRow")!);
+            const badge = box(document.querySelector(".slotTimestamp")!);
+
+            expect(chips.top - (content.bottom - 4.5)).toBe(8);
+            expect(badge.top + badge.height / 2).toBe(chips.top + chips.height / 2);
+        });
+
         it.each([
             ["another's", false],
             ["your own", true],
