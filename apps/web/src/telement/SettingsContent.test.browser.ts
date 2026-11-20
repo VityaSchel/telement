@@ -28,6 +28,10 @@ import viewSourceStyles from "../../res/css/structures/_ViewSource.pcss?raw";
 import settingsSubsectionStyles from "../../res/css/components/views/settings/shared/_SettingsSubsection.pcss?raw";
 import settingsSubsectionHeadingStyles from "../../res/css/components/views/settings/shared/_SettingsSubsectionHeading.pcss?raw";
 import deviceSecurityCardStyles from "../../res/css/components/views/settings/devices/_DeviceSecurityCard.pcss?raw";
+import deviceDetailsStyles from "../../res/css/components/views/settings/devices/_DeviceDetails.pcss?raw";
+import filteredDeviceListStyles from "../../res/css/components/views/settings/devices/_FilteredDeviceList.pcss?raw";
+import filteredDeviceListHeaderStyles from "../../res/css/components/views/settings/devices/_FilteredDeviceListHeader.pcss?raw";
+import encryptionCardStyles from "../../res/css/views/settings/encryption/_EncryptionCard.pcss?raw";
 import aliasSettingsStyles from "../../res/css/views/room_settings/_AliasSettings.pcss?raw";
 import betaCardStyles from "../../res/css/views/beta/_BetaCard.pcss?raw";
 import createRoomDialogStyles from "../../res/css/views/dialogs/_CreateRoomDialog.pcss?raw";
@@ -78,6 +82,10 @@ const APP_STYLES = [
     aliasSettingsStyles,
     betaCardStyles,
     deviceSecurityCardStyles,
+    deviceDetailsStyles,
+    filteredDeviceListStyles,
+    filteredDeviceListHeaderStyles,
+    encryptionCardStyles,
     imageSizePanelStyles,
     createRoomDialogStyles,
     compoundOverrides,
@@ -282,6 +290,74 @@ describe.each(THEMES.map(([theme]) => theme))("Settings content in %s", (theme) 
         expect(Math.abs((label.top + label.bottom) / 2 - (input.top + 0.5))).toBeLessThanOrEqual(0.5);
         expect(textStart("#label")).toBe(textStart("#value"));
         expect(getComputedStyle(document.querySelector("#label")!).fontSize).toBe("11px");
+    });
+
+    it("bands the other sessions' header 4px from the card's edge like a menu row, the sessions on its 16px edge", () => {
+        render(
+            theme,
+            `<div class="mx_SettingsSubsection_content mx_SettingsSubsection_contentStretch" id="card">
+                <div class="mx_FilteredDeviceList">
+                    <div class="mx_FilteredDeviceListHeader" id="header">
+                        <span id="select-all" style="display: inline-block; width: 20px; height: 20px"></span>
+                        <span class="mx_FilteredDeviceListHeader_label">Devices</span>
+                    </div>
+                    <ol class="mx_FilteredDeviceList_list">
+                        <li class="mx_FilteredDeviceList_listItem">
+                            <span id="select-one" style="display: inline-block; width: 20px; height: 20px"></span>
+                        </li>
+                    </ol>
+                </div>
+            </div>`,
+        );
+        const card = box("#card");
+        const header = box("#header");
+
+        expect([header.left - card.left, card.right - header.right]).toEqual([4, 4]);
+        expect(cornerRadii(document.querySelector("#header")!)).toEqual({ x: 8, y: 8 });
+        expect(box("#select-all").left - card.left).toBe(16);
+        expect(box("#select-one").left - card.left).toBe(16);
+    });
+
+    it("draws a session's details as a card inside the session's card, padded 12 × 16 and rounded to the 4px floor", () => {
+        render(
+            theme,
+            `<div class="mx_SettingsSubsection_content" id="card">
+                <div class="mx_DeviceDetails" id="details">
+                    <section class="mx_DeviceDetails_section">
+                        <p class="mx_DeviceDetails_sectionHeading" id="heading">Push notifications
+                            <small class="mx_DeviceDetails_sectionSubheading" id="help">Receive push notifications on this device.</small>
+                        </p>
+                    </section>
+                </div>
+            </div>`,
+        );
+        const details = box("#details");
+
+        expect(cornerRadii(document.querySelector("#details")!)).toEqual({ x: 4, y: 4 });
+        expect(textStart("#heading") - details.left).toBe(17);
+        expect(box("#heading").top - details.top).toBe(13);
+    });
+
+    it("draws the Encryption tab's reset and recovery cards as the tab's other cards, without a border or shadow", () => {
+        render(
+            theme,
+            `<div class="mx_SettingsTab mx_EncryptionUserSettingsTab">
+                <div class="mx_SettingsSection_content" id="other-card">Key storage</div>
+                <div class="mx_EncryptionCard" id="card"><div class="mx_EncryptionCard_header" id="header">Reset</div></div>
+            </div>`,
+        );
+        const card = getComputedStyle(document.querySelector("#card")!);
+        const other = getComputedStyle(document.querySelector("#other-card")!);
+
+        expect(card.backgroundColor).toBe(other.backgroundColor);
+        expect(cornerRadii(document.querySelector("#card")!)).toEqual({ x: 12, y: 12 });
+        expect([card.paddingTop, card.paddingRight, card.paddingBottom, card.paddingLeft]).toEqual([
+            "12px",
+            "16px",
+            "12px",
+            "16px",
+        ]);
+        expect([card.borderTopStyle, card.boxShadow]).toEqual(["none", "none"]);
     });
 
     describe("Help & About", () => {

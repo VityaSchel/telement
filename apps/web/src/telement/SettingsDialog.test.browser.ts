@@ -218,7 +218,7 @@ describe("Settings dialogs", () => {
     });
 
     describe("session security card", () => {
-        it("is a 12px card holding its icon tile rounded to the 4px floor, 17px from its corner", () => {
+        it("rounds to the 4px floor inside its settings card, as its icon tile does 17px from its corner", () => {
             document.body.innerHTML = `
                 <div class="mx_DeviceSecurityCard" style="width: 600px">
                     <div class="mx_DeviceSecurityCard_icon Verified"><svg width="16" height="16"></svg></div>
@@ -230,7 +230,8 @@ describe("Settings dialogs", () => {
             const card = document.querySelector(".mx_DeviceSecurityCard")!;
             const icon = document.querySelector(".mx_DeviceSecurityCard_icon")!;
 
-            expect(cornerRadii(card)).toEqual({ x: 12, y: 12 });
+            // 12 less the 16px or more it sits inside a settings card is below zero, so it takes the floor of 4
+            expect(cornerRadii(card)).toEqual({ x: 4, y: 4 });
             expect(cornerRadii(icon)).toEqual({ x: 4, y: 4 });
             const cardRect = card.getBoundingClientRect();
             const iconRect = icon.getBoundingClientRect();

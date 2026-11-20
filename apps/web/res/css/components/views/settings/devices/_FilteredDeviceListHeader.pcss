@@ -13,13 +13,17 @@ Please see LICENSE files in the repository root for full details.
     box-sizing: border-box;
     gap: var(--cpd-space-4x);
 
-    width: 100%;
+    /* Telement: a band drawn as a menu's row is, reaching 4px from the edge of the settings card it is on, rounded
+       concentrically with it, with what it holds back on the card's 16px content edge, where the sessions under it
+       start (TELEMENT.md, "Radius and spacing") */
+    width: calc(100% + 2 * (var(--cpd-space-4x) - var(--tl-inset-menu)));
     height: 48px;
-    padding: 0 var(--cpd-space-4x);
+    padding: 0 calc(var(--cpd-space-4x) - var(--tl-inset-menu));
+    margin-inline: calc(var(--tl-inset-menu) - var(--cpd-space-4x));
     margin-bottom: var(--cpd-space-8x);
 
     background-color: $panels;
-    border-radius: 8px;
+    border-radius: var(--tl-radius-row);
     color: $secondary-content;
 
     /* Higher specificity selector to override the flex-start value */

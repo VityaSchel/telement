@@ -490,21 +490,32 @@ describe.each(THEMES.map(([theme]) => theme))("Settings groups in %s", (theme) =
         }
     });
 
-    it("draws the Labs tab's beta cards as settings cards on the pane", () => {
+    it("draws the Labs tab's beta cards as settings cards on the pane, padded 12 × 16 like the others", () => {
         const container = renderTab(
             theme,
             section(
                 "labs",
                 "Upcoming features",
                 `<div class="mx_SettingsSubsection_text" id="labs-text">What's next?</div>
-                <div class="mx_BetaCard" id="beta"><div class="mx_BetaCard_columns">Video rooms</div></div>`,
+                <div class="mx_BetaCard" id="beta"><div class="mx_BetaCard_columns" id="beta-content">Video rooms</div></div>`,
             ),
         );
         const beta = getComputedStyle(get("#beta"));
 
         expect(beta.backgroundColor).toBe(cardColor(container));
         expect(cornerRadii(get("#beta"))).toEqual({ x: 12, y: 12 });
-        expect(beta.paddingTop).toBe("24px");
+        expect([beta.paddingTop, beta.paddingRight, beta.paddingBottom, beta.paddingLeft]).toEqual([
+            "12px",
+            "16px",
+            "12px",
+            "16px",
+        ]);
+        // Its content on the content edge of the card above it, which starts where it does
+        const labsText = get("#labs-text");
+        expect(get("#beta").getBoundingClientRect().left).toBe(labsText.getBoundingClientRect().left);
+        expect(get("#beta-content").getBoundingClientRect().left - get("#beta").getBoundingClientRect().left).toBe(
+            parseFloat(getComputedStyle(labsText).paddingLeft),
+        );
         expectCard("#labs-text", container);
     });
 

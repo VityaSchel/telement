@@ -12,8 +12,11 @@ Please see LICENSE files in the repository root for full details.
     box-sizing: border-box;
 
     margin-top: var(--cpd-space-4x);
-    padding: var(--cpd-space-6x);
-    border-radius: 8px;
+    /* Telement: a card inside the session's settings card, padded as the settings cards are (_common.pcss), with its
+       radius pushed inward from the outer card's 12, which is below the floor of 4 that far in (TELEMENT.md, "Radius
+       and spacing") */
+    padding: var(--cpd-space-3x) var(--cpd-space-4x);
+    border-radius: max(calc(var(--tl-radius-bubble) - var(--cpd-space-4x)), var(--tl-radius-inline));
     border: 1px solid $quinary-content;
 }
 

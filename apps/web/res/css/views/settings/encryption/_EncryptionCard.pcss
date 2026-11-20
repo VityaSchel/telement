@@ -37,6 +37,15 @@
         box-shadow: none;
         padding: 0px;
     }
+
+    /* Telement: in the Encryption settings tab, the card is one of the tab's cards on its gray pane (_common.pcss), with
+       their fill, 12px corners and 12 × 16 padding, rather than a bordered and shadowed card of its own that the pane
+       showed through. Dialogs and the login flow keep Compound's card */
+    .mx_EncryptionUserSettingsTab &:not(.mx_EncryptionCard_noBorder) {
+        @mixin settingsGroupCard;
+        border: none;
+        box-shadow: none;
+    }
 }
 
 .mx_EncryptionCard_buttons {

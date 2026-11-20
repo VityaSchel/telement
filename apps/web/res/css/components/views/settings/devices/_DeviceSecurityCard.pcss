@@ -16,9 +16,10 @@ Please see LICENSE files in the repository root for full details.
     padding: var(--cpd-space-4x);
 
     /* Telement: Compound's separator, which a dark theme's raised dialogs (_common.pcss) move a step further, as they
-       do their other lines; the fixed gray stayed at the dialog's own color */
+       do their other lines; the fixed gray stayed at the dialog's own color. It sits 16px or more inside a settings
+       card, which pushes its radius inward: 12 less 16 is below the floor of 4 (TELEMENT.md, "Radius and spacing") */
     border: 1px solid var(--cpd-color-separator-primary);
-    border-radius: var(--tl-radius-bubble);
+    border-radius: max(calc(var(--tl-radius-bubble) - var(--cpd-space-4x)), var(--tl-radius-inline));
 }
 
 .mx_DeviceSecurityCard_icon {
