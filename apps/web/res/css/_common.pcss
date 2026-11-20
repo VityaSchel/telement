@@ -693,6 +693,12 @@ summary {
     margin-right: 0px;
 }
 
+/* Telement: a button placed straight in the footer, as ErrorDialog's OK is, keeps the dialog's 24px under it, as
+   DialogButtons' row does, rather than adding its 5px bottom margin to it */
+.mx_Dialog_buttons > :is(button, input[type="submit"]).mx_LegacyDialogButton {
+    margin-bottom: 0;
+}
+
 .mx_Dialog button.mx_LegacyDialogButton:focus-visible,
 .mx_Dialog input.mx_LegacyDialogButton[type="submit"]:focus-visible {
     filter: brightness($focus-brightness);

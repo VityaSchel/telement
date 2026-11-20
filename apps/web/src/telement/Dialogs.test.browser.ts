@@ -261,6 +261,15 @@ describe("Dialogs", () => {
             expect(box("[data-testid=text]").left - body.left).toBe(24);
             expect(middle(box(".mx_Dialog_title"))).toBe(middle(box(".mx_Dialog_cancelButton")));
         });
+
+        it("keep their OK button 24px from the bottom and end, and 24px under the text", () => {
+            renderAlert();
+            const body = box("[data-testid=body]");
+            const ok = box(".mx_Dialog_primary");
+
+            expect([body.right - ok.right, body.bottom - ok.bottom]).toEqual([24, 24]);
+            expect(ok.top - box("[data-testid=text]").bottom).toBe(24);
+        });
     });
 
     describe("space dialogs titled with their space", () => {
