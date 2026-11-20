@@ -116,6 +116,33 @@ describe("<AccountUserSettingsTab />", () => {
         expect(manageAccountLink.getAttribute("href")).toMatch(accountManagementLink);
     });
 
+    describe("before the capabilities are fetched again", () => {
+        beforeEach(() => {
+            mockClient.getCapabilities.mockReturnValue(new Promise(() => {}));
+        });
+
+        it("opens with the profile text and controls of the capabilities the client already has", () => {
+            mockClient.getCachedCapabilities.mockReturnValue({});
+            render(getComponent());
+
+            expect(screen.getByText("This is how you appear to others on the app.")).toBeInTheDocument();
+            expect(screen.queryByText(/managed separately by an identity provider/)).not.toBeInTheDocument();
+            expect(screen.getByRole("textbox", { name: /display name/i })).toBeEnabled();
+            expect(screen.getByRole("button", { name: "Mock change password" })).toBeInTheDocument();
+        });
+
+        it("opens with the read-only profile when the cached capabilities forbid changing it", () => {
+            mockClient.getCachedCapabilities.mockReturnValue({
+                "m.set_displayname": { enabled: false },
+                "m.set_avatar_url": { enabled: false },
+            });
+            render(getComponent());
+
+            expect(screen.getByText(/managed separately by an identity provider/)).toBeInTheDocument();
+            expect(screen.getByRole("textbox", { name: /display name/i })).toBeDisabled();
+        });
+    });
+
     describe("deactivate account", () => {
         it("should not render section when account deactivation feature is disabled", () => {
             vi.spyOn(SettingsStore, "getValue").mockImplementation(

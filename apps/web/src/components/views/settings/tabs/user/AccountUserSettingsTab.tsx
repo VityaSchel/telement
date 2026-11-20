@@ -8,7 +8,7 @@ Please see LICENSE files in the repository root for full details.
 */
 
 import React, { type JSX, useCallback, useContext, useEffect } from "react";
-import { HTTPError } from "matrix-js-sdk/src/matrix";
+import { type Capabilities, HTTPError } from "matrix-js-sdk/src/matrix";
 import { logger } from "matrix-js-sdk/src/logger";
 
 import { UserFriendlyError, _t } from "../../../../../languageHandler";
@@ -86,43 +86,49 @@ const ManagementSection: React.FC<ManagementSectionProps> = ({ onDeactivateClick
     );
 };
 
-const AccountUserSettingsTab: React.FC<IProps> = ({ closeSettingsFn, startCustomStatus }) => {
-    const [externalAccountManagementUrl, setExternalAccountManagementUrl] = React.useState<string | undefined>();
-    const [canMake3pidChanges, setCanMake3pidChanges] = React.useState<boolean>(false);
-    const [canSetDisplayName, setCanSetDisplayName] = React.useState<boolean>(false);
-    const [canSetAvatar, setCanSetAvatar] = React.useState<boolean>(false);
-    const [canChangePassword, setCanChangePassword] = React.useState<boolean>(false);
+interface AccountPermissions {
+    canChangePassword: boolean;
+    canMake3pidChanges: boolean;
+    canSetDisplayName: boolean;
+    canSetAvatar: boolean;
+}
 
+/**
+ * What the homeserver's capabilities let the user change on their account. A missing capability means it is allowed,
+ * as the spec defines it.
+ */
+function getAccountPermissions(capabilities: Capabilities = {}): AccountPermissions {
+    // You can change your password so long as the capability isn't explicitly disabled. The implicit
+    // behaviour is you can change your password when the capability is missing or has not-false as
+    // the enabled flag value.
+    const changePasswordCap = capabilities["m.change_password"];
+    return {
+        canChangePassword: !changePasswordCap || changePasswordCap["enabled"] !== false,
+        // https://spec.matrix.org/v1.7/client-server-api/#m3pid_changes-capability
+        // We support as far back as v1.1 which doesn't have m.3pid_changes
+        // so the behaviour for when it is missing has to be assume true
+        canMake3pidChanges: !capabilities["m.3pid_changes"] || capabilities["m.3pid_changes"].enabled === true,
+        canSetDisplayName: !capabilities["m.set_displayname"] || capabilities["m.set_displayname"].enabled === true,
+        canSetAvatar: !capabilities["m.set_avatar_url"] || capabilities["m.set_avatar_url"].enabled === true,
+    };
+}
+
+const AccountUserSettingsTab: React.FC<IProps> = ({ closeSettingsFn, startCustomStatus }) => {
     const sdkContext = useContext(SDKContext);
     const cli = sdkContext.client!;
 
+    const [externalAccountManagementUrl, setExternalAccountManagementUrl] = React.useState<string | undefined>();
+    // Telement: the client fetches the capabilities when it starts, so the tab opens with the profile's final text
+    // and controls rather than switching from the read-only ones once they arrive
+    const [{ canMake3pidChanges, canSetDisplayName, canSetAvatar, canChangePassword }, setAccountPermissions] =
+        React.useState(() => getAccountPermissions(cli.getCachedCapabilities()));
+
     useEffect(() => {
         (async () => {
-            const capabilities = (await cli.getCapabilities()) ?? {};
-            const changePasswordCap = capabilities["m.change_password"];
-
-            // You can change your password so long as the capability isn't explicitly disabled. The implicit
-            // behaviour is you can change your password when the capability is missing or has not-false as
-            // the enabled flag value.
-            const canChangePassword = !changePasswordCap || changePasswordCap["enabled"] !== false;
+            setAccountPermissions(getAccountPermissions((await cli.getCapabilities()) ?? {}));
 
             const authMetadata = await cli.getAuthMetadata().catch(() => {});
-            const externalAccountManagementUrl = authMetadata?.account_management_uri;
-            // https://spec.matrix.org/v1.7/client-server-api/#m3pid_changes-capability
-            // We support as far back as v1.1 which doesn't have m.3pid_changes
-            // so the behaviour for when it is missing has to be assume true
-            const canMake3pidChanges =
-                !capabilities["m.3pid_changes"] || capabilities["m.3pid_changes"].enabled === true;
-
-            const canSetDisplayName =
-                !capabilities["m.set_displayname"] || capabilities["m.set_displayname"].enabled === true;
-            const canSetAvatar = !capabilities["m.set_avatar_url"] || capabilities["m.set_avatar_url"].enabled === true;
-
-            setCanMake3pidChanges(canMake3pidChanges);
-            setCanSetDisplayName(canSetDisplayName);
-            setCanSetAvatar(canSetAvatar);
-            setExternalAccountManagementUrl(externalAccountManagementUrl);
-            setCanChangePassword(canChangePassword);
+            setExternalAccountManagementUrl(authMetadata?.account_management_uri);
         })();
     }, [cli]);
 
