@@ -21,12 +21,14 @@ Please see LICENSE files in the repository root for full details.
         .mx_BetaCard_columns_description {
             flex: 1;
 
+            /* Telement: Compound's sizes (TELEMENT.md, "Colors, type and components"): 18px becomes heading-sm, the
+               caption body text and the reload warning and FAQ the 13px of help text in the settings, with semibold
+               rather than bold questions. 14px of space becomes 12 */
             .mx_BetaCard_title {
-                font-weight: var(--cpd-font-weight-semibold);
-                font-size: $font-18px;
-                line-height: $font-22px;
+                font: var(--cpd-font-heading-sm-semibold);
+                letter-spacing: var(--cpd-font-letter-spacing-heading-sm);
                 color: $primary-content;
-                margin: var(--cpd-space-1x) 0 14px;
+                margin: 0 0 var(--cpd-space-3x);
 
                 display: flex;
                 align-items: center;
@@ -34,8 +36,7 @@ Please see LICENSE files in the repository root for full details.
             }
 
             .mx_BetaCard_caption {
-                font-size: $font-15px;
-                line-height: $font-20px;
+                font: var(--cpd-font-body-md-regular);
             }
 
             .mx_BetaCard_buttons {
@@ -57,16 +58,17 @@ Please see LICENSE files in the repository root for full details.
 
             .mx_BetaCard_refreshWarning {
                 margin-top: var(--cpd-space-2x);
-                font-size: $font-10px;
+                font: var(--cpd-font-body-sm-regular);
                 text-align: center;
             }
 
             .mx_BetaCard_faq {
                 margin-top: var(--cpd-space-5x);
-                font: var(--cpd-font-body-xs-regular);
+                font: var(--cpd-font-body-sm-regular);
 
                 > h4 {
                     margin: var(--cpd-space-3x) 0 0;
+                    font-weight: var(--cpd-font-weight-semibold);
                 }
 
                 > p {

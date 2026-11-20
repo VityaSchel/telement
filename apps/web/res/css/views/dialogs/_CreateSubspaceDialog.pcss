@@ -35,9 +35,10 @@ Please see LICENSE files in the repository root for full details.
             }
         }
 
+        /* Telement: 12px text is 13 on Compound's scale (TELEMENT.md, "Colors, type and components") */
         .mx_JoinRuleDropdown + p {
             color: $muted-fg-color;
-            font-size: $font-12px;
+            font: var(--cpd-font-body-sm-regular);
         }
     }
 
@@ -47,8 +48,7 @@ Please see LICENSE files in the repository root for full details.
 
         .mx_CreateSubspaceDialog_footer_prompt {
             flex-grow: 1;
-            font-size: $font-12px;
-            line-height: $font-15px;
+            font: var(--cpd-font-body-sm-regular);
             color: $secondary-content;
 
             > * {

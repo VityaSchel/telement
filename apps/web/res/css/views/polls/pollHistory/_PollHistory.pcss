@@ -16,4 +16,13 @@ Please see LICENSE files in the repository root for full details.
 
 .mx_PollHistory_header.mx_Heading_h2 {
     margin-bottom: var(--cpd-space-4x);
+
+    /* Telement: in the room settings' Polls tab the dialog's title is the only large heading, so the list's heading is a
+       13px group label like the other tabs' (_common.pcss) rather than a 28px heading under a 20px title, on the edge of
+       the list's filter, as the list isn't on a card. The way back from a poll keeps its size */
+    .mx_SettingsTab &:not(:has(.mx_PollDetailHeader)) {
+        --settings-group-inset: 0;
+
+        @mixin settingsGroupLabel;
+    }
 }

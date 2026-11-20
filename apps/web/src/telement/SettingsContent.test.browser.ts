@@ -31,6 +31,7 @@ import deviceSecurityCardStyles from "../../res/css/components/views/settings/de
 import deviceDetailsStyles from "../../res/css/components/views/settings/devices/_DeviceDetails.pcss?raw";
 import filteredDeviceListStyles from "../../res/css/components/views/settings/devices/_FilteredDeviceList.pcss?raw";
 import filteredDeviceListHeaderStyles from "../../res/css/components/views/settings/devices/_FilteredDeviceListHeader.pcss?raw";
+import pollHistoryStyles from "../../res/css/views/polls/pollHistory/_PollHistory.pcss?raw";
 import encryptionCardStyles from "../../res/css/views/settings/encryption/_EncryptionCard.pcss?raw";
 import aliasSettingsStyles from "../../res/css/views/room_settings/_AliasSettings.pcss?raw";
 import betaCardStyles from "../../res/css/views/beta/_BetaCard.pcss?raw";
@@ -90,6 +91,7 @@ const APP_STYLES = [
     filteredDeviceListStyles,
     filteredDeviceListHeaderStyles,
     encryptionCardStyles,
+    pollHistoryStyles,
     imageSizePanelStyles,
     createRoomDialogStyles,
     compoundOverrides,
@@ -400,6 +402,20 @@ describe.each(THEMES.map(([theme]) => theme))("Settings content in %s", (theme) 
         expect(box("#heading").top - details.top).toBe(13);
     });
 
+    it("writes a session detail's help in the 13px of help text rather than 12px", () => {
+        render(
+            theme,
+            `<div class="mx_DeviceDetails">
+                <p class="mx_DeviceDetails_sectionHeading">Push notifications
+                    <small class="mx_DeviceDetails_sectionSubheading" id="help">Receive push notifications on this device.</small>
+                </p>
+            </div>`,
+        );
+        const help = getComputedStyle(document.querySelector("#help")!);
+
+        expect([help.fontSize, help.lineHeight]).toEqual(["13px", "19.5px"]);
+    });
+
     it("draws the Encryption tab's reset and recovery cards as the tab's other cards, without a border or shadow", () => {
         render(
             theme,
@@ -420,6 +436,53 @@ describe.each(THEMES.map(([theme]) => theme))("Settings content in %s", (theme) 
             "16px",
         ]);
         expect([card.borderTopStyle, card.boxShadow]).toEqual(["none", "none"]);
+    });
+
+    it("writes a beta card in Compound's sizes: a 20px title, body text, and 13px help with semibold questions", () => {
+        render(
+            theme,
+            `<div class="mx_BetaCard"><div class="mx_BetaCard_columns"><div class="mx_BetaCard_columns_description">
+                <h3 class="mx_BetaCard_title" id="title"><span>Video rooms</span></h3>
+                <div class="mx_BetaCard_caption" id="caption"><p>A new way to chat over voice and video.</p></div>
+                <div class="mx_BetaCard_refreshWarning" id="warning">Joining the beta will reload Telement.</div>
+                <div class="mx_BetaCard_faq"><h4 id="question">How can I create a video room?</h4><p id="answer">Use the “+” button.</p></div>
+            </div></div></div>`,
+        );
+        const style = (id: string): string[] => {
+            const { fontSize, fontWeight, lineHeight } = getComputedStyle(document.querySelector(id)!);
+            return [fontSize, fontWeight, lineHeight];
+        };
+
+        expect(style("#title")).toEqual(["20px", "600", "25px"]);
+        expect(style("#caption")).toEqual(["15px", "400", "22.5px"]);
+        expect(style("#warning")).toEqual(["13px", "400", "19.5px"]);
+        expect(style("#question")).toEqual(["13px", "600", "19.5px"]);
+        expect(style("#answer")).toEqual(["13px", "400", "19.5px"]);
+    });
+
+    it("heads the Polls tab with a 13px group label on the list's edge, as the dialog's title is the only large heading", () => {
+        render(
+            theme,
+            `<div class="mx_SettingsTab" id="tab">
+                <div class="mx_PollHistory_content">
+                    <h2 class="mx_Heading_h2 mx_PollHistory_header" id="heading">Polls</h2>
+                    <div id="filter">Active polls</div>
+                </div>
+            </div>`,
+        );
+        const heading = getComputedStyle(document.querySelector("#heading")!);
+
+        expect([heading.fontSize, heading.fontWeight]).toEqual(["13px", "400"]);
+        expect(textStart("#heading")).toBe(textStart("#filter"));
+    });
+
+    it("writes bold text in the settings semibold", () => {
+        render(
+            theme,
+            `<div class="mx_SettingsTab"><p>Your access token gives <strong id="bold">full access</strong></p></div>`,
+        );
+
+        expect(getComputedStyle(document.querySelector("#bold")!).fontWeight).toBe("600");
     });
 
     describe("Help & About", () => {

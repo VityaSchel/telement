@@ -42,17 +42,15 @@ Please see LICENSE files in the repository root for full details.
             margin-top: 24px;
         }
 
+        /* Telement: 12px text is 13 on Compound's scale (TELEMENT.md, "Colors, type and components") */
         > h3 {
             margin: 0;
             color: $secondary-content;
-            font-size: $font-12px;
-            font-weight: var(--cpd-font-weight-semibold);
-            line-height: $font-15px;
+            font: var(--cpd-font-body-sm-semibold);
         }
 
         .mx_AccessibleButton_kind_link {
-            font-size: $font-12px;
-            line-height: $font-15px;
+            font: var(--cpd-font-body-sm-semibold);
             margin-top: 8px;
         }
     }
@@ -63,8 +61,7 @@ Please see LICENSE files in the repository root for full details.
 
         > span {
             flex-grow: 1;
-            font-size: $font-12px;
-            line-height: $font-15px;
+            font: var(--cpd-font-body-sm-regular);
             color: $secondary-content;
 
             .mx_ProgressBar {
@@ -102,8 +99,7 @@ Please see LICENSE files in the repository root for full details.
 
             .mx_AddExistingToSpace_errorCaption {
                 margin-top: 4px;
-                font-size: $font-12px;
-                line-height: $font-15px;
+                font: var(--cpd-font-body-sm-regular);
                 color: $primary-content;
             }
         }

@@ -15,6 +15,11 @@ Please see LICENSE files in the repository root for full details.
         color: $links;
     }
 
+    /* Telement: bold is semibold, as in Compound's type (TELEMENT.md, "Colors, type and components") */
+    :is(strong, b) {
+        font-weight: var(--cpd-font-weight-semibold);
+    }
+
     form {
         display: flex;
         flex-direction: column;

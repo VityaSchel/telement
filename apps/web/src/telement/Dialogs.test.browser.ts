@@ -275,6 +275,29 @@ describe("Dialogs", () => {
                 expect([space.fontSize, space.fontWeight]).toEqual(["15px", "400"]);
             },
         );
+
+        it("writes their section headings, links and footer prompts in 13px rather than 12px", () => {
+            render(`
+                <div class="mx_AddExistingToSpace">
+                    <div class="mx_AddExistingToSpace_section">
+                        <h3 data-testid="section">Rooms</h3>
+                        <div class="mx_AccessibleButton mx_AccessibleButton_kind_link" data-testid="more">Show more</div>
+                    </div>
+                    <div class="mx_AddExistingToSpace_footer"><span data-testid="add-footer">Want to add a new room instead?</span></div>
+                </div>
+                <div class="mx_CreateSubspaceDialog">
+                    <div class="mx_CreateSubspaceDialog_footer">
+                        <div class="mx_CreateSubspaceDialog_footer_prompt" data-testid="create-footer">Want to add an existing space instead?</div>
+                    </div>
+                </div>
+            `);
+            const sizes = ["section", "more", "add-footer", "create-footer"].map((id) => {
+                const { fontSize, lineHeight } = getComputedStyle(get(`[data-testid=${id}]`));
+                return [fontSize, lineHeight];
+            });
+
+            expect(sizes).toEqual(Array.from({ length: 4 }, () => ["13px", "19.5px"]));
+        });
     });
 
     describe("fields", () => {
