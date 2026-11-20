@@ -237,6 +237,32 @@ describe("Dialogs", () => {
         });
     });
 
+    describe("alerts", () => {
+        /** ErrorDialog, its OK button placed straight in the footer rather than in DialogButtons' row. */
+        function renderAlert(): void {
+            renderDialog(
+                "mx_ErrorDialog",
+                "Unable to access your microphone",
+                `<div class="mx_Dialog_content" id="mx_Dialog_content">
+                    <p style="margin: 0" data-testid="text">We were unable to access your microphone. Please check your browser settings and try again.</p>
+                </div>
+                <div class="mx_Dialog_buttons">
+                    <button class="mx_LegacyDialogButton mx_Dialog_primary" type="button">OK</button>
+                </div>`,
+            );
+        }
+
+        it("are 400px confirmation dialogs, the title on the close button's line and the text on the 24px edge", () => {
+            renderAlert();
+            const body = box("[data-testid=body]");
+
+            expect(body.width).toBe(400);
+            expect(box(".mx_Dialog_title").left - body.left).toBe(24);
+            expect(box("[data-testid=text]").left - body.left).toBe(24);
+            expect(middle(box(".mx_Dialog_title"))).toBe(middle(box(".mx_Dialog_cancelButton")));
+        });
+    });
+
     describe("space dialogs titled with their space", () => {
         /** SubspaceSelector in BaseDialog's title, as Create a space (CreateSubspaceDialog) and Add existing rooms draw it. */
         function renderSpaceDialog(className: string, title: string): void {

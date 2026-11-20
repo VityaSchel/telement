@@ -505,6 +505,12 @@ summary {
     max-width: 704px;
 }
 
+/* Telement: an alert is a 400px confirmation dialog (TELEMENT.md, "Colors, type and components"), so that a sentence or
+   two wraps under the title rather than stretching the dialog into a strip around one long line */
+.mx_ErrorDialog.mx_Dialog_fixedWidth {
+    width: calc(400px - 2 * var(--cpd-space-6x));
+}
+
 .mx_Dialog_background {
     position: fixed;
     top: 0;
