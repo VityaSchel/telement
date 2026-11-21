@@ -444,6 +444,37 @@ describe("EventUtils", () => {
                 }),
             ).toBeUndefined();
         });
+
+        const textMessage = (id: string): MatrixEvent =>
+            new MatrixEvent({
+                event_id: id,
+                type: EventType.RoomMessage,
+                sender: userId,
+                content: { msgtype: MsgType.Text, body: id },
+            });
+
+        it("skips the user's own poll for the message before it, as the timeline has no inline editor for polls", () => {
+            const message = textMessage("$text");
+            const poll = makePollStartEvent("Lunch?", userId, undefined, { id: "$poll" });
+
+            expect(canEditContent(mockClient, poll)).toBe(true);
+            expect(findEditableEvent({ events: [message, poll], isForward: false, matrixClient: mockClient })).toBe(
+                message,
+            );
+        });
+
+        it("skips polls going on from the message being edited, either way", () => {
+            const [first, last] = [textMessage("$first"), textMessage("$last")];
+            const poll = makePollStartEvent("Lunch?", userId, undefined, { id: "$poll" });
+            const events = [first, poll, last];
+
+            expect(
+                findEditableEvent({ events, isForward: true, fromEventId: "$first", matrixClient: mockClient }),
+            ).toBe(last);
+            expect(
+                findEditableEvent({ events, isForward: false, fromEventId: "$last", matrixClient: mockClient }),
+            ).toBe(first);
+        });
     });
 
     describe("highlightEvent", () => {

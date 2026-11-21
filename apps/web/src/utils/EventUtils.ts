@@ -102,6 +102,12 @@ export function canEditOwnEvent(matrixClient: MatrixClient, mxEvent: MatrixEvent
 }
 
 const MAX_JUMP_DISTANCE = 100;
+
+/**
+ * Finds the user's own message to edit in place, in the order the composer's up and down arrows go through them.
+ * Polls are skipped: they are edited in a dialog, so the timeline has no inline editor for them, and picking one
+ * would only scroll to it.
+ */
 export function findEditableEvent({
     matrixClient,
     events,
@@ -130,7 +136,12 @@ export function findEditableEvent({
             // don't look further than MAX_JUMP_DISTANCE events from `fromEventId`
             // to not iterate potentially 1000nds of events on key up/down
             endIdx = Math.min(Math.max(0, i + inc * MAX_JUMP_DISTANCE), maxIdx);
-        } else if (foundFromEventId && !shouldHideEvent(e) && canEditOwnEvent(matrixClient, e)) {
+        } else if (
+            foundFromEventId &&
+            !shouldHideEvent(e) &&
+            !M_POLL_START.matches(e.getType()) &&
+            canEditOwnEvent(matrixClient, e)
+        ) {
             // otherwise look for editable event
             return e;
         }
