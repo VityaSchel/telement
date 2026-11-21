@@ -267,6 +267,17 @@ describe.each(THEMES.map(([theme]) => theme))("Settings groups in %s", (theme) =
         expect(box("#sub-label").top - pane.getBoundingClientRect().top).toBe(16);
     });
 
+    it("ends the tab 24px under its last card, on the dialog's edge, so a tab that fits doesn't scroll", () => {
+        renderTab(
+            theme,
+            section("notifications", "", subsection("sound", "Sounds", `<div style="height: 400px"></div>`)),
+        );
+        const scroller = get(".mx_TabbedView_tabPanelContent");
+
+        expect(box(".mx_SettingsTab").bottom - box("#sound-card").bottom).toBe(24);
+        expect(scroller.scrollHeight).toBe(scroller.clientHeight);
+    });
+
     it("draws a subsection as a 13px secondary label 8px over its card, with its help 8px under the card", () => {
         const container = renderTab(
             theme,
