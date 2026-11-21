@@ -301,7 +301,7 @@ describe("Code in a message", () => {
         expect(firstTextLine(code).left - code.getBoundingClientRect().left).toBe(5);
     });
 
-    it("insets a code block's text and line numbers 12px from its edge, border included", () => {
+    it("insets a code block's text and line numbers 12px from its edge, border included, and its end by the buttons' room too", () => {
         // Shrunk to fit, as in a bubble, so that the longest line ends at the block's end padding
         render(formatted(codeBlock()), "width: fit-content");
         const pre = box("pre");
@@ -312,8 +312,41 @@ describe("Code in a message", () => {
         expect(numbers.top - pre.top).toBe(12);
         expect(pre.bottom - numbers.bottom).toBe(12);
         expect(code.top - pre.top).toBe(12);
-        expect(pre.right - code.right).toBe(12);
+        // The 12px, then the buttons' 28px and 8px between them and the code
+        expect(pre.right - code.right).toBe(12 + 28 + 8);
         expect(pre.bottom - code.bottom).toBe(12);
+    });
+
+    it.each(["ltr", "rtl"])(
+        "keeps the end of a block's first line clear of its buttons in %s text when the block fits its longest line, as in a bubble",
+        (dir) => {
+            // The first line is the longest, where the buttons sit. A message that starts in Hebrew is right to left.
+            const block = codeBlock(["const accent = '#2481cc';", "x"]);
+            render(formatted(dir === "ltr" ? block : `<p>הריצו:</p>${block}`), "width: fit-content");
+            const firstLine = textBoxes(document.querySelector("pre code")!)[0];
+            const buttons = [...document.querySelectorAll(".mx_EventTile_button")].map((button) =>
+                button.getBoundingClientRect(),
+            );
+
+            for (const button of buttons) {
+                const gap = dir === "ltr" ? button.left - firstLine.right : firstLine.left - button.right;
+                expect(gap).toBeGreaterThanOrEqual(12);
+            }
+        },
+    );
+
+    it("puts the buttons at the end of a right-to-left block, away from its line numbers at its start", () => {
+        render(formatted(`<p>הריצו את הפקודות:</p>${codeBlock()}`));
+        const pre = box("pre");
+        const numbers = box(".mx_EventTile_lineNumbers");
+        const icons = [...document.querySelectorAll(".mx_EventTile_button svg")].map((icon) =>
+            icon.getBoundingClientRect(),
+        );
+
+        for (const icon of icons) {
+            expect(icon.left - pre.left).toBe(12);
+            expect(icon.right).toBeLessThan(numbers.left);
+        }
     });
 
     it("starts the code 8px after its line numbers", () => {
@@ -371,9 +404,10 @@ describe("Code in a message", () => {
         const textEnd = Math.max(...textBoxes(pre.querySelector("code")!).map((line) => line.right));
 
         expect(pre.scrollLeft).toBeGreaterThan(0);
-        // Less a fraction of a pixel, as the scroll position is whole pixels and the text isn't
-        expect(pre.getBoundingClientRect().right - textEnd).toBeGreaterThan(11);
-        expect(pre.getBoundingClientRect().right - textEnd).toBeLessThanOrEqual(12);
+        // The 12px and the buttons' room, less a fraction of a pixel, as the scroll position is whole pixels and the
+        // text isn't
+        expect(pre.getBoundingClientRect().right - textEnd).toBeGreaterThan(47);
+        expect(pre.getBoundingClientRect().right - textEnd).toBeLessThanOrEqual(48);
     });
 
     it("cuts a reply's quoted code block off at its padding, after the lines the quote shows", () => {

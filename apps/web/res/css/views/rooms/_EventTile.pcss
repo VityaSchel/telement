@@ -346,11 +346,19 @@ $left-gutter: 64px;
             max-height: 30vh;
         }
 
-        /* Inserted adjacent to <pre> blocks, (See TextualBody) */
+        /* The expand and copy buttons sit over the block's top end corner, so the code ends clear of them: the block
+           keeps their 28px and 8px more at its end, and a block that fits its longest line, as in a bubble, is that
+           much wider. Without the room they would cover the end of the first line when they show. */
+        > pre {
+            padding-inline-end: calc(var(--cpd-space-3x) - 1px + var(--cpd-space-7x) + var(--cpd-space-2x));
+        }
+
+        /* Inserted adjacent to <pre> blocks, (See TextualBody), at the block's end, which is its left in right-to-left
+           text, where the code ends */
         .mx_EventTile_button {
             position: absolute;
             top: var(--cpd-space-2x);
-            right: var(--cpd-space-2x);
+            inset-inline-end: var(--cpd-space-2x);
             visibility: hidden;
 
             /* The expand button is the copy button's size, a 20px icon in a 28px box, so their icons line up. */
