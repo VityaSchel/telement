@@ -16,6 +16,12 @@ a.mx_ExternalLink:any-link {
     text-decoration: underline;
 }
 
+/* Telement: browsers may wrap before an icon even after a word joiner, unless the two are in an element that doesn't
+   wrap, so the icon stays with the link's last word (ExternalLink.tsx) */
+.mx_ExternalLink_iconWrapper {
+    white-space: nowrap;
+}
+
 .mx_ExternalLink_icon {
     display: inline-block;
     width: $font-11px;

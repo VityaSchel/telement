@@ -126,4 +126,26 @@ describe.each(THEMES.map(([theme]) => theme))("Inline links in %s", (theme) => {
 
         expect([style.fontWeight, style.textDecorationLine]).toEqual(["600", "none"]);
     });
+
+    it("keeps a leaving link's icon on the line of its last word when the line ends with the word", () => {
+        const container = document.createElement("div");
+        container.className = theme;
+        container.innerHTML = `<div id="text" style="font: var(--cpd-font-body-md-regular); font-family: Inter">${renderToStaticMarkup(
+            createElement(ExternalLink, { href: "https://example.org/" }, "Apache 2.0"),
+        )}</div>`;
+        document.body.append(container);
+        const text = container.querySelector<HTMLElement>("#text")!;
+        const link = container.querySelector<HTMLElement>(".mx_ExternalLink")!;
+        // As wide as the link's text, so that only the icon doesn't fit on its line
+        const range = document.createRange();
+        range.selectNodeContents(link.firstChild!);
+        text.style.width = `${Math.ceil(range.getBoundingClientRect().width) + 1}px`;
+
+        const icon = link.querySelector("svg")!.getBoundingClientRect();
+        const lines = [...range.getClientRects()];
+        const lastLine = lines[lines.length - 1];
+        expect(icon.top).toBeGreaterThanOrEqual(lastLine.top);
+        expect(icon.bottom).toBeLessThanOrEqual(lastLine.bottom);
+        expect(icon.left).toBeGreaterThan(lastLine.right);
+    });
 });

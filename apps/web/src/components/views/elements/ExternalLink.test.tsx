@@ -42,6 +42,13 @@ describe("<ExternalLink />", () => {
         expect(container.getAttribute("target")).toEqual("_blank");
     });
 
+    it("keeps the icon and the word joiner holding it to the last word out of the link's name", () => {
+        const { getByRole } = getComponent({ children: "Apache 2.0" });
+
+        expect(getByRole("link")).toHaveAccessibleName("Apache 2.0");
+        expect(getByRole("link").querySelector(".mx_ExternalLink_iconWrapper")).toHaveTextContent("⁠");
+    });
+
     it("renders plain text link correctly", () => {
         const children = "test";
         expect(getComponent({ children }).asFragment()).toMatchSnapshot();

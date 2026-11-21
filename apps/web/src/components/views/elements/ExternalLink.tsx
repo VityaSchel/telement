@@ -18,7 +18,12 @@ interface Props extends DetailedHTMLProps<AnchorHTMLAttributes<HTMLAnchorElement
 const ExternalLink: React.FC<Props> = ({ children, className, ...rest }) => (
     <a target="_blank" rel="noreferrer noopener" {...rest} className={classNames("mx_ExternalLink", className)}>
         {children}
-        <PopOutIcon className="mx_ExternalLink_icon" />
+        {/* Telement: a word joiner, in a span that doesn't wrap, keeps the icon on the line of the link's last word
+            rather than alone on the next (_ExternalLink.pcss) */}
+        <span className="mx_ExternalLink_iconWrapper" aria-hidden={true}>
+            {"\u2060"}
+            <PopOutIcon className="mx_ExternalLink_icon" />
+        </span>
     </a>
 );
 
