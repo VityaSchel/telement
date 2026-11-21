@@ -8,7 +8,7 @@ Please see LICENSE files in the repository root for full details.
 
 import React, { useEffect, useState, type JSX } from "react";
 import classNames from "classnames";
-import { MenuItem, Separator, ToggleMenuItem, Text, Badge, Heading, IconButton, Link } from "@vector-im/compound-web";
+import { Separator, Text, Badge, Heading, IconButton, Link } from "@vector-im/compound-web";
 import UserAddIcon from "@vector-im/compound-design-tokens/assets/web/icons/user-add";
 import LinkIcon from "@vector-im/compound-design-tokens/assets/web/icons/link";
 import SettingsIcon from "@vector-im/compound-design-tokens/assets/web/icons/settings";
@@ -45,6 +45,7 @@ import { topicToHtml } from "../../../HtmlUtils.tsx";
 import { useRoomSummaryCardViewModel } from "../../viewmodels/right_panel/RoomSummaryCardViewModel";
 import { useRoomTopicViewModel } from "../../viewmodels/right_panel/RoomSummaryCardTopicViewModel";
 import { useRoomName } from "../../../hooks/useRoomName.ts";
+import { RovingMenuBar, RovingMenuItem, RovingToggleMenuItem } from "../../../telement/right-panel/RovingMenu";
 
 interface IProps {
     room: Room;
@@ -232,14 +233,15 @@ const RoomSummaryCardView: React.FC<IProps> = ({
 
             <Separator />
 
-            <div role="menubar" aria-orientation="vertical">
-                <ToggleMenuItem
+            {/* Telement: one Tab stop, which the arrow keys move through, as a menu is */}
+            <RovingMenuBar>
+                <RovingToggleMenuItem
                     Icon={PinIcon}
                     label={_t("telement|right_panel|pin_to_top")}
                     checked={vm.isFavorite}
                     onSelect={vm.onFavoriteToggleClick}
                 />
-                <MenuItem
+                <RovingMenuItem
                     Icon={UserAddIcon}
                     label={_t("action|invite")}
                     disabled={!vm.canInviteToState}
@@ -248,11 +250,11 @@ const RoomSummaryCardView: React.FC<IProps> = ({
 
                 <Separator />
 
-                <MenuItem Icon={UserProfileIcon} label={_t("common|people")} onSelect={vm.onRoomMembersClick} />
-                <MenuItem Icon={ThreadsIcon} label={_t("common|threads")} onSelect={vm.onRoomThreadsClick} />
+                <RovingMenuItem Icon={UserProfileIcon} label={_t("common|people")} onSelect={vm.onRoomMembersClick} />
+                <RovingMenuItem Icon={ThreadsIcon} label={_t("common|threads")} onSelect={vm.onRoomThreadsClick} />
                 {!vm.isVideoRoom && (
                     <>
-                        <MenuItem
+                        <RovingMenuItem
                             Icon={PinIcon}
                             label={_t("right_panel|pinned_messages_button")}
                             onSelect={vm.onRoomPinsClick}
@@ -260,13 +262,13 @@ const RoomSummaryCardView: React.FC<IProps> = ({
                             <Text as="span" size="sm">
                                 {vm.pinCount}
                             </Text>
-                        </MenuItem>
-                        <MenuItem
+                        </RovingMenuItem>
+                        <RovingMenuItem
                             Icon={FilesIcon}
                             label={_t("right_panel|files_button")}
                             onSelect={vm.onRoomFilesClick}
                         />
-                        <MenuItem
+                        <RovingMenuItem
                             Icon={ExtensionsIcon}
                             label={_t("right_panel|extensions_button")}
                             onSelect={vm.onRoomExtensionsClick}
@@ -276,16 +278,16 @@ const RoomSummaryCardView: React.FC<IProps> = ({
 
                 <Separator />
 
-                <MenuItem Icon={LinkIcon} label={_t("action|copy_link")} onSelect={vm.onShareRoomClick} />
+                <RovingMenuItem Icon={LinkIcon} label={_t("action|copy_link")} onSelect={vm.onShareRoomClick} />
 
                 {!vm.isVideoRoom && (
                     <>
-                        <MenuItem
+                        <RovingMenuItem
                             Icon={PollsIcon}
                             label={_t("right_panel|polls_button")}
                             onSelect={vm.onRoomPollHistoryClick}
                         />
-                        <MenuItem
+                        <RovingMenuItem
                             Icon={ExportArchiveIcon}
                             label={_t("export_chat|title")}
                             onSelect={vm.onRoomExportClick}
@@ -293,17 +295,17 @@ const RoomSummaryCardView: React.FC<IProps> = ({
                     </>
                 )}
 
-                <MenuItem Icon={SettingsIcon} label={_t("common|settings")} onSelect={vm.onRoomSettingsClick} />
+                <RovingMenuItem Icon={SettingsIcon} label={_t("common|settings")} onSelect={vm.onRoomSettingsClick} />
 
                 <Separator />
                 <div className="mx_RoomSummaryCard_bottomOptions">
-                    <MenuItem
+                    <RovingMenuItem
                         Icon={ErrorIcon}
                         kind="critical"
                         label={_t("action|report_room")}
                         onSelect={vm.onReportRoomClick}
                     />
-                    <MenuItem
+                    <RovingMenuItem
                         className="mx_RoomSummaryCard_leave"
                         Icon={LeaveIcon}
                         kind="critical"
@@ -311,7 +313,7 @@ const RoomSummaryCardView: React.FC<IProps> = ({
                         onSelect={vm.onLeaveRoomClick}
                     />
                 </div>
-            </div>
+            </RovingMenuBar>
         </BaseCard>
     );
 };

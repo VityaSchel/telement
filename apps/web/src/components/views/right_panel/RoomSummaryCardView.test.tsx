@@ -202,6 +202,54 @@ describe("<RoomSummaryCard />", () => {
         });
     });
 
+    describe("keyboard", () => {
+        const items = (): HTMLElement[] => [
+            ...screen.getByRole("menubar").querySelectorAll<HTMLElement>('[role^="menuitem"]'),
+        ];
+
+        it("makes the items one Tab stop, which the up and down arrows, Home and End move through, as a menu's", async () => {
+            const user = userEvent.setup();
+            getComponent();
+            const [pin, invite, people] = items();
+
+            expect(items().filter((item) => item.tabIndex === 0)).toEqual([pin]);
+            pin.focus();
+            await user.keyboard("{ArrowDown}");
+            expect(invite).toHaveFocus();
+            await user.keyboard("{ArrowDown}");
+            expect(people).toHaveFocus();
+            expect(items().filter((item) => item.tabIndex === 0)).toEqual([people]);
+            await user.keyboard("{End}");
+            expect(items().at(-1)).toHaveFocus();
+            await user.keyboard("{Home}");
+            expect(pin).toHaveFocus();
+            await user.keyboard("{ArrowUp}");
+            expect(pin).toHaveFocus();
+        });
+
+        it("skips a disabled item, which can't take the focus", async () => {
+            vi.mocked(useRoomSummaryCardViewModel).mockReturnValue({ ...vmDefaultValues, canInviteToState: false });
+            const user = userEvent.setup();
+            getComponent();
+            const [pin, invite, people] = items();
+
+            expect(invite.tabIndex).toBe(-1);
+            pin.focus();
+            await user.keyboard("{ArrowDown}");
+            expect(people).toHaveFocus();
+        });
+
+        it("keeps Pin to top a toggle that reads whether the room is pinned", () => {
+            vi.mocked(useRoomSummaryCardViewModel).mockReturnValue({ ...vmDefaultValues, isFavorite: true });
+            getComponent();
+            const [pin] = items();
+
+            expect(pin).toHaveAttribute("role", "menuitemcheckbox");
+            expect(pin).toHaveAttribute("aria-checked", "true");
+            expect(pin.querySelector('input[role="switch"], input[type="checkbox"]')).toBeChecked();
+        });
+    });
+
     it("opens room file panel on button click", () => {
         const { getByText } = getComponent();
 
