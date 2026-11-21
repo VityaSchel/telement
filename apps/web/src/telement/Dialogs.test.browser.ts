@@ -586,6 +586,23 @@ describe("Dialogs", () => {
             // A placeholder of its own is a hint, and shows under the floated label
             expect(await placeholderColorOnFocus("Topic")).not.toBe("rgba(0, 0, 0, 0)");
         });
+
+        it("draws the field of a text input dialog, such as Remove message's reason, as every 36px field", () => {
+            renderDialog(
+                "mx_TextInputDialog",
+                "Confirm removal",
+                `<div class="mx_Dialog_content">
+                    ${field("Reason (optional)", "Reason (optional)", "mx_TextInputDialog_input")}
+                    ${field("Other", "Other", "")}
+                </div>`,
+            );
+            const [reason, other] = [...document.querySelectorAll(".mx_Field")].map((element) =>
+                element.getBoundingClientRect(),
+            );
+
+            expect(reason.height).toBe(36);
+            expect([reason.left, reason.width]).toEqual([other.left, other.width]);
+        });
     });
 
     describe("invite dialog", () => {
