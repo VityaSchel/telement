@@ -67,16 +67,21 @@ exports[`<PinnedMessagesCard /> > should show the empty state when there are no 
             fill-rule="evenodd"
           />
         </svg>
-        <p
-          class="_typography _font-body-lg-semibold"
+        <div
+          class="_flex"
+          style="--mx-flex-display: flex; --mx-flex-direction: column; --mx-flex-align: center; --mx-flex-justify: start; --mx-flex-gap: var(--cpd-space-2x); --mx-flex-wrap: nowrap;"
         >
-          Pin important messages so that they can be easily discovered
-        </p>
-        <p
-          class="_typography _font-body-md-regular"
-        >
-          Right-click a message and choose “Pin” to add it here.
-        </p>
+          <p
+            class="_typography _font-body-lg-semibold"
+          >
+            Pin important messages so that they can be easily discovered
+          </p>
+          <p
+            class="_typography _font-body-md-regular"
+          >
+            Right-click a message and choose “Pin” to add it here.
+          </p>
+        </div>
       </div>
     </div>
   </div>

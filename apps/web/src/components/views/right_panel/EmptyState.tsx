@@ -20,12 +20,15 @@ const EmptyState: React.FC<Props> = ({ Icon, title, description }) => {
     return (
         <Flex className="mx_EmptyState" direction="column" gap="var(--cpd-space-4x)" align="center" justify="center">
             <Icon width="32px" height="32px" />
-            <Text size="lg" weight="semibold">
-                {title}
-            </Text>
-            <Text size="md" weight="regular">
-                {description}
-            </Text>
+            {/* Telement: the title and its description read as one block, 8px apart and 16px under the icon */}
+            <Flex direction="column" gap="var(--cpd-space-2x)" align="center">
+                <Text size="lg" weight="semibold">
+                    {title}
+                </Text>
+                <Text size="md" weight="regular">
+                    {description}
+                </Text>
+            </Flex>
         </Flex>
     );
 };

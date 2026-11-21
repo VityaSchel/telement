@@ -18,11 +18,13 @@ import {
     MenuItem,
     Search,
     Separator,
+    Text,
     ToggleMenuItem,
 } from "@vector-im/compound-web";
 import {
     ChatIcon,
     ChevronDownIcon,
+    FilesIcon,
     LeaveIcon,
     OverflowHorizontalIcon,
     PinIcon,
@@ -187,6 +189,26 @@ function renderMemberList(dir = "ltr"): HTMLElement {
     `;
     return document.querySelector(".mx_MemberListView")!;
 }
+
+/**
+ * EmptyState as the files card shows it when the room has no files: the icon, then the title and description in a
+ * group of their own, in shared-components' Flex with Compound's Text paragraphs.
+ */
+const filesEmptyState = (): string => {
+    const centered = (gap: string): string =>
+        `display: flex; flex-direction: column; align-items: center; justify-content: center; gap: ${gap}`;
+    const text = (size: "lg" | "md", weight: "semibold" | "regular", content: string): string =>
+        html(createElement(Text, { size, weight }, content));
+    return `
+        <div class="mx_EmptyState" style="${centered("var(--cpd-space-4x)")}">
+            ${html(createElement(FilesIcon, { width: "32px", height: "32px" }))}
+            <div style="${centered("var(--cpd-space-2x)")}">
+                ${text("lg", "semibold", "No files in this room")}
+                ${text("md", "regular", "Use the attachment button in the composer, or drag and drop files into the room.")}
+            </div>
+        </div>
+    `;
+};
 
 function rows(card: HTMLElement): HTMLElement[] {
     return [...card.querySelectorAll<HTMLElement>('[class*="_item_"]')];
@@ -678,6 +700,21 @@ describe("Right panel", () => {
                 start: CONTENT_EDGE,
                 end: CONTENT_EDGE,
             });
+        });
+
+        it("puts the title 16px under the icon's tile and the description 8px under the title", () => {
+            document.body.innerHTML = `
+                <div class="mx_BaseCard" style="width: ${CARD_WIDTH}px; height: 600px; position: relative">
+                    ${filesEmptyState()}
+                </div>
+            `;
+            const tile = document.querySelector(".mx_EmptyState svg")!.getBoundingClientRect();
+            const [title, description] = [...document.querySelectorAll(".mx_EmptyState p")].map((paragraph) =>
+                paragraph.getBoundingClientRect(),
+            );
+
+            expect(title.top - tile.bottom).toBe(16);
+            expect(description.top - title.bottom).toBe(8);
         });
 
         it("puts a third-party invite's details on the card's 12px content edge", () => {

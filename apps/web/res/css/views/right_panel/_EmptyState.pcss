@@ -13,6 +13,11 @@ Please see LICENSE files in the repository root for full details.
     padding: var(--cpd-space-4x) var(--cpd-space-3x);
     text-align: center;
 
+    /* Telement: Compound's Text is a paragraph with the browser's 1em margins, which would add to the gaps */
+    p {
+        margin: 0;
+    }
+
     svg {
         width: 56px;
         height: 56px;
