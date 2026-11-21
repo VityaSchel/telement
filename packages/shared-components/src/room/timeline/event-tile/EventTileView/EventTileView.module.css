@@ -2509,6 +2509,11 @@
 /* Preview-shaped layouts. */
 .root.shapeThreadsList,
 .root.shapeNotification {
+    /* The time is in the row above the preview and there are no read receipts, so the preview keeps no room at its
+       end for them. With that room a one-line preview that fits overflows the clamped body, which ends it with an
+       ellipsis. */
+    --event-tile-content-inline-end: 0;
+
     display: flex;
     flex-flow: row wrap;
     align-items: center;

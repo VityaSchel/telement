@@ -28,6 +28,7 @@ import { ImageBodyView, ImageBodyViewState, type ImageBodyViewSnapshot } from ".
 import imageBodyStyles from "../body/MImageBodyView/ImageBodyView.module.css";
 import { VideoBodyView, VideoBodyViewState, type VideoBodyViewSnapshot } from "../body/MVideoBodyView";
 import videoBodyStyles from "../body/MVideoBodyView/VideoBodyView.module.css";
+import previewStyles from "./EventPreviewView/EventPreviewView.module.css";
 
 const renderState: EventTileViewProps["root"] = {
     id: "event-line-1",
@@ -1039,6 +1040,34 @@ describe("EventTileView placement", () => {
         expect(tail).toBe(6);
         expect(line.getBoundingClientRect().right + tail).toBe(list.right);
     });
+
+    it.each(["ThreadsList", "Notification"] as const)(
+        "doesn't end a one-line %s preview that fits with an ellipsis: it keeps no room at its end for the time",
+        (shape) => {
+            renderTiles("group", {
+                shape,
+                state: { previewClamped: true },
+                slots: {
+                    sender: <span>Bob</span>,
+                    avatar: <span style={{ display: "block", width: 32, height: 32 }} />,
+                    // A preview as EventPreviewView renders it, 8px narrower than the body
+                    body: (
+                        <span
+                            className={previewStyles.eventPreview}
+                            style={{ display: "inline-block", width: "calc(100% - 8px)" }}
+                        >
+                            Thread: which icon set do we keep?
+                        </span>
+                    ),
+                },
+            });
+            const body = screen.getByTestId("event-tile-slot-body");
+
+            // The clamped body draws its ellipsis wherever its line overflows it
+            expect(getComputedStyle(body).textOverflow).toBe("ellipsis");
+            expect(body.scrollWidth).toBeLessThanOrEqual(body.clientWidth);
+        },
+    );
 
     it.each(["bubble", "group"] as const)(
         "keeps the %s layout media timestamp on the picture when a wider reply is quoted above it",
