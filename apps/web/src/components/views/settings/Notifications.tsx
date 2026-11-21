@@ -48,7 +48,6 @@ import {
     updatePushRuleActions,
 } from "../../../utils/pushRules/updatePushRuleActions";
 import { Caption } from "../typography/Caption";
-import { SettingsSubsectionHeading } from "./shared/SettingsSubsectionHeading";
 import { SettingsSubsection } from "./shared/SettingsSubsection";
 import { doesRoomHaveUnreadMessages } from "../../../Unread";
 import SettingsFlag from "../elements/SettingsFlag";
@@ -809,17 +808,18 @@ export default class Notifications extends React.PureComponent<EmptyObject, ISta
                 throw new Error("Developer error: Unnamed notifications section: " + category);
         }
 
+        // The section's name is its group's label above the card, as every other group's is, and the column names are
+        // the card's first row
         return (
-            <div>
+            <SettingsSubsection heading={sectionName} stretchContent>
                 <div data-testid={`notif-section-${category}`} className="mx_UserNotifSettings_grid">
-                    <SettingsSubsectionHeading heading={sectionName} as="h2" />
                     <span className="mx_UserNotifSettings_gridColumnLabel">{VectorStateToLabel[VectorState.Off]}</span>
                     <span className="mx_UserNotifSettings_gridColumnLabel">{VectorStateToLabel[VectorState.On]}</span>
                     <span className="mx_UserNotifSettings_gridColumnLabel">{VectorStateToLabel[VectorState.Loud]}</span>
                     {fieldsetRows}
                 </div>
                 {keywordComposer}
-            </div>
+            </SettingsSubsection>
         );
     }
 
@@ -859,16 +859,19 @@ export default class Notifications extends React.PureComponent<EmptyObject, ISta
                 .getRooms()
                 .some((r) => doesRoomHaveUnreadMessages(r, true))
         ) {
+            // On a card of its own like the tab's other settings, and not red, as marking rooms read destroys nothing
             clearNotifsButton = (
-                <AccessibleButton
-                    onClick={this.onClearNotificationsClicked}
-                    disabled={this.state.clearingNotifications}
-                    kind="danger"
-                    className="mx_UserNotifSettings_clearNotifsButton"
-                    data-testid="clear-notifications"
-                >
-                    {_t("notifications|mark_all_read")}
-                </AccessibleButton>
+                <SettingsSubsection>
+                    <AccessibleButton
+                        onClick={this.onClearNotificationsClicked}
+                        disabled={this.state.clearingNotifications}
+                        kind="primary_outline"
+                        className="mx_UserNotifSettings_clearNotifsButton"
+                        data-testid="clear-notifications"
+                    >
+                        {_t("notifications|mark_all_read")}
+                    </AccessibleButton>
+                </SettingsSubsection>
             );
         }
 

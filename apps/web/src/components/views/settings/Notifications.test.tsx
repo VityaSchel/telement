@@ -517,6 +517,22 @@ describe("<Notifications />", () => {
             expect(screen.getByTestId("notif-section-vector_other")).toBeInTheDocument();
         });
 
+        it("labels each category as its group, outside the table, which starts with the column names", async () => {
+            await getComponentAndWait();
+
+            for (const [section, name] of [
+                ["vector_global", "Global"],
+                ["vector_mentions", "Mentions and keywords"],
+                ["vector_other", "Other"],
+            ]) {
+                const grid = screen.getByTestId(`notif-section-${section}`);
+                const group = grid.closest(".mx_SettingsSubsection")!;
+                expect(group.querySelector(".mx_SettingsSubsectionHeading")).toHaveTextContent(name);
+                expect(grid.querySelector(".mx_SettingsSubsectionHeading")).toBeNull();
+                expect(grid.firstElementChild).toHaveClass("mx_UserNotifSettings_gridColumnLabel");
+            }
+        });
+
         it("renders radios correctly", async () => {
             await getComponentAndWait();
             const section = "vector_global";
@@ -1189,6 +1205,20 @@ describe("<Notifications />", () => {
             expect(clearNotificationEl.className).toContain("mx_AccessibleButton_disabled");
             await waitFor(() => expect(clearNotificationEl.className).not.toContain("mx_AccessibleButton_disabled"));
             expect(mockClient.sendReadReceipt).toHaveBeenCalled();
+        });
+
+        it("offers to mark everything read as an outline button on a card of its own, not a red one", async () => {
+            const room = new Room("room123", mockClient, "@alice:example.org");
+            mockClient.getRooms.mockReset().mockReturnValue([room]);
+            const message = mkMessage({ event: true, room: "room123", user: "@alice:example.org", ts: 1 });
+            await room.addLiveEvents([message], { addToState: true });
+
+            const { container } = await getComponentAndWait();
+            const clearNotificationEl = getByTestId(container, "clear-notifications");
+
+            expect(clearNotificationEl).toHaveClass("mx_AccessibleButton_kind_primary_outline");
+            expect(clearNotificationEl).not.toHaveClass("mx_AccessibleButton_kind_danger");
+            expect(clearNotificationEl.parentElement).toHaveClass("mx_SettingsSubsection_content");
         });
     });
 });

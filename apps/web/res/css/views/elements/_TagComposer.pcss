@@ -21,6 +21,11 @@ Please see LICENSE files in the repository root for full details.
         display: flex;
         flex-wrap: wrap;
         margin-top: 12px; /* this plus 12px from the tags makes 24px from the input */
+
+        /* Telement: without tags it takes no room, so that a card ends 12px under the input, as under other content */
+        &:empty {
+            margin-top: 0;
+        }
     }
 
     .mx_Tag {

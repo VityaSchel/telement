@@ -39,6 +39,7 @@ import fieldStyles from "../../res/css/views/elements/_Field.pcss?raw";
 import settingsDropdownStyles from "../../res/css/views/elements/_SettingsDropdown.pcss?raw";
 import settingsFlagStyles from "../../res/css/views/elements/_SettingsFlag.pcss?raw";
 import styledRadioButtonStyles from "../../res/css/views/elements/_StyledRadioButton.pcss?raw";
+import tagComposerStyles from "../../res/css/views/elements/_TagComposer.pcss?raw";
 import pollHistoryStyles from "../../res/css/views/polls/pollHistory/_PollHistory.pcss?raw";
 import pollHistoryListStyles from "../../res/css/views/polls/pollHistory/_PollHistoryList.pcss?raw";
 import fontScalingPanelStyles from "../../res/css/views/settings/_FontScalingPanel.pcss?raw";
@@ -80,6 +81,7 @@ const APP_STYLES = [
     settingsDropdownStyles,
     settingsFlagStyles,
     styledRadioButtonStyles,
+    tagComposerStyles,
     pollHistoryStyles,
     pollHistoryListStyles,
     fontScalingPanelStyles,
@@ -632,6 +634,79 @@ describe.each(THEMES.map(([theme]) => theme))("Settings groups in %s", (theme) =
             const edges = contentBox("#info-card");
 
             expect([box("#room-id").left, box("#room-id").right]).toEqual([edges.left, edges.right]);
+        });
+    });
+
+    describe("the user Notifications tab", () => {
+        /** A rule's row, as Notifications renders the grid's radios. */
+        const radio = (value: string): string => `
+            <label class="mx_StyledRadioButton mx_StyledRadioButton_enabled">
+                <input type="radio" name="keywords" value="${value}" aria-label="${value}" />
+                <div><div></div></div>
+                <div class="mx_StyledRadioButton_content"></div>
+                <div class="mx_StyledRadioButton_spacer"></div>
+            </label>
+        `;
+        /** The Mentions and keywords group and the Mark all as read card, as Notifications renders them. */
+        const notifications = `
+            <div class="mx_SettingsSection">
+                <div class="mx_SettingsSection_subSections">
+                    <div class="mx_SettingsSubsection">
+                        <div class="mx_SettingsSubsectionHeading">
+                            <h2 class="mx_Heading_h4 mx_SettingsSubsectionHeading_heading" id="mentions-label">Mentions and keywords</h2>
+                        </div>
+                        <div class="mx_SettingsSubsection_content mx_SettingsSubsection_contentStretch" id="mentions-card">
+                            <div class="mx_UserNotifSettings_grid" id="grid">
+                                <span class="mx_UserNotifSettings_gridColumnLabel" id="off">Off</span>
+                                <span class="mx_UserNotifSettings_gridColumnLabel">On</span>
+                                <span class="mx_UserNotifSettings_gridColumnLabel" id="noisy">Noisy</span>
+                                <fieldset class="mx_UserNotifSettings_gridRowContainer">
+                                    <legend class="mx_UserNotifSettings_gridRowLabel" id="rule">Messages containing keywords</legend>
+                                    ${radio("off")}${radio("on")}${radio("noisy")}
+                                </fieldset>
+                            </div>
+                            <div class="mx_TagComposer" id="keywords">
+                                <form class="mx_TagComposer_input">
+                                    <div class="mx_Field mx_Field_input" id="keyword-field">
+                                        <input id="keyword-input" placeholder="New keyword" /><label for="keyword-input">Keyword</label>
+                                    </div>
+                                    <div class="mx_AccessibleButton mx_AccessibleButton_hasKind mx_AccessibleButton_kind_primary">Add</div>
+                                </form>
+                                <div class="mx_TagComposer_tags" role="list"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mx_SettingsSubsection">
+                        <div class="mx_SettingsSubsection_content" id="clear-card">
+                            <div class="mx_AccessibleButton mx_AccessibleButton_hasKind mx_AccessibleButton_kind_primary_outline" id="clear">Mark all as read</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        it("labels each group above its card, the column names on the card's first row over their columns", () => {
+            renderTab(theme, notifications);
+            const edges = contentBox("#mentions-card");
+
+            expect(box("#mentions-card").top - box("#mentions-label").bottom).toBe(8);
+            expect(box("#off").top).toBe(edges.top);
+            expect(box("#off").left).toBeGreaterThan(box("#rule").right);
+            expect([box("#grid").left, box("#grid").right]).toEqual([edges.left, edges.right]);
+        });
+
+        it("puts the keyword field 16px under the table and ends the card 12px under it", () => {
+            renderTab(theme, notifications);
+
+            expect(box("#keywords").top - box("#grid").bottom).toBe(16);
+            expect(box("#mentions-card").bottom - box("#keyword-field").bottom).toBe(12);
+        });
+
+        it("puts Mark all as read on a card of its own", () => {
+            const container = renderTab(theme, notifications);
+
+            expectCard("#clear-card", container);
+            expect(box("#clear").left - box("#clear-card").left).toBe(16);
         });
     });
 
