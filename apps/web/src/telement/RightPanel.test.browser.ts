@@ -565,6 +565,27 @@ describe("Right panel", () => {
 
             expect(insets(card.querySelector("li")!, card)).toEqual({ start: CONTENT_EDGE, end: CONTENT_EDGE });
         });
+
+        it.each(["ltr", "rtl"])(
+            "centers its empty state on the card, which TimelinePanel puts where the room's empty timeline goes (%s)",
+            (dir) => {
+                document.body.innerHTML = `
+                    <aside class="mx_RightPanel" dir="${dir}" style="width: ${CARD_WIDTH + 1}px; height: 600px">
+                        <div class="mx_BaseCard mx_FilePanel">
+                            <div class="undefined mx_RoomView_messageListWrapper">
+                                <div class="mx_RoomView_empty">${filesEmptyState()}</div>
+                            </div>
+                        </div>
+                    </aside>
+                `;
+                const card = document.querySelector(".mx_FilePanel")!.getBoundingClientRect();
+                const tile = document.querySelector(".mx_EmptyState svg")!.getBoundingClientRect();
+                const title = document.querySelector(".mx_EmptyState p")!.getBoundingClientRect();
+
+                expect(tile.left + tile.width / 2).toBeCloseTo(card.left + card.width / 2, 0);
+                expect(title.left + title.width / 2).toBeCloseTo(card.left + card.width / 2, 0);
+            },
+        );
     });
 
     describe("pinned messages", () => {

@@ -28,4 +28,10 @@ Please see LICENSE files in the repository root for full details.
     .mx_RoomView_messageListWrapper > .mx_RoomView_MessageList {
         padding-inline: var(--cpd-space-3x);
     }
+
+    /* The empty state centers itself on the card, as the threads list's does, without the 30px end margin and the
+       80px bottom margin that the room's empty timeline takes */
+    .mx_RoomView_messageListWrapper > .mx_RoomView_empty {
+        display: contents;
+    }
 }
