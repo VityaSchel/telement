@@ -94,7 +94,11 @@ function roomHeader(facePile: boolean): ReactNode {
         h(
             "button",
             { className: "mx_RoomHeader_infoWrapper", type: "button" },
-            h("div", { className: "mx_RoomHeader_info", style: { flex: 1 } }, "Room"),
+            h(
+                "div",
+                { className: "mx_RoomHeader_info", style: { flex: 1 } },
+                h("div", { className: "mx_RoomHeader_heading" }, "Room"),
+            ),
         ),
         h(IconButton, { "aria-label": "Video call" }, h(VideoCallIcon)),
         h(IconButton, { "aria-label": "Voice call" }, h(VoiceCallIcon)),
@@ -248,6 +252,15 @@ describe("Telement's headers", () => {
                 expect(button(label).getBoundingClientRect().top - header.top).toBe(13.5);
             }
             expect(header.right - button("Threads").getBoundingClientRect().right).toBe(12);
+        });
+
+        it.each(["ltr", "rtl"])("lets the room's name run up to the 12px gap before the first button (%s)", (dir) => {
+            render(h("div", { dir, style: { width: "900px" } }, roomHeader(false)));
+
+            const heading = box(".mx_RoomHeader_heading");
+            const firstButton = button("Video call").getBoundingClientRect();
+            const gap = dir === "rtl" ? heading.left - firstButton.right : firstButton.left - heading.right;
+            expect(gap).toBe(12);
         });
 
         it("keeps its background under the pointer, over its buttons as over the room's name", async () => {

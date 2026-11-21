@@ -51,9 +51,8 @@ Please see LICENSE files in the repository root for full details.
 }
 
 .mx_RoomHeader_info {
-    /* We want the spacing to be 64px, 13x = 52px but we have a flex gap of
-       12px set on the flex container, which sums up to 64 */
-    padding-right: var(--cpd-space-13x);
+    /* Telement: the name runs up to the header's 12px gap before the first button, as the header's other parts are
+       spaced, rather than leaving Element's 64px there */
     /* See mx_RoomHeader_infoWrapper min-width comment above. */
     min-width: 0;
 }
