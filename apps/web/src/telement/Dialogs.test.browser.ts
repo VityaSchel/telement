@@ -18,6 +18,8 @@ import telementTokens from "../../../../packages/shared-components/src/telement/
 import commonStyles from "../../res/css/_common.pcss?raw";
 import fontSizes from "../../res/css/_font-sizes.pcss?raw";
 import lightTheme from "../../res/themes/light/css/_light.pcss?raw";
+import pollListItemStyles from "../../res/css/components/views/dialogs/polls/_PollListItem.pcss?raw";
+import pollListItemEndedStyles from "../../res/css/components/views/dialogs/polls/_PollListItemEnded.pcss?raw";
 import spacePillButtonStyles from "../../res/css/structures/_SpacePillButton.pcss?raw";
 import tabbedViewStyles from "../../res/css/structures/_TabbedView.pcss?raw";
 import viewSourceStyles from "../../res/css/structures/_ViewSource.pcss?raw";
@@ -42,6 +44,7 @@ import accessibleButtonStyles from "../../res/css/views/elements/_AccessibleButt
 import copyableTextStyles from "../../res/css/views/elements/_CopyableText.pcss?raw";
 import fieldStyles from "../../res/css/views/elements/_Field.pcss?raw";
 import roomAliasFieldStyles from "../../res/css/views/elements/_RoomAliasField.pcss?raw";
+import pollHistoryStyles from "../../res/css/views/polls/pollHistory/_PollHistory.pcss?raw";
 import linkModalStyles from "../../res/css/views/rooms/wysiwyg_composer/components/_LinkModal.pcss?raw";
 import roomProfileSettingsStyles from "../../res/css/views/settings/_RoomProfileSettings.pcss?raw";
 import settingsSectionStyles from "../../res/css/views/settings/tabs/_SettingsSection.pcss?raw";
@@ -54,6 +57,8 @@ import { loadInter } from "../test/telement/fonts";
 /** In the order _components.pcss imports them, Heading's last, as BaseDialog's title has to win over it. */
 const APP_STYLES = [
     commonStyles,
+    pollListItemStyles,
+    pollListItemEndedStyles,
     spacePillButtonStyles,
     tabbedViewStyles,
     viewSourceStyles,
@@ -78,6 +83,7 @@ const APP_STYLES = [
     copyableTextStyles,
     fieldStyles,
     roomAliasFieldStyles,
+    pollHistoryStyles,
     linkModalStyles,
     roomProfileSettingsStyles,
     settingsSectionStyles,
@@ -805,6 +811,44 @@ describe("Dialogs", () => {
 
             expect(source.height).toBeGreaterThan(100);
             expect([copy.top - source.top, source.right - copy.right]).toEqual([4, 4]);
+        });
+    });
+
+    describe("polls", () => {
+        /** PollHistoryDialog: the list of active polls under the dialog's title, one row per poll. */
+        function renderPolls(): void {
+            renderDialog(
+                "mx_PollHistoryDialog",
+                "Polls",
+                `<div class="mx_PollHistory_content">
+                    <div class="mx_PollHistoryList" data-testid="list">
+                        <ol class="mx_PollHistoryList_list">
+                            <li class="mx_PollListItem">
+                                <div class="mx_PollListItem_content">
+                                    <span>11/20/26</span>
+                                    <svg class="mx_PollListItem_icon" viewBox="0 0 24 24" data-testid="icon"></svg>
+                                    <span class="mx_PollListItem_question">Which accent for your own bubbles?</span>
+                                </div>
+                            </li>
+                        </ol>
+                    </div>
+                </div>`,
+            );
+        }
+
+        it("is a 640px list dialog with its list 16px under the title", () => {
+            renderPolls();
+
+            expect(box("[data-testid=body]").width).toBe(640);
+            expect(box("[data-testid=list]").top - box(".mx_Dialog_title").bottom).toBe(16);
+        });
+
+        it("marks each poll with a 16px icon in the secondary icon color", () => {
+            renderPolls();
+            const icon = getComputedStyle(get("[data-testid=icon]"));
+
+            expect([icon.width, icon.height]).toEqual(["16px", "16px"]);
+            expect(icon.color).toBe(colorOf("--cpd-color-icon-secondary"));
         });
     });
 

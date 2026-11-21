@@ -24,6 +24,11 @@ type PollHistoryProps = {
     matrixClient: MatrixClient;
     permalinkCreator: RoomPermalinkCreator;
     onFinished(this: void): void;
+    /**
+     * Whether the list of polls has its own "Polls" heading, true by default. The poll history dialog leaves it to its
+     * title. A poll's details always keep the heading, which holds the way back to the list.
+     */
+    showListHeading?: boolean;
 };
 
 const sortEventsByLatest = (left: MatrixEvent, right: MatrixEvent): number => right.getTs() - left.getTs();
@@ -41,7 +46,13 @@ const filterAndSortPolls = (polls: Map<string, Poll>, filter: PollHistoryFilter)
         .sort(sortEventsByLatest);
 };
 
-export const PollHistory: React.FC<PollHistoryProps> = ({ room, matrixClient, permalinkCreator, onFinished }) => {
+export const PollHistory: React.FC<PollHistoryProps> = ({
+    room,
+    matrixClient,
+    permalinkCreator,
+    onFinished,
+    showListHeading = true,
+}) => {
     const { polls } = usePollsWithRelations(room.roomId, matrixClient);
     const { isLoading, loadMorePolls, oldestEventTimestamp } = useFetchPastPolls(room, matrixClient);
     const [filter, setFilter] = useState<PollHistoryFilter>("ACTIVE");
@@ -60,9 +71,11 @@ export const PollHistory: React.FC<PollHistoryProps> = ({ room, matrixClient, pe
     return (
         <div className="mx_PollHistory_content">
             {/* @TODO this probably needs some style */}
-            <Heading className="mx_PollHistory_header" size="2">
-                {title}
-            </Heading>
+            {(focusedPoll || showListHeading) && (
+                <Heading className="mx_PollHistory_header" size="2">
+                    {title}
+                </Heading>
+            )}
             {focusedPoll ? (
                 <PollDetail poll={focusedPoll} permalinkCreator={permalinkCreator} requestModalClose={onFinished} />
             ) : (

@@ -23,6 +23,7 @@ import {
 } from "test-utils";
 
 import { PollHistory } from "./PollHistory";
+import { PollHistoryDialog } from "../../dialogs/PollHistoryDialog";
 import { RoomPermalinkCreator } from "../../../../utils/permalinks/Permalinks";
 import defaultDispatcher from "../../../../dispatcher/dispatcher";
 import { Action } from "../../../../dispatcher/actions";
@@ -58,12 +59,11 @@ describe("<PollHistory />", () => {
         permalinkCreator: new RoomPermalinkCreator(room),
         onFinished: vi.fn(),
     };
-    const getComponent = () =>
-        render(<PollHistory {...defaultProps} />, {
-            wrapper: ({ children }) => (
-                <MatrixClientContext.Provider value={mockClient}>{children}</MatrixClientContext.Provider>
-            ),
-        });
+    const wrapper = ({ children }: { children: React.ReactNode }) => (
+        <MatrixClientContext.Provider value={mockClient}>{children}</MatrixClientContext.Provider>
+    );
+    const getComponent = (props: Partial<React.ComponentProps<typeof PollHistory>> = {}) =>
+        render(<PollHistory {...defaultProps} {...props} />, { wrapper });
 
     beforeEach(() => {
         room = new Room(roomId, mockClient, userId);
@@ -394,6 +394,33 @@ describe("<PollHistory />", () => {
             expect(getByTestId("filter-tab-PollHistory_filter-ACTIVE").firstElementChild).toBeChecked();
             // list displayed
             expect(container.getElementsByClassName("mx_PollHistoryList_list").length).toBeTruthy();
+        });
+
+        it("leaves the list without a heading when asked to, and keeps the way back from a poll", async () => {
+            await setupRoomWithPollEvents([pollStart1, pollStart2, pollStart3], [], [pollEnd3], mockClient, room);
+
+            const { getByText, queryByRole, getByRole } = getComponent({ showListHeading: false });
+            await flushPromises();
+
+            expect(queryByRole("heading")).not.toBeInTheDocument();
+
+            fireEvent.click(getByText("Question?"));
+            fireEvent.click(getByRole("button", { name: "Active polls" }));
+
+            expect(queryByRole("heading")).not.toBeInTheDocument();
+            expect(getByText("Question?")).toBeInTheDocument();
+        });
+
+        it("is titled Polls by the poll history dialog, rather than by a second, larger heading of its own", async () => {
+            await setupRoomWithPollEvents([pollStart1, pollStart2, pollStart3], [], [pollEnd3], mockClient, room);
+
+            const { getAllByRole } = render(<PollHistoryDialog {...defaultProps} />, { wrapper });
+            await flushPromises();
+
+            const headings = getAllByRole("heading");
+            expect(headings).toHaveLength(1);
+            expect(headings[0]).toHaveTextContent("Polls");
+            expect(headings[0]).toHaveAttribute("id", "mx_BaseDialog_title");
         });
 
         it("displays poll detail on past poll list item click", async () => {

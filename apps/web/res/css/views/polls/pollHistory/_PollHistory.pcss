@@ -26,3 +26,9 @@ Please see LICENSE files in the repository root for full details.
         @mixin settingsGroupLabel;
     }
 }
+
+/* Telement: in the poll history dialog the dialog's title heads the list, which starts 16px under it as any dialog's
+   content does */
+.mx_PollHistoryDialog .mx_PollHistory_content {
+    margin-top: var(--cpd-space-4x);
+}

@@ -23,10 +23,12 @@ Please see LICENSE files in the repository root for full details.
     color: $primary-content;
 }
 
+/* Telement: an inline status icon on Compound's 16px icon size, in the secondary icon gray rather than a near-invisible
+   quaternary one (TELEMENT.md, "Colors, type and components") */
 .mx_PollListItem_icon {
-    height: 14px;
-    width: 14px;
-    color: $quaternary-content;
+    height: 16px;
+    width: 16px;
+    color: var(--cpd-color-icon-secondary);
     padding-left: var(--cpd-space-2x);
 }
 
