@@ -8,7 +8,6 @@ Please see LICENSE files in the repository root for full details.
 
 import React from "react";
 
-import InlineSpinner from "../elements/InlineSpinner";
 import { _t } from "../../../languageHandler";
 import RecordingPlayback from "../audio_messages/RecordingPlayback";
 import MAudioBody from "./MAudioBody";
@@ -18,6 +17,7 @@ import { PlaybackQueue } from "../../../audio/PlaybackQueue";
 import { type Playback } from "../../../audio/Playback";
 import RoomContext from "../../../contexts/RoomContext";
 import { FileBodyFactory, renderMBody } from "./MBodyFactory";
+import { VoiceMessagePlaceholder } from "../../../telement/media/VoiceMessagePlaceholder";
 
 export default class MVoiceMessageBody extends MAudioBody {
     public static contextType = RoomContext;
@@ -45,7 +45,7 @@ export default class MVoiceMessageBody extends MAudioBody {
         if (!this.state.playback) {
             return (
                 <span className="mx_MVoiceMessageBody">
-                    <InlineSpinner />
+                    <VoiceMessagePlaceholder mxEvent={this.props.mxEvent} />
                 </span>
             );
         }

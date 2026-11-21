@@ -59,4 +59,31 @@ describe("<MVvoiceMessageBody />", () => {
         await act(() => render(<MVoiceMessageBody mxEvent={event} mediaEventHelper={mediaEventHelper} />));
         expect(await screen.findByTestId("recording-playback")).toBeInTheDocument();
     });
+
+    it("lays out the player while the file downloads rather than a spinner, so the message keeps its size once it loads", async () => {
+        const downloading = {
+            sourceBlob: { value: new Promise(() => {}) },
+        } as unknown as MediaEventHelper;
+        event = new MatrixEvent({
+            ...event.event,
+            content: {
+                ...event.getContent(),
+                "info": { duration: 3000 },
+                "org.matrix.msc1767.audio": { duration: 3000, waveform: [0, 512, 1024] },
+            },
+        });
+
+        const { container } = await act(() =>
+            render(<MVoiceMessageBody mxEvent={event} mediaEventHelper={downloading} />),
+        );
+
+        expect(screen.queryByTestId("recording-playback")).not.toBeInTheDocument();
+        expect(screen.queryByRole("progressbar")).not.toBeInTheDocument();
+        // The player's own containers, which size it, with its play button disabled as while it decodes
+        const player = container.querySelector(".mx_MVoiceMessageBody > .mx_VoiceMessagePrimaryContainer")!;
+        expect(player).toHaveAttribute("aria-busy", "true");
+        expect(screen.getByRole("button", { name: "Play" })).toHaveAttribute("aria-disabled", "true");
+        expect(player.querySelectorAll(".mx_RecordingPlayback_timelineLayoutMiddle .mx_Waveform_bar")).toHaveLength(39);
+        expect(screen.getByRole("timer")).toHaveTextContent("00:03");
+    });
 });
