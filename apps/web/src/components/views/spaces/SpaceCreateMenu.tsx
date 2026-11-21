@@ -7,7 +7,6 @@ Please see LICENSE files in the repository root for full details.
 */
 
 import React, {
-    type ComponentProps,
     type RefObject,
     type SyntheticEvent,
     type KeyboardEvent,
@@ -38,8 +37,7 @@ import { _t } from "../../../languageHandler";
 import ContextMenu, { ChevronFace } from "../../structures/ContextMenu";
 import createRoom, { type IOpts as ICreateOpts } from "../../../createRoom";
 import MatrixClientContext, { useMatrixClientContext } from "../../../contexts/MatrixClientContext";
-import type SpaceBasicSettings from "./SpaceBasicSettings";
-import { SpaceAvatar } from "./SpaceBasicSettings";
+import { SpaceAvatar, type SpaceBasicSettingsProps } from "./SpaceBasicSettings";
 import AccessibleButton, { type ButtonEvent } from "../elements/AccessibleButton";
 import Field from "../elements/Field";
 import withValidation from "../elements/Validation";
@@ -110,7 +108,7 @@ const nameToLocalpart = (name: string): string => {
         .replace(/[^a-z0-9_-]+/gi, "");
 };
 
-type BProps = Omit<ComponentProps<typeof SpaceBasicSettings>, "nameDisabled" | "topicDisabled" | "avatarDisabled">;
+type BProps = Omit<SpaceBasicSettingsProps, "avatarDisabled">;
 interface ISpaceCreateFormProps extends BProps {
     busy: boolean;
     alias: string;

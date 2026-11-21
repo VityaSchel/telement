@@ -2103,7 +2103,6 @@
             "aliases_section": "Room Addresses",
             "avatar_field_label": "Room avatar",
             "canonical_alias_field_label": "Main address",
-            "description_space": "Edit settings relating to your space.",
             "error_creating_alias_description": "There was an error creating that address. It may not be allowed by the server or a temporary failure occurred.",
             "error_creating_alias_title": "Error creating address",
             "error_deleting_alias_description": "There was an error removing that address. It may no longer exist or a temporary error occurred.",
@@ -3088,9 +3087,6 @@
         "title_when_query_unavailable": "Rooms and spaces",
         "unmark_suggested": "Mark as not suggested",
         "user_lacks_permission": "You don't have permission"
-    },
-    "space_settings": {
-        "title": "Settings - %(spaceName)s"
     },
     "spotlight": {
         "public_rooms": {

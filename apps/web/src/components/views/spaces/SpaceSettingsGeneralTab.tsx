@@ -6,14 +6,15 @@ SPDX-License-Identifier: AGPL-3.0-only OR GPL-3.0-only OR LicenseRef-Element-Com
 Please see LICENSE files in the repository root for full details.
 */
 
-import React, { useState } from "react";
+import React, { type ChangeEvent, useState } from "react";
+import classNames from "classnames";
 import { type Room, EventType, type MatrixClient } from "matrix-js-sdk/src/matrix";
 import { logger } from "matrix-js-sdk/src/logger";
 
 import { _t } from "../../../languageHandler";
 import AccessibleButton from "../elements/AccessibleButton";
-import SpaceBasicSettings from "./SpaceBasicSettings";
-import { avatarUrlForRoom } from "../../../Avatar";
+import Field from "../elements/Field";
+import AvatarSetting from "../settings/AvatarSetting";
 import { htmlSerializeFromMdIfNeeded } from "../../../editor/serialize";
 import { leaveSpace } from "../../../utils/leave-behaviour";
 import { getTopic } from "../../../hooks/room/useTopic";
@@ -35,6 +36,8 @@ const SpaceSettingsGeneralTab: React.FC<IProps> = ({ matrixClient: cli, space })
     const [newAvatar, setNewAvatar] = useState<File | null | undefined>(null); // undefined means to remove avatar
     const canSetAvatar = space.currentState.maySendStateEvent(EventType.RoomAvatar, userId);
     const avatarChanged = newAvatar !== null;
+    const currentAvatar = space.getMxcAvatarUrl() ?? undefined;
+    const shownAvatar = newAvatar === undefined ? undefined : (newAvatar ?? currentAvatar);
 
     const [name, setName] = useState<string>(space.name);
     const canSetName = space.currentState.maySendStateEvent(EventType.RoomName, userId);
@@ -50,6 +53,8 @@ const SpaceSettingsGeneralTab: React.FC<IProps> = ({ matrixClient: cli, space })
         setName(space.name);
         setTopic(currentTopic);
     };
+
+    const anythingChanged = avatarChanged || nameChanged || topicChanged;
 
     const onSave = async (): Promise<void> => {
         setBusy(true);
@@ -86,37 +91,67 @@ const SpaceSettingsGeneralTab: React.FC<IProps> = ({ matrixClient: cli, space })
         }
     };
 
+    // Laid out as the room's profile (RoomProfileSettings): the fields beside the avatar editor, whose letter avatar is
+    // square as the space bar draws spaces, and Cancel and Save disabled until something changes. The dialog's title
+    // names the tab, so the section has no heading of its own.
     return (
         <SettingsTab>
-            <SettingsSection heading={_t("common|general")}>
-                <div>
-                    <div>{_t("room_settings|general|description_space")}</div>
-
+            <SettingsSection>
+                <form
+                    className="mx_RoomProfileSettings"
+                    autoComplete="off"
+                    noValidate={true}
+                    onSubmit={(e) => {
+                        e.preventDefault();
+                        if (anythingChanged) void onSave();
+                    }}
+                >
                     {error && <div className="mx_SpaceRoomView_errorText">{error}</div>}
 
-                    <SpaceBasicSettings
-                        avatarUrl={avatarUrlForRoom(space, 80, 80, "crop") ?? undefined}
-                        avatarDisabled={busy || !canSetAvatar}
-                        setAvatar={setNewAvatar}
-                        name={name}
-                        nameDisabled={busy || !canSetName}
-                        setName={setName}
-                        topic={topic}
-                        topicDisabled={busy || !canSetTopic}
-                        setTopic={setTopic}
-                    />
+                    <div className="mx_RoomProfileSettings_profile">
+                        <div className="mx_RoomProfileSettings_profile_controls">
+                            <Field
+                                name="spaceName"
+                                label={_t("common|name")}
+                                autoFocus={true}
+                                value={name}
+                                onChange={(ev: ChangeEvent<HTMLInputElement>) => setName(ev.target.value)}
+                                disabled={busy || !canSetName}
+                            />
+                            <Field
+                                className={classNames(
+                                    "mx_RoomProfileSettings_profile_controls_topic",
+                                    "mx_RoomProfileSettings_profile_controls_topic--room",
+                                )}
+                                name="spaceTopic"
+                                element="textarea"
+                                label={_t("common|description")}
+                                value={topic}
+                                onChange={(ev: ChangeEvent<HTMLTextAreaElement>) => setTopic(ev.target.value)}
+                                disabled={busy || !canSetTopic}
+                            />
+                        </div>
+                        <AvatarSetting
+                            avatar={shownAvatar}
+                            avatarAccessibleName={_t("common|avatar")}
+                            disabled={busy || !canSetAvatar}
+                            onChange={setNewAvatar}
+                            removeAvatar={shownAvatar ? () => setNewAvatar(undefined) : undefined}
+                            placeholderId={space.roomId}
+                            placeholderName={space.name}
+                            type="square"
+                        />
+                    </div>
 
-                    <AccessibleButton
-                        onClick={onCancel}
-                        disabled={busy || !(avatarChanged || nameChanged || topicChanged)}
-                        kind="link"
-                    >
-                        {_t("action|cancel")}
-                    </AccessibleButton>
-                    <AccessibleButton onClick={onSave} disabled={busy} kind="primary">
-                        {busy ? _t("common|saving") : _t("room_settings|general|save")}
-                    </AccessibleButton>
-                </div>
+                    <div className="mx_RoomProfileSettings_buttons">
+                        <AccessibleButton onClick={onCancel} disabled={busy || !anythingChanged} kind="primary_outline">
+                            {_t("action|cancel")}
+                        </AccessibleButton>
+                        <AccessibleButton onClick={onSave} disabled={busy || !anythingChanged} kind="primary">
+                            {busy ? _t("common|saving") : _t("room_settings|general|save")}
+                        </AccessibleButton>
+                    </div>
+                </form>
 
                 <SettingsSubsection heading={_t("room_settings|general|leave_space")}>
                     <AccessibleButton

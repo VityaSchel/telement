@@ -72,7 +72,7 @@ test.describe("Header section of the room list", () => {
         // It should open the space settings
         await spaceMenu.click();
         await page.getByRole("menuitem", { name: "Space Settings" }).click();
-        await expect(page.getByRole("heading", { name: "Settings" })).toBeVisible();
+        await expect(page.getByRole("heading", { name: "MySpace: General" })).toBeVisible();
         await app.closeDialog();
     });
 });

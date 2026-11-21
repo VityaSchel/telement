@@ -11,7 +11,7 @@ import { type Room, type MatrixClient } from "matrix-js-sdk/src/matrix";
 import {
     AdminIcon,
     AdvancedSettingsIcon,
-    VisibilityOnIcon,
+    LockIcon,
     SettingsIcon,
 } from "@vector-im/compound-design-tokens/assets/web/icons";
 
@@ -60,7 +60,7 @@ const SpaceSettingsDialog: React.FC<IProps> = ({ matrixClient: cli, space, onFin
             new Tab(
                 SpaceSettingsTab.Visibility,
                 _td("room_settings|visibility|title"),
-                <VisibilityOnIcon key={SpaceSettingsTab.Visibility} />,
+                <LockIcon key={SpaceSettingsTab.Visibility} />,
                 <SpaceSettingsVisibilityTab
                     key={SpaceSettingsTab.Visibility}
                     matrixClient={cli}
@@ -91,9 +91,21 @@ const SpaceSettingsDialog: React.FC<IProps> = ({ matrixClient: cli, space, onFin
 
     const [activeTabId, setActiveTabId] = React.useState(SpaceSettingsTab.General);
 
+    // "<space name>: <tab>", as the room settings dialog titles itself, the space's name in the stronger weight
+    const activeTab = tabs.find((tab) => tab.id === activeTabId);
+    const spaceName = space.name || _t("common|unnamed_space");
+    const title = activeTab
+        ? _t(
+              "room_settings|dialog_title",
+              { roomName: spaceName, tabName: _t(activeTab.label) },
+              { strong: (sub) => <span className="mx_RoomSettingsDialog_title_strong">{sub}</span> },
+          )
+        : spaceName;
+
     return (
         <BaseDialog
-            title={_t("space_settings|title", { spaceName: space.name || _t("common|unnamed_space") })}
+            title={title}
+            titleClass="mx_RoomSettingsDialog_title"
             className="mx_SpaceSettingsDialog"
             contentId="mx_SpaceSettingsDialog"
             onFinished={onFinished}

@@ -102,6 +102,11 @@ interface IProps {
      * String to use for the placeholder display if no avatar is set
      */
     placeholderName: string;
+
+    /**
+     * The avatar's shape: round for people and rooms, square for spaces, as the space bar draws them
+     */
+    type?: React.ComponentProps<typeof BaseAvatar>["type"];
 }
 
 export function getFileChanged(e: React.ChangeEvent<HTMLInputElement>): File | null {
@@ -127,6 +132,7 @@ const AvatarSetting: React.FC<IProps> = ({
     disabled,
     placeholderId,
     placeholderName,
+    type,
 }) => {
     const fileInputRef = createRef<HTMLInputElement>();
 
@@ -184,6 +190,7 @@ const AvatarSetting: React.FC<IProps> = ({
                 size="120px"
                 url={avatarURL}
                 altText={avatarAccessibleName}
+                type={type}
             />
         </AccessibleButton>
     );

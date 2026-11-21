@@ -6,27 +6,25 @@ SPDX-License-Identifier: AGPL-3.0-only OR GPL-3.0-only OR LicenseRef-Element-Com
 Please see LICENSE files in the repository root for full details.
 */
 
-import React, { type ChangeEvent, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import { TakePhotoSolidIcon } from "@vector-im/compound-design-tokens/assets/web/icons";
 
 import { _t } from "../../../languageHandler";
 import AccessibleButton from "../elements/AccessibleButton";
-import Field from "../elements/Field";
 import { chromeFileInputFix } from "../../../utils/BrowserWorkarounds";
 
-interface IProps {
+/** A new space's avatar, name and topic, as the space creation form takes them. */
+export interface SpaceBasicSettingsProps {
     avatarUrl?: string;
     avatarDisabled?: boolean;
     name: string;
-    nameDisabled?: boolean;
     topic?: string;
-    topicDisabled?: boolean;
     setAvatar(this: void, avatar?: File): void;
     setName(this: void, name: string): void;
     setTopic(this: void, topic: string): void;
 }
 
-export const SpaceAvatar: React.FC<Pick<IProps, "avatarUrl" | "avatarDisabled" | "setAvatar">> = ({
+export const SpaceAvatar: React.FC<Pick<SpaceBasicSettingsProps, "avatarUrl" | "avatarDisabled" | "setAvatar">> = ({
     avatarUrl,
     avatarDisabled = false,
     setAvatar,
@@ -110,42 +108,3 @@ export const SpaceAvatar: React.FC<Pick<IProps, "avatarUrl" | "avatarDisabled" |
         </div>
     );
 };
-
-const SpaceBasicSettings: React.FC<IProps> = ({
-    avatarUrl,
-    avatarDisabled = false,
-    setAvatar,
-    name = "",
-    nameDisabled = false,
-    setName,
-    topic = "",
-    topicDisabled = false,
-    setTopic,
-}) => {
-    return (
-        <div className="mx_SpaceBasicSettings">
-            <SpaceAvatar avatarUrl={avatarUrl} avatarDisabled={avatarDisabled} setAvatar={setAvatar} />
-
-            <Field
-                name="spaceName"
-                label={_t("common|name")}
-                autoFocus={true}
-                value={name}
-                onChange={(ev: ChangeEvent<HTMLInputElement>) => setName(ev.target.value)}
-                disabled={nameDisabled}
-            />
-
-            <Field
-                name="spaceTopic"
-                element="textarea"
-                label={_t("common|description")}
-                value={topic}
-                onChange={(ev: ChangeEvent<HTMLTextAreaElement>) => setTopic(ev.target.value)}
-                rows={3}
-                disabled={topicDisabled}
-            />
-        </div>
-    );
-};
-
-export default SpaceBasicSettings;
