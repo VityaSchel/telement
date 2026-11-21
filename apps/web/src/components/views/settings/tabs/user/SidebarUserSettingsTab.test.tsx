@@ -64,6 +64,21 @@ describe("<SidebarUserSettingsTab />", () => {
         );
     });
 
+    it("starts the label of each space's switch with the space's icon, as the space bar draws it", () => {
+        vi.spyOn(SettingsStore, "getValue").mockImplementation((settingName) => {
+            if (settingName === "Spaces.enabledMetaSpaces") return { [MetaSpace.Home]: true };
+            return settingName === "feature_video_rooms";
+        });
+        render(<SidebarUserSettingsTab />);
+
+        for (const name of ["Home", "Rooms outside of a space", "Video rooms and conferences"]) {
+            const label = screen.getByText(name, { selector: "label" });
+            expect(label.firstElementChild?.tagName).toBe("svg");
+            expect(label.firstElementChild).toHaveClass("mx_SidebarUserSettingsTab_icon");
+        }
+        expect(screen.getByText("Show all rooms", { selector: "label" }).querySelector("svg")).toBeNull();
+    });
+
     it("toggles all rooms in home setting", async () => {
         vi.spyOn(SettingsStore, "getValue").mockImplementation((settingName) => {
             if (settingName === "Spaces.enabledMetaSpaces") {

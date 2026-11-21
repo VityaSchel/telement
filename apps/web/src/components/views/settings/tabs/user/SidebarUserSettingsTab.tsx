@@ -8,7 +8,7 @@ Please see LICENSE files in the repository root for full details.
 
 import React, { type ChangeEvent, type ReactNode, useId, useMemo } from "react";
 import { HelpMessage, InlineField, Label, ToggleInput } from "@vector-im/compound-web";
-import { VideoCallSolidIcon, HomeSolidIcon } from "@vector-im/compound-design-tokens/assets/web/icons";
+import { VideoCallSolidIcon, HomeSolidIcon, RoomIcon } from "@vector-im/compound-design-tokens/assets/web/icons";
 import classNames from "classnames";
 
 import { _t } from "../../../../../languageHandler";
@@ -112,7 +112,13 @@ const SidebarUserSettingsTab: React.FC = () => {
                     <SidebarToggle
                         checked={!!orphansEnabled}
                         onChange={onMetaSpaceChangeFactory(MetaSpace.Orphans)}
-                        label={_t("settings|sidebar|metaspaces_orphans")}
+                        label={
+                            <>
+                                {/* The space bar's icon for this space (SpacePanel) */}
+                                <RoomIcon className="mx_SidebarUserSettingsTab_icon" />
+                                {_t("settings|sidebar|metaspaces_orphans")}
+                            </>
+                        }
                         description={_t("settings|sidebar|metaspaces_orphans_description")}
                     />
                     {SettingsStore.getValue("feature_video_rooms") && (
