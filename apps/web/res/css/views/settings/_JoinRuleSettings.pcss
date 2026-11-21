@@ -48,6 +48,12 @@ Please see LICENSE files in the repository root for full details.
 .mx_SettingsFieldset_content:has(> .mx_JoinRuleSettings_radioButton) {
     gap: 0;
     padding-block: 0;
+
+    /* What follows the options on their card, such as Show advanced, ends 16px above the card's bottom, as the options
+       do, rather than on its edge */
+    > :not(.mx_StyledRadioButton, .mx_StyledRadioButton + span) {
+        padding-block-end: var(--cpd-space-4x);
+    }
 }
 
 .mx_JoinRuleSettings_radioButton {

@@ -661,6 +661,28 @@ describe.each(THEMES.map(([theme]) => theme))("Settings content in %s", (theme) 
             expect(box("#radio-Anyone .mx_StyledRadioButton_content").top - (next.top + separator)).toBe(16);
             expect(next.top - (description.top + descriptionLine)).toBe(16);
         });
+
+        it("end the join rules' card 16px under Show advanced, as under the last option", () => {
+            render(
+                theme,
+                `<fieldset class="mx_SettingsFieldset">
+                    <legend class="mx_SettingsFieldset_legend">Access</legend>
+                    <div class="mx_SettingsFieldset_content" id="access-card">
+                        ${radio("Anyone", true, "mx_JoinRuleSettings_radioButton")}
+                        <span id="description">Anyone can join.</span>
+                        <div>
+                            <div class="mx_AccessibleButton mx_AccessibleButton_hasKind mx_AccessibleButton_kind_link mx_SettingsTab_showAdvanced"
+                                role="button" id="show-advanced">Show advanced</div>
+                        </div>
+                    </div>
+                </fieldset>`,
+            );
+
+            const descriptionLine = parseFloat(getComputedStyle(document.querySelector("#description")!).lineHeight);
+
+            expect(box("#show-advanced").top - (box("#description").top + descriptionLine)).toBe(16);
+            expect(box("#access-card").bottom - box("#show-advanced").bottom).toBe(16);
+        });
     });
 
     it("draws the BETA pill as a 24px accent badge with 11px white capitals", () => {
