@@ -83,8 +83,9 @@ pnpm test:unit
     - `pnpm-lock.yaml`: take upstream's version, then run `pnpm install`.
     - `apps/web/res/css/_components.pcss`: run `pnpm --filter element-web rethemendex`.
     - `apps/web/src/i18n/strings/en_EN.json`: take upstream's version, then run `pnpm i18n`.
-    - Sentence case overrides: run `pnpm vitest run apps/web/src/telement/i18n/sentenceCase.test.ts`, then fix or drop
-      the overrides it lists, and add any new Title Case strings to `apps/web/src/telement/i18n/sentenceCase.en.json`.
+    - English overrides: run `pnpm vitest run apps/web/src/telement/i18n/englishOverrides.test.ts`; check each
+      override whose upstream English changed and record the new text as its `upstream`, or drop it; add new
+      overrides to `apps/web/src/telement/i18n/englishOverrides.json` with their upstream text.
 - Start the app and check the screens Telement changes.
 - Add a row to the [upstream merge log](#upstream-merge-log), noting conflicts and anything surprising.
 
@@ -209,13 +210,15 @@ easier.
    Telement's radius and spacing tokens (see [radius and spacing](#radius-and-spacing)). Replace a value with a token
    only on lines or in rules Telement changes anyway; never sweep upstream stylesheets.
 6. **Strings.** Use `telement|…` translation keys so Telement's strings land in one block of `en_EN.json`. Run
-   `pnpm i18n` in `apps/web` and `packages/shared-components` after removing code, so unused strings go too. English
-   sentence case for upstream strings lives in `apps/web/src/telement/i18n/sentenceCase.en.json`, never in
-   `en_EN.json`, which every merge takes from upstream as it is. The file is keyed by translation key and registered
-   over the English strings of `apps/web` and `packages/shared-components` at startup and after every language change
-   (`sentenceCase.ts`); other languages keep their translations, and a deployment's custom translations still win.
-   `sentenceCase.test.ts` fails when an override changes anything but letter case (placeholders, tags and plural forms
-   included), or names a string upstream has dropped or already writes that way.
+   `pnpm i18n` in `apps/web` and `packages/shared-components` after removing code, so unused strings go too.
+   Telement's English for upstream strings (sentence case, wording and punctuation) lives in
+   `apps/web/src/telement/i18n/englishOverrides.json`, never in `en_EN.json`, which every merge takes from upstream as
+   it is. The file is keyed by translation key, each entry recording the upstream English it was written against
+   (`upstream`) and Telement's (`telement`), and `englishOverrides.ts` registers it over the English strings of
+   `apps/web` and `packages/shared-components` at startup and after every language change; other languages keep their
+   translations, and a deployment's custom translations still win. `englishOverrides.test.ts` fails when upstream's
+   English for a key changes, when an override adds placeholders or tags or changes plural forms, or when it names a
+   string upstream has dropped or repeats upstream's text.
 7. **Extension points.** The module API (`packages/module-api`) offers custom message renderers, composer upload
    options and component visibility; use it where it fits.
 
@@ -262,24 +265,56 @@ What Telement changes in Element's behavior, apart from the features described f
   room, and keywords count, and turning all notifications off stops them. Muted counts don't feed the Unread filter or
   the space and app badges.
 - **Room menus:** hovering a room shows only the "…" button, in the time's place, and the badges stay; the bell button
-  is gone. The notification options are a "Notifications" submenu in the "…" and right-click menus. Room menus have
-  the message menu's size (16px icons, 15px text, 4px padding, 8px item highlights, 12px corners).
+  is gone. The notification options are a "Notifications" submenu in the "…" and right-click menus, which marks the
+  room's setting with a trailing check, as the sort menu marks its option (2026-11-21). Room menus have the message
+  menu's size (16px icons, 15px text, 4px padding, 8px item highlights, 12px corners).
+- **Room list status, toasts and filters** (2026-11-23): while the client catches up after starting or reconnecting, a
+  16px spinner and "Updating…" take the place of the room list's title, or "Waiting for network…" while sync fails,
+  in 15px secondary text 8px after the spinner; the heading stays for screen readers and the status is announced.
+  TimelinePanel's sync spinner, which made the timeline jump 32px, is gone. Toasts dock between the filters and the
+  list, 20px under the chips, 12px from the sides and 12px above the first row, with a 1px border, 12px corners, no
+  shadow and 12 × 16 padding, and their buttons wrap in a room list at its narrowest; they float only beside a
+  module's full-screen view.
+  An empty filter (People, Rooms, Unread, Mentions, Invites, Low priority) offers an outline "Clear filters" button
+  with the filter icon in place of "Show all chats" and "See all activity"; without a filter, "No chats yet" keeps
+  New message and New room.
+- **Opening chats** (2026-11-23): a chat or a space opens as the primary mouse button goes down, as in Telegram, and
+  the click after it is skipped; the "…" button, the badges and a space's collapse toggle still act on click, and the
+  keyboard works as before. Typing a printable character on a room or the room list opens the search dialog with it.
 - **Search fields:** `SearchFieldView` (shared) is Telegram's search field: centred at rest, sliding left on focus,
   with a clear button. The emoji and reaction pickers use it; it scrolls away with the emoji while the category bar
   sticks. Pickers open with focus on the selected category, not on the search field. The room list search keeps Element's search dialog but looks like the field at rest
-  (`SearchFieldButtonView`).
+  (`SearchFieldButtonView`, which without a label is a 36px circle around the magnifier). Typing in a picker searches
+  (2026-11-23): a character typed without Ctrl, Alt or Meta, or Backspace while there is a query, moves the focus to
+  the search field, which takes the key; Space is left to the focused tab or emoji.
 - **Timestamps:** always shown; the "Always show message timestamps" setting is gone. Modern layout: at the right of
   the last line, in a reserved gutter. Bubbles: in the bottom-right corner, sharing the last line when it fits.
   Pictures, stickers and videos without a caption show the time as a dark pill over the media's bottom-right corner. The filename and size banner shown when hovering a picture is gone.
 - **Message menu:** right-clicking anywhere on a message row (margins, avatar, sender, reply quote, reactions,
   receipts) opens the message menu, with "Copy image" on pictures and "Copy link" on links. Above it, Telegram's quick
-  reactions: a pill of the six emoji the user reacts with most (the emoji picker's history, filled with Telegram's
-  👍 ❤️ 🔥 🥰 👏 😁) and a chevron that opens the full picker; choosing one adds or removes the user's reaction, in
-  place of the menu's React item. "Copy text" copies a message's plain text or a file's caption, and "View source"
+  reactions: a capsule of the six emoji the user reacts with most (the emoji picker's history, filled with Telegram's
+  👍 ❤️ 🔥 🥰 👏 😁), inset 4px from every edge, and a chevron in an emoji's 32px round cell that opens the full
+  picker; choosing one adds or removes the user's reaction, in place of the menu's React item. "Copy text" copies a
+  message's plain text or a file's caption, and "View source"
   shows only in developer mode (2026-11-18). Every message with a file
   has "Save as…", which opens the system save dialog in Chromium and Telement Desktop (File System Access API) and
-  downloads elsewhere; the picture viewer's Download is "Save as…" too. Electron's own picture menu is gone.
+  downloads elsewhere; the picture viewer's Download is "Save as…" too. Since 2026-11-23 the file tiles of the
+  timeline and the Files card, a legacy file body's name and icon, and the keyboard toolbar's button save the same
+  way, and no media has a download button under it anymore. Electron's own picture menu is gone.
   `BasePlatform.allowOverridingNativeContextMenus()` is gone.
+- **Replying** (2026-11-23): double-clicking a message outside its text and controls (the bubble's padding, beside
+  it or between messages; not links, buttons, media, fields or the avatar) replies to it, in the room and thread
+  timelines when the user can send, without selecting the nearest word. Ctrl+Up and Ctrl+Down (Cmd on macOS) in the
+  room's plain composer choose the message to reply to and mark it with the selected band, only while the composer is
+  empty or they are already choosing one; with text in it, and in threads, they are left to the caret. The Keyboard
+  tab lists them under Composer.
+- **Failed messages** (2026-11-23): the red mark of a message that failed to send is a button opening a menu with
+  Resend and Delete, red with a trash icon; the unsent bar stays.
+- **Media downloads** (2026-11-23): while media downloads, Telegram's 48px ring (a dark disc with a white ring and a
+  ×) sits over the gray placeholder or the blurhash, and a 32px one replaces a voice or audio player's play button,
+  with the player at its full size (audio files get a full-size placeholder too). It fills as the file arrives when
+  its size is known and spins otherwise, one turn in 4s with reduced motion; × cancels the download and an arrow
+  starts it again (`telement/media/mediaDownloads.ts`, through `Media.downloadSource`).
 - **Videos:** regular videos never play in the timeline. They show a poster with a play button, the length at the top
   left and the time at the bottom right, and open in a full-window viewer (`VideoLightboxView`) with play/pause, a seek
   bar, volume, speed (0.5–2×), full screen (the whole page), Save as…, Forward, and keys Space, ←/→, M, F and Escape.
@@ -288,22 +323,86 @@ What Telement changes in Element's behavior, apart from the features described f
   only affects video notes.
 - **Reply preview:** the composer shows "Reply to <name>" in the sender's colour with the quote's vertical line and a
   one-line excerpt, like the reply quote in messages; Element's "Replying" header is gone.
+- **Floating date** (2026-11-23): while the main timeline scrolls, the date of the first message in view floats in
+  the timeline's own date pill, 8px under its top and centered on the content. It fades out over 200ms a second after
+  scrolling stops (with reduced motion it hides without a transition), hides at the bottom, gives way to a real date
+  separator, and takes no input.
+- **Unread mentions** (2026-11-23): Telegram's unread mentions button replaces Element's "Jump to first unread
+  message" bar (`TopUnreadMessagesBar`): a 36px outlined circle with the room list's accent counter, 8px above jump to
+  bottom or in its place. It counts the unread mentions in the loaded main timeline and goes once the room is read,
+  as Escape marks it. Each press jumps to the next mention, oldest first, starting over after the newest. Jumping to
+  the first unread message is now only Shift+Page Up. Jump to bottom's count is the room list's accent counter,
+  with or without mentions, and gray only in a muted room without them, never red.
+- **Unread line** (2026-11-24): a message that arrives at the bottom of a focused, visible window draws no line, and
+  a line that is there goes on its own in a focused window (3s at the bottom, the off-screen time above) without
+  mouse or key input. Read receipts and fully_read still wait for input. A line that was never drawn no longer leaves a
+  fading ghost.
+- **Jumping back** (2026-11-23): after a jump from a reply's quote, a pin, "View in timeline" or a search result,
+  jump to bottom says "Back to where you were" and first returns to the message the jump started from, flashing it;
+  it keeps up to 10 such places, and reaching the bottom or pressing Escape clears them. The message a jump lands on
+  lights up in the selected band and fades back over 1.5s (ease-in), or holds for 2s and drops with reduced motion; a
+  message chosen with right-click keeps the band, the same accent tint, while its menu is open.
+- **Search in a room** (2026-11-23): the search bar steps through the room's results with Older and Newer buttons
+  and "N of M"; the timeline shows each hit in place with the term highlighted, and "Show results" goes back to the
+  list.
 - **Cursors:** the arrow on every control (`apps/web/res/css/telement/_Cursor.pcss`); the hand only on links in
   message text and link preview headers; the I-beam over the whole text of a message; not-allowed on disabled
   controls. The left panel's separator shows its own resize cursor, and while it is dragged a window-wide layer keeps
   it; the panels library's cursor rule on every element (`disableCursor`) and any cursor rule conditioned on the
   separator's state are gone, as each restyled the whole page on hover, grab, release and at the panel's limits.
+- **Text selection:** as in a native app, the text of controls (buttons, labels, menu items, tabs, chips, options,
+  switches and the like) can't be selected, so a double click or a drag across the app highlights none of it, while
+  message text, links in messages and quotes, fields and composers stay selectable
+  (`apps/web/res/css/telement/_UserSelect.pcss`, 2026-11-20).
+- **Keyboard:** Tab follows the order things are drawn in (2026-11-21). The room info panel is one Tab stop that the
+  arrow keys, Home and End move through, and the room list filters are one Tab stop that the arrow keys move through,
+  with their chevron after them. The room list's and the member list's containers are a Tab stop, so that Tab reaches
+  an item scrolled out of view, except while one of their items has the focus, so that Shift+Tab leaves the list. A
+  message's time comes after its links and reactions. Tab and Shift+Tab close a legacy context menu and return the
+  focus to what opened it. Tab leaves an empty composer at once, as there is no name to complete. The Forward dialog's
+  preview is inert: none of it is a Tab stop and it never shows the action bar. The arrow key that edits your last
+  message skips polls, which have no inline editor. In the Forward dialog and the search dialog the pointer moves the
+  selection the arrow keys move, so only one row is ever highlighted; the Forward dialog's paper plane shows on the
+  selected row (2026-11-23). A dialog ignores a key that something inside it has already acted on (`defaultPrevented`),
+  so Escape in a menu closes the menu alone, with reduced motion too, where the menu fades out (2026-11-23).
 - **Dialogs with tabs** (user, room and space settings) focus the selected tab when they open, so Escape works
   straight away. Before, focus could fall to the page when React replaced the first focused element. The room settings
   dialog is titled "<room name>: <tab>" like the user settings' "Settings: <tab>" (the room's name semibold, the tab's
   regular), and its tabs no longer open with a heading repeating the tab's name.
 - **Create a space** dims the app like a dialog, so it has a dialog's close button on its title's line.
 - **Explore rooms:** a public room's result shows its address only when it has one, never the raw room ID.
-- **English text** is in sentence case: Telement overrides the English of 213 upstream titles and labels written in
-  Title Case (see [Strings](#changing-upstream-code)), for example "Security & privacy" and "Voice & video".
+- **English text** is in sentence case: Telement overrides the English of 225 upstream strings (see
+  [Strings](#changing-upstream-code)), mostly titles and labels written in Title Case, for example "Security & privacy"
+  and "Voice & video". Since 2026-11-23 the overrides also fix wording and punctuation: both leave dialogs ask "Leave
+  <name>?", the search hint's quotes are curly, "typing…" has no space before its ellipsis, Upgrade room no longer asks
+  for a bug report, the Report message dialog's Ignore user switch says what it does ("Hide all current and future
+  messages from this user."), the "Set timezone" row is "Time zone", as the setting that publishes it spells it too, and
+  starting a chat is "New message", as in Telegram (the menu item, the tooltip, the empty room list and the dialog's
+  title).
 - **Stickers:** the "Show stickers button" setting is gone; stickers are available whenever widgets are
   (`UIFeature.Widgets`).
 - **Defaults:** GIFs autoplay, and the message layout is bubbles.
+- **Settings tabs** (2026-11-23): the user settings keep Element's tab names in a new order: Account, Notifications,
+  Appearance (with a theme icon), Sidebar, Preferences, Voice & video, Security & privacy, Encryption, Devices,
+  Keyboard, Labs, Ignored users (a lab) and Help & about. Within Preferences, the five desktop toggles moved to the
+  "Start-up and window behaviour" group and Ctrl/Cmd+Enter to "Keyboard shortcuts", after Ctrl+F, and "General" is
+  "Advanced". Security & privacy holds the warning, Presence (read receipts, typing, publishing the time zone),
+  Moderation and safety, Show media in timeline, How to find you, Message search, Advanced and, last, Manage
+  integrations; Devices gained the offline-device notice (Secure backup) and the client information toggle. Room
+  settings put the room's own settings first: General (profile, Leave room), Notifications (with this room's Show
+  media), Security & privacy (access, room addresses, history), People (a lab), Roles & permissions, Voice & video,
+  Bridges (a lab) and Advanced. The room Polls tab is gone, as room info's Polls opens the same history
+  (`PollHistoryDialog`). Space settings keep their tabs, and no tab id changed.
+- **Settings search and exceptions** (2026-11-23): a search pill above the user settings tabs finds a setting by name
+  and lists its results as a menu of "Tab › Group › Setting" rows, moved by the arrow keys and the pointer; choosing
+  one opens the tab scrolled to the setting, its row flashing the hover fill (held for 2s with reduced motion). The
+  settings are declared in `telement/settings/settingsSearchIndex.ts`. In windows up to 1024px wide, where the tabs are
+  icons only, each with its name in a tooltip, the search is a 36px round filled button 16px above them ("Search
+  settings"): it opens the same 220px pill and results on a floating surface over the tabs and the pane, so nothing
+  moves, and Escape empties the pill, then turns it back into the button, as choosing a result or leaving it does. The
+  Notifications tab has a "Rooms with their own setting" row with their count, on a card of its own and hidden at 0,
+  which opens a 640px list of the rooms whose level isn't the default, each with its level as a menu, so that a muted
+  room can be found again.
 - **Preferences:** the "Room list" subsection only appears when its settings list in `PreferencesUserSettingsTab` is
   not empty, which it is today. "Show all rooms" in Home is only in the Sidebar tab, indented under Home, so the
   Preferences tab's Spaces subsection, which held only that setting, is gone.
@@ -693,7 +792,8 @@ Do not repeat:
       text as it wraps, and the attach button has no native tooltip. Upstream's 16px padding under the composer and its 55px
       minimum height are gone, so one line is 51px tall and multi-line text keeps 16px from the top and bottom. The
       rich-text lab's field is as tall as the buttons (36px for one line, in a 52px row) with 6px above and below its
-      text, and its buttons sit on the last line like the plain composer's.
+      text, and its buttons sit on the last line like the plain composer's. The composer bar is docked across the
+      thread panel and the timeline card as it is across the room (2026-11-21).
     - The drawer's Emoji/Stickers tabs sit at its bottom, as in Telegram for macOS; the picker's text can't be
       selected except in its search field. The picker's category tabs sit at its top, 8px from the top and sides, and
       the search field sits below them, scrolling away with the emoji. The drawer's corners are concentric with the
@@ -765,14 +865,16 @@ kinds, legacy dialog buttons) giving about 17 button specs in 8 visible families
   label; avatars in dense lists (autocomplete, receipts) too. Icons, checks, toggles and chevrons sit on the label's
   first line, and what ends an item ends 16px from the edge, measured on what is drawn. Separators span the
   highlights with 2px above and below. Two-line rows (filters with a description) are 52px. Keyboard focus is
-  Compound's 2px ring inside the highlight, and a focused row also gets the hover fill. Tokens: `--tl-menu-row-size`,
-  `--tl-menu-icon-gap`, `--tl-menu-separator-spacing`.
+  Compound's 2px ring inside the highlight, and a focused row also gets the hover fill, both only while the keyboard is
+  in use: Compound's menus focus the item under the pointer, which the browser would otherwise ring after a key press
+  (2026-11-21). Tokens: `--tl-menu-row-size`, `--tl-menu-icon-gap`, `--tl-menu-separator-spacing`.
 - **Legacy fields and dropdowns** are 36px, with their 15px text 12px inside the 1px border and a floated label
   centered on the top border. Their block padding is computed so the 22.5px line is centered. Stacked fields are 16px
-  apart at every font size. A dropdown looks like a field in every state: its arrow sits 9px from the end, as from the
-  top and bottom; focused, it gets the accent border, and from the keyboard a 1px accent ring on that border. Its menu
-  opens 4px below the field as a 12px menu with the shared menu rows, its text on the field's text edge, about five
-  and a half rows before it scrolls, and its scrollbar clipped to the corners.
+  apart at every font size, and a field at a settings card's top is as far from the card's edge (2026-11-23). A dropdown
+  looks like a field in every state: its arrow sits 9px from the end, as from the top and bottom; focused, it gets the
+  accent border, and from the keyboard a 1px accent ring on that border. Its menu opens 4px below the field as a 12px
+  menu with the shared menu rows, its text on the field's text edge, about five and a half rows before it scrolls, and
+  its scrollbar clipped to the corners.
 - **Centering by painted pixels:** text and icons are centered on what is drawn, measured on screenshots, not on their
   boxes; "centered" means within 0.5px. Chrome rounds the space above a line down to a whole pixel and draws glyphs
   and inline icons on whole pixels, so labels in pills use `line-height: normal` or a whole-pixel line height, text in
@@ -789,9 +891,11 @@ kinds, legacy dialog buttons) giving about 17 button specs in 8 visible families
 - **Where tokens live:** one `:root` file in shared-components (imported by its index and Storybook), registered in
   `apps/web/.stylelintrc.cjs` so `.pcss` files may use it. Compound tokens and components are not redefined, except
   single overrides where Compound has no variable (tooltip radius and arrow, text-button underline, the geometry of
-  menus made only of items, separators and titles, and Button's lg size).
+  menus made only of items, separators and titles, or of a group of items under something else, such as a search pill,
+  and Button's lg size).
 - **Rollout:** a first pass on 2026-11-12 covered Telement's own styles, menus, the search dialog, the reply bar and
-  quote, buttons, tooltips, dialogs, bubbles, media, the action bar, toasts and the legacy jump buttons. A second pass
+  quote, buttons, tooltips, dialogs, bubbles, media, the action bar, toasts and the legacy jump buttons (the top bar
+  among them, since replaced by the unread mentions button, 2026-11-23). A second pass
   on 2026-11-12 and 2026-11-13, after audits of the app and the timeline and the maintainer's review, covered every
   menu, the rich-text composer and the Markdown viewer, code blocks and the IRC layout, bubbles, cards and media, small
   timeline pieces, buttons and legacy fields, the right panel, settings and spaces, headers and media viewers, the
@@ -806,7 +910,10 @@ kinds, legacy dialog buttons) giving about 17 button specs in 8 visible families
       speed menu and Compound's menus (paperclip, sort, compose, space, room header, pinned message, avatar). The space
       menu has no title row, as it opens from the space's name. The user menu's name, status and Matrix ID are 4px
       apart, 8px under the 64px avatar. With no threads, the Threads Activity Centre centers Compound's threads icon in
-      a 56px tile, 16px above its caption. The search dialog lines its text, section headers, hints and avatars up 24px
+      a 56px tile, 16px above its caption, as the shared empty state's compact size draws it. The space menu's Add
+      group is titled by a 32px menu title row under a
+      separator, and the autocomplete names its sections without an emoji, so every heading starts on its rows' edge.
+      The search dialog lines its text, section headers, hints and avatars up 24px
       in; its rows are 40px with the avatar 8px from every side. Explore rooms lists public rooms as 52px two-line rows:
       a 36px avatar 8px from the row's start, top and bottom, and the name over 13px details, centered on the row with
       its button. Its recently viewed tiles keep upstream's 58px width and are 67px tall, with the avatar centered 8px
@@ -818,24 +925,40 @@ kinds, legacy dialog buttons) giving about 17 button specs in 8 visible families
       the message quote's 2px pill. The reply bar's quote line sits on the paperclip's drawn glyph, 5px into its 20px
       icon.
     - **Code:** blocks round to 4 in every layout, with their text and line numbers 12px inside the edge and the
-      numbers 8px from the code, at the start side (on the right in right-to-left messages). The expand and copy
-      buttons are 20px icons in 28px boxes, 12px from the top and end. A numbered block in a bubble fits its longest
+      numbers 8px from the code, at the start side (on the right in right-to-left messages). Since 2026-11-23 a 28px
+      header line at the block's top, as in Telegram, names the code's language in 13px secondary text on that edge
+      and holds the expand and copy buttons at its end, always shown, the copy icon 8px from the end (the left in
+      right-to-left blocks); a 1px line sets it apart from the code, and the fill and corners are the whole block's.
+      With the buttons out of its way, the code ends 12px from the block's end, and the side it is scrolled out of
+      fades over 24px, mirrored in right-to-left blocks. A reply's quote shows the code alone, without the
+      header or the fade. A numbered block in a bubble fits its longest
       line. Inline code is 22px tall with 4px side padding on a 24px line, and stays open where it breaks across
       lines. A code block quoted in a reply keeps 4px under it. Quote lines in formatted text are pills like the reply
       quote. IRC messages are 4px apart; state events stay together.
-    - **Bubbles:** text bubbles pad 8 × 12 and sections are 12px apart. Reactions sit at the bottom of the bubble, 8px
+    - **Bubbles:** text bubbles pad 8 × 12 and sections are 12px apart. Since 2026-11-23 their text stops at 480px,
+      Telegram's measure (a bubble is at most 504px), and a bubble ends at least 64px from the timeline's far side,
+      measured on the message list, which is a query container; bubble text and its quotes have Telegram's 20px line
+      height, and code keeps 22px. Reactions sit at the bottom of the bubble, 8px
       under the message and starting on its padding, as in Telegram: the time ends their last line when it fits there,
       centered on it, and takes a line of its own when it doesn't. Messages drawn without a bubble (pictures without a
       caption, stickers, emotes, maps) keep their reactions 8px under them. Messages of only emoji, which Element draws
-      large, have no bubble: the emoji stand where the bubble would start (your own, and their reactions, end at the
-      row's end), and the time is the pictures' 20px dark badge after them or after their reactions; a quoted reply
-      keeps the bubble. Hovering draws no band; selected and highlighted messages keep theirs, and the selected band is
-      a gray step darker than other people's bubbles. Your own messages have no avatar. Your own bubbles are filled like
-      Telegram's Day and Night themes: the accent (#2481cc) in light themes and #3d6a97 in dark ones, deeper blues in
-      high contrast, with white text; times and other secondary content are Telegram's 80% white (`#effaff`), and what
-      the bubble holds (links, code, quotes, reactions, polls, players) is re-pointed to white or translucent white
+      large, have no bubble: the emoji are the message's whole box, as a picture without a caption is, standing where
+      the bubble would start (your own, and their reactions, end at the row's end), 2px from the bubbles of their run,
+      with their reactions 8px under them; the time is the pictures' 20px dark badge after them or after their
+      reactions, its bottom level with the emoji's (2026-11-20). A quoted reply keeps the bubble. Hovering draws no
+      band; selected and highlighted messages keep theirs. Since 2026-11-23 every layout has one selected band, a tint
+      of the accent (`--tl-color-bg-message-selected`): for a message while its right-click menu is open, for the one a
+      jump lands on as it fades back (see [behavior changes](#behavior-changes)) and, except in the side panels' lists,
+      for the one with keyboard focus or chosen to reply to with the composer's keys. It covers a mention's highlight,
+      secondary text drawn on it turns Compound's gray 1000, and your own bubble takes its muted blue highlighted fill
+      when right-clicked or jumped to, but keeps its plain blue for the keyboard. A message being edited in the group
+      and IRC layouts stays gray. Your own messages have no avatar. Your own bubbles are filled
+      like Telegram's Day and Night themes: the accent (#2481cc) in light themes and #3d6a97 in dark ones, deeper blues
+      in high contrast, with white text; times and other secondary content are Telegram's 80% white (`#effaff`), and
+      what the bubble holds (links, code, quotes, reactions, polls, players) is re-pointed to white or translucent white
       (`--tl-color-bg-bubble-own*`, `--tl-color-on-bubble-own*`); a quote's line in formatted text is solid white like
-      the reply quote's, and its text the 80% white. Bubbles show no read receipts: your own carry
+      the reply quote's, and its text the 80% white. Only the mark of a message that failed to send stays red, a red
+      disc with a white "!" ringed in white, so that it doesn't look sent. Bubbles show no read receipts: your own carry
       Telegram's checks after the time, one when sent and two once someone has read it, and the message menu lists
       who has under "Seen by N". Group and IRC layouts keep Element's receipts. A pinned message shows the room list's
       tilted pin before its time, and bubbles have no add-reaction button (reactions come from the message menu).
@@ -847,63 +970,109 @@ kinds, legacy dialog buttons) giving about 17 button specs in 8 visible families
       avatar beside the bubble stays clear of its edge. In the settings previews your own bubble sits at the end, its
       tail ending at the card's inset. Informational rows are 20px with a 14px avatar 3px from their edges, so the read
       marker clears every avatar by at least 2px. In bubbles they start on the bubble column, the avatar on their first
-      line, and their time follows the text 8px after it, at the end of the last line, in the bubble time style. Times
-      of emotes center on their last line.
+      line, and their time follows the text 8px after it, at the end of the last line, in the bubble time style; a
+      summary's Expand takes that place, 8px after its text in 13px accent semibold, and its Collapse starts the
+      expanded rows' column (2026-11-23). Times
+      of emotes center on their last line. Message search results start on the timeline's edges, without the browser's
+      list padding. Link preview titles are in the text's color (white in your own bubbles), underlined when hovered.
+      The typing notice is 13px secondary text, its 24px avatars ringed in the page's color.
     - **Cards and media:** a captioned picture or video is one bubble, the media across the top, clipped to the
       bubble's corners, with the caption below it; media under 160px wide is centered in a 160px bubble. Files, audio
       and voice messages are bubbles in the sender's color, with or without a caption: the card or player sits 8px
       from the bubble's start, top and bottom, and captions and quotes 12px. File bubbles fit the file name, from 268px
       up to a bubble's maximum, and keep no time column: the time ends the size line, under 36px buttons centered on
       the name's line. Polls are drawn in a bubble, with options, bars and counts 12px from both ends and the time at
-      the end of the vote summary; the modern and IRC layouts keep 8px option cards. File and link icons are 44px
+      the end of the vote summary; pointed at, an option's radio gets a 2px accent ring (white in your own bubbles),
+      and pressed, a light fill as well, while the option itself is never filled (2026-11-23). The modern and IRC
+      layouts keep 8px option cards. File and link icons are 44px
       squares with 24px glyphs. The time over pictures, GIFs, stickers and maps is a 20px dark badge 8px from the
       corner, the same as a GIF's label and a video's length. Link previews end with a row for the time under the last
-      card. In bubbles, a legacy 1:1 call card is a stacked 290px card, its type, state and buttons on rows of their
+      card. A picture's box is filled with the bubble gray while it loads, and a voice message shows its player,
+      disabled, at its full size while its file downloads. Hidden media's placeholder takes the next gray when hovered,
+      with its eye 8px from its 13px medium label. In bubbles, a legacy 1:1 call card is a stacked 290px card, its type,
+      state and buttons on rows of their
       own and the time 12px from its bottom and end; in IRC the card leaves the caller's avatar and name to the row.
       Ongoing call cards are 60px with their content 12px from every edge.
     - **Timeline pieces:** reaction chips are 24px pills with their content 8px from each edge, custom emoji included,
       and the add-reaction button (group and IRC layouts) is a 24px circle. In bubbles the chips have no outline (a transparent border keeps
       their shape in forced colors): your own is filled with the accent and white (`--cpd-color-bg-accent-rest`,
       `--tl-color-on-accent`), other people's are tinted with it (`--cpd-color-bg-badge-accent`,
-      `--cpd-color-text-badge-accent`), and the count is body-sm medium (13px) in tabular digits trimmed to their cap
-      height; the modern and IRC layouts keep Element's outlined chips and the 24px pinned badge. Voice and audio play
+      `--cpd-color-text-badge-accent`), and hovered and pressed, yours takes the accent's hover and pressed fills and
+      other people's a deeper tint (`--tl-color-bg-badge-accent-hovered`, `-pressed`); the count is body-sm medium
+      (13px) in tabular digits trimmed to their cap
+      height; the modern and IRC layouts keep Element's outlined chips and the 24px pinned badge. A reaction's tooltip
+      names its emoji ("reacted with 👍"), and while three or fewer people reacted, in DMs too, a bubble's chip shows
+      their 16px avatars in place of the count: each 4px under the next, cut away around it with a 1.5px gap,
+      and the last one 4px from the chip's end, as from its top and bottom. The summary of the
+      thread open in the right panel is drawn as selected (`aria-current`): a 2px accent border and its reply count and
+      icon in the accent (2026-11-23). Voice and audio play
       buttons, their played part, poll choices and result bars, and file and link icon tiles are in the accent in
       other people's bubbles (`--tl-color-bg-media-icon`, `--tl-color-media-played`) and white in your own, where the
       play button is a white circle holding the bubble's blue glyph, as in Telegram's Day and Night themes
-      (`--tl-color-bg-media-play`, `--tl-color-on-media-play`). Every separator
+      (`--tl-color-bg-media-play`, `--tl-color-on-media-play`). Hovered and pressed, the play button takes the
+      accent's deeper fills, and a translucent white in your own bubbles. Every separator
       (dates, jump to date, "Originally sent …", search results, edit history, export) is a 24px gray pill with 13px
       medium text and no lines, and the jump-to-date chevron sits on the middle of the date's lowercase letters. Search
       highlights round to 4. The end of message search results ("No more results", "No results") is a centered line of
-      13px secondary text, 8px above and below, rather than a heading.
+      13px secondary text, 8px above and below, rather than a heading; a room search that found nothing has none, as
+      its bar already says so (2026-11-23).
       The jump-to-bottom count is a 20px circle for one digit and a pill for more, centered on the button's bottom
-      edge.
+      edge; it is the room list's accent counter, gray only in a muted room without mentions (2026-11-23).
     - **Controls and fields:** buttons are 36px pills with Compound's hover and pressed colors, including the older 40
       to 52px ones; tooltips have no arrow. Notification keywords are 36px chips. The sessions filter is a 36px chip,
       transparent until hovered, with a 264px menu. The invite dialog's address bar is a 36px pill field that grows by
       32px per row of 24px pills, with the Invite button beside its first row. A labelled SSO button's logo sits 6px
       from its start, top and bottom, and several providers form a row of 36px circles 16px apart. Beta cards and the
-      verification options round to 12, and the verification panel's buttons sit 16px under their text. Dialogs are
-      30 inside a 42 Glass frame and clip their scrollbars to their corners.
+      verification options round to 12, and the verification panel's buttons sit 16px under their text; beta cards pad
+      12 × 16 and leave out the illustration column when they have no illustration. Dialogs are 30 inside a 42 Glass
+      frame and clip their scrollbars to their corners. A radio's label starts 12px after it and radios stack 12px
+      apart everywhere: settings, dialogs (export, the server picker, leaving a space) and polls (2026-11-23).
     - **Right panel and panels:** every right panel card keeps its content 12px from both edges, like its header. Room
       info, member info, the member list, the threads list and the notifications card highlight their rows 4px from
       the edge with the content 8px inside; the member list's 56px tiles have no dividers and hold the avatar 12px from
       the start, top and bottom. The document, PDF and
       Markdown viewers use the same 12px edge. Settings tabs are 36px pills with the 20px icon on the dialog title's
       edge (circles in a narrow dialog). Theme choices are 44px pills with the radio 12px from their top, bottom and
-      start, and the message layout cards have a 44px header with the radio 12px from the card's top and start. Home
-      page tiles and the session security card are 12px cards, and space home tiles pad 16 (76px tall).
+      start, and the message layout cards have a 44px header with the radio 12px from the card's top and start; they
+      stretch across their card, and the image sizes are two equal columns 16px apart, each drawing scaled to its
+      column 12px above its radio (2026-11-23). Home page tiles are 12px cards, and space home tiles pad 16 (76px
+      tall). Cards inside a settings card, such as a session's details, pad 12 × 16 like it and round to 4, its 12
+      pushed inward by their 16px inset and kept at the floor (2026-11-20), and bordered boxes there (the session
+      security box, the microphone alert, the versions box, the layout and image size choices) round to a row's 8
+      (2026-11-23; the session security box was 4). Media in the Files card has no download button under it (the message
+      menu saves it), and the card's voice players span it. The line under the member count stops on the card's 12px
+      content edge, as room info's dividers do. Destructive rows (Leave room, Report, Ignore, the admin tools) hover and
+      press in the menus' red (2026-11-23).
       In the space panel, Threads and Settings are 40px circles when collapsed and 40px rows when expanded, like the
-      space buttons. The widget picture-in-picture is 25 around its 12px widget, with a 36px back button.
+      space buttons, and in light themes, where the panel is as white as the selected space's inverted badge, that
+      badge is ringed in the plate's color. The space panel's counters stay 20px (24px with their 2px ring), with 11px
+      digits, at every font size, as its tiles don't grow (2026-11-23). The room intro's avatar upload badge is filled
+      with the accent and holds a white camera, as the settings avatar's badge does. The widget picture-in-picture is
+      25 around its 12px widget, with a 36px back button.
+    - **Empty states** (2026-11-23): one shared view, `EmptyStateView` (shared-components `telement/core`), centered
+      both ways in its area. Its panel size, for the right panel and the room list, is a 56px icon tile, a 20px
+      semibold title 16px under it, a 15px secondary description 8px under the title, and buttons 24px below, 16px
+      apart, the text no wider than 360px; its compact size, for popovers, is the tile over a 13px secondary caption.
+      Right panel cards keep the accent glow behind the tile, and the room list's states have an icon tile per filter.
+      The Files card centers its empty state like the Threads and Pins cards, and the empty Threads and Pins cards
+      point to a message's right-click menu. An empty space's home shows "No rooms yet" in the panel size, with Add
+      existing room and New room for people who may add rooms and the text alone for others, 44px under the header's
+      buttons, and its bulk buttons hide while nothing can be selected. Explore hides its Suggestions title while
+      there are none and keeps the server picker.
     - **Headers and viewers:** icon buttons in the room header, right panel card headers, the thread list and both
       media viewers are 36px circles around 24px icons; the legacy call header's hold 20px icons, as does the thread
       list's mark-all-read button. Every right panel card header button (back, options, close) is filled at rest with
       the fill of Compound's secondary icon buttons (`bg-subtle-secondary`), `bg-subtle-primary` when hovered or
       pressed, and the card's title is 15px semibold in the primary text color, the room name's weight and color a
-      size smaller. The room header and card headers inset their content 12px. The face pile and the
-      thread list's filter are 36px pills. The image and video viewers share a 68px top bar in the dark theme's
-      colors, with the sender and the buttons 16px from the edges, and both show the sender as a semibold name over a
+      size smaller. The room header and card headers inset their content 12px, and the room's name runs up to the
+      header's 12px gap before its buttons. The face pile and the thread list's filter are 36px pills; the face pile
+      stays marked open while a member's profile or verification opened from the member list is shown. The image and
+      video viewers share a 68px top bar, filled, in the dark theme's colors, with the sender and the buttons 16px from
+      the edges, and both show the sender as a semibold name over a
       gray date. The video viewer's speed menu is a 12px menu with 8px items inset 4px, and the PDF viewer's zoom
-      buttons and page field are 36px.
+      buttons and page field are 36px. The room header's call buttons are named by their tooltips alone, which label
+      them through `aria-labelledby` ([element-web#35984](https://github.com/element-hq/element-web/pull/35984),
+      2026-11-23).
     - **Pickers and chrome:** the emoji picker's category tabs sit at its top above the search field, highlight as
       36px circles, and mark the selected tab with a 20px line with round ends; headers, emoji, quick reactions and
       the search field share an 8px inset. The Frequently used tab is Compound's 24px history icon rather than a clock
@@ -915,10 +1084,10 @@ kinds, legacy dialog buttons) giving about 17 button specs in 8 visible families
     - **Room list:** rows are 72px, with a 64px plate inset 4px and rounded by 8; the plate holds a 48px avatar 8px
       from its start, top and bottom. The search field, header, filters and rows share a 12px edge; header buttons are
       36px with 24px icons, and filter chips 28px with their labels centered by cap height. The sort and compose menus
-      open aligned to their button's end, over the list, and the filters' 28px chevron is outlined like the chips
-      beside it, with their hover border. Badges sit on the row's
-      bottom line; unread counters and the @ are 20px at the default font size and grow with it (30px at 24px), so one
-      digit is a circle and longer counts are pills.
+      open aligned to their button's end, over the list, and the header buttons draw their glyph in the accent while
+      their menu is open. The filters' 28px chevron follows the chips, outlined like them, with their hover border.
+      Badges sit on the row's bottom line; unread counters and the @ are 20px at the default font size and grow with it
+      (30px at 24px), so one digit is a circle and longer counts are pills.
 
     Linux screenshot baselines that show these surfaces are out of date until regenerated in Docker (see
     [open questions](#open-questions)).
@@ -940,14 +1109,23 @@ findings: https://claude.ai/artifact/BVZ6pyrzyasmRRAVMFxxB7.
   and dark text. Compound's info blue follows the accent, so the accent is the only blue, and the status glyphs next
   to the room name are secondary gray, as they aren't actions (2026-11-18).
 - **Letter avatars** are Telegram's: a gradient from its avatar palette with white initials in both themes
-  (`_CompoundOverrides.pcss`), as Compound's pastel and dark circles had no contrast with hovered rows (1.0:1).
+  (`_CompoundOverrides.pcss`), as Compound's pastel and dark circles had no contrast with hovered rows (1.0:1). The
+  gradient runs under the transparent border (`background-origin: border-box`), so its top and bottom rows of pixels
+  don't show the other end's color. As in Telegram, an avatar shows its letters until its photo has loaded and keeps
+  them if the photo fails, without a flash for a photo already shown (`Avatar` in shared-components `telement/core`,
+  2026-11-23).
 - **Color roles:** one Compound token per role, light and dark from Compound, named `--tl-color-*` in
   `telement/tokens.css`: one secondary text color (`text-secondary`) for meta, previews, captions, timestamps and
   placeholders; one divider (`separator-primary`); one hover fill (Compound's secondary hover) and one pressed fill,
-  which keyboard selection in lists also uses; one media overlay. Unread counters and mentions look like the room
-  list's everywhere: accent counter, gray when muted, accent @.
+  which keyboard selection in lists also uses; one media overlay. Rows, menu items and tabs hover and press as
+  strongly as the room list: the secondary hover and pressed fills take the next steps of Compound's translucent gray
+  (`alpha-gray-300` and `alpha-gray-400`, about 1.12:1 and 1.3:1 on the page), and every control is a step deeper
+  pressed than hovered, icon buttons and chips (`--tl-color-bg-subtle-pressed`) and the selected room's plate and
+  filter included (2026-11-21). Unread counters and mentions look like the room list's
+  everywhere: accent counter, gray when muted, accent @; red is left for messages that failed to send (2026-11-21).
 - **Type:** Compound's eight sizes only. 12px becomes 13 (11 in badges), 18 becomes 20, 10 becomes 11, bold becomes
-  semibold. Identifiers (Matrix user and room IDs, room addresses, server names, usernames, copyable values and code)
+  semibold. Settings and their dialogs use 11, 13, 15 and 20, and `strong` is 600 there (2026-11-20). Identifiers
+  (Matrix user and room IDs, room addresses, server names, usernames, copyable values and code)
   are drawn as typed: `--tl-font-feature-settings-identifier` turns off Inter's contextual alternates, which draw an
   "x" between digits as a multiplication sign
   ([element-web#25538](https://github.com/element-hq/element-web/issues/25538), fix proposed upstream in
@@ -955,11 +1133,37 @@ findings: https://claude.ai/artifact/BVZ6pyrzyasmRRAVMFxxB7.
 - **Dialogs:** one anatomy. Content, title, body and footer on a 24px edge; the close button on the title's line and
   kept on every dialog; titles 20 semibold (Compound heading-sm), start-aligned except hero cards (security flows,
   big icon) which center. Footer: Telegram-style flat accent text buttons at the bottom right, Cancel before the
-  action, red for destructive, one shared component. Widths: 400 confirmations, 480 forms, 640 lists, 980 tabbed
-  settings. Image and video viewers, the search dialog, spinner, maps and dial pad stay as they are. The Create a
-  space panel, which dims the app, is laid out as a 480px dialog: its title shares a line 16px from the top with the
-  close button and, after the first step, the back button; the rest sits on the 24px edge, and its corners are 32
-  around its 8px cards.
+  action, red for destructive, one shared component: `DialogFooterView` (shared-components `telement/core`, since
+  2026-11-23) of 36px pill text buttons whose labels sit 24px from the dialog's end and bottom and from the content
+  above, their boxes hanging 12px past those edges, concentric with the corner (18 in 30); 8px apart, stacking 8px
+  apart when they wrap; accent labels, red for destructive and the disabled color when disabled; a gray hover, red
+  for destructive. A button with `aria-disabled` looks disabled but can still show a tooltip saying why, and a spinner
+  sits 8px before its label. The link dialog's Remove sits at the footer's start. Hero cards use it too, their filled
+  first button now the last text button, without icons, and so do the encryption cards: in the Encryption tab, in the
+  login flow's steps (Sign out, Can't confirm?, Use recovery key, Use another device), when resetting the identity and
+  in the auth dialog's cross-signing step. In those two dialogs the card is the dialog's body, without a border, 16px
+  under the auth dialog's title. Unpin all and Share (Copy link alone) end in it as well. Widths: 400
+  confirmations, 480 forms, 640 lists, 980 tabbed settings. Image and video viewers, the search dialog, spinner, maps
+  and dial pad stay as they are. The Create a space panel, which dims the app, is laid out as a 480px dialog: its title
+  shares a line 16px from the top with the close button and, after the first step, the back button; the rest sits on the
+  24px edge, and its corners are 32 around its 8px cards. Since 2026-11-21:
+    - A fixed-width dialog nobody sized is a 480px form. Alerts and confirmations are 400 (error, question, text input,
+      confirm user action, sign out and, since 2026-11-23, Unpin all), lists 640 (view source, poll history, edit
+      history, add existing rooms, invite). Developer tools, a widget's own dialog and the screen sharing picker are 640
+      too, the width of a list (2026-11-23; upstream's 752 until then).
+    - Destructive confirmations draw their action red (ignore, remove message, deactivate account). The password step
+      of a confirmation has the dialog footer, Cancel before the action at the bottom end, which is how Deactivate
+      account's button moved to the footer's end. Disabled legacy dialog buttons use Compound's disabled look.
+    - Dialog text is in the primary color and help and subtitles in the secondary one. Create poll and Leave space
+      follow the anatomy; Create a space and Add existing rooms title on the close button's line, 20px semibold, with
+      the space's avatar on the dialog's edge. The text input dialog's field is the shared 36px field, Create room's
+      address spans the dialog, Add existing rooms lists in the Forward dialog's 52px rows, View source labels its
+      event like a settings group with its copy button at the top, the Polls dialog is titled like every dialog with
+      16px poll icons and filters with the room list's 28px chips, the polls 20px under them without a card
+      (2026-11-23), and the space type choices are titled in 15px semibold.
+    - The loading screen says "Sign out" rather than "Logout".
+    - Both report dialogs (a message, a room) share one form (2026-11-23): the reason in the shared field with its
+      label on its border, help 4px under it, then the option as a switch row, the blocks 16px apart.
 - **Settings** are grouped as in Telegram (`settingsGroupLabel`, `settingsGroupCard` and `settingsGroupHelp` in
   `_common.pcss`): each group's rows sit on a card rounded by 12 with 12 × 16 padding, under a 13px secondary label
   and over 13px secondary help, both 8px from the card and on its 16px content edge. Groups are 24px apart, with no
@@ -970,18 +1174,65 @@ findings: https://claude.ai/artifact/BVZ6pyrzyasmRRAVMFxxB7.
   cards, with a 12px corner by the tabs. Light themes put cards in the dialog's white on Compound's gray 300; dark
   themes put the pane in the page canvas and the cards in the raised dialog color, as Telegram's night theme does;
   high contrast themes also outline the cards (`--tl-color-bg-settings-pane`, `--tl-color-bg-settings-card`,
-  `--tl-color-border-settings-card`). Fields and dropdowns span their card. The room Notifications options are rows
+  `--tl-color-border-settings-card`). Fields and dropdowns span their card; since 2026-11-23 a field at its top sits
+  16px under its edge, so that the floated label is at least 8px inside, while a fieldset in a card still has no
+  padding, and the Encryption tab's hero cards pad 24px all round, so that their content and footer labels share an
+  edge, as do the login card's, 24px from its sides. The room Notifications options are rows
   like the Security tab's join rules: the radio on the card's content edge, a 15px semibold label 12px after it, a
   13px secondary description 4px under the label, 16px above and below each row and a separator between rows. The
   Sounds block shows the sound's name as regular secondary text and "Set a new custom sound" as a 15px semibold label
   8px above an outline "Browse…" button. Beta cards are settings cards, and in dark themes the Video rooms beta shows
-  a dark illustration, loaded only there.
+  a dark illustration, loaded only there. Since 2026-11-20:
+    - Tabs end on the dialog's 24px bottom edge rather than 100px below the last card. Space settings are titled and
+      laid out like room settings ("Studio: General", a lock icon, the profile editor) and leave their tab's name to
+      the title. The room Polls tab, which drew its filter as the room list's 28px chips, is gone, and the Polls dialog
+      draws it so now (2026-11-23).
+    - Intros are help under their cards, the language's reload hint too since 2026-11-23; the notification grids are
+      subsections labeled above their cards, with Mark all as read on a card of its own. Disclosures are accent
+      semibold text buttons without an underline. Legacy radios have their label 12px after them, rows 12px apart,
+      like Compound's, in settings and, since 2026-11-23, everywhere. The phone number's country code sits inside the
+      field without a divider. The keyboard tab draws arrow keys with Compound's arrows in 24px keys.
+    - The encryption details are drawn as menu rows on the card; unselected theme chips, layout cards and image size
+      drawings take Compound's darker outline gray, 3:1 or more against the card. In dark high contrast, whose deeper
+      accent fill is under 3:1 on the cards, a checked radio is ringed in the accent's border color
+      (`--tl-color-border-radio-checked`), poll options in bubbles included.
+    - The Account tab opens with the profile text and controls of the client's cached capabilities, so nothing
+      changes or moves once the server answers.
+    - Since 2026-11-23 each group has one label: a section's heading is hidden when its first group has a label of
+      its own, and names the group for assistive technologies instead; "Account management" over Deactivate account
+      is gone. Show media in timeline is a group of its own, labelled above its card with its help under it, and the
+      invite avatars toggle stays in Moderation and safety. A notification toggle that needs the one above it is
+      indented 24px under it and disabled while that one is off, as Sidebar's are.
+    - Single-choice settings are Telegram's value rows (2026-11-23; `ValueRowView` and `ValueRowList` in
+      shared-components): 44px rows with the label on the card's 16px content edge and the value in secondary text
+      at the end, cut before half the row, then a 16px chevron 4px after it, opening Compound's menu aligned to the
+      row's end with a trailing check. The hover fill sits 4px inside the card's sides, rounded by 8; rows touch, and
+      the card pads 4px where a row comes first or last. They serve Roles & permissions (22 rows; a custom level
+      shows its number, and "Custom…" opens a 36px number field), the level for adding privileged users, the
+      language, the time zone, the font size, the microphone, the audio output and the camera, in place of dropdowns
+      with their labels above them. A menu of more than 20 options (the time zone's and the language's) starts with the
+      36px search pill, 8px from its edges, over a list 8.5 rows tall that keeps its height and width while filtered
+      and opens scrolled to the checked choice. Focus stays in the pill, the arrow keys and the pointer move one
+      highlight, and Escape empties the pill, then closes the menu. On the pressed fill, which a row keeps while its
+      menu is open, its secondary text is gray 1000, gray 1100 in dark themes (`--tl-color-text-secondary-on-pressed`);
+      on the hover and keyboard focus fill the dark theme alone takes gray 1000
+      (`--tl-color-text-secondary-on-hovered`). Both are 4.5:1 or more in every theme.
+    - One-off and destructive buttons are text rows on the card's edge (2026-11-23, `ActionRowView`), as Telegram's
+      Log Out and Clear Cache: Leave room, Leave space, Deactivate account, Remove this device and Clear cache and
+      reload in red with the menus' red hover; Mark all as read, Check for update and Show advanced in the accent,
+      regular weight, with the gray hover. No filled red button stands alone in a card anymore.
+    - Privileged and muted users are 52px person rows (2026-11-23): a 36px avatar on the content edge, the name over
+      the Matrix ID in 13px secondary text, and the role as a value menu at the end, applied as soon as it is chosen,
+      after the member info's warnings for demoting yourself or promoting someone to your own level.
 - **Menus:** one menu spec for every floating menu and dropdown (the geometry in Radius and spacing), one dense list
   spec for autocomplete, receipts and search results, and the right panel lists keep their larger 24px icons and
   medium labels. The selected option has a 16px check at the row's end in the text color, as Telegram's menus do, and
-  a menu title is a 32px row. Chevrons only on submenus. Destructive items are red with a
-  red hover everywhere. Upstream menus nobody restyled yet (jump to date, server picker, read-receipt popup,
-  autocomplete, which floats above the composer) are restyled too. In dark themes, where shadows don't show, menus,
+  a menu title is a 32px row; since the room Notifications submenu took the check (2026-11-21), no menu has radios.
+  Chevrons only on submenus. Destructive items are red with a red hover everywhere, as strong as the gray one and a
+  step deeper when pressed: Compound's red 300 and 400 in light themes, where its lightest red barely shows on white,
+  and a translucent red over the raised gray in dark ones (2026-11-21). Upstream menus nobody restyled yet (jump to
+  date, server picker, read-receipt popup, autocomplete, which floats above the composer) are restyled too. In dark
+  themes, where shadows don't show, menus,
   pickers, the autocomplete, dropdowns and dialogs are one gray step lighter than the page (Compound's raised canvas)
   and the hover, pressed, subtle and disabled fills and separators inside them one step further (`floatingSurface` in
   `_common.pcss`, 2026-11-18). Raised that way, they share the color of other people's bubbles, so dark themes give
@@ -1010,9 +1261,18 @@ findings: https://claude.ai/artifact/BVZ6pyrzyasmRRAVMFxxB7.
   The 32px icon buttons become 36, the `_sm` kinds and the 156px minimum go, every button uses Compound's disabled
   look, and standalone link buttons lose the underline. Inline links are underlined in the weight of the sentence
   around them, and every link that leaves the app is an `ExternalLink`, underlined, with its external icon (bridges,
-  Labs, key storage help, managing a session on the account's page).
+  Labs, key storage help, managing a session on the account's page), which stays on the line of its last word.
+- **Focus** (2026-11-21): one keyboard focus ring for the whole app, Compound's 2px ring in the focus color, 1px
+  outside the element and following its corners (`apps/web/res/css/telement/FocusRing.pcss`). It replaces the
+  browser's ring, so buttons, links, tabs and avatars without a ring of their own get it, and it sits in the lowest
+  cascade layer, so a component that draws its own ring, an inset one or none keeps it. Upstream's transparent
+  outlines "for enhanced visibility under contrast control" apply only in forced colors, where they are drawn, and
+  never to a focused element, as elsewhere they took the place of the ring. Rings follow the shape of what they ring:
+  the room's name in the header gets a row's ring inside the header. A focused panel separator is drawn in the focus
+  color, as its hover gray is under 3:1.
 - **The rest:** four shadows (floating, raised, edge, on media), Compound's tooltip only, two toasts on tokens,
   eleven avatar sizes (14, 16, 20, 24, 32, 36, 40, 48, 64, 80, 120), three durations (100ms, 200ms ease-out, 300ms).
+  The jump highlight's 1.5s fade is the one exception (2026-11-23).
 
 ### Floating toolbar
 
@@ -1026,7 +1286,8 @@ actions. Keyboard focus on a message still shows it, since that is how keyboard 
 have no context menu key). The message menu gained Retry and Cancel for a message, edit or removal that is sending or
 failed, Hide for shown media, Expand and Collapse quotes, and Reply in thread on a removed message with a thread. A
 thread in the thread list opens its own right-click menu with "View in room" and "Copy link to thread". "Save as…"
-already covered the toolbar's Download. Upstream's Playwright specs that hovered a message to click its toolbar now
+already covered the toolbar's Download, and since 2026-11-23 the toolbar's own button saves as it does. Upstream's
+Playwright specs that hovered a message to click its toolbar now
 right-click it and choose from the menu.
 
 ### Emoji artwork
@@ -1087,7 +1348,11 @@ the Jitsi default `meet.element.io`.
 
 ## Open questions
 
-None. Answered on 2026-11-16 (see the decision log):
+Answered on 2026-11-23: developer tools, a widget's own dialog and the screen sharing picker, which hold neither a
+form nor a list and kept upstream's 752px width, are 640px wide, the width of a list (see
+[colors, type and components](#colors-type-and-components)).
+
+Answered on 2026-11-16 (see the decision log):
 
 - Typing in one-to-one chats keeps Element's "Alice is typing …".
 - Narrow media in bubbles keeps the plain fill.
@@ -1157,7 +1422,7 @@ Deferred work:
 | 2026-11-12 | Cards round to 12 in bubbles and 8 in the modern and IRC layouts.                                                                               | [Radius and spacing](#radius-and-spacing)                                            |
 | 2026-11-12 | Files, audio and voice messages are bubbles, with or without a caption.                                                                         | [Radius and spacing](#radius-and-spacing)                                            |
 | 2026-11-13 | Telegram-style room list rows: 72px, 48px avatars, time, "Sender:"/"You:" previews, typing, medium names, an accent plate when selected.        | [Behavior changes](#behavior-changes)                                                |
-| 2026-11-13 | In bubbles, the selected band is one gray step darker than other people's bubbles.                                                              | [Radius and spacing](#radius-and-spacing)                                            |
+| 2026-11-13 | In bubbles, the selected band was a gray step darker than other people's bubbles; since 2026-11-23 it is a tint of the accent.                  | [Radius and spacing](#radius-and-spacing)                                            |
 | 2026-11-13 | Polls are drawn in bubbles; every timeline separator is the date pill.                                                                          | [Radius and spacing](#radius-and-spacing)                                            |
 | 2026-11-13 | File and player blocks sit 8px inside bubbles; file bubbles size to their name.                                                                 | [Radius and spacing](#radius-and-spacing)                                            |
 | 2026-11-13 | Every right panel card uses one 12px content edge, with rows inset like the room list's.                                                        | [Radius and spacing](#radius-and-spacing)                                            |
@@ -1182,7 +1447,7 @@ Deferred work:
 | 2026-11-17 | Keep the backup authenticity shield; implementing MSC4048 is on the backlog.                                                                    | [Authenticated key backup](#authenticated-key-backup-msc4048)                        |
 | 2026-11-17 | Accent is Telegram blue, overridable by the system accent; custom themes are removed.                                                           | [Colors, type and components](#colors-type-and-components)                           |
 | 2026-11-17 | One token per color role, Compound's type scale only, one dialog anatomy with text-button footers.                                              | [Colors, type and components](#colors-type-and-components)                           |
-| 2026-11-17 | One menu spec with Compound's radios, one field spec with floated labels and hover borders, icons 16/20/24.                                     | [Colors, type and components](#colors-type-and-components)                           |
+| 2026-11-17 | One menu spec (its radios have since become a trailing check), one field spec with floated labels and hover borders, icons 16/20/24.            | [Colors, type and components](#colors-type-and-components)                           |
 | 2026-11-17 | Menus get 32px rows, 2px separator spacing and 10px icon-to-label gaps (were 40, 4 and 12): 40px rows were too spacey.                          | [Radius and spacing](#radius-and-spacing)                                            |
 | 2026-11-18 | Accent #2481cc / #2ea6ff (white on #2481cc stays 4.1:1); dark themes select in #3d6a97 with white text; Telegram's gradient letter avatars.     | [Colors, type and components](#colors-type-and-components)                           |
 | 2026-11-18 | In bubbles, reactions sit in the bubble before the time, your own filled with the accent; emoji-only messages lose the bubble for a time badge. | [Radius and spacing](#radius-and-spacing)                                            |
@@ -1204,6 +1469,47 @@ Deferred work:
 | 2026-11-19 | Your own bubbles: a white play button with a blue glyph and a white quote line; Explore rooms hides raw room IDs; Create a space is a dialog.   | [Radius and spacing](#radius-and-spacing)                                            |
 | 2026-11-20 | Agents draft upstream issues and pull request texts, which the maintainer rewrites; accessibility-only fixes go up as their own pull requests.  | [Upstream pull requests](#upstream-pull-requests)                                    |
 | 2026-11-20 | Telement commits that carry an upstream fix name its pull request in a body line, `See https://github.com/element-hq/element-web/pull/N`.       | [Upstream pull requests](#upstream-pull-requests)                                    |
+| 2026-11-21 | Quick reactions sit 4px from every edge, the chevron in a 32px cell; large emoji are their message's whole box, 2px from their run.             | [Behavior changes](#behavior-changes)                                                |
+| 2026-11-21 | The text of controls can't be selected; message text, links and fields can.                                                                     | [Behavior changes](#behavior-changes)                                                |
+| 2026-11-21 | Tab follows what is drawn: room info and the room list filters are one stop each; Tab closes legacy menus and leaves an empty composer.         | [Behavior changes](#behavior-changes)                                                |
+| 2026-11-21 | Cards inside settings cards round to 4, the session security card included (was 12); beta cards pad 12 × 16; alerts are 400px wide.             | [Radius and spacing](#radius-and-spacing)                                            |
+| 2026-11-21 | Your own failed message keeps a red mark ringed in white; code ends 48px from its block's end, clear of its buttons.                            | [Radius and spacing](#radius-and-spacing)                                            |
+| 2026-11-21 | Dialogs default to 480px, confirmations 400, lists 640; developer tools, widget dialogs and the screen picker keep 752 until decided.           | [Colors, type and components](#colors-type-and-components)                           |
+| 2026-11-21 | Destructive confirmations act in red; password steps get the dialog footer; dialog text is primary, help and subtitles secondary.               | [Colors, type and components](#colors-type-and-components)                           |
+| 2026-11-21 | Settings use 11/13/15/20 type, help under cards, accent disclosures, tabs ending on the 24px edge; space settings match rooms'.                 | [Colors, type and components](#colors-type-and-components)                           |
+| 2026-11-21 | In dark high contrast a checked radio is ringed in the accent's border color, poll options included.                                            | [Colors, type and components](#colors-type-and-components)                           |
+| 2026-11-21 | Mention badges are in the accent everywhere, red only for messages that failed to send; no menu has radios left.                                | [Colors, type and components](#colors-type-and-components)                           |
+| 2026-11-21 | Every control's pressed fill is a step past its hover; rows and menu items hover as strongly as the room list, red items too.                   | [Colors, type and components](#colors-type-and-components)                           |
+| 2026-11-21 | One app-wide focus ring under every stylesheet; menu items ring only while the keyboard is in use; forced-colors outlines only there.           | [Colors, type and components](#colors-type-and-components)                           |
+| 2026-11-23 | Settings keep Element's tab names in a new order; room settings put the room's own first and drop the Polls tab; one label per group.           | [Behavior changes](#behavior-changes)                                                |
+| 2026-11-23 | Single-choice settings are value rows; one-off and destructive buttons are red or accent text rows; privileged users are person rows.           | [Colors, type and components](#colors-type-and-components)                           |
+| 2026-11-23 | A search pill above the user settings tabs; the Notifications tab lists the rooms with their own setting.                                       | [Behavior changes](#behavior-changes)                                                |
+| 2026-11-23 | Radios start their label 12px after them everywhere; the session security box rounds to 8; dependent notification toggles indent 24px.          | [Colors, type and components](#colors-type-and-components)                           |
+| 2026-11-23 | One shared dialog footer, `DialogFooterView`; developer tools, widget dialogs and the screen sharing picker are 640px wide.                     | [Colors, type and components](#colors-type-and-components)                           |
+| 2026-11-23 | English overrides may change wording and punctuation and record upstream's text, so its changes get flagged; starting a chat is "New message".  | [Changing upstream code](#changing-upstream-code)                                    |
+| 2026-11-23 | The pointer moves the selection in the search and Forward dialogs, whose plane is on the selected row; report dialogs share one form.           | [Behavior changes](#behavior-changes)                                                |
+| 2026-11-23 | Room list: "Updating…" in place of its title, toasts above the first row, "Clear filters" in empty filters, typing opens the search dialog.     | [Behavior changes](#behavior-changes)                                                |
+| 2026-11-23 | Chats and spaces open as the mouse button goes down; letters show until an avatar's photo loads; space panel counters stay 20px.                | [Behavior changes](#behavior-changes)                                                |
+| 2026-11-23 | One shared empty state, in a panel and a compact size; an empty space home offers Add existing room and New room.                               | [Radius and spacing](#radius-and-spacing)                                            |
+| 2026-11-23 | Bubble text stops at 480px, bubbles 64px from the far side, 20px lines; code gets a header line, ends 12px in and fades where it scrolls.       | [Radius and spacing](#radius-and-spacing)                                            |
+| 2026-11-23 | Reactors' avatars in bubbles, in DMs too; reactions named by their emoji; poll radios ring on hover; the open thread's summary looks selected.  | [Radius and spacing](#radius-and-spacing)                                            |
+| 2026-11-23 | A floating date while scrolling; an unread mentions button replaces the top unread bar; jump to bottom first returns to where a jump began.     | [Behavior changes](#behavior-changes)                                                |
+| 2026-11-23 | Jumped-to messages fade over 1.5s; keyboard focus, right-click and jumps share one accent tint, which covers a mention's highlight.             | [Radius and spacing](#radius-and-spacing)                                            |
+| 2026-11-23 | Search steps through a room's results in the timeline; double-clicking beside a message's text replies to it; typing in a picker searches.      | [Behavior changes](#behavior-changes)                                                |
+| 2026-11-23 | A download ring over media; the failed-send mark opens Resend and Delete; Save as… for file tiles; no download buttons under media.             | [Behavior changes](#behavior-changes)                                                |
+| 2026-11-23 | The jump-to-bottom count is the room list's accent counter, gray only in muted rooms; red is left for messages that failed to send.             | [Colors, type and components](#colors-type-and-components)                           |
+| 2026-11-23 | Right panel destructive rows hover in the menus' red; call buttons are named by their tooltips.                                                 | [Radius and spacing](#radius-and-spacing)                                            |
+| 2026-11-23 | Ctrl+Up/Down (Cmd on macOS) picks the message to reply to while the room's composer is empty or already picking one, not in threads.            | [Behavior changes](#behavior-changes)                                                |
+| 2026-11-23 | The encryption cards, Unpin all and Share end in the shared dialog footer; the Encryption tab's hero cards pad 24px.                            | [Colors, type and components](#colors-type-and-components)                           |
+| 2026-11-23 | The poll history dialog filters with the room list's 28px chips; the Ignore user switch says what it does.                                      | [Colors, type and components](#colors-type-and-components)                           |
+| 2026-11-23 | A field at a settings card's top sits 16px under its edge, as far as fields are apart; the time zone's row is "Time zone".                      | [Colors, type and components](#colors-type-and-components)                           |
+| 2026-11-23 | Value row menus of more than 20 options (time zone, language) start with a search pill that filters them.                                       | [Colors, type and components](#colors-type-and-components)                           |
+| 2026-11-23 | In windows up to 1024px wide the settings search is a round button that opens its pill and results over the tabs.                               | [Behavior changes](#behavior-changes)                                                |
+| 2026-11-23 | Unpin all is 400px wide like the other confirmations; the setting that publishes the time zone spells it as the time zone's row does.           | [Colors, type and components](#colors-type-and-components)                           |
+| 2026-11-23 | A settings row's secondary text darkens on its pressed fill, to gray 1000, or gray 1100 in dark themes, at least 4.5:1 in every theme.          | [Colors, type and components](#colors-type-and-components)                           |
+| 2026-11-23 | Your own bubble keeps its plain blue under the keyboard's band; only a right-click or a jump gives it the muted highlighted blue.               | [Radius and spacing](#radius-and-spacing)                                            |
+| 2026-11-24 | A settings row's secondary text also darkens on its hover and keyboard focus fill in the dark theme, where it was 4.16:1.                       | [Colors, type and components](#colors-type-and-components)                           |
+| 2026-11-24 | A focused window draws no unread line for messages arriving at its bottom; a line there goes by itself, and receipts still wait for input.      | [Behavior changes](#behavior-changes)                                                |
 
 ## Upstream merge log
 
