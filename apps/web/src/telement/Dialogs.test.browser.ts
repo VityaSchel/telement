@@ -20,6 +20,7 @@ import fontSizes from "../../res/css/_font-sizes.pcss?raw";
 import lightTheme from "../../res/themes/light/css/_light.pcss?raw";
 import spacePillButtonStyles from "../../res/css/structures/_SpacePillButton.pcss?raw";
 import tabbedViewStyles from "../../res/css/structures/_TabbedView.pcss?raw";
+import viewSourceStyles from "../../res/css/structures/_ViewSource.pcss?raw";
 import interactiveAuthEntryStyles from "../../res/css/views/auth/_InteractiveAuthEntryComponents.pcss?raw";
 import addExistingToSpaceDialogStyles from "../../res/css/views/dialogs/_AddExistingToSpaceDialog.pcss?raw";
 import compoundDialogStyles from "../../res/css/views/dialogs/_CompoundDialog.pcss?raw";
@@ -38,6 +39,7 @@ import settingsDialogStyles from "../../res/css/views/dialogs/_SettingsDialog.pc
 import unpinAllDialogStyles from "../../res/css/views/dialogs/_UnpinAllDialog.pcss?raw";
 import userSettingsDialogStyles from "../../res/css/views/dialogs/_UserSettingsDialog.pcss?raw";
 import accessibleButtonStyles from "../../res/css/views/elements/_AccessibleButton.pcss?raw";
+import copyableTextStyles from "../../res/css/views/elements/_CopyableText.pcss?raw";
 import fieldStyles from "../../res/css/views/elements/_Field.pcss?raw";
 import roomAliasFieldStyles from "../../res/css/views/elements/_RoomAliasField.pcss?raw";
 import linkModalStyles from "../../res/css/views/rooms/wysiwyg_composer/components/_LinkModal.pcss?raw";
@@ -54,6 +56,7 @@ const APP_STYLES = [
     commonStyles,
     spacePillButtonStyles,
     tabbedViewStyles,
+    viewSourceStyles,
     interactiveAuthEntryStyles,
     addExistingToSpaceDialogStyles,
     compoundDialogStyles,
@@ -72,6 +75,7 @@ const APP_STYLES = [
     unpinAllDialogStyles,
     userSettingsDialogStyles,
     accessibleButtonStyles,
+    copyableTextStyles,
     fieldStyles,
     roomAliasFieldStyles,
     linkModalStyles,
@@ -768,6 +772,39 @@ describe("Dialogs", () => {
             ]).toEqual([16, 16]);
             expect(getComputedStyle(row).borderRadius).toBe("8px");
             expect(getComputedStyle(row).backgroundColor).toBe(colorOf("--cpd-color-bg-action-secondary-hovered"));
+        });
+    });
+
+    describe("view source", () => {
+        function renderViewSource(): void {
+            renderDialog(
+                "mx_ViewSource",
+                "View source",
+                `<div class="mx_ViewSource_header">Event ID: $event</div>
+                <div class="mx_ViewSource_heading" data-testid="heading">Original event source</div>
+                <span class="mx_CopyableText mx_CopyableText_border" data-testid="source">
+                    <pre><code>{\n  "content": {\n    "body": "Hello"\n  },\n  "type": "m.room.message"\n}</code></pre>
+                    <button class="mx_CopyableText_copyButton" style="width: 28px; height: 28px; padding: 4px; border: 0; line-height: 0" data-testid="copy"><svg viewBox="0 0 24 24"></svg></button>
+                </span>`,
+            );
+        }
+
+        it("labels the source like a settings group: 13px secondary, 8px above it", () => {
+            renderViewSource();
+            const heading = getComputedStyle(get("[data-testid=heading]"));
+
+            expect([heading.fontSize, heading.fontWeight]).toEqual(["13px", "400"]);
+            expect(heading.color).toBe(colorOf("--cpd-color-text-secondary"));
+            expect(box("[data-testid=source]").top - box("[data-testid=heading]").bottom).toBe(8);
+        });
+
+        it("keeps the copy button 4px from the top and end of the source, as on a one-line field", () => {
+            renderViewSource();
+            const source = box("[data-testid=source]");
+            const copy = box("[data-testid=copy]");
+
+            expect(source.height).toBeGreaterThan(100);
+            expect([copy.top - source.top, source.right - copy.right]).toEqual([4, 4]);
         });
     });
 

@@ -246,7 +246,7 @@ describe.each(THEMES.map(([theme]) => theme))("Settings content in %s", (theme) 
             expect(button.top - field.top).toBe(field.bottom - button.bottom);
         });
 
-        it("keeps 12px around the event source in the view source dialog", () => {
+        it("keeps the event source 8px under its label in the view source dialog, and 12px above what follows", () => {
             render(
                 theme,
                 `<div class="mx_ViewSource">
@@ -256,7 +256,7 @@ describe.each(THEMES.map(([theme]) => theme))("Settings content in %s", (theme) 
             );
             const style = getComputedStyle(document.querySelector("#source")!);
 
-            expect([style.marginTop, style.marginBottom]).toEqual(["12px", "12px"]);
+            expect([style.marginTop, style.marginBottom]).toEqual(["8px", "12px"]);
         });
 
         it("floats its label on the middle of its top border, the label's text where the field's starts", () => {
