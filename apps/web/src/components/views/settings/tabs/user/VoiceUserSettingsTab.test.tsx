@@ -114,9 +114,9 @@ describe("<VoiceUserSettingsTab />", () => {
         });
     });
 
-    it("describes audio input in the secondary text other subsections use", () => {
+    it("describes audio input in the help under its card, as other groups are described", () => {
         render(getComponent());
-        expect(screen.getByText(/The audio input configured here/)).toHaveClass("mx_SettingsSubsection_text");
+        expect(screen.getByText(/The audio input configured here/)).toHaveClass("mx_SettingsSection_help");
     });
 
     it("renders audio processing settings", () => {

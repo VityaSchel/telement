@@ -131,6 +131,15 @@ describe("<AccountUserSettingsTab />", () => {
             expect(screen.getByRole("button", { name: "Mock change password" })).toBeInTheDocument();
         });
 
+        it("describes changing the password in the help under the account's card", () => {
+            mockClient.getCachedCapabilities.mockReturnValue({});
+            render(getComponent());
+
+            expect(
+                screen.getByText("Set a new account password…").closest(".mx_SettingsSubsection_description"),
+            ).not.toBeNull();
+        });
+
         it("opens with the read-only profile when the cached capabilities forbid changing it", () => {
             mockClient.getCachedCapabilities.mockReturnValue({
                 "m.set_displayname": { enabled: false },

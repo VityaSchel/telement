@@ -68,6 +68,18 @@ describe("<LoginWithQRSection />", () => {
                 vi.spyOn(MatrixClientPeg, "get").mockReturnValue(client);
             });
 
+            test("explains the QR code under its card, as help, rather than at the card's top", async () => {
+                const { container } = render(getComponent());
+                const help = container.querySelector(".mx_SettingsSubsection_description");
+
+                expect(help).toHaveTextContent(
+                    "Use a QR code to sign in to another device and set up secure messaging.",
+                );
+                expect(container.querySelector(".mx_SettingsSubsection_content")).not.toHaveTextContent(
+                    "Use a QR code",
+                );
+            });
+
             test("no homeserver support", async () => {
                 const { container } = render(getComponent({ versions: makeVersions({ "org.matrix.msc4108": false }) }));
                 expect(container.textContent).toContain("Not supported by your account provider");

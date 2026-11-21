@@ -110,12 +110,10 @@ describe("ProfileSettings", () => {
         expect(await screen.findByRole("textbox", { name: "What's your status?" })).toBeInTheDocument();
     });
 
-    it("describes the profile in the secondary text other subsections use", () => {
+    it("describes the profile in the help under its card, as other groups are described", () => {
         renderProfileSettings(toastRack, client);
 
-        expect(screen.getByText("This is how you appear to others on the app.")).toHaveClass(
-            "mx_SettingsSubsection_text",
-        );
+        expect(screen.getByText("This is how you appear to others on the app.")).toHaveClass("mx_SettingsSection_help");
     });
 
     it("floats the username's label on its copy field", () => {

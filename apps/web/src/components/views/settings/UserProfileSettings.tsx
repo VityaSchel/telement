@@ -30,7 +30,6 @@ import LogoutDialog, { shouldShowLogoutDialog } from "../dialogs/LogoutDialog";
 import Modal from "../../../Modal";
 import defaultDispatcher from "../../../dispatcher/dispatcher";
 import { SettingsSection } from "./shared/SettingsSection.tsx";
-import { SettingsSubsectionText } from "./shared/SettingsSubsection.tsx";
 import { SetStatusViewModel } from "../../../viewmodels/status/SetStatusViewModel.ts";
 import SettingsStore from "../../../settings/SettingsStore.ts";
 
@@ -200,13 +199,15 @@ const UserProfileSettings: React.FC<UserProfileSettingsProps> = ({
     const someFieldsDisabled = !canSetDisplayName || !canSetAvatar;
 
     return (
-        <SettingsSection heading={_t("common|profile")}>
+        <SettingsSection
+            heading={_t("common|profile")}
+            subHeading={
+                someFieldsDisabled
+                    ? _t("settings|general|profile_subtitle_oidc")
+                    : _t("settings|general|profile_subtitle")
+            }
+        >
             <div className="mx_UserProfileSettings">
-                <SettingsSubsectionText>
-                    {someFieldsDisabled
-                        ? _t("settings|general|profile_subtitle_oidc")
-                        : _t("settings|general|profile_subtitle")}
-                </SettingsSubsectionText>
                 <div className="mx_UserProfileSettings_profile">
                     <AvatarSetting
                         avatar={avatarURL ?? undefined}

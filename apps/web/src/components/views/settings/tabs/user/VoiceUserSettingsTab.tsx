@@ -23,7 +23,7 @@ import SettingsStore from "../../../../../settings/SettingsStore";
 import { requestMediaPermissions } from "../../../../../utils/media/requestMediaPermissions";
 import SettingsTab from "../SettingsTab";
 import { SettingsSection } from "../../shared/SettingsSection";
-import { SettingsSubsection, SettingsSubsectionText } from "../../shared/SettingsSubsection";
+import { SettingsSubsection } from "../../shared/SettingsSubsection";
 import MatrixClientContext from "../../../../../contexts/MatrixClientContext";
 import SdkConfig from "../../../../../SdkConfig";
 
@@ -259,8 +259,10 @@ export default class VoiceUserSettingsTab extends React.Component<EmptyObject, I
                         evt.stopPropagation();
                     }}
                 >
-                    <SettingsSection heading={_t("settings|voip|voice_input_section")}>
-                        <SettingsSubsectionText>{_t("settings|voip|voice_input_description")}</SettingsSubsectionText>
+                    <SettingsSection
+                        heading={_t("settings|voip|voice_input_section")}
+                        subHeading={_t("settings|voip|voice_input_description")}
+                    >
                         {requestButton}
                         {microphoneDropdown}
                     </SettingsSection>

@@ -22,7 +22,7 @@ import ErrorDialog, { extractErrorMessageFromError } from "../../../dialogs/Erro
 import ChangePassword from "../../ChangePassword";
 import SettingsTab from "../SettingsTab";
 import { SettingsSection } from "../../shared/SettingsSection";
-import { SettingsSubsection, SettingsSubsectionText } from "../../shared/SettingsSubsection";
+import { SettingsSubsection } from "../../shared/SettingsSubsection";
 import { UserPersonalInfoSettings } from "../../UserPersonalInfoSettings";
 import { SDKContext } from "../../../../../contexts/SDKContext.ts";
 
@@ -51,10 +51,10 @@ const AccountSection: React.FC<AccountSectionProps> = ({
         <SettingsSection>
             <SettingsSubsection
                 heading={_t("settings|general|account_section")}
+                description={_t("settings|general|password_change_section")}
                 stretchContent
                 data-testid="accountSection"
             >
-                <SettingsSubsectionText>{_t("settings|general|password_change_section")}</SettingsSubsectionText>
                 <ChangePassword
                     rowClassName=""
                     buttonKind="primary"
