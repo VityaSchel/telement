@@ -685,6 +685,26 @@ describe.each(THEMES.map(([theme]) => theme))("Settings content in %s", (theme) 
         });
     });
 
+    describe("disclosures", () => {
+        it("are text buttons like Show advanced: semibold in the accent, without an underline or the browser's marker", () => {
+            const container = render(
+                theme,
+                `<details><summary class="mx_AliasSettings_localAddresses" id="show-more">Show more</summary></details>
+                <div class="mx_SettingsSubsection_content">
+                    <details><summary class="mx_HelpUserSettingsTab_accessTokenDetails" id="token">Access token</summary></details>
+                </div>`,
+            );
+            const accent = tokenColor("--cpd-color-text-action-accent", container);
+
+            for (const id of ["#show-more", "#token"]) {
+                const style = getComputedStyle(document.querySelector(id)!);
+                expect([style.color, style.fontWeight, style.textDecorationLine]).toEqual([accent, "600", "none"]);
+                expect(style.listStyleType).toBe("none");
+                expect(textStart(id)).toBe(box(id).left);
+            }
+        });
+    });
+
     it("draws the BETA pill as a 24px accent badge with 11px white capitals", () => {
         const container = render(theme, `<span class="mx_BetaCard_betaPill" id="pill">Beta</span>`);
         const style = getComputedStyle(document.querySelector("#pill")!);
