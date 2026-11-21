@@ -89,8 +89,10 @@ Please see LICENSE files in the repository root for full details.
 .mx_InviteDialog_other {
     display: flex;
     flex-direction: column;
-    /* Telement: a list dialog, 640px with the dialog's 24px padding (TELEMENT.md, "Colors, type and components") */
-    max-width: calc(640px - 2 * var(--cpd-space-6x));
+    /* Telement: a list dialog, 640px with the dialog's 24px padding (TELEMENT.md, "Colors, type and components"),
+       rather than the form width fixed width dialogs default to (_common.pcss) */
+    width: calc(640px - 2 * var(--cpd-space-6x));
+    max-width: 100%;
     /* As tall as its content up to 600px, so a dialog with nothing to suggest isn't mostly empty */
     max-height: 600px;
     overflow: hidden;

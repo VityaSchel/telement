@@ -500,15 +500,30 @@ summary {
     }
 }
 
+/* Telement: a dialog is as wide as its kind (TELEMENT.md, "Colors, type and components"): 400 for alerts and
+   confirmations, 480 for forms, 640 for lists, each with the dialog's 24px padding on both sides. A form is the
+   default, so that a dialog nobody sized isn't a 752px strip around a line or two */
 .mx_Dialog_fixedWidth {
-    width: 60vw;
-    max-width: 704px;
+    width: calc(480px - 2 * var(--cpd-space-6x));
+    max-width: 100%;
 }
 
-/* Telement: an alert is a 400px confirmation dialog (TELEMENT.md, "Colors, type and components"), so that a sentence or
-   two wraps under the title rather than stretching the dialog into a strip around one long line */
-.mx_ErrorDialog.mx_Dialog_fixedWidth {
+/* Telement: alerts and confirmations, so that a sentence or two wraps under the title rather than stretching the
+   dialog into a strip around one long line */
+:is(.mx_ErrorDialog, .mx_QuestionDialog, .mx_TextInputDialog, .mx_ConfirmUserActionDialog).mx_Dialog_fixedWidth {
     width: calc(400px - 2 * var(--cpd-space-6x));
+}
+
+:is(.mx_ViewSource, .mx_PollHistoryDialog, .mx_MessageEditHistoryDialog).mx_Dialog_fixedWidth {
+    width: calc(640px - 2 * var(--cpd-space-6x));
+}
+
+/* Telement: the search dialog stays as it is, and developer tools (a QuestionDialog by its class), a widget's own
+   dialog and the screen sharing picker, which hold neither a form nor a list, keep upstream's width */
+:is(.mx_SpotlightDialog, .mx_ModalWidgetDialog, .mx_desktopCapturerSourcePicker).mx_Dialog_fixedWidth,
+.mx_DevtoolsDialog_wrapper .mx_Dialog_fixedWidth.mx_QuestionDialog {
+    width: 60vw;
+    max-width: 704px;
 }
 
 .mx_Dialog_background {

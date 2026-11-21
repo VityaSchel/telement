@@ -7,8 +7,9 @@ Please see LICENSE files in the repository root for full details.
 */
 
 .mx_RoomUpgradeWarningDialog {
-    max-width: 38vw;
-    width: 38vw;
+    /* Telement: a 480px form, with the dialog's 24px padding (TELEMENT.md, "Colors, type and components") */
+    max-width: 100%;
+    width: calc(480px - 2 * var(--cpd-space-6x));
 
     .mx_RoomUpgradeWarningDialog_progress {
         .mx_ProgressBar {

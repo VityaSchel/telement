@@ -119,7 +119,8 @@ Please see LICENSE files in the repository root for full details.
 }
 
 .mx_AddExistingToSpaceDialog {
-    width: 480px;
+    /* Telement: a list dialog, 640px with the dialog's 24px padding (TELEMENT.md, "Colors, type and components") */
+    width: calc(640px - 2 * var(--cpd-space-6x));
     color: $primary-content;
     display: flex;
     flex-direction: column;

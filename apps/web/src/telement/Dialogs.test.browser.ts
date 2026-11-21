@@ -21,15 +21,20 @@ import lightTheme from "../../res/themes/light/css/_light.pcss?raw";
 import spacePillButtonStyles from "../../res/css/structures/_SpacePillButton.pcss?raw";
 import tabbedViewStyles from "../../res/css/structures/_TabbedView.pcss?raw";
 import addExistingToSpaceDialogStyles from "../../res/css/views/dialogs/_AddExistingToSpaceDialog.pcss?raw";
+import compoundDialogStyles from "../../res/css/views/dialogs/_CompoundDialog.pcss?raw";
 import createRoomDialogStyles from "../../res/css/views/dialogs/_CreateRoomDialog.pcss?raw";
 import createSubspaceDialogStyles from "../../res/css/views/dialogs/_CreateSubspaceDialog.pcss?raw";
 import inviteDialogStyles from "../../res/css/views/dialogs/_InviteDialog.pcss?raw";
+import leaveRoomDialogStyles from "../../res/css/views/dialogs/_LeaveRoomDialog.pcss?raw";
+import logoutDialogStyles from "../../res/css/views/dialogs/_LogoutDialog.pcss?raw";
 import roomSettingsDialogStyles from "../../res/css/views/dialogs/_RoomSettingsDialog.pcss?raw";
+import roomUpgradeWarningDialogStyles from "../../res/css/views/dialogs/_RoomUpgradeWarningDialog.pcss?raw";
 import settingsDialogStyles from "../../res/css/views/dialogs/_SettingsDialog.pcss?raw";
 import unpinAllDialogStyles from "../../res/css/views/dialogs/_UnpinAllDialog.pcss?raw";
 import userSettingsDialogStyles from "../../res/css/views/dialogs/_UserSettingsDialog.pcss?raw";
 import accessibleButtonStyles from "../../res/css/views/elements/_AccessibleButton.pcss?raw";
 import fieldStyles from "../../res/css/views/elements/_Field.pcss?raw";
+import linkModalStyles from "../../res/css/views/rooms/wysiwyg_composer/components/_LinkModal.pcss?raw";
 import roomProfileSettingsStyles from "../../res/css/views/settings/_RoomProfileSettings.pcss?raw";
 import settingsSectionStyles from "../../res/css/views/settings/tabs/_SettingsSection.pcss?raw";
 import settingsTabStyles from "../../res/css/views/settings/tabs/_SettingsTab.pcss?raw";
@@ -44,15 +49,20 @@ const APP_STYLES = [
     spacePillButtonStyles,
     tabbedViewStyles,
     addExistingToSpaceDialogStyles,
+    compoundDialogStyles,
     createRoomDialogStyles,
     createSubspaceDialogStyles,
     inviteDialogStyles,
+    leaveRoomDialogStyles,
+    logoutDialogStyles,
     roomSettingsDialogStyles,
+    roomUpgradeWarningDialogStyles,
     settingsDialogStyles,
     unpinAllDialogStyles,
     userSettingsDialogStyles,
     accessibleButtonStyles,
     fieldStyles,
+    linkModalStyles,
     roomProfileSettingsStyles,
     settingsSectionStyles,
     settingsTabStyles,
@@ -127,6 +137,11 @@ function middle({ top, height }: DOMRect): number {
 
 function colorOf(token: string): string {
     return tokenColor(token, get(".cpd-theme-light"));
+}
+
+/** Adds `className` to the dialog's wrapper, as Modal does with the class a dialog is opened with. */
+function addWrapperClass(className: string): void {
+    get(".mx_Dialog_wrapper").classList.add(className);
 }
 
 describe("Dialogs", () => {
@@ -269,6 +284,112 @@ describe("Dialogs", () => {
 
             expect([body.right - ok.right, body.bottom - ok.bottom]).toEqual([24, 24]);
             expect(ok.top - box("[data-testid=text]").bottom).toBe(24);
+        });
+    });
+
+    describe("widths", () => {
+        it.each([
+            { kind: "a confirmation", className: "mx_QuestionDialog", wrapper: "", fixedWidth: true, width: 400 },
+            {
+                kind: "the confirmation to leave a room",
+                className: "mx_QuestionDialog",
+                wrapper: "mx_LeaveRoomDialog",
+                fixedWidth: true,
+                width: 400,
+            },
+            {
+                kind: "the confirmation to remove a message",
+                className: "mx_TextInputDialog",
+                wrapper: "",
+                fixedWidth: true,
+                width: 400,
+            },
+            {
+                kind: "the confirmation to remove a member",
+                className: "mx_ConfirmUserActionDialog",
+                wrapper: "",
+                fixedWidth: true,
+                width: 400,
+            },
+            {
+                kind: "the confirmation to sign out",
+                className: "mx_LogoutDialog",
+                wrapper: "",
+                fixedWidth: true,
+                width: 400,
+            },
+            {
+                kind: "a dialog nobody sized",
+                className: "mx_ReportEventDialog",
+                wrapper: "",
+                fixedWidth: true,
+                width: 480,
+            },
+            {
+                kind: "the report of a room",
+                className: "mx_ReportRoomDialog",
+                wrapper: "",
+                fixedWidth: true,
+                width: 480,
+            },
+            { kind: "the export of a chat", className: "mx_ExportDialog", wrapper: "", fixedWidth: true, width: 480 },
+            {
+                kind: "the deactivation of the account",
+                className: "mx_DeactivateAccountDialog",
+                wrapper: "",
+                fixedWidth: true,
+                width: 480,
+            },
+            {
+                kind: "the upgrade of a room",
+                className: "mx_RoomUpgradeWarningDialog",
+                wrapper: "",
+                fixedWidth: false,
+                width: 480,
+            },
+            { kind: "a message's source", className: "mx_ViewSource", wrapper: "", fixedWidth: true, width: 640 },
+            {
+                kind: "a message's edits",
+                className: "mx_MessageEditHistoryDialog",
+                wrapper: "",
+                fixedWidth: true,
+                width: 640,
+            },
+            {
+                kind: "the rooms to add to a space",
+                className: "mx_AddExistingToSpaceDialog",
+                wrapper: "mx_AddExistingToSpaceDialog_wrapper",
+                fixedWidth: false,
+                width: 640,
+            },
+        ])("makes $kind ($className) $width wide", ({ className, wrapper, fixedWidth, width }) => {
+            renderDialog(
+                className,
+                "Title",
+                `<div class="mx_Dialog_content"><p>Text</p></div>${FOOTER}`,
+                "",
+                fixedWidth,
+            );
+            if (wrapper) addWrapperClass(wrapper);
+
+            expect(box("[data-testid=body]").width).toBe(width);
+        });
+
+        it("makes the link dialog, which has no padding around it, a 480px form too", () => {
+            renderDialog("mx_LinkModal", "Create a link", `<form class="mx_LinkModal_content"></form>`);
+            addWrapperClass("mx_CompoundDialog");
+
+            expect(box("[data-testid=body]").width).toBe(480);
+        });
+
+        it("keeps the search dialog and developer tools at upstream's width", () => {
+            renderDialog("mx_SpotlightDialog", "Search", "");
+            expect(box(".mx_SpotlightDialog").width).toBe(704);
+            document.body.innerHTML = "";
+
+            renderDialog("mx_QuestionDialog", "Developer tools", "");
+            addWrapperClass("mx_DevtoolsDialog_wrapper");
+            expect(box("[data-testid=body]").width).toBe(752);
         });
     });
 
