@@ -263,8 +263,6 @@ export const CATEGORIES: Record<CategoryName, ICategory> = {
         settingNames: [
             KeyBindingAction.SelectRoomInRoomList,
             KeyBindingAction.ClearRoomFilter,
-            KeyBindingAction.CollapseRoomListSection,
-            KeyBindingAction.ExpandRoomListSection,
             KeyBindingAction.NextRoom,
             KeyBindingAction.PrevRoom,
             KeyBindingAction.ToggleRoomListPanel,
@@ -307,6 +305,9 @@ export const CATEGORIES: Record<CategoryName, ICategory> = {
             KeyBindingAction.SelectPrevRoom,
             KeyBindingAction.OpenUserSettings,
             KeyBindingAction.SwitchToSpaceByNumber,
+            // Telement has no room list sections, so these only fold spaces in the space bar (SpaceTreeLevel)
+            KeyBindingAction.CollapseRoomListSection,
+            KeyBindingAction.ExpandRoomListSection,
             KeyBindingAction.PreviousVisitedRoomOrSpace,
             KeyBindingAction.NextVisitedRoomOrSpace,
             KeyBindingAction.NextLandmark,
@@ -499,13 +500,13 @@ export const KEYBOARD_SHORTCUTS: IKeyboardShortcuts = {
         default: {
             key: Key.ARROW_LEFT,
         },
-        displayName: _td("keyboard|room_list_collapse_section"),
+        displayName: _td("telement|keyboard|space_bar_collapse_space"),
     },
     [KeyBindingAction.ExpandRoomListSection]: {
         default: {
             key: Key.ARROW_RIGHT,
         },
-        displayName: _td("keyboard|room_list_expand_section"),
+        displayName: _td("telement|keyboard|space_bar_expand_space"),
     },
     [KeyBindingAction.NextRoom]: {
         default: {

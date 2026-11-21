@@ -10,7 +10,14 @@ import { userEvent } from "vitest/browser";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { Alert, Form, IconButton, SettingsToggleInput } from "@vector-im/compound-web";
-import { ChevronDownIcon, CopyIcon } from "@vector-im/compound-design-tokens/assets/web/icons";
+import {
+    ArrowDownIcon,
+    ArrowLeftIcon,
+    ArrowRightIcon,
+    ArrowUpIcon,
+    ChevronDownIcon,
+    CopyIcon,
+} from "@vector-im/compound-design-tokens/assets/web/icons";
 import compoundBase from "@vector-im/compound-design-tokens/assets/web/css/cpd-common-base.css?raw";
 import compoundSemantic from "@vector-im/compound-design-tokens/assets/web/css/cpd-common-semantic.css?raw";
 import compoundLightTheme from "@vector-im/compound-design-tokens/assets/web/css/cpd-theme-light-base.css?raw";
@@ -804,6 +811,35 @@ describe.each(THEMES.map(([theme]) => theme))("Settings content in %s", (theme) 
             expect(style.backgroundColor).toBe(tokenColor("--cpd-color-bg-subtle-primary", container));
             // The spaces around a key's name don't widen its tile
             expect(box("#spaced").width).toBe(box("#bare").width);
+        });
+
+        it("draws the arrow keys as square 24px tiles around Compound's 16px arrows, all four alike", () => {
+            const arrows: [string, typeof ArrowUpIcon][] = [
+                ["↑", ArrowUpIcon],
+                ["↓", ArrowDownIcon],
+                ["←", ArrowLeftIcon],
+                ["→", ArrowRightIcon],
+            ];
+            // As KeyboardKey renders an arrow key
+            render(
+                theme,
+                `<div class="mx_KeyboardShortcut">${arrows
+                    .map(
+                        ([arrow, icon], index) =>
+                            `<kbd id="arrow-${index}">${renderToStaticMarkup(
+                                createElement(icon, { "aria-hidden": true, "width": "16px", "height": "16px" }),
+                            )}<span class="mx_KeyboardKey_text">${arrow}</span></kbd>`,
+                    )
+                    .join("+")}</div>`,
+            );
+
+            for (const index of [0, 1, 2, 3]) {
+                const key = box(`#arrow-${index}`);
+                const icon = box(`#arrow-${index} svg`);
+                expect([key.width, key.height]).toEqual([24, 24]);
+                expect([icon.left - key.left, icon.top - key.top]).toEqual([4, 4]);
+                expect(box(`#arrow-${index} .mx_KeyboardKey_text`).width).toBeLessThanOrEqual(1);
+            }
         });
 
         it("puts the shortcuts on 32px rows, one after another, each key in the middle of its row", () => {

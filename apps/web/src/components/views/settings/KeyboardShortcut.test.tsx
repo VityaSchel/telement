@@ -31,6 +31,20 @@ describe("KeyboardShortcut", () => {
         expect(body).toMatchSnapshot();
     });
 
+    it.each([
+        [Key.ARROW_UP, "↑"],
+        [Key.ARROW_DOWN, "↓"],
+        [Key.ARROW_LEFT, "←"],
+        [Key.ARROW_RIGHT, "→"],
+    ])("draws %s as a 16px arrow icon, keeping the arrow as hidden text", (name, arrow) => {
+        const kbd = renderKeyboardShortcut(KeyboardKey, { name, last: true }).querySelector("kbd")!;
+        const icon = kbd.querySelector("svg")!;
+
+        expect(icon).toHaveAttribute("aria-hidden", "true");
+        expect([icon.getAttribute("width"), icon.getAttribute("height")]).toEqual(["16px", "16px"]);
+        expect(kbd.querySelector(".mx_KeyboardKey_text")).toHaveTextContent(arrow);
+    });
+
     it("renders alternative key name", () => {
         const body = renderKeyboardShortcut(KeyboardKey, { name: Key.PAGE_DOWN });
         expect(body).toMatchSnapshot();

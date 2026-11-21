@@ -54,6 +54,26 @@ describe("KeyboardShortcutUtils", () => {
         expect(file.KEYBOARD_SHORTCUTS).toEqual(copyKeyboardShortcuts);
     });
 
+    it("lists the shortcuts that fold spaces in the space bar under Navigation, named for what they do", async () => {
+        // The real shortcuts, rather than an earlier test's
+        vi.doUnmock(PATH_TO_KEYBOARD_SHORTCUTS);
+        const { CATEGORIES, CategoryName, KEYBOARD_SHORTCUTS, KeyBindingAction } = await getFile();
+        const { default: strings } = await import("../i18n/strings/en_EN.json");
+        const folding = [KeyBindingAction.CollapseRoomListSection, KeyBindingAction.ExpandRoomListSection];
+
+        expect(CATEGORIES[CategoryName.NAVIGATION].settingNames).toEqual(expect.arrayContaining(folding));
+        expect(CATEGORIES[CategoryName.ROOM_LIST].settingNames).not.toEqual(expect.arrayContaining([folding[0]]));
+        expect(CATEGORIES[CategoryName.ROOM_LIST].settingNames).not.toEqual(expect.arrayContaining([folding[1]]));
+        expect(folding.map((action) => KEYBOARD_SHORTCUTS[action].displayName)).toEqual([
+            "telement|keyboard|space_bar_collapse_space",
+            "telement|keyboard|space_bar_expand_space",
+        ]);
+        expect(strings.telement.keyboard).toEqual({
+            space_bar_collapse_space: "Collapse a space in the space bar",
+            space_bar_expand_space: "Expand a space in the space bar",
+        });
+    });
+
     it("shows the room list panel shortcuts without binding them", async () => {
         const { KeyBindingAction } = await getFile();
         const utils = await getUtils();

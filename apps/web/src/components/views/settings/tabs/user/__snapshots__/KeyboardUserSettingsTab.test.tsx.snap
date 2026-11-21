@@ -280,9 +280,23 @@ exports[`KeyboardUserSettingsTab > renders list of keyboard shortcuts 1`] = `
                     class="mx_KeyboardShortcut"
                   >
                     <kbd>
-                       
-                      ↓
-                       
+                      <svg
+                        aria-hidden="true"
+                        fill="currentColor"
+                        height="16px"
+                        viewBox="0 0 24 24"
+                        width="16px"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M12 4.5a1 1 0 0 1 1 1v10.586l4.293-4.293a1 1 0 0 1 1.414 1.414l-6 6a1 1 0 0 1-1.414 0l-6-6a1 1 0 1 1 1.414-1.414L11 16.086V5.5a1 1 0 0 1 1-1"
+                        />
+                      </svg>
+                      <span
+                        class="mx_KeyboardKey_text"
+                      >
+                        ↓
+                      </span>
                     </kbd>
                   </div>
                 </li>
@@ -294,9 +308,23 @@ exports[`KeyboardUserSettingsTab > renders list of keyboard shortcuts 1`] = `
                     class="mx_KeyboardShortcut"
                   >
                     <kbd>
-                       
-                      ↑
-                       
+                      <svg
+                        aria-hidden="true"
+                        fill="currentColor"
+                        height="16px"
+                        viewBox="0 0 24 24"
+                        width="16px"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M12 19.5a1 1 0 0 0 1-1V7.914l4.293 4.293a1 1 0 0 0 1.414-1.414l-6-6a1 1 0 0 0-1.414 0l-6 6a1 1 0 1 0 1.414 1.414L11 7.914V18.5a1 1 0 0 0 1 1"
+                        />
+                      </svg>
+                      <span
+                        class="mx_KeyboardKey_text"
+                      >
+                        ↑
+                      </span>
                     </kbd>
                   </div>
                 </li>
@@ -320,9 +348,23 @@ exports[`KeyboardUserSettingsTab > renders list of keyboard shortcuts 1`] = `
                     </kbd>
                     +
                     <kbd>
-                       
-                      ↓
-                       
+                      <svg
+                        aria-hidden="true"
+                        fill="currentColor"
+                        height="16px"
+                        viewBox="0 0 24 24"
+                        width="16px"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M12 4.5a1 1 0 0 1 1 1v10.586l4.293-4.293a1 1 0 0 1 1.414 1.414l-6 6a1 1 0 0 1-1.414 0l-6-6a1 1 0 1 1 1.414-1.414L11 16.086V5.5a1 1 0 0 1 1-1"
+                        />
+                      </svg>
+                      <span
+                        class="mx_KeyboardKey_text"
+                      >
+                        ↓
+                      </span>
                     </kbd>
                   </div>
                 </li>
@@ -346,9 +388,23 @@ exports[`KeyboardUserSettingsTab > renders list of keyboard shortcuts 1`] = `
                     </kbd>
                     +
                     <kbd>
-                       
-                      ↑
-                       
+                      <svg
+                        aria-hidden="true"
+                        fill="currentColor"
+                        height="16px"
+                        viewBox="0 0 24 24"
+                        width="16px"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M12 19.5a1 1 0 0 0 1-1V7.914l4.293 4.293a1 1 0 0 0 1.414-1.414l-6-6a1 1 0 0 0-1.414 0l-6 6a1 1 0 1 0 1.414 1.414L11 7.914V18.5a1 1 0 0 0 1 1"
+                        />
+                      </svg>
+                      <span
+                        class="mx_KeyboardKey_text"
+                      >
+                        ↑
+                      </span>
                     </kbd>
                   </div>
                 </li>
@@ -640,42 +696,28 @@ exports[`KeyboardUserSettingsTab > renders list of keyboard shortcuts 1`] = `
                 <li
                   class="mx_KeyboardShortcut_shortcutRow"
                 >
-                  Collapse room list section
-                  <div
-                    class="mx_KeyboardShortcut"
-                  >
-                    <kbd>
-                       
-                      ←
-                       
-                    </kbd>
-                  </div>
-                </li>
-                <li
-                  class="mx_KeyboardShortcut_shortcutRow"
-                >
-                  Expand room list section
-                  <div
-                    class="mx_KeyboardShortcut"
-                  >
-                    <kbd>
-                       
-                      →
-                       
-                    </kbd>
-                  </div>
-                </li>
-                <li
-                  class="mx_KeyboardShortcut_shortcutRow"
-                >
                   Navigate down in the room list
                   <div
                     class="mx_KeyboardShortcut"
                   >
                     <kbd>
-                       
-                      ↓
-                       
+                      <svg
+                        aria-hidden="true"
+                        fill="currentColor"
+                        height="16px"
+                        viewBox="0 0 24 24"
+                        width="16px"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M12 4.5a1 1 0 0 1 1 1v10.586l4.293-4.293a1 1 0 0 1 1.414 1.414l-6 6a1 1 0 0 1-1.414 0l-6-6a1 1 0 1 1 1.414-1.414L11 16.086V5.5a1 1 0 0 1 1-1"
+                        />
+                      </svg>
+                      <span
+                        class="mx_KeyboardKey_text"
+                      >
+                        ↓
+                      </span>
                     </kbd>
                   </div>
                 </li>
@@ -687,9 +729,23 @@ exports[`KeyboardUserSettingsTab > renders list of keyboard shortcuts 1`] = `
                     class="mx_KeyboardShortcut"
                   >
                     <kbd>
-                       
-                      ↑
-                       
+                      <svg
+                        aria-hidden="true"
+                        fill="currentColor"
+                        height="16px"
+                        viewBox="0 0 24 24"
+                        width="16px"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M12 19.5a1 1 0 0 0 1-1V7.914l4.293 4.293a1 1 0 0 0 1.414-1.414l-6-6a1 1 0 0 0-1.414 0l-6 6a1 1 0 1 0 1.414 1.414L11 7.914V18.5a1 1 0 0 0 1 1"
+                        />
+                      </svg>
+                      <span
+                        class="mx_KeyboardKey_text"
+                      >
+                        ↑
+                      </span>
                     </kbd>
                   </div>
                 </li>
@@ -715,9 +771,23 @@ exports[`KeyboardUserSettingsTab > renders list of keyboard shortcuts 1`] = `
                     class="mx_KeyboardShortcut"
                   >
                     <kbd>
-                       
-                      ←
-                       
+                      <svg
+                        aria-hidden="true"
+                        fill="currentColor"
+                        height="16px"
+                        viewBox="0 0 24 24"
+                        width="16px"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M12.207 5.293a1 1 0 0 1 0 1.414L7.914 11H18.5a1 1 0 1 1 0 2H7.914l4.293 4.293a1 1 0 0 1-1.414 1.414l-6-6a1 1 0 0 1 0-1.414l6-6a1 1 0 0 1 1.414 0"
+                        />
+                      </svg>
+                      <span
+                        class="mx_KeyboardKey_text"
+                      >
+                        ←
+                      </span>
                     </kbd>
                   </div>
                 </li>
@@ -729,9 +799,23 @@ exports[`KeyboardUserSettingsTab > renders list of keyboard shortcuts 1`] = `
                     class="mx_KeyboardShortcut"
                   >
                     <kbd>
-                       
-                      →
-                       
+                      <svg
+                        aria-hidden="true"
+                        fill="currentColor"
+                        height="16px"
+                        viewBox="0 0 24 24"
+                        width="16px"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M11.793 5.293a1 1 0 0 1 1.414 0l6 6a1 1 0 0 1 0 1.414l-6 6a1 1 0 0 1-1.414-1.414L16.086 13H5.5a1 1 0 1 1 0-2h10.586l-4.293-4.293a1 1 0 0 1 0-1.414"
+                        />
+                      </svg>
+                      <span
+                        class="mx_KeyboardKey_text"
+                      >
+                        →
+                      </span>
                     </kbd>
                   </div>
                 </li>
@@ -1005,9 +1089,23 @@ exports[`KeyboardUserSettingsTab > renders list of keyboard shortcuts 1`] = `
                     </kbd>
                     +
                     <kbd>
-                       
-                      ↓
-                       
+                      <svg
+                        aria-hidden="true"
+                        fill="currentColor"
+                        height="16px"
+                        viewBox="0 0 24 24"
+                        width="16px"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M12 4.5a1 1 0 0 1 1 1v10.586l4.293-4.293a1 1 0 0 1 1.414 1.414l-6 6a1 1 0 0 1-1.414 0l-6-6a1 1 0 1 1 1.414-1.414L11 16.086V5.5a1 1 0 0 1 1-1"
+                        />
+                      </svg>
+                      <span
+                        class="mx_KeyboardKey_text"
+                      >
+                        ↓
+                      </span>
                     </kbd>
                   </div>
                 </li>
@@ -1031,9 +1129,23 @@ exports[`KeyboardUserSettingsTab > renders list of keyboard shortcuts 1`] = `
                     </kbd>
                     +
                     <kbd>
-                       
-                      ↑
-                       
+                      <svg
+                        aria-hidden="true"
+                        fill="currentColor"
+                        height="16px"
+                        viewBox="0 0 24 24"
+                        width="16px"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M12 19.5a1 1 0 0 0 1-1V7.914l4.293 4.293a1 1 0 0 0 1.414-1.414l-6-6a1 1 0 0 0-1.414 0l-6 6a1 1 0 1 0 1.414 1.414L11 7.914V18.5a1 1 0 0 0 1 1"
+                        />
+                      </svg>
+                      <span
+                        class="mx_KeyboardKey_text"
+                      >
+                        ↑
+                      </span>
                     </kbd>
                   </div>
                 </li>
@@ -1051,9 +1163,23 @@ exports[`KeyboardUserSettingsTab > renders list of keyboard shortcuts 1`] = `
                     </kbd>
                     +
                     <kbd>
-                       
-                      ↓
-                       
+                      <svg
+                        aria-hidden="true"
+                        fill="currentColor"
+                        height="16px"
+                        viewBox="0 0 24 24"
+                        width="16px"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M12 4.5a1 1 0 0 1 1 1v10.586l4.293-4.293a1 1 0 0 1 1.414 1.414l-6 6a1 1 0 0 1-1.414 0l-6-6a1 1 0 1 1 1.414-1.414L11 16.086V5.5a1 1 0 0 1 1-1"
+                        />
+                      </svg>
+                      <span
+                        class="mx_KeyboardKey_text"
+                      >
+                        ↓
+                      </span>
                     </kbd>
                   </div>
                 </li>
@@ -1071,9 +1197,79 @@ exports[`KeyboardUserSettingsTab > renders list of keyboard shortcuts 1`] = `
                     </kbd>
                     +
                     <kbd>
-                       
-                      ↑
-                       
+                      <svg
+                        aria-hidden="true"
+                        fill="currentColor"
+                        height="16px"
+                        viewBox="0 0 24 24"
+                        width="16px"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M12 19.5a1 1 0 0 0 1-1V7.914l4.293 4.293a1 1 0 0 0 1.414-1.414l-6-6a1 1 0 0 0-1.414 0l-6 6a1 1 0 1 0 1.414 1.414L11 7.914V18.5a1 1 0 0 0 1 1"
+                        />
+                      </svg>
+                      <span
+                        class="mx_KeyboardKey_text"
+                      >
+                        ↑
+                      </span>
+                    </kbd>
+                  </div>
+                </li>
+                <li
+                  class="mx_KeyboardShortcut_shortcutRow"
+                >
+                  Collapse a space in the space bar
+                  <div
+                    class="mx_KeyboardShortcut"
+                  >
+                    <kbd>
+                      <svg
+                        aria-hidden="true"
+                        fill="currentColor"
+                        height="16px"
+                        viewBox="0 0 24 24"
+                        width="16px"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M12.207 5.293a1 1 0 0 1 0 1.414L7.914 11H18.5a1 1 0 1 1 0 2H7.914l4.293 4.293a1 1 0 0 1-1.414 1.414l-6-6a1 1 0 0 1 0-1.414l6-6a1 1 0 0 1 1.414 0"
+                        />
+                      </svg>
+                      <span
+                        class="mx_KeyboardKey_text"
+                      >
+                        ←
+                      </span>
+                    </kbd>
+                  </div>
+                </li>
+                <li
+                  class="mx_KeyboardShortcut_shortcutRow"
+                >
+                  Expand a space in the space bar
+                  <div
+                    class="mx_KeyboardShortcut"
+                  >
+                    <kbd>
+                      <svg
+                        aria-hidden="true"
+                        fill="currentColor"
+                        height="16px"
+                        viewBox="0 0 24 24"
+                        width="16px"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M11.793 5.293a1 1 0 0 1 1.414 0l6 6a1 1 0 0 1 0 1.414l-6 6a1 1 0 0 1-1.414-1.414L16.086 13H5.5a1 1 0 1 1 0-2h10.586l-4.293-4.293a1 1 0 0 1 0-1.414"
+                        />
+                      </svg>
+                      <span
+                        class="mx_KeyboardKey_text"
+                      >
+                        →
+                      </span>
                     </kbd>
                   </div>
                 </li>
@@ -1166,9 +1362,23 @@ exports[`KeyboardUserSettingsTab > renders list of keyboard shortcuts 1`] = `
                     class="mx_KeyboardShortcut"
                   >
                     <kbd>
-                       
-                      ↓
-                       
+                      <svg
+                        aria-hidden="true"
+                        fill="currentColor"
+                        height="16px"
+                        viewBox="0 0 24 24"
+                        width="16px"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M12 4.5a1 1 0 0 1 1 1v10.586l4.293-4.293a1 1 0 0 1 1.414 1.414l-6 6a1 1 0 0 1-1.414 0l-6-6a1 1 0 1 1 1.414-1.414L11 16.086V5.5a1 1 0 0 1 1-1"
+                        />
+                      </svg>
+                      <span
+                        class="mx_KeyboardKey_text"
+                      >
+                        ↓
+                      </span>
                     </kbd>
                   </div>
                 </li>
@@ -1180,9 +1390,23 @@ exports[`KeyboardUserSettingsTab > renders list of keyboard shortcuts 1`] = `
                     class="mx_KeyboardShortcut"
                   >
                     <kbd>
-                       
-                      ↑
-                       
+                      <svg
+                        aria-hidden="true"
+                        fill="currentColor"
+                        height="16px"
+                        viewBox="0 0 24 24"
+                        width="16px"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M12 19.5a1 1 0 0 0 1-1V7.914l4.293 4.293a1 1 0 0 0 1.414-1.414l-6-6a1 1 0 0 0-1.414 0l-6 6a1 1 0 1 0 1.414 1.414L11 7.914V18.5a1 1 0 0 0 1 1"
+                        />
+                      </svg>
+                      <span
+                        class="mx_KeyboardKey_text"
+                      >
+                        ↑
+                      </span>
                     </kbd>
                   </div>
                 </li>
