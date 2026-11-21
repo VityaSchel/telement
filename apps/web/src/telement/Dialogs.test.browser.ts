@@ -1220,5 +1220,14 @@ describe("Dialogs", () => {
                 colorOf("--cpd-color-border-interactive-secondary"),
             );
         });
+
+        it("title the choice in 15px semibold, on Compound's type scale", () => {
+            render(
+                `<div class="mx_AccessibleButton mx_SpacePillButton" role="button">Public<div>Open space for anyone</div></div>`,
+            );
+            const pill = getComputedStyle(get(".mx_SpacePillButton"));
+
+            expect([pill.fontSize, pill.fontWeight]).toEqual(["15px", "600"]);
+        });
     });
 });
