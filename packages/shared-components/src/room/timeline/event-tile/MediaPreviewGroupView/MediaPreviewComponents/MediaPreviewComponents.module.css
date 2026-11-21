@@ -20,6 +20,17 @@
     font-weight: 600;
 }
 
+/* A linked title reads as the card's title, as Telegram draws it: in the text's color, which is white in your own
+   bubbles, rather than the browser's default link blue. It is underlined while hovered, as a link. */
+.header a {
+    color: inherit;
+    text-decoration: none;
+}
+
+.header a:hover {
+    text-decoration: underline;
+}
+
 .body {
     font-size: var(--cpd-font-size-body-sm);
     color: var(--cpd-color-text-secondary);

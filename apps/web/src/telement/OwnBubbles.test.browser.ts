@@ -787,6 +787,21 @@ describe("Your own bubbles", () => {
             expect(contrast(WHITE, composite(fill(card), theme.fill))).toBeGreaterThanOrEqual(3);
         });
 
+        it("writes a link preview's linked title in the text's color rather than the browser's link blue: white in your own bubble", async () => {
+            const linkedTitle = PREVIEW.replace(
+                "Element 1.12",
+                `<a href="https://element.io/blog/" target="_blank">Element 1.12</a>`,
+            );
+            const list = render(tile(linkedTitle), tile(linkedTitle, { own: false }));
+            const [own, others] = list.querySelectorAll(".MediaPreviewComponents_header a");
+
+            expect(color(own)).toBe(WHITE);
+            expect(color(others)).toBe(tokenColor("--cpd-color-text-primary", list));
+            expect(getComputedStyle(own).textDecorationLine).toBe("none");
+            await userEvent.hover(own);
+            expect(getComputedStyle(own).textDecorationLine).toBe("underline");
+        });
+
         it("sets hidden media's placeholder apart from the bubble in translucent white, with white text, also when hovered", async () => {
             const hidden = `
                 <div class="mx_EventTile_content">
