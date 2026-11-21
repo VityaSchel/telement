@@ -252,10 +252,17 @@ describe("SpacePanel button styles", () => {
  * The collapsed space panel with Home showing a notification badge, as SpaceButton and NotificationBadgeView render
  * them (with the badge's unhashed class names), and the "+" button below it.
  */
-function renderBadge(badgeType: "dot" | "badge_2char" | "badge_3char", count: string, selected = false): void {
+function renderBadge(
+    badgeType: "dot" | "badge_2char" | "badge_3char",
+    count: string,
+    selected = false,
+    theme = "cpd-theme-light",
+): void {
     const badgeClass = { dot: "dot", badge_2char: "badge2Char", badge_3char: "badge3Char" }[badgeType];
+    // The app puts the theme's class on the body too
+    document.body.className = theme;
     document.body.innerHTML = `
-        <nav class="mx_SpacePanel cpd-theme-light collapsed" style="height: 400px">
+        <nav class="mx_SpacePanel ${theme} collapsed" style="height: 400px">
             <ul class="mx_SpaceTreeLevel">
                 <li class="mx_SpaceItem collapsed">
                     <div class="mx_AccessibleButton mx_SpaceButton ${selected ? "mx_SpaceButton_active" : ""} mx_SpaceButton_narrow" aria-label="Home">
@@ -296,7 +303,10 @@ describe("SpacePanel badges and create button", () => {
         stylesheet = document.createElement("style");
         stylesheet.textContent = `
             @layer compound-tokens, compound-web, shared-components, app-web;
-            @layer compound-tokens { ${compoundTokens} ${compoundSemantic} ${compoundLightTheme} ${compoundLightSemantic} }
+            @layer compound-tokens {
+                ${compoundTokens} ${compoundSemantic}
+                ${compoundLightTheme} ${compoundLightSemantic} ${compoundDarkTheme} ${compoundDarkSemantic}
+            }
             @layer compound-web { ${compoundStyles} }
             @layer shared-components { ${telementTokens} ${notificationBadgeStyles} }
             @layer app-web { ${toBrowserCss(spacePanelStyles, lightTheme)} }
@@ -311,6 +321,7 @@ describe("SpacePanel badges and create button", () => {
 
     afterEach(() => {
         document.body.innerHTML = "";
+        document.body.className = "";
     });
 
     function badge(): HTMLElement {
@@ -335,7 +346,7 @@ describe("SpacePanel badges and create button", () => {
     });
 
     it.each(["badge_2char", "dot"] as const)(
-        "inverts the %s badge of the selected space and rings it in the panel's color, cut out of the plate's corner",
+        "inverts the %s badge of the selected space and, as the light panel is as white, rings it in the plate's color",
         async (badgeType) => {
             renderBadge(badgeType, "3", true);
             const panel = document.querySelector(".mx_SpacePanel")!;
@@ -345,13 +356,30 @@ describe("SpacePanel badges and create button", () => {
                 plate,
             );
             expect(getComputedStyle(badge()).backgroundColor).toBe(tokenColor("--tl-color-on-selection", panel));
-            expect(getComputedStyle(badge()).borderTopColor).toBe(getComputedStyle(panel).backgroundColor);
+            expect(getComputedStyle(badge()).backgroundColor).toBe(getComputedStyle(panel).backgroundColor);
+            expect(getComputedStyle(badge()).borderTopColor).toBe(plate);
             expect(getComputedStyle(badge()).color).toBe(plate);
 
-            // Hovered, the plate darkens and the count with it, while the ring stays the panel's
+            // Hovered, the plate darkens and the count and the ring with it
+            await userEvent.hover(button("Home"));
+            const hovered = tokenColor("--tl-color-bg-selection-hovered", panel);
+            expect(getComputedStyle(badge()).borderTopColor).toBe(hovered);
+            expect(getComputedStyle(badge()).color).toBe(hovered);
+            await userEvent.unhover(button("Home"));
+        },
+    );
+
+    it.each(["badge_2char", "dot"] as const)(
+        "keeps the inverted %s badge's ring in the dark panel's color, cut out of the plate's corner",
+        async (badgeType) => {
+            renderBadge(badgeType, "3", true, "cpd-theme-dark");
+            const panel = document.querySelector(".mx_SpacePanel")!;
+
+            expect(getComputedStyle(badge()).backgroundColor).toBe(tokenColor("--tl-color-on-selection", panel));
+            expect(getComputedStyle(badge()).borderTopColor).toBe(getComputedStyle(panel).backgroundColor);
+            expect(getComputedStyle(badge()).color).toBe(tokenColor("--tl-color-bg-selection", panel));
             await userEvent.hover(button("Home"));
             expect(getComputedStyle(badge()).borderTopColor).toBe(getComputedStyle(panel).backgroundColor);
-            expect(getComputedStyle(badge()).color).toBe(tokenColor("--tl-color-bg-selection-hovered", panel));
             await userEvent.unhover(button("Home"));
         },
     );

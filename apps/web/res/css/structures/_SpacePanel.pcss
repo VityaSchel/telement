@@ -221,11 +221,17 @@ Please see LICENSE files in the repository root for full details.
             }
 
             /* Its badge is inverted, as the selected room's badges are: the accent badge would vanish on the accent
-               plate. It keeps the ring in the panel's color, so it reads as cut out of the tile where it hangs past
-               the plate's corner, rather than outlined in the plate's color there. */
+               plate. In light themes the panel is as white as the badge, so the ring takes the plate's color, which
+               the count is in, and the badge reads as a white pill outlined in it on the tile as where it hangs over
+               the panel. Dark themes keep the ring in the panel's color, so it reads as cut out of the tile there. */
             .mx_SpacePanel_notificationBadge {
                 background-color: var(--tl-color-on-selection);
                 color: var(--tl-color-bg-selection);
+                border-color: currentcolor;
+            }
+
+            :is(.cpd-theme-dark, .cpd-theme-dark-hc) & .mx_SpacePanel_notificationBadge {
+                border-color: var(--cpd-color-bg-canvas-default);
             }
         }
 
