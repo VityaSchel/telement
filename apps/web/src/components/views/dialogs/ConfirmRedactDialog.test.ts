@@ -8,13 +8,14 @@ Please see LICENSE files in the repository root for full details.
 
 // @vitest-environment happy-dom
 
+import { createElement } from "react";
 import { type MatrixClient, type MatrixEvent } from "matrix-js-sdk/src/matrix";
-import { screen, act } from "test-utils-rtl";
+import { screen, act, render } from "test-utils-rtl";
 import userEvent from "@testing-library/user-event";
 import { vi, describe, it, expect, beforeEach } from "vitest";
 
 import { flushPromises, mkEvent, stubClient } from "test-utils";
-import { createRedactEventDialog } from "./ConfirmRedactDialog";
+import ConfirmRedactDialog, { createRedactEventDialog } from "./ConfirmRedactDialog";
 
 describe("ConfirmRedactDialog", () => {
     const roomId = "!room:example.com";
@@ -58,5 +59,20 @@ describe("ConfirmRedactDialog", () => {
         await expect(confirmDeleteVoiceBroadcastStartedEvent()).rejects.toThrow(
             `cannot redact event ${mxEvent.getId()} without room ID`,
         );
+    });
+
+    it("draws Remove as a destructive action", () => {
+        mxEvent = mkEvent({
+            event: true,
+            type: "m.room.message",
+            room: roomId,
+            content: {},
+            user: client.getSafeUserId(),
+        });
+        render(createElement(ConfirmRedactDialog, { event: mxEvent, onFinished: vi.fn() }));
+
+        const remove = screen.getByTestId("dialog-primary-button");
+        expect(remove).toHaveTextContent("Remove");
+        expect(remove).toHaveClass("danger");
     });
 });

@@ -41,6 +41,7 @@ export const useUserInfoIgnoreButtonViewModel = (member: User | RoomMember): Use
             title: _t("user_info|ignore_confirm_title", { user: name }),
             description: <div>{_t("user_info|ignore_confirm_description")}</div>,
             button: _t("action|ignore"),
+            danger: true,
         });
         const [confirmed] = await finished;
 

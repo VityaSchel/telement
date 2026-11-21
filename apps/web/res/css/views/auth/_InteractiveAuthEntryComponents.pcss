@@ -50,7 +50,10 @@ Please see LICENSE files in the repository root for full details.
     align-items: center;
 }
 
-.mx_InteractiveAuthEntryComponents_passwordSection {
+/* Telement: the field keeps the 300px the form had, and the form spans the dialog, so that its footer ends on the
+   dialog's edge */
+.mx_InteractiveAuthEntryComponents_passwordSection > .mx_Field {
+    box-sizing: border-box;
     width: 300px;
 }
 

@@ -97,6 +97,24 @@ describe("InteractiveAuthDialog", function () {
         expect(onFinished).toHaveBeenCalledWith(true, { a: 1 });
     });
 
+    it("ends the password flow in the dialog's footer, whose Cancel closes the dialog", async () => {
+        const onFinished = vi.fn();
+        mockClient.credentials = { userId: "@user:id" };
+        renderComponent({ onFinished, authData: { session: "sess", flows: [{ stages: ["m.login.password"] }] } });
+
+        // Cancel before the action, as in every dialog's footer
+        const [cancel, submit] = screen.getAllByRole("button", { name: /^(Cancel|Continue)$/ });
+        expect(cancel).toHaveTextContent("Cancel");
+        expect(submit).toHaveTextContent("Continue");
+        expect(submit).toHaveAttribute("type", "submit");
+        expect(submit.closest(".mx_Dialog_buttons")).toContainElement(cancel);
+
+        await userEvent.click(cancel);
+        await flushPromises();
+
+        expect(onFinished).toHaveBeenCalledWith(false, null);
+    });
+
     describe("SSO flow", () => {
         it("should close on cancel", () => {
             const onFinished = vi.fn();

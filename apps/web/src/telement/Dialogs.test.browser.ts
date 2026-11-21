@@ -20,10 +20,12 @@ import fontSizes from "../../res/css/_font-sizes.pcss?raw";
 import lightTheme from "../../res/themes/light/css/_light.pcss?raw";
 import spacePillButtonStyles from "../../res/css/structures/_SpacePillButton.pcss?raw";
 import tabbedViewStyles from "../../res/css/structures/_TabbedView.pcss?raw";
+import interactiveAuthEntryStyles from "../../res/css/views/auth/_InteractiveAuthEntryComponents.pcss?raw";
 import addExistingToSpaceDialogStyles from "../../res/css/views/dialogs/_AddExistingToSpaceDialog.pcss?raw";
 import compoundDialogStyles from "../../res/css/views/dialogs/_CompoundDialog.pcss?raw";
 import createRoomDialogStyles from "../../res/css/views/dialogs/_CreateRoomDialog.pcss?raw";
 import createSubspaceDialogStyles from "../../res/css/views/dialogs/_CreateSubspaceDialog.pcss?raw";
+import deactivateAccountDialogStyles from "../../res/css/views/dialogs/_DeactivateAccountDialog.pcss?raw";
 import exportDialogStyles from "../../res/css/views/dialogs/_ExportDialog.pcss?raw";
 import inviteDialogStyles from "../../res/css/views/dialogs/_InviteDialog.pcss?raw";
 import leaveRoomDialogStyles from "../../res/css/views/dialogs/_LeaveRoomDialog.pcss?raw";
@@ -49,10 +51,12 @@ const APP_STYLES = [
     commonStyles,
     spacePillButtonStyles,
     tabbedViewStyles,
+    interactiveAuthEntryStyles,
     addExistingToSpaceDialogStyles,
     compoundDialogStyles,
     createRoomDialogStyles,
     createSubspaceDialogStyles,
+    deactivateAccountDialogStyles,
     exportDialogStyles,
     inviteDialogStyles,
     leaveRoomDialogStyles,
@@ -489,6 +493,55 @@ describe("Dialogs", () => {
             );
 
             expect(getComputedStyle(get("[data-testid=help]")).color).toBe(colorOf("--cpd-color-text-secondary"));
+        });
+    });
+
+    describe("deactivating the account", () => {
+        /** DeactivateAccountDialog at InteractiveAuth's password stage, which ends in the dialog's footer. */
+        function renderDeactivate(): void {
+            renderDialog(
+                "mx_DeactivateAccountDialog",
+                "Deactivate account",
+                `<div class="mx_Dialog_content">
+                    <p>Confirm that you would like to deactivate your account.</p>
+                    <div class="mx_DeactivateAccountDialog_input_section">
+                        <div>
+                            <p>Confirm your identity by entering your account password below.</p>
+                            <form class="mx_InteractiveAuthEntryComponents_passwordSection">
+                                <div class="mx_Field mx_Field_input" data-testid="password">
+                                    <input id="password" type="password" placeholder="Password">
+                                    <label for="password">Password</label>
+                                </div>
+                                <div class="mx_Dialog_buttons">
+                                    <span class="mx_Dialog_buttons_row">
+                                        <button class="mx_LegacyDialogButton cancel" type="button" data-testid="cancel">Cancel</button>
+                                        <button class="mx_LegacyDialogButton mx_Dialog_primary danger" type="submit" data-testid="deactivate">Deactivate account</button>
+                                    </span>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>`,
+            );
+        }
+
+        it("ends in a footer with Cancel, then a red action, 24px from the bottom and end", () => {
+            renderDeactivate();
+            const body = box("[data-testid=body]");
+            const deactivate = box("[data-testid=deactivate]");
+
+            expect([body.right - deactivate.right, body.bottom - deactivate.bottom]).toEqual([24, 24]);
+            expect(deactivate.left - box("[data-testid=cancel]").right).toBe(8);
+            expect(getComputedStyle(get("[data-testid=deactivate]")).backgroundColor).toBe(
+                colorOf("--cpd-color-bg-critical-primary"),
+            );
+        });
+
+        it("keeps the password field 300px wide, the footer 24px under it", () => {
+            renderDeactivate();
+
+            expect(box("[data-testid=password]").width).toBe(300);
+            expect(box(".mx_Dialog_buttons").top - box("[data-testid=password]").bottom).toBe(24);
         });
     });
 

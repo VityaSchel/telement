@@ -21,6 +21,7 @@ import { AuthHeaderModifier } from "../../structures/auth/header/AuthHeaderModif
 import AccessibleButton, { type AccessibleButtonKind, type ButtonEvent } from "../elements/AccessibleButton";
 import Field from "../elements/Field";
 import Spinner from "../elements/Spinner";
+import DialogButtons from "../elements/DialogButtons";
 import CaptchaForm from "./CaptchaForm";
 import { pickBestPolicyLanguage } from "../../../Terms.ts";
 import { EncryptionCardButtons } from "../settings/encryption/EncryptionCardButtons.tsx";
@@ -89,14 +90,20 @@ interface IAuthEntryProps {
     clientSecret: string;
 }
 
+interface IPasswordAuthEntryProps extends IAuthEntryProps {
+    continueText?: string;
+    continueKind?: ContinueKind;
+    onCancel?: () => void;
+}
+
 interface IPasswordAuthEntryState {
     password: string;
 }
 
-export class PasswordAuthEntry extends React.Component<IAuthEntryProps, IPasswordAuthEntryState> {
+export class PasswordAuthEntry extends React.Component<IPasswordAuthEntryProps, IPasswordAuthEntryState> {
     public static LOGIN_TYPE = AuthType.Password;
 
-    public constructor(props: IAuthEntryProps) {
+    public constructor(props: IPasswordAuthEntryProps) {
         super(props);
 
         this.state = {
@@ -134,16 +141,19 @@ export class PasswordAuthEntry extends React.Component<IAuthEntryProps, IPasswor
             error: this.props.errorText,
         });
 
-        let submitButtonOrSpinner;
+        // Telement: the dialog's footer, Cancel before the action at the bottom end, as every dialog's is
+        let footerOrSpinner;
         if (this.props.busy) {
-            submitButtonOrSpinner = <Spinner />;
+            footerOrSpinner = <Spinner />;
         } else {
-            submitButtonOrSpinner = (
-                <input
-                    type="submit"
-                    className="mx_LegacyDialogButton mx_Dialog_primary"
-                    disabled={!this.state.password}
-                    value={_t("action|continue")}
+            footerOrSpinner = (
+                <DialogButtons
+                    primaryButton={this.props.continueText || _t("action|continue")}
+                    primaryButtonClass={this.props.continueKind === "danger" ? "danger" : undefined}
+                    primaryIsSubmit={true}
+                    primaryDisabled={!this.state.password}
+                    hasCancel={!!this.props.onCancel}
+                    onCancel={this.props.onCancel}
                 />
             );
         }
@@ -171,7 +181,7 @@ export class PasswordAuthEntry extends React.Component<IAuthEntryProps, IPasswor
                         onChange={this.onPasswordFieldChange}
                     />
                     {errorSection}
-                    <div className="mx_button_row">{submitButtonOrSpinner}</div>
+                    {footerOrSpinner}
                 </form>
             </div>
         );

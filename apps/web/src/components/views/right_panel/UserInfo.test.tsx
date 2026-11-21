@@ -348,7 +348,11 @@ describe("<UserInfo />", () => {
                     renderComponent();
 
                     await userEvent.click(screen.getByRole("button", { name: "Ignore" }));
-                    expect(modalSpy).toHaveBeenCalled();
+                    // Ignoring is destructive, so its confirmation's action is red
+                    expect(modalSpy).toHaveBeenCalledWith(
+                        expect.anything(),
+                        expect.objectContaining({ button: "Ignore", danger: true }),
+                    );
                     expect(mockClient.setIgnoredUsers).toHaveBeenLastCalledWith([member.userId]);
                 } finally {
                     Modal.createDialog = originalCreateDialog;

@@ -8,14 +8,14 @@ Please see LICENSE files in the repository root for full details.
 */
 
 import React, { type JSX } from "react";
-import { type AuthType, type IAuthData } from "matrix-js-sdk/src/interactive-auth";
+import { AuthType, type IAuthData } from "matrix-js-sdk/src/interactive-auth";
 import { logger } from "matrix-js-sdk/src/logger";
 import { type MatrixClient } from "matrix-js-sdk/src/matrix";
 
 import { MatrixClientPeg } from "../../../MatrixClientPeg";
 import { _t } from "../../../languageHandler";
 import InteractiveAuth, { ERROR_USER_CANCELLED, type InteractiveAuthCallback } from "../../structures/InteractiveAuth";
-import { type ContinueKind, SSOAuthEntry } from "../auth/InteractiveAuthEntryComponents";
+import { type ContinueKind, DEFAULT_PHASE, SSOAuthEntry } from "../auth/InteractiveAuthEntryComponents";
 import StyledCheckbox from "../elements/StyledCheckbox";
 import BaseDialog from "./BaseDialog";
 import defaultDispatcher from "../../../dispatcher/dispatcher";
@@ -24,7 +24,7 @@ import { Action } from "../../../dispatcher/actions";
 type DialogAesthetics = Partial<{
     [x in AuthType]: {
         [x: number]: {
-            body: string;
+            body?: string;
             continueText?: string;
             continueKind?: ContinueKind;
         };
@@ -82,6 +82,13 @@ export default class DeactivateAccountDialog extends React.Component<IProps, ISt
         const DEACTIVATE_AESTHETICS: DialogAesthetics = {
             [SSOAuthEntry.LOGIN_TYPE]: dialogAesthetics,
             [SSOAuthEntry.UNSTABLE_LOGIN_TYPE]: dialogAesthetics,
+            // Telement: the password's submit button is the dialog's destructive action, named after it
+            [AuthType.Password]: {
+                [DEFAULT_PHASE]: {
+                    continueText: _t("settings|general|deactivate_section"),
+                    continueKind: "danger",
+                },
+            },
         };
 
         const aesthetics = DEACTIVATE_AESTHETICS[stage];
@@ -202,7 +209,6 @@ export default class DeactivateAccountDialog extends React.Component<IProps, ISt
             <BaseDialog
                 className="mx_DeactivateAccountDialog"
                 onFinished={this.props.onFinished}
-                titleClass="danger"
                 title={_t("settings|general|deactivate_section")}
             >
                 <div className="mx_Dialog_content">
