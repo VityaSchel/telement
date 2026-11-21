@@ -109,18 +109,21 @@ const BetaCard: React.FC<IProps> = ({ title: titleOverride, featureId }) => {
                     {refreshWarning && <div className="mx_BetaCard_refreshWarning">{refreshWarning}</div>}
                     {faq && <div className="mx_BetaCard_faq">{faq(value)}</div>}
                 </div>
-                <div className="mx_BetaCard_columns_image_wrapper">
-                    <img className="mx_BetaCard_columns_image" src={image} alt="" />
-                    {/* Telement: dark themes show this one instead (_BetaCard.pcss) */}
-                    {darkImage && (
-                        <img
-                            className="mx_BetaCard_columns_image mx_BetaCard_columns_image_dark"
-                            src={darkImage}
-                            alt=""
-                            loading="lazy"
-                        />
-                    )}
-                </div>
+                {/* Telement: without a picture, nothing takes the columns' gap beside the description */}
+                {image && (
+                    <div className="mx_BetaCard_columns_image_wrapper">
+                        <img className="mx_BetaCard_columns_image" src={image} alt="" />
+                        {/* Telement: dark themes show this one instead (_BetaCard.pcss) */}
+                        {darkImage && (
+                            <img
+                                className="mx_BetaCard_columns_image mx_BetaCard_columns_image_dark"
+                                src={darkImage}
+                                alt=""
+                                loading="lazy"
+                            />
+                        )}
+                    </div>
+                )}
             </div>
             {extraSettings && value && (
                 <div className="mx_BetaCard_relatedSettings">

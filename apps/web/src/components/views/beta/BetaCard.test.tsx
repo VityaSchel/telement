@@ -68,4 +68,11 @@ describe("<BetaCard />", () => {
 
         expect(container.querySelectorAll(".mx_BetaCard_columns_image_wrapper > img")).toHaveLength(1);
     });
+
+    it("leaves out the illustration's column when a beta has no illustration, so the description takes its room", () => {
+        const { container } = render(<BetaCard featureId={featureId} />);
+
+        expect(container.querySelector(".mx_BetaCard_columns_image_wrapper")).toBeNull();
+        expect(container.querySelector(".mx_BetaCard_columns_image")).toBeNull();
+    });
 });
