@@ -439,6 +439,7 @@ describe("Voice, audio, poll and file controls", () => {
             const radio = list.querySelector('[data-option="Pizza"] input + div')!;
 
             expect(fill(radio)).toBe(theme.fill);
+            expect(getComputedStyle(radio).borderTopColor).toBe(theme.radioRing);
             expect(getComputedStyle(radio.querySelector("svg")!).color).toBe(WHITE);
             for (const bar of list.querySelectorAll(".mx_PollOption_popularityAmount")) {
                 expect(fill(bar)).toBe(theme.line);

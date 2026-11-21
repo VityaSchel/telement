@@ -78,11 +78,12 @@ Please see LICENSE files in the repository root for full details.
     }
 }
 
-/* An ended poll's radios are disabled, so the winner's check takes the accent back from the disabled gray */
+/* An ended poll's radios are disabled, so the winner's check takes the accent back from the disabled gray, and the
+   ring a live choice has where Telement gives it one (telement/tokens.css) */
 .mx_PollOption_ended.mx_PollOption_checked {
     .mx_StyledRadioButton_checked {
         input[type="radio"]:checked + div {
-            border-color: var(--cpd-color-bg-accent-rest);
+            border-color: var(--tl-color-border-radio-checked, var(--cpd-color-bg-accent-rest));
             background-color: var(--cpd-color-bg-accent-rest);
         }
     }
