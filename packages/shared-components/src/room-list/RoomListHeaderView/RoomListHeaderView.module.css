@@ -11,6 +11,12 @@
     padding: 0 var(--cpd-space-3x);
 }
 
+/* A button whose menu is open draws its glyph in the accent, with no fill of its own, as the room header's buttons do.
+   Hovered, it keeps Compound's hover fill and the accent glyph. */
+.header [aria-expanded="true"] svg {
+    fill: var(--cpd-color-icon-accent-primary);
+}
+
 .container {
     flex: 1;
     padding-bottom: var(--cpd-space-3x);
