@@ -238,6 +238,27 @@ describe("<SpaceSettingsVisibilityTab />", () => {
                 expect(getErrorMessage(component)).toEqual("Failed to update the history visibility of this space");
             });
 
+            it("puts the preview toggle in a Preview group of its own, its help ending with the recommendation", () => {
+                const space = makeMockSpace(mockMatrixClient, joinRule, guestRule, historyRule);
+                const component = getComponent({ space });
+                const toggle = getHistoryVisibilityToggle(component);
+                const group = toggle.closest(".mx_SettingsSubsection")!;
+
+                expect(group.querySelector(".mx_SettingsSubsectionHeading")).toHaveTextContent("Preview");
+                expect(component.getByTestId("access-fieldset")).not.toContainElement(toggle);
+                expect(group).toHaveTextContent(
+                    "Allow people to preview your space before they join. Recommended for public spaces.",
+                );
+                expect(component.queryByText("Recommended for public spaces.", { selector: "strong" })).toBeNull();
+            });
+
+            it("doesn't repeat the tab's name as a heading, as the dialog's title names the tab", () => {
+                const space = makeMockSpace(mockMatrixClient, joinRule, guestRule, historyRule);
+                const component = getComponent({ space });
+
+                expect(component.queryByRole("heading", { name: /Security & privacy/i })).toBeNull();
+            });
+
             it("disables room preview toggle when history visibility changes are not allowed", () => {
                 const space = makeMockSpace(mockMatrixClient, joinRule, guestRule, historyRule);
                 vi.mocked(space.currentState.maySendStateEvent).mockReturnValue(false);

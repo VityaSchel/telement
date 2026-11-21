@@ -27,6 +27,7 @@ import { useRoomState } from "../../../hooks/useRoomState";
 import SettingsFieldset from "../settings/SettingsFieldset";
 import { useAsyncMemo } from "../../../hooks/useAsyncMemo";
 import { SettingsSection } from "../settings/shared/SettingsSection";
+import { SettingsSubsection } from "../settings/shared/SettingsSubsection";
 import SettingsTab from "../settings/tabs/SettingsTab";
 
 interface IProps {
@@ -137,9 +138,17 @@ const SpaceSettingsVisibilityTab: React.FC<IProps> = ({ matrixClient: cli, space
         );
     }
 
+    const preventSubmit = (evt: React.FormEvent): void => {
+        evt.preventDefault();
+        evt.stopPropagation();
+    };
+
+    // The dialog's title names the tab, so the section has no heading of its own. Previewing the space is about its
+    // history rather than who can join, so it is a group of its own under the join rules rather than a row after
+    // "Anyone", and the recommendation is part of its help.
     return (
         <SettingsTab>
-            <SettingsSection heading={_t("room_settings|visibility|title")}>
+            <SettingsSection>
                 {error && (
                     <div data-testid="space-settings-error" className="mx_SpaceRoomView_errorText">
                         {error}
@@ -156,13 +165,11 @@ const SpaceSettingsVisibilityTab: React.FC<IProps> = ({ matrixClient: cli, space
                         onError={(): void => setError(_t("room_settings|visibility|error_failed_save"))}
                         closeSettingsFn={closeSettingsFn}
                     />
-                    <Form.Root
-                        onSubmit={(evt) => {
-                            evt.preventDefault();
-                            evt.stopPropagation();
-                        }}
-                    >
-                        {advancedSection}
+                    {advancedSection && <Form.Root onSubmit={preventSubmit}>{advancedSection}</Form.Root>}
+                </SettingsFieldset>
+
+                <SettingsSubsection heading={_t("telement|space_settings|preview")}>
+                    <Form.Root onSubmit={preventSubmit}>
                         <SettingsToggleInput
                             name="space-history-visibility"
                             checked={historyVisibility === HistoryVisibility.WorldReadable}
@@ -171,18 +178,15 @@ const SpaceSettingsVisibilityTab: React.FC<IProps> = ({ matrixClient: cli, space
                                     evt.target.checked ? HistoryVisibility.WorldReadable : HistoryVisibility.Shared,
                                 );
                             }}
-                            helpMessage={_t("room_settings|visibility|history_visibility_anyone_space_description")}
+                            helpMessage={`${_t("room_settings|visibility|history_visibility_anyone_space_description")} ${_t(
+                                "room_settings|visibility|history_visibility_anyone_space_recommendation",
+                            )}`}
                             disabled={!canSetHistoryVisibility}
                             disabledMessage={_t("room_settings|visibility|history_visibility_anyone_space_disabled")}
                             label={_t("room_settings|visibility|history_visibility_anyone_space")}
                         />
-                        <p>
-                            <strong>
-                                {_t("room_settings|visibility|history_visibility_anyone_space_recommendation")}
-                            </strong>
-                        </p>
                     </Form.Root>
-                </SettingsFieldset>
+                </SettingsSubsection>
 
                 {addressesSection}
             </SettingsSection>

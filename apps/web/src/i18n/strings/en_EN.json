@@ -3188,6 +3188,9 @@
             "failed_unpin": "Failed to unpin room",
             "you": "You"
         },
+        "space_settings": {
+            "preview": "Preview"
+        },
         "timeline": {
             "context_menu": {
                 "collapse_quotes": "Collapse quotes",
