@@ -52,6 +52,12 @@ Please see LICENSE files in the repository root for full details.
     > :is(.mx_Field, :has(.mx_Field), .mx_AutocompleteInput) + :is(.mx_Field, :has(.mx_Field)) {
         margin-top: calc(var(--cpd-space-4x) - var(--cpd-space-2x));
     }
+
+    /* Radios one under another, such as who can read the history, are 12px apart, as Compound's radios are in a list
+       (Show media in timeline) */
+    > .mx_StyledRadioButton + .mx_StyledRadioButton {
+        margin-top: calc(var(--cpd-space-3x) - var(--cpd-space-2x));
+    }
 }
 
 :is(.mx_SettingsSubsection_content, .mx_SettingsFieldset_content) .mx_SettingsFieldset_content {

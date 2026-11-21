@@ -683,6 +683,32 @@ describe.each(THEMES.map(([theme]) => theme))("Settings content in %s", (theme) 
             expect(box("#show-advanced").top - (box("#description").top + descriptionLine)).toBe(16);
             expect(box("#access-card").bottom - box("#show-advanced").bottom).toBe(16);
         });
+
+        /** Who can read the history, as StyledRadioGroup renders it in a SettingsFieldset of a settings tab. */
+        const history = `
+            <div class="mx_SettingsTab">
+                <fieldset class="mx_SettingsFieldset">
+                    <legend class="mx_SettingsFieldset_legend">Who can read history?</legend>
+                    <div class="mx_SettingsFieldset_content">
+                        ${radio("Invited", true)}${radio("Members", false)}${radio("Anyone", false)}
+                    </div>
+                </fieldset>
+            </div>
+        `;
+
+        it("start a settings radio's label 12px after it, as on Compound's radios", () => {
+            render(theme, history);
+            const ring = box("#radio-Invited input + div");
+
+            expect(textStart("#radio-Invited .mx_StyledRadioButton_content") - ring.right).toBe(12);
+        });
+
+        it("keep a settings list of radios 12px apart, as Compound's radios in a list are", () => {
+            render(theme, history);
+
+            expect(box("#radio-Members").top - box("#radio-Invited").bottom).toBe(12);
+            expect(box("#radio-Anyone").top - box("#radio-Members").bottom).toBe(12);
+        });
     });
 
     describe("disclosures", () => {

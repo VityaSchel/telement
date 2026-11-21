@@ -31,6 +31,12 @@ Please see LICENSE files in the repository root for full details.
 
         margin-left: 8px;
         margin-right: 8px;
+
+        /* Telement: in settings the label starts 12px after the radio, as on Compound's radios beside it (InlineField)
+           and the join rules */
+        .mx_SettingsTab & {
+            margin-inline: var(--cpd-space-3x) var(--cpd-space-2x);
+        }
     }
 
     .mx_StyledRadioButton_spacer {
