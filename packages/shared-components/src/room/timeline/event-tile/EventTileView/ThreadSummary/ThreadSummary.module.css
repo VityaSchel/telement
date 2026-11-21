@@ -99,7 +99,8 @@
     bottom: 0;
     width: 60px;
     box-sizing: border-box;
-    background: linear-gradient(270deg, var(--cpd-color-bg-canvas-default) 50%, transparent 100%);
+    /* The text fades into the card's own fill under the chevron, not into the page's */
+    background: linear-gradient(270deg, var(--cpd-color-bg-subtle-secondary) 50%, transparent 100%);
     opacity: 0;
     transform: translateX(60px);
     transition: all 0.1s ease-in-out;

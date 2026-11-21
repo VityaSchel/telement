@@ -42,3 +42,23 @@ describe("Thread summary insets", () => {
         }
     });
 });
+
+describe("Thread summary's chevron", () => {
+    it.each(["cpd-theme-light", "cpd-theme-dark"])(
+        "fades the text into the card's own fill in %s, rather than the page's, which would show as a patch behind it",
+        (theme) => {
+            render(
+                <div className={theme}>
+                    <Default />
+                </div>,
+            );
+            const summary = screen.getByRole("button");
+            const chevron = summary.querySelector<HTMLElement>("[class*='chevron']")!;
+            const fill = getComputedStyle(summary).backgroundColor;
+
+            expect(getComputedStyle(chevron).backgroundImage).toBe(
+                `linear-gradient(270deg, ${fill} 50%, rgba(0, 0, 0, 0) 100%)`,
+            );
+        },
+    );
+});
