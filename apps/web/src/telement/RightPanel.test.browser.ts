@@ -429,6 +429,17 @@ describe("Right panel", () => {
         );
 
         it.each(["ltr", "rtl"])(
+            "stops the line under the member count on the content edge at both ends, as room info's dividers do (%s)",
+            (dir) => {
+                const card = renderMemberList(dir);
+                const header = card.querySelector(".mx_MemberListHeaderView")!;
+
+                expect(getComputedStyle(header).borderBottomWidth).toBe("1px");
+                expect(insets(header, card)).toEqual({ start: CONTENT_EDGE, end: CONTENT_EDGE });
+            },
+        );
+
+        it.each(["ltr", "rtl"])(
             "puts the avatar 12px from the tile's start, top and bottom and ends the tile's content on the content edge (%s)",
             (dir) => {
                 const card = renderMemberList(dir);
