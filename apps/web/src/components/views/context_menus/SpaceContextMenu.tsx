@@ -168,8 +168,9 @@ const SpaceContextMenu: React.FC<IProps> = ({ space, hideHeader, onFinished, ...
             onFinished();
         };
 
+        // Its own group under a separator, titled like Compound's menus title theirs
         newRoomSection = (
-            <>
+            <IconizedContextMenuOptionList>
                 <div data-testid="add-to-space-header" className="mx_SpacePanel_contextMenu_separatorLabel">
                     {_t("action|add")}
                 </div>
@@ -201,7 +202,7 @@ const SpaceContextMenu: React.FC<IProps> = ({ space, hideHeader, onFinished, ...
                         <BetaPill />
                     </IconizedContextMenuOption>
                 )}
-            </>
+            </IconizedContextMenuOptionList>
         );
     }
 
@@ -255,8 +256,8 @@ const SpaceContextMenu: React.FC<IProps> = ({ space, hideHeader, onFinished, ...
                 {devtoolsOption}
                 {settingsOption}
                 {leaveOption}
-                {newRoomSection}
             </IconizedContextMenuOptionList>
+            {newRoomSection}
         </IconizedContextMenu>
     );
 };

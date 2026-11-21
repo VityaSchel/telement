@@ -8,6 +8,9 @@ Please see LICENSE files in the repository root for full details.
 import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
 import { userEvent } from "vitest/browser";
 import compoundTokens from "@vector-im/compound-design-tokens/assets/web/css/cpd-common-base.css?raw";
+import compoundSemantic from "@vector-im/compound-design-tokens/assets/web/css/cpd-common-semantic.css?raw";
+import compoundLightTheme from "@vector-im/compound-design-tokens/assets/web/css/cpd-theme-light-base.css?raw";
+import compoundLightSemantic from "@vector-im/compound-design-tokens/assets/web/css/cpd-theme-light-semantic.css?raw";
 import sharedComponentsStyles from "@element-hq/web-shared-components/dist/element-web-shared-components.css?raw";
 
 import contextualMenuStyles from "../../../../res/css/structures/_ContextualMenu.pcss?raw";
@@ -57,6 +60,36 @@ function renderSpaceMenu(): void {
     `;
 }
 
+/** The space's menu with the group of things to add to it after its options, as SpaceContextMenu renders it. */
+function renderSpaceMenuWithAddGroup(): void {
+    document.body.innerHTML = `
+        <div class="mx_ContextualMenu" id="menu" style="position: static">
+            <ul role="none" class="mx_IconizedContextMenu mx_SpacePanel_contextMenu mx_IconizedContextMenu_compact">
+                <div class="mx_SpacePanel_contextMenu_header">My space</div>
+                <div class="mx_IconizedContextMenu_optionList">
+                    ${option("home", "Space home")}
+                    ${option("settings", "Settings")}
+                </div>
+                <div class="mx_IconizedContextMenu_optionList mx_IconizedContextMenu_optionList_notFirst" id="addGroup">
+                    <div class="mx_SpacePanel_contextMenu_separatorLabel" id="addLabel">Add</div>
+                    ${option("room", "Room")}
+                    ${option("space", "Space")}
+                </div>
+            </ul>
+        </div>
+    `;
+}
+
+/** The color a token resolves to. */
+function tokenColor(token: string): string {
+    const probe = document.createElement("span");
+    probe.style.color = `var(${token})`;
+    document.body.append(probe);
+    const color = getComputedStyle(probe).color;
+    probe.remove();
+    return color;
+}
+
 function rectOf(id: string): DOMRect {
     return document.getElementById(id)!.getBoundingClientRect();
 }
@@ -67,7 +100,7 @@ describe("IconizedContextMenu", () => {
         // The browser does the nesting. The SCSS variables only set colours, which these tests don't look at, but a
         // border needs a valid colour to be drawn.
         stylesheet.textContent = `
-            ${compoundTokens}
+            ${compoundTokens} ${compoundSemantic} ${compoundLightTheme} ${compoundLightSemantic}
             ${sharedComponentsStyles}
             :root {
                 --cpd-color-border-interactive-secondary: gray;
@@ -209,5 +242,29 @@ describe("IconizedContextMenu", () => {
         expect(header.top - menu.top).toBe(12);
         expect(getComputedStyle(document.getElementById("options")!).borderTopWidth).toBe("1px");
         expect(separator.top - header.bottom).toBe(12);
+    });
+
+    it("titles the space menu's Add group with a 32px row under a separator, its text on the items' content edge", () => {
+        renderSpaceMenuWithAddGroup();
+        const menu = rectOf("menu");
+        const label = document.getElementById("addLabel")!;
+        const text = document.createRange();
+        text.selectNodeContents(label);
+        const style = getComputedStyle(label);
+
+        // The separator 2px under the options before it, the title row 2px under the separator, as items are
+        expect(getComputedStyle(document.getElementById("addGroup")!).borderTopWidth).toBe("1px");
+        expect(rectOf("addGroup").top - rectOf("settings").bottom).toBe(2);
+        expect(rectOf("addLabel").top - rectOf("addGroup").top).toBe(2 + 1);
+        expect(rectOf("addLabel").height).toBe(32);
+        expect(rectOf("room").top).toBe(rectOf("addLabel").bottom);
+        // Compound's menu title text: 13px semibold in the secondary color, centered on its row
+        expect(style.fontSize).toBe("13px");
+        expect(style.fontWeight).toBe("600");
+        expect(style.color).toBe(tokenColor("--cpd-color-text-secondary"));
+        expect(text.getBoundingClientRect().left - menu.left).toBe(16);
+        const textBox = text.getBoundingClientRect();
+        // Within a pixel: the text's box follows the fallback font's metrics, which aren't symmetric
+        expect(Math.abs(textBox.top + textBox.height / 2 - (rectOf("addLabel").top + 16))).toBeLessThanOrEqual(1);
     });
 });

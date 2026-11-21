@@ -192,6 +192,21 @@ describe("<SpaceContextMenu />", () => {
             expect(screen.queryByTestId("new-subspace-option")).not.toBeInTheDocument();
         });
 
+        it("puts the section in a group of its own under a separator, titled before its options", () => {
+            vi.mocked(shouldShowSpaceSettings).mockReturnValue(false);
+            renderComponent({ space });
+
+            const header = screen.getByTestId("add-to-space-header");
+            const group = header.parentElement!;
+            expect(group).toHaveClass(
+                "mx_IconizedContextMenu_optionList",
+                "mx_IconizedContextMenu_optionList_notFirst",
+            );
+            expect(group.firstElementChild).toBe(header);
+            expect(group).toContainElement(screen.getByTestId("new-room-option"));
+            expect(group).not.toContainElement(screen.getByTestId("leave-option"));
+        });
+
         it("renders section with add space button when UIComponent customisation allows CreateSpace", () => {
             // only allow CreateSpaces
             vi.mocked(shouldShowComponent).mockImplementation((feature) => feature === UIComponent.CreateSpaces);

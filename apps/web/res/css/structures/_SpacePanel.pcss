@@ -396,11 +396,16 @@ Please see LICENSE files in the repository root for full details.
         white-space: nowrap;
     }
 
+    /* The title of the Add group under its separator: a 32px row like the items, in the 13px semibold secondary text
+       of Compound's menu titles, on the edge of the items' content */
     .mx_SpacePanel_contextMenu_separatorLabel {
-        color: $tertiary-content;
-        font-size: $font-10px;
-        line-height: $font-12px;
-        font-weight: var(--cpd-font-weight-semibold);
+        display: flex;
+        align-items: center;
+        box-sizing: border-box;
+        min-block-size: var(--tl-menu-row-size);
+        color: var(--cpd-color-text-secondary);
+        font: var(--cpd-font-body-sm-semibold);
+        letter-spacing: var(--cpd-font-letter-spacing-body-sm);
     }
 }
 
