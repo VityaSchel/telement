@@ -75,7 +75,7 @@ exports[`<PinnedMessagesCard /> > should show the empty state when there are no 
         <p
           class="_typography _font-body-md-regular"
         >
-          Select a message and choose “Pin” to it include here.
+          Right-click a message and choose “Pin” to add it here.
         </p>
       </div>
     </div>

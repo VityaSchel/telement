@@ -230,7 +230,8 @@ const ThreadPanel: React.FC<IProps> = ({ roomId, onClose, permalinkCreator }) =>
                                 <EmptyState
                                     Icon={ThreadsIcon}
                                     title={_t("threads|empty_title")}
-                                    description={_t("threads|empty_description", {
+                                    // Telement: messages have no hover toolbar, their actions are in the right-click menu
+                                    description={_t("telement|threads|empty_description", {
                                         replyInThread: _t("action|reply_in_thread"),
                                     })}
                                 />

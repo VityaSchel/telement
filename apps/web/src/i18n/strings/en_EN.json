@@ -1805,7 +1805,6 @@
         "extensions_empty_title": "Boost productivity with more tools, widgets and bots",
         "files_button": "Files",
         "pinned_messages": {
-            "empty_description": "Select a message and choose “%(pinAction)s” to it include here.",
             "empty_title": "Pin important messages so that they can be easily discovered",
             "header": {
                 "one": "1 Pinned message",
@@ -3180,7 +3179,10 @@
             "open_matrix_client_other_device": "Open your Matrix client on your other device"
         },
         "right_panel": {
-            "pin_to_top": "Pin to top"
+            "pin_to_top": "Pin to top",
+            "pinned_messages": {
+                "empty_description": "Right-click a message and choose “%(pinAction)s” to add it here."
+            }
         },
         "room": {
             "enable_encryption_prompt": "<a>Enable encryption in settings</a>.",
@@ -3194,6 +3196,9 @@
         },
         "space_settings": {
             "preview": "Preview"
+        },
+        "threads": {
+            "empty_description": "Right-click a message and choose “%(replyInThread)s”."
         },
         "timeline": {
             "context_menu": {
@@ -3238,7 +3243,6 @@
             "one": "%(count)s reply",
             "other": "%(count)s replies"
         },
-        "empty_description": "Use “%(replyInThread)s” when hovering over a message.",
         "empty_title": "Threads help keep your conversations on-topic and easy to track.",
         "mark_all_read": "Mark all as read",
         "my_threads": "My threads",

@@ -189,6 +189,13 @@ describe("ThreadPanel", () => {
             return { sender: event.event.sender ?? null, content: event.event.content?.body ?? null };
         }
 
+        it("points to the message menu, as Telement shows no toolbar on hover, when the room has no threads", async () => {
+            render(<TestThreadPanel />, clientAndSDKContextRenderOptions(createTestClient(), SDKContextClass.instance));
+
+            expect(await screen.findByText("Right-click a message and choose “Reply in thread”.")).toBeInTheDocument();
+            expect(screen.queryByText(/hovering/)).not.toBeInTheDocument();
+        });
+
         it("correctly filters Thread List with multiple threads", async () => {
             const otherThread = mkThread({
                 room,

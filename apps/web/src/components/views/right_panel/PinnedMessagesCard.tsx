@@ -70,7 +70,8 @@ export function PinnedMessagesCard({ room, onClose, permalinkCreator }: PinnedMe
             <EmptyState
                 Icon={PinIcon}
                 title={_t("right_panel|pinned_messages|empty_title")}
-                description={_t("right_panel|pinned_messages|empty_description", {
+                // Telement: the action is in the message's right-click menu
+                description={_t("telement|right_panel|pinned_messages|empty_description", {
                     pinAction: _t("action|pin"),
                 })}
             />
