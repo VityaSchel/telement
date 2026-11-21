@@ -146,13 +146,14 @@ const lineStateMatrix = [
     hook: keyof typeof styles;
 }>;
 
+/** The time is drawn at the end of the message's last line, so it ends the line, and Tab reaches it last. */
 const groupLineSlotOrder = [
     "styling-contract-contextMenu",
-    "event-tile-slot-timestamp",
     "event-tile-slot-padlock",
     "event-tile-slot-replyChain",
     "event-tile-slot-body",
     "event-tile-slot-actionBar",
+    "event-tile-slot-timestamp",
 ];
 
 const groupRootSlotOrder = [
@@ -164,8 +165,19 @@ const groupRootSlotOrder = [
     "event-tile-slot-receipt",
 ];
 
-/** In bubbles a message's reactions are at the bottom of its bubble, so they end the line. */
-const bubbleLineSlotOrder = [...groupLineSlotOrder, "event-tile-slot-footer"];
+/**
+ * In bubbles a message's reactions are at the bottom of its bubble, before the time in its corner, so they precede the
+ * time at the line's end.
+ */
+const bubbleLineSlotOrder = [
+    "styling-contract-contextMenu",
+    "event-tile-slot-padlock",
+    "event-tile-slot-replyChain",
+    "event-tile-slot-body",
+    "event-tile-slot-actionBar",
+    "event-tile-slot-footer",
+    "event-tile-slot-timestamp",
+];
 
 /** In bubbles an informational row's time follows its text, at the end of its last line. */
 const bubbleInfoLineSlotOrder = [

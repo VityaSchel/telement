@@ -95,7 +95,8 @@ export function EventTileView({
     // as an emote or a picture without a caption, keep them under the message.
     const footerInLine = avatarFollowsLine && !root.state.noBubble && !timestampOverMedia;
     // In bubbles an informational row ends its text with its time, as a bubble ends its last line, so the time follows
-    // the text instead of preceding it.
+    // the text. Elsewhere the time is drawn at the end of the message's last line, or in the bubble's corner after its
+    // reactions, so it ends the line: Tab reaches it after the message's links and reactions, as they are drawn.
     const timestampEndsText = layout === "bubble" && !!root.state.info;
 
     const lineClassName = classNames(styles.line, classNameOverrides?.line, {
@@ -304,12 +305,12 @@ export function EventTileView({
             {!avatarFollowsLine && renderSlot("avatar")}
             <div id={root.id} data-testid="event-tile-line" className={lineClassName}>
                 {renderSlot("contextMenu")}
-                {!timestampEndsText && renderLineTimestamp()}
                 {renderSlots("padlock", "replyChain")}
                 {renderBody()}
                 {timestampEndsText && renderLineTimestamp()}
                 {renderSlot("actionBar")}
                 {footerInLine && renderSlot("footer")}
+                {!timestampEndsText && renderLineTimestamp()}
             </div>
             {avatarFollowsLine && renderSlot("avatar")}
             {!footerInLine && renderSlot("footer")}
