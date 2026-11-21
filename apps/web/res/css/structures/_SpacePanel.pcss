@@ -191,6 +191,11 @@ Please see LICENSE files in the repository root for full details.
             }
         }
 
+        /* Pressed, it takes the pressed fill, a step past the hover fill; pressing its "…" presses only that */
+        &:active:not(:has(.mx_SpaceButton_menuButton:active)) .mx_SpaceButton_selectionWrapper {
+            background-color: var(--cpd-color-bg-action-secondary-pressed);
+        }
+
         /* The selected space is a plate in the selection color with its name and icons in white, as the selected room
            is. Home's and the other icons drop their gray tile on it. */
         &.mx_SpaceButton_active {
@@ -209,6 +214,16 @@ Please see LICENSE files in the repository root for full details.
 
                 .mx_SpacePanel_notificationBadge {
                     color: var(--tl-color-bg-selection-hovered);
+                }
+            }
+
+            &:active:not(:has(.mx_SpaceButton_menuButton:active)) {
+                .mx_SpaceButton_selectionWrapper {
+                    background-color: var(--tl-color-bg-selection-pressed);
+                }
+
+                .mx_SpacePanel_notificationBadge {
+                    color: var(--tl-color-bg-selection-pressed);
                 }
             }
 

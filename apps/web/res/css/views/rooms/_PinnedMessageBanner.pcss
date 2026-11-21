@@ -22,6 +22,16 @@
     /* From figma */
     box-shadow: 0 var(--cpd-space-2x) var(--cpd-space-6x) calc(var(--cpd-space-2x) * -1) rgb(27, 29, 34, 0.1);
 
+    /* Telement: the banner is filled in the rows' hover gray while the message it shows is hovered, and a step further
+       while pressed, as the arrow cursor on every control doesn't show that it can be clicked */
+    &:has(> .mx_PinnedMessageBanner_main:hover) {
+        background-color: var(--cpd-color-bg-action-tertiary-hovered);
+    }
+
+    &:has(> .mx_PinnedMessageBanner_main:active) {
+        background-color: var(--cpd-color-bg-action-tertiary-selected);
+    }
+
     .mx_PinnedMessageBanner_main {
         color: inherit;
         background: transparent;

@@ -190,6 +190,7 @@ Please see LICENSE files in the repository root for full details.
     /* The selected room: the accent with white text, as in Telegram's day themes */
     --tl-color-bg-selection: var(--tl-accent-900);
     --tl-color-bg-selection-hovered: var(--tl-accent-1000);
+    --tl-color-bg-selection-pressed: var(--tl-accent-1100);
     --tl-color-on-selection: #ffffff;
 }
 
@@ -206,6 +207,7 @@ Please see LICENSE files in the repository root for full details.
 
     --tl-color-bg-selection: #3d6a97;
     --tl-color-bg-selection-hovered: #46739f;
+    --tl-color-bg-selection-pressed: #4f7ca7;
 }
 
 /* Three steps down, so that white on the fills is 7:1 as in light high contrast */
@@ -217,6 +219,7 @@ Please see LICENSE files in the repository root for full details.
 
     --tl-color-bg-selection: #2b5784;
     --tl-color-bg-selection-hovered: #33608c;
+    --tl-color-bg-selection-pressed: #3b6994;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -228,7 +231,25 @@ Please see LICENSE files in the repository root for full details.
 
         --tl-color-bg-selection: #3d6a97;
         --tl-color-bg-selection-hovered: #46739f;
+        --tl-color-bg-selection-pressed: #4f7ca7;
     }
+}
+
+/*
+ * One hover fill and one pressed fill for rows, menu items and tabs, as strong as the room list's. Compound's secondary
+ * hover is a step fainter than its tertiary one, which the room list, the settings tabs and the space bar are filled
+ * with, so the secondary hover and pressed fills take the next steps of Compound's translucent gray: about 1.12:1 and
+ * 1.3:1 on the page in every theme. Icon buttons and chips are filled a step deeper when pressed than when hovered
+ * (bg-subtle-primary); Compound has no token for that step. Your reactions' chips and other people's take a deeper
+ * accent when hovered and pressed, as the accent fills do.
+ */
+:root,
+[class*="cpd-theme-"] {
+    --cpd-color-bg-action-secondary-hovered: var(--cpd-color-alpha-gray-300);
+    --cpd-color-bg-action-secondary-pressed: var(--cpd-color-alpha-gray-400);
+    --tl-color-bg-subtle-pressed: var(--cpd-color-gray-500);
+    --tl-color-bg-badge-accent-hovered: var(--tl-accent-500);
+    --tl-color-bg-badge-accent-pressed: var(--tl-accent-600);
 }
 
 /*
@@ -294,7 +315,7 @@ Please see LICENSE files in the repository root for full details.
  * line in the accent. The icon square has no edge on the accent. Your own bubbles point these at their translucent
  * white fill and edge, white and secondary white (EventTileView.module.css), so they keep showing on the bubble's blue.
  * The play button has its own pair, as your own bubbles draw it as Telegram does: a white circle with the bubble's blue
- * as its glyph.
+ * as its glyph. Hovered and pressed, it takes the accent's deeper fills, and a translucent white in your own bubbles.
  */
 :root,
 [class*="cpd-theme-"] {
@@ -302,6 +323,8 @@ Please see LICENSE files in the repository root for full details.
     --tl-color-on-media-icon: var(--tl-color-on-accent);
     --tl-color-border-media-icon: transparent;
     --tl-color-bg-media-play: var(--tl-color-bg-media-icon);
+    --tl-color-bg-media-play-hovered: var(--cpd-color-bg-accent-hovered);
+    --tl-color-bg-media-play-pressed: var(--cpd-color-bg-accent-pressed);
     --tl-color-on-media-play: var(--tl-color-on-media-icon);
     --tl-color-media-played: var(--cpd-color-icon-accent-primary);
 }
@@ -310,8 +333,12 @@ Please see LICENSE files in the repository root for full details.
  * Floating surfaces: menus, pickers, autocomplete, dropdowns and dialogs. Shadows barely show on near-black, so in dark
  * themes they are one gray step lighter than the page, Compound's raised canvas, and the fills and separators inside
  * them one step further, so that hovered, selected and disabled rows, fields and separators still show. Light themes
- * keep Compound's colors. These name Compound's grays rather than its color roles, because a floating surface points
+ * keep the page's colors. These name Compound's grays rather than its color roles, because a floating surface points
  * those roles at these tokens.
+ *
+ * A menu's destructive items have a red hover and pressed fill as strong as the gray ones: Compound's lightest reds in
+ * light themes, whose first step barely shows on white (1.06:1), and a translucent red over the raised gray in dark
+ * ones, where Compound's dark reds are opaque maroon blocks.
  *
  * The raised gray is also the incoming bubble's, so a menu over a bubble would only have its border to set it apart:
  * in dark themes the menus' shadow is much darker than in light ones. A dialog's Glass frame rises with the dialog, so
@@ -323,10 +350,13 @@ Please see LICENSE files in the repository root for full details.
 :root,
 [class*="cpd-theme-"] {
     --tl-color-bg-floating: var(--cpd-color-theme-bg);
-    --tl-color-bg-floating-hovered: var(--cpd-color-alpha-gray-200);
-    --tl-color-bg-floating-pressed: var(--cpd-color-alpha-gray-300);
+    --tl-color-bg-floating-hovered: var(--cpd-color-alpha-gray-300);
+    --tl-color-bg-floating-pressed: var(--cpd-color-alpha-gray-400);
     --tl-color-bg-floating-subtle-secondary: var(--cpd-color-gray-300);
     --tl-color-bg-floating-subtle-primary: var(--cpd-color-gray-400);
+    --tl-color-bg-floating-subtle-pressed: var(--cpd-color-gray-500);
+    --tl-color-bg-menu-critical-hovered: var(--cpd-color-red-300);
+    --tl-color-bg-menu-critical-pressed: var(--cpd-color-red-400);
     --tl-color-bg-floating-disabled: var(--cpd-color-gray-200);
     --tl-color-bg-floating-frame: var(--cpd-color-alpha-gray-400);
     --tl-color-separator-floating: var(--cpd-color-gray-400);
@@ -341,6 +371,9 @@ Please see LICENSE files in the repository root for full details.
     --tl-color-bg-floating-pressed: var(--cpd-color-gray-500);
     --tl-color-bg-floating-subtle-secondary: var(--cpd-color-gray-400);
     --tl-color-bg-floating-subtle-primary: var(--cpd-color-gray-500);
+    --tl-color-bg-floating-subtle-pressed: var(--cpd-color-gray-600);
+    --tl-color-bg-menu-critical-hovered: color-mix(in srgb, var(--cpd-color-red-900) 12%, transparent);
+    --tl-color-bg-menu-critical-pressed: color-mix(in srgb, var(--cpd-color-red-900) 24%, transparent);
     --tl-color-bg-floating-disabled: var(--cpd-color-gray-400);
     --tl-color-bg-floating-frame: var(--cpd-color-alpha-gray-600);
     --tl-color-separator-floating: var(--cpd-color-gray-500);
@@ -355,6 +388,9 @@ Please see LICENSE files in the repository root for full details.
         --tl-color-bg-floating-pressed: var(--cpd-color-gray-500);
         --tl-color-bg-floating-subtle-secondary: var(--cpd-color-gray-400);
         --tl-color-bg-floating-subtle-primary: var(--cpd-color-gray-500);
+        --tl-color-bg-floating-subtle-pressed: var(--cpd-color-gray-600);
+        --tl-color-bg-menu-critical-hovered: color-mix(in srgb, var(--cpd-color-red-900) 12%, transparent);
+        --tl-color-bg-menu-critical-pressed: color-mix(in srgb, var(--cpd-color-red-900) 24%, transparent);
         --tl-color-bg-floating-disabled: var(--cpd-color-gray-400);
         --tl-color-bg-floating-frame: var(--cpd-color-alpha-gray-600);
         --tl-color-separator-floating: var(--cpd-color-gray-500);

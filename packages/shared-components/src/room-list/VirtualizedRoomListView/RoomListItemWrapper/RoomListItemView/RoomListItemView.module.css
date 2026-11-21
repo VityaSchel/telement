@@ -264,6 +264,16 @@
     }
 }
 
+/* Pressed, the plate takes the pressed fill, a step past the hover fill, and the selected plate a step past its own.
+   Pressing a button of the hover menu presses only that button. */
+.roomListItem:active:not(:has(.hoverMenu :active)) {
+    --plate-color: var(--cpd-color-bg-action-secondary-pressed);
+
+    &.selected {
+        --plate-color: var(--tl-color-bg-selection-pressed);
+    }
+}
+
 .roomListItem:focus-visible {
     outline: none;
 }

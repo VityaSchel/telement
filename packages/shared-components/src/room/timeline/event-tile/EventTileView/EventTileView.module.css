@@ -1747,6 +1747,10 @@
             --cpd-color-bg-accent-rest: var(--tl-color-on-bubble-own);
             --cpd-color-bg-accent-hovered: var(--tl-color-on-bubble-own-secondary);
             --cpd-color-bg-accent-pressed: var(--tl-color-on-bubble-own-secondary);
+            /* A pressed icon button or reaction takes the translucent white of a hovered one, as the accent does */
+            --tl-color-bg-subtle-pressed: var(--tl-color-bg-bubble-own-subtle-hovered);
+            --tl-color-bg-badge-accent-hovered: var(--tl-color-bg-bubble-own-subtle-hovered);
+            --tl-color-bg-badge-accent-pressed: var(--tl-color-bg-bubble-own-subtle-hovered);
             --cpd-color-bg-action-primary-rest: var(--tl-color-on-bubble-own);
             --cpd-color-bg-action-primary-hovered: var(--tl-color-on-bubble-own-secondary);
             --cpd-color-bg-action-primary-pressed: var(--tl-color-on-bubble-own-secondary);
@@ -1763,6 +1767,8 @@
             --tl-color-on-media-icon: var(--tl-color-on-bubble-own);
             --tl-color-border-media-icon: var(--tl-color-separator-bubble-own);
             --tl-color-bg-media-play: var(--tl-color-on-bubble-own);
+            --tl-color-bg-media-play-hovered: color-mix(in srgb, var(--tl-color-on-bubble-own) 90%, transparent);
+            --tl-color-bg-media-play-pressed: var(--tl-color-on-bubble-own-secondary);
             --tl-color-on-media-play: var(--event-tile-bubble-self-background);
             --tl-color-media-played: var(--tl-color-on-bubble-own-secondary);
             /* Grays the app's message styles name directly: lines and tracks, the tertiary text and the translucent

@@ -80,6 +80,24 @@ img.reactionsRowButtonContent {
     color: var(--tl-color-on-accent);
 }
 
+/* Telement: hovered and pressed, a chip takes a deeper fill, other people's a deeper tint of the accent and yours the
+   accent's hover and pressed fills (telement/tokens.css), as the arrow cursor doesn't show it can be clicked */
+.reactionsRowButtonInBubble:not(.reactionsRowButtonDisabled):hover {
+    background-color: var(--tl-color-bg-badge-accent-hovered);
+}
+
+.reactionsRowButtonInBubble:not(.reactionsRowButtonDisabled):active {
+    background-color: var(--tl-color-bg-badge-accent-pressed);
+}
+
+.reactionsRowButtonInBubble.reactionsRowButtonSelected:not(.reactionsRowButtonDisabled):hover {
+    background-color: var(--cpd-color-bg-accent-hovered);
+}
+
+.reactionsRowButtonInBubble.reactionsRowButtonSelected:not(.reactionsRowButtonDisabled):active {
+    background-color: var(--cpd-color-bg-accent-pressed);
+}
+
 .reactionsRowButtonInBubble .reactionsRowButtonCount {
     inset-block-start: 0;
     font: var(--cpd-font-body-sm-medium);

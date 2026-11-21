@@ -45,6 +45,26 @@
 }
 
 /*
+ * Pressed, a filter takes the pressed fill, a step past Compound's hover fill (telement/tokens.css). The selected filter,
+ * in the primary fill, takes that fill's hover and pressed steps, as Compound's primary button does.
+ */
+.list > :active:not([aria-selected="true"]) {
+    --cpd-color-bg-subtle-primary: var(--tl-color-bg-subtle-pressed);
+}
+
+@media (hover) {
+    .list > [aria-selected="true"]:hover {
+        border-color: var(--cpd-color-bg-action-primary-hovered);
+        background: var(--cpd-color-bg-action-primary-hovered);
+    }
+}
+
+.list > [aria-selected="true"]:active {
+    border-color: var(--cpd-color-bg-action-primary-pressed);
+    background: var(--cpd-color-bg-action-primary-pressed);
+}
+
+/*
  * The chevron is outlined like the chips beside it, with their hover border; Compound's icon button gives it their hover
  * fill. The container's class outranks Compound's border reset where its stylesheet comes later, as in unit tests.
  */

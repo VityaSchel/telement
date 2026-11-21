@@ -192,9 +192,10 @@ Please see LICENSE files in the repository root for full details.
 
                     /* A translucent gray, so the circle shows a step over the row's fill whether the row is hovered or
                        selected. An opaque gray would match one of them: the subtle one is the selected row's fill in
-                       dark themes. */
+                       dark themes. The lightest step, as the selected row's pressed fill is already deep enough that a
+                       further step would leave the plane under 3:1 on it in light themes. */
                     &:not(.mx_AccessibleButton_disabled):hover {
-                        background-color: var(--cpd-color-alpha-gray-300);
+                        background-color: var(--cpd-color-alpha-gray-200);
                     }
 
                     &.mx_ForwardList_canSend.mx_AccessibleButton_disabled {

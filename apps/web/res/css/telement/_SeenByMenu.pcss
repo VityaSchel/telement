@@ -14,6 +14,12 @@ Please see LICENSE files in the repository root for full details.
     margin-inline-start: var(--cpd-space-2x);
 }
 
+/* While its submenu is open, the item keeps the hover fill, as macOS and Telegram keep a submenu's parent highlighted,
+   so that it shows which item the submenu belongs to */
+.mx_IconizedContextMenu .mx_IconizedContextMenu_optionList .mx_SeenByMenuItem[aria-expanded="true"] {
+    background-color: var(--cpd-color-bg-action-secondary-hovered);
+}
+
 /* At most 320px wide, which SeenByMenuItem allows for when it chooses the side to open the submenu on */
 .mx_ContextualMenu.mx_SeenByMenu_submenu {
     box-sizing: border-box;

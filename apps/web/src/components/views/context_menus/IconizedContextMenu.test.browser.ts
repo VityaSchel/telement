@@ -109,7 +109,8 @@ describe("IconizedContextMenu", () => {
                 --cpd-color-text-primary: black;
                 --cpd-color-text-critical-primary: rgb(200, 0, 0);
                 --cpd-color-icon-critical-primary: rgb(200, 0, 0);
-                --cpd-color-bg-critical-subtle: rgb(255, 230, 230);
+                /* The menus' red hover (telement/tokens.css), which the menu points Compound's critical fill at */
+                --tl-color-bg-menu-critical-hovered: rgb(255, 230, 230);
                 --cpd-color-text-disabled: rgb(150, 150, 150);
             }
             ${contextualMenuStyles}

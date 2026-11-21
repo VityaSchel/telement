@@ -708,6 +708,27 @@ describe("Your own bubbles", () => {
             expect(color(other)).toBe(WHITE);
         });
 
+        it("fills a hovered reaction a step deeper than at rest, in your own bubble and in others'", async () => {
+            const list = render(
+                tile(plain("Shipping it today"), { footer: REACTIONS }),
+                tile(plain("Nice"), { own: false, footer: REACTIONS }),
+            );
+            const [ownBubble, othersBubble] = list.querySelectorAll(".line");
+            const hovered = async (bubble: Element, reaction: string): Promise<string> => {
+                const chip = bubble.querySelector<HTMLElement>(`[data-reaction="${reaction}"]`)!;
+                await userEvent.hover(chip);
+                return fill(chip);
+            };
+
+            expect(await hovered(ownBubble, "own")).toBe(tokenColor("--tl-color-on-bubble-own-secondary", list));
+            expect(await hovered(ownBubble, "other")).toBe(tokenColor("--tl-color-bg-bubble-own-subtle-hovered", list));
+            expect(await hovered(othersBubble, "own")).toBe(tokenColor("--cpd-color-bg-accent-hovered", list));
+            expect(await hovered(othersBubble, "other")).toBe(tokenColor("--tl-color-bg-badge-accent-hovered", list));
+            expect(tokenColor("--tl-color-bg-badge-accent-hovered", list)).not.toBe(
+                tokenColor("--cpd-color-bg-badge-accent", list),
+            );
+        });
+
         it("draws the pin of a pinned message before the time in the time's secondary white, under reactions too", () => {
             const list = render(
                 tile(plain("Shipping it today"), { pinned: true }),

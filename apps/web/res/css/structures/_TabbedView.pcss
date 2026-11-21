@@ -34,10 +34,14 @@ Please see LICENSE files in the repository root for full details.
         flex-direction: column;
     }
 
-    /* Hovering a tab fills it in the room list's hover gray */
+    /* Hovering a tab fills it in the room list's hover gray, and pressing it in the pressed fill, a step further */
     .mx_TabbedView_tabLabel:hover {
         color: $tab-label-active-fg-color;
         background-color: var(--cpd-color-bg-action-tertiary-hovered);
+    }
+
+    .mx_TabbedView_tabLabel:active {
+        background-color: var(--cpd-color-bg-action-secondary-pressed);
     }
 
     /* The selected tab is a plate in the selection color with its label and icon in white, as the selected room is */
@@ -50,6 +54,10 @@ Please see LICENSE files in the repository root for full details.
         &:hover {
             background-color: var(--tl-color-bg-selection-hovered);
             color: var(--tl-color-on-selection);
+        }
+
+        &:active {
+            background-color: var(--tl-color-bg-selection-pressed);
         }
     }
 }

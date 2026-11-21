@@ -67,4 +67,14 @@ Please see LICENSE files in the repository root for full details.
         width: 24px;
         color: var(--cpd-color-icon-tertiary);
     }
+
+    /* Telement: filled inside its border when hovered, as Compound's secondary icon buttons are, and a step further
+       when pressed. The arrow cursor shows on every control, so the fill is what shows it can be clicked. */
+    &:hover {
+        background: var(--cpd-color-bg-subtle-secondary);
+    }
+
+    &:active {
+        background: var(--cpd-color-bg-subtle-primary);
+    }
 }

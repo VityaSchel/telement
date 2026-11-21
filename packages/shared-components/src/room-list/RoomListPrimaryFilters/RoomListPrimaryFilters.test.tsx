@@ -13,6 +13,7 @@ import { act, render, screen } from "@test-utils";
 import userEvent from "@testing-library/user-event";
 import { composeStories } from "@storybook/react-vite";
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import { cdp } from "vitest/browser";
 
 import * as stories from "./RoomListPrimaryFilters.stories";
 
@@ -54,6 +55,42 @@ describe("<RoomListPrimaryFilters /> stories", () => {
             await user.click(screen.getByRole("option", { name: "People" }));
 
             expect(Default.args.onToggleFilter).toHaveBeenCalled();
+        });
+
+        /** The filter's background while the left mouse button is held on it, through CDP, which can hold it down. */
+        async function pressedFill(target: HTMLElement): Promise<string> {
+            const frame = window.frameElement!.getBoundingClientRect();
+            const scale = frame.width / document.documentElement.clientWidth;
+            const box = target.getBoundingClientRect();
+            const x = frame.left + (box.left + box.width / 2) * scale;
+            const y = frame.top + (box.top + box.height / 2) * scale;
+            await cdp().send("Input.dispatchMouseEvent", { type: "mouseMoved", x, y });
+            await cdp().send("Input.dispatchMouseEvent", { type: "mousePressed", x, y, button: "left", clickCount: 1 });
+            try {
+                return getComputedStyle(target).backgroundColor;
+            } finally {
+                await cdp().send("Input.dispatchMouseEvent", { type: "mouseReleased", x, y, button: "left" });
+            }
+        }
+
+        function colorOf(token: string): string {
+            const probe = document.createElement("div");
+            probe.style.color = `var(${token})`;
+            document.body.append(probe);
+            const color = getComputedStyle(probe).color;
+            probe.remove();
+            return color;
+        }
+
+        it("presses a filter a step deeper than its hover, and the selected filter a step deeper than its fill", async () => {
+            render(<PeopleSelected />);
+
+            expect(await pressedFill(screen.getByRole("option", { name: "Rooms" }))).toBe(
+                colorOf("--tl-color-bg-subtle-pressed"),
+            );
+            expect(await pressedFill(screen.getByRole("option", { name: "People" }))).toBe(
+                colorOf("--cpd-color-bg-action-primary-pressed"),
+            );
         });
     });
 

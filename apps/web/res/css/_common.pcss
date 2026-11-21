@@ -48,6 +48,7 @@ Please see LICENSE files in the repository root for full details.
     --cpd-color-bg-action-tertiary-selected: var(--tl-color-bg-floating-subtle-primary);
     --cpd-color-bg-subtle-secondary: var(--tl-color-bg-floating-subtle-secondary);
     --cpd-color-bg-subtle-primary: var(--tl-color-bg-floating-subtle-primary);
+    --tl-color-bg-subtle-pressed: var(--tl-color-bg-floating-subtle-pressed);
     --cpd-color-separator-primary: var(--tl-color-separator-floating);
 }
 
@@ -992,6 +993,11 @@ summary {
         svg {
             color: $hover-color;
         }
+    }
+
+    /* Telement: a step past the hover fill when pressed, as Compound's icon buttons are (_CompoundOverrides.pcss) */
+    &:active {
+        background-color: var(--tl-color-bg-subtle-pressed);
     }
 }
 

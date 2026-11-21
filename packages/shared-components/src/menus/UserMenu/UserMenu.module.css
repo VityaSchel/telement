@@ -198,6 +198,17 @@
     padding-inline-start: var(--cpd-space-1x);
 }
 
+/* Hovered and while its menu is open, the avatar sits in a 40px circle of the space items' hover gray, which takes the
+   pressed fill when pressed. Telement draws the arrow cursor on every control, so the fill is what shows it can be
+   clicked. */
+.triggerButton:is(:hover, [aria-expanded="true"]) .avatarWrapper > :first-child {
+    box-shadow: 0 0 0 var(--cpd-space-0-5x) var(--cpd-color-bg-action-tertiary-hovered);
+}
+
+.triggerButton:active .avatarWrapper > :first-child {
+    box-shadow: 0 0 0 var(--cpd-space-0-5x) var(--cpd-color-bg-action-secondary-pressed);
+}
+
 .displayName {
     max-width: 175px;
     white-space: nowrap;

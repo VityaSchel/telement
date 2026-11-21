@@ -376,7 +376,7 @@ describe("The Forward dialog", () => {
             expect(fill(sendButton("Bob"))).toBe("rgba(0, 0, 0, 0)");
 
             await userEvent.hover(sendButton("Bob"));
-            expect(fill(sendButton("Bob"))).toBe(dialogColor("--cpd-color-alpha-gray-300"));
+            expect(fill(sendButton("Bob"))).toBe(dialogColor("--cpd-color-alpha-gray-200"));
         });
 
         it("hide the plane only where a pointer can hover, as nothing would ever show it on a touch screen", () => {

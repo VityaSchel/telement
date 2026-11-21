@@ -26,12 +26,17 @@ Please see LICENSE files in the repository root for full details.
          * override compound default background color when hovered
          * should disappear when the space panel will be migrated to compound
          */
-        background-color: $quaternary-content !important;
+        /* Telement: the space buttons' hover gray, and the pressed fill when pressed */
+        background-color: var(--cpd-color-bg-action-tertiary-hovered) !important;
         color: $primary-content;
 
         svg {
             fill: $primary-content;
         }
+    }
+
+    &:not(.expanded):active {
+        background-color: var(--cpd-color-bg-action-secondary-pressed) !important;
     }
 
     &.expanded {
@@ -57,6 +62,15 @@ Please see LICENSE files in the repository root for full details.
         &:focus-visible {
             outline: var(--cpd-border-width-2) solid var(--cpd-color-border-focused);
             outline-offset: calc(-1 * var(--cpd-border-width-2));
+        }
+
+        /* Telement: the row is filled as the space rows are when hovered, and with the pressed fill when pressed */
+        &:hover {
+            background-color: var(--cpd-color-bg-action-tertiary-hovered) !important;
+        }
+
+        &:active {
+            background-color: var(--cpd-color-bg-action-secondary-pressed) !important;
         }
 
         /**

@@ -35,6 +35,15 @@
             outline-offset: calc(-1 * var(--cpd-border-width-2));
         }
 
+        /* Telement: the row is filled as the space rows are when hovered, and with the pressed fill when pressed */
+        &:hover {
+            background-color: var(--cpd-color-bg-action-tertiary-hovered) !important;
+        }
+
+        &:active {
+            background-color: var(--cpd-color-bg-action-secondary-pressed) !important;
+        }
+
         /**
          * modify internal css of the compound component
          * dirty but we need to add the `Threads` label into the indicator icon button
@@ -70,9 +79,14 @@
         block-size: var(--cpd-space-10x);
         padding: var(--cpd-space-2x);
 
+        /* The space buttons' hover gray, and the pressed fill when pressed */
         &:hover {
             /* !important override compound */
-            background-color: $quaternary-content !important;
+            background-color: var(--cpd-color-bg-action-tertiary-hovered) !important;
+        }
+
+        &:active {
+            background-color: var(--cpd-color-bg-action-secondary-pressed) !important;
         }
 
         &:hover,

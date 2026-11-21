@@ -279,4 +279,20 @@ describe("Compound's menus", () => {
         const chevron = poll.querySelector<SVGSVGElement>(":scope > svg:last-child")!;
         expect(chevron).not.toBeVisible();
     });
+
+    it("fills a hovered destructive item in the menus' red, whose first step barely shows on white", async () => {
+        const menu = await renderMenu([
+            item("Photo or video", ImageIcon),
+            createElement(MenuItem, { key: "Delete", label: "Delete", kind: "critical", onSelect: () => {} }),
+        ]);
+        const remove = rows(menu)[1];
+        const probe = document.createElement("div");
+        probe.style.color = "var(--cpd-color-red-300)";
+        menu.append(probe);
+        const red = getComputedStyle(probe).color;
+        probe.remove();
+
+        await userEvent.hover(remove);
+        expect(getComputedStyle(remove).backgroundColor).toBe(red);
+    });
 });

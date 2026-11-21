@@ -112,6 +112,26 @@ describe("User menu insets", () => {
         expect(style.outlineOffset).toBe("-2px");
     });
 
+    it("rings the avatar in the space items' hover gray when hovered, a 40px circle round the 36px avatar", async () => {
+        render(<Default />);
+        const trigger = screen.getByRole("button", { name: "User menu" });
+        const avatar = trigger.firstElementChild!.firstElementChild!;
+        const probe = (token: string): string => {
+            const element = document.createElement("div");
+            element.style.color = `var(${token})`;
+            document.body.append(element);
+            const color = getComputedStyle(element).color;
+            element.remove();
+            return color;
+        };
+
+        expect(getComputedStyle(avatar).boxShadow).toBe("none");
+        await userEvent.hover(trigger);
+        expect(getComputedStyle(avatar).boxShadow).toBe(
+            `${probe("--cpd-color-bg-action-tertiary-hovered")} 0px 0px 0px 2px`,
+        );
+    });
+
     it("opens the menu at the space panel's edge, clear of the space badges that reach past the space avatars", async () => {
         render(
             <div data-testid="space-panel" style={{ inlineSize: `${SPACE_PANEL_WIDTH}px` }}>

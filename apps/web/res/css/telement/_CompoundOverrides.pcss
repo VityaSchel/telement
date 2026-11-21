@@ -108,9 +108,12 @@ Please see LICENSE files in the repository root for full details.
 }
 
 /* Every Compound menu is a floating surface with the floating shadow, like the app's menus (_common.pcss), and its
-   title's line a separator */
+   title's line a separator. Destructive items take the menus' red hover and pressed fills (telement/tokens.css). */
 :is([class^="_menu_"], [class*=" _menu_"])[role="menu"] {
     @mixin floatingSurface;
+
+    --cpd-color-bg-critical-subtle: var(--tl-color-bg-menu-critical-hovered);
+    --cpd-color-bg-critical-subtle-hovered: var(--tl-color-bg-menu-critical-pressed);
     box-shadow: var(--tl-shadow-floating);
 
     [class*="_menu-title_"] {
@@ -344,4 +347,13 @@ input[class*="_control_"] + button[class*="_action_"] {
 :where([class^="_button_"][data-size="lg"][class*=" _icon-only_"] > svg) {
     inline-size: 20px;
     block-size: 20px;
+}
+
+/*
+ * Compound fills an icon button the same when pressed as when hovered (bg-subtle-primary). Pressed, that fill takes the
+ * next gray (telement/tokens.css), as every control's pressed fill is a step past its hover. Buttons of the app's that
+ * hover in the same fill, and the ring of an indicator dot, which takes the button's fill, follow.
+ */
+[class^="_icon-button_"]:not([aria-disabled="true"]):active {
+    --cpd-color-bg-subtle-primary: var(--tl-color-bg-subtle-pressed);
 }

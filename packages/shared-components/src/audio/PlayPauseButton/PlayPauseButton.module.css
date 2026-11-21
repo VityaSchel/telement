@@ -22,6 +22,16 @@
     box-sizing: border-box;
 }
 
+/* Telement: a deeper accent when hovered and pressed, and a translucent white in your own bubbles (telement/tokens.css).
+   Its own fill would otherwise hide Compound's icon button hover, and the arrow cursor doesn't show it can be clicked. */
+.button:not([disabled]):hover {
+    background-color: var(--tl-color-bg-media-play-hovered);
+}
+
+.button:not([disabled]):active {
+    background-color: var(--tl-color-bg-media-play-pressed);
+}
+
 .button svg {
     width: 20px;
     height: 20px;

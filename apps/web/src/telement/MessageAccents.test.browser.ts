@@ -353,7 +353,7 @@ describe("Voice, audio, poll and file controls", () => {
         /** The color the glyph is painted in: its path's fill, which Compound's icon button colors on every element. */
         const glyph = (element: Element | null): string => getComputedStyle(element!.querySelector("svg path")!).fill;
 
-        it("fills a voice message's play button with the accent and draws its glyph white, also when hovered", async () => {
+        it("fills a voice message's play button with the accent and draws its glyph white, the accent deeper when hovered", async () => {
             const list = render(tile(VOICE, { lineClass: "lineMedia" }));
             const play = list.querySelector<HTMLElement>(".PlayPauseButton_button")!;
 
@@ -362,9 +362,10 @@ describe("Voice, audio, poll and file controls", () => {
             expect(glyph(play)).toBe(WHITE);
             expect(contrast(WHITE, theme.fill)).toBeGreaterThanOrEqual(theme.minimumContrast);
 
-            // Compound's icon button turns its glyph to the primary icon color when hovered
+            // Compound's icon button turns its glyph to the primary icon color when hovered; the button's own fill
+            // takes the accent's hover step, as nothing else shows that it can be clicked
             await userEvent.hover(play);
-            expect(fill(play)).toBe(theme.fill);
+            expect(fill(play)).toBe(tokenColor("--cpd-color-bg-accent-hovered", list));
             expect(glyph(play)).toBe(WHITE);
         });
 
@@ -460,7 +461,7 @@ describe("Voice, audio, poll and file controls", () => {
             },
         );
 
-        it("draws an audio's play button in your own bubble as a white circle with the bubble's blue glyph, also when hovered, and its played part the secondary white", async () => {
+        it("draws an audio's play button in your own bubble as a white circle with the bubble's blue glyph, a translucent white when hovered, and its played part the secondary white", async () => {
             const list = render(tile(AUDIO, { own: true, lineClass: "lineMedia" }));
             const play = list.querySelector<HTMLElement>(".PlayPauseButton_button")!;
             const seekBar = list.querySelector(".SeekBar_seekBar")!;
@@ -469,7 +470,8 @@ describe("Voice, audio, poll and file controls", () => {
             expect(fill(play)).toBe(WHITE);
             expect(glyph(play)).toBe(bubble);
             await userEvent.hover(play);
-            expect(fill(play)).toBe(WHITE);
+            expect(fill(play)).not.toBe(WHITE);
+            expect(fill(play)).toBe(tokenColor("--tl-color-bg-media-play-hovered", play));
             expect(glyph(play)).toBe(bubble);
             expect(getComputedStyle(seekBar, "::before").backgroundColor).toBe(
                 tokenColor("--tl-color-on-bubble-own-secondary", list),

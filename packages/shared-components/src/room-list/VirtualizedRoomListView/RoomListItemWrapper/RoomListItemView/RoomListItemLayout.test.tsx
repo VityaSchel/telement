@@ -14,7 +14,7 @@ import "../../../../telement/tokens.css";
 import React, { type JSX } from "react";
 import { render, screen } from "@test-utils";
 import { afterEach, beforeAll, describe, expect, it } from "vitest";
-import { userEvent } from "vitest/browser";
+import { cdp, userEvent } from "vitest/browser";
 
 import { RoomListItemView, type RoomListItemViewSnapshot } from "./RoomListItemView";
 import { useMockedViewModel } from "../../../../core/viewmodel";
@@ -82,6 +82,26 @@ function colorOf(token: string): string {
     const color = getComputedStyle(probe).color;
     probe.remove();
     return color;
+}
+
+/**
+ * The background of `element` while the left mouse button is held on `target`. Through CDP, because userEvent can only
+ * click, which releases the button before the test can look at it. The test runs in an iframe of the page CDP drives.
+ */
+async function pressedFill(target: HTMLElement, element: HTMLElement): Promise<string> {
+    const frame = window.frameElement!.getBoundingClientRect();
+    const scale = frame.width / document.documentElement.clientWidth;
+    const box = target.getBoundingClientRect();
+    const x = frame.left + (box.left + box.width / 2) * scale;
+    const y = frame.top + (box.top + box.height / 2) * scale;
+    await cdp().send("Input.dispatchMouseEvent", { type: "mouseMoved", x, y });
+    await cdp().send("Input.dispatchMouseEvent", { type: "mousePressed", x, y, button: "left", clickCount: 1 });
+    try {
+        expect(target.matches(":active")).toBe(true);
+        return getComputedStyle(element).backgroundColor;
+    } finally {
+        await cdp().send("Input.dispatchMouseEvent", { type: "mouseReleased", x, y, button: "left", clickCount: 1 });
+    }
 }
 
 /** The vertical center of the n-th line (from 0) of an element whose lines are `lineHeight` tall. */
@@ -489,6 +509,29 @@ describe("Room list item layout", () => {
         expect(hovered).toBe(colorOf("--cpd-color-bg-accent-hovered"));
         expect(getComputedStyle(part(row, styles.container)).backgroundColor).toBe(hovered);
         expect(getComputedStyle(screen.getByText("3")).color).toBe(hovered);
+    });
+
+    it("presses the plate a step past its hover fill", async () => {
+        const row = renderRow();
+        expect(await pressedFill(row, part(row, styles.container))).toBe(
+            colorOf("--cpd-color-bg-action-secondary-pressed"),
+        );
+    });
+
+    it("presses the selected plate a step past its hovered accent", async () => {
+        const row = renderRow({ isSelected: true });
+        expect(await pressedFill(row, part(row, styles.container))).toBe(colorOf("--tl-color-bg-selection-pressed"));
+        expect(colorOf("--tl-color-bg-selection-pressed")).toBe(colorOf("--cpd-color-bg-accent-pressed"));
+    });
+
+    it("presses only the more options button when it is pressed, not the row's plate", async () => {
+        const row = renderRow();
+        await userEvent.hover(row);
+        const more = screen.getByRole("button", { name: "More Options" });
+
+        expect(await pressedFill(more, part(row, styles.container))).toBe(
+            colorOf("--cpd-color-bg-action-tertiary-hovered"),
+        );
     });
 
     it("selects in Telegram's muted night blue with white text in the dark theme", () => {

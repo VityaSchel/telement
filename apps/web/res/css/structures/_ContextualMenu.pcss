@@ -23,6 +23,9 @@ Please see LICENSE files in the repository root for full details.
 
 .mx_ContextualMenu {
     @mixin floatingSurface;
+    /* Destructive items' red hover and pressed fills, as strong as the gray ones (telement/tokens.css) */
+    --cpd-color-bg-critical-subtle: var(--tl-color-bg-menu-critical-hovered);
+    --cpd-color-bg-critical-subtle-hovered: var(--tl-color-bg-menu-critical-pressed);
 
     /* An item highlight's radius plus the menu padding (_IconizedContextMenu.pcss) */
     border-radius: var(--tl-radius-menu);
