@@ -229,6 +229,28 @@ describe("BasicMessageComposer", () => {
         fireEvent.compositionEnd(input);
     });
 
+    it("lets Tab leave an empty composer at once, as there is nothing to complete", () => {
+        const model = new EditorModel([], pc, renderer);
+        render(<BasicMessageComposer model={model} room={room} />, {
+            wrapper: ({ children }) => (
+                <SDKContext.Provider value={SDKContextClass.instance}>{children}</SDKContext.Provider>
+            ),
+        });
+
+        expect(fireEvent.keyDown(screen.getByRole("textbox"), { key: "Tab", code: "Tab" })).toBe(true);
+    });
+
+    it("keeps Tab for completing a name once something is typed", () => {
+        const model = new EditorModel([pc.plain("Ali")], pc, renderer);
+        render(<BasicMessageComposer model={model} room={room} />, {
+            wrapper: ({ children }) => (
+                <SDKContext.Provider value={SDKContextClass.instance}>{children}</SDKContext.Provider>
+            ),
+        });
+
+        expect(fireEvent.keyDown(screen.getByRole("textbox"), { key: "Tab", code: "Tab" })).toBe(false);
+    });
+
     // oxlint-disable-next-line vitest/expect-expect
     it("should handle keydown events normally when not composing", () => {
         const model = new EditorModel([], pc, renderer);

@@ -563,7 +563,12 @@ export default class BasicMessageEditor extends React.Component<IProps, IState> 
                     handled = true;
                     break;
             }
-        } else if (autocompleteAction === KeyBindingAction.ForceCompleteAutocomplete && !this.state.showVisualBell) {
+        } else if (
+            autocompleteAction === KeyBindingAction.ForceCompleteAutocomplete &&
+            !this.state.showVisualBell &&
+            // Telement: with nothing typed there is nothing to complete, so Tab moves the focus straight away
+            !model.isEmpty
+        ) {
             // there is no current autocomplete window, try to open it
             void this.tabCompleteName();
             handled = true;
