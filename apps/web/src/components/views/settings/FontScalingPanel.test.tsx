@@ -10,7 +10,7 @@ Please see LICENSE files in the repository root for full details.
 
 import React from "react";
 import { describe, it, expect } from "vitest";
-import { render } from "test-utils-rtl";
+import { render, screen } from "test-utils-rtl";
 import * as TestUtils from "test-utils";
 
 import FontScalingPanel from "./FontScalingPanel";
@@ -20,5 +20,13 @@ describe("FontScalingPanel", () => {
         TestUtils.stubClient();
         const { asFragment } = render(<FontScalingPanel />);
         expect(asFragment()).toMatchSnapshot();
+    });
+
+    it("names the dropdown after its group's label rather than repeating it as a floated label", () => {
+        TestUtils.stubClient();
+        render(<FontScalingPanel />);
+
+        expect(screen.getByRole("combobox", { name: "Font size" })).toBeInTheDocument();
+        expect(screen.getAllByText("Font size")).toHaveLength(1);
     });
 });

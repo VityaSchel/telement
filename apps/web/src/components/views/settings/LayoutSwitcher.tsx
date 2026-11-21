@@ -155,7 +155,10 @@ function ToggleCompactLayout(): JSX.Element {
                 }
             >
                 <Label>{_t("settings|appearance|compact_layout")}</Label>
-                <HelpMessage>{_t("settings|appearance|compact_layout_description")}</HelpMessage>
+                {/* Only while it can't be turned on, as it says why */}
+                {layout !== Layout.Group && (
+                    <HelpMessage>{_t("settings|appearance|compact_layout_description")}</HelpMessage>
+                )}
             </InlineField>
         </Root>
     );

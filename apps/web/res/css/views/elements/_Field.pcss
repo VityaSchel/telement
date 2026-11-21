@@ -124,6 +124,12 @@ Please see LICENSE files in the repository root for full details.
     max-width: calc(100% - 2 * var(--cpd-space-3x)); /* 100% of parent minus margin and padding */
 }
 
+/* Telement: a field named only by an aria-label, such as the font size under its group's label, has no floated label,
+   whose background would otherwise cut a gap into its border */
+.mx_Field label:empty {
+    display: none;
+}
+
 .mx_Field_labelAlwaysTopLeft label,
 .mx_Field select + label /* Always show a select's label on top to not collide with the value */,
 .mx_Field input:focus + label,

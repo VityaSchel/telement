@@ -368,9 +368,8 @@ exports[`<LayoutSwitcher /> > should render 1`] = `
               class="_container"
             >
               <input
-                aria-describedby="radix-react-use-id-4"
                 class="_input"
-                id="radix-react-use-id-5"
+                id="radix-react-use-id-4"
                 name="compactLayout"
                 role="switch"
                 title=""
@@ -386,16 +385,10 @@ exports[`<LayoutSwitcher /> > should render 1`] = `
           >
             <label
               class="_label"
-              for="radix-react-use-id-5"
+              for="radix-react-use-id-4"
             >
               Show compact text and messages
             </label>
-            <span
-              class="_message _help-message"
-              id="radix-react-use-id-4"
-            >
-              Modern layout must be selected to use this feature.
-            </span>
           </div>
         </div>
       </form>

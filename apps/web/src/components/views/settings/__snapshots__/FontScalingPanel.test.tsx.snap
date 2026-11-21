@@ -19,12 +19,11 @@ exports[`FontScalingPanel > renders the font scaling UI 1`] = `
       class="mx_SettingsSubsection_content mx_SettingsSubsection_contentStretch"
     >
       <div
-        class="mx_Field mx_Field_select mx_FontScalingPanel_Dropdown mx_Field_placeholderIsLabel"
+        class="mx_Field mx_Field_select mx_FontScalingPanel_Dropdown"
       >
         <select
+          aria-label="Font size"
           id="mx_Field_1"
-          label="Font size"
-          placeholder="Font size"
           type="text"
         >
           <option
@@ -125,9 +124,7 @@ exports[`FontScalingPanel > renders the font scaling UI 1`] = `
         </select>
         <label
           for="mx_Field_1"
-        >
-          Font size
-        </label>
+        />
         <svg
           class="mx_Field_select_chevron"
           fill="currentColor"

@@ -637,6 +637,27 @@ describe.each(THEMES.map(([theme]) => theme))("Settings groups in %s", (theme) =
 
             expect([box("#room-id").left, box("#room-id").right]).toEqual([edges.left, edges.right]);
         });
+
+        it("draws no floated label on a field named only by its group's label, such as the font size", () => {
+            renderTab(
+                theme,
+                section(
+                    "appearance",
+                    "",
+                    subsection(
+                        "font-size",
+                        "Font size",
+                        `<div class="mx_Field mx_Field_select" id="size-field">
+                            <select id="size-select" aria-label="Font size"><option>16 (default)</option></select>
+                            <label for="size-select" id="size-floated-label"></label>
+                        </div>`,
+                    ),
+                ),
+            );
+
+            expect(getComputedStyle(get("#size-floated-label")).display).toBe("none");
+            expect(box("#size-field").height).toBe(36);
+        });
     });
 
     describe("the user Notifications tab", () => {

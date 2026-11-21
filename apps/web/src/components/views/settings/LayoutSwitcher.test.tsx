@@ -98,6 +98,19 @@ describe("<LayoutSwitcher />", () => {
             expect(screen.getByRole("switch", { name: "Show compact text and messages" })).toBeDisabled();
         });
 
+        it("should say why it is disabled only while it is", async () => {
+            const hint = "Modern layout must be selected to use this feature.";
+            await SettingsStore.setValue("layout", null, SettingLevel.DEVICE, Layout.Bubble);
+            const { unmount } = await renderLayoutSwitcher();
+            expect(screen.getByText(hint)).toBeInTheDocument();
+            unmount();
+
+            await SettingsStore.setValue("layout", null, SettingLevel.DEVICE, Layout.Group);
+            await renderLayoutSwitcher();
+            expect(screen.getByRole("switch", { name: "Show compact text and messages" })).toBeEnabled();
+            expect(screen.queryByText(hint)).toBeNull();
+        });
+
         it("should keep layout previews at the default density", async () => {
             await SettingsStore.setValue("useCompactLayout", null, SettingLevel.DEVICE, true);
             const { container } = await renderLayoutSwitcher();

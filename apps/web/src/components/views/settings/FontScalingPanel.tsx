@@ -108,10 +108,11 @@ export default class FontScalingPanel extends React.Component<EmptyObject, IStat
                 stretchContent
                 data-testid="mx_FontScalingPanel"
             >
+                {/* The group's label names the dropdown, so it has no floated label repeating it */}
                 <Field
                     element="select"
                     className="mx_FontScalingPanel_Dropdown"
-                    label={_t("settings|appearance|font_size")}
+                    aria-label={_t("settings|appearance|font_size")}
                     value={this.state.fontSizeDelta.toString()}
                     onChange={(e) => this.onFontSizeChanged(e.target.value)}
                 >
