@@ -29,7 +29,9 @@ import deactivateAccountDialogStyles from "../../res/css/views/dialogs/_Deactiva
 import exportDialogStyles from "../../res/css/views/dialogs/_ExportDialog.pcss?raw";
 import inviteDialogStyles from "../../res/css/views/dialogs/_InviteDialog.pcss?raw";
 import leaveRoomDialogStyles from "../../res/css/views/dialogs/_LeaveRoomDialog.pcss?raw";
+import leaveSpaceDialogStyles from "../../res/css/views/dialogs/_LeaveSpaceDialog.pcss?raw";
 import logoutDialogStyles from "../../res/css/views/dialogs/_LogoutDialog.pcss?raw";
+import pollCreateDialogStyles from "../../res/css/views/dialogs/_PollCreateDialog.pcss?raw";
 import roomSettingsDialogStyles from "../../res/css/views/dialogs/_RoomSettingsDialog.pcss?raw";
 import roomUpgradeWarningDialogStyles from "../../res/css/views/dialogs/_RoomUpgradeWarningDialog.pcss?raw";
 import settingsDialogStyles from "../../res/css/views/dialogs/_SettingsDialog.pcss?raw";
@@ -60,7 +62,9 @@ const APP_STYLES = [
     exportDialogStyles,
     inviteDialogStyles,
     leaveRoomDialogStyles,
+    leaveSpaceDialogStyles,
     logoutDialogStyles,
+    pollCreateDialogStyles,
     roomSettingsDialogStyles,
     roomUpgradeWarningDialogStyles,
     settingsDialogStyles,
@@ -542,6 +546,158 @@ describe("Dialogs", () => {
 
             expect(box("[data-testid=password]").width).toBe(300);
             expect(box(".mx_Dialog_buttons").top - box("[data-testid=password]").bottom).toBe(24);
+        });
+    });
+
+    describe("create poll", () => {
+        /** PollCreateDialog as ScrollableBaseModal draws it, in Modal's wrapper of the class it is opened with. */
+        function renderCreatePoll(options = 2): void {
+            const rows = Array.from(
+                { length: options },
+                (_, i) => `
+                    <div class="mx_PollCreateDialog_option">
+                        <div class="mx_Field mx_Field_input"><input id="option${i}"><label for="option${i}">Option ${i + 1}</label></div>
+                    </div>
+                `,
+            ).join("");
+            render(`
+                <div class="mx_Dialog_wrapper mx_CompoundDialog">
+                    <div class="mx_Dialog_border">
+                        <div class="mx_Dialog" data-testid="body">
+                            <div class="mx_CompoundDialog mx_ScrollableBaseDialog" role="dialog">
+                                <div class="mx_CompoundDialog_header"><h1>Create poll</h1></div>
+                                <div class="mx_AccessibleButton mx_CompoundDialog_cancelButton" role="button" aria-label="Close dialog">
+                                    <svg viewBox="0 0 24 24"></svg>
+                                </div>
+                                <form class="mx_CompoundDialog_form">
+                                    <div class="mx_CompoundDialog_content">
+                                        <div class="mx_PollCreateDialog">
+                                            <h2 data-testid="first">Poll type</h2>
+                                            <h2>Create options</h2>
+                                            ${rows}
+                                            <div class="mx_AccessibleButton mx_AccessibleButton_hasKind mx_AccessibleButton_kind_link mx_PollCreateDialog_addOption" role="button" data-testid="last">Add option</div>
+                                        </div>
+                                    </div>
+                                    <div class="mx_CompoundDialog_footer">
+                                        <div class="mx_AccessibleButton mx_AccessibleButton_hasKind mx_AccessibleButton_kind_primary_outline" role="button" data-testid="cancel">Cancel</div>
+                                        <button class="mx_AccessibleButton mx_AccessibleButton_hasKind mx_AccessibleButton_kind_primary mx_Dialog_nonDialogButton" type="submit" data-testid="create">Create poll</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `);
+        }
+
+        it("is a 480px form with the title in heading-sm on the close button's line, on the 24px edge", () => {
+            renderCreatePoll();
+            const body = box("[data-testid=body]");
+            const title = box(".mx_CompoundDialog_header h1");
+            const style = getComputedStyle(get(".mx_CompoundDialog_header h1"));
+
+            expect(body.width).toBe(480);
+            expect([style.fontSize, style.fontWeight, title.height]).toEqual(["20px", "600", 28]);
+            expect([title.top - body.top, title.left - body.left]).toEqual([16, 24]);
+            expect(middle(title)).toBe(middle(box(".mx_CompoundDialog_cancelButton")));
+            expect(box(".mx_CompoundDialog_cancelButton").left - title.right).toBe(8);
+        });
+
+        it("starts the content 16px under the title on the 24px edge, and ends 24px above the footer's buttons", () => {
+            renderCreatePoll();
+            const body = box("[data-testid=body]");
+
+            expect(box("[data-testid=first]").top - box(".mx_CompoundDialog_header h1").bottom).toBe(16);
+            expect(box("[data-testid=first]").left - body.left).toBe(24);
+            expect(box("[data-testid=create]").top - box("[data-testid=last]").bottom).toBe(24);
+        });
+
+        it("puts Cancel and Create poll 8px apart, 24px from the end and the bottom", () => {
+            renderCreatePoll();
+            const body = box("[data-testid=body]");
+            const create = box("[data-testid=create]");
+
+            expect(create.left - box("[data-testid=cancel]").right).toBe(8);
+            expect([body.right - create.right, body.bottom - create.bottom]).toEqual([24, 24]);
+        });
+
+        it("is as tall as its content, and past the window's height scrolls it between the title and the footer", () => {
+            renderCreatePoll();
+            expect(box("[data-testid=body]").height).toBeLessThan(400);
+            document.body.innerHTML = "";
+
+            renderCreatePoll(30);
+            const body = box("[data-testid=body]");
+            const content = get(".mx_CompoundDialog_content");
+
+            expect(body.bottom).toBeLessThanOrEqual(WINDOW.height);
+            expect(content.scrollHeight).toBeGreaterThan(content.clientHeight);
+            expect(body.bottom - box("[data-testid=create]").bottom).toBe(24);
+        });
+    });
+
+    describe("leave space", () => {
+        /** LeaveSpaceDialog, in Modal's wrapper of the class it is opened with, with the note for a space's only admin. */
+        function renderLeaveSpace(): void {
+            renderDialog(
+                "mx_LeaveSpaceDialog",
+                "Leave Studio",
+                `<div class="mx_Dialog_content" id="mx_LeaveSpaceDialog">
+                    <p data-testid="text">You are about to leave <strong>Studio</strong>. Would you like to leave the rooms in this space?</p>
+                    <div class="mx_SpaceChildrenPicker" data-testid="picker" style="height: 100px"></div>
+                    <div class="mx_LeaveSpaceDialog_section_warning" data-testid="note">
+                        <svg viewBox="0 0 24 24" data-testid="icon"></svg>You're the only admin of this space. Leaving it will mean no one has control over it.
+                    </div>
+                </div>
+                <div class="mx_Dialog_buttons">
+                    <span class="mx_Dialog_buttons_row">
+                        <button class="mx_LegacyDialogButton cancel" type="button">Cancel</button>
+                        <button class="mx_LegacyDialogButton mx_Dialog_primary danger" type="button" data-testid="leave">Leave space</button>
+                    </span>
+                </div>`,
+                "",
+                false,
+            );
+            addWrapperClass("mx_LeaveSpaceDialog_wrapper");
+        }
+
+        it("is a 480px form on the shared anatomy: the title on the close button's line, all on the 24px edge", () => {
+            renderLeaveSpace();
+            const body = box("[data-testid=body]");
+            const title = box(".mx_Dialog_title");
+
+            expect(body.width).toBe(480);
+            expect([title.top - body.top, title.left - body.left]).toEqual([16, 24]);
+            expect(middle(title)).toBe(middle(box(".mx_Dialog_cancelButton")));
+            expect(box("[data-testid=text]").left - body.left).toBe(24);
+            expect(box("[data-testid=text]").top - title.bottom).toBe(16);
+        });
+
+        it("is as tall as its content, its footer 24px under the note and 24px from the bottom and end", () => {
+            renderLeaveSpace();
+            const body = box("[data-testid=body]");
+            const leave = box("[data-testid=leave]");
+
+            expect(leave.top - box("[data-testid=note]").bottom).toBe(24);
+            expect([body.right - leave.right, body.bottom - leave.bottom]).toEqual([24, 24]);
+        });
+
+        it("writes the note in 13px, its icon on the first line and the lines after it indented past the icon", () => {
+            renderLeaveSpace();
+            const note = get("[data-testid=note]");
+            const style = getComputedStyle(note);
+            const icon = box("[data-testid=icon]");
+            const range = document.createRange();
+            range.selectNodeContents(note.lastChild!);
+            const lines = [...range.getClientRects()];
+            const firstLineMiddle =
+                note.getBoundingClientRect().top + parseFloat(style.paddingTop) + parseFloat(style.lineHeight) / 2;
+
+            expect(style.fontSize).toBe("13px");
+            expect(lines.length).toBeGreaterThan(1);
+            expect(new Set(lines.map(({ left }) => left)).size).toBe(1);
+            expect(lines[0].left).toBeGreaterThan(icon.right);
+            expect(middle(icon)).toBe(firstLineMiddle);
         });
     });
 

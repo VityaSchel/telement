@@ -24,13 +24,18 @@ Please see LICENSE files in the repository root for full details.
         flex-direction: column;
     }
 
+    /* Telement: the dialog anatomy of every other dialog (_common.pcss): a 20px semibold title on the close button's
+       line 16px from the top, on the 24px edge and 8px clear of the close button, the content 16px under it, and the
+       footer's buttons 24px from the content, the end and the bottom */
     .mx_CompoundDialog_header {
-        padding: 32px 32px 16px 32px;
+        padding-block: var(--cpd-space-4x) 0;
+        padding-inline: var(--cpd-space-6x)
+            calc(var(--dialog-close-button-size) + var(--cpd-space-4x) + var(--cpd-space-2x));
 
         h1 {
-            display: inline-block;
-            font-weight: var(--cpd-font-weight-semibold);
-            font-size: $font-24px;
+            font: var(--cpd-font-heading-sm-semibold);
+            letter-spacing: var(--cpd-font-letter-spacing-heading-sm);
+            line-height: var(--dialog-title-line-height);
             margin: 0; /* managed by header class */
         }
     }
@@ -52,15 +57,15 @@ Please see LICENSE files in the repository root for full details.
 
     .mx_CompoundDialog_content {
         overflow: auto;
-        padding: 8px 32px;
+        padding: var(--cpd-space-4x) var(--cpd-space-6x) 0;
         flex: 1;
     }
 
     .mx_CompoundDialog_footer {
-        padding: 20px 32px;
+        padding: var(--cpd-space-6x);
 
         display: flex;
-        gap: var(--cpd-space-6x);
+        gap: var(--buttons-dialog-gap-column);
         justify-content: flex-end;
 
         .mx_AccessibleButton .mx_Spinner {
@@ -73,11 +78,11 @@ Please see LICENSE files in the repository root for full details.
     display: flex;
     flex-direction: column;
 
-    width: 544px; /* fixed */
-    height: 516px; /* fixed */
+    /* Telement: a 480px form (TELEMENT.md, "Colors, type and components") as tall as its content, up to the height the
+       window leaves the dialog, past which the content scrolls between the title and the footer */
+    width: 480px;
     max-width: 100%;
     min-height: 0;
-    max-height: 80%;
 
     .mx_CompoundDialog_footer {
         box-shadow: 0px -4px 4px rgb(0, 0, 0, 0.05); /* hardcoded colour for both themes */

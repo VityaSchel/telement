@@ -10,36 +10,51 @@ Please see LICENSE files in the repository root for full details.
     .mx_Dialog {
         display: flex;
         flex-direction: column;
-        padding: 24px 32px;
 
+        /* Telement: a 480px form on the dialog's 24px edge (TELEMENT.md, "Colors, type and components"), as tall as
+           its content. A long list of rooms to leave scrolls between the title and the footer */
         .mx_LeaveSpaceDialog {
-            width: 440px;
+            width: calc(480px - 2 * var(--cpd-space-6x));
+            max-width: 100%;
+            min-height: 0;
             display: flex;
             flex-direction: column;
             flex-wrap: nowrap;
-            height: 520px;
 
             .mx_Dialog_content {
                 flex-grow: 1;
-                margin: 0;
+                /* 16px under the title together with the header's 8px margin, which this column doesn't collapse
+                   into its own, and the footer's own 24px above the buttons */
+                margin: var(--cpd-space-2x) 0 0;
                 overflow-y: auto;
 
+                /* The content scrolls, so the margins of its first and last lines would add to the space around it */
+                > :first-child {
+                    margin-top: 0;
+                }
+
+                > :last-child {
+                    margin-bottom: 0;
+                }
+
+                /* Telement: a 13px note with the icon on its first line and the lines after it indented past it */
                 .mx_LeaveSpaceDialog_section_warning {
+                    display: flex;
+                    gap: var(--cpd-space-1x);
                     border-radius: 8px;
                     margin: 12px 0 0;
-                    padding: 12px 8px;
+                    padding: var(--cpd-space-3x);
                     background-color: $header-panel-bg-color;
 
-                    font-size: $font-12px;
-                    line-height: $font-15px;
+                    font: var(--cpd-font-body-sm-regular);
                     color: $secondary-content;
 
                     svg {
+                        flex-shrink: 0;
                         height: 16px;
                         width: 16px;
                         color: $secondary-content;
-                        vertical-align: middle;
-                        margin: 0 var(--cpd-space-1x);
+                        margin-block-start: calc((1lh - 16px) / 2);
                     }
                 }
 
