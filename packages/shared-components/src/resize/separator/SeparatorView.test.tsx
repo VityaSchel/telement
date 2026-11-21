@@ -88,6 +88,25 @@ describe("<SeparatorView />", () => {
         expect(document.elementFromPoint(0, 0)).toBe(separator);
     });
 
+    it("draws the line in the focus color when the keyboard focuses it, as its hover gray is under 3:1", async () => {
+        // The focus color and the gray, which the file doesn't load Compound's tokens for, as they change the layout
+        document.documentElement.style.setProperty("--cpd-color-border-focused", "rgb(20, 112, 181)");
+        document.documentElement.style.setProperty("--cpd-color-border-interactive-secondary", "rgb(189, 196, 204)");
+        renderPanel({ isCollapsed: false });
+        const separator = screen.getByRole("separator");
+        const line = separator.querySelector<HTMLElement>("[class*='activeSeparator']:not([class*='Container'])")!;
+
+        await userEvent.keyboard("{Shift}");
+        separator.focus();
+        expect(separator.matches(":focus-visible")).toBe(true);
+        for (const animation of line.getAnimations()) animation.finish();
+        const style = getComputedStyle(line);
+        expect(style.borderRightWidth).toBe("2px");
+        expect(style.borderRightColor).toBe("rgb(20, 112, 181)");
+        document.documentElement.style.removeProperty("--cpd-color-border-focused");
+        document.documentElement.style.removeProperty("--cpd-color-border-interactive-secondary");
+    });
+
     it("should call onDoubleClick on double click", async () => {
         const vm = renderPanel();
         const separator = screen.getByRole("separator");

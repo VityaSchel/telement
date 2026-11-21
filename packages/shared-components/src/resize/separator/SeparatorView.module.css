@@ -87,6 +87,12 @@
     }
 }
 
+/* Telement: focused from the keyboard, the thicker line is in the focus color, as a focus ring is: the gray it has when
+   hovered or dragged is under the 3:1 a focus indicator needs against the page */
+.separator[data-separator-type="border"]:focus-visible .activeSeparatorContainer .activeSeparator {
+    border-right-color: var(--cpd-color-border-focused);
+}
+
 /* Container for the separator when the left panel is expanded */
 .activeSeparatorContainer {
     display: flex;
