@@ -39,6 +39,7 @@ import unpinAllDialogStyles from "../../res/css/views/dialogs/_UnpinAllDialog.pc
 import userSettingsDialogStyles from "../../res/css/views/dialogs/_UserSettingsDialog.pcss?raw";
 import accessibleButtonStyles from "../../res/css/views/elements/_AccessibleButton.pcss?raw";
 import fieldStyles from "../../res/css/views/elements/_Field.pcss?raw";
+import roomAliasFieldStyles from "../../res/css/views/elements/_RoomAliasField.pcss?raw";
 import linkModalStyles from "../../res/css/views/rooms/wysiwyg_composer/components/_LinkModal.pcss?raw";
 import roomProfileSettingsStyles from "../../res/css/views/settings/_RoomProfileSettings.pcss?raw";
 import settingsSectionStyles from "../../res/css/views/settings/tabs/_SettingsSection.pcss?raw";
@@ -72,6 +73,7 @@ const APP_STYLES = [
     userSettingsDialogStyles,
     accessibleButtonStyles,
     fieldStyles,
+    roomAliasFieldStyles,
     linkModalStyles,
     roomProfileSettingsStyles,
     settingsSectionStyles,
@@ -811,6 +813,29 @@ describe("Dialogs", () => {
 
             expect(reason.height).toBe(36);
             expect([reason.left, reason.width]).toEqual([other.left, other.width]);
+        });
+
+        it("spans the room address over the create room dialog, as the fields above it", () => {
+            renderDialog(
+                "mx_CreateRoomDialog",
+                "Create a public room",
+                `<div class="mx_Dialog_content">
+                    ${field("Name", "Name", "")}
+                    <div class="mx_CreateRoomDialog_aliasContainer">
+                        <div class="mx_Field mx_Field_input mx_RoomAliasField mx_Field_labelAlwaysTopLeft">
+                            <span class="mx_Field_prefix">#</span>
+                            <input id="alias" type="text" placeholder="e.g. my-room">
+                            <label for="alias">Room address</label>
+                            <span class="mx_Field_postfix" data-testid="postfix">:localhost</span>
+                        </div>
+                    </div>
+                </div>`,
+            );
+            const name = box(".mx_Field:not(.mx_RoomAliasField)");
+            const address = box(".mx_RoomAliasField");
+
+            expect([address.left, address.width]).toEqual([name.left, name.width]);
+            expect(box("[data-testid=postfix]").right).toBe(address.right - 1);
         });
     });
 
