@@ -77,8 +77,10 @@ describe("UnreadNotificationBadgeViewModel", () => {
 
         setUnreads(0, 2);
 
+        // A mention, which the badge draws in the accent rather than the red of messages that failed to send
         expect(vm.getSnapshot()).toMatchObject({
             isHighlight: true,
+            isUnsent: false,
             symbol: "2",
         });
         expect(listener).toHaveBeenCalled();
@@ -132,10 +134,12 @@ describe("UnreadNotificationBadgeViewModel", () => {
 
         const vm = new UnreadNotificationBadgeViewModel({ room });
 
+        // Red, as the room list's mark for them is
         expect(vm.getSnapshot()).toMatchObject({
             shouldRender: true,
             symbol: "!",
             isHighlight: true,
+            isUnsent: true,
         });
         vm.dispose();
     });
@@ -149,6 +153,7 @@ describe("UnreadNotificationBadgeViewModel", () => {
             shouldRender: true,
             symbol: "!",
             isHighlight: true,
+            isUnsent: false,
         });
         vm.dispose();
     });

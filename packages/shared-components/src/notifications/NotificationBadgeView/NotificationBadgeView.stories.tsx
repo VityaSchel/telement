@@ -38,6 +38,7 @@ const meta = {
         isVisible: true,
         isNotification: false,
         isHighlight: false,
+        isUnsent: false,
         isKnocked: false,
         badgeType: "badge_2char",
         symbol: "3",
@@ -86,6 +87,7 @@ export const Clickable: Story = {
 export const WithTooltip: Story = {
     args: {
         isHighlight: true,
+        isUnsent: true,
         symbol: "!",
         showUnsentTooltip: true,
     },

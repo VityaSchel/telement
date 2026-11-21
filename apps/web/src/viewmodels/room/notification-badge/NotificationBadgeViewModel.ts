@@ -99,6 +99,7 @@ export class NotificationBadgeViewModel
             isVisible: isRendered && isVisible,
             isNotification: props.level === NotificationLevel.Notification,
             isHighlight: props.level >= NotificationLevel.Highlight,
+            isUnsent: props.level === NotificationLevel.Unsent,
             isKnocked: knocked,
             badgeType: getBadgeType(props.level, displaySymbol, props.forceDot, knocked),
             symbol: displaySymbol,

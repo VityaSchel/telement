@@ -20,10 +20,17 @@
 .notificationBadge.visible {
     background-color: var(--roomtile-default-badge-bg-color, var(--cpd-color-icon-secondary));
     color: var(--cpd-color-text-on-solid-primary);
-    outline: 1px solid transparent;
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+/* Telement: forced colors draw a transparent outline, so it keeps the badge's shape there. Elsewhere it would take the
+   place of the focus ring of a badge that is a button. */
+@media (forced-colors: active) {
+    .notificationBadge.visible:not(:focus-visible) {
+        outline: 1px solid transparent;
+    }
 }
 
 button.notificationBadge {
@@ -55,8 +62,22 @@ button.notificationBadge {
     background-color: var(--cpd-color-icon-accent-primary);
 }
 
+/*
+ * Mentions look like the room list's too: the accent counter with white digits, and an accent dot. Messages that
+ * failed to send stay red, as the room list's mark for them is.
+ */
 .notificationBadge.visible.highlight {
+    background-color: var(--cpd-color-bg-accent-rest);
+    color: var(--tl-color-on-accent);
+}
+
+.notificationBadge.visible.highlight.dot {
+    background-color: var(--cpd-color-icon-accent-primary);
+}
+
+.notificationBadge.visible.highlight.unsent {
     background-color: var(--cpd-color-icon-critical-primary);
+    color: var(--cpd-color-text-on-solid-primary);
 }
 
 /*

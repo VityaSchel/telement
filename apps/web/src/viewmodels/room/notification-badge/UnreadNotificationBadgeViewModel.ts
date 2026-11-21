@@ -76,6 +76,7 @@ export class UnreadNotificationBadgeViewModel
             isVisible: symbol === null && count === 0 ? true : hasUnreadCount,
             isNotification: level === NotificationLevel.Notification,
             isHighlight: level >= NotificationLevel.Highlight,
+            isUnsent: level === NotificationLevel.Unsent,
             isKnocked: false,
             badgeType: getBadgeType(level, displaySymbol, props.forceDot),
             symbol: displaySymbol,

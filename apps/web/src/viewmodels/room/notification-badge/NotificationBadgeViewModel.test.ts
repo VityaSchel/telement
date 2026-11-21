@@ -68,8 +68,17 @@ describe("NotificationBadgeViewModel", () => {
             isVisible: true,
             symbol: "4",
             isHighlight: true,
+            isUnsent: true,
             badgeType: "badge_2char",
         });
+    });
+
+    it("marks only messages that failed to send as unsent, so mentions don't take their red", () => {
+        const vm = new NotificationBadgeViewModel({ symbol: null, count: 1, level: NotificationLevel.Highlight });
+
+        expect(vm.getSnapshot()).toMatchObject({ isHighlight: true, isUnsent: false });
+        vm.setNotificationData({ symbol: "!", count: 1, level: NotificationLevel.Unsent });
+        expect(vm.getSnapshot()).toMatchObject({ isHighlight: true, isUnsent: true });
     });
 
     it("hides activity badges when hide bold is enabled", () => {

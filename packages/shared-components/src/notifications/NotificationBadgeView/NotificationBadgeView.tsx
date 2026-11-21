@@ -34,6 +34,10 @@ export interface NotificationBadgeViewSnapshot {
      */
     isHighlight: boolean;
     /**
+     * Marks the badge as reporting messages that failed to send, which keeps it red while mentions are in the accent.
+     */
+    isUnsent?: boolean;
+    /**
      * Marks the badge as representing a knock request.
      */
     isKnocked: boolean;
@@ -84,6 +88,7 @@ export function NotificationBadgeView({ vm, className }: Readonly<NotificationBa
         isVisible,
         isNotification,
         isHighlight,
+        isUnsent,
         isKnocked,
         badgeType,
         symbol,
@@ -101,6 +106,7 @@ export function NotificationBadgeView({ vm, className }: Readonly<NotificationBa
         [styles.visible]: isVisible,
         [styles.notification]: isNotification,
         [styles.highlight]: isHighlight,
+        [styles.unsent]: isUnsent,
         [styles.dot]: badgeType === "dot",
         [styles.badge2Char]: badgeType === "badge_2char",
         [styles.badge3Char]: badgeType === "badge_3char",

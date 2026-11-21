@@ -17,7 +17,7 @@ import { afterEach, beforeAll, describe, expect, it } from "vitest";
 import * as stories from "./NotificationBadgeView.stories";
 import { NotificationDecoration } from "../../room-list/VirtualizedRoomListView/RoomListItemWrapper/RoomListItemView/NotificationDecoration";
 
-const { Notification, Dot, Knocked } = composeStories(stories);
+const { Notification, Dot, Knocked, Highlight, WithTooltip } = composeStories(stories);
 
 /** The room list's unread counter, which the badge should look like, after the @ of a mention. */
 function RoomListCounter({
@@ -176,6 +176,45 @@ describe("NotificationBadgeView layout", () => {
         }
         expect(getComputedStyle(mention.querySelector("svg")!).fill).toBe("rgb(255, 255, 255)");
     });
+
+    it.each(["cpd-theme-light", "cpd-theme-dark"])(
+        "counts mentions in the room list's accent counter with white digits, rather than in red (%s)",
+        (theme) => {
+            render(
+                <div className={theme}>
+                    <Highlight symbol="1" />
+                    <RoomListCounter count={1} mention={true} />
+                </div>,
+            );
+            const style = getComputedStyle(badge());
+
+            expect(style.backgroundColor).toBe(getComputedStyle(roomListCounter()).backgroundColor);
+            expect(style.color).toBe(getComputedStyle(roomListCounter()).color);
+            expect(style.color).toBe("rgb(255, 255, 255)");
+        },
+    );
+
+    it("keeps a mention's dot in the accent", () => {
+        render(<Highlight badgeType="dot" symbol={null} />);
+
+        expect(getComputedStyle(badge()).backgroundColor).toBe("rgb(36, 129, 204)");
+    });
+
+    it.each([
+        ["cpd-theme-light", "rgb(213, 25, 40)"],
+        ["cpd-theme-dark", "rgb(253, 62, 60)"],
+    ])(
+        "keeps the badge of messages that failed to send red, as the room list's mark for them is (%s)",
+        (theme, red) => {
+            render(
+                <div className={theme}>
+                    <WithTooltip />
+                </div>,
+            );
+
+            expect(getComputedStyle(badge()).backgroundColor).toBe(red);
+        },
+    );
 
     it("keeps the dot in the dark theme's accent itself, as nothing is drawn on it", () => {
         render(
