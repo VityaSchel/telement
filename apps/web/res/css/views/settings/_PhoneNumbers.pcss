@@ -27,3 +27,9 @@ Please see LICENSE files in the repository root for full details.
 .mx_PhoneNumbers_country {
     width: 80px;
 }
+
+/* Telement: the country code is a prefix inside the one field, as the room address's "#" is (_RoomAliasField.pcss),
+   with no line between it and the number, so that the floated label names the whole field */
+.mx_Field_prefix:has(> .mx_PhoneNumbers_country) {
+    border-inline: none;
+}

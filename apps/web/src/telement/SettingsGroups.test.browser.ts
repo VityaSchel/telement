@@ -46,6 +46,7 @@ import pollHistoryListStyles from "../../res/css/views/polls/pollHistory/_PollHi
 import fontScalingPanelStyles from "../../res/css/views/settings/_FontScalingPanel.pcss?raw";
 import joinRuleSettingsStyles from "../../res/css/views/settings/_JoinRuleSettings.pcss?raw";
 import notificationsStyles from "../../res/css/views/settings/_Notifications.pcss?raw";
+import phoneNumbersStyles from "../../res/css/views/settings/_PhoneNumbers.pcss?raw";
 import roomProfileSettingsStyles from "../../res/css/views/settings/_RoomProfileSettings.pcss?raw";
 import setIntegrationManagerStyles from "../../res/css/views/settings/_SetIntegrationManager.pcss?raw";
 import settingsFieldsetStyles from "../../res/css/views/settings/_SettingsFieldset.pcss?raw";
@@ -89,6 +90,7 @@ const APP_STYLES = [
     fontScalingPanelStyles,
     joinRuleSettingsStyles,
     notificationsStyles,
+    phoneNumbersStyles,
     roomProfileSettingsStyles,
     setIntegrationManagerStyles,
     settingsFieldsetStyles,
@@ -657,6 +659,33 @@ describe.each(THEMES.map(([theme]) => theme))("Settings groups in %s", (theme) =
 
             expect(getComputedStyle(get("#size-floated-label")).display).toBe("none");
             expect(box("#size-field").height).toBe(36);
+        });
+
+        it("draws the phone number's country code inside the one field, with no line between it and the number", () => {
+            renderTab(
+                theme,
+                section(
+                    "account",
+                    "",
+                    subsection(
+                        "phone-numbers",
+                        "Phone numbers",
+                        `<form>
+                            <div class="mx_Field mx_Field_input mx_Field_labelAlwaysTopLeft" id="phone-field">
+                                <span class="mx_Field_prefix" id="prefix">
+                                    <div class="mx_Dropdown mx_PhoneNumbers_country mx_CountryDropdown">+1</div>
+                                </span>
+                                <input type="text" id="phone-input" placeholder="Phone number" />
+                                <label for="phone-input">Phone number</label>
+                            </div>
+                        </form>`,
+                    ),
+                ),
+            );
+            const prefix = getComputedStyle(get("#prefix"));
+
+            expect([prefix.borderLeftStyle, prefix.borderRightStyle]).toEqual(["none", "none"]);
+            expect(box("#phone-field").height).toBe(36);
         });
     });
 
