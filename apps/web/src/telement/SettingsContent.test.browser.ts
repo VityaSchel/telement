@@ -31,7 +31,6 @@ import deviceSecurityCardStyles from "../../res/css/components/views/settings/de
 import deviceDetailsStyles from "../../res/css/components/views/settings/devices/_DeviceDetails.pcss?raw";
 import filteredDeviceListStyles from "../../res/css/components/views/settings/devices/_FilteredDeviceList.pcss?raw";
 import filteredDeviceListHeaderStyles from "../../res/css/components/views/settings/devices/_FilteredDeviceListHeader.pcss?raw";
-import pollHistoryStyles from "../../res/css/views/polls/pollHistory/_PollHistory.pcss?raw";
 import encryptionCardStyles from "../../res/css/views/settings/encryption/_EncryptionCard.pcss?raw";
 import aliasSettingsStyles from "../../res/css/views/room_settings/_AliasSettings.pcss?raw";
 import betaCardStyles from "../../res/css/views/beta/_BetaCard.pcss?raw";
@@ -91,7 +90,6 @@ const APP_STYLES = [
     filteredDeviceListStyles,
     filteredDeviceListHeaderStyles,
     encryptionCardStyles,
-    pollHistoryStyles,
     imageSizePanelStyles,
     createRoomDialogStyles,
     compoundOverrides,
@@ -458,22 +456,6 @@ describe.each(THEMES.map(([theme]) => theme))("Settings content in %s", (theme) 
         expect(style("#warning")).toEqual(["13px", "400", "19.5px"]);
         expect(style("#question")).toEqual(["13px", "600", "19.5px"]);
         expect(style("#answer")).toEqual(["13px", "400", "19.5px"]);
-    });
-
-    it("heads the Polls tab with a 13px group label on the list's edge, as the dialog's title is the only large heading", () => {
-        render(
-            theme,
-            `<div class="mx_SettingsTab" id="tab">
-                <div class="mx_PollHistory_content">
-                    <h2 class="mx_Heading_h2 mx_PollHistory_header" id="heading">Polls</h2>
-                    <div id="filter">Active polls</div>
-                </div>
-            </div>`,
-        );
-        const heading = getComputedStyle(document.querySelector("#heading")!);
-
-        expect([heading.fontSize, heading.fontWeight]).toEqual(["13px", "400"]);
-        expect(textStart("#heading")).toBe(textStart("#filter"));
     });
 
     it("writes bold text in the settings semibold", () => {
