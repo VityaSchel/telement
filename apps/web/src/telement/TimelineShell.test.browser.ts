@@ -1539,5 +1539,25 @@ describe("Timeline shell", () => {
 
             expect(Math.abs(centerX(line) - centerX(pill))).toBeLessThanOrEqual(0.5);
         });
+
+        it.each(["ltr", "rtl"])(
+            "puts a result's avatar and bubble on the timeline's edges in %s text, not the browser's list padding further in",
+            (dir) => {
+                /** How far the avatar and the bubble start from the list's start edge. */
+                const insets = (): number[] => {
+                    const list = box(document.querySelector(".mx_RoomView_MessageList")!);
+                    const start = (rect: DOMRect): number =>
+                        dir === "ltr" ? rect.left - list.left : list.right - rect.right;
+                    return [start(box(document.querySelector(".slotAvatar > *")!)), start(box(all(".line")[0]))];
+                };
+                render("bubble", row("bubble", text("Can you check the dark theme?")));
+                document.querySelector(".mx_RoomView_body")!.setAttribute("dir", dir);
+                const timeline = insets();
+                renderSearchResults("No more results", { dir });
+
+                expect(timeline).toEqual([12, 52]);
+                expect(insets()).toEqual(timeline);
+            },
+        );
     });
 });

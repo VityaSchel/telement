@@ -151,8 +151,11 @@ Please see LICENSE files in the repository root for full details.
     .mx_RoomView_messageListWrapper {
         justify-content: flex-start;
 
+        /* Each result is a list of its date separator and its message. Without the browser's 40px start padding it
+           lines up with the timeline, its avatars and bubbles on the timeline's own edges. */
         > .mx_RoomView_MessageList > li > ol {
             list-style-type: none;
+            padding-inline-start: 0;
         }
     }
 
@@ -162,11 +165,10 @@ Please see LICENSE files in the repository root for full details.
     }
 
     /* The end of the results, "No more results" or "No results", is a line of secondary text rather than a heading,
-       spaced like the date pills in every layout, the compact one included. It is centered over the results as their
-       date pills are: each result is a list with the browser's 40px start padding, which the line takes too. */
+       spaced like the date pills in every layout, the compact one included, and centered over the results as their
+       date pills are. */
     .mx_RoomView_MessageList h2.mx_RoomView_topMarker {
         margin: var(--cpd-space-2x) 0;
-        padding-inline-start: 40px;
         font: var(--cpd-font-body-sm-regular);
         letter-spacing: var(--cpd-font-letter-spacing-body-sm);
         color: var(--cpd-color-text-secondary);
