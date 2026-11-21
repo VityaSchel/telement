@@ -205,11 +205,13 @@ export interface ShouldShowMessageActionBarInput {
     actionBarFocused: boolean;
     /** Whether an EventTile context menu is currently open. */
     hasContextMenu: boolean;
+    /** Whether the tile is a preview that can't be interacted with, such as the Forward dialog's. */
+    inhibitInteraction?: boolean;
 }
 
 /**
  * Whether EventTile should render the message action bar. Telement shows it only for keyboard focus: with a mouse, as
- * in Telegram, the right-click menu has every action and nothing appears on hover.
+ * in Telegram, the right-click menu has every action and nothing appears on hover. A preview has no actions to show.
  */
 export function getShouldShowMessageActionBar({
     isEditing,
@@ -217,8 +219,14 @@ export function getShouldShowMessageActionBar({
     showActionBarFromFocus,
     actionBarFocused,
     hasContextMenu,
+    inhibitInteraction,
 }: ShouldShowMessageActionBarInput): boolean {
-    return !isEditing && !forExport && (showActionBarFromFocus || (actionBarFocused && !hasContextMenu));
+    return (
+        !isEditing &&
+        !forExport &&
+        !inhibitInteraction &&
+        (showActionBarFromFocus || (actionBarFocused && !hasContextMenu))
+    );
 }
 
 /** Inputs for EventTile timestamp visibility derivation. */

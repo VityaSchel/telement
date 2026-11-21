@@ -707,6 +707,7 @@ export class EventTileViewModel extends BaseViewModel<EventTileViewModelRenderSt
                     showActionBarFromFocus: interaction.showActionBarFromFocus,
                     actionBarFocused: interaction.isActionBarFocused,
                     hasContextMenu: interaction.hasContextMenu,
+                    inhibitInteraction: interaction.inhibitInteraction,
                 }),
             },
             timestamp: {

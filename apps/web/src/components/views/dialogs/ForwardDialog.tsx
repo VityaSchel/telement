@@ -345,12 +345,15 @@ const ForwardDialog: React.FC<IProps> = ({ matrixClient: cli, event, permalinkCr
             fixedWidth={false}
         >
             <h3>{_t("forward|message_preview_heading")}</h3>
-            {/* Telement: the layout is named, as the timeline names it, for the bubble's place in the preview */}
+            {/* Telement: the layout is named, as the timeline names it, for the bubble's place in the preview. The preview
+                only shows the message, so it is inert: its links and time are no Tab stops, and focus can't show its
+                action bar. */}
             <div
                 className={classnames("mx_ForwardDialog_preview", {
                     mx_IRCLayout: previewLayout == Layout.IRC,
                 })}
                 data-layout={previewLayout}
+                inert
             >
                 <EventPresentationContextProvider layout={previewLayout}>
                     <EventTile

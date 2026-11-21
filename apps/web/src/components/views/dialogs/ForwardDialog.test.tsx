@@ -147,6 +147,14 @@ describe("ForwardDialog", () => {
         expect(container.querySelector(".mx_ForwardDialog_preview")).toHaveAttribute("data-layout", "bubble");
     });
 
+    it("makes the preview inert, so that its time and links are no Tab stops and focus can't show its action bar", () => {
+        const { container } = mountForwardDialog();
+        const preview = container.querySelector(".mx_ForwardDialog_preview")!;
+
+        expect(preview).toHaveAttribute("inert");
+        expect(preview.querySelector('[data-testid="event-tile-slot-actionBar"]')).toBeNull();
+    });
+
     it("sends with a paper plane named Send rather than a Send label", () => {
         const { container } = mountForwardDialog();
         const buttons = screen.getAllByRole("button", { name: "Send" });
