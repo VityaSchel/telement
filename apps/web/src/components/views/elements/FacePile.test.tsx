@@ -15,6 +15,8 @@ import { describe, it, expect } from "vitest";
 import { mkRoomMember } from "test-utils";
 
 import FacePile from "./FacePile";
+import { CurrentRightPanelPhaseContext } from "../../../contexts/CurrentRightPanelPhaseContext";
+import { RightPanelPhases } from "../../../stores/right-panel/RightPanelStorePhases";
 
 describe("<FacePile />", () => {
     it("renders with a tooltip", () => {
@@ -25,5 +27,23 @@ describe("<FacePile />", () => {
         );
 
         expect(asFragment()).toMatchSnapshot();
+    });
+
+    it.each([
+        [RightPanelPhases.MemberList, true],
+        [RightPanelPhases.MemberInfo, true],
+        [RightPanelPhases.ThreePidMemberInfo, true],
+        [RightPanelPhases.EncryptionPanel, true],
+        [RightPanelPhases.RoomSummary, false],
+    ])("marks the member list open while the right panel shows %s: %s", (currentPhase, toggled) => {
+        const member = mkRoomMember("123", "456", KnownMembership.Join);
+
+        const { container } = render(
+            <CurrentRightPanelPhaseContext.Provider value={{ currentPhase, isPanelOpen: true }}>
+                <FacePile members={[member]} size="36px" overflow={false} tooltipLabel="People" />
+            </CurrentRightPanelPhaseContext.Provider>,
+        );
+
+        expect(container.querySelector(".mx_FacePile")!.classList.contains("mx_FacePile_toggled")).toBe(toggled);
     });
 });

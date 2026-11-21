@@ -12,12 +12,14 @@ import { CurrentRightPanelPhaseContext } from "../../../../../contexts/CurrentRi
 
 /**
  * Hook to easily track whether a given right panel phase is toggled on/off.
+ *
+ * @param phases - The phases that count as the control's panel, such as a member's profile opened from the member list.
  */
-export function useToggled(phase: RightPanelPhases): boolean {
+export function useToggled(...phases: RightPanelPhases[]): boolean {
     const context = useContext(CurrentRightPanelPhaseContext);
     if (!context) {
         return false;
     }
     const { currentPhase, isPanelOpen } = context;
-    return !!(isPanelOpen && currentPhase === phase);
+    return !!(isPanelOpen && currentPhase && phases.includes(currentPhase));
 }
