@@ -22,19 +22,52 @@ Please see LICENSE files in the repository root for full details.
 
     .mx_AddExistingToSpace_content {
         flex-grow: 1;
+        /* Telement: the rows highlight 8px outside the dialog's content edge and keep their content on it, as the
+           Forward dialog's do (_ForwardDialog.pcss), so the list reaches 8px past the edge on both sides */
+        margin-inline: calc(-1 * var(--cpd-space-2x));
     }
 
     .mx_AddExistingToSpace_noResults {
         display: block;
         margin-top: 24px;
+        /* Telement: back on the dialog's content edge from the list's 8px outside it */
+        margin-inline: var(--cpd-space-2x);
     }
 
     .mx_AddExistingToSpace_section {
-        margin-right: 12px;
+        /* Telement: the heading and "Show more" on the dialog's content edge, the rows' highlight 8px outside it */
+        padding-inline: var(--cpd-space-2x);
 
         ul {
             list-style: none;
             padding-left: 0;
+            margin-inline: calc(-1 * var(--cpd-space-2x));
+        }
+
+        /* Telement: the Forward dialog's 52px row: the 36px avatar 8px from its start, top and bottom, the checkbox
+           as far from its end, and the one hover fill, which a row also gets while the keyboard has its focus */
+        .mx_AddExistingToSpace_entry {
+            align-items: center;
+            gap: var(--cpd-space-3x);
+            margin-top: 0;
+            padding: var(--cpd-space-2x);
+            border-radius: var(--tl-radius-row);
+
+            &:hover,
+            &:has(:focus-visible) {
+                background-color: var(--cpd-color-bg-action-secondary-hovered);
+            }
+
+            .mx_DecoratedRoomAvatar,
+            .mx_AddExistingToSpace_entry_name {
+                margin-right: 0;
+            }
+
+            /* The checkbox has no label, so Compound's inline field leaves its label's column empty: without it, the
+               12px gap before that column doesn't push the checkbox off the row's end */
+            form > div > div:last-child:empty {
+                display: none;
+            }
         }
 
         /* provides space for scrollbar so that checkbox and scrollbar do not collide */

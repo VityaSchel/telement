@@ -703,6 +703,74 @@ describe("Dialogs", () => {
         });
     });
 
+    describe("add existing rooms", () => {
+        /**
+         * AddExistingToSpaceDialog's list of rooms, each row an Entry with its avatar, name and checkbox. StyledCheckbox
+         * puts the checkbox in Compound's inline field, a row with a 12px gap before its label's column, which a
+         * checkbox without a label leaves empty.
+         */
+        function renderAddExisting(): void {
+            const rows = ["Project 10", "Project 05"]
+                .map(
+                    (name) => `
+                        <li class="mx_AddExistingToSpace_entry" data-testid="row">
+                            <span class="mx_DecoratedRoomAvatar"><span class="mx_BaseAvatar" style="display: block; width: 36px; height: 36px" data-testid="avatar"></span></span>
+                            <span class="mx_AddExistingToSpace_entry_name">${name}</span>
+                            <form>
+                                <div style="display: flex; gap: 12px">
+                                    <div><span style="display: block; width: 20px; height: 20px" data-testid="checkbox"></span></div>
+                                    <div style="flex: 1"></div>
+                                </div>
+                            </form>
+                        </li>
+                    `,
+                )
+                .join("");
+            renderDialog(
+                "mx_AddExistingToSpaceDialog",
+                "Add existing rooms",
+                `<div class="mx_AddExistingToSpace">
+                    <div class="mx_AutoHideScrollbar mx_AddExistingToSpace_content">
+                        <div class="mx_AddExistingToSpace_section">
+                            <h3 data-testid="heading">Rooms</h3>
+                            <ul>${rows}</ul>
+                        </div>
+                    </div>
+                </div>`,
+                "",
+                false,
+            );
+            addWrapperClass("mx_AddExistingToSpaceDialog_wrapper");
+        }
+
+        it("lists the rooms in the Forward dialog's 52px rows, the avatar and checkbox on the 24px edge", () => {
+            renderAddExisting();
+            const body = box("[data-testid=body]");
+            const [first, second] = [...document.querySelectorAll("[data-testid=row]")].map((row) =>
+                row.getBoundingClientRect(),
+            );
+
+            expect([first.height, second.top - first.top]).toEqual([52, 52]);
+            expect(box("[data-testid=avatar]").left - body.left).toBe(24);
+            expect(body.right - box("[data-testid=checkbox]").right).toBe(24);
+            expect(box("[data-testid=heading]").left - body.left).toBe(24);
+        });
+
+        it("highlights a hovered row on an 8px plate reaching 8px past the content edge", async () => {
+            renderAddExisting();
+            const body = box("[data-testid=body]");
+            const row = get("[data-testid=row]");
+            await userEvent.hover(row);
+
+            expect([
+                row.getBoundingClientRect().left - body.left,
+                body.right - row.getBoundingClientRect().right,
+            ]).toEqual([16, 16]);
+            expect(getComputedStyle(row).borderRadius).toBe("8px");
+            expect(getComputedStyle(row).backgroundColor).toBe(colorOf("--cpd-color-bg-action-secondary-hovered"));
+        });
+    });
+
     describe("space dialogs titled with their space", () => {
         /** SubspaceSelector in BaseDialog's title, as Create a space (CreateSubspaceDialog) and Add existing rooms draw it. */
         function renderSpaceDialog(className: string, title: string): void {

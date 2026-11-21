@@ -37,7 +37,7 @@ import { type NonEmptyArray } from "../../../@types/common";
 import { SDKContextClass } from "../../../contexts/SDKContextClass.ts";
 
 // These values match CSS
-const ROW_HEIGHT = 32 + 12;
+const ROW_HEIGHT = 36 + 2 * 8;
 const HEADER_HEIGHT = 15;
 const GROUP_MARGIN = 24;
 
@@ -57,9 +57,9 @@ export const Entry: React.FC<{
     return (
         <li id={id} className="mx_AddExistingToSpace_entry" aria-label={room.name}>
             {room?.isSpaceRoom() ? (
-                <RoomAvatar room={room} size="32px" />
+                <RoomAvatar room={room} size="36px" />
             ) : (
-                <DecoratedRoomAvatar room={room} size="32px" />
+                <DecoratedRoomAvatar room={room} size="36px" />
             )}
             <span className="mx_AddExistingToSpace_entry_name">{room.name}</span>
             <StyledCheckbox
