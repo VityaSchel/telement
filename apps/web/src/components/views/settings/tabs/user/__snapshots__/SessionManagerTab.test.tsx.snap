@@ -205,7 +205,6 @@ exports[`<SessionManagerTab /> > current session section > renders current sessi
         </div>
       </div>
     </div>
-    <br />
     <div
       class="mx_DeviceSecurityCard"
     >
@@ -380,7 +379,6 @@ exports[`<SessionManagerTab /> > current session section > renders current sessi
         </div>
       </div>
     </div>
-    <br />
     <div
       class="mx_DeviceSecurityCard"
     >

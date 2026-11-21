@@ -303,7 +303,6 @@ exports[`<CurrentDeviceSection /> > renders device and correct security card whe
           </div>
         </div>
       </div>
-      <br />
       <div
         class="mx_DeviceSecurityCard"
       >
@@ -490,7 +489,6 @@ exports[`<CurrentDeviceSection /> > renders device and correct security card whe
           </div>
         </div>
       </div>
-      <br />
       <div
         class="mx_DeviceSecurityCard"
       >

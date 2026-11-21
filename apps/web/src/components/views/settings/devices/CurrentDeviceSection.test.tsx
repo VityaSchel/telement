@@ -55,6 +55,13 @@ describe("<CurrentDeviceSection />", () => {
         expect(container).toMatchSnapshot();
     });
 
+    it("leaves the space between the session and its verification card to the card's gap, with no line break", () => {
+        const { container } = render(getComponent({ device: alicesUnverifiedDevice }));
+
+        expect(container.querySelector(".mx_DeviceSecurityCard")).toBeInTheDocument();
+        expect(container.querySelector(".mx_SettingsSubsection_content > br")).toBeNull();
+    });
+
     it("renders device and correct security card when device is unverified", () => {
         const { container } = render(getComponent({ device: alicesUnverifiedDevice }));
         expect(container).toMatchSnapshot();

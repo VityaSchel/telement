@@ -29,6 +29,7 @@ import filterTabGroupStyles from "../../res/css/components/views/elements/_Filte
 import tabbedViewStyles from "../../res/css/structures/_TabbedView.pcss?raw";
 import settingsSubsectionStyles from "../../res/css/components/views/settings/shared/_SettingsSubsection.pcss?raw";
 import settingsSubsectionHeadingStyles from "../../res/css/components/views/settings/shared/_SettingsSubsectionHeading.pcss?raw";
+import loginWithQrStyles from "../../res/css/views/auth/_LoginWithQR.pcss?raw";
 import betaCardStyles from "../../res/css/views/beta/_BetaCard.pcss?raw";
 import roomSettingsDialogStyles from "../../res/css/views/dialogs/_RoomSettingsDialog.pcss?raw";
 import settingsDialogStyles from "../../res/css/views/dialogs/_SettingsDialog.pcss?raw";
@@ -71,6 +72,7 @@ const APP_STYLES = [
     tabbedViewStyles,
     settingsSubsectionStyles,
     settingsSubsectionHeadingStyles,
+    loginWithQrStyles,
     betaCardStyles,
     roomSettingsDialogStyles,
     settingsDialogStyles,
@@ -708,6 +710,27 @@ describe.each(THEMES.map(([theme]) => theme))("Settings groups in %s", (theme) =
             expectCard("#clear-card", container);
             expect(box("#clear").left - box("#clear-card").left).toBe(16);
         });
+    });
+
+    it("ends the Link new device card 12px under its last line", () => {
+        renderTab(
+            theme,
+            section(
+                "sessions",
+                "",
+                subsection(
+                    "qr",
+                    "Link new device",
+                    `<div class="mx_LoginWithQRSection">
+                        <div class="mx_AccessibleButton mx_AccessibleButton_hasKind mx_AccessibleButton_kind_primary">Show QR code</div>
+                        <p class="_typography_6v6n8_153 _font-body-sm-regular_6v6n8_31" id="unsupported">Not supported by your account provider</p>
+                    </div>`,
+                    "Use a QR code to sign in to another device and set up secure messaging.",
+                ),
+            ),
+        );
+
+        expect(box("#qr-card").bottom - box("#unsupported").bottom).toBe(12);
     });
 
     describe("the room Notifications tab", () => {

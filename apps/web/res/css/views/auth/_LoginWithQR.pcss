@@ -9,6 +9,11 @@ Please see LICENSE files in the repository root for full details.
 .mx_LoginWithQRSection p {
     margin-top: 0;
     margin-bottom: var(--cpd-space-4x);
+
+    /* Telement: the last line ends on the card's 12px inset, as other cards' content does */
+    &:last-child {
+        margin-bottom: 0;
+    }
 }
 
 .mx_LoginWithQRSection {

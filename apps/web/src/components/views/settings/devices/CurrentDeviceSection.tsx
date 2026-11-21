@@ -135,14 +135,12 @@ const CurrentDeviceSection: React.FC<Props> = ({
                             isCurrentDevice
                         />
                     ) : (
-                        <>
-                            <br />
-                            <DeviceVerificationStatusCard
-                                device={device}
-                                onVerifyDevice={onVerifyCurrentDevice}
-                                isCurrentDevice
-                            />
-                        </>
+                        // The card's 16px gap alone keeps the verification status clear of the session above it
+                        <DeviceVerificationStatusCard
+                            device={device}
+                            onVerifyDevice={onVerifyCurrentDevice}
+                            isCurrentDevice
+                        />
                     )}
                 </>
             )}
