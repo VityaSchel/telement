@@ -97,7 +97,7 @@ export default class CommandProvider extends AutocompleteProvider {
     }
 
     public getName(): string {
-        return "*️⃣ " + _t("composer|autocomplete|command_description");
+        return _t("composer|autocomplete|command_description");
     }
 
     public renderCompletions(completions: React.ReactNode[]): React.ReactNode {

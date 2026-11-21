@@ -61,7 +61,7 @@ export default class NotifProvider extends AutocompleteProvider {
     }
 
     public getName(): string {
-        return "❗️ " + _t("composer|autocomplete|notification_description");
+        return _t("composer|autocomplete|notification_description");
     }
 
     public renderCompletions(completions: React.ReactNode[]): React.ReactNode {
