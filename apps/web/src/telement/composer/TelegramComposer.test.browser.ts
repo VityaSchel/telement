@@ -25,6 +25,7 @@ import sendMessageComposerStyles from "../../../res/css/views/rooms/_SendMessage
 import sendWysiwygComposerStyles from "../../../res/css/views/rooms/wysiwyg_composer/_SendWysiwygComposer.pcss?raw";
 import editorStyles from "../../../res/css/views/rooms/wysiwyg_composer/components/_Editor.pcss?raw";
 import telegramComposerStyles from "../../../res/css/telement/_TelegramComposer.pcss?raw";
+import threadPanelStyles from "../../../res/css/views/right_panel/_ThreadPanel.pcss?raw";
 import replyPreviewStyles from "../../../res/css/views/rooms/_ReplyPreview.pcss?raw";
 import emojiButtonStyles from "../../../res/css/views/rooms/_EmojiButton.pcss?raw";
 import lightTheme from "../../../res/themes/light/css/_light.pcss?raw";
@@ -112,6 +113,7 @@ describe("Telegram composer buttons", () => {
             ${toBrowserCss(sendWysiwygComposerStyles, fontSizes)}
             ${toBrowserCss(editorStyles, commonStyles, fontSizes)}
             ${toBrowserCss(telegramComposerStyles, fontSizes)}
+            ${toBrowserCss(threadPanelStyles, fontSizes, lightTheme)}
             ${replyPreviewStyles}
         `;
         document.head.append(stylesheet);
@@ -208,6 +210,46 @@ describe("Telegram composer buttons", () => {
         expect(getComputedStyle(document.querySelector(".mx_MessageComposer_wrapper")!).borderTopWidth).toBe("1px");
         expect(composer.top - menu.bottom).toBe(8);
     });
+
+    it.each(["mx_ThreadView", "mx_TimelineCard"])(
+        "docks the composer of a right panel card (%s) as the room's is docked: its divider meets the card's edges and its paperclip keeps the room's inset",
+        (card) => {
+            const composer = (classes: string): string => `
+                <div class="${classes}">
+                    <div class="mx_MessageComposer_wrapper">
+                        <div class="mx_MessageComposer_row">
+                            <div class="mx_TelementAttachButton" style="display: flex; --cpd-icon-button-size: 36px">${ICON}</div>
+                            ${PLAIN_FIELD}
+                        </div>
+                    </div>
+                </div>
+            `;
+            // The thread's composer is the compact one
+            const compact = card === "mx_ThreadView" ? " mx_MessageComposer--compact" : "";
+            document.body.innerHTML = `
+                <div class="cpd-theme-light" style="display: flex; align-items: flex-end; height: 300px">
+                    <main style="width: 520px">${composer("mx_MessageComposer")}</main>
+                    <aside class="mx_BaseCard ${card} mx_ThreadPanel" style="width: 320px">
+                        ${composer(`mx_MessageComposer${compact}`)}
+                    </aside>
+                </div>
+            `;
+            const [room, panel] = [box("main"), box("aside")];
+            const [roomWrapper, panelWrapper] = [...document.querySelectorAll(".mx_MessageComposer_wrapper")].map(
+                (wrapper) => wrapper.getBoundingClientRect(),
+            );
+            const [roomClip, panelClip] = [...document.querySelectorAll(".mx_TelementAttachButton")].map((button) =>
+                button.getBoundingClientRect(),
+            );
+            const panelComposer = getComputedStyle(document.querySelector("aside .mx_MessageComposer")!);
+
+            expect([roomWrapper.left - room.left, room.right - roomWrapper.right]).toEqual([0, 0]);
+            expect([panelWrapper.left - panel.left, panel.right - panelWrapper.right]).toEqual([0, 0]);
+            expect(panelClip.left - panel.left).toBe(roomClip.left - room.left);
+            expect(panelComposer.borderRadius).toBe("0px");
+            expect(panelComposer.marginTop).toBe("0px");
+        },
+    );
 
     it.each([
         ["one line", "See you at the standup"],

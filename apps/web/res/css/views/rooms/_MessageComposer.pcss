@@ -215,9 +215,10 @@ Please see LICENSE files in the repository root for full details.
         left: 0;
     }
 
+    /* The room's inset: the thread's composer, the only compact one, spans its card as the room's spans the room */
     &:not(.mx_MessageComposer_e2eStatus) {
         .mx_MessageComposer_wrapper {
-            padding: 0;
+            padding: 0 var(--cpd-space-2x);
         }
     }
 
