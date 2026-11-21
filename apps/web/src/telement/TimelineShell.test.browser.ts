@@ -1464,6 +1464,28 @@ describe("Timeline shell", () => {
             },
         );
 
+        it("writes the typing notice as the informational rows are written: 13px regular secondary text", () => {
+            render("bubble", row("bubble", text("First message in the room")), typing(["Alice"]));
+            const label = document.querySelector(".mx_WhoIsTypingTile_label")!;
+            const style = getComputedStyle(label);
+
+            expect([style.fontSize, style.fontWeight]).toEqual(["13px", "400"]);
+            expect(style.color).toBe(tokenColor("--cpd-color-text-secondary", label));
+        });
+
+        it("draws the typing avatars at 24px, one of the avatar sizes, with the ring that sets them apart outside them", () => {
+            render("bubble", row("bubble", text("First message in the room")), typing(["Alice", "Bob"]));
+            const avatars = all(".mx_WhoIsTypingTile_avatars > *");
+
+            for (const avatar of avatars) {
+                const style = getComputedStyle(avatar);
+                expect([box(avatar).width, box(avatar).height]).toEqual([24, 24]);
+                // Compound's edge in the avatar's own color, not in the page's, which drew it 22px
+                expect(style.borderTopColor).toBe(style.backgroundColor);
+                expect(style.boxShadow).toBe(`${tokenColor("--cpd-color-bg-canvas-default", avatar)} 0px 0px 0px 1px`);
+            }
+        });
+
         it("puts the typing avatars where the sender's name starts in the IRC layout", () => {
             render("irc", row("irc", text("First message in the room")), typing(["Alice", "Bob"]));
             const sender = box(document.querySelector(".slotSender")!);
