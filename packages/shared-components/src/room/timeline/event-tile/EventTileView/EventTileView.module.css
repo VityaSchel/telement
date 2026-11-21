@@ -1711,6 +1711,7 @@
         --event-tile-page-bg-canvas-default: var(--cpd-color-bg-canvas-default);
         --event-tile-page-bg-subtle-primary: var(--cpd-color-bg-subtle-primary);
         --event-tile-page-bg-subtle-secondary: var(--cpd-color-bg-subtle-secondary);
+        --event-tile-page-icon-critical-primary: var(--cpd-color-icon-critical-primary);
 
         > :is(.slotTimestamp, .slotPadlock, .slotReplyChain, .slotBody, .slotFooter) {
             --cpd-color-text-primary: var(--tl-color-on-bubble-own);
@@ -1790,6 +1791,20 @@
         /* The reply quote's sender, line and text are all white, as in Telegram */
         > .slotReplyChain {
             --cpd-color-text-secondary: var(--tl-color-on-bubble-own);
+        }
+
+        /* A message that failed to send keeps the page's red mark after its time, so that it doesn't look sent: a red
+           disc with a white "!", ringed in white to stand out on the blue, as Telegram draws it. The glyph is a disc
+           with the "!" cut out and 1px of room around it, so a white disc behind it draws the "!" and most of the
+           ring. */
+        > .slotTimestamp [data-status="failed"] {
+            --cpd-color-icon-critical-primary: var(--event-tile-page-icon-critical-primary);
+
+            svg {
+                border-radius: 50%;
+                background-color: var(--tl-color-on-bubble-own);
+                box-shadow: 0 0 0 0.5px var(--tl-color-on-bubble-own);
+            }
         }
 
         /* Secondary white on a translucent white fill drops under 3:1 in light themes, so what sits on one is white: a

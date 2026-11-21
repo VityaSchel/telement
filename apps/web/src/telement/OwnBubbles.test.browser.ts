@@ -288,7 +288,7 @@ const PIN_SLOT = `<div class="slotPin"><span class="PinnedMarkView_mark" role="i
 /** The status after the time, as MessageStatusView renders it in its slot. */
 function statusSlot(status: "read" | "failed"): string {
     const glyph = status === "read" ? DoubleCheckIcon : ErrorSolidIcon;
-    return `<div class="slotStatus"><span class="MessageStatusView_status MessageStatusView_${status}" role="img">${icon(glyph, { className: "MessageStatusView_icon" })}</span></div>`;
+    return `<div class="slotStatus"><span class="MessageStatusView_status MessageStatusView_${status}" role="img" data-status="${status}">${icon(glyph, { className: "MessageStatusView_icon" })}</span></div>`;
 }
 
 /** An EventTileView, in the bubble layout unless told otherwise, the last of its sender's run, as the room timeline
@@ -585,13 +585,18 @@ describe("Your own bubbles", () => {
             );
         });
 
-        it("draws the read checks after the time in its secondary white, and the failed mark in white rather than red", () => {
+        it("draws the read checks after the time in its secondary white, and the failed mark as the page's red disc ringed in white, so it doesn't look sent", () => {
             const list = render(tile(plain("Read"), { status: "read" }), tile(plain("Not sent"), { status: "failed" }));
             const [read, failed] = list.querySelectorAll(".MessageStatusView_status svg");
 
             expect(color(read)).toBe(theme.secondary);
             expect(color(read)).toBe(color(list.querySelector(".mx_MessageTimestamp")));
-            expect(color(failed)).toBe(WHITE);
+            expect(color(failed)).toBe(tokenColor("--cpd-color-icon-critical-primary", list));
+            expect(color(failed)).not.toBe(color(read));
+            // The white disc behind the glyph shows through its "!" and rings it
+            expect(fill(failed)).toBe(WHITE);
+            expect(getComputedStyle(failed).borderRadius).toBe("50%");
+            expect(getComputedStyle(failed).boxShadow).toBe(`${WHITE} 0px 0px 0px 0.5px`);
         });
 
         it("draws the checks of your own emote, which has no bubble, in the page's time color", () => {
