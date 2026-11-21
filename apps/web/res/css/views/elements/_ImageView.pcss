@@ -46,6 +46,9 @@ $button-gap: var(--cpd-space-3x);
     height: var(--image-view-panel-height);
     /* The image's wrapper below is as tall as the viewer, which would shrink the panel off the 16px around its buttons */
     flex-shrink: 0;
+    /* Opaque in the viewer's dark canvas: the lightbox behind it only dims the app, whose header would show through
+       between the viewer's buttons */
+    background-color: var(--cpd-color-bg-canvas-default);
     display: flex;
     justify-content: space-between;
     align-items: center;

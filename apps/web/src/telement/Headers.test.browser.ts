@@ -629,6 +629,18 @@ describe("Telement's headers", () => {
             expect(videoHover).toBe(tokenColor("--cpd-color-bg-subtle-primary", dark));
         });
 
+        it.each(["cpd-theme-light", "cpd-theme-dark"])(
+            "fills the bar with the viewer's dark canvas over %s, so the app behind the lightbox doesn't show between its buttons",
+            (theme) => {
+                render(imageView(theme));
+                const dark = document.querySelector(".mx_ImageView")!;
+                const fill = getComputedStyle(document.querySelector(".mx_ImageView_panel")!).backgroundColor;
+
+                expect(fill).toBe(tokenColor("--cpd-color-bg-canvas-default", dark));
+                expect(fill).toMatch(/^rgb\(/);
+            },
+        );
+
         it("draws no disc around a disabled button, as Compound doesn't", async () => {
             render(imageView("cpd-theme-light"));
 
