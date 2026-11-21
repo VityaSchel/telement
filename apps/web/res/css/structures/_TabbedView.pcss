@@ -44,12 +44,12 @@ Please see LICENSE files in the repository root for full details.
         background-color: var(--cpd-color-bg-action-secondary-pressed);
     }
 
-    /* The selected tab is a plate in the selection color with its label and icon in white, as the selected room is */
+    /* The selected tab is a plate in the selection color with its label and icon in white, as the selected room is.
+       Its focus ring is white too, as the accent would vanish on the plate, a ring's width inside the plate's edge so
+       that a band of the plate shows on both sides of it, as on the selected room. */
     .mx_TabbedView_tabLabel_active {
         background-color: var(--tl-color-bg-selection);
         color: var(--tl-color-on-selection);
-        /* For enhanced visibility under contrast control */
-        outline: 1px solid transparent;
 
         &:hover {
             background-color: var(--tl-color-bg-selection-hovered);
@@ -58,6 +58,19 @@ Please see LICENSE files in the repository root for full details.
 
         &:active {
             background-color: var(--tl-color-bg-selection-pressed);
+        }
+
+        &:focus-visible {
+            outline-color: var(--tl-color-on-selection);
+            outline-offset: calc(-2 * var(--cpd-border-width-2));
+        }
+
+        /* For enhanced visibility under contrast control. Only there, where a transparent outline is drawn: elsewhere
+           it would take the place of the focus ring. */
+        @media (forced-colors: active) {
+            &:not(:focus-visible) {
+                outline: 1px solid transparent;
+            }
         }
     }
 }

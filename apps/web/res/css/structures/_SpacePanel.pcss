@@ -63,8 +63,14 @@ Please see LICENSE files in the repository root for full details.
     &:hover .mx_SpacePanel_toggleCollapse,
     .mx_SpacePanel_toggleCollapse:focus-visible {
         opacity: 1;
-        /* For enhanced visibility under contrast control */
-        outline: 1px solid transparent;
+    }
+
+    /* For enhanced visibility under contrast control. Only there, where a transparent outline is drawn: elsewhere it
+       would take the place of the focus ring. */
+    @media (forced-colors: active) {
+        &:hover .mx_SpacePanel_toggleCollapse:not(:focus-visible) {
+            outline: 1px solid transparent;
+        }
     }
 
     ul {

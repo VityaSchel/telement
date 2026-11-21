@@ -131,11 +131,22 @@ Please see LICENSE files in the repository root for full details.
                     background-color: var(--cpd-color-bg-action-secondary-hovered);
                 }
 
+                /* Telement: focused, the room's button rings the whole row, inside it, as a menu item's ring is, rather
+                   than its avatar and name, where the list's edge cut the ring off */
+                &:has(> .mx_ForwardList_roomButton:focus-visible) {
+                    outline: var(--cpd-border-width-2) solid var(--cpd-color-border-focused);
+                    outline-offset: calc(-1 * var(--cpd-border-width-2));
+                }
+
                 .mx_ForwardList_roomButton {
                     display: flex;
                     align-items: center;
                     gap: var(--cpd-space-3x);
                     min-width: 0;
+
+                    &:focus-visible {
+                        outline: none;
+                    }
                 }
 
                 /* Telement: the name over the room's details, centered beside the avatar, or the name alone on its
@@ -209,10 +220,17 @@ Please see LICENSE files in the repository root for full details.
                 }
             }
 
-            /* Telement: "and N others" holds its icon where the rooms hold their avatars */
+            /* Telement: "and N others" holds its icon where the rooms hold their avatars, and its focus ring inside
+               it, as the rooms' rows do, where the list's edge would cut it off */
             .mx_OverflowTileView {
                 padding-block: var(--cpd-space-2x);
                 padding-inline-start: var(--cpd-space-2x);
+                border-radius: var(--tl-radius-row);
+
+                &:focus-visible {
+                    outline: var(--cpd-border-width-2) solid var(--cpd-color-border-focused);
+                    outline-offset: calc(-1 * var(--cpd-border-width-2));
+                }
             }
 
             .mx_OverflowTileView_icon {

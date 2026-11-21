@@ -27,8 +27,9 @@
 
     /* The plate's color when shown, which the inverted badges of the selected plate take too */
     --plate-color: var(--cpd-color-bg-action-tertiary-hovered);
-    /* The keyboard focus ring's color, drawn inside the plate */
+    /* The keyboard focus ring's color and offset, drawn inside the plate */
     --focus-ring-color: var(--cpd-color-border-focused);
+    --focus-ring-offset: calc(-1 * var(--cpd-border-width-2));
 }
 
 /*
@@ -284,14 +285,16 @@
  */
 .roomListItem:focus-visible:not([data-state="open"], :has(.hoverMenu > button[data-state="open"])) .container {
     outline: var(--cpd-border-width-2) solid var(--focus-ring-color);
-    outline-offset: calc(-1 * var(--cpd-border-width-2));
+    outline-offset: var(--focus-ring-offset);
 }
 
 /* Like Telegram's desktop apps, the selected room is a plate in the selection color with everything on it in white */
 .selected {
     --plate-color: var(--tl-color-bg-selection);
-    /* The focus color, the accent, would vanish on the accent plate */
+    /* The focus color, the accent, would vanish on the accent plate, so the ring is white, a ring's width inside the
+       plate's edge: a band of the plate shows on both sides of it, on a light page as on a dark one */
     --focus-ring-color: var(--tl-color-on-selection);
+    --focus-ring-offset: calc(-2 * var(--cpd-border-width-2));
 
     .container {
         background-color: var(--plate-color);

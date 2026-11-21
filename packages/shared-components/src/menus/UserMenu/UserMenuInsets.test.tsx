@@ -152,6 +152,20 @@ describe("User menu insets", () => {
         );
     });
 
+    it("rings the round avatar, outside its hover circle, when the keyboard focuses the button", async () => {
+        render(<Default />);
+        const trigger = screen.getByRole("button", { name: "User menu" });
+        const avatar = trigger.firstElementChild!.firstElementChild!;
+        await userEvent.keyboard("{Shift}");
+        trigger.focus();
+
+        expect(trigger.matches(":focus-visible")).toBe(true);
+        expect(getComputedStyle(trigger).outlineStyle).toBe("none");
+        const ring = getComputedStyle(avatar);
+        expect(`${ring.outlineStyle} ${ring.outlineWidth} ${ring.outlineOffset}`).toBe("solid 2px 2px");
+        expect(ring.borderRadius).toBe("50%");
+    });
+
     it("opens the menu at the space panel's edge, clear of the space badges that reach past the space avatars", async () => {
         render(
             <div data-testid="space-panel" style={{ inlineSize: `${SPACE_PANEL_WIDTH}px` }}>

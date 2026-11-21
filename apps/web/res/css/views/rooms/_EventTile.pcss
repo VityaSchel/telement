@@ -148,6 +148,9 @@ $left-gutter: 64px;
         background-color: inherit;
         color: inherit; /* inherit the colour from the dark or light theme by default (but not for code blocks) */
         flex: 1;
+        /* Telement: github-markdown-css rings a focused link in its own variable, which nothing defines, so the ring
+           was dropped; it takes the focus color, which your own bubbles make white */
+        --borderColor-accent-emphasis: var(--cpd-color-border-focused);
 
         pre,
         code {

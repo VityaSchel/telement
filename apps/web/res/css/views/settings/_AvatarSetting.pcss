@@ -17,6 +17,17 @@ Please see LICENSE files in the repository root for full details.
         opacity: 1;
     }
 
+    /* Telement: the focus ring follows the avatar's shape, round or a space's rounded square, outside it, rather than
+       the square box of the button around it */
+    .mx_AvatarSetting_avatarDisplay:focus-visible {
+        outline: none;
+
+        > .mx_BaseAvatar {
+            outline: var(--cpd-border-width-2) solid var(--cpd-color-border-focused);
+            outline-offset: var(--cpd-space-0-5x);
+        }
+    }
+
     & > * {
         box-sizing: border-box;
     }

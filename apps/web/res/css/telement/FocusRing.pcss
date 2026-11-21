@@ -1,0 +1,20 @@
+/*
+Copyright 2026 Viktor Shchelochkov
+
+SPDX-License-Identifier: AGPL-3.0-only OR GPL-3.0-only
+Please see LICENSE files in the repository root for full details.
+*/
+
+/*
+ * One keyboard focus ring for the whole app, Compound's: 2px in the focus color (the accent, white in your own bubbles),
+ * 1px outside the element and following its corners. It replaces the browser's own ring, so that buttons, links, tabs
+ * and avatars that draw no ring of their own get the one Compound's fields, switches and menus draw.
+ *
+ * _index.pcss imports this file into the lowest cascade layer, under Compound's, the shared components' and the app's
+ * stylesheets, so that any of them that draws a ring of its own, an inset one or none at all keeps it. The name has no
+ * leading underscore, which keeps rethemendex.sh from also listing the file in _components.pcss, in the app's layer.
+ */
+:focus-visible {
+    outline: var(--cpd-border-width-2) solid var(--cpd-color-border-focused);
+    outline-offset: var(--cpd-border-width-1);
+}

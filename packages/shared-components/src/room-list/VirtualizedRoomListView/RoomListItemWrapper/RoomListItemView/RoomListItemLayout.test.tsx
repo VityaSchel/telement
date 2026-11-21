@@ -566,6 +566,10 @@ describe("Room list item layout", () => {
         const plate = getComputedStyle(part(row, styles.container));
         expect(plate.outlineStyle).toBe("solid");
         expect(plate.outlineColor).toBe(colorOf("--tl-color-on-selection"));
+        // A ring's width inside the plate's edge, so that the plate shows on both sides of the white ring, on a light
+        // page as on a dark one
+        expect(plate.outlineWidth).toBe("2px");
+        expect(plate.outlineOffset).toBe("-4px");
     });
 
     it.each([

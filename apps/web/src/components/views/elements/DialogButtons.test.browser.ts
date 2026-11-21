@@ -21,6 +21,7 @@ import telementTokens from "../../../../../../packages/shared-components/src/tel
 import commonStyles from "../../../../res/css/_common.pcss?raw";
 import fontSizes from "../../../../res/css/_font-sizes.pcss?raw";
 import lightTheme from "../../../../res/themes/light/css/_light.pcss?raw";
+import focusRing from "../../../../res/css/telement/FocusRing.pcss?raw";
 import { toBrowserCss } from "../../../test/telement/browserCss";
 import { press, settledStyle, tokenColor } from "../../../test/telement/computedStyle";
 
@@ -158,7 +159,7 @@ describe("Legacy dialog button styles", () => {
         stylesheet = document.createElement("style");
         stylesheet.textContent = `
             @layer compound-tokens, compound-web, shared-components, app-web;
-            @layer compound-tokens { ${compoundBase} ${compoundSemantic} ${compoundLightTheme} }
+            @layer compound-tokens { ${compoundBase} ${compoundSemantic} ${compoundLightTheme} ${focusRing} }
             /* Compound's stylesheet defines the pill radius */
             @layer compound-web { ${compoundStyles} }
             @layer shared-components { ${telementTokens} }
@@ -266,14 +267,16 @@ describe("Legacy dialog button styles", () => {
         expect(getComputedStyle(button).filter).toBe("none");
     });
 
-    it("brightens a button focused from the keyboard", async () => {
+    it("rings a button focused from the keyboard in the app's one focus ring, rather than brightening it", async () => {
         render(footer());
         const button = element("primary");
 
         const style = await press(button);
 
         expect(button.matches(":focus-visible")).toBe(true);
-        expect(style.filter).toBe("brightness(1.05)");
+        expect(style.filter).toBe("none");
+        expect(`${style.outlineStyle} ${style.outlineWidth} ${style.outlineOffset}`).toBe("solid 2px 1px");
+        expect(style.outlineColor).toBe(lightColor("--cpd-color-border-focused"));
     });
 
     it("keeps a warning cancel button a red outline, like Compound's destructive secondary Button", () => {

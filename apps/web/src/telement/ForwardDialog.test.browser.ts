@@ -426,6 +426,39 @@ describe("The Forward dialog", () => {
             expect(fill(row("Media and more"))).toBe(dialogColor("--cpd-color-bg-action-secondary-hovered"));
         });
 
+        it("ring the whole row, inside it, while the keyboard focus is on the room's button, rather than its avatar and name", async () => {
+            renderDialog();
+            get("[data-testid=search]").focus();
+            await userEvent.tab();
+            const button = row("Media and more").querySelector<HTMLElement>(".mx_ForwardList_roomButton")!;
+            const rowStyle = getComputedStyle(row("Media and more"));
+
+            expect(document.activeElement).toBe(button);
+            expect(getComputedStyle(button).outlineStyle).toBe("none");
+            expect(`${rowStyle.outlineStyle} ${rowStyle.outlineWidth} ${rowStyle.outlineOffset}`).toBe(
+                "solid 2px -2px",
+            );
+            expect(rowStyle.outlineColor).toBe(dialogColor("--cpd-color-border-focused"));
+        });
+
+        it("ring the row that offers the other rooms inside it, where the list's edge would cut the ring off", async () => {
+            renderDialog();
+            get(".mx_ForwardList_results").insertAdjacentHTML(
+                "beforeend",
+                `<div class="mx_AccessibleButton mx_OverflowTileView" role="button" tabindex="0" data-testid="overflow">
+                    <div class="mx_OverflowTileView_icon"></div><div class="mx_OverflowTileView_text">and 2 others...</div>
+                </div>`,
+            );
+            const overflow = get("[data-testid=overflow]");
+            await userEvent.keyboard("{Shift}");
+            overflow.focus();
+            const style = getComputedStyle(overflow);
+
+            expect(overflow.matches(":focus-visible")).toBe(true);
+            expect(`${style.outlineStyle} ${style.outlineWidth} ${style.outlineOffset}`).toBe("solid 2px -2px");
+            expect(style.borderRadius).toBe("8px");
+        });
+
         it("keep the accent check of a sent forward showing, and gray the plane where you may not send", () => {
             renderDialog();
             const sent = getComputedStyle(sendButton("Project 10"));

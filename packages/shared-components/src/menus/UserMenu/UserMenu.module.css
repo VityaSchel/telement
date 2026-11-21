@@ -216,6 +216,16 @@
     box-shadow: 0 0 0 var(--cpd-space-0-5x) var(--cpd-color-bg-action-secondary-pressed);
 }
 
+/* The focus ring goes round the avatar, outside its hover circle, rather than round the button's square box */
+.triggerButton:focus-visible {
+    outline: none;
+}
+
+.triggerButton:focus-visible .avatarWrapper > :first-child {
+    outline: var(--cpd-border-width-2) solid var(--cpd-color-border-focused);
+    outline-offset: var(--cpd-space-0-5x);
+}
+
 .displayName {
     max-width: 175px;
     white-space: nowrap;

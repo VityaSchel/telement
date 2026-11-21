@@ -717,11 +717,6 @@ summary {
     margin-bottom: 0;
 }
 
-.mx_Dialog button.mx_LegacyDialogButton:focus-visible,
-.mx_Dialog input.mx_LegacyDialogButton[type="submit"]:focus-visible {
-    filter: brightness($focus-brightness);
-}
-
 /* Default (non-cancel) buttons inside a DialogButtons footer get filled in as the primary action,
  * even without the mx_Dialog_primary class - .danger/.warning override the colours below via a
  * same-specificity, later-in-source rule; disabled overrides everyone the same way.

@@ -14,10 +14,12 @@ Please see LICENSE files in the repository root for full details.
     border-bottom: 1px solid $separator;
     background-color: $background;
 
-    button:has(svg.mx_RoomHeader_toggled),
-    [class^="_icon-button_"][aria-expanded="true"] {
-        /* For enhanced visibility under contrast control */
-        outline: 1px solid transparent;
+    /* For enhanced visibility under contrast control. Only there, where a transparent outline is drawn: elsewhere it
+       would take the place of the focus ring. */
+    @media (forced-colors: active) {
+        :is(button:has(svg.mx_RoomHeader_toggled), [class^="_icon-button_"][aria-expanded="true"]):not(:focus-visible) {
+            outline: 1px solid transparent;
+        }
     }
 
     /* 36px buttons around 24px icons, as in Telegram's chat header. Compound sets an icon button's size inline and
@@ -48,6 +50,25 @@ Please see LICENSE files in the repository root for full details.
     /* Without this, this flex item reports its unshrunk content width to
        mx_RoomHeader which breaks its max-width. */
     min-width: 0;
+
+    /* Telement: the keyboard focus ring of the room's name, which opens room info, is a row's, inside the header: 8px
+       from its top and bottom, 8px past the name's start and the button's end, and rounded like a row, rather than a
+       ring round the header-high button that starts at the name's first letter */
+    position: relative;
+
+    &:focus-visible {
+        outline: none;
+    }
+
+    &:focus-visible::after {
+        content: "";
+        position: absolute;
+        inset: var(--cpd-space-2x) calc(-1 * var(--cpd-space-2x));
+        border-radius: var(--tl-radius-row);
+        outline: var(--cpd-border-width-2) solid var(--cpd-color-border-focused);
+        outline-offset: calc(-1 * var(--cpd-border-width-2));
+        pointer-events: none;
+    }
 }
 
 .mx_RoomHeader_info {
@@ -113,8 +134,13 @@ Please see LICENSE files in the repository root for full details.
     &.mx_FacePile_toggled {
         color: var(--cpd-color-text-action-accent);
         font: var(--cpd-font-body-sm-semibold);
-        /* For enhanced visibility under contrast control */
-        outline: 1px solid transparent;
+
+        /* For enhanced visibility under contrast control, where a transparent outline is drawn */
+        @media (forced-colors: active) {
+            &:not(:focus-visible) {
+                outline: 1px solid transparent;
+            }
+        }
     }
 }
 

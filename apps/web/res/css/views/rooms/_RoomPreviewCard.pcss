@@ -97,8 +97,14 @@ Please see LICENSE files in the repository root for full details.
         display: flex;
         align-items: center;
         margin-top: var(--cpd-space-4x);
-        /* For enhanced visibility under contrast control */
-        outline: 1px solid transparent;
+
+        /* For enhanced visibility under contrast control. Only there, where a transparent outline is drawn: elsewhere
+           it would take the place of the focus ring. */
+        @media (forced-colors: active) {
+            &:not(:focus-visible) {
+                outline: 1px solid transparent;
+            }
+        }
 
         :first-child {
             flex-shrink: 0;
