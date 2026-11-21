@@ -6,8 +6,8 @@
  */
 
 import React, { useEffect, useRef, useState, type JSX } from "react";
-import { MenuItem, RadioInput, SubMenu } from "@vector-im/compound-web";
-import { NotificationsIcon, NotificationsOffIcon } from "@vector-im/compound-design-tokens/assets/web/icons";
+import { MenuItem, SubMenu } from "@vector-im/compound-web";
+import { CheckIcon, NotificationsIcon, NotificationsOffIcon } from "@vector-im/compound-design-tokens/assets/web/icons";
 import classNames from "classnames";
 
 import { _t } from "../../../../core/i18n/i18n";
@@ -15,8 +15,6 @@ import { RoomNotifState } from "./RoomNotifs";
 import { useViewModel, type ViewModel } from "../../../../core/viewmodel";
 import type { RoomListItemViewSnapshot, RoomListItemViewActions } from "./RoomListItemView";
 import styles from "./RoomListItemView.module.css";
-
-const noop = (): void => {};
 
 /**
  * View model type for room list item
@@ -91,19 +89,21 @@ export function RoomListItemNotificationMenu({ vm, inContextMenu }: RoomListItem
             >
                 {options.map(({ state, label }) => {
                     const checked = snapshot.roomNotifState === state;
-                    // Compound's radio marks the selected option, as Compound's RadioMenuItem draws it; that component
-                    // can't stop the click, which would also open the room under the menu
+                    // Radio items without the radio, as in the sort menu: the chosen one has a check at its end, as
+                    // Telegram's menus mark it. Compound's RadioMenuItem can't stop the click, which would also open
+                    // the room under the menu
                     return (
                         <MenuItem
                             key={state}
                             role="menuitemradio"
                             aria-checked={checked}
                             hideChevron={true}
-                            Icon={<RadioInput aria-hidden={true} tabIndex={-1} checked={checked} onChange={noop} />}
                             label={label}
                             onSelect={() => vm.onSetRoomNotifState(state)}
                             onClick={(evt) => evt.stopPropagation()}
-                        />
+                        >
+                            {checked && <CheckIcon className={styles.check} aria-hidden={true} />}
+                        </MenuItem>
                     );
                 })}
             </div>

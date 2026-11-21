@@ -436,3 +436,10 @@
         margin-inline-end: calc(-16px * 4.275 / 24);
     }
 }
+
+/* The current notification setting's check, a menu icon's size in the text color, as the sort menu's */
+.check {
+    inline-size: var(--cpd-space-4x);
+    block-size: var(--cpd-space-4x);
+    color: var(--cpd-color-text-primary);
+}

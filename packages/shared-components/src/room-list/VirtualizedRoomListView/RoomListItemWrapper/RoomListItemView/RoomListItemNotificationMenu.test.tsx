@@ -103,7 +103,12 @@ describe("<RoomListItemNotificationMenu />", () => {
         const checked = screen.getAllByRole("menuitemradio", { checked: true });
         expect(checked).toHaveLength(1);
         expect(checked[0]).toHaveAccessibleName(label);
-        expect(checked[0].querySelector('input[type="radio"]')).toBeChecked();
+        // Marked with a check at its end, as the sort menu marks its option, rather than a radio
+        expect(checked[0].querySelector("svg")).toBeVisible();
+        for (const option of screen.getAllByRole("menuitemradio")) {
+            expect(option.querySelector('input[type="radio"]')).toBeNull();
+            if (option !== checked[0]) expect(option.querySelector("svg")).toBeNull();
+        }
     });
 
     it.each([

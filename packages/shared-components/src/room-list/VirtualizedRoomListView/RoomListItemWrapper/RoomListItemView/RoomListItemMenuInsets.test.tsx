@@ -81,11 +81,15 @@ describe("Room menu insets", () => {
         expect(icon.top - toggleItem.getBoundingClientRect().top).toBe(8);
     });
 
-    it("puts the submenu's radios where the menu's icons are, 10px before their labels, in 32px rows", async () => {
+    it("starts the submenu's labels where the menu's icons are and ends the current option's check with the chevron, in 32px rows", async () => {
         const user = userEvent.setup();
         renderMenu();
 
         await user.click(screen.getByRole("button", { name: "More Options" }));
+        const chevron = screen
+            .getByRole("menuitem", { name: "Notifications" })
+            .querySelector<SVGSVGElement>(":scope > svg:last-child")!;
+        const menu = screen.getByRole("menu", { name: "More Options" }).getBoundingClientRect();
         await user.click(screen.getByRole("menuitem", { name: "Notifications" }));
         const option = await screen.findByRole("menuitemradio", { name: "Match default settings" });
         const subMenu = option.closest('[role="menu"]')!;
@@ -96,10 +100,16 @@ describe("Room menu insets", () => {
             const rect = item.getBoundingClientRect();
             expect(rect.height).toBe(32);
             expect(rect.left - edge.left).toBe(4);
-            const radio = item.querySelector('input[type="radio"]')!.parentElement!.getBoundingClientRect();
-            expect(radio.left - edge.left).toBe(16);
-            expect(item.querySelector("span")!.getBoundingClientRect().left - radio.right).toBe(10);
+            expect(item.querySelector("span")!.getBoundingClientRect().left - edge.left).toBe(16);
         }
+        // A 16px check in the text color, its drawing ending 16px from the submenu's edge, as the chevron's does
+        const check = option.querySelector<SVGSVGElement>("svg")!;
+        const checkBox = check.getBoundingClientRect();
+        const row = option.getBoundingClientRect();
+        expect([checkBox.width, checkBox.height]).toEqual([16, 16]);
+        expect(checkBox.top + checkBox.height / 2).toBe(row.top + row.height / 2);
+        expect(getComputedStyle(check).color).toBe(colorOf("--cpd-color-text-primary"));
+        expect(edge.right - inkRight(check)).toBeCloseTo(menu.right - inkRight(chevron), 1);
     });
 
     it("draws the keyboard focus ring inside the item's highlight, 4px clear of the menu's edge", async () => {
