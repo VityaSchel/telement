@@ -393,6 +393,62 @@ describe("Dialogs", () => {
         });
     });
 
+    describe("disabled buttons", () => {
+        function colorIn(token: string): string {
+            return tokenColor(token, get("[data-testid=body]"));
+        }
+
+        /** The look of a button as Compound Button draws it while disabled. */
+        function look(element: HTMLElement): string[] {
+            const style = getComputedStyle(element);
+            return [style.color, style.backgroundColor, style.borderTopColor, style.opacity];
+        }
+
+        it("draw a filled action, a red one and a submit input in Compound's disabled fill", () => {
+            renderDialog(
+                "mx_DeactivateAccountDialog",
+                "Deactivate account",
+                `<input type="submit" class="mx_LegacyDialogButton mx_Dialog_primary" value="Continue" disabled data-testid="input">
+                <div class="mx_Dialog_buttons">
+                    <span class="mx_Dialog_buttons_row">
+                        <button class="mx_LegacyDialogButton danger" type="button" disabled data-testid="danger">Leave</button>
+                        <button class="mx_LegacyDialogButton" type="button" disabled data-testid="action">Send report</button>
+                    </span>
+                </div>`,
+            );
+            const filled = [
+                colorIn("--cpd-color-text-disabled"),
+                colorIn("--cpd-color-bg-subtle-primary"),
+                colorIn("--cpd-color-bg-subtle-primary"),
+                "1",
+            ];
+
+            expect(look(get("[data-testid=input]"))).toEqual(filled);
+            expect(look(get("[data-testid=danger]"))).toEqual(filled);
+            expect(look(get("[data-testid=action]"))).toEqual(filled);
+        });
+
+        it("keep a disabled Cancel an outline, as Compound draws a disabled outline button", () => {
+            renderDialog(
+                "mx_ReportEventDialog",
+                "Report content",
+                `<div class="mx_Dialog_buttons">
+                    <span class="mx_Dialog_buttons_row">
+                        <button class="mx_LegacyDialogButton cancel" type="button" disabled data-testid="cancel">Cancel</button>
+                        <button class="mx_LegacyDialogButton mx_Dialog_primary" type="button" disabled>Send report</button>
+                    </span>
+                </div>`,
+            );
+
+            expect(look(get("[data-testid=cancel]"))).toEqual([
+                colorIn("--cpd-color-text-disabled"),
+                colorIn("--cpd-color-bg-subtle-secondary"),
+                colorIn("--cpd-color-border-interactive-secondary"),
+                "1",
+            ]);
+        });
+    });
+
     describe("space dialogs titled with their space", () => {
         /** SubspaceSelector in BaseDialog's title, as Create a space (CreateSubspaceDialog) and Add existing rooms draw it. */
         function renderSpaceDialog(className: string, title: string): void {

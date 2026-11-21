@@ -752,11 +752,20 @@ summary {
     border-color: var(--cpd-color-border-interactive-secondary);
 }
 
-.mx_Dialog button.mx_LegacyDialogButton:disabled,
-.mx_Dialog input.mx_LegacyDialogButton[type="submit"]:disabled {
-    background-color: $light-fg-color;
-    border: solid 1px $light-fg-color;
-    opacity: 0.7;
+/* Telement: Compound Button's disabled look, as every other button has (_AccessibleButton.pcss), for buttons and submit
+   inputs alike: an outline button keeps a gray outline on the subtle fill, and a filled one, red ones and the footer's
+   action included, takes the gray fill. Both write their label in the disabled text color */
+.mx_Dialog :is(button, input[type="submit"]).mx_LegacyDialogButton:disabled {
+    cursor: not-allowed;
+    color: var(--cpd-color-text-disabled);
+    background-color: var(--cpd-color-bg-subtle-secondary);
+    border-color: var(--cpd-color-border-interactive-secondary);
+}
+
+.mx_Dialog :is(button, input[type="submit"]).mx_LegacyDialogButton:is(.mx_Dialog_primary, .danger):disabled,
+.mx_Dialog_buttons button.mx_LegacyDialogButton:not(.cancel, .warning):disabled {
+    background-color: var(--cpd-color-bg-subtle-primary);
+    border-color: var(--cpd-color-bg-subtle-primary);
 }
 
 /* Compound Button's hover and pressed colors: secondary on outline buttons, primary or critical on filled ones */
