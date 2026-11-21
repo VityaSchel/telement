@@ -166,11 +166,13 @@ export function VideoBodyFactory({
         vm.setPermalinkCreator(permalinkCreator);
     }, [permalinkCreator, vm]);
 
+    // Telement: the files panel saves videos from the message menu's "Save as…", with no download button under them
     const showFileBody =
         !forExport &&
         timelineRenderingType !== TimelineRenderingType.Room &&
         timelineRenderingType !== TimelineRenderingType.Pinned &&
-        timelineRenderingType !== TimelineRenderingType.Search;
+        timelineRenderingType !== TimelineRenderingType.Search &&
+        timelineRenderingType !== TimelineRenderingType.File;
 
     return (
         <VideoBodyView vm={vm} className="mx_MVideoBody" containerClassName="mx_MVideoBody_container">
@@ -267,13 +269,16 @@ export function ImageBodyFactory({
         vm.setSetMediaVisible(setMediaVisible);
     }, [setMediaVisible, shouldFallbackToFileBody, vm]);
 
+    // Telement: the files panel saves pictures from the message menu's "Save as…" and the image viewer, with no
+    // download button under them
     const showFileBody =
         !forExport &&
         timelineRenderingType !== TimelineRenderingType.Room &&
         timelineRenderingType !== TimelineRenderingType.Pinned &&
         timelineRenderingType !== TimelineRenderingType.Search &&
         timelineRenderingType !== TimelineRenderingType.Thread &&
-        timelineRenderingType !== TimelineRenderingType.ThreadsList;
+        timelineRenderingType !== TimelineRenderingType.ThreadsList &&
+        timelineRenderingType !== TimelineRenderingType.File;
 
     if (shouldFallbackToFileBody) {
         return (

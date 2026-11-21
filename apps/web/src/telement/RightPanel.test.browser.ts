@@ -40,6 +40,8 @@ import compoundStyles from "@vector-im/compound-web/dist/style.css?raw";
 // The package doesn't export its token stylesheet on its own
 // eslint-disable-next-line no-restricted-imports
 import telementTokens from "../../../../packages/shared-components/src/telement/tokens.css?raw";
+// eslint-disable-next-line no-restricted-imports
+import mediaBodyStyles from "../../../../packages/shared-components/src/room/timeline/event-tile/body/MediaBody/MediaBody.module.css?raw";
 import fontSizes from "../../res/css/_font-sizes.pcss?raw";
 import filePanelStyles from "../../res/css/structures/_FilePanel.pcss?raw";
 import rightPanelStyles from "../../res/css/structures/_RightPanel.pcss?raw";
@@ -263,11 +265,12 @@ describe("Right panel", () => {
         stylesheet = document.createElement("style");
         // In the order _components.pcss imports them: _FilePanel.pcss comes before _RightPanel.pcss
         stylesheet.textContent = `
-            @layer compound-tokens, compound-web, app-web;
+            @layer compound-tokens, compound-web, shared-components, app-web;
             @layer compound-tokens {
                 ${compoundBase} ${compoundSemantic} ${compoundLightTheme} ${compoundLightSemantic} ${telementTokens}
             }
             @layer compound-web { ${compoundStyles} }
+            @layer shared-components { ${mediaBodyStyles} }
             @layer app-web {
                 body { margin: 0; }
                 ${[
@@ -565,6 +568,31 @@ describe("Right panel", () => {
 
             expect(insets(card.querySelector("li")!, card)).toEqual({ start: CONTENT_EDGE, end: CONTENT_EDGE });
         });
+
+        it.each(["ltr", "rtl"])(
+            "spans a voice message's player to the content edge at both ends, as the file cards are (%s)",
+            (dir) => {
+                document.body.innerHTML = `
+                    <aside class="mx_RightPanel" dir="${dir}" style="width: ${CARD_WIDTH + 1}px; height: 400px">
+                        <div class="mx_BaseCard mx_FilePanel">
+                            <div class="mx_RoomView_messagePanel">
+                                <div class="mx_RoomView_messageListWrapper">
+                                    <ol class="mx_RoomView_MessageList">
+                                        <li><span class="mx_MVoiceMessageBody">
+                                            <div class="mediaBody mx_VoiceMessagePrimaryContainer">00:01</div>
+                                        </span></li>
+                                    </ol>
+                                </div>
+                            </div>
+                        </div>
+                    </aside>
+                `;
+                const card = document.querySelector(".mx_FilePanel")!;
+                const player = card.querySelector(".mx_VoiceMessagePrimaryContainer")!;
+
+                expect(insets(player, card)).toEqual({ start: CONTENT_EDGE, end: CONTENT_EDGE });
+            },
+        );
 
         it.each(["ltr", "rtl"])(
             "centers its empty state on the card, which TimelinePanel puts where the room's empty timeline goes (%s)",

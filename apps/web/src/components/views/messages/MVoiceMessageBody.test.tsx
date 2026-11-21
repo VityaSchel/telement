@@ -20,6 +20,8 @@ import type { MediaEventHelper } from "../../../utils/MediaEventHelper";
 import MVoiceMessageBody from "./MVoiceMessageBody";
 import { PlaybackQueue } from "../../../audio/PlaybackQueue";
 import { SDKContextClass } from "../../../contexts/SDKContextClass";
+import { TimelineRenderingType } from "../../../contexts/RoomContext";
+import { ScopedRoomContextProvider } from "../../../contexts/ScopedRoomContext";
 
 describe("<MVvoiceMessageBody />", () => {
     let event: MatrixEvent;
@@ -58,6 +60,25 @@ describe("<MVvoiceMessageBody />", () => {
 
         await act(() => render(<MVoiceMessageBody mxEvent={event} mediaEventHelper={mediaEventHelper} />));
         expect(await screen.findByTestId("recording-playback")).toBeInTheDocument();
+    });
+
+    it("puts no download button under the player in the files panel, which saves it from the message menu", async () => {
+        const mediaEventHelper = {
+            sourceBlob: { value: { arrayBuffer: () => new ArrayBuffer(8) } },
+        } as unknown as MediaEventHelper;
+
+        const { container } = await act(() =>
+            render(
+                // Only the rendering type matters here, so the rest of the room's state is left out
+                <ScopedRoomContextProvider {...({ timelineRenderingType: TimelineRenderingType.File } as any)}>
+                    <MVoiceMessageBody mxEvent={event} mediaEventHelper={mediaEventHelper} />
+                </ScopedRoomContextProvider>,
+            ),
+        );
+
+        expect(await screen.findByTestId("recording-playback")).toBeInTheDocument();
+        expect(container.querySelector(".mx_MFileBody")).toBeNull();
+        expect(screen.queryByText(/^Download/)).not.toBeInTheDocument();
     });
 
     it("lays out the player while the file downloads rather than a spinner, so the message keeps its size once it loads", async () => {

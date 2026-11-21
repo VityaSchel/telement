@@ -72,11 +72,14 @@ export default class MAudioBody extends React.PureComponent<IBodyProps, IState> 
         this.state.playback?.destroy();
     }
 
+    // Telement: the files panel saves voice messages and audio from the message menu's "Save as…", as the room does,
+    // with no download button under them
     protected get showFileBody(): boolean {
         return (
             this.context.timelineRenderingType !== TimelineRenderingType.Room &&
             this.context.timelineRenderingType !== TimelineRenderingType.Pinned &&
-            this.context.timelineRenderingType !== TimelineRenderingType.Search
+            this.context.timelineRenderingType !== TimelineRenderingType.Search &&
+            this.context.timelineRenderingType !== TimelineRenderingType.File
         );
     }
 

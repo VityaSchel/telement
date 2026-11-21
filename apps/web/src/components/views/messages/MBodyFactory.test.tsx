@@ -177,6 +177,33 @@ describe("MBodyFactory", () => {
         });
     });
 
+    describe("media in the files panel", () => {
+        const renderMedia = (msgtype: string, timelineRenderingType: TimelineRenderingType): RenderResult => {
+            const mimetype = msgtype === "m.image" ? "image/png" : "video/mp4";
+            const mediaEvent = mkEvent(msgtype, { body: "holiday", info: { mimetype, w: 320, h: 240, size: 1024 } });
+            return renderInRoomContext(
+                renderMBody({ ...props, mxEvent: mediaEvent, mediaEventHelper: new MediaEventHelper(mediaEvent) }),
+                timelineRenderingType,
+            );
+        };
+
+        it.each(["m.image", "m.video"])(
+            "puts no download button under %s, which the message menu's Save as… saves",
+            async (msgtype) => {
+                renderMedia(msgtype, TimelineRenderingType.File);
+
+                await waitFor(() => expect(document.querySelector(".mx_MFileBody")).toBeNull());
+                expect(screen.queryByText(/^Download/)).not.toBeInTheDocument();
+            },
+        );
+
+        it("still puts one under a video in the notifications panel", async () => {
+            renderMedia("m.video", TimelineRenderingType.Notification);
+
+            expect(await screen.findByText(/^Download/)).toBeInTheDocument();
+        });
+    });
+
     describe("FileBodyFactory and the document previews lab, for a PDF", () => {
         afterEach(async () => {
             // Both viewers share the lab, so a value left on the device would leak into the next test.

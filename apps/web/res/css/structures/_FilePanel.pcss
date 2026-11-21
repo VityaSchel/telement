@@ -34,4 +34,9 @@ Please see LICENSE files in the repository root for full details.
     .mx_RoomView_messageListWrapper > .mx_RoomView_empty {
         display: contents;
     }
+
+    /* A voice message's player spans the card's content, as the file cards do, rather than the room's 243px */
+    .mx_MVoiceMessageBody .mx_VoiceMessagePrimaryContainer {
+        max-width: none;
+    }
 }
