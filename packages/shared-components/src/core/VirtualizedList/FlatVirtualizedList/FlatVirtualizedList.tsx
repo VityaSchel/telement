@@ -55,9 +55,9 @@ export function FlatVirtualizedList<Item, Context>(props: FlatVirtualizedListPro
     return (
         <Virtuoso
             // note that either the container of direct children must be focusable to be axe
-            // compliant, so we leave tabIndex as the default so the container can be focused
-            // (virtuoso wraps the children inside another couple of elements so setting it
-            // on those doesn't seem to work, unfortunately)
+            // compliant, so the container can be focused while the focus is outside the list
+            // (useVirtualizedList sets its tabIndex; virtuoso wraps the children inside another
+            // couple of elements so setting it on those doesn't seem to work, unfortunately)
             itemContent={getItemComponentInternal}
             data={props.items}
             {...virtuosoProps}

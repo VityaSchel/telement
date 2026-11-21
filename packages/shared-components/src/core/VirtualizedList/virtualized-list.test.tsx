@@ -668,6 +668,29 @@ describe.each<ListTestVariant>([flatVariant])("$name", (variant) => {
             expect(container.querySelector("[data-testid='row-0']")).toBeNull();
         });
 
+        it("takes the list out of the Tab order while an item has the focus, so that Shift+Tab leaves the list", async () => {
+            renderRealVirtualizedList();
+            const listContainer = screen.getByRole("grid");
+            await waitFor(() => {
+                expect(screen.getByTestId("row-0")).toBeDefined();
+            });
+            const outside = document.createElement("button");
+            document.body.append(outside);
+
+            // Tab reaches the list itself while the focus is outside it, so that an item scrolled out of the rendered
+            // range can still be reached
+            expect(listContainer.getAttribute("tabindex")).toBe("0");
+            await act(async () => {
+                screen.getByTestId("row-0").focus();
+            });
+            expect(listContainer.getAttribute("tabindex")).toBe("-1");
+            await act(async () => {
+                outside.focus();
+            });
+            expect(listContainer.getAttribute("tabindex")).toBe("0");
+            outside.remove();
+        });
+
         it("should move focus from a focused child element to the scroller on keyboard navigation", async () => {
             renderRealVirtualizedList();
             const listContainer = screen.getByRole("grid");

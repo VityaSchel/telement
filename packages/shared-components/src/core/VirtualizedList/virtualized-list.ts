@@ -380,6 +380,10 @@ export function useVirtualizedList<Item, Context>(
         computeItemKey,
         ref: setRef,
         scrollerRef,
+        // The list itself is a Tab stop, so that Tab reaches an item that has scrolled out of the rendered range: its
+        // onFocus scrolls to it, and the item focuses itself. While the focus is on an item the list is no Tab stop,
+        // or Shift+Tab from the item would stop on the list, which shows nothing, rather than leave it.
+        tabIndex: isFocused ? -1 : 0,
         onKeyDown: keyDownCallback,
         onFocus,
         onBlur,
