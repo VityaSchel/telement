@@ -24,6 +24,7 @@ import addExistingToSpaceDialogStyles from "../../res/css/views/dialogs/_AddExis
 import compoundDialogStyles from "../../res/css/views/dialogs/_CompoundDialog.pcss?raw";
 import createRoomDialogStyles from "../../res/css/views/dialogs/_CreateRoomDialog.pcss?raw";
 import createSubspaceDialogStyles from "../../res/css/views/dialogs/_CreateSubspaceDialog.pcss?raw";
+import exportDialogStyles from "../../res/css/views/dialogs/_ExportDialog.pcss?raw";
 import inviteDialogStyles from "../../res/css/views/dialogs/_InviteDialog.pcss?raw";
 import leaveRoomDialogStyles from "../../res/css/views/dialogs/_LeaveRoomDialog.pcss?raw";
 import logoutDialogStyles from "../../res/css/views/dialogs/_LogoutDialog.pcss?raw";
@@ -52,6 +53,7 @@ const APP_STYLES = [
     compoundDialogStyles,
     createRoomDialogStyles,
     createSubspaceDialogStyles,
+    exportDialogStyles,
     inviteDialogStyles,
     leaveRoomDialogStyles,
     logoutDialogStyles,
@@ -446,6 +448,47 @@ describe("Dialogs", () => {
                 colorIn("--cpd-color-border-interactive-secondary"),
                 "1",
             ]);
+        });
+    });
+
+    describe("text", () => {
+        it("is primary in dialogs, labels included, rather than the legacy gray", () => {
+            renderDialog(
+                "mx_ExportDialog",
+                "Export chat",
+                `<p data-testid="subtitle">Select from the options below to export chats from your timeline</p>
+                <div class="mx_ExportDialog_options">
+                    <label data-testid="label"><input type="radio" name="format"> HTML</label>
+                </div>`,
+            );
+
+            expect(getComputedStyle(get("[data-testid=body]")).color).toBe(colorOf("--cpd-color-text-primary"));
+            expect(getComputedStyle(get("[data-testid=label]")).color).toBe(colorOf("--cpd-color-text-primary"));
+            // A subtitle is secondary
+            expect(getComputedStyle(get("[data-testid=subtitle]")).color).toBe(colorOf("--cpd-color-text-secondary"));
+        });
+
+        it("writes a confirmation's body in primary, the leave room one included", () => {
+            renderDialog(
+                "mx_QuestionDialog",
+                "Leave Project 11?",
+                `<div class="mx_Dialog_content" data-testid="text">You are the only person here.</div>${FOOTER}`,
+            );
+            addWrapperClass("mx_LeaveRoomDialog");
+
+            expect(getComputedStyle(get("[data-testid=text]")).color).toBe(colorOf("--cpd-color-text-primary"));
+        });
+
+        it("writes the invite dialog's help in secondary", () => {
+            renderDialog(
+                "mx_InviteDialog_other",
+                "Direct messages",
+                `<div class="mx_InviteDialog_content">
+                    <p class="mx_InviteDialog_helpText" data-testid="help">Start a conversation with someone.</p>
+                </div>`,
+            );
+
+            expect(getComputedStyle(get("[data-testid=help]")).color).toBe(colorOf("--cpd-color-text-secondary"));
         });
     });
 

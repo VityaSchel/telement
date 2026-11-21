@@ -7,6 +7,12 @@ Please see LICENSE files in the repository root for full details.
 */
 
 .mx_ExportDialog {
+    /* Telement: the subtitle over the options, in the one secondary text color (TELEMENT.md, "Colors, type and
+       components"), where the dialog's text and the options' labels are primary */
+    > p:has(+ .mx_ExportDialog_options) {
+        color: var(--cpd-color-text-secondary);
+    }
+
     .mx_ExportDialog_subheading {
         font-size: $font-16px;
         display: block;

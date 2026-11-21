@@ -403,7 +403,9 @@ summary {
 
 .mx_Dialog {
     @mixin floatingSurface;
-    color: $light-fg-color;
+    /* Telement: the one primary text color for bodies, labels, radios and checkboxes, rather than the legacy gray
+       ($light-fg-color), which is no Compound token. Descriptions and help set the one secondary color themselves */
+    color: var(--cpd-color-text-primary);
     font-size: $font-15px;
     position: relative;
     /* Telement's dialog anatomy (TELEMENT.md, "Colors, type and components"): everything on a 24px edge, with the
