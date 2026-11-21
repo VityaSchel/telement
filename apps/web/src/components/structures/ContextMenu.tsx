@@ -27,6 +27,7 @@ import UIStore from "../../stores/UIStore";
 import { checkInputableElement, RovingTabIndexProvider } from "../../accessibility/RovingTabIndex";
 import { KeyBindingAction } from "../../accessibility/KeyboardShortcuts";
 import { getKeyBindingsManager } from "../../KeyBindingsManager";
+import { Key } from "../../Keyboard";
 import Modal, { ModalManagerEvent } from "../../Modal";
 
 // Shamelessly ripped off Modal.js.  There's probably a better way
@@ -232,12 +233,18 @@ export default class ContextMenu extends React.PureComponent<React.PropsWithChil
             return;
         }
 
+        // You can only navigate the ContextMenu by arrow keys and Home/End (see RovingTabIndex), so Tab and Shift+Tab
+        // close it, and focus goes back to what had it before the menu opened (componentWillUnmount) rather than on to
+        // the page behind the menu. The key is read directly: no key binding maps to KeyBindingAction.Tab.
+        if (ev.key === Key.TAB) {
+            ev.preventDefault();
+            this.props.onFinished();
+            return;
+        }
+
         if (
             [
                 KeyBindingAction.Escape,
-                // You can only navigate the ContextMenu by arrow keys and Home/End (see RovingTabIndex).
-                // Tabbing to the next section of the page, will close the ContextMenu.
-                KeyBindingAction.Tab,
                 // When someone moves left or right along a <Toolbar /> (like the
                 // MessageActionBar), we should close any ContextMenu that is open.
                 KeyBindingAction.ArrowLeft,

@@ -10,7 +10,7 @@ Please see LICENSE files in the repository root for full details.
 
 import React from "react";
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { render } from "test-utils-rtl";
+import { fireEvent, render, screen } from "test-utils-rtl";
 
 import ContextMenu, { toRightOf, ChevronFace } from "./ContextMenu";
 import UIStore from "../../stores/UIStore";
@@ -193,6 +193,28 @@ describe("ContextMenu", () => {
             expect(onFinished).not.toHaveBeenCalled();
             Modal.createDialog(BaseDialog);
             expect(onFinished).toHaveBeenCalled();
+        });
+
+        it.each([
+            ["Tab", false],
+            ["Shift+Tab", true],
+        ])("closes when %s is pressed, rather than letting the focus leave the open menu", (_, shiftKey) => {
+            const onFinished = vi.fn();
+            render(
+                <ContextMenu top={0} left={0} onFinished={onFinished}>
+                    <div role="menuitem" tabIndex={-1}>
+                        Forward
+                    </div>
+                </ContextMenu>,
+            );
+            const item = screen.getByRole("menuitem");
+            item.focus();
+
+            const allowed = fireEvent.keyDown(item, { key: "Tab", code: "Tab", shiftKey });
+
+            expect(onFinished).toHaveBeenCalledTimes(1);
+            // The focus goes back to what had it before the menu opened, not on to the page behind it
+            expect(allowed).toBe(false);
         });
 
         it("should not automatically close when a modal is opened under the existing one", () => {
