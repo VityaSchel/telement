@@ -42,7 +42,7 @@ export function LoginSplashView(props: Props): JSX.Element {
             <Spinner />
             <div className="mx_LoginSplashView_splashButtons">
                 <AccessibleButton kind="link_inline" onClick={props.onLogoutClick}>
-                    {_t("action|logout")}
+                    {_t("action|sign_out_before_verify")}
                 </AccessibleButton>
             </div>
         </div>

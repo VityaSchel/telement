@@ -35,7 +35,7 @@ exports[`<LoginSplashView /> > Renders a spinner 1`] = `
         role="button"
         tabindex="0"
       >
-        Logout
+        Sign out
       </div>
     </div>
   </div>
@@ -84,7 +84,7 @@ exports[`<LoginSplashView /> > Renders an error message 1`] = `
         role="button"
         tabindex="0"
       >
-        Logout
+        Sign out
       </div>
     </div>
   </div>

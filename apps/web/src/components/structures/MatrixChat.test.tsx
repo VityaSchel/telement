@@ -801,7 +801,7 @@ describe("<MatrixChat />", () => {
             const renderResult = getComponent(props);
 
             // we think we are logged in, but are still waiting for the /sync to complete
-            await screen.findByText("Logout");
+            await screen.findByText("Sign out");
             // initial sync
             mockClient.emit(ClientEvent.Sync, SyncState.Prepared, null);
             // wait for logged in view to load

@@ -38,7 +38,7 @@ describe("<LoginSplashView />", () => {
         const onLogoutClick = vi.fn();
         const rendered = getComponent({ onLogoutClick });
         expect(onLogoutClick).not.toHaveBeenCalled();
-        rendered.getByRole("button", { name: "Logout" }).click();
+        rendered.getByRole("button", { name: "Sign out" }).click();
         expect(onLogoutClick).toHaveBeenCalled();
     });
 });
