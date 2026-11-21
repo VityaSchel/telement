@@ -43,6 +43,14 @@ describe("<SetIdServer />", () => {
         expect(asFragment()).toMatchSnapshot();
     });
 
+    it("points its help, which is under the server's field, up to the field", () => {
+        const { container } = render(getComponent());
+        const help = container.querySelector(".mx_SettingsFieldset_description")!;
+
+        expect(help).toHaveTextContent(/above\.$/);
+        expect(help).not.toHaveTextContent("below");
+    });
+
     it("should allow setting an identity server", async () => {
         const { getByLabelText, findByText, getByRole, findByRole } = render(getComponent());
 

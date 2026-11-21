@@ -336,24 +336,25 @@ export default class SetIdServer extends React.Component<IProps, IState> {
     public render(): React.ReactNode {
         const idServerUrl = this.state.currentClientIdServer;
         let sectionTitle;
+        // Telement: the fieldset's help is under the server's field (SettingsFieldset), so it points up to it
         let bodyText;
         if (idServerUrl) {
             sectionTitle = _t("identity_server|url", { server: abbreviateUrl(idServerUrl) });
             bodyText = _t(
-                "identity_server|description_connected",
+                "telement|identity_server|description_connected",
                 {},
                 { server: () => <strong>{abbreviateUrl(idServerUrl)}</strong> },
             );
             if (this.props.missingTerms) {
                 bodyText = _t(
-                    "identity_server|change_server_prompt",
+                    "telement|identity_server|change_server_prompt",
                     {},
                     { server: () => <strong>{abbreviateUrl(idServerUrl)}</strong> },
                 );
             }
         } else {
             sectionTitle = _t("common|identity_server");
-            bodyText = _t("identity_server|description_disconnected");
+            bodyText = _t("telement|identity_server|description_disconnected");
         }
 
         let discoSection;
