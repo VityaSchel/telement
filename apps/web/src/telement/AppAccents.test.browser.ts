@@ -10,7 +10,7 @@ import { userEvent } from "vitest/browser";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { Button, Field, InlineField, Label, RadioControl, Root } from "@vector-im/compound-web";
-import { ChevronDownIcon, TakePhotoIcon } from "@vector-im/compound-design-tokens/assets/web/icons";
+import { ChevronDownIcon, TakePhotoIcon, TakePhotoSolidIcon } from "@vector-im/compound-design-tokens/assets/web/icons";
 import compoundBase from "@vector-im/compound-design-tokens/assets/web/css/cpd-common-base.css?raw";
 import compoundSemantic from "@vector-im/compound-design-tokens/assets/web/css/cpd-common-semantic.css?raw";
 import compoundLightTheme from "@vector-im/compound-design-tokens/assets/web/css/cpd-theme-light-base.css?raw";
@@ -30,6 +30,7 @@ import commonStyles from "../../res/css/_common.pcss?raw";
 import fontSizes from "../../res/css/_font-sizes.pcss?raw";
 import createRoomDialogStyles from "../../res/css/views/dialogs/_CreateRoomDialog.pcss?raw";
 import styledRadioButtonStyles from "../../res/css/views/elements/_StyledRadioButton.pcss?raw";
+import miniAvatarUploaderStyles from "../../res/css/views/elements/_MiniAvatarUploader.pcss?raw";
 import compoundOverrides from "../../res/css/telement/_CompoundOverrides.pcss?raw";
 import emptyStateStyles from "../../res/css/views/right_panel/_EmptyState.pcss?raw";
 import pinnedMessagesCardStyles from "../../res/css/views/right_panel/_PinnedMessagesCard.pcss?raw";
@@ -67,6 +68,7 @@ const APP_STYLES = [
     createRoomDialogStyles,
     emptyStateStyles,
     styledRadioButtonStyles,
+    miniAvatarUploaderStyles,
     compoundOverrides,
     // A dialog's surface, raised a gray step in dark themes, as .mx_Dialog is (_common.pcss)
     ".raised { @mixin floatingSurface; }",
@@ -456,6 +458,46 @@ describe.each(THEMES.map(([theme]) => theme))("Telement's accents in %s", (theme
 
             expect(box.bottom).toBe(avatar.bottom);
             expect(dir === "rtl" ? box.left : box.right).toBe(dir === "rtl" ? avatar.left : avatar.right);
+        });
+    });
+
+    describe("the room intro's avatar upload badge", () => {
+        /** MiniAvatarUploader around the new room intro's 48px avatar, on the timeline. */
+        function renderMiniAvatarUploader(): { page: HTMLElement; badge: HTMLElement } {
+            const container = render(
+                theme,
+                `<div class="page" style="padding: 24px; background-color: var(--cpd-color-bg-canvas-default)">
+                    <div class="mx_AccessibleButton mx_MiniAvatarUploader" role="button" aria-label="Add a photo">
+                        <span style="display: block; width: 48px; height: 48px; border-radius: 50%"></span>
+                        <div class="mx_MiniAvatarUploader_indicator">
+                            ${markup(h(TakePhotoSolidIcon, { className: "mx_MiniAvatarUploader_cameraIcon" }))}
+                        </div>
+                    </div>
+                </div>`,
+            );
+            return {
+                page: container.querySelector<HTMLElement>(".page")!,
+                badge: container.querySelector<HTMLElement>(".mx_MiniAvatarUploader_indicator")!,
+            };
+        }
+
+        it("is the settings avatar's accent circle with a white camera, ringed in the page's color", () => {
+            const { page, badge } = renderMiniAvatarUploader();
+            const box = badge.getBoundingClientRect();
+            const camera = badge.querySelector("svg")!.getBoundingClientRect();
+            const style = getComputedStyle(badge);
+
+            expect([box.width, box.height, style.borderTopLeftRadius]).toEqual([26, 26, "50%"]);
+            expect(style.backgroundColor).toBe(tokenColor("--cpd-color-bg-accent-rest", badge));
+            expect(glyphColor(badge)).toBe("rgb(255, 255, 255)");
+            expect([camera.width, camera.height, camera.left - box.left, camera.top - box.top]).toEqual([16, 16, 5, 5]);
+            expect(style.boxShadow).toBe(`${getComputedStyle(page).backgroundColor} 0px 0px 0px 2px`);
+            // Its edge kept in forced colors, as the settings badge's is
+            expect([style.borderTopStyle, style.borderTopWidth, style.borderTopColor]).toEqual([
+                "solid",
+                "1px",
+                TRANSPARENT,
+            ]);
         });
     });
 
