@@ -57,6 +57,31 @@ describe("<RoomListPrimaryFilters /> stories", () => {
             expect(Default.args.onToggleFilter).toHaveBeenCalled();
         });
 
+        it("makes the filters one Tab stop, which the arrow keys, Home and End move through, as a listbox is", async () => {
+            const user = userEvent.setup();
+            render(
+                <>
+                    <Default />
+                    <button type="button">After</button>
+                </>,
+            );
+            const options = screen.getAllByRole("option");
+
+            expect(options.map((option) => option.tabIndex)).toEqual([0, ...options.slice(1).map(() => -1)]);
+            await user.tab();
+            expect(options[0]).toHaveFocus();
+            await user.keyboard("{ArrowRight}");
+            expect(options[1]).toHaveFocus();
+            expect(options[1].tabIndex).toBe(0);
+            expect(options[0].tabIndex).toBe(-1);
+            await user.keyboard("{End}");
+            expect(options.at(-1)).toHaveFocus();
+            await user.keyboard("{Home}");
+            expect(options[0]).toHaveFocus();
+            await user.tab();
+            expect(screen.getByRole("button", { name: "After" })).toHaveFocus();
+        });
+
         /** The filter's background while the left mouse button is held on it, through CDP, which can hold it down. */
         async function pressedFill(target: HTMLElement): Promise<string> {
             const frame = window.frameElement!.getBoundingClientRect();
@@ -132,6 +157,29 @@ describe("<RoomListPrimaryFilters /> stories", () => {
 
             expect(screen.queryByRole("option", { name: "Unreads" })).toBeNull();
             expect(screen.getByRole("button", { name: "Expand filter list" })).toBeInTheDocument();
+        });
+
+        it("puts the chevron after the filters, where it is drawn, so that Tab reaches it after them", () => {
+            render(<NarrowContainer />);
+            mockUnreadWrapping();
+            const listbox = screen.getByRole("listbox", { name: "Room list filters" });
+            const chevron = screen.getByRole("button", { name: "Expand filter list" });
+
+            expect(listbox.compareDocumentPosition(chevron) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+            expect(chevron.getBoundingClientRect().left).toBeGreaterThan(listbox.getBoundingClientRect().left);
+        });
+
+        it("moves the filters' Tab stop to the first filter shown when the one that held it wraps out of sight", async () => {
+            const user = userEvent.setup();
+            render(<NarrowContainer />);
+            mockFiltersNotWrapping();
+            await user.tab();
+            await user.keyboard("{End}");
+            expect(screen.getByRole("option", { name: "Unread" })).toHaveFocus();
+
+            mockUnreadWrapping();
+            const shown = screen.getAllByRole("option");
+            expect(shown.map((option) => option.tabIndex)).toEqual([0, ...shown.slice(1).map(() => -1)]);
         });
 
         it("should expand and collapse filter list with chevron button", async () => {

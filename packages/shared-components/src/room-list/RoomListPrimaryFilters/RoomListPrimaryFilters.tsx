@@ -5,11 +5,12 @@
  * Please see LICENSE files in the repository root for full details.
  */
 
-import React, { type JSX, memo, useId, useState } from "react";
+import React, { type ComponentProps, type JSX, memo, useContext, useId, useLayoutEffect, useState } from "react";
 import { ChatFilter, IconButton } from "@vector-im/compound-web";
 import ChevronDownIcon from "@vector-im/compound-design-tokens/assets/web/icons/chevron-down";
 
 import { Flex } from "../../core/utils/Flex";
+import { RovingTabIndexContext, RovingTabIndexProvider, useRovingTabIndex } from "../../core/roving";
 import { _t } from "../../core/i18n/i18n";
 import { useCollapseFilters } from "./useCollapseFilters";
 import { useVisibleFilters, type FilterId } from "./useVisibleFilters";
@@ -34,6 +35,29 @@ const filterIdToLabel = (filterId: FilterId): string => {
             return _t("room_list|filters|low_priority");
     }
 };
+
+/**
+ * A filter that holds the filters' one Tab stop while it is the active one, as the options of a listbox do: the arrow
+ * keys move through the filters and Tab leaves them. While the active filter is hidden, because it wrapped while the
+ * filters are collapsed, the first filter shown holds the stop instead.
+ */
+function RovingChatFilter(props: ComponentProps<typeof ChatFilter>): JSX.Element {
+    const [onFocus, , ref, nodeRef] = useRovingTabIndex<HTMLButtonElement>();
+    const { state } = useContext(RovingTabIndexContext);
+
+    // ChatFilter renders tabIndex 0 whatever it is given, so the stop is set on its button, which React leaves alone as
+    // the value it renders never changes. Which filters are shown changes outside React (useCollapseFilters), so this
+    // runs after every render.
+    useLayoutEffect(() => {
+        const node = nodeRef.current;
+        if (!node) return;
+        const isShown = (element?: HTMLElement): element is HTMLElement => !!element && element.offsetParent !== null;
+        const holder = isShown(state.activeNode) ? state.activeNode : state.nodes.find(isShown);
+        node.tabIndex = node === holder ? 0 : -1;
+    });
+
+    return <ChatFilter {...props} ref={ref} onFocus={onFocus} />;
+}
 
 /**
  * Props for RoomListPrimaryFilters component
@@ -66,14 +90,44 @@ export const RoomListPrimaryFilters = memo(function RoomListPrimaryFilters({
     } = useCollapseFilters<HTMLUListElement>(isExpanded, "wrapping");
     const visibleFilterIds = useVisibleFilters(filterIds, activeFilterId, wrappingIndex);
 
+    // Telement: the chevron follows the filters, where it is drawn, so that Tab reaches it after them
     return (
         <Flex
             className={styles.roomListPrimaryFilters}
             data-testid="primary-filters"
             gap="var(--cpd-space-3x)"
-            direction="row-reverse"
             justify="space-between"
         >
+            <RovingTabIndexProvider handleLeftRight handleHomeEnd>
+                {({ onKeyDownHandler }) => (
+                    <Flex
+                        id={id}
+                        as="div"
+                        role="listbox"
+                        aria-label={_t("room_list|primary_filters")}
+                        aria-orientation="horizontal"
+                        align="center"
+                        gap="var(--cpd-space-2x)"
+                        wrap="wrap"
+                        className={styles.list}
+                        ref={ref}
+                        onKeyDown={onKeyDownHandler}
+                    >
+                        {visibleFilterIds.map((filterId, index) => (
+                            <RovingChatFilter
+                                // oxlint-disable-next-line react/no-array-index-key
+                                key={`${filterId}-${index}`}
+                                role="option"
+                                aria-selected={filterId === activeFilterId}
+                                selected={filterId === activeFilterId}
+                                onClick={() => onToggleFilter(filterId)}
+                            >
+                                {filterIdToLabel(filterId)}
+                            </RovingChatFilter>
+                        ))}
+                    </Flex>
+                )}
+            </RovingTabIndexProvider>
             {displayChevron && (
                 <IconButton
                     aria-expanded={isExpanded}
@@ -88,31 +142,6 @@ export const RoomListPrimaryFilters = memo(function RoomListPrimaryFilters({
                     <ChevronDownIcon />
                 </IconButton>
             )}
-            <Flex
-                id={id}
-                as="div"
-                role="listbox"
-                aria-label={_t("room_list|primary_filters")}
-                align="center"
-                gap="var(--cpd-space-2x)"
-                wrap="wrap"
-                className={styles.list}
-                ref={ref}
-            >
-                {visibleFilterIds.map((filterId, index) => (
-                    <ChatFilter
-                        // oxlint-disable-next-line react/no-array-index-key
-                        key={`${filterId}-${index}`}
-                        role="option"
-                        tabIndex={0}
-                        aria-selected={filterId === activeFilterId}
-                        selected={filterId === activeFilterId}
-                        onClick={() => onToggleFilter(filterId)}
-                    >
-                        {filterIdToLabel(filterId)}
-                    </ChatFilter>
-                ))}
-            </Flex>
         </Flex>
     );
 });

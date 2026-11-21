@@ -9,10 +9,11 @@ exports[`<RoomListView /> > renders Default story 1`] = `
       <div
         class="Flex-module_flex RoomListPrimaryFilters-module_roomListPrimaryFilters"
         data-testid="primary-filters"
-        style="--mx-flex-display: flex; --mx-flex-direction: row-reverse; --mx-flex-align: start; --mx-flex-justify: space-between; --mx-flex-gap: var(--cpd-space-3x); --mx-flex-wrap: nowrap;"
+        style="--mx-flex-display: flex; --mx-flex-direction: row; --mx-flex-align: start; --mx-flex-justify: space-between; --mx-flex-gap: var(--cpd-space-3x); --mx-flex-wrap: nowrap;"
       >
         <div
           aria-label="Room list filters"
+          aria-orientation="horizontal"
           class="Flex-module_flex RoomListPrimaryFilters-module_list"
           id="react-use-id-1"
           role="listbox"
@@ -32,7 +33,7 @@ exports[`<RoomListView /> > renders Default story 1`] = `
             aria-selected="false"
             class="_chat-filter_5qdp0_8"
             role="option"
-            tabindex="0"
+            tabindex="-1"
           >
             People
           </button>
@@ -41,7 +42,7 @@ exports[`<RoomListView /> > renders Default story 1`] = `
             aria-selected="false"
             class="_chat-filter_5qdp0_8"
             role="option"
-            tabindex="0"
+            tabindex="-1"
           >
             Rooms
           </button>
@@ -2440,10 +2441,11 @@ exports[`<RoomListView /> > renders Empty story 1`] = `
       <div
         class="Flex-module_flex RoomListPrimaryFilters-module_roomListPrimaryFilters"
         data-testid="primary-filters"
-        style="--mx-flex-display: flex; --mx-flex-direction: row-reverse; --mx-flex-align: start; --mx-flex-justify: space-between; --mx-flex-gap: var(--cpd-space-3x); --mx-flex-wrap: nowrap;"
+        style="--mx-flex-display: flex; --mx-flex-direction: row; --mx-flex-align: start; --mx-flex-justify: space-between; --mx-flex-gap: var(--cpd-space-3x); --mx-flex-wrap: nowrap;"
       >
         <div
           aria-label="Room list filters"
+          aria-orientation="horizontal"
           class="Flex-module_flex RoomListPrimaryFilters-module_list"
           id="react-use-id-1"
           role="listbox"
@@ -2463,7 +2465,7 @@ exports[`<RoomListView /> > renders Empty story 1`] = `
             aria-selected="false"
             class="_chat-filter_5qdp0_8"
             role="option"
-            tabindex="0"
+            tabindex="-1"
           >
             People
           </button>
@@ -2472,7 +2474,7 @@ exports[`<RoomListView /> > renders Empty story 1`] = `
             aria-selected="false"
             class="_chat-filter_5qdp0_8"
             role="option"
-            tabindex="0"
+            tabindex="-1"
           >
             Rooms
           </button>
@@ -2565,10 +2567,11 @@ exports[`<RoomListView /> > renders EmptyInvitesFilter story 1`] = `
       <div
         class="Flex-module_flex RoomListPrimaryFilters-module_roomListPrimaryFilters"
         data-testid="primary-filters"
-        style="--mx-flex-display: flex; --mx-flex-direction: row-reverse; --mx-flex-align: start; --mx-flex-justify: space-between; --mx-flex-gap: var(--cpd-space-3x); --mx-flex-wrap: nowrap;"
+        style="--mx-flex-display: flex; --mx-flex-direction: row; --mx-flex-align: start; --mx-flex-justify: space-between; --mx-flex-gap: var(--cpd-space-3x); --mx-flex-wrap: nowrap;"
       >
         <div
           aria-label="Room list filters"
+          aria-orientation="horizontal"
           class="Flex-module_flex RoomListPrimaryFilters-module_list"
           id="react-use-id-1"
           role="listbox"
@@ -2588,7 +2591,7 @@ exports[`<RoomListView /> > renders EmptyInvitesFilter story 1`] = `
             aria-selected="false"
             class="_chat-filter_5qdp0_8"
             role="option"
-            tabindex="0"
+            tabindex="-1"
           >
             People
           </button>
@@ -2638,10 +2641,11 @@ exports[`<RoomListView /> > renders EmptyMentionsFilter story 1`] = `
       <div
         class="Flex-module_flex RoomListPrimaryFilters-module_roomListPrimaryFilters"
         data-testid="primary-filters"
-        style="--mx-flex-display: flex; --mx-flex-direction: row-reverse; --mx-flex-align: start; --mx-flex-justify: space-between; --mx-flex-gap: var(--cpd-space-3x); --mx-flex-wrap: nowrap;"
+        style="--mx-flex-display: flex; --mx-flex-direction: row; --mx-flex-align: start; --mx-flex-justify: space-between; --mx-flex-gap: var(--cpd-space-3x); --mx-flex-wrap: nowrap;"
       >
         <div
           aria-label="Room list filters"
+          aria-orientation="horizontal"
           class="Flex-module_flex RoomListPrimaryFilters-module_list"
           id="react-use-id-1"
           role="listbox"
@@ -2661,7 +2665,7 @@ exports[`<RoomListView /> > renders EmptyMentionsFilter story 1`] = `
             aria-selected="false"
             class="_chat-filter_5qdp0_8"
             role="option"
-            tabindex="0"
+            tabindex="-1"
           >
             People
           </button>
@@ -2711,10 +2715,11 @@ exports[`<RoomListView /> > renders EmptyPeopleFilter story 1`] = `
       <div
         class="Flex-module_flex RoomListPrimaryFilters-module_roomListPrimaryFilters"
         data-testid="primary-filters"
-        style="--mx-flex-display: flex; --mx-flex-direction: row-reverse; --mx-flex-align: start; --mx-flex-justify: space-between; --mx-flex-gap: var(--cpd-space-3x); --mx-flex-wrap: nowrap;"
+        style="--mx-flex-display: flex; --mx-flex-direction: row; --mx-flex-align: start; --mx-flex-justify: space-between; --mx-flex-gap: var(--cpd-space-3x); --mx-flex-wrap: nowrap;"
       >
         <div
           aria-label="Room list filters"
+          aria-orientation="horizontal"
           class="Flex-module_flex RoomListPrimaryFilters-module_list"
           id="react-use-id-1"
           role="listbox"
@@ -2734,7 +2739,7 @@ exports[`<RoomListView /> > renders EmptyPeopleFilter story 1`] = `
             aria-selected="false"
             class="_chat-filter_5qdp0_8"
             role="option"
-            tabindex="0"
+            tabindex="-1"
           >
             Rooms
           </button>
@@ -2780,10 +2785,11 @@ exports[`<RoomListView /> > renders EmptyRoomsFilter story 1`] = `
       <div
         class="Flex-module_flex RoomListPrimaryFilters-module_roomListPrimaryFilters"
         data-testid="primary-filters"
-        style="--mx-flex-display: flex; --mx-flex-direction: row-reverse; --mx-flex-align: start; --mx-flex-justify: space-between; --mx-flex-gap: var(--cpd-space-3x); --mx-flex-wrap: nowrap;"
+        style="--mx-flex-display: flex; --mx-flex-direction: row; --mx-flex-align: start; --mx-flex-justify: space-between; --mx-flex-gap: var(--cpd-space-3x); --mx-flex-wrap: nowrap;"
       >
         <div
           aria-label="Room list filters"
+          aria-orientation="horizontal"
           class="Flex-module_flex RoomListPrimaryFilters-module_list"
           id="react-use-id-1"
           role="listbox"
@@ -2803,7 +2809,7 @@ exports[`<RoomListView /> > renders EmptyRoomsFilter story 1`] = `
             aria-selected="false"
             class="_chat-filter_5qdp0_8"
             role="option"
-            tabindex="0"
+            tabindex="-1"
           >
             People
           </button>
@@ -2849,10 +2855,11 @@ exports[`<RoomListView /> > renders EmptyUnreadFilter story 1`] = `
       <div
         class="Flex-module_flex RoomListPrimaryFilters-module_roomListPrimaryFilters"
         data-testid="primary-filters"
-        style="--mx-flex-display: flex; --mx-flex-direction: row-reverse; --mx-flex-align: start; --mx-flex-justify: space-between; --mx-flex-gap: var(--cpd-space-3x); --mx-flex-wrap: nowrap;"
+        style="--mx-flex-display: flex; --mx-flex-direction: row; --mx-flex-align: start; --mx-flex-justify: space-between; --mx-flex-gap: var(--cpd-space-3x); --mx-flex-wrap: nowrap;"
       >
         <div
           aria-label="Room list filters"
+          aria-orientation="horizontal"
           class="Flex-module_flex RoomListPrimaryFilters-module_list"
           id="react-use-id-1"
           role="listbox"
@@ -2872,7 +2879,7 @@ exports[`<RoomListView /> > renders EmptyUnreadFilter story 1`] = `
             aria-selected="false"
             class="_chat-filter_5qdp0_8"
             role="option"
-            tabindex="0"
+            tabindex="-1"
           >
             People
           </button>
@@ -2922,10 +2929,11 @@ exports[`<RoomListView /> > renders EmptyWithoutCreatePermission story 1`] = `
       <div
         class="Flex-module_flex RoomListPrimaryFilters-module_roomListPrimaryFilters"
         data-testid="primary-filters"
-        style="--mx-flex-display: flex; --mx-flex-direction: row-reverse; --mx-flex-align: start; --mx-flex-justify: space-between; --mx-flex-gap: var(--cpd-space-3x); --mx-flex-wrap: nowrap;"
+        style="--mx-flex-display: flex; --mx-flex-direction: row; --mx-flex-align: start; --mx-flex-justify: space-between; --mx-flex-gap: var(--cpd-space-3x); --mx-flex-wrap: nowrap;"
       >
         <div
           aria-label="Room list filters"
+          aria-orientation="horizontal"
           class="Flex-module_flex RoomListPrimaryFilters-module_list"
           id="react-use-id-1"
           role="listbox"
@@ -2945,7 +2953,7 @@ exports[`<RoomListView /> > renders EmptyWithoutCreatePermission story 1`] = `
             aria-selected="false"
             class="_chat-filter_5qdp0_8"
             role="option"
-            tabindex="0"
+            tabindex="-1"
           >
             People
           </button>
@@ -2954,7 +2962,7 @@ exports[`<RoomListView /> > renders EmptyWithoutCreatePermission story 1`] = `
             aria-selected="false"
             class="_chat-filter_5qdp0_8"
             role="option"
-            tabindex="0"
+            tabindex="-1"
           >
             Rooms
           </button>
@@ -3026,10 +3034,11 @@ exports[`<RoomListView /> > renders LargeFlatList story 1`] = `
       <div
         class="Flex-module_flex RoomListPrimaryFilters-module_roomListPrimaryFilters"
         data-testid="primary-filters"
-        style="--mx-flex-display: flex; --mx-flex-direction: row-reverse; --mx-flex-align: start; --mx-flex-justify: space-between; --mx-flex-gap: var(--cpd-space-3x); --mx-flex-wrap: nowrap;"
+        style="--mx-flex-display: flex; --mx-flex-direction: row; --mx-flex-align: start; --mx-flex-justify: space-between; --mx-flex-gap: var(--cpd-space-3x); --mx-flex-wrap: nowrap;"
       >
         <div
           aria-label="Room list filters"
+          aria-orientation="horizontal"
           class="Flex-module_flex RoomListPrimaryFilters-module_list"
           id="react-use-id-1"
           role="listbox"
@@ -3049,7 +3058,7 @@ exports[`<RoomListView /> > renders LargeFlatList story 1`] = `
             aria-selected="false"
             class="_chat-filter_5qdp0_8"
             role="option"
-            tabindex="0"
+            tabindex="-1"
           >
             People
           </button>
@@ -3058,7 +3067,7 @@ exports[`<RoomListView /> > renders LargeFlatList story 1`] = `
             aria-selected="false"
             class="_chat-filter_5qdp0_8"
             role="option"
-            tabindex="0"
+            tabindex="-1"
           >
             Rooms
           </button>
@@ -8651,10 +8660,11 @@ exports[`<RoomListView /> > renders Loading story 1`] = `
       <div
         class="Flex-module_flex RoomListPrimaryFilters-module_roomListPrimaryFilters"
         data-testid="primary-filters"
-        style="--mx-flex-display: flex; --mx-flex-direction: row-reverse; --mx-flex-align: start; --mx-flex-justify: space-between; --mx-flex-gap: var(--cpd-space-3x); --mx-flex-wrap: nowrap;"
+        style="--mx-flex-display: flex; --mx-flex-direction: row; --mx-flex-align: start; --mx-flex-justify: space-between; --mx-flex-gap: var(--cpd-space-3x); --mx-flex-wrap: nowrap;"
       >
         <div
           aria-label="Room list filters"
+          aria-orientation="horizontal"
           class="Flex-module_flex RoomListPrimaryFilters-module_list"
           id="react-use-id-1"
           role="listbox"
@@ -8674,7 +8684,7 @@ exports[`<RoomListView /> > renders Loading story 1`] = `
             aria-selected="false"
             class="_chat-filter_5qdp0_8"
             role="option"
-            tabindex="0"
+            tabindex="-1"
           >
             People
           </button>
@@ -8683,7 +8693,7 @@ exports[`<RoomListView /> > renders Loading story 1`] = `
             aria-selected="false"
             class="_chat-filter_5qdp0_8"
             role="option"
-            tabindex="0"
+            tabindex="-1"
           >
             Rooms
           </button>
@@ -8716,10 +8726,11 @@ exports[`<RoomListView /> > renders SmallFlatList story 1`] = `
       <div
         class="Flex-module_flex RoomListPrimaryFilters-module_roomListPrimaryFilters"
         data-testid="primary-filters"
-        style="--mx-flex-display: flex; --mx-flex-direction: row-reverse; --mx-flex-align: start; --mx-flex-justify: space-between; --mx-flex-gap: var(--cpd-space-3x); --mx-flex-wrap: nowrap;"
+        style="--mx-flex-display: flex; --mx-flex-direction: row; --mx-flex-align: start; --mx-flex-justify: space-between; --mx-flex-gap: var(--cpd-space-3x); --mx-flex-wrap: nowrap;"
       >
         <div
           aria-label="Room list filters"
+          aria-orientation="horizontal"
           class="Flex-module_flex RoomListPrimaryFilters-module_list"
           id="react-use-id-1"
           role="listbox"
@@ -8739,7 +8750,7 @@ exports[`<RoomListView /> > renders SmallFlatList story 1`] = `
             aria-selected="false"
             class="_chat-filter_5qdp0_8"
             role="option"
-            tabindex="0"
+            tabindex="-1"
           >
             People
           </button>
@@ -8748,7 +8759,7 @@ exports[`<RoomListView /> > renders SmallFlatList story 1`] = `
             aria-selected="false"
             class="_chat-filter_5qdp0_8"
             role="option"
-            tabindex="0"
+            tabindex="-1"
           >
             Rooms
           </button>
@@ -9052,10 +9063,11 @@ exports[`<RoomListView /> > renders WithActiveFilter story 1`] = `
       <div
         class="Flex-module_flex RoomListPrimaryFilters-module_roomListPrimaryFilters"
         data-testid="primary-filters"
-        style="--mx-flex-display: flex; --mx-flex-direction: row-reverse; --mx-flex-align: start; --mx-flex-justify: space-between; --mx-flex-gap: var(--cpd-space-3x); --mx-flex-wrap: nowrap;"
+        style="--mx-flex-display: flex; --mx-flex-direction: row; --mx-flex-align: start; --mx-flex-justify: space-between; --mx-flex-gap: var(--cpd-space-3x); --mx-flex-wrap: nowrap;"
       >
         <div
           aria-label="Room list filters"
+          aria-orientation="horizontal"
           class="Flex-module_flex RoomListPrimaryFilters-module_list"
           id="react-use-id-1"
           role="listbox"
@@ -9075,7 +9087,7 @@ exports[`<RoomListView /> > renders WithActiveFilter story 1`] = `
             aria-selected="true"
             class="_chat-filter_5qdp0_8"
             role="option"
-            tabindex="0"
+            tabindex="-1"
           >
             People
           </button>
@@ -9084,7 +9096,7 @@ exports[`<RoomListView /> > renders WithActiveFilter story 1`] = `
             aria-selected="false"
             class="_chat-filter_5qdp0_8"
             role="option"
-            tabindex="0"
+            tabindex="-1"
           >
             Rooms
           </button>
