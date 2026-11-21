@@ -152,7 +152,13 @@
             padding: var(--cpd-space-3x);
             border-radius: var(--tl-radius-row);
 
+            /* Radix focuses the row under the pointer, which the browser takes for keyboard focus when a key was
+               pressed last, so the ring and the highlight wait until the keyboard is in use (what-input) */
             &:focus-visible {
+                outline: none;
+            }
+
+            :root:not([data-whatintent="mouse"]) &:focus-visible {
                 outline: var(--cpd-border-width-2) solid var(--cpd-color-border-focused);
                 outline-offset: calc(-1 * var(--cpd-border-width-2));
                 background: var(--cpd-color-bg-action-secondary-hovered);

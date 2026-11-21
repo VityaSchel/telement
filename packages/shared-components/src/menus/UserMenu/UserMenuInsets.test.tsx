@@ -11,7 +11,7 @@ import "../../telement/tokens.css";
 import React from "react";
 import { composeStories } from "@storybook/react-vite";
 import { render, screen, waitFor, within } from "@test-utils";
-import { describe, it, expect } from "vitest";
+import { afterEach, describe, it, expect } from "vitest";
 import { userEvent } from "vitest/browser";
 
 import * as stories from "./UserMenu.stories.tsx";
@@ -30,6 +30,10 @@ function inkRight(svg: SVGSVGElement): number {
 }
 
 describe("User menu insets", () => {
+    afterEach(() => {
+        delete document.documentElement.dataset.whatintent;
+    });
+
     it("insets the items 4px from the menu's edge as 32px rows with no gaps, rounded concentrically with it", async () => {
         render(<Open />);
         const menu = await screen.findByRole("menu");
@@ -110,6 +114,22 @@ describe("User menu insets", () => {
         expect(style.outlineStyle).toBe("solid");
         expect(style.outlineWidth).toBe("2px");
         expect(style.outlineOffset).toBe("-2px");
+    });
+
+    it("draws no ring or highlight for the focus Radix gives the item under the mouse", async () => {
+        render(<Open />);
+        const menu = await screen.findByRole("menu");
+        await Promise.all(menu.getAnimations().map((animation) => animation.finished));
+        const item = screen.getAllByRole("menuitem")[0];
+        await userEvent.keyboard("{ArrowDown}");
+        await waitFor(() => expect(item).toHaveFocus());
+        const highlight = getComputedStyle(item).backgroundColor;
+
+        // what-input, which the app loads, marks the mouse in use
+        document.documentElement.dataset.whatintent = "mouse";
+        expect(item.matches(":focus-visible")).toBe(true);
+        expect(getComputedStyle(item).outlineStyle).toBe("none");
+        expect(getComputedStyle(item).backgroundColor).not.toBe(highlight);
     });
 
     it("rings the avatar in the space items' hover gray when hovered, a 40px circle round the 36px avatar", async () => {

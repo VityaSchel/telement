@@ -84,17 +84,24 @@ Please see LICENSE files in the repository root for full details.
         }
 
         /* An item focused with the keyboard is highlighted as on hover, with the focus ring inside the highlight, so
-           that it keeps clear of the menu's edge as far as the highlight does */
+           that it keeps clear of the menu's edge as far as the highlight does. Radix focuses the item under the
+           pointer, which the browser takes for keyboard focus when a key was pressed last, so the ring and the
+           highlight wait until the keyboard is in use (what-input, MatrixChat.tsx), and a pressed item shows
+           Compound's pressed fill */
         &:focus-visible {
+            outline: none;
+        }
+
+        :root:not([data-whatintent="mouse"]) &:focus-visible {
             outline: var(--cpd-border-width-2) solid var(--cpd-color-border-focused);
             outline-offset: calc(-1 * var(--cpd-border-width-2));
         }
 
-        &[data-kind="primary"]:focus-visible {
+        :root:not([data-whatintent="mouse"]) &[data-kind="primary"]:focus-visible {
             background: var(--cpd-color-bg-action-secondary-hovered);
         }
 
-        &[data-kind="critical"]:focus-visible {
+        :root:not([data-whatintent="mouse"]) &[data-kind="critical"]:focus-visible {
             background: var(--cpd-color-bg-critical-subtle);
         }
     }

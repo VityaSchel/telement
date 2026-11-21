@@ -416,17 +416,23 @@
             min-block-size: 0;
         }
 
-        /* Like the message menu's, an item focused with the keyboard is highlighted as on hover */
-        &[data-kind="primary"]:focus-visible {
+        /* Like the message menu's, an item focused with the keyboard is highlighted as on hover. Radix focuses the
+           item under the pointer, which the browser takes for keyboard focus when a key was pressed last, so the
+           highlight and the ring wait until the keyboard is in use (what-input, which the app loads) */
+        :root:not([data-whatintent="mouse"]) &[data-kind="primary"]:focus-visible {
             background: var(--cpd-color-bg-action-secondary-hovered);
         }
 
-        &[data-kind="critical"]:focus-visible {
+        :root:not([data-whatintent="mouse"]) &[data-kind="critical"]:focus-visible {
             background: var(--cpd-color-bg-critical-subtle);
         }
 
         /* Inside the highlight, so that the ring keeps clear of the menu's edge, as far as the highlight does */
         &:focus-visible {
+            outline: none;
+        }
+
+        :root:not([data-whatintent="mouse"]) &:focus-visible {
             outline: var(--cpd-border-width-2) solid var(--cpd-color-border-focused);
             outline-offset: calc(-1 * var(--cpd-border-width-2));
         }

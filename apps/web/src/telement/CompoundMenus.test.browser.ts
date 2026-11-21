@@ -240,6 +240,21 @@ describe("Compound's menus", () => {
         expect(style.backgroundColor).not.toBe(getComputedStyle(rows(menu)[0]).backgroundColor);
     });
 
+    it("draws no ring or highlight for the focus Radix gives the item under the mouse", async () => {
+        const menu = await renderMenu([item("Photo or video", ImageIcon), item("File", AttachmentIcon)]);
+        const file = rows(menu)[1];
+        await userEvent.keyboard("{Shift}");
+        file.focus();
+        const rest = getComputedStyle(rows(menu)[0]).backgroundColor;
+
+        // what-input, which the app loads, marks the mouse in use; Chrome still takes the focus for the keyboard's
+        document.documentElement.dataset.whatintent = "mouse";
+        expect(file.matches(":focus-visible")).toBe(true);
+        expect(getComputedStyle(file).outlineStyle).toBe("none");
+        expect(getComputedStyle(file).backgroundColor).toBe(rest);
+        delete document.documentElement.dataset.whatintent;
+    });
+
     it("leaves menus with a layout of their own to it", async () => {
         const menu = await renderMenu([
             createElement("section", { key: "profile" }, "Alice"),
