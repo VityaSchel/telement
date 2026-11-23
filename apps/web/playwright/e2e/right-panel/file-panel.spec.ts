@@ -65,10 +65,10 @@ test.describe("FilePanel", () => {
             // Assert that the audio player is rendered
             await expect(roomViewBody.getByRole("region", { name: "Audio player" })).toBeVisible();
 
-            // Assert that the file is rendered as a preview tile with its name and a download button
+            // Assert that the file is rendered as a preview tile with its name and a Save as… button
             const fileTile = roomViewBody.locator(".mx_EventTile").last();
             await expect(fileTile.getByText(/matrix.*?\.json/)).toBeVisible();
-            await expect(fileTile.getByRole("button", { name: "Download" })).toBeVisible();
+            await expect(fileTile.getByRole("button", { name: "Save as…" })).toBeVisible();
 
             const filePanel = page.locator(".mx_FilePanel");
             // Assert that the file panel is opened inside mx_RightPanel and visible
@@ -104,10 +104,10 @@ test.describe("FilePanel", () => {
             await expect(audio.getByRole("button", { name: "Play" })).toBeVisible();
 
             // Detect the JSON file
-            // Assert that the file is rendered as a preview tile with its name and a download button
+            // Assert that the file is rendered as a preview tile with its name and a Save as… button
             const file = filePanelMessageList.locator(".mx_EventTile").last();
             await expect(file.getByText(/matrix.*?\.json/)).toBeVisible();
-            await expect(file.getByRole("button", { name: "Download" })).toBeVisible();
+            await expect(file.getByRole("button", { name: "Save as…" })).toBeVisible();
 
             // Make the viewport tall enough to display all of the file tiles on FilePanel
             await page.setViewportSize({ width: 800, height: 1000 });

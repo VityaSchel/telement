@@ -31,9 +31,9 @@ test.describe("Composer API", () => {
         await app.getComposer().getByRole("button", { name: "Attachment" }).click();
         await page.getByRole("menuitem", { name: "Example uploader" }).click({ noWaitAfter: true });
         await page.locator(".mx_Dialog").getByRole("button", { name: "Upload" }).click();
-        // The timeline renders the uploaded file as a preview tile with its name and a download button
+        // The timeline renders the uploaded file as a preview tile with its name and a Save as… button
         const fileTile = page.getByRole("listitem").filter({ hasText: "testfile.txt" });
         await expect(fileTile.getByText("testfile.txt")).toBeVisible();
-        await expect(fileTile.getByRole("button", { name: "Download" })).toBeVisible();
+        await expect(fileTile.getByRole("button", { name: "Save as…" })).toBeVisible();
     });
 });

@@ -37,6 +37,9 @@ import { TimelineRenderingType } from "../../../contexts/RoomContext.ts";
 import { ScopedRoomContextProvider } from "../../../contexts/ScopedRoomContext.tsx";
 import { useMediaVisible } from "../../../hooks/useMediaVisible";
 import { FileDownloader } from "../../../utils/FileDownloader";
+import { saveMediaAs } from "../../../telement/media/saveMediaAs";
+
+vi.mock("../../../telement/media/saveMediaAs", () => ({ saveMediaAs: vi.fn().mockResolvedValue(undefined) }));
 
 vi.mock("matrix-encrypt-attachment", () => ({
     default: {
@@ -318,9 +321,10 @@ describe("MBodyFactory", () => {
                 timelineRenderingType,
             );
 
-            // The preview tile leaves the filename as plain text and gives the download its own button.
+            // The preview tile leaves the filename as plain text and gives saving it its own button, "Save as…" as in
+            // the message menu.
             expect(screen.getByText("test-file.txt")).toBeInTheDocument();
-            expect(screen.getByRole("button", { name: "Download" })).toBeInTheDocument();
+            expect(screen.getByRole("button", { name: "Save as…" })).toBeInTheDocument();
             expect(container).toMatchSnapshot();
         },
     );
@@ -358,25 +362,15 @@ describe("MBodyFactory", () => {
             expect(screen.getByText("Size unknown")).toBeInTheDocument();
         });
 
-        it("downloads the source blob under the file name when the download button is clicked", async () => {
-            const blob = new Blob(["pdf"], { type: "application/pdf" });
+        it("asks where to save the file when its Save as… button is clicked, as the message menu does", async () => {
             const mediaEvent = mkEvent("m.file");
+            const mediaEventHelper = mkFileHelper("report.pdf", new Blob(["pdf"], { type: "application/pdf" }));
 
-            renderPreview(mediaEvent, mkFileHelper("report.pdf", blob));
-            await userEvent.click(screen.getByRole("button", { name: "Download" }));
+            renderPreview(mediaEvent, mediaEventHelper);
+            await userEvent.click(screen.getByRole("button", { name: "Save as…" }));
 
-            await waitFor(() => expect(mockDownload).toHaveBeenCalledWith({ blob, name: "report.pdf" }));
-        });
-
-        it("downloads under a generic name when the file has none", async () => {
-            const mediaEvent = mkEvent("m.file");
-
-            renderPreview(mediaEvent, mkFileHelper("", new Blob(["pdf"])));
-            await userEvent.click(screen.getByRole("button", { name: "Download" }));
-
-            await waitFor(() =>
-                expect(mockDownload).toHaveBeenCalledWith(expect.objectContaining({ name: "Attachment" })),
-            );
+            await waitFor(() => expect(saveMediaAs).toHaveBeenCalledWith(mediaEvent, mediaEventHelper));
+            expect(mockDownload).not.toHaveBeenCalled();
         });
     });
 

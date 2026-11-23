@@ -79,6 +79,13 @@ describe("ActionBarView", () => {
         expect(screen.queryByRole("button", { name: /reply/i })).not.toBeInTheDocument();
     });
 
+    it("names the download action Save as…, as the message menu does", () => {
+        render(<AllIconActions />);
+
+        expect(screen.getByRole("button", { name: "Save as…" })).toBeInTheDocument();
+        expect(screen.queryByRole("button", { name: "Download" })).toBeNull();
+    });
+
     it("renders a loading download action with the downloading label", () => {
         render(<DownloadingAttachment />);
 

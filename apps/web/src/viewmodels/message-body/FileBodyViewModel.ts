@@ -28,6 +28,7 @@ import { type MediaEventHelper } from "../../utils/MediaEventHelper";
 import { TimelineRenderingType } from "../../contexts/RoomContext";
 import ErrorDialog from "../../components/views/dialogs/ErrorDialog";
 import { documentViewerForEvent, openDocumentViewer } from "../../utils/documentViewer";
+import { saveMediaAs } from "../../telement/media/saveMediaAs";
 
 export interface FileBodyViewModelProps {
     mxEvent: MatrixEvent;
@@ -155,7 +156,8 @@ export class FileBodyViewModel
             ? presentableTextForFile(content, _t("common|attachment"), true)
             : undefined;
         const fileInfoIcon = showFileInfo ? FileBodyViewModel.getInfoIcon(content) : undefined;
-        const downloadLabel = showDownload ? downloadLabelForFile(content, true) : undefined;
+        // Telement: the download control in the info row is "Save as…", as the message menu says
+        const downloadLabel = showDownload ? downloadLabelForFile(content, true) : _t("telement|media|save_as");
         // Offer a viewer wherever the file is presented as a file, i.e. not in an export and not in
         // the download-only panels. Needs the media helper, since opening has to fetch the bytes.
         const viewer =
@@ -272,21 +274,13 @@ export class FileBodyViewModel
         }
     };
 
+    /** Telement: asks where to save the file, as the message menu's "Save as…" does, and saves it there. */
     public onInfoClick = async (): Promise<void> => {
         if (this.props.forExport || !(this.props.showFileInfo ?? true) || !this.props.mediaEventHelper) {
             return;
         }
 
-        if (this.props.mediaEventHelper.media.isEncrypted) {
-            await this.decryptFile();
-            this.downloadFile(this.fileName, this.linkText);
-            return;
-        }
-
-        await this.fileDownloader.download({
-            blob: await this.props.mediaEventHelper.sourceBlob.value,
-            name: this.fileName,
-        });
+        await saveMediaAs(this.props.mxEvent, this.props.mediaEventHelper);
     };
 
     public onOpenClick = (): void => openDocumentViewer(this.props.mxEvent);

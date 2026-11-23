@@ -38,11 +38,8 @@ import { MediaEventHelper } from "../../utils/MediaEventHelper";
 import SettingsStore from "../../settings/SettingsStore";
 import { type SettingKey } from "../../settings/Settings";
 import { getMediaVisibility, setMediaVisibility } from "../../utils/media/mediaVisibility";
-import { FileDownloader } from "../../utils/FileDownloader";
-import { _t } from "../../languageHandler";
-import Modal from "../../Modal";
-import ErrorDialog from "../../components/views/dialogs/ErrorDialog";
 import { ModuleApi } from "../../modules/Api";
+import { saveMediaAs } from "../../telement/media/saveMediaAs";
 
 /** Props for the event-tile action bar view model. */
 export interface EventTileActionBarViewModelProps {
@@ -107,8 +104,7 @@ export class EventTileActionBarViewModel
     private downloadRequestId = 0;
     private canDownload = true;
     private isDownloadLoading = false;
-    private readonly downloader = new FileDownloader();
-    private downloadedBlob?: Blob;
+    private mediaEventHelper?: MediaEventHelper;
 
     public constructor(props: EventTileActionBarViewModelProps) {
         super(
@@ -294,7 +290,7 @@ export class EventTileActionBarViewModel
     };
 
     private resetEventState(): void {
-        this.downloadedBlob = undefined;
+        this.mediaEventHelper = undefined;
         this.canDownload = true;
         this.isDownloadLoading = false;
     }
@@ -424,32 +420,19 @@ export class EventTileActionBarViewModel
         await PinningUtils.pinOrUnpinEvent(MatrixClientPeg.safeGet(), this.props.mxEvent);
     };
 
-    /** Downloads the media content for the current event when available. */
+    /**
+     * Telement: asks where to save the media of the current event, as the message menu's "Save as…" does, and saves
+     * it there. The event's file, once loaded, is reused for the next save.
+     */
     public onDownloadClick = async (_anchor: HTMLElement | null): Promise<void> => {
         if (this.isDownloadLoading || !this.canDownload) return;
         const requestId = ++this.downloadRequestId;
         const { mxEvent } = this.props;
+        if (!this.setDownloadLoading(requestId, mxEvent, true)) return;
 
+        this.mediaEventHelper ??= new MediaEventHelper(mxEvent);
         try {
-            if (!this.setDownloadLoading(requestId, mxEvent, true)) return;
-            const mediaEventHelper = new MediaEventHelper(mxEvent);
-
-            if (!this.downloadedBlob) {
-                const downloadedBlob = await mediaEventHelper.sourceBlob.value;
-                if (!this.isCurrentDownloadRequest(requestId, mxEvent)) return;
-                this.downloadedBlob = downloadedBlob;
-            }
-
-            await this.downloader.download({
-                blob: this.downloadedBlob,
-                name: mediaEventHelper.fileName ?? _t("common|image"),
-            });
-        } catch (e) {
-            if (!this.isCurrentDownloadRequest(requestId, mxEvent)) return;
-            Modal.createDialog(ErrorDialog, {
-                title: _t("timeline|download_failed"),
-                description: `${_t("timeline|download_failed_description")}\n\n${String(e)}`,
-            });
+            await saveMediaAs(mxEvent, this.mediaEventHelper);
         } finally {
             this.setDownloadLoading(requestId, mxEvent, false);
         }

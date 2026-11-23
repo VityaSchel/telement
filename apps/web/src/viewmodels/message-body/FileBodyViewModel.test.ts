@@ -19,6 +19,7 @@ import { type MediaEventHelper } from "../../utils/MediaEventHelper";
 import { FileBodyViewModel } from "./FileBodyViewModel";
 import ErrorDialog from "../../components/views/dialogs/ErrorDialog";
 import { openDocumentViewer } from "../../utils/documentViewer";
+import { saveMediaAs } from "../../telement/media/saveMediaAs";
 
 const mockDownload = vi.fn();
 
@@ -29,6 +30,8 @@ vi.mock("../../utils/FileDownloader", () => ({
         };
     }),
 }));
+
+vi.mock("../../telement/media/saveMediaAs", () => ({ saveMediaAs: vi.fn().mockResolvedValue(undefined) }));
 
 vi.mock("../../utils/documentViewer", async (importOriginal) => ({
     ...(await importOriginal<typeof import("../../utils/documentViewer")>()),
@@ -140,19 +143,24 @@ describe("FileBodyViewModel", () => {
         });
     });
 
-    it("downloads unencrypted placeholder content on info click", async () => {
-        const blob = new Blob(["placeholder"], { type: "text/plain" });
-        const vm = createVm({
-            showFileInfo: true,
-            mediaEventHelper: mkMediaEventHelper({ encrypted: false, blob, fileName: "placeholder.txt" }),
-        });
+    it.each([false, true])(
+        "asks where to save the file on info click, as the message menu's Save as… does (encrypted: %s)",
+        async (encrypted) => {
+            const mxEvent = mkMediaEvent({});
+            const mediaEventHelper = mkMediaEventHelper({ encrypted, fileName: "placeholder.txt" });
+            const vm = createVm({ showFileInfo: true, mxEvent, mediaEventHelper });
 
-        await vm.onInfoClick();
+            await vm.onInfoClick();
 
-        expect(mockDownload).toHaveBeenCalledWith({
-            blob,
-            name: "placeholder.txt",
-        });
+            expect(saveMediaAs).toHaveBeenCalledWith(mxEvent, mediaEventHelper);
+            expect(mockDownload).not.toHaveBeenCalled();
+        },
+    );
+
+    it("labels the download control in the info row Save as…", () => {
+        const vm = createVm({ showFileInfo: true, timelineRenderingType: TimelineRenderingType.Room });
+
+        expect(vm.getSnapshot().downloadLabel).toBe("Save as…");
     });
 
     it("decrypts encrypted content and downloads on iframe load", async () => {
@@ -310,6 +318,7 @@ describe("FileBodyViewModel", () => {
         await vm.onInfoClick();
 
         expect(mockDownload).not.toHaveBeenCalled();
+        expect(saveMediaAs).not.toHaveBeenCalled();
     });
 
     it("keeps unencrypted snapshot when download is clicked without mediaEventHelper", async () => {

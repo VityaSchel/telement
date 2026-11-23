@@ -228,7 +228,8 @@ export function ActionBarView({ vm, className }: Readonly<ActionBarViewProps>): 
         />
     );
 
-    let downloadTitle = _t("action|download");
+    // Telement: the download action asks where to save the file, as the message menu's "Save as…" does
+    let downloadTitle = _t("telement|media|save_as");
     if (isDownloadLoading) {
         downloadTitle = isDownloadEncrypted
             ? _t("timeline|download_action_decrypting")

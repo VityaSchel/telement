@@ -3320,8 +3320,6 @@
             "unable_to_decrypt": "Unable to decrypt message"
         },
         "disambiguated_profile": "%(displayName)s (%(matrixId)s)",
-        "download_failed": "Download failed",
-        "download_failed_description": "An error occurred while downloading this file",
         "edits": {
             "tooltip_label": "Edited at %(date)s. Select to view edit history.",
             "tooltip_sub": "View edit history",

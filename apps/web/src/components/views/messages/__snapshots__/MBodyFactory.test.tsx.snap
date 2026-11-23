@@ -130,7 +130,7 @@ exports[`MBodyFactory > renderMBody shows the preview tile for m.file in File 1`
             class="_buttonGroup"
           >
             <button
-              aria-label="Download"
+              aria-label="Save as…"
               class="_button"
               type="button"
             >
@@ -206,7 +206,7 @@ exports[`MBodyFactory > renderMBody shows the preview tile for m.file in Room 1`
             class="_buttonGroup"
           >
             <button
-              aria-label="Download"
+              aria-label="Save as…"
               class="_button"
               type="button"
             >

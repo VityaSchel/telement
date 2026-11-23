@@ -31,14 +31,13 @@ import defaultDispatcher from "../../dispatcher/dispatcher";
 import { Action } from "../../dispatcher/actions";
 import Resend from "../../Resend";
 import PinningUtils from "../../utils/PinningUtils";
-import Modal from "../../Modal";
-import ErrorDialog from "../../components/views/dialogs/ErrorDialog";
 import SettingsStore from "../../settings/SettingsStore";
 import { ModuleApi } from "../../modules/Api";
 import { canCancel, canEditContent, editEvent, isContentActionable } from "../../utils/EventUtils";
 import { shouldDisplayReply } from "../../utils/Reply";
 import { MediaEventHelper } from "../../utils/MediaEventHelper";
 import { getMediaVisibility, setMediaVisibility } from "../../utils/media/mediaVisibility";
+import { saveMediaAs } from "../../telement/media/saveMediaAs";
 
 vi.mock("../../dispatcher/dispatcher", () => ({
     __esModule: true,
@@ -57,20 +56,9 @@ vi.mock("../../Resend", () => ({
     },
 }));
 
-vi.mock("../../Modal", () => ({
-    __esModule: true,
-    default: {
-        createDialog: vi.fn(),
-    },
-}));
-
 vi.mock("../../languageHandler", () => ({
     _t: (key: string) => {
         switch (key) {
-            case "timeline|download_failed":
-                return "Download failed";
-            case "timeline|download_failed_description":
-                return "Failed to download file";
             case "common|image":
                 return "Image";
             default:
@@ -106,13 +94,8 @@ vi.mock("../../utils/media/mediaVisibility", () => ({
     setMediaVisibility: vi.fn(),
 }));
 
-const mockDownload = vi.fn();
-vi.mock("../../utils/FileDownloader", () => ({
-    FileDownloader: vi.fn().mockImplementation(function () {
-        return {
-            download: mockDownload,
-        };
-    }),
+vi.mock("../../telement/media/saveMediaAs", () => ({
+    saveMediaAs: vi.fn(),
 }));
 
 describe("EventTileActionBarViewModel", () => {
@@ -197,7 +180,7 @@ describe("EventTileActionBarViewModel", () => {
         vi.mocked(PinningUtils.pinOrUnpinEvent).mockResolvedValue(undefined);
         vi.spyOn(MediaEventHelper, "isEligible").mockReturnValue(false);
         vi.spyOn(MediaEventHelper, "canHide").mockReturnValue(false);
-        mockDownload.mockResolvedValue(undefined);
+        vi.mocked(saveMediaAs).mockResolvedValue(undefined);
 
         getHintsForMessageSpy = vi.spyOn(ModuleApi.instance.customComponents, "getHintsForMessage");
         getHintsForMessageSpy.mockReturnValue(null);
@@ -363,40 +346,27 @@ describe("EventTileActionBarViewModel", () => {
         expect(Resend.removeFromQueue).toHaveBeenCalledWith(client, replacingEvent);
     });
 
-    it("downloads a cached blob and shows an error dialog on failure", async () => {
-        const blob = new Blob(["downloaded"]);
+    it("asks where to save the media, as the message menu's Save as… does, reusing the loaded file", async () => {
         vi.spyOn(MediaEventHelper, "isEligible").mockReturnValue(true);
-
-        const vm = createVm({
-            mxEvent: createMessageEvent({
-                content: { msgtype: MsgType.Image, body: "Image", url: "mxc://example.org/file" },
-            }),
+        const mxEvent = createMessageEvent({
+            content: { msgtype: MsgType.Image, body: "Image", url: "mxc://example.org/file" },
         });
-        (vm as unknown as { downloadedBlob: Blob }).downloadedBlob = blob;
+        const vm = createVm({ mxEvent });
 
         await vm.onDownloadClick(null);
         await vm.onDownloadClick(null);
 
-        expect(mockDownload).toHaveBeenNthCalledWith(1, { blob, name: "Image" });
-        expect(mockDownload).toHaveBeenNthCalledWith(2, { blob, name: "Image" });
-
-        mockDownload.mockRejectedValueOnce(new Error("boom"));
-
-        await vm.onDownloadClick(null);
-
-        expect(Modal.createDialog).toHaveBeenCalledWith(
-            ErrorDialog,
-            expect.objectContaining({
-                title: "Download failed",
-                description: expect.stringContaining("boom"),
-            }),
-        );
+        expect(saveMediaAs).toHaveBeenCalledTimes(2);
+        const [[firstEvent, firstHelper], [, secondHelper]] = vi.mocked(saveMediaAs).mock.calls;
+        expect(firstEvent).toBe(mxEvent);
+        expect(firstHelper).toBeInstanceOf(MediaEventHelper);
+        expect(secondHelper).toBe(firstHelper);
         expect(vm.getSnapshot().isDownloadLoading).toBe(false);
     });
 
-    it("ignores stale download completion after setProps changes the event", async () => {
+    it("ignores a stale save's completion after setProps changes the event", async () => {
         vi.spyOn(MediaEventHelper, "isEligible").mockReturnValue(true);
-        const firstDownload = createPendingPromise<void>();
+        const firstSave = createPendingPromise<void>();
         const eventA = createMessageEvent({
             event_id: "$eventA",
             content: { msgtype: MsgType.Image, body: "Image A", url: "mxc://example.org/a" },
@@ -407,29 +377,24 @@ describe("EventTileActionBarViewModel", () => {
         });
 
         const vm = createVm({ mxEvent: eventA });
-        (vm as unknown as { downloadedBlob: Blob }).downloadedBlob = new Blob(["a"]);
-        mockDownload.mockReturnValueOnce(firstDownload.promise);
+        vi.mocked(saveMediaAs).mockReturnValueOnce(firstSave.promise);
 
-        const firstDownloadCall = vm.onDownloadClick(null);
+        const firstSaveCall = vm.onDownloadClick(null);
 
         expect(vm.getSnapshot().isDownloadLoading).toBe(true);
 
         vm.setProps({ mxEvent: eventB });
-        (vm as unknown as { downloadedBlob: Blob }).downloadedBlob = new Blob(["b"]);
 
         expect(vm.getSnapshot().isDownloadLoading).toBe(false);
 
-        const secondDownload = vm.onDownloadClick(null);
-        await secondDownload;
+        await vm.onDownloadClick(null);
 
-        firstDownload.resolve();
-        await firstDownloadCall;
+        firstSave.resolve();
+        await firstSaveCall;
 
-        expect(mockDownload).toHaveBeenCalledTimes(2);
-        expect(mockDownload).toHaveBeenNthCalledWith(2, {
-            blob: expect.any(Blob),
-            name: "Image B",
-        });
+        expect(saveMediaAs).toHaveBeenCalledTimes(2);
+        expect(vi.mocked(saveMediaAs).mock.calls[1][0]).toBe(eventB);
+        expect(vi.mocked(saveMediaAs).mock.calls[1][1]).not.toBe(vi.mocked(saveMediaAs).mock.calls[0][1]);
         expect(vm.getSnapshot().isDownloadLoading).toBe(false);
     });
 

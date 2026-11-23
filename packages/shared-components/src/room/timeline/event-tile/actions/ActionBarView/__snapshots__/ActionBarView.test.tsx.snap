@@ -33,7 +33,7 @@ exports[`ActionBarView > story snapshots > renders AllIconActions 1`] = `
     </button>
     <button
       aria-disabled="false"
-      aria-label="Download"
+      aria-label="Save as…"
       class="_button_1nw83_8 ActionBarView-module_toolbar_item _has-icon_1nw83_60 _icon-only_1nw83_53"
       data-kind="tertiary"
       data-presentation="icon"
@@ -382,7 +382,7 @@ exports[`ActionBarView > story snapshots > renders AllLabelActions 1`] = `
     </button>
     <button
       aria-disabled="false"
-      aria-label="Download"
+      aria-label="Save as…"
       class="_button_1nw83_8 ActionBarView-module_toolbar_item"
       data-kind="tertiary"
       data-presentation="label"
@@ -390,7 +390,7 @@ exports[`ActionBarView > story snapshots > renders AllLabelActions 1`] = `
       role="button"
       tabindex="-1"
     >
-      Download
+      Save as…
     </button>
     <button
       aria-label="React"

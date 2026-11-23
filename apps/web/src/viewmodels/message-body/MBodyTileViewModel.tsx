@@ -17,9 +17,9 @@ import { type MatrixEvent } from "matrix-js-sdk/src/matrix";
 import { type MediaEventHelper } from "../../utils/MediaEventHelper";
 import { DownloadIcon, ExpandIcon } from "@vector-im/compound-design-tokens/assets/web/icons";
 import { type MediaEventContent } from "matrix-js-sdk/src/types";
-import { FileDownloader } from "../../utils/FileDownloader";
 import { fileSize } from "../../utils/FileUtils";
 import { documentViewerForEvent, openDocumentViewer } from "../../utils/documentViewer";
+import { saveMediaAs } from "../../telement/media/saveMediaAs";
 
 export class MBodyTileViewModel extends MediaPreviewGroupViewModel {
     private readonly mxEvent: MatrixEvent;
@@ -46,7 +46,6 @@ export class MBodyTileViewModel extends MediaPreviewGroupViewModel {
         mediaEventHelper: MediaEventHelper,
         documentPreviewsEnabled: boolean,
     ): MediaPreviewGroupSnapshot {
-        const downloader = new FileDownloader();
         const content = mxEvent.getContent<MediaEventContent>();
         const size = content.info?.size;
         // Behind the same lab as the legacy file body's viewers.
@@ -56,15 +55,11 @@ export class MBodyTileViewModel extends MediaPreviewGroupViewModel {
             ...(viewer
                 ? [{ label: viewer.openLabel(), icon: <ExpandIcon />, onClick: () => openDocumentViewer(mxEvent) }]
                 : []),
+            // Telement: "Save as…", as the message menu says, asks where to save the file
             {
-                label: _t("action|download"),
+                label: _t("telement|media|save_as"),
                 icon: <DownloadIcon />,
-                onClick: async () => {
-                    await downloader.download({
-                        blob: await mediaEventHelper.sourceBlob.value, // decrypts transparently if E2EE
-                        name: mediaEventHelper.fileName || _t("common|attachment"),
-                    });
-                },
+                onClick: () => void saveMediaAs(mxEvent, mediaEventHelper),
             },
         ];
 
