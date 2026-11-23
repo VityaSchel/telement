@@ -8,6 +8,7 @@ Please see LICENSE files in the repository root for full details.
 */
 
 import React, { type JSX, useCallback } from "react";
+import { DialogFooterButton, DialogFooterView } from "@element-hq/web-shared-components";
 
 import { _t } from "../../../languageHandler";
 import SettingsStore from "../../../settings/SettingsStore";
@@ -76,17 +77,16 @@ export default function AskInviteAnywayDialog({
                 <ul>{errorList}</ul>
             </div>
 
-            <div className="mx_Dialog_buttons">
-                <button onClick={onGiveUpClicked} className="mx_LegacyDialogButton" type="button">
-                    {_t("action|close")}
-                </button>
-                <button onClick={onInviteNeverWarnClicked} className="mx_LegacyDialogButton" type="button">
+            {/* Telement: the shared dialog footer */}
+            <DialogFooterView className="mx_Dialog_buttons">
+                <DialogFooterButton onClick={onGiveUpClicked}>{_t("action|close")}</DialogFooterButton>
+                <DialogFooterButton onClick={onInviteNeverWarnClicked}>
                     {inviteNeverWarnLabel ?? _t("invite|unable_find_profiles_invite_never_warn_label_default")}
-                </button>
-                <button onClick={onInviteClicked} autoFocus={true} className="mx_LegacyDialogButton" type="button">
+                </DialogFooterButton>
+                <DialogFooterButton onClick={onInviteClicked} autoFocus={true}>
                     {inviteLabel ?? _t("invite|unable_find_profiles_invite_label_default")}
-                </button>
-            </div>
+                </DialogFooterButton>
+            </DialogFooterView>
         </BaseDialog>
     );
 }

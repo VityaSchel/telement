@@ -48,26 +48,22 @@ exports[`<NewRecoveryMethodDialog /> > when key backup is disabled 1`] = `
       If you didn't set the new recovery method, an attacker may be trying to access your account. Change your account password and set a new recovery method immediately in Settings.
     </strong>
     <div
-      class="mx_Dialog_buttons"
+      class="_footer mx_Dialog_buttons"
     >
-      <span
-        class="mx_Dialog_buttons_row"
+      <button
+        class="_button cancel"
+        data-testid="dialog-cancel-button"
+        type="button"
       >
-        <button
-          class="mx_LegacyDialogButton cancel"
-          data-testid="dialog-cancel-button"
-          type="button"
-        >
-          Go to Settings
-        </button>
-        <button
-          class="mx_LegacyDialogButton mx_Dialog_primary"
-          data-testid="dialog-primary-button"
-          type="button"
-        >
-          Set up Secure Messages
-        </button>
-      </span>
+        Go to Settings
+      </button>
+      <button
+        class="_button mx_Dialog_primary"
+        data-testid="dialog-primary-button"
+        type="button"
+      >
+        Set up Secure Messages
+      </button>
     </div>
     <div
       aria-describedby="react-use-id-1"
@@ -148,26 +144,22 @@ exports[`<NewRecoveryMethodDialog /> > when key backup is enabled 1`] = `
       If you didn't set the new recovery method, an attacker may be trying to access your account. Change your account password and set a new recovery method immediately in Settings.
     </strong>
     <div
-      class="mx_Dialog_buttons"
+      class="_footer mx_Dialog_buttons"
     >
-      <span
-        class="mx_Dialog_buttons_row"
+      <button
+        class="_button cancel"
+        data-testid="dialog-cancel-button"
+        type="button"
       >
-        <button
-          class="mx_LegacyDialogButton cancel"
-          data-testid="dialog-cancel-button"
-          type="button"
-        >
-          Go to Settings
-        </button>
-        <button
-          class="mx_LegacyDialogButton mx_Dialog_primary"
-          data-testid="dialog-primary-button"
-          type="button"
-        >
-          Set up Secure Messages
-        </button>
-      </span>
+        Go to Settings
+      </button>
+      <button
+        class="_button mx_Dialog_primary"
+        data-testid="dialog-primary-button"
+        type="button"
+      >
+        Set up Secure Messages
+      </button>
     </div>
     <div
       aria-describedby="react-use-id-1"

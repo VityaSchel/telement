@@ -85,16 +85,16 @@ exports[`ImportE2eKeysDialog > renders 1`] = `
         </div>
       </div>
       <div
-        class="mx_Dialog_buttons"
+        class="_footer mx_Dialog_buttons"
       >
         <button
-          class="mx_LegacyDialogButton cancel"
+          class="_button cancel"
           type="button"
         >
           Cancel
         </button>
         <button
-          class="mx_LegacyDialogButton mx_Dialog_primary"
+          class="_button mx_Dialog_primary"
           disabled=""
           type="submit"
         >

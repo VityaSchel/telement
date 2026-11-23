@@ -10,6 +10,7 @@ import React from "react";
 import { logger } from "matrix-js-sdk/src/logger";
 import { MatrixError } from "matrix-js-sdk/src/matrix";
 import { emailLooksValid } from "@element-hq/element-web-shared-utils";
+import { DialogFooterButton, DialogFooterView } from "@element-hq/web-shared-components";
 
 import AddThreepid from "../../../AddThreepid";
 import { _t, UserFriendlyError } from "../../../languageHandler";
@@ -157,20 +158,13 @@ export default class SetEmailDialog extends React.Component<IProps, IState> {
                     <p id="mx_Dialog_content">{_t("auth|set_email|description")}</p>
                     {emailInput}
                 </div>
-                <div className="mx_Dialog_buttons">
-                    <input
-                        className="mx_LegacyDialogButton mx_Dialog_primary"
-                        type="submit"
-                        value={_t("action|continue")}
-                        onClick={this.onSubmit}
-                    />
-                    <input
-                        className="mx_LegacyDialogButton"
-                        type="submit"
-                        value={_t("action|skip")}
-                        onClick={this.onCancelled}
-                    />
-                </div>
+                {/* Telement: the shared dialog footer, Skip before the action */}
+                <DialogFooterView className="mx_Dialog_buttons">
+                    <DialogFooterButton onClick={this.onCancelled}>{_t("action|skip")}</DialogFooterButton>
+                    <DialogFooterButton className="mx_Dialog_primary" type="submit" onClick={this.onSubmit}>
+                        {_t("action|continue")}
+                    </DialogFooterButton>
+                </DialogFooterView>
             </BaseDialog>
         );
     }

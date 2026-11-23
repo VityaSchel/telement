@@ -10,6 +10,7 @@ Please see LICENSE files in the repository root for full details.
 import React, { createContext, type ReactNode, useState } from "react";
 import { type Room } from "matrix-js-sdk/src/matrix";
 import classNames from "classnames";
+import { DialogFooterButton, DialogFooterView } from "@element-hq/web-shared-components";
 
 import { _t } from "../../../../languageHandler";
 import { type XOR } from "../../../../@types/common";
@@ -61,23 +62,18 @@ const BaseTool: React.FC<XOR<IMinProps, IProps>> = ({
             });
         };
 
-        actionButton = (
-            <button onClick={onActionClick} className="mx_LegacyDialogButton" type="button">
-                {_t(actionLabel)}
-            </button>
-        );
+        actionButton = <DialogFooterButton onClick={onActionClick}>{_t(actionLabel)}</DialogFooterButton>;
     }
 
     return (
         <>
             <div className={classNames("mx_DevTools_content", className)}>{children}</div>
-            <div className="mx_Dialog_buttons">
+            {/* Telement: the shared dialog footer */}
+            <DialogFooterView className="mx_Dialog_buttons">
                 {extraButton}
-                <button onClick={onBackClick} className="mx_LegacyDialogButton" type="button">
-                    {_t("action|back")}
-                </button>
+                <DialogFooterButton onClick={onBackClick}>{_t("action|back")}</DialogFooterButton>
                 {actionButton}
-            </div>
+            </DialogFooterView>
         </>
     );
 };

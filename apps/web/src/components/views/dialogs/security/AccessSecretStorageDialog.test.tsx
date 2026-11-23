@@ -77,7 +77,7 @@ describe("AccessSecretStorageDialog", () => {
         await enterRecoveryKey();
         await submitDialog();
 
-        expect(screen.getByText("Continue")).not.toHaveAttribute("aria-disabled", "true");
+        expect(screen.getByRole("button", { name: "Continue" })).toBeEnabled();
         expect(checkPrivateKey).toHaveBeenCalledWith({ recoveryKey });
         expect(onFinished).toHaveBeenCalledWith({ recoveryKey });
     });
@@ -95,7 +95,7 @@ describe("AccessSecretStorageDialog", () => {
         await submitDialog();
 
         expect(screen.getByText("The recovery key you entered is not correct.")).toBeInTheDocument();
-        expect(screen.getByText("Continue")).toHaveAttribute("aria-disabled", "true");
+        expect(screen.getByRole("button", { name: "Continue" })).toBeDisabled();
     });
 
     it("Notifies the user if they input an invalid passphrase", async function () {
@@ -119,7 +119,7 @@ describe("AccessSecretStorageDialog", () => {
         expect(screen.getByTitle("Recovery key")).toHaveValue(recoveryKey);
 
         expect(screen.getByText("The recovery key you entered is not correct.")).toBeInTheDocument();
-        expect(screen.getByText("Continue")).toHaveAttribute("aria-disabled", "true");
+        expect(screen.getByRole("button", { name: "Continue" })).toBeDisabled();
     });
 
     it("Clears the 'invalid recovery key' notice when the input is cleared", async function () {
@@ -137,6 +137,6 @@ describe("AccessSecretStorageDialog", () => {
         expect(
             screen.getByText("If you have a security key or security phrase, this will work too."),
         ).toBeInTheDocument();
-        expect(screen.getByText("Continue")).toHaveAttribute("aria-disabled", "true");
+        expect(screen.getByRole("button", { name: "Continue" })).toBeDisabled();
     });
 });

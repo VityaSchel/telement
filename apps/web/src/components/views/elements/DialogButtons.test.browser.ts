@@ -25,41 +25,18 @@ import focusRing from "../../../../res/css/telement/FocusRing.pcss?raw";
 import { toBrowserCss } from "../../../test/telement/browserCss";
 import { press, settledStyle, tokenColor } from "../../../test/telement/computedStyle";
 
-/** A DialogButtons footer, with the classes each of its buttons gets, inside the dialog it belongs to. */
-function footer(primaryClasses = "mx_Dialog_primary", cancelClasses = "cancel"): string {
+/**
+ * Legacy dialog buttons in a dialog, outside its footer, which is DialogFooterView's text buttons: Deactivate account's
+ * submit input, developer tools' buttons, an interactive auth stage's.
+ */
+function buttons(primaryClasses = "mx_Dialog_primary", cancelClasses = ""): string {
     return `
-        <div class="mx_Dialog_buttons">
-            <span class="mx_Dialog_buttons_row">
-                <button id="cancel" class="mx_LegacyDialogButton ${cancelClasses}" type="button">Cancel</button>
-                <button id="primary" class="mx_LegacyDialogButton ${primaryClasses}" type="button">Leave</button>
-            </span>
-        </div>
+        <button id="cancel" class="mx_LegacyDialogButton ${cancelClasses}" type="button">Cancel</button>
+        <button id="primary" class="mx_LegacyDialogButton ${primaryClasses}" type="button">Leave</button>
     `;
 }
 
-/** A footer button with neither the cancel nor the primary class, like AskInviteAnywayDialog's. */
-const UNCLASSED_FOOTER = `
-    <div class="mx_Dialog_buttons">
-        <input id="primary" class="mx_LegacyDialogButton mx_Dialog_primary" type="submit" value="Import">
-        <button id="cancel" class="mx_LegacyDialogButton" type="button">Cancel</button>
-    </div>
-`;
-
-/**
- * ExportE2eKeysDialog's and ImportE2eKeysDialog's footer: Cancel with the cancel class, then the submit button, with no
- * space between them, as React renders it. Their tests check that the components' buttons come in this order and match
- * the footer's cancel and last-child rules.
- */
-function keysFooter(primaryLabel: string): string {
-    const cancel = '<button id="cancel" class="mx_LegacyDialogButton cancel" type="button">Cancel</button>';
-    const primary = `<button id="primary" class="mx_LegacyDialogButton mx_Dialog_primary" type="submit">`;
-    return `<div class="mx_Dialog_buttons">${cancel}${primary}${primaryLabel}</button></div>`;
-}
-
-const EXPORT_KEYS_FOOTER = keysFooter("Export");
-const IMPORT_KEYS_FOOTER = keysFooter("Import");
-
-interface FooterCase {
+interface ButtonCase {
     name: string;
     html: string;
     id: "cancel" | "primary";
@@ -71,43 +48,26 @@ interface FooterCase {
 
 const OUTLINE_HOVER: [string, string] = ["--cpd-color-bg-subtle-secondary", "--cpd-color-border-interactive-hovered"];
 const OUTLINE_PRESSED: [string, string] = ["--cpd-color-bg-subtle-primary", "--cpd-color-border-interactive-hovered"];
-const PRIMARY_HOVER: [string, string] = [
-    "--cpd-color-bg-action-primary-hovered",
-    "--cpd-color-bg-action-primary-hovered",
-];
-const PRIMARY_PRESSED: [string, string] = [
-    "--cpd-color-bg-action-primary-pressed",
-    "--cpd-color-bg-action-primary-pressed",
-];
 
-const FOOTER_CASES: FooterCase[] = [
-    { name: "the cancel button", html: footer(), id: "cancel", hover: OUTLINE_HOVER, pressed: OUTLINE_PRESSED },
-    { name: "the primary button", html: footer(), id: "primary", hover: PRIMARY_HOVER, pressed: PRIMARY_PRESSED },
+const BUTTON_CASES: ButtonCase[] = [
+    { name: "an outline button", html: buttons(), id: "cancel", hover: OUTLINE_HOVER, pressed: OUTLINE_PRESSED },
+    {
+        name: "a primary button",
+        html: buttons(),
+        id: "primary",
+        hover: ["--cpd-color-bg-action-primary-hovered", "--cpd-color-bg-action-primary-hovered"],
+        pressed: ["--cpd-color-bg-action-primary-pressed", "--cpd-color-bg-action-primary-pressed"],
+    },
     {
         name: "a danger primary button",
-        html: footer("mx_Dialog_primary danger"),
+        html: buttons("mx_Dialog_primary danger"),
         id: "primary",
         hover: ["--cpd-color-bg-critical-hovered", "--cpd-color-bg-critical-hovered"],
         pressed: ["--cpd-color-red-1100", "--cpd-color-red-1100"],
     },
-    // The footer fills every button but .cancel, so this one takes the primary's colors
     {
-        name: "a button without the cancel class",
-        html: UNCLASSED_FOOTER,
-        id: "cancel",
-        hover: PRIMARY_HOVER,
-        pressed: PRIMARY_PRESSED,
-    },
-    {
-        name: "Export room keys' Cancel",
-        html: EXPORT_KEYS_FOOTER,
-        id: "cancel",
-        hover: OUTLINE_HOVER,
-        pressed: OUTLINE_PRESSED,
-    },
-    {
-        name: "a warning cancel button",
-        html: footer("mx_Dialog_primary danger", "warning"),
+        name: "a warning button",
+        html: buttons("mx_Dialog_primary danger", "warning"),
         id: "cancel",
         hover: ["--cpd-color-bg-critical-subtle", "--cpd-color-border-critical-hovered"],
         pressed: ["--cpd-color-bg-critical-subtle-hovered", "--cpd-color-border-critical-hovered"],
@@ -180,34 +140,28 @@ describe("Legacy dialog button styles", () => {
         document.body.innerHTML = "";
     });
 
-    it.each(["cancel", "primary"])(
-        "gives the footer's %s button Compound's md geometry, as wide as its label",
-        (id) => {
-            render(footer());
-            const button = element(id);
-            const style = getComputedStyle(button);
+    it.each(["cancel", "primary"])("gives the %s button Compound's md geometry, as wide as its label", (id) => {
+        render(buttons());
+        const button = element(id);
+        const style = getComputedStyle(button);
 
-            expect(button.getBoundingClientRect().height).toBe(36);
-            expect(style.borderTopWidth).toBe("1px");
-            expect([style.paddingTop, style.paddingRight, style.paddingBottom, style.paddingLeft]).toEqual([
-                "3px",
-                "19px",
-                "3px",
-                "19px",
-            ]);
-            expect(parseFloat(style.borderTopLeftRadius)).toBeGreaterThanOrEqual(18);
-            expect(style.fontWeight).toBe("600");
-            // No 156px minimum (TELEMENT.md, "Colors, type and components")
-            const label = document.createRange();
-            label.selectNodeContents(button);
-            expect(button.getBoundingClientRect().width).toBeCloseTo(
-                label.getBoundingClientRect().width + 2 * (19 + 1),
-                0,
-            );
-        },
-    );
+        expect(button.getBoundingClientRect().height).toBe(36);
+        expect(style.borderTopWidth).toBe("1px");
+        expect([style.paddingTop, style.paddingRight, style.paddingBottom, style.paddingLeft]).toEqual([
+            "3px",
+            "19px",
+            "3px",
+            "19px",
+        ]);
+        expect(parseFloat(style.borderTopLeftRadius)).toBeGreaterThanOrEqual(18);
+        expect(style.fontWeight).toBe("600");
+        // No 156px minimum (TELEMENT.md, "Colors, type and components")
+        const label = document.createRange();
+        label.selectNodeContents(button);
+        expect(button.getBoundingClientRect().width).toBeCloseTo(label.getBoundingClientRect().width + 2 * (19 + 1), 0);
+    });
 
-    it.each(FOOTER_CASES)("colors $name like Compound's Button on hover", async ({ html, id, hover }) => {
+    it.each(BUTTON_CASES)("colors $name like Compound's Button on hover", async ({ html, id, hover }) => {
         render(html);
 
         await userEvent.hover(element(id));
@@ -216,7 +170,7 @@ describe("Legacy dialog button styles", () => {
         expect([style.backgroundColor, style.borderTopColor]).toEqual(hover.map(lightColor));
     });
 
-    it.each(FOOTER_CASES)("colors $name like Compound's Button when pressed", async ({ html, id, pressed }) => {
+    it.each(BUTTON_CASES)("colors $name like Compound's Button when pressed", async ({ html, id, pressed }) => {
         render(html);
 
         const style = await press(element(id));
@@ -224,33 +178,8 @@ describe("Legacy dialog button styles", () => {
         expect([style.backgroundColor, style.borderTopColor]).toEqual(pressed.map(lightColor));
     });
 
-    it("renders Export room keys' Cancel as an outline beside the filled Export", () => {
-        render(EXPORT_KEYS_FOOTER);
-        const cancel = getComputedStyle(element("cancel"));
-        const primary = getComputedStyle(element("primary"));
-
-        expect(cancel.backgroundColor).toBe(lightColor("--cpd-color-bg-action-secondary-rest"));
-        expect(cancel.borderTopColor).toBe(lightColor("--cpd-color-border-interactive-secondary"));
-        expect(cancel.color).toBe(lightColor("--cpd-color-text-primary"));
-        expect(primary.backgroundColor).toBe(lightColor("--cpd-color-bg-action-primary-rest"));
-    });
-
-    it.each([
-        ["Export", EXPORT_KEYS_FOOTER],
-        ["Import", IMPORT_KEYS_FOOTER],
-    ])("puts %s room keys' Cancel first and the primary flush with the footer's right edge", (_name, html) => {
-        render(html);
-        const footer = document.querySelector(".mx_Dialog_buttons")!.getBoundingClientRect();
-        const cancel = element("cancel").getBoundingClientRect();
-        const primary = element("primary").getBoundingClientRect();
-
-        // Like a DialogButtons footer, whose row puts the column gap between the buttons and nothing after them
-        expect(primary.right).toBe(footer.right);
-        expect(primary.left - cancel.right).toBe(8);
-    });
-
     it("shows Compound's pressed color, unfiltered, while the mouse holds a button down", async () => {
-        render(footer());
+        render(buttons());
         const button = element("primary");
 
         await mouse("mousePressed", button);
@@ -268,7 +197,7 @@ describe("Legacy dialog button styles", () => {
     });
 
     it("rings a button focused from the keyboard in the app's one focus ring, rather than brightening it", async () => {
-        render(footer());
+        render(buttons());
         const button = element("primary");
 
         const style = await press(button);
@@ -280,7 +209,7 @@ describe("Legacy dialog button styles", () => {
     });
 
     it("keeps a warning cancel button a red outline, like Compound's destructive secondary Button", () => {
-        render(footer("mx_Dialog_primary danger", "warning"));
+        render(buttons("mx_Dialog_primary danger", "warning"));
         const style = getComputedStyle(element("cancel"));
 
         expect(style.backgroundColor).toBe("rgba(0, 0, 0, 0)");
@@ -289,7 +218,7 @@ describe("Legacy dialog button styles", () => {
     });
 
     it("leaves a disabled button's colors alone on hover", async () => {
-        render(footer().replace('type="button">Leave', 'type="button" disabled>Leave'));
+        render(buttons().replace('type="button">Leave', 'type="button" disabled>Leave'));
         const before = getComputedStyle(element("primary")).backgroundColor;
 
         await userEvent.hover(element("primary"));

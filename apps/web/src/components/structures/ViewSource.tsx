@@ -9,6 +9,7 @@ Please see LICENSE files in the repository root for full details.
 
 import React, { type JSX } from "react";
 import { type MatrixEvent } from "matrix-js-sdk/src/matrix";
+import { DialogFooterButton, DialogFooterView } from "@element-hq/web-shared-components";
 
 import SyntaxHighlight from "../views/elements/SyntaxHighlight";
 import { _t } from "../../languageHandler";
@@ -171,11 +172,9 @@ export default class ViewSource extends React.Component<IProps, IState> {
                 </div>
                 {isEditing ? this.editSourceContent() : this.viewSourceContent()}
                 {!isEditing && canEdit && (
-                    <div className="mx_Dialog_buttons">
-                        <button onClick={() => this.onEdit()} className="mx_LegacyDialogButton" type="button">
-                            {_t("action|edit")}
-                        </button>
-                    </div>
+                    <DialogFooterView className="mx_Dialog_buttons">
+                        <DialogFooterButton onClick={() => this.onEdit()}>{_t("action|edit")}</DialogFooterButton>
+                    </DialogFooterView>
                 )}
             </BaseDialog>
         );

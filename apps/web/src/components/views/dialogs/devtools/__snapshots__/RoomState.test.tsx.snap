@@ -26,16 +26,16 @@ exports[`<RoomStateExplorer /> > should render 1`] = `
     No results found
   </div>
   <div
-    class="mx_Dialog_buttons"
+    class="_footer mx_Dialog_buttons"
   >
     <button
-      class="mx_LegacyDialogButton"
+      class="_button"
       type="button"
     >
       Back
     </button>
     <button
-      class="mx_LegacyDialogButton"
+      class="_button"
       type="button"
     >
       Send custom state event

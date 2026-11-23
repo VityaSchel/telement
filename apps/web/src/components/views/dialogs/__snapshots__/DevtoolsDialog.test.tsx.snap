@@ -364,10 +364,10 @@ exports[`DevtoolsDialog > renders the devtools dialog 1`] = `
       </form>
     </div>
     <div
-      class="mx_Dialog_buttons"
+      class="_footer mx_Dialog_buttons"
     >
       <button
-        class="mx_LegacyDialogButton"
+        class="_button"
         type="button"
       >
         Back

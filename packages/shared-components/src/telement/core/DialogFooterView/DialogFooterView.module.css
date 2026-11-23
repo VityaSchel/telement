@@ -1,0 +1,87 @@
+/*
+Copyright 2026 Viktor Shchelochkov
+
+SPDX-License-Identifier: AGPL-3.0-only OR GPL-3.0-only
+Please see LICENSE files in the repository root for full details.
+*/
+
+/*
+ * Telement's dialog footer (TELEMENT.md, "Colors, type and components"). Each button is a 36px pill with its label 12px
+ * inside, and those 12px hang outside the footer's box at the end, top and bottom: the footer is as tall as the labels'
+ * line, so the labels keep the dialog's spacing (24px under the content and from the end and bottom edges) where a
+ * dialog places the footer on its content's edges. The last button's box then sits 12px inside the dialog's corner, its
+ * 18px radius concentric with the dialog's 30px.
+ */
+.footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    column-gap: var(--cpd-space-2x);
+    /* Buttons that wrap stack 8px apart, as they sit side by side */
+    row-gap: calc(2 * var(--cpd-space-3x) + var(--cpd-space-2x));
+    margin-inline-end: calc(-1 * var(--cpd-space-3x));
+}
+
+/* A flex row, so that a button at the start adds no line of text around itself and stays on the buttons' line */
+.start {
+    display: flex;
+    align-items: center;
+    margin-inline-end: auto;
+}
+
+/* A button at the start, such as a link dialog's Remove, has its label on the start edge as the last one has on the end */
+.start > .button {
+    margin-inline-start: calc(-1 * var(--cpd-space-3x));
+}
+
+.button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    min-block-size: var(--tl-control-size);
+    margin: calc(-1 * var(--cpd-space-3x)) 0;
+    padding: 0 var(--cpd-space-3x);
+    border: none;
+    border-radius: var(--tl-radius-control);
+    background-color: transparent;
+    font: var(--cpd-font-body-md-semibold);
+    letter-spacing: var(--cpd-font-letter-spacing-body-md);
+    color: var(--cpd-color-text-action-accent);
+    transition: background-color 0.1s;
+}
+
+.destructive {
+    color: var(--cpd-color-text-critical-primary);
+}
+
+/* The one hover and pressed fills (telement/tokens.css), red for a destructive button as for a menu's red items */
+@media (hover) {
+    .button:not(:disabled):hover {
+        background-color: var(--cpd-color-bg-action-secondary-hovered);
+    }
+
+    .destructive:not(:disabled):hover {
+        background-color: var(--tl-color-bg-menu-critical-hovered);
+    }
+}
+
+.button:not(:disabled):active {
+    background-color: var(--cpd-color-bg-action-secondary-pressed);
+}
+
+.destructive:not(:disabled):active {
+    background-color: var(--tl-color-bg-menu-critical-pressed);
+}
+
+.button:disabled {
+    color: var(--cpd-color-text-disabled);
+    cursor: not-allowed;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .button {
+        transition: none;
+    }
+}

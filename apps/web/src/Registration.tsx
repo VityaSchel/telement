@@ -12,6 +12,7 @@ Please see LICENSE files in the repository root for full details.
  */
 
 import React from "react";
+import { DialogFooterButton } from "@element-hq/web-shared-components";
 
 import dis from "./dispatcher/dispatcher";
 import Modal from "./Modal";
@@ -50,17 +51,15 @@ export async function startAnyRegistrationFlow(
         button: _t("action|sign_in"),
         extraButtons: SettingsStore.getValue(UIFeature.Registration)
             ? [
-                  <button
+                  <DialogFooterButton
                       key="register"
                       onClick={() => {
                           modal.close();
                           dis.dispatch({ action: "start_registration", screenAfterLogin: options.screen_after });
                       }}
-                      className="mx_LegacyDialogButton"
-                      type="button"
                   >
                       {_t("auth|register_action")}
-                  </button>,
+                  </DialogFooterButton>,
               ]
             : [],
     });

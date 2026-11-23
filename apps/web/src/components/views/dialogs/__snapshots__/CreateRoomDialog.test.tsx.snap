@@ -215,26 +215,22 @@ exports[`<CreateRoomDialog /> > for a private room > should create a private roo
       </form>
     </div>
     <div
-      class="mx_Dialog_buttons"
+      class="_footer mx_Dialog_buttons"
     >
-      <span
-        class="mx_Dialog_buttons_row"
+      <button
+        class="_button cancel"
+        data-testid="dialog-cancel-button"
+        type="button"
       >
-        <button
-          class="mx_LegacyDialogButton cancel"
-          data-testid="dialog-cancel-button"
-          type="button"
-        >
-          Cancel
-        </button>
-        <button
-          class="mx_LegacyDialogButton mx_Dialog_primary"
-          data-testid="dialog-primary-button"
-          type="button"
-        >
-          Create room
-        </button>
-      </span>
+        Cancel
+      </button>
+      <button
+        class="_button mx_Dialog_primary"
+        data-testid="dialog-primary-button"
+        type="button"
+      >
+        Create room
+      </button>
     </div>
     <div
       aria-label="Close dialog"
@@ -456,26 +452,22 @@ exports[`<CreateRoomDialog /> > for a private room > should render not the advan
       </form>
     </div>
     <div
-      class="mx_Dialog_buttons"
+      class="_footer mx_Dialog_buttons"
     >
-      <span
-        class="mx_Dialog_buttons_row"
+      <button
+        class="_button cancel"
+        data-testid="dialog-cancel-button"
+        type="button"
       >
-        <button
-          class="mx_LegacyDialogButton cancel"
-          data-testid="dialog-cancel-button"
-          type="button"
-        >
-          Cancel
-        </button>
-        <button
-          class="mx_LegacyDialogButton mx_Dialog_primary"
-          data-testid="dialog-primary-button"
-          type="button"
-        >
-          Create room
-        </button>
-      </span>
+        Cancel
+      </button>
+      <button
+        class="_button mx_Dialog_primary"
+        data-testid="dialog-primary-button"
+        type="button"
+      >
+        Create room
+      </button>
     </div>
     <div
       aria-label="Close dialog"
@@ -699,26 +691,22 @@ exports[`<CreateRoomDialog /> > for a private room > when the state encryption l
       </form>
     </div>
     <div
-      class="mx_Dialog_buttons"
+      class="_footer mx_Dialog_buttons"
     >
-      <span
-        class="mx_Dialog_buttons_row"
+      <button
+        class="_button cancel"
+        data-testid="dialog-cancel-button"
+        type="button"
       >
-        <button
-          class="mx_LegacyDialogButton cancel"
-          data-testid="dialog-cancel-button"
-          type="button"
-        >
-          Cancel
-        </button>
-        <button
-          class="mx_LegacyDialogButton mx_Dialog_primary"
-          data-testid="dialog-primary-button"
-          type="button"
-        >
-          Create room
-        </button>
-      </span>
+        Cancel
+      </button>
+      <button
+        class="_button mx_Dialog_primary"
+        data-testid="dialog-primary-button"
+        type="button"
+      >
+        Create room
+      </button>
     </div>
     <div
       aria-label="Close dialog"

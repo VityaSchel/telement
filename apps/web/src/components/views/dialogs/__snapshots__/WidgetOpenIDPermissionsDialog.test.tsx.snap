@@ -31,10 +31,10 @@ exports[`WidgetOpenIDPermissionsDialog > should render 1`] = `
       </p>
     </div>
     <div
-      class="mx_Dialog_buttons"
+      class="_footer mx_Dialog_buttons"
     >
       <div
-        class="mx_Dialog_buttons_additive"
+        class="_start"
       >
         <form
           class="_root"
@@ -72,24 +72,20 @@ exports[`WidgetOpenIDPermissionsDialog > should render 1`] = `
           </div>
         </form>
       </div>
-      <span
-        class="mx_Dialog_buttons_row"
+      <button
+        class="_button cancel"
+        data-testid="dialog-cancel-button"
+        type="button"
       >
-        <button
-          class="mx_LegacyDialogButton cancel"
-          data-testid="dialog-cancel-button"
-          type="button"
-        >
-          Cancel
-        </button>
-        <button
-          class="mx_LegacyDialogButton mx_Dialog_primary"
-          data-testid="dialog-primary-button"
-          type="button"
-        >
-          Continue
-        </button>
-      </span>
+        Cancel
+      </button>
+      <button
+        class="_button mx_Dialog_primary"
+        data-testid="dialog-primary-button"
+        type="button"
+      >
+        Continue
+      </button>
     </div>
     <div
       aria-label="Close dialog"

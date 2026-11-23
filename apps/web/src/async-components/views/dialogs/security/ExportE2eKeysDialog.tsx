@@ -11,6 +11,7 @@ import FileSaver from "file-saver";
 import React, { type ChangeEvent } from "react";
 import { type MatrixClient } from "matrix-js-sdk/src/matrix";
 import { logger } from "matrix-js-sdk/src/logger";
+import { DialogFooterButton, DialogFooterView } from "@element-hq/web-shared-components";
 
 import { _t, _td } from "../../../../languageHandler";
 import * as MegolmExportEncryption from "../../../../utils/MegolmExportEncryption";
@@ -204,23 +205,15 @@ export default class ExportE2eKeysDialog extends React.Component<IProps, IState>
                             </div>
                         </div>
                     </div>
-                    <div className="mx_Dialog_buttons">
-                        <button
-                            onClick={this.onCancelClick}
-                            disabled={disableForm}
-                            className="mx_LegacyDialogButton cancel"
-                            type="button"
-                        >
+                    {/* Telement: the shared dialog footer */}
+                    <DialogFooterView className="mx_Dialog_buttons">
+                        <DialogFooterButton onClick={this.onCancelClick} disabled={disableForm} className="cancel">
                             {_t("action|cancel")}
-                        </button>
-                        <button
-                            className="mx_LegacyDialogButton mx_Dialog_primary"
-                            type="submit"
-                            disabled={disableForm}
-                        >
+                        </DialogFooterButton>
+                        <DialogFooterButton className="mx_Dialog_primary" type="submit" disabled={disableForm}>
                             {_t("action|export")}
-                        </button>
-                    </div>
+                        </DialogFooterButton>
+                    </DialogFooterView>
                 </form>
             </BaseDialog>
         );

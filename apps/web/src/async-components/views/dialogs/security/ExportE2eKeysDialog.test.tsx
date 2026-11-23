@@ -27,13 +27,13 @@ describe("ExportE2eKeysDialog", () => {
         expect(asFragment()).toMatchSnapshot();
     });
 
-    it("marks Cancel as the footer's cancel button, which the footer leaves an outline", () => {
+    it("ends in the shared dialog footer of text buttons rather than legacy dialog buttons", () => {
         render(<ExportE2eKeysDialog matrixClient={createTestClient()} onFinished={vi.fn()} />);
         const cancel = screen.getByRole("button", { name: "Cancel" });
 
-        expect(cancel).toHaveClass("mx_LegacyDialogButton", "cancel");
-        // The selector of the footer's cancel rule in _common.pcss, whose colors DialogButtons.test.browser.ts measures
-        expect(cancel.matches(".mx_Dialog_buttons button.mx_LegacyDialogButton.cancel")).toBe(true);
+        expect(cancel).toHaveClass("cancel");
+        expect(cancel).not.toHaveClass("mx_LegacyDialogButton");
+        expect(screen.getByRole("button", { name: "Export" })).toHaveAttribute("type", "submit");
     });
 
     it("puts Cancel first and Export last in the footer, as DialogButtons does", () => {
@@ -42,9 +42,7 @@ describe("ExportE2eKeysDialog", () => {
         const exportButton = screen.getByRole("button", { name: "Export" });
 
         expect([...footer.children].map((button) => button.textContent)).toEqual(["Cancel", "Export"]);
-        // The footer rule in _common.pcss that leaves no margin after the last button, which
-        // DialogButtons.test.browser.ts measures
-        expect(exportButton.matches("button.mx_LegacyDialogButton.mx_Dialog_primary:last-child")).toBe(true);
+        expect(exportButton.matches("button.mx_Dialog_primary:last-child")).toBe(true);
     });
 
     it("moves focus from the passphrase fields to Cancel, then to Export", async () => {

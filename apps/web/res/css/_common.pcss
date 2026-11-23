@@ -98,7 +98,6 @@ Please see LICENSE files in the repository root for full details.
     --container-gap-width: 8px; /* only even numbers should be used because otherwise we get 0.5px margin values. */
     --transition-short: 0.1s;
     --transition-standard: 0.3s;
-    --buttons-dialog-gap-row: var(--cpd-space-2x);
     --buttons-dialog-gap-column: var(--cpd-space-2x);
     --MBody-border-radius: 8px;
     --EventTileBubble_margin-block: 10px;
@@ -639,32 +638,10 @@ summary {
     word-wrap: break-word;
 }
 
+/* Telement: the shared dialog footer (DialogFooterView), which lays out its own buttons. Its labels are 24px under the
+   content, whether or not .mx_Dialog_content, whose bottom margin this one meets, comes first */
 .mx_Dialog_buttons {
-    /* The same 24px above the footer whether or not .mx_Dialog_content, whose bottom margin it meets, comes first */
     margin-top: var(--cpd-space-6x);
-    margin-inline-start: auto;
-    text-align: right;
-
-    .mx_Dialog_buttons_additive {
-        /* The consumer is responsible for positioning their elements. */
-        float: left;
-    }
-
-    .mx_Dialog_buttons_row {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: flex-end;
-        text-align: initial;
-        margin-inline-start: auto;
-
-        /* default gap among elements */
-        column-gap: var(--buttons-dialog-gap-column);
-        row-gap: var(--buttons-dialog-gap-row);
-
-        button {
-            margin: 0 !important; /* override the margin settings */
-        }
-    }
 }
 
 @define-mixin mx_DialogButton {
@@ -718,19 +695,10 @@ summary {
     margin-right: 0px;
 }
 
-/* Telement: a button placed straight in the footer, as ErrorDialog's OK is, keeps the dialog's 24px under it, as
-   DialogButtons' row does, rather than adding its 5px bottom margin to it */
-.mx_Dialog_buttons > :is(button, input[type="submit"]).mx_LegacyDialogButton {
-    margin-bottom: 0;
-}
-
-/* Default (non-cancel) buttons inside a DialogButtons footer get filled in as the primary action,
- * even without the mx_Dialog_primary class - .danger/.warning override the colours below via a
- * same-specificity, later-in-source rule; disabled overrides everyone the same way.
- */
+/* Telement: a primary legacy button is filled. Dialog footers are DialogFooterView's text buttons, so no button is filled
+   for being in one; .danger/.warning override the colours below via a same-specificity, later-in-source rule */
 .mx_Dialog button.mx_LegacyDialogButton.mx_Dialog_primary,
-.mx_Dialog input.mx_LegacyDialogButton[type="submit"].mx_Dialog_primary,
-.mx_Dialog_buttons button.mx_LegacyDialogButton:not(.cancel) {
+.mx_Dialog input.mx_LegacyDialogButton[type="submit"].mx_Dialog_primary {
     color: var(--cpd-color-text-on-solid-primary);
     background-color: var(--cpd-color-bg-action-primary-rest);
     border-color: var(--cpd-color-bg-action-primary-rest);
@@ -747,19 +715,13 @@ summary {
 .mx_Dialog input.mx_LegacyDialogButton[type="submit"].warning {
     border: solid 1px var(--cpd-color-border-critical-subtle);
     color: var(--cpd-color-text-critical-primary);
-    /* An outline, also as a footer's cancel button, which the footer would otherwise fill */
+    /* An outline, as Compound's red outline button is */
     background-color: transparent;
 }
 
-.mx_Dialog_buttons button.mx_LegacyDialogButton.cancel {
-    color: var(--cpd-color-text-primary);
-    background-color: var(--cpd-color-bg-action-secondary-rest);
-    border-color: var(--cpd-color-border-interactive-secondary);
-}
-
 /* Telement: Compound Button's disabled look, as every other button has (_AccessibleButton.pcss), for buttons and submit
-   inputs alike: an outline button keeps a gray outline on the subtle fill, and a filled one, red ones and the footer's
-   action included, takes the gray fill. Both write their label in the disabled text color */
+   inputs alike: an outline button keeps a gray outline on the subtle fill, and a filled one, red ones included, takes
+   the gray fill. Both write their label in the disabled text color */
 .mx_Dialog :is(button, input[type="submit"]).mx_LegacyDialogButton:disabled {
     cursor: not-allowed;
     color: var(--cpd-color-text-disabled);
@@ -767,8 +729,7 @@ summary {
     border-color: var(--cpd-color-border-interactive-secondary);
 }
 
-.mx_Dialog :is(button, input[type="submit"]).mx_LegacyDialogButton:is(.mx_Dialog_primary, .danger):disabled,
-.mx_Dialog_buttons button.mx_LegacyDialogButton:not(.cancel, .warning):disabled {
+.mx_Dialog :is(button, input[type="submit"]).mx_LegacyDialogButton:is(.mx_Dialog_primary, .danger):disabled {
     background-color: var(--cpd-color-bg-subtle-primary);
     border-color: var(--cpd-color-bg-subtle-primary);
 }
@@ -780,8 +741,7 @@ summary {
         background-color: var(--cpd-color-bg-subtle-secondary);
     }
 
-    .mx_Dialog :is(button, input[type="submit"]).mx_LegacyDialogButton.mx_Dialog_primary:not(:disabled):hover,
-    .mx_Dialog_buttons button.mx_LegacyDialogButton:not(.cancel):not(:disabled):hover {
+    .mx_Dialog :is(button, input[type="submit"]).mx_LegacyDialogButton.mx_Dialog_primary:not(:disabled):hover {
         border-color: var(--cpd-color-bg-action-primary-hovered);
         background-color: var(--cpd-color-bg-action-primary-hovered);
     }
@@ -802,8 +762,7 @@ summary {
     background-color: var(--cpd-color-bg-subtle-primary);
 }
 
-.mx_Dialog :is(button, input[type="submit"]).mx_LegacyDialogButton.mx_Dialog_primary:not(:disabled):active,
-.mx_Dialog_buttons button.mx_LegacyDialogButton:not(.cancel):not(:disabled):active {
+.mx_Dialog :is(button, input[type="submit"]).mx_LegacyDialogButton.mx_Dialog_primary:not(:disabled):active {
     border-color: var(--cpd-color-bg-action-primary-pressed);
     background-color: var(--cpd-color-bg-action-primary-pressed);
 }

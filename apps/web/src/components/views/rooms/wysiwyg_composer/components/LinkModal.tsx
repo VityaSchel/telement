@@ -8,6 +8,7 @@ Please see LICENSE files in the repository root for full details.
 
 import { type FormattingFunctions } from "@vector-im/matrix-wysiwyg";
 import React, { type ChangeEvent, useState } from "react";
+import { DialogFooterButton } from "@element-hq/web-shared-components";
 
 import { _t } from "../../../../../languageHandler";
 import Modal from "../../../../../Modal";
@@ -111,23 +112,25 @@ export const LinkModal: React.FC<LinkModalProps> = ({
                 />
 
                 <div className="mx_LinkModal_buttons">
-                    {isEditing && (
-                        <button
-                            type="button"
-                            className="mx_LegacyDialogButton danger"
-                            onClick={() => {
-                                composer.removeLinks();
-                                onFinished();
-                            }}
-                        >
-                            {_t("action|remove")}
-                        </button>
-                    )}
+                    {/* Telement: Remove at the start of the shared dialog footer, in red */}
                     <DialogButtons
                         primaryButton={_t("action|save")}
                         primaryDisabled={isSaveDisabled}
                         primaryIsSubmit={true}
                         onCancel={onFinished}
+                        additive={
+                            isEditing && (
+                                <DialogFooterButton
+                                    destructive
+                                    onClick={() => {
+                                        composer.removeLinks();
+                                        onFinished();
+                                    }}
+                                >
+                                    {_t("action|remove")}
+                                </DialogFooterButton>
+                            )
+                        }
                     />
                 </div>
             </form>

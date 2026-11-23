@@ -15,32 +15,42 @@ import compoundLightSemantic from "@vector-im/compound-design-tokens/assets/web/
 // The package doesn't export its token stylesheet on its own
 // eslint-disable-next-line no-restricted-imports
 import telementTokens from "../../../../packages/shared-components/src/telement/tokens.css?raw";
+// The shared dialog footer's own stylesheet, its classes unhashed, as DialogFooterView's markup below names them
+// eslint-disable-next-line no-restricted-imports
+import dialogFooterStyles from "../../../../packages/shared-components/src/telement/core/DialogFooterView/DialogFooterView.module.css?raw";
 import commonStyles from "../../res/css/_common.pcss?raw";
 import fontSizes from "../../res/css/_font-sizes.pcss?raw";
 import lightTheme from "../../res/themes/light/css/_light.pcss?raw";
 import pollListItemStyles from "../../res/css/components/views/dialogs/polls/_PollListItem.pcss?raw";
 import pollListItemEndedStyles from "../../res/css/components/views/dialogs/polls/_PollListItemEnded.pcss?raw";
+import successDialogStyles from "../../res/css/compound/_SuccessDialog.pcss?raw";
 import spacePillButtonStyles from "../../res/css/structures/_SpacePillButton.pcss?raw";
 import tabbedViewStyles from "../../res/css/structures/_TabbedView.pcss?raw";
 import viewSourceStyles from "../../res/css/structures/_ViewSource.pcss?raw";
 import interactiveAuthEntryStyles from "../../res/css/views/auth/_InteractiveAuthEntryComponents.pcss?raw";
 import addExistingToSpaceDialogStyles from "../../res/css/views/dialogs/_AddExistingToSpaceDialog.pcss?raw";
 import compoundDialogStyles from "../../res/css/views/dialogs/_CompoundDialog.pcss?raw";
+import confirmKeyStorageOffDialogStyles from "../../res/css/views/dialogs/_ConfirmKeyStorageOffDialog.pcss?raw";
 import createRoomDialogStyles from "../../res/css/views/dialogs/_CreateRoomDialog.pcss?raw";
 import createSubspaceDialogStyles from "../../res/css/views/dialogs/_CreateSubspaceDialog.pcss?raw";
 import deactivateAccountDialogStyles from "../../res/css/views/dialogs/_DeactivateAccountDialog.pcss?raw";
+import devtoolsDialogStyles from "../../res/css/views/dialogs/_DevtoolsDialog.pcss?raw";
 import exportDialogStyles from "../../res/css/views/dialogs/_ExportDialog.pcss?raw";
 import inviteDialogStyles from "../../res/css/views/dialogs/_InviteDialog.pcss?raw";
 import leaveRoomDialogStyles from "../../res/css/views/dialogs/_LeaveRoomDialog.pcss?raw";
 import leaveSpaceDialogStyles from "../../res/css/views/dialogs/_LeaveSpaceDialog.pcss?raw";
 import logoutDialogStyles from "../../res/css/views/dialogs/_LogoutDialog.pcss?raw";
 import pollCreateDialogStyles from "../../res/css/views/dialogs/_PollCreateDialog.pcss?raw";
+import registrationEmailPromptDialogStyles from "../../res/css/views/dialogs/_RegistrationEmailPromptDialog.pcss?raw";
 import reportRoomDialogStyles from "../../res/css/views/dialogs/_ReportRoomDialog.pcss?raw";
 import roomSettingsDialogStyles from "../../res/css/views/dialogs/_RoomSettingsDialog.pcss?raw";
 import roomUpgradeWarningDialogStyles from "../../res/css/views/dialogs/_RoomUpgradeWarningDialog.pcss?raw";
 import settingsDialogStyles from "../../res/css/views/dialogs/_SettingsDialog.pcss?raw";
 import unpinAllDialogStyles from "../../res/css/views/dialogs/_UnpinAllDialog.pcss?raw";
 import userSettingsDialogStyles from "../../res/css/views/dialogs/_UserSettingsDialog.pcss?raw";
+import widgetCapabilitiesPromptDialogStyles from "../../res/css/views/dialogs/_WidgetCapabilitiesPromptDialog.pcss?raw";
+import accessSecretStorageDialogStyles from "../../res/css/views/dialogs/security/_AccessSecretStorageDialog.pcss?raw";
+import keyBackupFailedDialogStyles from "../../res/css/views/dialogs/security/_KeyBackupFailedDialog.pcss?raw";
 import accessibleButtonStyles from "../../res/css/views/elements/_AccessibleButton.pcss?raw";
 import copyableTextStyles from "../../res/css/views/elements/_CopyableText.pcss?raw";
 import fieldStyles from "../../res/css/views/elements/_Field.pcss?raw";
@@ -50,6 +60,8 @@ import linkModalStyles from "../../res/css/views/rooms/wysiwyg_composer/componen
 import roomProfileSettingsStyles from "../../res/css/views/settings/_RoomProfileSettings.pcss?raw";
 import settingsSectionStyles from "../../res/css/views/settings/tabs/_SettingsSection.pcss?raw";
 import settingsTabStyles from "../../res/css/views/settings/tabs/_SettingsTab.pcss?raw";
+import encryptionCardStyles from "../../res/css/views/settings/encryption/_EncryptionCard.pcss?raw";
+import encryptionCardEmphasisedContentStyles from "../../res/css/views/settings/encryption/_EncryptionCardEmphasisedContent.pcss?raw";
 import headingStyles from "../../res/css/views/typography/_Heading.pcss?raw";
 import { toBrowserCss } from "../test/telement/browserCss";
 import { tokenColor } from "../test/telement/computedStyle";
@@ -60,27 +72,34 @@ const APP_STYLES = [
     commonStyles,
     pollListItemStyles,
     pollListItemEndedStyles,
+    successDialogStyles,
     spacePillButtonStyles,
     tabbedViewStyles,
     viewSourceStyles,
     interactiveAuthEntryStyles,
     addExistingToSpaceDialogStyles,
     compoundDialogStyles,
+    confirmKeyStorageOffDialogStyles,
     createRoomDialogStyles,
     createSubspaceDialogStyles,
     deactivateAccountDialogStyles,
+    devtoolsDialogStyles,
     exportDialogStyles,
     inviteDialogStyles,
     leaveRoomDialogStyles,
     leaveSpaceDialogStyles,
     logoutDialogStyles,
     pollCreateDialogStyles,
+    registrationEmailPromptDialogStyles,
     reportRoomDialogStyles,
     roomSettingsDialogStyles,
     roomUpgradeWarningDialogStyles,
     settingsDialogStyles,
     unpinAllDialogStyles,
     userSettingsDialogStyles,
+    widgetCapabilitiesPromptDialogStyles,
+    accessSecretStorageDialogStyles,
+    keyBackupFailedDialogStyles,
     accessibleButtonStyles,
     copyableTextStyles,
     fieldStyles,
@@ -90,6 +109,8 @@ const APP_STYLES = [
     roomProfileSettingsStyles,
     settingsSectionStyles,
     settingsTabStyles,
+    encryptionCardStyles,
+    encryptionCardEmphasisedContentStyles,
     headingStyles,
 ];
 
@@ -138,15 +159,60 @@ function renderDialog(className: string, title: string, children: string, titleC
 /** The class of Compound's form (Root), which the test's stylesheet lays out as Compound does. */
 const COMPOUND_FORM = "compoundFormRoot";
 
+interface FooterButton {
+    label: string;
+    /** The classes DialogButtons gives the button, which tests look it up by. */
+    classes?: string;
+    destructive?: boolean;
+    disabled?: boolean;
+    testId?: string;
+}
+
+/**
+ * The shared dialog footer as DialogFooterView renders it, with the given class (DialogButtons' mx_Dialog_buttons by
+ * default), its buttons in order and, optionally, what sits at its start.
+ */
+function footer(buttons: FooterButton[], className = "mx_Dialog_buttons", start = ""): string {
+    const html = buttons.map(
+        ({ label, classes = "", destructive, disabled, testId }) =>
+            `<button type="button" class="button ${destructive ? "destructive" : ""} ${classes}" ` +
+            `${disabled ? "disabled" : ""} ${testId ? `data-testid="${testId}"` : ""}>${label}</button>`,
+    );
+    return `<div class="footer ${className}">${start ? `<div class="start">${start}</div>` : ""}${html.join("")}</div>`;
+}
+
 /** DialogButtons: Cancel, then the primary action. */
-const FOOTER = `
-    <div class="mx_Dialog_buttons">
-        <span class="mx_Dialog_buttons_row">
-            <button class="mx_LegacyDialogButton cancel" type="button">Cancel</button>
-            <button class="mx_LegacyDialogButton mx_Dialog_primary" type="button">Create room</button>
-        </span>
-    </div>
-`;
+const FOOTER = footer([
+    { label: "Cancel", classes: "cancel" },
+    { label: "Create room", classes: "mx_Dialog_primary" },
+]);
+
+/** The box of a button's label, as drawn. */
+function labelBox(selector: string): DOMRect {
+    const range = document.createRange();
+    range.selectNodeContents(get(selector));
+    return range.getBoundingClientRect();
+}
+
+/**
+ * Where a footer's last button sits in the dialog: its label's distance from the body's end edge, its box's from the
+ * end and bottom edges, and how far the footer's line, as tall as the labels, is under what comes above it. The label
+ * is centered in its 36px box (DialogFooterView.test.tsx), so a box 12px from the bottom puts the label as far from the
+ * bottom as from the end.
+ */
+function footerEdges(button: string, above: string, footerSelector = ".mx_Dialog_buttons"): number[] {
+    const body = box("[data-testid=body]");
+    const buttonBox = box(button);
+    return [
+        Math.round(body.right - labelBox(button).right),
+        body.right - buttonBox.right,
+        body.bottom - buttonBox.bottom,
+        box(footerSelector).top - box(above).bottom,
+    ];
+}
+
+/** A footer label 24px from the end and bottom edges and 24px under what is above: the button's box 12px inside. */
+const ON_THE_EDGES = [24, 12, 12, 24];
 
 function get(selector: string): HTMLElement {
     const element = document.querySelector<HTMLElement>(selector);
@@ -180,7 +246,7 @@ describe("Dialogs", () => {
             @layer compound-tokens { ${compoundBase} ${compoundSemantic} ${compoundLightTheme} ${compoundLightSemantic} }
             /* Compound's form (Root), a column of its fields 20px apart */
             @layer compound-web { .${COMPOUND_FORM} { display: flex; flex-direction: column; gap: var(--cpd-space-5x); } }
-            @layer shared-components { ${telementTokens} }
+            @layer shared-components { ${telementTokens} ${dialogFooterStyles} }
             @layer app-web {
                 body { margin: 0; }
                 ${APP_STYLES.map((styles) => toBrowserCss(styles, commonStyles, fontSizes, lightTheme)).join("\n")}
@@ -211,14 +277,26 @@ describe("Dialogs", () => {
             );
         }
 
-        it("puts the title, the content and the footer on a 24px edge", () => {
+        it("puts the title, the content and the footer's labels on a 24px edge", () => {
             renderForm();
             const body = box("[data-testid=body]");
 
             expect(box(".mx_Dialog_title").left - body.left).toBe(24);
             expect(box("[data-testid=text]").left - body.left).toBe(24);
-            expect(body.right - box(".mx_Dialog_primary").right).toBe(24);
-            expect(body.bottom - box(".mx_Dialog_primary").bottom).toBe(24);
+            expect(footerEdges(".mx_Dialog_primary", ".mx_Dialog_content")).toEqual(ON_THE_EDGES);
+        });
+
+        it("draws the footer as text buttons in the accent, Cancel before the action, the last box concentric with the corner", () => {
+            renderForm();
+            const [cancel, create] = [get(".cancel"), get(".mx_Dialog_primary")];
+            const radius = parseFloat(getComputedStyle(get("[data-testid=body]")).borderBottomRightRadius);
+
+            expect(cancel.compareDocumentPosition(create) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+            for (const button of [cancel, create]) {
+                expect(getComputedStyle(button).color).toBe(colorOf("--cpd-color-text-action-accent"));
+                expect(getComputedStyle(button).backgroundColor).toBe("rgba(0, 0, 0, 0)");
+            }
+            expect(12 + box(".mx_Dialog_primary").height / 2).toBe(radius);
         });
 
         it("writes the title in Compound's heading-sm, on the close button's line 16px from the top", () => {
@@ -257,7 +335,7 @@ describe("Dialogs", () => {
 
         it("sizes footer buttons to their labels, 8px apart, with no 156px minimum", () => {
             renderForm();
-            const cancel = box(".mx_LegacyDialogButton.cancel");
+            const cancel = box(".cancel");
             const primary = box(".mx_Dialog_primary");
 
             expect(cancel.width).toBeLessThan(100);
@@ -290,9 +368,7 @@ describe("Dialogs", () => {
                 `<div class="mx_Dialog_content" id="mx_Dialog_content">
                     <p style="margin: 0" data-testid="text">We were unable to access your microphone. Please check your browser settings and try again.</p>
                 </div>
-                <div class="mx_Dialog_buttons">
-                    <button class="mx_LegacyDialogButton mx_Dialog_primary" type="button">OK</button>
-                </div>`,
+                ${footer([{ label: "OK", classes: "mx_Dialog_primary" }])}`,
             );
         }
 
@@ -306,13 +382,10 @@ describe("Dialogs", () => {
             expect(middle(box(".mx_Dialog_title"))).toBe(middle(box(".mx_Dialog_cancelButton")));
         });
 
-        it("keep their OK button 24px from the bottom and end, and 24px under the text", () => {
+        it("keep their OK button's label 24px from the bottom and end, and 24px under the text", () => {
             renderAlert();
-            const body = box("[data-testid=body]");
-            const ok = box(".mx_Dialog_primary");
 
-            expect([body.right - ok.right, body.bottom - ok.bottom]).toEqual([24, 24]);
-            expect(ok.top - box("[data-testid=text]").bottom).toBe(24);
+            expect(footerEdges(".mx_Dialog_primary", "[data-testid=text]")).toEqual(ON_THE_EDGES);
         });
     });
 
@@ -454,12 +527,7 @@ describe("Dialogs", () => {
                 "mx_DeactivateAccountDialog",
                 "Deactivate account",
                 `<input type="submit" class="mx_LegacyDialogButton mx_Dialog_primary" value="Continue" disabled data-testid="input">
-                <div class="mx_Dialog_buttons">
-                    <span class="mx_Dialog_buttons_row">
-                        <button class="mx_LegacyDialogButton danger" type="button" disabled data-testid="danger">Leave</button>
-                        <button class="mx_LegacyDialogButton" type="button" disabled data-testid="action">Send report</button>
-                    </span>
-                </div>`,
+                <button class="mx_LegacyDialogButton danger" type="button" disabled data-testid="danger">Leave</button>`,
             );
             const filled = [
                 colorIn("--cpd-color-text-disabled"),
@@ -470,27 +538,25 @@ describe("Dialogs", () => {
 
             expect(look(get("[data-testid=input]"))).toEqual(filled);
             expect(look(get("[data-testid=danger]"))).toEqual(filled);
-            expect(look(get("[data-testid=action]"))).toEqual(filled);
         });
 
-        it("keep a disabled Cancel an outline, as Compound draws a disabled outline button", () => {
+        it("write a disabled footer button's label in the disabled color, without a fill, red ones included", () => {
             renderDialog(
                 "mx_ReportEventDialog",
                 "Report content",
-                `<div class="mx_Dialog_buttons">
-                    <span class="mx_Dialog_buttons_row">
-                        <button class="mx_LegacyDialogButton cancel" type="button" disabled data-testid="cancel">Cancel</button>
-                        <button class="mx_LegacyDialogButton mx_Dialog_primary" type="button" disabled>Send report</button>
-                    </span>
-                </div>`,
+                footer([
+                    { label: "Cancel", classes: "cancel", disabled: true, testId: "cancel" },
+                    { label: "Send report", destructive: true, disabled: true, testId: "action" },
+                ]),
             );
 
-            expect(look(get("[data-testid=cancel]"))).toEqual([
-                colorIn("--cpd-color-text-disabled"),
-                colorIn("--cpd-color-bg-subtle-secondary"),
-                colorIn("--cpd-color-border-interactive-secondary"),
-                "1",
-            ]);
+            for (const id of ["cancel", "action"]) {
+                const style = getComputedStyle(get(`[data-testid=${id}]`));
+                expect([style.color, style.backgroundColor]).toEqual([
+                    colorIn("--cpd-color-text-disabled"),
+                    "rgba(0, 0, 0, 0)",
+                ]);
+            }
         });
     });
 
@@ -602,6 +668,138 @@ describe("Dialogs", () => {
         });
     });
 
+    describe("the footer in every kind of dialog", () => {
+        const CANCEL_AND_ACTION = footer([
+            { label: "Cancel", classes: "cancel" },
+            { label: "Continue", classes: "mx_Dialog_primary", testId: "action" },
+        ]);
+
+        it.each([
+            { kind: "a widget's permission prompt", className: "mx_WidgetCapabilitiesPromptDialog", wrapper: "" },
+            { kind: "the key backup failure", className: "mx_KeyBackupFailedDialog", wrapper: "" },
+            { kind: "the registration email prompt", className: "mx_RegistrationEmailPromptDialog", wrapper: "" },
+            { kind: "a success dialog", className: "mx_SuccessDialog", wrapper: "" },
+        ])("keeps $kind's labels 24px under the content and from the end and bottom", ({ className, wrapper }) => {
+            renderDialog(
+                className,
+                "Title",
+                `<div class="mx_Dialog_content"><p style="margin: 0" data-testid="text">Text</p></div>${CANCEL_AND_ACTION}`,
+            );
+            if (wrapper) addWrapperClass(wrapper);
+
+            expect(footerEdges("[data-testid=action]", ".mx_Dialog_content")).toEqual(ON_THE_EDGES);
+        });
+
+        it("keeps developer tools' labels 24px under a tool and from the end and bottom", () => {
+            renderDialog(
+                "mx_QuestionDialog",
+                "Developer tools",
+                `<div class="mx_DevTools_content"><p style="margin: 0">Event type</p></div>
+                ${footer([{ label: "Back" }, { label: "Send", testId: "action" }])}`,
+            );
+            addWrapperClass("mx_DevtoolsDialog_wrapper");
+
+            expect(footerEdges("[data-testid=action]", ".mx_DevTools_content")).toEqual(ON_THE_EDGES);
+        });
+
+        it("ends Sign out's hero card on the edges, signing out last and in red", () => {
+            renderDialog(
+                "mx_LogoutDialog",
+                "",
+                `<div class="mx_EncryptionCard mx_EncryptionCard_noBorder">
+                    <div class="mx_EncryptionCard_header"><h2>Set up recovery</h2></div>
+                    <div class="mx_EncryptionCard_emphasisedContent" data-testid="text"><p>Without recovery you lose your messages.</p></div>
+                    ${footer([
+                        { label: "Set up recovery" },
+                        { label: "Remove this device anyway", destructive: true, testId: "action" },
+                    ])}
+                </div>`,
+            );
+
+            expect(footerEdges("[data-testid=action]", "[data-testid=text]")).toEqual(ON_THE_EDGES);
+            expect(getComputedStyle(get("[data-testid=action]")).color).toBe(
+                colorOf("--cpd-color-text-critical-primary"),
+            );
+        });
+
+        it("draws Turn off key storage's card as the dialog's body, its footer on the edges", () => {
+            render(`
+                <div class="mx_Dialog_wrapper mx_ConfirmKeyStorageOffDialog">
+                    <div class="mx_Dialog_border">
+                        <div class="mx_Dialog" data-testid="body">
+                            <div class="mx_EncryptionCard">
+                                <div class="mx_EncryptionCard_header"><h2>Are you sure you want to keep key storage turned off?</h2></div>
+                                <span data-testid="text">If you sign out of all your devices you will lose your message history.</span>
+                                ${footer([{ label: "Yes, dismiss" }, { label: "Go to Settings", testId: "action" }])}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `);
+            const body = box("[data-testid=body]");
+
+            expect(box("[data-testid=text]").left - body.left).toBe(24);
+            expect(footerEdges("[data-testid=action]", "[data-testid=text]")).toEqual(ON_THE_EDGES);
+        });
+
+        it("ends the recovery key prompt's form in the footer, Cancel before Continue", () => {
+            renderDialog(
+                "",
+                "",
+                `<div class="mx_EncryptionCard mx_AccessSecretStorageDialog">
+                    <div class="mx_EncryptionCard_header"><h2>Enter your recovery key</h2></div>
+                    <div>
+                        <form class="mx_AccessSecretStorageDialog_primaryContainer">
+                            <div class="mx_AccessSecretStorageDialog_recoveryKeyEntry" data-testid="text"><input></div>
+                            ${footer([{ label: "Cancel" }, { label: "Continue", testId: "action" }])}
+                        </form>
+                    </div>
+                </div>`,
+                "",
+                false,
+            );
+
+            expect(footerEdges("[data-testid=action]", "[data-testid=text]")).toEqual(ON_THE_EDGES);
+        });
+
+        it("puts the link dialog's Remove at the footer's start, its label on the start edge", () => {
+            render(`
+                <div class="mx_Dialog_wrapper mx_CompoundDialog">
+                    <div class="mx_Dialog_border">
+                        <div class="mx_Dialog" data-testid="body">
+                            <div class="mx_LinkModal mx_Dialog_fixedWidth" role="dialog">
+                                <div class="mx_Dialog_header"><h1 class="mx_Heading_h3 mx_Dialog_title">Edit link</h1></div>
+                                <form class="mx_LinkModal_content">
+                                    <div class="mx_Field mx_Field_input mx_LinkModal_Field" data-testid="text"><input id="link"><label for="link">Link</label></div>
+                                    <div class="mx_LinkModal_buttons">
+                                        ${footer(
+                                            [
+                                                { label: "Cancel", classes: "cancel" },
+                                                { label: "Save", testId: "action" },
+                                            ],
+                                            "mx_Dialog_buttons",
+                                            `<button type="button" class="button destructive" data-testid="remove">Remove</button>`,
+                                        )}
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `);
+            const body = box("[data-testid=body]");
+
+            expect(Math.round(labelBox("[data-testid=remove]").left - body.left)).toBe(24);
+            expect(Math.round(body.right - labelBox("[data-testid=action]").right)).toBe(24);
+            expect(body.bottom - box("[data-testid=action]").bottom).toBe(12);
+            // On the dialog anatomy's edges, as every dialog is
+            expect([box(".mx_Dialog_title").top - body.top, box(".mx_Dialog_title").left - body.left]).toEqual([
+                16, 24,
+            ]);
+            expect(middle(box("[data-testid=remove]"))).toBe(middle(box("[data-testid=action]")));
+        });
+    });
+
     describe("deactivating the account", () => {
         /** DeactivateAccountDialog at InteractiveAuth's password stage, which ends in the dialog's footer. */
         function renderDeactivate(): void {
@@ -618,12 +816,15 @@ describe("Dialogs", () => {
                                     <input id="password" type="password" placeholder="Password">
                                     <label for="password">Password</label>
                                 </div>
-                                <div class="mx_Dialog_buttons">
-                                    <span class="mx_Dialog_buttons_row">
-                                        <button class="mx_LegacyDialogButton cancel" type="button" data-testid="cancel">Cancel</button>
-                                        <button class="mx_LegacyDialogButton mx_Dialog_primary danger" type="submit" data-testid="deactivate">Deactivate account</button>
-                                    </span>
-                                </div>
+                                ${footer([
+                                    { label: "Cancel", classes: "cancel", testId: "cancel" },
+                                    {
+                                        label: "Deactivate account",
+                                        classes: "mx_Dialog_primary danger",
+                                        destructive: true,
+                                        testId: "deactivate",
+                                    },
+                                ])}
                             </form>
                         </div>
                     </div>
@@ -631,15 +832,13 @@ describe("Dialogs", () => {
             );
         }
 
-        it("ends in a footer with Cancel, then a red action, 24px from the bottom and end", () => {
+        it("ends in a footer with Cancel, then a red action, its label 24px from the bottom and end", () => {
             renderDeactivate();
-            const body = box("[data-testid=body]");
-            const deactivate = box("[data-testid=deactivate]");
 
-            expect([body.right - deactivate.right, body.bottom - deactivate.bottom]).toEqual([24, 24]);
-            expect(deactivate.left - box("[data-testid=cancel]").right).toBe(8);
-            expect(getComputedStyle(get("[data-testid=deactivate]")).backgroundColor).toBe(
-                colorOf("--cpd-color-bg-critical-primary"),
+            expect(footerEdges("[data-testid=deactivate]", "[data-testid=password]")).toEqual(ON_THE_EDGES);
+            expect(box("[data-testid=deactivate]").left - box("[data-testid=cancel]").right).toBe(8);
+            expect(getComputedStyle(get("[data-testid=deactivate]")).color).toBe(
+                colorOf("--cpd-color-text-critical-primary"),
             );
         });
 
@@ -681,8 +880,13 @@ describe("Dialogs", () => {
                                         </div>
                                     </div>
                                     <div class="mx_CompoundDialog_footer">
-                                        <div class="mx_AccessibleButton mx_AccessibleButton_hasKind mx_AccessibleButton_kind_primary_outline" role="button" data-testid="cancel">Cancel</div>
-                                        <button class="mx_AccessibleButton mx_AccessibleButton_hasKind mx_AccessibleButton_kind_primary mx_Dialog_nonDialogButton" type="submit" data-testid="create">Create poll</button>
+                                        ${footer(
+                                            [
+                                                { label: "Cancel", testId: "cancel" },
+                                                { label: "Create poll", testId: "create" },
+                                            ],
+                                            "",
+                                        )}
                                     </div>
                                 </form>
                             </div>
@@ -705,22 +909,21 @@ describe("Dialogs", () => {
             expect(box(".mx_CompoundDialog_cancelButton").left - title.right).toBe(8);
         });
 
-        it("starts the content 16px under the title on the 24px edge, and ends 24px above the footer's buttons", () => {
+        it("starts the content 16px under the title on the 24px edge", () => {
             renderCreatePoll();
             const body = box("[data-testid=body]");
 
             expect(box("[data-testid=first]").top - box(".mx_CompoundDialog_header h1").bottom).toBe(16);
             expect(box("[data-testid=first]").left - body.left).toBe(24);
-            expect(box("[data-testid=create]").top - box("[data-testid=last]").bottom).toBe(24);
         });
 
-        it("puts Cancel and Create poll 8px apart, 24px from the end and the bottom", () => {
+        it("puts Cancel and Create poll 8px apart, their labels 24px under the footer's edge and from the end and bottom", () => {
             renderCreatePoll();
-            const body = box("[data-testid=body]");
             const create = box("[data-testid=create]");
 
             expect(create.left - box("[data-testid=cancel]").right).toBe(8);
-            expect([body.right - create.right, body.bottom - create.bottom]).toEqual([24, 24]);
+            // The footer's line sits 24px under the edge it draws its shadow on, as under the content elsewhere
+            expect(footerEdges("[data-testid=create]", ".mx_CompoundDialog_content", ".footer")).toEqual(ON_THE_EDGES);
         });
 
         it("is as tall as its content, and past the window's height scrolls it between the title and the footer", () => {
@@ -734,7 +937,7 @@ describe("Dialogs", () => {
 
             expect(body.bottom).toBeLessThanOrEqual(WINDOW.height);
             expect(content.scrollHeight).toBeGreaterThan(content.clientHeight);
-            expect(body.bottom - box("[data-testid=create]").bottom).toBe(24);
+            expect(body.bottom - box("[data-testid=create]").bottom).toBe(12);
         });
     });
 
@@ -751,12 +954,10 @@ describe("Dialogs", () => {
                         <svg viewBox="0 0 24 24" data-testid="icon"></svg>You're the only admin of this space. Leaving it will mean no one has control over it.
                     </div>
                 </div>
-                <div class="mx_Dialog_buttons">
-                    <span class="mx_Dialog_buttons_row">
-                        <button class="mx_LegacyDialogButton cancel" type="button">Cancel</button>
-                        <button class="mx_LegacyDialogButton mx_Dialog_primary danger" type="button" data-testid="leave">Leave space</button>
-                    </span>
-                </div>`,
+                ${footer([
+                    { label: "Cancel", classes: "cancel" },
+                    { label: "Leave space", classes: "mx_Dialog_primary danger", destructive: true, testId: "leave" },
+                ])}`,
                 "",
                 false,
             );
@@ -775,13 +976,10 @@ describe("Dialogs", () => {
             expect(box("[data-testid=text]").top - title.bottom).toBe(16);
         });
 
-        it("is as tall as its content, its footer 24px under the note and 24px from the bottom and end", () => {
+        it("is as tall as its content, its footer's labels 24px under the note and 24px from the bottom and end", () => {
             renderLeaveSpace();
-            const body = box("[data-testid=body]");
-            const leave = box("[data-testid=leave]");
 
-            expect(leave.top - box("[data-testid=note]").bottom).toBe(24);
-            expect([body.right - leave.right, body.bottom - leave.bottom]).toEqual([24, 24]);
+            expect(footerEdges("[data-testid=leave]", "[data-testid=note]")).toEqual(ON_THE_EDGES);
         });
 
         it("writes the note in 13px, its icon on the first line and the lines after it indented past the icon", () => {

@@ -11,6 +11,7 @@ import React, { type ChangeEventHandler, useCallback, useContext, useEffect, use
 import { type IContent, type MatrixEvent } from "matrix-js-sdk/src/matrix";
 import classNames from "classnames";
 import { Form, SettingsToggleInput } from "@vector-im/compound-web";
+import { DialogFooterButton } from "@element-hq/web-shared-components";
 
 import { _t, _td } from "../../../../languageHandler";
 import BaseTool, { DevtoolsContext, type IDevtoolsProps } from "./BaseTool";
@@ -150,9 +151,7 @@ const RoomStateExplorerEventType: React.FC<IEventTypeProps> = ({ eventType, onBa
             setHistory(true);
         };
         const extraButton = (
-            <button onClick={onHistoryClick} className="mx_LegacyDialogButton" type="button">
-                {_t("devtools|see_history")}
-            </button>
+            <DialogFooterButton onClick={onHistoryClick}>{_t("devtools|see_history")}</DialogFooterButton>
         );
         return <EventViewer mxEvent={event} onBack={_onBack} Editor={StateEventEditor} extraButton={extraButton} />;
     }

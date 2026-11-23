@@ -14,6 +14,7 @@ import { type AuthDict } from "matrix-js-sdk/src/matrix";
 import { type GeneratedSecretStorageKey } from "matrix-js-sdk/src/crypto-api";
 import classNames from "classnames";
 import CheckmarkIcon from "@vector-im/compound-design-tokens/assets/web/icons/check";
+import { DialogFooterButton } from "@element-hq/web-shared-components";
 
 import { MatrixClientPeg } from "../../../../MatrixClientPeg";
 import { _t, _td } from "../../../../languageHandler";
@@ -412,9 +413,9 @@ export default class CreateSecretStorageDialog extends React.PureComponent<IProp
                     hasCancel={false}
                     disabled={!this.state.passPhraseValid}
                 >
-                    <button type="button" onClick={this.onCancelClick} className="mx_LegacyDialogButton danger">
+                    <DialogFooterButton destructive onClick={this.onCancelClick}>
                         {_t("action|cancel")}
-                    </button>
+                    </DialogFooterButton>
                 </DialogButtons>
             </form>
         );
@@ -472,9 +473,9 @@ export default class CreateSecretStorageDialog extends React.PureComponent<IProp
                     hasCancel={false}
                     disabled={this.state.passPhrase !== this.state.passPhraseConfirm}
                 >
-                    <button type="button" onClick={this.onCancelClick} className="mx_LegacyDialogButton danger">
+                    <DialogFooterButton destructive onClick={this.onCancelClick}>
                         {_t("action|skip")}
-                    </button>
+                    </DialogFooterButton>
                 </DialogButtons>
             </form>
         );
@@ -586,9 +587,9 @@ export default class CreateSecretStorageDialog extends React.PureComponent<IProp
                     onPrimaryButtonClick={this.onGoBackClick}
                     hasCancel={false}
                 >
-                    <button type="button" className="mx_LegacyDialogButton danger" onClick={this.onCancel}>
+                    <DialogFooterButton destructive onClick={this.onCancel}>
                         {_t("action|cancel")}
-                    </button>
+                    </DialogFooterButton>
                 </DialogButtons>
             </div>
         );

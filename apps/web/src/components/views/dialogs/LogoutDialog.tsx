@@ -9,13 +9,11 @@ Please see LICENSE files in the repository root for full details.
 
 import React, { type JSX } from "react";
 import { type MatrixClient } from "matrix-js-sdk/src/matrix";
-import { Button, Text } from "@vector-im/compound-web";
-import DeleteIcon from "@vector-im/compound-design-tokens/assets/web/icons/delete";
+import { Text } from "@vector-im/compound-web";
+import { DialogFooterButton, DialogFooterView } from "@element-hq/web-shared-components";
 import ErrorIcon from "@vector-im/compound-design-tokens/assets/web/icons/error-solid";
 import InfoIcon from "@vector-im/compound-design-tokens/assets/web/icons/info";
-import KeyIcon from "@vector-im/compound-design-tokens/assets/web/icons/key";
 import PopOutIcon from "@vector-im/compound-design-tokens/assets/web/icons/pop-out";
-import SignOutIcon from "@vector-im/compound-design-tokens/assets/web/icons/sign-out";
 
 import dis from "../../../dispatcher/dispatcher";
 import { type OpenToTabPayload } from "../../../dispatcher/payloads/OpenToTabPayload";
@@ -29,7 +27,6 @@ import Spinner from "../elements/Spinner";
 import { BackupStatus, useKeyBackupStatus } from "../../../hooks/useKeyBackupStatus";
 import { useHasOtherVerifiedDevices } from "../../../hooks/useHasOtherVerifiedDevices";
 import { EncryptionCard } from "../settings/encryption/EncryptionCard";
-import { EncryptionCardButtons } from "../settings/encryption/EncryptionCardButtons";
 import { EncryptionCardEmphasisedContent } from "../settings/encryption/EncryptionCardEmphasisedContent";
 import { type State as EncryptionState } from "../settings/tabs/user/EncryptionUserSettingsTab";
 
@@ -110,17 +107,18 @@ export default function LogoutDialog(props: IProps): JSX.Element {
                         <EncryptionCardEmphasisedContent>
                             <Text>{_t("auth|logout_dialog|setup_secure_backup_description")}</Text>
                         </EncryptionCardEmphasisedContent>
-                        <EncryptionCardButtons>
-                            <Button destructive={true} onClick={onLogoutConfirm} Icon={DeleteIcon}>
-                                {_t("auth|logout_dialog|continue")}
-                            </Button>
-                            <Button kind="secondary" onClick={() => openSettingsWithState("main")}>
-                                {_t("auth|logout_dialog|check_recovery_key")}
-                            </Button>
-                            <Button kind="tertiary" onClick={() => openSettingsWithState("change_recovery_key")}>
+                        {/* Telement: the shared dialog footer, the other choices before the action, signing out */}
+                        <DialogFooterView className="mx_Dialog_buttons">
+                            <DialogFooterButton onClick={() => openSettingsWithState("change_recovery_key")}>
                                 {_t("auth|logout_dialog|generate_recovery_key")}
-                            </Button>
-                        </EncryptionCardButtons>
+                            </DialogFooterButton>
+                            <DialogFooterButton onClick={() => openSettingsWithState("main")}>
+                                {_t("auth|logout_dialog|check_recovery_key")}
+                            </DialogFooterButton>
+                            <DialogFooterButton destructive onClick={onLogoutConfirm}>
+                                {_t("auth|logout_dialog|continue")}
+                            </DialogFooterButton>
+                        </DialogFooterView>
                     </EncryptionCard>
                 </BaseDialog>
             );
@@ -149,14 +147,15 @@ export default function LogoutDialog(props: IProps): JSX.Element {
                                 {_t("action|learn_more")} <PopOutIcon />
                             </Text>
                         </EncryptionCardEmphasisedContent>
-                        <EncryptionCardButtons>
-                            <Button onClick={() => openSettingsWithState("set_recovery_key")} Icon={KeyIcon}>
-                                {_t("settings|encryption|recovery|set_up_recovery")}
-                            </Button>
-                            <Button kind="tertiary" destructive={true} onClick={onLogoutConfirm} Icon={SignOutIcon}>
+                        {/* Telement: the shared dialog footer, setting up recovery, which the dialog suggests, last */}
+                        <DialogFooterView className="mx_Dialog_buttons">
+                            <DialogFooterButton destructive onClick={onLogoutConfirm}>
                                 {_t("auth|logout_dialog|skip_key_backup")}
-                            </Button>
-                        </EncryptionCardButtons>
+                            </DialogFooterButton>
+                            <DialogFooterButton onClick={() => openSettingsWithState("set_recovery_key")}>
+                                {_t("settings|encryption|recovery|set_up_recovery")}
+                            </DialogFooterButton>
+                        </DialogFooterView>
                     </EncryptionCard>
                 </BaseDialog>
             );

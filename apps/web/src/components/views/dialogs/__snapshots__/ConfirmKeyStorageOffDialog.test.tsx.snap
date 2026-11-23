@@ -57,25 +57,19 @@ exports[`ConfirmKeyStorageOffDialog > renders 1`] = `
       </a>
     </span>
     <div
-      class="mx_EncryptionCard_buttons"
+      class="_footer mx_Dialog_buttons"
     >
       <button
         class="_button"
-        data-kind="primary"
-        data-size="lg"
-        role="button"
-        tabindex="0"
+        type="button"
       >
-        Go to Settings
+        Yes, dismiss
       </button>
       <button
         class="_button"
-        data-kind="secondary"
-        data-size="lg"
-        role="button"
-        tabindex="0"
+        type="button"
       >
-        Yes, dismiss
+        Go to Settings
       </button>
     </div>
   </div>

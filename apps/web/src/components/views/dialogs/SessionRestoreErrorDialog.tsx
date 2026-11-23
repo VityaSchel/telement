@@ -9,6 +9,7 @@ Please see LICENSE files in the repository root for full details.
 */
 
 import React from "react";
+import { DialogFooterButton } from "@element-hq/web-shared-components";
 
 import SdkConfig from "../../../SdkConfig";
 import Modal from "../../../Modal";
@@ -42,9 +43,9 @@ export default class SessionRestoreErrorDialog extends React.Component<IProps> {
         const brand = SdkConfig.get().brand;
 
         const clearStorageButton = (
-            <button onClick={this.onClearStorageClick} className="mx_LegacyDialogButton danger" type="button">
+            <DialogFooterButton destructive onClick={this.onClearStorageClick}>
                 {_t("error|session_restore|clear_storage_button")}
-            </button>
+            </DialogFooterButton>
         );
 
         return (

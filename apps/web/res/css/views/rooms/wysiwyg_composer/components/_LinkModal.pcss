@@ -7,7 +7,9 @@ Please see LICENSE files in the repository root for full details.
 */
 
 .mx_LinkModal {
-    padding: var(--cpd-space-8x);
+    /* Telement: the dialog anatomy's padding (_common.pcss), so the title shares the close button's line and the
+       fields and the footer sit on the 24px edge */
+    padding: var(--cpd-space-4x) var(--cpd-space-6x) var(--cpd-space-6x);
     /* Telement: a 480px form (TELEMENT.md, "Colors, type and components"). The dialog around it has no padding of its
        own (_CompoundDialog.pcss), so the form width fixed width dialogs default to would leave it 48px narrower */
     width: 480px;
@@ -34,8 +36,9 @@ Please see LICENSE files in the repository root for full details.
             flex: 1;
             align-items: flex-end;
 
+            /* Telement: the shared footer (DialogFooterView) spans the dialog, Remove at its start */
             .mx_Dialog_buttons {
-                display: inline-block;
+                flex: 1;
             }
         }
     }

@@ -6,18 +6,17 @@ SPDX-License-Identifier: AGPL-3.0-only OR GPL-3.0-only OR LicenseRef-Element-Com
 Please see LICENSE files in the repository root for full details.
 */
 
-import { Button, PasswordInput } from "@vector-im/compound-web";
+import { PasswordInput } from "@vector-im/compound-web";
 import LockSolidIcon from "@vector-im/compound-design-tokens/assets/web/icons/lock-solid";
 import { debounce } from "lodash";
 import classNames from "classnames";
 import React, { type ChangeEvent, type FormEvent, type ReactNode } from "react";
 import { type SecretStorage } from "matrix-js-sdk/src/matrix";
-import { Flex } from "@element-hq/web-shared-components";
+import { DialogFooterButton, DialogFooterView, Flex } from "@element-hq/web-shared-components";
 import { ErrorSolidIcon } from "@vector-im/compound-design-tokens/assets/web/icons";
 
 import { _t } from "../../../../languageHandler";
 import { EncryptionCard } from "../../settings/encryption/EncryptionCard";
-import { EncryptionCardButtons } from "../../settings/encryption/EncryptionCardButtons";
 import BaseDialog from "../BaseDialog";
 
 // Don't shout at the user that their key is invalid every time they type a key: wait a short time
@@ -199,14 +198,13 @@ export default class AccessSecretStorageDialog extends React.PureComponent<IProp
                         />
                     </div>
                     {recoveryKeyFeedback}
-                    <EncryptionCardButtons>
-                        <Button disabled={!this.state.recoveryKeyCorrect} onClick={this.onRecoveryKeyNext}>
+                    {/* Telement: the shared dialog footer, Cancel before the action */}
+                    <DialogFooterView className="mx_Dialog_buttons">
+                        <DialogFooterButton onClick={this.onCancel}>{_t("action|cancel")}</DialogFooterButton>
+                        <DialogFooterButton disabled={!this.state.recoveryKeyCorrect} onClick={this.onRecoveryKeyNext}>
                             {_t("action|continue")}
-                        </Button>
-                        <Button kind="tertiary" onClick={this.onCancel}>
-                            {_t("action|cancel")}
-                        </Button>
-                    </EncryptionCardButtons>
+                        </DialogFooterButton>
+                    </DialogFooterView>
                 </form>
             </div>
         );

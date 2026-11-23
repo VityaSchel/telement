@@ -7,13 +7,12 @@ Please see LICENSE files in the repository root for full details.
 
 import React from "react";
 import ErrorIcon from "@vector-im/compound-design-tokens/assets/web/icons/error";
-import { Button } from "@vector-im/compound-web";
+import { DialogFooterButton, DialogFooterView } from "@element-hq/web-shared-components";
 import { PopOutIcon } from "@vector-im/compound-design-tokens/assets/web/icons";
 
 import { _t } from "../../../languageHandler";
 import defaultDispatcher from "../../../dispatcher/dispatcher";
 import { EncryptionCard } from "../settings/encryption/EncryptionCard";
-import { EncryptionCardButtons } from "../settings/encryption/EncryptionCardButtons";
 import { type OpenToTabPayload } from "../../../dispatcher/payloads/OpenToTabPayload";
 import { Action } from "../../../dispatcher/actions";
 import { UserTab } from "./UserTab";
@@ -67,14 +66,13 @@ export default class ConfirmKeyStorageOffDialog extends React.Component<Props> {
                         </>
                     ),
                 })}
-                <EncryptionCardButtons>
-                    <Button onClick={this.onGoToSettingsClick} autoFocus kind="primary" className="">
+                {/* Telement: the shared dialog footer, dismissing before going to the settings */}
+                <DialogFooterView className="mx_Dialog_buttons">
+                    <DialogFooterButton onClick={this.onDismissClick}>{_t("action|yes_dismiss")}</DialogFooterButton>
+                    <DialogFooterButton onClick={this.onGoToSettingsClick} autoFocus>
                         {_t("common|go_to_settings")}
-                    </Button>
-                    <Button onClick={this.onDismissClick} kind="secondary">
-                        {_t("action|yes_dismiss")}
-                    </Button>
-                </EncryptionCardButtons>
+                    </DialogFooterButton>
+                </DialogFooterView>
             </EncryptionCard>
         );
     }

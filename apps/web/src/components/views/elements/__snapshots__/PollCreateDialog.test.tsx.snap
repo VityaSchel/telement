@@ -200,22 +200,22 @@ exports[`PollCreateDialog > renders a blank poll 1`] = `
         class="mx_CompoundDialog_footer"
       >
         <div
-          class="mx_AccessibleButton mx_AccessibleButton_hasKind mx_AccessibleButton_kind_primary_outline"
-          role="button"
-          tabindex="0"
+          class="_footer"
         >
-          Cancel
+          <button
+            class="_button"
+            type="button"
+          >
+            Cancel
+          </button>
+          <button
+            class="_button"
+            disabled=""
+            type="submit"
+          >
+            Create Poll
+          </button>
         </div>
-        <button
-          aria-disabled="true"
-          class="mx_AccessibleButton mx_Dialog_nonDialogButton mx_AccessibleButton_hasKind mx_AccessibleButton_kind_primary mx_AccessibleButton_disabled"
-          disabled=""
-          role="button"
-          tabindex="0"
-          type="submit"
-        >
-          Create Poll
-        </button>
       </div>
     </form>
   </div>
@@ -465,20 +465,21 @@ exports[`PollCreateDialog > renders a question and some options 1`] = `
         class="mx_CompoundDialog_footer"
       >
         <div
-          class="mx_AccessibleButton mx_AccessibleButton_hasKind mx_AccessibleButton_kind_primary_outline"
-          role="button"
-          tabindex="0"
+          class="_footer"
         >
-          Cancel
+          <button
+            class="_button"
+            type="button"
+          >
+            Cancel
+          </button>
+          <button
+            class="_button"
+            type="submit"
+          >
+            Create Poll
+          </button>
         </div>
-        <button
-          class="mx_AccessibleButton mx_Dialog_nonDialogButton mx_AccessibleButton_hasKind mx_AccessibleButton_kind_primary"
-          role="button"
-          tabindex="0"
-          type="submit"
-        >
-          Create Poll
-        </button>
       </div>
     </form>
   </div>
@@ -690,20 +691,21 @@ exports[`PollCreateDialog > renders info from a previous event 1`] = `
         class="mx_CompoundDialog_footer"
       >
         <div
-          class="mx_AccessibleButton mx_AccessibleButton_hasKind mx_AccessibleButton_kind_primary_outline"
-          role="button"
-          tabindex="0"
+          class="_footer"
         >
-          Cancel
+          <button
+            class="_button"
+            type="button"
+          >
+            Cancel
+          </button>
+          <button
+            class="_button"
+            type="submit"
+          >
+            Done
+          </button>
         </div>
-        <button
-          class="mx_AccessibleButton mx_Dialog_nonDialogButton mx_AccessibleButton_hasKind mx_AccessibleButton_kind_primary"
-          role="button"
-          tabindex="0"
-          type="submit"
-        >
-          Done
-        </button>
       </div>
     </form>
   </div>

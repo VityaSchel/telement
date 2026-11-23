@@ -150,16 +150,16 @@ exports[`ViewSource > should be able to edit a message 1`] = `
       </div>
     </div>
     <div
-      class="mx_Dialog_buttons"
+      class="_footer mx_Dialog_buttons"
     >
       <button
-        class="mx_LegacyDialogButton"
+        class="_button"
         type="button"
       >
         Back
       </button>
       <button
-        class="mx_LegacyDialogButton"
+        class="_button"
         type="button"
       >
         Send

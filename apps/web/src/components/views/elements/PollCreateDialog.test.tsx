@@ -167,7 +167,7 @@ describe("PollCreateDialog", () => {
         changeValue(dialog, "Option 2", "A2");
         expect(dialog.container.querySelector(".mx_Spinner")).toBeFalsy();
 
-        fireEvent.click(dialog.container.querySelector("button")!);
+        fireEvent.click(dialog.container.querySelector('button[type="submit"]')!);
         expect(dialog.container.querySelector(".mx_Spinner")).toBeDefined();
     });
 
@@ -183,7 +183,7 @@ describe("PollCreateDialog", () => {
         changeValue(dialog, "Option 1", "A1");
         changeValue(dialog, "Option 2", "A2");
 
-        fireEvent.click(dialog.container.querySelector("button")!);
+        fireEvent.click(dialog.container.querySelector('button[type="submit"]')!);
         expect(dialog.container.querySelector(".mx_Spinner")).toBeVisible();
         await waitFor(() => expect(spy).toHaveBeenCalled());
         expect(dialog.container.querySelector(".mx_Spinner")).toBeFalsy();
@@ -195,7 +195,7 @@ describe("PollCreateDialog", () => {
         changeValue(dialog, "Option 1", "A1");
         changeValue(dialog, "Option 2", "A2");
 
-        fireEvent.click(dialog.container.querySelector("button")!);
+        fireEvent.click(dialog.container.querySelector('button[type="submit"]')!);
         const [, , eventType, sentEventContent] = mockClient.sendEvent.mock.calls[0];
         expect(M_POLL_START.matches(eventType)).toBeTruthy();
         expect(sentEventContent).toEqual({
@@ -237,7 +237,7 @@ describe("PollCreateDialog", () => {
         changeValue(dialog, "Question or topic", "Poll Q updated");
         changeValue(dialog, "Option 2", "Answer 2 updated");
         changeKind(dialog, M_POLL_KIND_UNDISCLOSED.name);
-        fireEvent.click(dialog.container.querySelector("button")!);
+        fireEvent.click(dialog.container.querySelector('button[type="submit"]')!);
 
         const [, , eventType, sentEventContent] = mockClient.sendEvent.mock.calls[0];
         expect(M_POLL_START.matches(eventType)).toBeTruthy();
@@ -284,7 +284,7 @@ describe("PollCreateDialog", () => {
         );
 
         changeValue(dialog, "Question or topic", "Poll Q updated");
-        fireEvent.click(dialog.container.querySelector("button")!);
+        fireEvent.click(dialog.container.querySelector('button[type="submit"]')!);
 
         const [, , eventType, sentEventContent] = mockClient.sendEvent.mock.calls[0];
         expect(M_POLL_START.matches(eventType)).toBeTruthy();
@@ -311,8 +311,8 @@ function changeKind(wrapper: RenderResult, value: string) {
 
 function expectSubmitToBeDisabled(wrapper: RenderResult, disabled: boolean) {
     if (disabled) {
-        expect(wrapper.container.querySelector('button[type="submit"]')).toHaveAttribute("aria-disabled", "true");
+        expect(wrapper.container.querySelector('button[type="submit"]')).toBeDisabled();
     } else {
-        expect(wrapper.container.querySelector('button[type="submit"]')).not.toHaveAttribute("aria-disabled", "true");
+        expect(wrapper.container.querySelector('button[type="submit"]')).toBeEnabled();
     }
 }

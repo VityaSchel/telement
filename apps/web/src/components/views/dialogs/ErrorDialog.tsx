@@ -18,6 +18,7 @@ Please see LICENSE files in the repository root for full details.
  */
 
 import React from "react";
+import { DialogFooterButton, DialogFooterView } from "@element-hq/web-shared-components";
 
 import { _t, UserFriendlyError } from "../../../languageHandler";
 import BaseDialog from "./BaseDialog";
@@ -73,16 +74,16 @@ export default class ErrorDialog extends React.Component<IProps, IState> {
                 <div className="mx_Dialog_content" id="mx_Dialog_content">
                     {this.props.description || _t("error|dialog_description_default")}
                 </div>
-                <div className="mx_Dialog_buttons">
-                    <button
-                        className="mx_LegacyDialogButton mx_Dialog_primary"
+                {/* Telement: the shared dialog footer */}
+                <DialogFooterView className="mx_Dialog_buttons">
+                    <DialogFooterButton
+                        className="mx_Dialog_primary"
                         onClick={this.onClick}
                         autoFocus={this.props.focus}
-                        type="button"
                     >
                         {this.props.button || _t("action|ok")}
-                    </button>
-                </div>
+                    </DialogFooterButton>
+                </DialogFooterView>
             </BaseDialog>
         );
     }

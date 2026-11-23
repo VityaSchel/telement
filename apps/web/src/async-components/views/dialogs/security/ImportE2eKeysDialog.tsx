@@ -10,6 +10,7 @@ Please see LICENSE files in the repository root for full details.
 import React, { createRef } from "react";
 import { type MatrixClient } from "matrix-js-sdk/src/matrix";
 import { logger } from "matrix-js-sdk/src/logger";
+import { DialogFooterButton, DialogFooterView } from "@element-hq/web-shared-components";
 
 import * as MegolmExportEncryption from "../../../../utils/MegolmExportEncryption";
 import { _t } from "../../../../languageHandler";
@@ -172,23 +173,19 @@ export default class ImportE2eKeysDialog extends React.Component<IProps, IState>
                             </div>
                         </div>
                     </div>
-                    <div className="mx_Dialog_buttons">
-                        <button
-                            onClick={this.onCancelClick}
-                            disabled={disableForm}
-                            className="mx_LegacyDialogButton cancel"
-                            type="button"
-                        >
+                    {/* Telement: the shared dialog footer */}
+                    <DialogFooterView className="mx_Dialog_buttons">
+                        <DialogFooterButton onClick={this.onCancelClick} disabled={disableForm} className="cancel">
                             {_t("action|cancel")}
-                        </button>
-                        <button
-                            className="mx_LegacyDialogButton mx_Dialog_primary"
+                        </DialogFooterButton>
+                        <DialogFooterButton
+                            className="mx_Dialog_primary"
                             type="submit"
                             disabled={!this.state.enableSubmit || disableForm}
                         >
                             {_t("action|import")}
-                        </button>
-                    </div>
+                        </DialogFooterButton>
+                    </DialogFooterView>
                 </form>
             </BaseDialog>
         );

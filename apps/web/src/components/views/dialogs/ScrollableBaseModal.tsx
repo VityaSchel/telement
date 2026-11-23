@@ -10,6 +10,7 @@ import React, { type FormEvent, type ReactNode } from "react";
 import { type MatrixClient } from "matrix-js-sdk/src/matrix";
 import FocusLock from "react-focus-lock";
 import { CloseIcon } from "@vector-im/compound-design-tokens/assets/web/icons";
+import { DialogFooterButton, DialogFooterView } from "@element-hq/web-shared-components";
 
 import { MatrixClientPeg } from "../../../MatrixClientPeg";
 import MatrixClientContext from "../../../contexts/MatrixClientContext";
@@ -97,20 +98,20 @@ export default abstract class ScrollableBaseModal<
                     </AccessibleButton>
                     <form onSubmit={this.onSubmit} className="mx_CompoundDialog_form">
                         <div className="mx_CompoundDialog_content">{this.renderContent()}</div>
+                        {/* Telement: the shared dialog footer, Cancel before the action as accent text buttons */}
                         <div className="mx_CompoundDialog_footer">
-                            <AccessibleButton onClick={this.onCancel} kind="primary_outline">
-                                {this.state.cancelLabel ?? _t("action|cancel")}
-                            </AccessibleButton>
-                            <AccessibleButton
-                                onClick={this.onSubmit}
-                                kind="primary"
-                                disabled={!this.state.canSubmit}
-                                type="submit"
-                                element="button"
-                                className="mx_Dialog_nonDialogButton"
-                            >
-                                {this.state.actionLabel}
-                            </AccessibleButton>
+                            <DialogFooterView>
+                                <DialogFooterButton onClick={this.onCancel}>
+                                    {this.state.cancelLabel ?? _t("action|cancel")}
+                                </DialogFooterButton>
+                                <DialogFooterButton
+                                    onClick={this.onSubmit}
+                                    disabled={!this.state.canSubmit}
+                                    type="submit"
+                                >
+                                    {this.state.actionLabel}
+                                </DialogFooterButton>
+                            </DialogFooterView>
                         </div>
                     </form>
                 </FocusLock>

@@ -15,6 +15,7 @@ import DialogButtons from "../elements/DialogButtons";
 import { fileSize } from "../../../utils/FileUtils";
 import {
     attachmentIcon,
+    DialogFooterButton,
     type MediaPreviewGroupEntry,
     type MediaPreviewGroupEntryContent,
     MediaPreviewGroupPreview,
@@ -130,9 +131,7 @@ export default function UploadConfirmDialog({
     let uploadAllButton: JSX.Element | undefined;
     if (currentIndex + 1 < totalFiles) {
         uploadAllButton = (
-            <button onClick={onUploadAllClick} className="mx_LegacyDialogButton" type="button">
-                {_t("upload_file|upload_all_button")}
-            </button>
+            <DialogFooterButton onClick={onUploadAllClick}>{_t("upload_file|upload_all_button")}</DialogFooterButton>
         );
     }
 

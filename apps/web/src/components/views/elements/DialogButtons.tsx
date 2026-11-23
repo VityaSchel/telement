@@ -10,6 +10,7 @@ Please see LICENSE files in the repository root for full details.
 
 import React, { type JSX, type ReactNode } from "react";
 import classNames from "classnames";
+import { DialogFooterButton, DialogFooterView } from "@element-hq/web-shared-components";
 
 import { _t } from "../../../languageHandler";
 
@@ -54,8 +55,16 @@ interface IProps {
     children?: ReactNode;
 }
 
+/** Whether a button class that callers pass marks the button as destructive, which the footer draws in red. */
+function isDestructive(className?: string): boolean {
+    return !!className && /(^|\s)(danger|warning)(\s|$)/.test(className);
+}
+
 /**
  * Basic container for buttons in modal dialogs.
+ *
+ * Telement: the shared dialog footer (DialogFooterView), Telegram's accent text buttons with Cancel before the action and
+ * a "danger" one in red. The buttons keep their classes for the callers and tests that look them up.
  */
 export default class DialogButtons extends React.Component<IProps> {
     public static defaultProps: Partial<IProps> = {
@@ -69,51 +78,40 @@ export default class DialogButtons extends React.Component<IProps> {
     };
 
     public render(): React.ReactNode {
-        let primaryButtonClassName = "mx_LegacyDialogButton mx_Dialog_primary";
-        if (this.props.primaryButtonClass) {
-            primaryButtonClassName += " " + this.props.primaryButtonClass;
-        }
-
         let cancelButton: JSX.Element | undefined;
         if (this.props.hasCancel) {
             cancelButton = (
-                <button
+                <DialogFooterButton
                     // important: the default type is 'submit' and this button comes before the
                     // primary in the DOM so will get form submissions unless we make it not a submit.
                     data-testid="dialog-cancel-button"
                     type="button"
                     onClick={this.onCancelClick}
-                    className={classNames("mx_LegacyDialogButton", this.props.cancelButtonClass)}
+                    className={this.props.cancelButtonClass}
+                    destructive={isDestructive(this.props.cancelButtonClass)}
                     disabled={this.props.disabled}
                 >
                     {this.props.cancelButton || _t("action|cancel")}
-                </button>
+                </DialogFooterButton>
             );
         }
 
-        let additive: JSX.Element | undefined;
-        if (this.props.additive) {
-            additive = <div className="mx_Dialog_buttons_additive">{this.props.additive}</div>;
-        }
-
         return (
-            <div className="mx_Dialog_buttons">
-                {additive}
-                <span className="mx_Dialog_buttons_row">
-                    {cancelButton}
-                    {this.props.children}
-                    <button
-                        type={this.props.primaryIsSubmit ? "submit" : "button"}
-                        data-testid="dialog-primary-button"
-                        className={primaryButtonClassName}
-                        onClick={this.props.onPrimaryButtonClick}
-                        autoFocus={this.props.focus}
-                        disabled={this.props.disabled || this.props.primaryDisabled}
-                    >
-                        {this.props.primaryButton}
-                    </button>
-                </span>
-            </div>
+            <DialogFooterView className="mx_Dialog_buttons" start={this.props.additive}>
+                {cancelButton}
+                {this.props.children}
+                <DialogFooterButton
+                    type={this.props.primaryIsSubmit ? "submit" : "button"}
+                    data-testid="dialog-primary-button"
+                    className={classNames("mx_Dialog_primary", this.props.primaryButtonClass)}
+                    destructive={isDestructive(this.props.primaryButtonClass)}
+                    onClick={this.props.onPrimaryButtonClick}
+                    autoFocus={this.props.focus}
+                    disabled={this.props.disabled || this.props.primaryDisabled}
+                >
+                    {this.props.primaryButton}
+                </DialogFooterButton>
+            </DialogFooterView>
         );
     }
 }

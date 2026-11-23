@@ -12,5 +12,15 @@ Please see LICENSE files in the repository root for full details.
 
     .mx_EncryptionCard {
         text-align: center;
+        /* Telement: the dialog's body rather than a card in it, so its text and footer sit on the dialog's 24px edge,
+           as Sign out's card does */
+        border: none;
+        box-shadow: none;
+        padding: 0;
+
+        /* The footer's labels 24px under the text, less the card's 32px gap */
+        .mx_Dialog_buttons {
+            margin-top: calc(var(--cpd-space-6x) - var(--cpd-space-8x));
+        }
     }
 }

@@ -61,15 +61,13 @@ Please see LICENSE files in the repository root for full details.
         flex: 1;
     }
 
+    /* Telement: the shared dialog footer (DialogFooterView) on the dialog's 24px edges, its labels 24px from the line
+       above it and from the bottom and end */
     .mx_CompoundDialog_footer {
         padding: var(--cpd-space-6x);
 
-        display: flex;
-        gap: var(--buttons-dialog-gap-column);
-        justify-content: flex-end;
-
-        .mx_AccessibleButton .mx_Spinner {
-            margin-right: var(--cpd-space-2x);
+        .mx_Spinner {
+            margin-inline-end: var(--cpd-space-2x);
         }
     }
 }
