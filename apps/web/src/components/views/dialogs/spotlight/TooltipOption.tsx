@@ -29,6 +29,8 @@ export const TooltipOption = <T extends keyof HTMLElementTagNameMap>({
             {...props}
             className={classNames(className, "mx_SpotlightDialog_option")}
             onFocus={onFocus}
+            // Telement: the pointer moves the selection, as Option's does
+            onPointerMove={isActive ? undefined : onFocus}
             ref={ref}
             tabIndex={-1}
             aria-selected={isActive}

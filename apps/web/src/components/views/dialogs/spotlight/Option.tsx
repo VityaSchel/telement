@@ -22,6 +22,9 @@ interface OptionProps {
 
 export const Option: React.FC<OptionProps> = ({ children, endAdornment, className, onClick, ...props }) => {
     const [onFocus, isActive, ref] = useRovingTabIndex<HTMLLIElement>();
+    // Telement: the pointer moves the selection, as in Telegram's search results and macOS menus, so one highlight
+    // follows both the pointer and the arrow keys, and Enter opens the option it is on
+    const onPointerMove = isActive ? undefined : onFocus;
     const optionClassName = classNames(className, "mx_SpotlightDialog_option");
     const content = (
         <>
@@ -43,6 +46,7 @@ export const Option: React.FC<OptionProps> = ({ children, endAdornment, classNam
                 {...props}
                 className={optionClassName}
                 onFocus={onFocus}
+                onPointerMove={onPointerMove}
                 ref={ref}
                 tabIndex={-1}
                 aria-selected={isActive}
@@ -60,6 +64,7 @@ export const Option: React.FC<OptionProps> = ({ children, endAdornment, classNam
             onClick={onClick}
             className={optionClassName}
             onFocus={onFocus}
+            onPointerMove={onPointerMove}
             ref={ref}
             tabIndex={-1}
             aria-selected={isActive}

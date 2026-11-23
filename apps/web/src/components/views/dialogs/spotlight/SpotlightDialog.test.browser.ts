@@ -9,7 +9,7 @@ Please see LICENSE files in the repository root for full details.
 /// <reference types="@vitest/browser-playwright" />
 
 import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
-import { cdp } from "vitest/browser";
+import { cdp, userEvent } from "vitest/browser";
 import compoundTokens from "@vector-im/compound-design-tokens/assets/web/css/cpd-common-base.css?raw";
 import compoundSemantic from "@vector-im/compound-design-tokens/assets/web/css/cpd-common-semantic.css?raw";
 import compoundLightTheme from "@vector-im/compound-design-tokens/assets/web/css/cpd-theme-light-base.css?raw";
@@ -319,6 +319,24 @@ describe("SpotlightDialog styles", () => {
         person.setAttribute("aria-selected", "true");
         const enter = person.querySelector(".mx_SpotlightDialog_enterPrompt")!.getBoundingClientRect();
         expect(person.getBoundingClientRect().right - enter.right).toBe(8);
+    });
+
+    it('fills and shows the "…" of only the selected option, which the pointer selects, not of one it rests on', async () => {
+        document.body.innerHTML = spotlightDialog(["↓", "↑"], ["Design", "Developers"]);
+        const [selected, rested] = [...document.querySelectorAll<HTMLElement>(".mx_SpotlightDialog_option")];
+        rested
+            .querySelector(".mx_SpotlightDialog_option--endAdornment")!
+            .insertAdjacentHTML("beforeend", ROOM_RESULT_BUTTONS);
+        const menu = (option: HTMLElement): string =>
+            getComputedStyle(option.querySelector(".mx_SpotlightDialog_option--menu")!).display;
+
+        // The arrow keys moved the selection away from the option under the pointer
+        await userEvent.hover(rested);
+        expect(getComputedStyle(rested).backgroundColor).toBe("rgba(0, 0, 0, 0)");
+        expect(menu(rested)).toBe("none");
+        expect(getComputedStyle(selected).backgroundColor).not.toBe("rgba(0, 0, 0, 0)");
+        expect(menu(selected)).toBe("block");
+        await userEvent.unhover(rested);
     });
 
     it("lines the search text, the filter's icon, the section headers and the avatars up 24px from the dialog's edge", () => {

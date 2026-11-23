@@ -223,6 +223,29 @@ describe("Spotlight Dialog", () => {
         expect(startChat).toHaveClass("mx_AccessibleButton");
     });
 
+    it("should select the option the pointer moves over, so the arrow keys and Enter go on from the one selection", async () => {
+        render(<SpotlightDialog initialText="zzzznothingmatchesthis" onFinished={() => null} />);
+
+        vi.advanceTimersByTime(200);
+        await flushPromisesWithFakeTimers();
+
+        const selected = (): Element[] => [...document.querySelectorAll('[role="option"][aria-selected="true"]')];
+        const publicRooms = document.querySelector("#mx_SpotlightDialog_button_explorePublicRooms")!;
+        const startChat = document.querySelector("#mx_SpotlightDialog_button_startChat")!;
+        const input = document.querySelector(".mx_SpotlightDialog_searchBox input")!;
+
+        expect(selected()).not.toEqual([startChat]);
+        fireEvent.pointerMove(startChat);
+        expect(selected()).toEqual([startChat]);
+        fireEvent.keyDown(input, { key: "ArrowUp" });
+        expect(selected()).toEqual([publicRooms]);
+        fireEvent.pointerMove(startChat);
+        expect(selected()).toEqual([startChat]);
+
+        fireEvent.keyDown(input, { key: "Enter" });
+        expect(document.querySelector("div.mx_SpotlightDialog_filter")).toHaveTextContent("People");
+    });
+
     describe("should apply filters supplied via props", () => {
         it("without filter", async () => {
             render(<SpotlightDialog onFinished={() => null} />);
