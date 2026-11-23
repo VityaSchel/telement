@@ -559,6 +559,37 @@ describe("<LoggedInView />", () => {
             // ...while the space panel rail remains visible.
             expect(container.querySelector(".mx_SpacePanel")).toBeInTheDocument();
         });
+
+        describe("toasts", () => {
+            beforeEach(() => {
+                ToastStore.sharedInstance().addOrReplaceToast({
+                    key: "test-toast",
+                    title: "Verify this device",
+                    component: () => <div />,
+                    priority: 100,
+                });
+            });
+
+            afterEach(() => {
+                ToastStore.sharedInstance().dismissToast("test-toast");
+            });
+
+            it("docks the toasts in the room list for a normal room view, rather than floating them over it", () => {
+                const { container } = getComponent({ page_type: "room" });
+
+                const toasts = container.querySelectorAll(".mx_ToastContainer");
+                expect(toasts).toHaveLength(1);
+                expect(toasts[0].closest(".mx_RoomListPanel")).not.toBeNull();
+            });
+
+            it("floats the toasts for a module-rendered fullscreen view, which has no room list", () => {
+                const { container } = getComponent({ page_type: modulePageType });
+
+                const toasts = container.querySelectorAll(".mx_ToastContainer");
+                expect(toasts).toHaveLength(1);
+                expect(container.querySelector(".mx_RoomListPanel")).toBeNull();
+            });
+        });
     });
 
     it("should handle KeyBindingAction.ToggleRoomSidePanel", async () => {

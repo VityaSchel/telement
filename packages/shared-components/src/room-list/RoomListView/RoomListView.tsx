@@ -95,12 +95,17 @@ export interface RoomListViewProps {
     renderAvatar: (room: Room) => ReactNode;
     /** Optional callback for keyboard events on the room list */
     onKeyDown?: (e: React.KeyboardEvent<HTMLDivElement>) => void;
+    /**
+     * The app's toasts, such as "Verify this device", docked above the first room, under the filters, as Telegram docks
+     * its suggestions at the top of the chat list, rather than floating over the search field, header and filters
+     */
+    toasts?: ReactNode;
 }
 
 /**
  * Room list view component that manages filters, loading states, empty states, and the room list.
  */
-export const RoomListView: React.FC<RoomListViewProps> = ({ vm, renderAvatar, onKeyDown }): JSX.Element => {
+export const RoomListView: React.FC<RoomListViewProps> = ({ vm, renderAvatar, onKeyDown, toasts }): JSX.Element => {
     const snapshot = useViewModel(vm);
     let listBody: ReactNode;
 
@@ -121,6 +126,7 @@ export const RoomListView: React.FC<RoomListViewProps> = ({ vm, renderAvatar, on
                     onToggleFilter={vm.onToggleFilter}
                 />
             </div>
+            {toasts}
             <Flex direction="column" className={styles.list}>
                 <AutoHideScrollbar className={styles.scrollbar}>
                     {listBody}

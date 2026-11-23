@@ -733,7 +733,8 @@ class LoggedInView extends React.Component<IProps, IState> {
                     className={wrapperClasses}
                     aria-hidden={this.props.hideToSRUsers}
                 >
-                    <ToastContainer />
+                    {/* The room list docks the toasts above its first room; they float only where there is none */}
+                    {moduleRenderer && <ToastContainer />}
                     <div className={bodyClasses}>{content}</div>
                 </div>
                 <PipContainer />

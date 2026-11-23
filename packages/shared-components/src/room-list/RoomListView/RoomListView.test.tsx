@@ -149,6 +149,26 @@ describe("<RoomListView />", () => {
         expect(Story.args.onToggleFilter).toHaveBeenLastCalledWith(filterId);
     });
 
+    it.each([
+        ["rooms", Default],
+        ["no rooms", Empty],
+        ["the rooms loading", Loading],
+    ])(
+        "docks the app's toasts under the filters, above %s, where the list's scrolling doesn't take them",
+        (_, Story) => {
+            renderWithMockContext(<Story toasts={<div data-testid="toast">Verify this device</div>} />);
+            const toast = screen.getByTestId("toast");
+            const listBox = toast.nextElementSibling!;
+
+            expect(toast.previousElementSibling).toContainElement(
+                screen.getByRole("listbox", { name: "Room list filters" }),
+            );
+            // The rooms, the empty state or the loading skeleton scroll in the next box, without the toast
+            expect(listBox.textContent).not.toContain("Verify this device");
+            expect(listBox.childElementCount).toBeGreaterThan(0);
+        },
+    );
+
     it("should call scrollToUnreadActivity when the unread activity toast is clicked", async () => {
         const user = userEvent.setup();
         renderWithMockContext(<UnreadActivityBelow />);

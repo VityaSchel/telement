@@ -23,7 +23,7 @@ import {
 } from "../story-mocks";
 
 type RoomListViewProps = RoomListViewSnapshot &
-    RoomListViewActions & { renderAvatar: (room: Room) => React.ReactElement };
+    RoomListViewActions & { renderAvatar: (room: Room) => React.ReactElement; toasts?: React.ReactNode };
 
 const mockFilterIds: FilterId[] = ["unread", "people", "rooms"];
 
@@ -38,6 +38,7 @@ const RoomListViewWrapperImpl = ({
     renderAvatar: renderAvatarProp,
     scrollToUnreadActivity,
     setScrollToIndex,
+    toasts,
     ...rest
 }: RoomListViewProps): JSX.Element => {
     const vm = useMockedViewModel(rest, {
@@ -50,7 +51,7 @@ const RoomListViewWrapperImpl = ({
         scrollToUnreadActivity,
         setScrollToIndex,
     });
-    return <RoomListView vm={vm} renderAvatar={renderAvatarProp} />;
+    return <RoomListView vm={vm} renderAvatar={renderAvatarProp} toasts={toasts} />;
 };
 const RoomListViewWrapper = withViewDocs(RoomListViewWrapperImpl, RoomListView);
 

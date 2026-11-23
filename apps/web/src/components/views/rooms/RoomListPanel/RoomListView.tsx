@@ -22,6 +22,7 @@ import { Landmark, LandmarkNavigation } from "../../../../accessibility/Landmark
 import { RoomListViewModel } from "../../../../viewmodels/room-list/RoomListViewModel";
 import { SDKContext } from "../../../../contexts/SDKContext.ts";
 import { openSearchOnTyping } from "../../../../telement/room-list/openSearchOnTyping";
+import ToastContainer from "../../../structures/ToastContainer";
 
 /**
  * RoomListView component using shared components with proper MVVM pattern.
@@ -61,5 +62,13 @@ export function RoomListView(): JSX.Element {
         }
     }, []);
 
-    return <SharedRoomListView vm={vm} renderAvatar={renderAvatar} onKeyDown={onKeyDown} />;
+    return (
+        <SharedRoomListView
+            vm={vm}
+            renderAvatar={renderAvatar}
+            onKeyDown={onKeyDown}
+            // Docked above the first room rather than floating over the room list's top, as Telegram does
+            toasts={<ToastContainer />}
+        />
+    );
 }

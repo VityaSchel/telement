@@ -82,3 +82,33 @@ Please see LICENSE files in the repository root for full details.
         }
     }
 }
+
+/*
+ * Telement: in the room list, toasts are a card docked under the filters, above the first room, as Telegram docks its
+ * suggestions at the top of the chat list, rather than floating over the search field, the header and the filters.
+ * The card spans the list's 12px content edge and lies flat in it, padded 12 × 16 like settings cards, its text
+ * spanning it, and the grid's last 8px row and the first room's 4px inset put the room 12px under it. Without a room
+ * list, as beside a module's full-screen view, toasts float as before.
+ */
+.mx_RoomListPanel .mx_ToastContainer {
+    position: static;
+    z-index: auto;
+    flex-shrink: 0;
+    margin: 0 var(--cpd-space-3x);
+
+    /* The toast behind, outlined like the card rather than raised */
+    &.mx_ToastContainer_stacked::before {
+        background-color: var(--cpd-color-bg-canvas-default);
+        border: var(--cpd-border-width-1) solid var(--cpd-color-border-interactive-secondary);
+        box-shadow: none;
+    }
+
+    .mx_Toast_toast {
+        --generic-toast-description-max-width: none;
+
+        box-shadow: none;
+        border-radius: var(--tl-radius-bubble);
+        padding: calc(var(--cpd-space-3x) - var(--cpd-border-width-1))
+            calc(var(--cpd-space-4x) - var(--cpd-border-width-1));
+    }
+}
