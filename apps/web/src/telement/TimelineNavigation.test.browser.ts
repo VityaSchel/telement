@@ -6,6 +6,7 @@ Please see LICENSE files in the repository root for full details.
 */
 
 import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
+import { userEvent } from "vitest/browser";
 import compoundBase from "@vector-im/compound-design-tokens/assets/web/css/cpd-common-base.css?raw";
 import compoundSemantic from "@vector-im/compound-design-tokens/assets/web/css/cpd-common-semantic.css?raw";
 import compoundLightTheme from "@vector-im/compound-design-tokens/assets/web/css/cpd-theme-light-base.css?raw";
@@ -27,11 +28,12 @@ import telementTokens from "../../../../packages/shared-components/src/telement/
 import commonStyles from "../../res/css/_common.pcss?raw";
 import fontSizes from "../../res/css/_font-sizes.pcss?raw";
 import eventTileStyles from "../../res/css/views/rooms/_EventTile.pcss?raw";
+import focusRingStyles from "../../res/css/telement/FocusRing.pcss?raw";
 import lightTheme from "../../res/themes/light/css/_light.pcss?raw";
 import darkTheme from "../../res/themes/dark/css/_dark.pcss?raw";
 import lightHighContrastTheme from "../../res/themes/light-high-contrast/css/_light-high-contrast.pcss?raw";
 import { toBrowserCss } from "../test/telement/browserCss";
-import { colorChannels, tokenColor } from "../test/telement/computedStyle";
+import { colorChannels, contrastOver, tokenColor } from "../test/telement/computedStyle";
 
 interface Theme {
     name: string;
@@ -55,7 +57,7 @@ interface RowOptions {
     states?: string[];
 }
 
-/** A message as EventTileView lays it out, the last of its sender's run. */
+/** A message as EventTileView lays it out, the last of its sender's run, with a link and a reaction to focus. */
 function row(text: string, { own = false, layout = "Bubble", states = [] }: RowOptions = {}): string {
     const classes = [
         "root",
@@ -70,6 +72,19 @@ function row(text: string, { own = false, layout = "Bubble", states = [] }: RowO
             <div class="line mx_EventTile_line">
                 <div class="slotTimestamp"><a class="mx_MessageTimestamp" href="#">12:48</a></div>
                 <div class="slotBody"><div class="mx_EventTile_content"><div class="mx_EventTile_body" dir="auto">${text} <a href="#">link</a></div></div></div>
+                <div class="slotFooter"><button type="button" class="reaction">👍 2</button></div>
+            </div>
+        </li>
+    `;
+}
+
+/** An informational row ("Alice joined the room"), whose text is drawn on the row's band in the secondary color. */
+function infoRow(text: string): string {
+    return `
+        <li class="root mx_EventTile layoutBubble stateInfo stateLastInSection" data-testid="event-tile">
+            <div class="line mx_EventTile_line">
+                <div class="slotBody"><div class="info" style="color: var(--cpd-color-text-secondary)">${text}</div></div>
+                <div class="slotTimestamp"><a class="mx_MessageTimestamp" href="#">12:48</a></div>
             </div>
         </li>
     `;
@@ -91,6 +106,7 @@ function loadStyles({ reducedMotion }: { reducedMotion: boolean }): void {
     stylesheet.textContent = `
         @layer compound-tokens, compound-web, shared-components, app-web;
         @layer compound-tokens {
+            ${focusRingStyles}
             ${compoundBase} ${compoundSemantic}
             ${compoundLightTheme} ${compoundLightSemantic} ${compoundDarkTheme} ${compoundDarkSemantic}
             ${compoundLightHcTheme} ${compoundLightHcSemantic} ${compoundDarkHcTheme} ${compoundDarkHcSemantic}
@@ -143,6 +159,37 @@ function colorDistance(actual: string, expected: string): number {
 }
 
 const alphaOf = (color: string): number => colorChannels(color)[3];
+
+/** How far apart two opaque colors look: their distance in OKLab, in hundredths, where about 2 is just noticeable. */
+function perceivedDistance(first: string, second: string): number {
+    const oklab = (color: string): number[] => {
+        const [red, green, blue] = colorChannels(color)
+            .slice(0, 3)
+            .map((channel) => {
+                const value = channel / 255;
+                return value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4;
+            });
+        const [l, m, s] = [
+            0.4122214708 * red + 0.5363325363 * green + 0.0514459929 * blue,
+            0.2119034982 * red + 0.6806995451 * green + 0.1073969566 * blue,
+            0.0883024619 * red + 0.2817188376 * green + 0.6299787005 * blue,
+        ].map(Math.cbrt);
+        return [
+            0.2104542553 * l + 0.793617785 * m - 0.0040720468 * s,
+            1.9779984951 * l - 2.428592205 * m + 0.4505937099 * s,
+            0.0259040371 * l + 0.7827717662 * m - 0.808675766 * s,
+        ];
+    };
+    const [a, b] = [oklab(first), oklab(second)];
+    return 100 * Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]);
+}
+
+/** Moves the focus from the page to the element with the Tab key, as a keyboard user does. */
+async function tabTo(element: HTMLElement): Promise<void> {
+    for (let i = 0; i < 10 && document.activeElement !== element; i++) await userEvent.keyboard("{Tab}");
+    expect(document.activeElement).toBe(element);
+    expect(element.matches(":focus-visible")).toBe(true);
+}
 
 describe("Timeline navigation", () => {
     beforeAll(() => {
@@ -258,6 +305,89 @@ describe("Timeline navigation", () => {
 
             expect(tile.getAnimations()).toHaveLength(0);
             expect(getComputedStyle(tile, "::before").backgroundImage).toBe("none");
+        });
+    });
+
+    describe("the message the keyboard is on", () => {
+        beforeAll(() => loadStyles({ reducedMotion: true }));
+
+        it.each(THEMES)(
+            "takes the accent's tint, which stands apart from the page and every bubble ($name)",
+            async ({ name }) => {
+                const scope = render(
+                    name,
+                    row("Mine", { own: true }),
+                    row("Focused"),
+                    row("Selected", { states: ["stateSelected"] }),
+                );
+                const [own, focused, selected] = scope.querySelectorAll<HTMLElement>(".root");
+                await tabTo(focused.querySelector<HTMLElement>(".mx_MessageTimestamp")!);
+
+                const page = getComputedStyle(scope).backgroundColor;
+                const band = getComputedStyle(focused, "::before").backgroundColor;
+                const grayBand = getComputedStyle(selected, "::before").backgroundColor;
+                const bubble = getComputedStyle(focused.querySelector(".line")!).backgroundColor;
+                const ownBubble = getComputedStyle(own.querySelector(".line")!).backgroundColor;
+                const hoverBand = tokenColor("--event-tile-state-hover-background", focused);
+
+                expect(colorDistance(band, tokenColor("--tl-color-bg-message-focused", scope))).toBeLessThanOrEqual(1);
+                // At least the room list's hover (about 1.12:1) on the page
+                expect(contrastOver(band, page)).toBeGreaterThanOrEqual(1.2);
+                // Other people's bubbles stand out on it clearly more than on the gray band, which is a step from them
+                expect(perceivedDistance(band, bubble)).toBeGreaterThanOrEqual(
+                    Math.max(6, 1.5 * perceivedDistance(grayBand, bubble)),
+                );
+                expect(perceivedDistance(band, grayBand)).toBeGreaterThanOrEqual(3);
+                expect(perceivedDistance(band, hoverBand)).toBeGreaterThanOrEqual(6);
+                // Your own bubble keeps 3:1 on it, or as much as it has on the gray band where that is less
+                expect(contrastOver(ownBubble, band)).toBeGreaterThanOrEqual(
+                    Math.min(3, contrastOver(ownBubble, grayBand)) - 0.05,
+                );
+            },
+        );
+
+        it.each(THEMES)("keeps the secondary text drawn on it at 4.5:1 ($name)", async ({ name }) => {
+            const scope = render(name, infoRow("Alice joined the room"));
+            const tile = scope.querySelector<HTMLElement>(".root")!;
+            await tabTo(tile.querySelector<HTMLElement>(".mx_MessageTimestamp")!);
+
+            const band = getComputedStyle(tile, "::before").backgroundColor;
+            expect(colorDistance(band, tokenColor("--tl-color-bg-message-focused", scope))).toBeLessThanOrEqual(1);
+            expect(contrastOver(getComputedStyle(tile.querySelector(".info")!).color, band)).toBeGreaterThanOrEqual(
+                4.5,
+            );
+        });
+
+        it("keeps the ring on the focused link", async () => {
+            const scope = render("cpd-theme-light", row("Focused"));
+            const link = scope.querySelector<HTMLElement>(".mx_EventTile_body a")!;
+            await tabTo(link);
+
+            expect(getComputedStyle(link).outlineStyle).toBe("solid");
+            expect(getComputedStyle(link).outlineWidth).toBe("2px");
+        });
+
+        it.each<Layout>(["Group", "Irc"])("fills the %s layout's line with it", async (layout) => {
+            const scope = render("cpd-theme-light", row("Focused", { layout }));
+            const tile = scope.querySelector<HTMLElement>(".root")!;
+            await tabTo(tile.querySelector<HTMLElement>(".mx_MessageTimestamp")!);
+
+            const band = getComputedStyle(tile.querySelector(".line")!).backgroundColor;
+            expect(colorDistance(band, tokenColor("--tl-color-bg-message-focused", scope))).toBeLessThanOrEqual(1);
+            expect(contrastOver(tokenColor("--cpd-color-text-secondary", tile), band)).toBeGreaterThanOrEqual(4.5);
+        });
+
+        it("leaves a message focused with the mouse, or being edited, without the band", async () => {
+            const scope = render("cpd-theme-light", row("Clicked"), row("Edited", { states: ["stateEditing"] }));
+            const [clicked, edited] = scope.querySelectorAll<HTMLElement>(".root");
+
+            await userEvent.click(clicked.querySelector(".reaction")!);
+            expect(document.activeElement).toBe(clicked.querySelector(".reaction"));
+            expect(getComputedStyle(clicked, "::before").backgroundColor).toBe("rgba(0, 0, 0, 0)");
+
+            // Its time is hidden while it is edited
+            await tabTo(edited.querySelector<HTMLElement>(".mx_EventTile_body a")!);
+            expect(getComputedStyle(edited, "::before").backgroundColor).toBe("rgba(0, 0, 0, 0)");
         });
     });
 });
