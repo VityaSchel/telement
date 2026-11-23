@@ -44,6 +44,8 @@ export interface EventTileViewRootState {
     highlighted?: boolean;
     /** Whether the event is selected. */
     selected?: boolean;
+    /** Whether the timeline has just jumped to the event, which lights it up and then fades. */
+    jumpedTo?: boolean;
     /** Whether the event is currently being edited. */
     editing?: boolean;
     /** Whether the event continues the previous event block. */

@@ -147,8 +147,10 @@ export interface EventTileDisplayInput {
     noBubbleEvent?: boolean;
     /** Whether the event should be highlighted. */
     isHighlighted: boolean;
-    /** Whether the tile is selected or has an open context menu. */
+    /** Whether the tile has an open context menu. */
     isSelected: boolean;
+    /** Whether the timeline has just jumped to the tile, from a reply's quote, a pin, a search result or a link. */
+    isJumpedTo?: boolean;
     /** Whether the tile is the last event in its section. */
     isLastInSection?: boolean;
     /** Whether the tile is being rendered in contextual mode. */
@@ -660,6 +662,7 @@ export class EventTileViewModel extends BaseViewModel<EventTileViewModelRenderSt
             emote: sender.isEmote,
             highlighted: display.isHighlighted,
             selected: display.isSelected,
+            jumpedTo: display.isJumpedTo,
             editing: event.isEditing,
             continuation: isContinuation || event.isCallInvite || ElementCallEventType.matches(event.eventType),
             lastInSection: display.isLastInSection,

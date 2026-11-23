@@ -98,6 +98,39 @@
     --event-tile-add-reaction-visibility: visible;
 }
 
+/*
+ * A message the timeline jumped to (from a reply's quote, a pin, a search result or a link) lights up with the selected
+ * band, and your own bubble with its highlighted fill, then both fade back to rest over 1.5s, as in Telegram. Without
+ * motion they hold for 2s and then drop. One registered percentage drives both, so they fade together, and the band is
+ * drawn over the row's own fills, so that a hover or a selection under it shows once it has faded.
+ */
+@property --event-tile-jump-flash {
+    syntax: "<percentage>";
+    inherits: true;
+    initial-value: 0%;
+}
+
+@keyframes jumpFlash {
+    from {
+        --event-tile-jump-flash: 100%;
+    }
+
+    to {
+        --event-tile-jump-flash: 0%;
+    }
+}
+
+.root.stateJumpedTo {
+    animation: jumpFlash 1.5s ease-in;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .root.stateJumpedTo {
+        animation-duration: 2s;
+        animation-timing-function: step-end;
+    }
+}
+
 /* Line. */
 .line {
     position: relative;
@@ -427,6 +460,22 @@
     &.stateEditing .line {
         box-shadow: inset calc(50px + var(--event-tile-state-marker-width)) 0 0 -50px
             var(--event-tile-state-marker-color);
+    }
+
+    /* A message jumped to takes the selected band and marker, fading (.stateJumpedTo) */
+    &.stateJumpedTo .line {
+        --event-tile-jump-band: color-mix(
+            in srgb,
+            var(--event-tile-state-selected-background) var(--event-tile-jump-flash),
+            transparent
+        );
+
+        background-image: linear-gradient(var(--event-tile-jump-band), var(--event-tile-jump-band));
+    }
+
+    &.stateJumpedTo:not(.stateSelected, .stateEditing) .line {
+        box-shadow: inset calc(50px + var(--event-tile-state-marker-width)) 0 0 -50px
+            color-mix(in srgb, var(--event-tile-state-marker-color) var(--event-tile-jump-flash), transparent);
     }
 
     &.hasReceiptSlot .line {
@@ -775,6 +824,22 @@
     &.stateEditing .line {
         box-shadow: inset calc(50px + var(--event-tile-state-marker-width)) 0 0 -50px
             var(--event-tile-state-marker-color);
+    }
+
+    /* A message jumped to takes the selected band and marker, fading (.stateJumpedTo) */
+    &.stateJumpedTo .line {
+        --event-tile-jump-band: color-mix(
+            in srgb,
+            var(--event-tile-state-selected-background) var(--event-tile-jump-flash),
+            transparent
+        );
+
+        background-image: linear-gradient(var(--event-tile-jump-band), var(--event-tile-jump-band));
+    }
+
+    &.stateJumpedTo:not(.stateSelected, .stateEditing) .line {
+        box-shadow: inset calc(50px + var(--event-tile-state-marker-width)) 0 0 -50px
+            color-mix(in srgb, var(--event-tile-state-marker-color) var(--event-tile-jump-flash), transparent);
     }
 
     &.stateBubbleContainer {
@@ -1676,9 +1741,23 @@
         margin-inline-end: var(--event-tile-bubble-line-margin-inline-end);
     }
 
-    /* A selected bubble of your own, jumped to or right-clicked, takes the highlighted fill, as in Telegram. */
+    /* A selected bubble of your own, right-clicked, takes the highlighted fill, as in Telegram. */
     &.stateOwnEvent.stateSelected > .line {
         --event-tile-bubble-self-background: var(--event-tile-bubble-self-highlighted-background);
+    }
+
+    /* One jumped to takes it too and fades back to its own fill (.stateJumpedTo), with what is drawn in the bubble's
+       color, such as a play button's glyph */
+    &.stateOwnEvent.stateJumpedTo:not(.stateSelected) {
+        --event-tile-jump-rest-background: var(--event-tile-bubble-self-background);
+
+        > .line {
+            --event-tile-bubble-self-background: color-mix(
+                in srgb,
+                var(--event-tile-bubble-self-highlighted-background) var(--event-tile-jump-flash),
+                var(--event-tile-jump-rest-background)
+            );
+        }
     }
 
     /* What your own bubble holds is drawn for its accent fill rather than the page: the colors the timeline's content
@@ -1924,7 +2003,18 @@
         }
     }
 
-    /* Hovering a message draws no band behind it, as in Telegram; a selected or highlighted message keeps one. */
+    /* Hovering a message draws no band behind it, as in Telegram; a selected or highlighted message keeps one, and one
+       jumped to takes the selected band while it fades (.stateJumpedTo). */
+    &.stateJumpedTo::before {
+        --event-tile-jump-band: color-mix(
+            in srgb,
+            var(--event-tile-bubble-hover-background) var(--event-tile-jump-flash),
+            transparent
+        );
+
+        background-image: linear-gradient(var(--event-tile-jump-band), var(--event-tile-jump-band));
+    }
+
     &.stateSelected::before {
         background: var(--event-tile-bubble-hover-background);
     }

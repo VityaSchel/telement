@@ -158,6 +158,7 @@ export function EventTileView({
                 [styles.stateHasReply]: root.state?.hasReply,
                 [styles.stateHighlighted]: root.state?.highlighted,
                 [styles.stateSelected]: root.state?.selected,
+                [styles.stateJumpedTo]: root.state?.jumpedTo,
                 [styles.stateEditing]: root.state?.editing,
                 [styles.stateContinuation]: root.state?.continuation,
                 [styles.stateLastInSection]: root.state?.lastInSection,

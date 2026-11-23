@@ -297,6 +297,25 @@ describe("EventTile", () => {
         });
     });
 
+    describe("jumped to and selected", () => {
+        it("marks the event the timeline jumped to, which fades, rather than selecting it", () => {
+            const { container } = getComponent({ isSelectedEvent: true });
+
+            expect(getTile(container).className).toMatch(/_stateJumpedTo_/);
+            expect(getTile(container).className).not.toMatch(/_stateSelected_/);
+        });
+
+        it("selects the event while its context menu is open", async () => {
+            const { container } = getComponent();
+
+            fireEvent.contextMenu(getLine(container), { clientX: 1, clientY: 2 });
+
+            expect(await screen.findByTestId("mx_MessageContextMenu")).toBeInTheDocument();
+            expect(getTile(container).className).toMatch(/_stateSelected_/);
+            expect(getTile(container).className).not.toMatch(/_stateJumpedTo_/);
+        });
+    });
+
     describe("shared root attributes", () => {
         it.each([
             TimelineRenderingType.Room,

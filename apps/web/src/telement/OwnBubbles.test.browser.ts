@@ -927,7 +927,7 @@ describe("Your own bubbles", () => {
             expect(color(highlight)).toBe(theme.fill);
         });
 
-        it("fills a selected bubble, jumped to or right-clicked, and its tail with the highlighted blue", () => {
+        it("fills a right-clicked bubble and its tail with the highlighted blue", () => {
             const list = render(tile(plain("Jumped to this one"), { states: ["stateSelected"] }));
             const line = list.querySelector(".line")!;
 

@@ -192,7 +192,7 @@ export interface EventTileProps {
     /** Whether URL previews should be shown for this event. */
     showUrlPreview?: boolean;
 
-    /** Whether this is the currently selected event. */
+    /** Whether this is the event the timeline jumped to, which lights up and then fades. */
     isSelectedEvent?: boolean;
 
     /** Resize observer used by the parent timeline, if any. */
@@ -941,7 +941,8 @@ export class UnwrappedEventTile extends React.Component<EventTileProps, IState> 
                     forExport: this.props.forExport,
                     isRedacted: this.props.isRedacted,
                 }),
-                isSelected: this.props.isSelectedEvent || !!this.state.interaction.contextMenu,
+                isSelected: !!this.state.interaction.contextMenu,
+                isJumpedTo: this.props.isSelectedEvent,
                 isLastInSection: this.props.lastInSection,
                 isContextual: this.props.contextual,
             },
