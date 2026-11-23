@@ -59,6 +59,21 @@ const GenericEventListSummary: React.FC<IProps> = ({
 
     const eventIds = events.map((e) => e.getId()).join(",");
 
+    // Telement: in bubbles a collapsed summary ends its text with the toggle, 8px after it, where an informational
+    // row has its time, rather than at the far end of the row
+    const toggleFollowsSummary = layout === Layout.Bubble && !expanded;
+    const toggle = (
+        <AccessibleButton
+            kind="link"
+            element={toggleFollowsSummary ? "span" : "div"}
+            className="mx_GenericEventListSummary_toggle"
+            onClick={toggleExpanded}
+            aria-expanded={expanded}
+        >
+            {expanded ? _t("action|collapse") : _t("action|expand")}
+        </AccessibleButton>
+    );
+
     // If we are only given few events then just pass them through
     if (events.length < threshold) {
         return (
@@ -105,7 +120,10 @@ const GenericEventListSummary: React.FC<IProps> = ({
                     <span className="mx_GenericEventListSummary_avatars" onClick={toggleExpanded}>
                         {avatars}
                     </span>
-                    <span className="mx_TextualEvent mx_GenericEventListSummary_summary">{getSummaryText()}</span>
+                    <span className="mx_TextualEvent mx_GenericEventListSummary_summary">
+                        {getSummaryText()}
+                        {toggleFollowsSummary && toggle}
+                    </span>
                 </div>
             </div>
         );
@@ -119,14 +137,7 @@ const GenericEventListSummary: React.FC<IProps> = ({
             data-layout={layout}
             data-testid={testId}
         >
-            <AccessibleButton
-                kind="link"
-                className="mx_GenericEventListSummary_toggle"
-                onClick={toggleExpanded}
-                aria-expanded={expanded}
-            >
-                {expanded ? _t("action|collapse") : _t("action|expand")}
-            </AccessibleButton>
+            {!toggleFollowsSummary && toggle}
             {body}
         </li>
     );

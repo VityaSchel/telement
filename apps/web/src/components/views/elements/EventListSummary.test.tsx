@@ -272,6 +272,30 @@ describe("EventListSummary", function () {
         expect(summary).toMatchSnapshot();
     });
 
+    it.each([
+        [Layout.Bubble, true],
+        [Layout.Group, false],
+        [Layout.IRC, false],
+    ])("in the %s layout, ends the collapsed summary's text with its toggle: %s", (layout, endsText) => {
+        const events = generateEvents([
+            { userId: "@user_1:some.domain", prevMembership: KnownMembership.Leave, membership: KnownMembership.Join },
+            { userId: "@user_1:some.domain", prevMembership: KnownMembership.Join, membership: KnownMembership.Leave },
+            { userId: "@user_1:some.domain", prevMembership: KnownMembership.Leave, membership: KnownMembership.Join },
+        ]);
+        const { container, getByRole } = renderComponent({ events, children: generateTiles(events), layout });
+        const toggle = getByRole("button", { name: "Expand" });
+
+        expect(toggle.parentElement === container.querySelector(".mx_GenericEventListSummary_summary")).toBe(endsText);
+        expect(toggle.tagName).toBe(endsText ? "SPAN" : "DIV");
+
+        fireEvent.click(toggle);
+
+        // Expanded, there is no summary text: the toggle heads the rows it shows
+        const collapse = getByRole("button", { name: "Collapse" });
+        expect(collapse.parentElement).toBe(container.querySelector(".mx_GenericEventListSummary"));
+        expect(collapse.nextElementSibling).toBe(container.querySelector(".mx_GenericEventListSummary_spacer"));
+    });
+
     it("truncates long join,leave repetitions", function () {
         const events = generateEvents([
             { userId: "@user_1:some.domain", prevMembership: KnownMembership.Leave, membership: KnownMembership.Join },
@@ -930,7 +954,12 @@ describe("EventListSummary", function () {
                 avatarsMaxLength: 5,
                 threshold: 1,
             });
-            return container.querySelector(".mx_GenericEventListSummary_summary")!.textContent!;
+            const summary = container.querySelector(".mx_GenericEventListSummary_summary")!;
+            // Without the toggle that ends the summary's text in bubbles
+            return [...summary.childNodes]
+                .filter((node) => !(node instanceof Element && node.matches(".mx_GenericEventListSummary_toggle")))
+                .map((node) => node.textContent)
+                .join("");
         };
 
         it("treats an explicit null avatar_url the same as an absent one", () => {

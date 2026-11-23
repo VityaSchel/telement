@@ -19,6 +19,14 @@ exports[`EventListSummary > correctly identifies transitions 1`] = `
      
     was invited, requested to join, was banned, joined, rejected their invitation, left, had their invitation withdrawn, was unbanned, was removed, left and was removed
   </span>
+  <span
+    aria-expanded="false"
+    class="mx_AccessibleButton mx_GenericEventListSummary_toggle mx_AccessibleButton_hasKind mx_AccessibleButton_kind_link"
+    role="button"
+    tabindex="0"
+  >
+    Expand
+  </span>
 </span>
 `;
 
@@ -47,6 +55,14 @@ exports[`EventListSummary > correctly orders sequences of transitions by the ord
      
     was unbanned, joined and left 2 times and was banned
   </span>
+  <span
+    aria-expanded="false"
+    class="mx_AccessibleButton mx_GenericEventListSummary_toggle mx_AccessibleButton_hasKind mx_AccessibleButton_kind_link"
+    role="button"
+    tabindex="0"
+  >
+    Expand
+  </span>
 </span>
 `;
 
@@ -63,6 +79,14 @@ exports[`EventListSummary > handles a summary length = 2, with 1 "other" 1`] = `
     </span>
      
     joined
+  </span>
+  <span
+    aria-expanded="false"
+    class="mx_AccessibleButton mx_GenericEventListSummary_toggle mx_AccessibleButton_hasKind mx_AccessibleButton_kind_link"
+    role="button"
+    tabindex="0"
+  >
+    Expand
   </span>
 </span>
 `;
@@ -81,6 +105,14 @@ exports[`EventListSummary > handles a summary length = 2, with many "others" 1`]
      
     joined
   </span>
+  <span
+    aria-expanded="false"
+    class="mx_AccessibleButton mx_GenericEventListSummary_toggle mx_AccessibleButton_hasKind mx_AccessibleButton_kind_link"
+    role="button"
+    tabindex="0"
+  >
+    Expand
+  </span>
 </span>
 `;
 
@@ -95,6 +127,14 @@ exports[`EventListSummary > handles a summary length = 2, with no "others" 1`] =
      
     joined 2 times
   </span>
+  <span
+    aria-expanded="false"
+    class="mx_AccessibleButton mx_GenericEventListSummary_toggle mx_AccessibleButton_hasKind mx_AccessibleButton_kind_link"
+    role="button"
+    tabindex="0"
+  >
+    Expand
+  </span>
 </span>
 `;
 
@@ -106,6 +146,14 @@ exports[`EventListSummary > handles invitation plurals correctly when there are 
     user_1
      
     rejected their invitation 2 times
+  </span>
+  <span
+    aria-expanded="false"
+    class="mx_AccessibleButton mx_GenericEventListSummary_toggle mx_AccessibleButton_hasKind mx_AccessibleButton_kind_link"
+    role="button"
+    tabindex="0"
+  >
+    Expand
   </span>
 </span>
 `;
@@ -121,6 +169,14 @@ exports[`EventListSummary > handles invitation plurals correctly when there are 
     </span>
      
     rejected their invitations and had their invitations withdrawn
+  </span>
+  <span
+    aria-expanded="false"
+    class="mx_AccessibleButton mx_GenericEventListSummary_toggle mx_AccessibleButton_hasKind mx_AccessibleButton_kind_link"
+    role="button"
+    tabindex="0"
+  >
+    Expand
   </span>
 </span>
 `;
@@ -147,6 +203,14 @@ exports[`EventListSummary > handles many users following the same sequence of me
      
     were unbanned, joined and left 2 times and were banned
   </span>
+  <span
+    aria-expanded="false"
+    class="mx_AccessibleButton mx_GenericEventListSummary_toggle mx_AccessibleButton_hasKind mx_AccessibleButton_kind_link"
+    role="button"
+    tabindex="0"
+  >
+    Expand
+  </span>
 </span>
 `;
 
@@ -172,6 +236,14 @@ exports[`EventListSummary > handles multiple users following the same sequence o
      
     were unbanned, joined and left 2 times and were banned
   </span>
+  <span
+    aria-expanded="false"
+    class="mx_AccessibleButton mx_GenericEventListSummary_toggle mx_AccessibleButton_hasKind mx_AccessibleButton_kind_link"
+    role="button"
+    tabindex="0"
+  >
+    Expand
+  </span>
 </span>
 `;
 
@@ -183,6 +255,14 @@ exports[`EventListSummary > knocks (ask to join enabled) > summarises a knock th
     user_1
      
     requested to join, was granted access and joined
+  </span>
+  <span
+    aria-expanded="false"
+    class="mx_AccessibleButton mx_GenericEventListSummary_toggle mx_AccessibleButton_hasKind mx_AccessibleButton_kind_link"
+    role="button"
+    tabindex="0"
+  >
+    Expand
   </span>
 </span>
 `;
@@ -196,6 +276,14 @@ exports[`EventListSummary > knocks (ask to join enabled) > summarises a knock th
      
     requested to join, cancelled their request to join, requested to join and had their request to join rejected
   </span>
+  <span
+    aria-expanded="false"
+    class="mx_AccessibleButton mx_GenericEventListSummary_toggle mx_AccessibleButton_hasKind mx_AccessibleButton_kind_link"
+    role="button"
+    tabindex="0"
+  >
+    Expand
+  </span>
 </span>
 `;
 
@@ -207,6 +295,14 @@ exports[`EventListSummary > renders collapsed events if events.length = props.th
     user_1
      
     joined and left and joined
+  </span>
+  <span
+    aria-expanded="false"
+    class="mx_AccessibleButton mx_GenericEventListSummary_toggle mx_AccessibleButton_hasKind mx_AccessibleButton_kind_link"
+    role="button"
+    tabindex="0"
+  >
+    Expand
   </span>
 </span>
 `;
@@ -251,6 +347,14 @@ exports[`EventListSummary > should not blindly group 3pid invites and treat them
      
     was invited
   </span>
+  <span
+    aria-expanded="false"
+    class="mx_AccessibleButton mx_GenericEventListSummary_toggle mx_AccessibleButton_hasKind mx_AccessibleButton_kind_link"
+    role="button"
+    tabindex="0"
+  >
+    Expand
+  </span>
 </span>
 `;
 
@@ -263,6 +367,14 @@ exports[`EventListSummary > truncates long join,leave repetitions 1`] = `
      
     joined and left 7 times
   </span>
+  <span
+    aria-expanded="false"
+    class="mx_AccessibleButton mx_GenericEventListSummary_toggle mx_AccessibleButton_hasKind mx_AccessibleButton_kind_link"
+    role="button"
+    tabindex="0"
+  >
+    Expand
+  </span>
 </span>
 `;
 
@@ -274,6 +386,14 @@ exports[`EventListSummary > truncates long join,leave repetitions between other 
     user_1
      
     was unbanned, joined and left 7 times and was invited
+  </span>
+  <span
+    aria-expanded="false"
+    class="mx_AccessibleButton mx_GenericEventListSummary_toggle mx_AccessibleButton_hasKind mx_AccessibleButton_kind_link"
+    role="button"
+    tabindex="0"
+  >
+    Expand
   </span>
 </span>
 `;
@@ -296,6 +416,14 @@ exports[`EventListSummary > truncates multiple sequences of repetitions with oth
     </button>
      
     was unbanned, joined and left 2 times, was banned, joined and left 3 times and was invited
+  </span>
+  <span
+    aria-expanded="false"
+    class="mx_AccessibleButton mx_GenericEventListSummary_toggle mx_AccessibleButton_hasKind mx_AccessibleButton_kind_link"
+    role="button"
+    tabindex="0"
+  >
+    Expand
   </span>
 </span>
 `;

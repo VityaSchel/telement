@@ -1253,10 +1253,9 @@ describe("Timeline shell", () => {
                 render(
                     "bubble",
                     `<li class="mx_GenericEventListSummary" data-expanded="false" data-layout="bubble">
-                        <div class="mx_AccessibleButton mx_GenericEventListSummary_toggle" role="button" aria-expanded="false">Expand</div>
                         <div class="mx_EventTile_line"><div class="mx_EventTile_info">
                             <span class="mx_GenericEventListSummary_avatars">${avatar(14)}</span>
-                            <span class="mx_TextualEvent mx_GenericEventListSummary_summary">Alice joined and left</span>
+                            <span class="mx_TextualEvent mx_GenericEventListSummary_summary">Alice joined and left<span class="mx_AccessibleButton mx_GenericEventListSummary_toggle" role="button" aria-expanded="false">Expand</span></span>
                         </div></div>
                     </li>`,
                     row("bubble", event("bubble", SHORT), { states: ["stateInfo"] }),

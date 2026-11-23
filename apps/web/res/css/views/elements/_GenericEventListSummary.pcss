@@ -70,16 +70,20 @@ Please see LICENSE files in the repository root for full details.
         display: flex;
         margin-left: calc(var(--avatarSize) + var(--gutterSize));
 
+        /* Telement: "Expand" follows the summary's text 8px after its last line, where an informational row has its
+           time, and "Collapse" starts the expanded rows' column, where their avatars start */
         .mx_GenericEventListSummary_toggle {
             margin-block: 0;
 
             &[aria-expanded="false"] {
-                order: 9; /* TODO: Remove */
+                display: inline-block;
+                margin-inline-start: var(--cpd-space-2x);
+                white-space: nowrap;
             }
 
             &[aria-expanded="true"] {
-                margin-inline-start: auto; /* reduce clickable area */
-                margin-inline-end: var(--EventTile_bubble-margin-inline-end); /* as the parent has zero margin */
+                align-self: flex-start; /* reduce clickable area */
+                margin-inline-start: var(--EventTile_bubble-margin-inline-start); /* as the parent has zero margin */
             }
         }
 
@@ -88,10 +92,7 @@ Please see LICENSE files in the repository root for full details.
         }
 
         &[data-expanded="false"] {
-            /* Keeps the toggle on the summary's first line when the summary wraps */
             align-items: flex-start;
-            justify-content: space-between;
-            column-gap: 5px;
         }
 
         /* ideally we'd use display=contents here for the layout to all work regardless of the *ELS but */
