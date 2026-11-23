@@ -21,6 +21,7 @@ import { KeyBindingAction } from "../../../../accessibility/KeyboardShortcuts";
 import { Landmark, LandmarkNavigation } from "../../../../accessibility/LandmarkNavigation";
 import { RoomListViewModel } from "../../../../viewmodels/room-list/RoomListViewModel";
 import { SDKContext } from "../../../../contexts/SDKContext.ts";
+import { openSearchOnTyping } from "../../../../telement/room-list/openSearchOnTyping";
 
 /**
  * RoomListView component using shared components with proper MVVM pattern.
@@ -46,8 +47,9 @@ export function RoomListView(): JSX.Element {
         return null;
     }, []);
 
-    // Handle keyboard navigation for landmarks
+    // Handle typing, which searches the rooms, and keyboard navigation for landmarks
     const onKeyDown = useCallback((ev: React.KeyboardEvent) => {
+        if (openSearchOnTyping(ev)) return;
         const navAction = getKeyBindingsManager().getNavigationAction(ev);
         if (navAction === KeyBindingAction.NextLandmark || navAction === KeyBindingAction.PreviousLandmark) {
             LandmarkNavigation.findAndFocusNextLandmark(
