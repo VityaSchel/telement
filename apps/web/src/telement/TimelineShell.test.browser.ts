@@ -911,14 +911,110 @@ describe("Timeline shell", () => {
             expect(timeOf(document.querySelector(".root")!).right).toBeLessThanOrEqual(contentEnd());
         });
 
-        it("lets other people's bubbles grow into the end margin the read receipts had", () => {
-            render("bubble", row("bubble", text(LONG_TEXT)));
-            const list = document.querySelector(".mx_RoomView_MessageList")!;
-            const contentWidth = box(list).width - 2 * parseFloat(getComputedStyle(list).paddingLeft);
-            const line = box(document.querySelector(".line")!);
+        describe("the width of a bubble", () => {
+            /** The room's timeline at the given width, in the given direction. */
+            function renderTimeline(width: number, dir: "ltr" | "rtl", ...items: string[]): void {
+                render("bubble", ...items);
+                const body = document.querySelector<HTMLElement>(".mx_RoomView_body")!;
+                body.style.width = `${width}px`;
+                body.setAttribute("dir", dir);
+            }
 
-            // 70% of the row, which starts 49px in and ends 18px from the content edge, and the bubble's padding
-            expect(line.width).toBeCloseTo((contentWidth - 49 - 18) * 0.7 + 24, 0);
+            const textWidth = (line: Element): number => {
+                const style = getComputedStyle(line);
+                return box(line).width - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight);
+            };
+
+            it("stops a bubble's text at 480px in a wide timeline, Telegram's measure", () => {
+                renderTimeline(
+                    1200,
+                    "ltr",
+                    row("bubble", text(LONG_TEXT)),
+                    row("bubble", text(LONG_TEXT), { own: true, status: true }),
+                );
+
+                for (const line of all(".line")) expect(textWidth(line)).toBe(480);
+            });
+
+            it.each(["ltr", "rtl"] as const)(
+                "fills a narrow timeline to within 64px of its far side, 52px of its content edge, in %s text",
+                (dir) => {
+                    renderTimeline(
+                        420,
+                        dir,
+                        row("bubble", text(LONG_TEXT)),
+                        row("bubble", text(LONG_TEXT), { own: true, status: true }),
+                    );
+                    const list = box(document.querySelector(".mx_RoomView_MessageList")!);
+                    const [others, own] = all(".line").map(box);
+
+                    expect(dir === "ltr" ? list.right - others.right : others.left - list.left).toBe(64);
+                    expect(dir === "ltr" ? own.left - list.left : list.right - own.right).toBe(64);
+                },
+            );
+
+            it.each([
+                ["ltr", 420],
+                ["ltr", 1200],
+                ["rtl", 420],
+                ["rtl", 1200],
+            ] as const)(
+                "keeps other people's bubbles and their avatars at the start and your own at the end, in %s text at %ipx",
+                (dir, width) => {
+                    renderTimeline(
+                        width,
+                        dir,
+                        row("bubble", text("Morning")),
+                        row("bubble", text(LONG_TEXT)),
+                        row("bubble", text("Yes, from ten"), { own: true, status: true }),
+                        row("bubble", text(LONG_TEXT), { own: true, status: true }),
+                    );
+                    const list = box(document.querySelector(".mx_RoomView_MessageList")!);
+                    const fromStart = (rect: DOMRect): number =>
+                        dir === "ltr" ? rect.left - list.left : list.right - rect.right;
+                    const fromEnd = (rect: DOMRect): number =>
+                        dir === "ltr" ? list.right - rect.right : rect.left - list.left;
+                    const [short, long, ownShort, ownLong] = all(".root");
+
+                    for (const tile of [short, long]) {
+                        expect(fromStart(box(tile.querySelector(".line")!))).toBe(52);
+                        expect(fromStart(box(tile.querySelector(".slotAvatar > *")!))).toBe(12);
+                    }
+                    for (const tile of [ownShort, ownLong]) {
+                        const line = tile.querySelector(".line")!;
+                        const tail = parseFloat(getComputedStyle(line, "::after").width);
+                        expect(fromEnd(box(line)) - tail).toBe(12);
+                    }
+                },
+            );
+
+            it("measures search results as the timeline", () => {
+                render("bubble");
+                document.querySelector(".mx_RoomView_body")!.innerHTML = `
+                    <div class="mx_RoomView_searchResultsPanel" style="width: 420px">
+                        <div class="mx_RoomView_messageListWrapper">
+                            <ol class="mx_RoomView_MessageList"><li><ol>${row("bubble", text(LONG_TEXT))}</ol></li></ol>
+                        </div>
+                    </div>
+                `;
+                const list = box(document.querySelector(".mx_RoomView_MessageList")!);
+
+                expect(list.right - box(document.querySelector(".line")!).right).toBe(64);
+            });
+
+            it("measures the right panel's timeline as the room's", () => {
+                document.body.innerHTML = `
+                    <div class="mx_ThreadPanel mx_TimelineCard cpd-theme-light" style="width: 380px; font-family: Inter">
+                        <div class="mx_ScrollPanel mx_RoomView_messagePanel">
+                            <div class="mx_RoomView_messageListWrapper">
+                                <ol class="mx_RoomView_MessageList">${row("bubble", text(LONG_TEXT))}</ol>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                expect(contentEnd() - box(document.querySelector(".line")!).right).toBe(52);
+            });
         });
 
         describe("Telegram's checks on your own messages", () => {
@@ -1249,6 +1345,15 @@ describe("Timeline shell", () => {
 
             expect(contentEnd() - box(others).right).toBe(36);
             expect(contentEnd() - box(own).right).toBe(18);
+        });
+
+        it("fills the panel with long messages to within 64px of its far side, as the room does", () => {
+            renderThread(threadRow(text(LONG_TEXT)), threadRow(text(LONG_TEXT), { own: true }));
+            const panel = box(document.querySelector(".mx_ThreadView")!);
+            const [others, own] = all(".line").map(box);
+
+            expect(panel.right - others.right).toBe(64);
+            expect(own.left - panel.left).toBe(64);
         });
 
         it("starts other people's bubbles where they do in the room, with their avatar 8px before the last one, level with its bottom", () => {

@@ -851,6 +851,29 @@
     /* How wide the time is where a message's last line or its reactions keep room for it: its text, or the badge of
        large emoji. */
     --event-tile-bubble-timestamp-width: var(--event-tile-timestamp-width);
+    /* Telegram's measure: a bubble's text grows to 480px, so lines stop growing in a wide window, and the bubble keeps
+       the avatar column and a bubble gutter free on the far side of the timeline, so a narrow timeline (a thread, or
+       the room beside the right panel) fills to within 52px of its content edge, 64px of its side. 100cqi is the
+       width of the timeline's content: its message list is the query container (_EventBubbleTile.pcss). The width is
+       a text bubble's text, without its padding. */
+    --event-tile-bubble-column-start: calc(
+        var(--event-tile-bubble-margin-inline-start) + var(--event-tile-bubble-line-margin-inline-start)
+    );
+    --event-tile-bubble-far-gap: calc(var(--event-tile-bubble-column-start) + var(--event-tile-bubble-gutter));
+    --event-tile-bubble-line-max-width: min(
+        100cqi - var(--event-tile-bubble-column-start) - var(--event-tile-bubble-far-gap) - 2 *
+            var(--event-tile-bubble-padding-inline),
+        480px
+    );
+
+    /* Your own bubbles end at the timeline's end, less their tail, and keep the gap at its start */
+    &.stateOwnEvent {
+        --event-tile-bubble-line-max-width: min(
+            100cqi - var(--event-tile-bubble-margin-inline-end) - var(--event-tile-bubble-line-margin-inline-end) -
+                var(--event-tile-bubble-far-gap) - 2 * var(--event-tile-bubble-padding-inline),
+            480px
+        );
+    }
 
     /* Root. Each row stacks its own band and content, so the band below the content still takes the pointer in
        the row's side margins rather than the timeline behind it. */

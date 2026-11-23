@@ -55,7 +55,8 @@ function option(text: string, votes: string, percent: number): string {
     `;
 }
 
-/** A poll in the timeline, as EventTileView renders MPollBody in the line's body slot. */
+/** A poll in the timeline, as EventTileView renders MPollBody in the line's body slot, in a list that bubbles measure
+ * as they measure the app's message list. */
 function render(
     layout: Layout,
     {
@@ -69,7 +70,7 @@ function render(
     const bubbleClass = layout === "bubble" ? " mx_MPollBody_bubble" : "";
     document.body.innerHTML = `
         <ol class="cpd-theme-light${layout === "irc" ? " mx_IRCLayout" : ""}" dir="${dir}"
-            style="width: ${width}px; margin: 0; padding: 0; list-style: none; font-family: Inter">
+            style="width: ${width}px; margin: 0; padding: 0; list-style: none; font-family: Inter; container-type: inline-size">
             <li class="root mx_EventTile ${LAYOUT_CLASS[layout]} stateLastInSection${own ? " stateOwnEvent" : ""}">
                 <div class="line mx_EventTile_line">
                     <div class="slotTimestamp"><a class="mx_MessageTimestamp">12:41</a></div>
@@ -253,7 +254,7 @@ describe("A poll in the bubble layout", () => {
     it.each([false, true])(
         "keeps the end of its vote summary's last line free for the timestamp when the summary wraps (own: %s)",
         (own) => {
-            render("bubble", { own, width: 380, summary: "512 votes cast. Vote to see the results" });
+            render("bubble", { own, width: 320, summary: "512 votes cast. Vote to see the results" });
             const range = document.createRange();
             range.selectNodeContents(document.querySelector(".mx_MPollBody_totalVotes")!);
             const lines = [...range.getClientRects()].filter((rect) => rect.width > 0);

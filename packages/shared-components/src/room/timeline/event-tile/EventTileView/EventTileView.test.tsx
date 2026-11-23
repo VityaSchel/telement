@@ -1004,9 +1004,10 @@ describe("EventTileView placement", () => {
         slots: EventTileViewProps["slots"];
     }
 
+    /** The tiles in a 400px timeline, which bubbles measure as they measure the app's message list. */
     function renderTiles(layout: EventLayout, ...tiles: PlacementTile[]): void {
         render(
-            <ol style={{ width: 400, margin: 0, padding: 0, listStyle: "none" }}>
+            <ol style={{ width: 400, margin: 0, padding: 0, listStyle: "none", containerType: "inline-size" }}>
                 {tiles.map(({ shape = "Room", state, line, slots }, index) => (
                     <EventTileView
                         key={index}
@@ -1541,9 +1542,9 @@ describe("EventTileView placement", () => {
             expect(getComputedStyle(reacted, "::after").float).toBe("none");
         });
 
-        // The bubble's content is 233.1px wide here: five 40px chips and their 4px gaps to a line
+        // The bubble's content is 284px wide here: six 40px chips and their 4px gaps to a line
         it("ends the last line of reactions that wrap with the time when it fits there, as in Telegram", () => {
-            renderTiles("bubble", { slots: { body: textBody("Lunch?"), footer: reactions(6) } });
+            renderTiles("bubble", { slots: { body: textBody("Lunch?"), footer: reactions(7) } });
             const chips = screen.getAllByTestId("chip").map((chip) => chip.getBoundingClientRect());
             const time = timestampRect();
 
@@ -1554,8 +1555,8 @@ describe("EventTileView placement", () => {
         });
 
         it("gives the time a line of its own under reactions that fill theirs", () => {
-            // Four 52px chips and their gaps make a 220px line, with no room left for the time
-            renderTiles("bubble", { slots: { body: textBody("Lunch?"), footer: reactions(4, 52) } });
+            // Five 52px chips and their gaps make a 276px line, with no room left for the time
+            renderTiles("bubble", { slots: { body: textBody("Lunch?"), footer: reactions(5, 52) } });
             const chips = screen.getAllByTestId("chip").map((chip) => chip.getBoundingClientRect());
             const time = timestampRect();
 

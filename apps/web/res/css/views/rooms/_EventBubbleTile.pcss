@@ -27,6 +27,14 @@ Please see LICENSE files in the repository root for full details.
     }
 }
 
+/* A bubble's width follows the width of the timeline's content (EventTileView.module.css), in the room, in search
+   results, in a thread and in the right panel's timeline: the list of messages is the container it measures. */
+.mx_RoomView_body[data-layout="bubble"] :is(.mx_RoomView_MessageList, .mx_NewTimelinePanel .mx_TimelineView_tile),
+.mx_ThreadView_timelinePanelWrapper[data-layout="bubble"] .mx_RoomView_MessageList,
+.mx_TimelineCard .mx_RoomView_MessageList {
+    container-type: inline-size;
+}
+
 .mx_GenericEventListSummary[data-layout="bubble"] {
     --avatarSize: 32px;
     --gutterSize: 11px;
