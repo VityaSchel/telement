@@ -10,7 +10,7 @@ Please see LICENSE files in the repository root for full details.
 
 import React from "react";
 import { vi, describe, it, expect } from "vitest";
-import { act, fireEvent, render, waitFor } from "test-utils-rtl";
+import { act, fireEvent, render, screen, waitFor } from "test-utils-rtl";
 import userEvent from "@testing-library/user-event";
 import { RoomMember, EventType } from "matrix-js-sdk/src/matrix";
 import { getMockClientWithEventEmitter, makeRoomWithStateEvents, mkEvent } from "test-utils";
@@ -104,17 +104,15 @@ describe("<AddPrivilegedUsers />", () => {
             fireEvent.mouseDown(matchTwo);
         });
 
-        // Check that `defaultUserLevel` is initially set and select a higher power level.
-        expect((getByTestId("power-level-option-0") as HTMLOptionElement).selected).toBeTruthy();
-        expect((getByTestId("power-level-option-50") as HTMLOptionElement).selected).toBeFalsy();
-        expect((getByTestId("power-level-option-100") as HTMLOptionElement).selected).toBeFalsy();
+        // Check that `defaultUserLevel` is initially set and select a higher power level in the power level's row
+        // (PowerLevelRow)
+        const powerLevelRow = screen.getByRole("button", { name: /^Power level/ });
+        expect(powerLevelRow).toHaveTextContent("Default");
 
-        const powerLevelSelect = getByTestId("power-level-select-element");
-        await userEvent.selectOptions(powerLevelSelect, "100");
+        await userEvent.click(powerLevelRow);
+        await userEvent.click(screen.getByRole("menuitemradio", { name: "Admin" }));
 
-        expect((getByTestId("power-level-option-0") as HTMLOptionElement).selected).toBeFalsy();
-        expect((getByTestId("power-level-option-50") as HTMLOptionElement).selected).toBeFalsy();
-        expect((getByTestId("power-level-option-100") as HTMLOptionElement).selected).toBeTruthy();
+        expect(powerLevelRow).toHaveTextContent("Admin");
 
         // The submit button should be enabled now.
         expect(submitButton).toBeEnabled();
@@ -134,9 +132,8 @@ describe("<AddPrivilegedUsers />", () => {
         expect(selectionItems).toHaveLength(0);
 
         // Verify that power level select is reset to `defaultUserLevel`.
-        expect((getByTestId("power-level-option-0") as HTMLOptionElement).selected).toBeTruthy();
-        expect((getByTestId("power-level-option-50") as HTMLOptionElement).selected).toBeFalsy();
-        expect((getByTestId("power-level-option-100") as HTMLOptionElement).selected).toBeFalsy();
+        await waitFor(() => expect(powerLevelRow).toHaveTextContent("Default"));
+        expect(mockClient.setPowerLevel).toHaveBeenCalledWith(room.roomId, expect.any(Array), 100);
     });
 
     it("getUserIdsFromCompletions() should map completions to user id's", () => {

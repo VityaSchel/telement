@@ -15,7 +15,6 @@ import { Alert, Form, SettingsToggleInput } from "@vector-im/compound-web";
 
 import { _t } from "../../../../../languageHandler";
 import MediaDeviceHandler, { type IMediaDevices, MediaDeviceKindEnum } from "../../../../../MediaDeviceHandler";
-import Field from "../../../elements/Field";
 import AccessibleButton from "../../../elements/AccessibleButton";
 import { SettingLevel } from "../../../../../settings/SettingLevel";
 import SettingsFlag from "../../../elements/SettingsFlag";
@@ -26,6 +25,7 @@ import { SettingsSection } from "../../shared/SettingsSection";
 import { SettingsSubsection } from "../../shared/SettingsSubsection";
 import MatrixClientContext from "../../../../../contexts/MatrixClientContext";
 import SdkConfig from "../../../../../SdkConfig";
+import { SettingsValueRow } from "../../../../../telement/settings/SettingsValueRow";
 
 interface IState {
     mediaDevices: IMediaDevices | null;
@@ -129,30 +129,21 @@ export default class VoiceUserSettingsTab extends React.Component<EmptyObject, I
         this.context.setForceTURN(!p2p);
     };
 
-    private renderDeviceOptions(devices: Array<MediaDeviceInfo>, category: MediaDeviceKindEnum): Array<JSX.Element> {
-        return devices.map((d) => {
-            return (
-                <option key={`${category}-${d.deviceId}`} value={d.deviceId}>
-                    {d.label}
-                </option>
-            );
-        });
-    }
-
     private renderDropdown(kind: MediaDeviceKindEnum, label: string): ReactNode {
         const devices = this.state.mediaDevices?.[kind].slice(0);
         if (!devices?.length) return null;
 
         const defaultDevice = MediaDeviceHandler.getDefaultDevice(devices);
+        // Telement: a value row, as Telegram lists settings with a value. A device that isn't listed shows as the first
+        // one, as the dropdown's select did
+        const selected = this.state[kind] || defaultDevice;
         return (
-            <Field
-                element="select"
+            <SettingsValueRow
                 label={label}
-                value={this.state[kind] || defaultDevice}
-                onChange={(e) => this.setDevice(e.target.value, kind)}
-            >
-                {this.renderDeviceOptions(devices, kind)}
-            </Field>
+                options={devices.map((d) => ({ key: d.deviceId, label: d.label }))}
+                selectedKey={devices.some((d) => d.deviceId === selected) ? selected : devices[0].deviceId}
+                onSelect={(deviceId) => this.setDevice(deviceId, kind)}
+            />
         );
     }
 

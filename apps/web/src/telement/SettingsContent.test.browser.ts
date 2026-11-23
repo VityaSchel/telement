@@ -895,38 +895,6 @@ describe.each(THEMES.map(([theme]) => theme))("Settings content in %s", (theme) 
         expect(cornerRadii(document.querySelector("#card")!)).toEqual({ x: 12, y: 12 });
     });
 
-    it("puts the Roles tab's stacked fields 16px apart, the user search and nested power selectors included", () => {
-        const powerSelector = (id: string, label: string): string => `
-            <div class="mx_PowerSelector"><div class="mx_Field mx_Field_select" id="${id}">
-                <select id="${id}-select"><option>Default</option></select><label for="${id}-select">${label}</label>
-            </div></div>
-        `;
-        render(
-            theme,
-            `<div class="mx_SettingsTab">
-                <fieldset class="mx_SettingsFieldset">
-                    <legend class="mx_SettingsFieldset_legend">Add privileged users</legend>
-                    <div class="mx_SettingsFieldset_content">
-                        <div class="mx_AutocompleteInput" id="search">
-                            <div class="mx_AutocompleteInput_editor"><input placeholder="Search users in this room…"></div>
-                        </div>
-                        ${powerSelector("level", "Power level")}
-                    </div>
-                </fieldset>
-                <fieldset class="mx_SettingsFieldset">
-                    <legend class="mx_SettingsFieldset_legend">Permissions</legend>
-                    <div class="mx_SettingsFieldset_content">
-                        <div>${powerSelector("send", "Send messages")}</div>
-                        <div>${powerSelector("invite", "Invite users")}</div>
-                    </div>
-                </fieldset>
-            </div>`,
-        );
-
-        expect(box("#level").top - box("#search").bottom).toBe(16);
-        expect(box("#invite").top - box("#send").bottom).toBe(16);
-    });
-
     it("draws the publish toggle 12px under the main address field", () => {
         render(
             theme,

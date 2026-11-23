@@ -13,12 +13,12 @@ import { _t } from "../../../languageHandler";
 import { type ICompletion } from "../../../autocomplete/Autocompleter";
 import UserProvider from "../../../autocomplete/UserProvider";
 import { AutocompleteInput } from "../../structures/AutocompleteInput";
-import PowerSelector from "../elements/PowerSelector";
 import MatrixClientContext from "../../../contexts/MatrixClientContext";
 import AccessibleButton from "../elements/AccessibleButton";
 import Modal from "../../../Modal";
 import ErrorDialog from "../dialogs/ErrorDialog";
 import SettingsFieldset from "./SettingsFieldset";
+import { PowerLevelRow } from "../../../telement/settings/PowerLevelRow";
 
 interface AddPrivilegedUsersProps {
     room: Room;
@@ -81,7 +81,8 @@ export const AddPrivilegedUsers: React.FC<AddPrivilegedUsersProps> = ({ room, de
                     selection={selectedUsers}
                     additionalFilter={hasLowerOrEqualLevelThanDefaultLevelFilter}
                 />
-                <PowerSelector value={powerLevel} onChange={setPowerLevel} />
+                {/* Telement: a value row, as Telegram lists settings with a value */}
+                <PowerLevelRow label={_t("power_level|label")} value={powerLevel} onChange={setPowerLevel} />
                 <AccessibleButton
                     type="submit"
                     element="button"

@@ -11,7 +11,8 @@ Please see LICENSE files in the repository root for full details.
 
 import React from "react";
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { fireEvent, render, screen } from "test-utils-rtl";
+import { render, screen, waitFor } from "test-utils-rtl";
+import userEvent from "@testing-library/user-event";
 import { logger } from "matrix-js-sdk/src/logger";
 import { flushPromises } from "test-utils";
 
@@ -61,25 +62,34 @@ describe("<VoiceUserSettingsTab />", () => {
     });
 
     describe("devices", () => {
-        it("renders dropdowns for input devices", async () => {
+        /** A device's value row (SettingsValueRow): the device in use at the end of the row named after its kind. */
+        const deviceRow = (kind: string): Promise<HTMLElement> =>
+            screen.findByRole("button", { name: new RegExp(`^${kind}`) });
+
+        const chooseDevice = async (kind: string, device: string): Promise<void> => {
+            await userEvent.click(await deviceRow(kind));
+            await userEvent.click(screen.getByRole("menuitemradio", { name: device }));
+        };
+
+        it("renders value rows for input devices", async () => {
             render(getComponent());
 
-            await expect(screen.findByLabelText("Microphone")).resolves.toHaveDisplayValue(audioIn1.label);
-            await expect(screen.findByLabelText("Camera")).resolves.toHaveDisplayValue(videoIn1.label);
+            await expect(deviceRow("Microphone")).resolves.toHaveTextContent(`Microphone${audioIn1.label}`);
+            await expect(deviceRow("Camera")).resolves.toHaveTextContent(`Camera${videoIn1.label}`);
         });
 
         it("updates device", async () => {
             render(getComponent());
             await flushPromises();
 
-            fireEvent.change(await screen.findByLabelText("Camera"), { target: { value: videoIn2.deviceId } });
+            await chooseDevice("Camera", videoIn2.label);
 
             expect(MediaDeviceHandlerMock.instance.setDevice).toHaveBeenCalledWith(
                 videoIn2.deviceId,
                 MediaDeviceKindEnum.VideoInput,
             );
 
-            expect(screen.getByLabelText("Camera")).toHaveDisplayValue(videoIn2.label);
+            expect(await deviceRow("Camera")).toHaveTextContent(videoIn2.label);
         });
 
         it("logs and resets device when update fails", async () => {
@@ -89,20 +99,18 @@ describe("<VoiceUserSettingsTab />", () => {
             render(getComponent());
             await flushPromises();
 
-            fireEvent.change(screen.getByLabelText("Camera"), { target: { value: videoIn2.deviceId } });
+            await chooseDevice("Camera", videoIn2.label);
 
             expect(MediaDeviceHandlerMock.instance.setDevice).toHaveBeenCalledWith(
                 videoIn2.deviceId,
                 MediaDeviceKindEnum.VideoInput,
             );
 
-            expect(screen.getByLabelText("Camera")).toHaveDisplayValue(videoIn2.label);
-
             await flushPromises();
 
             expect(logger.error).toHaveBeenCalledWith("Failed to set device videoinput: 3");
             // reset to original
-            expect(screen.getByLabelText("Camera")).toHaveDisplayValue(videoIn1.label);
+            await waitFor(async () => expect(await deviceRow("Camera")).toHaveTextContent(videoIn1.label));
         });
 
         it("does not render dropdown when no devices exist for type", async () => {

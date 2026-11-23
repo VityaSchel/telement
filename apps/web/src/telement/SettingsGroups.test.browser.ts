@@ -632,38 +632,85 @@ describe.each(THEMES.map(([theme]) => theme))("Settings groups in %s", (theme) =
         );
     });
 
-    describe("fields", () => {
-        it("spans a subsection's dropdown, the startup dropdown and the font size across the card", () => {
-            const dropdown = (id: string): string => `
-                <div class="mx_Dropdown">
-                    <span class="mx_Dropdown_label" aria-hidden="true">Application language</span>
-                    <div class="mx_AccessibleButton mx_Dropdown_input mx_no_textinput" role="button" id="${id}">
-                        <div class="mx_Dropdown_option">English</div>
+    describe("rows", () => {
+        /** A settings row (ValueRowView, ActionRowView) as it lays itself out: 44px, its fill 4px from the card's sides. */
+        const row = (id: string): string => `
+            <button data-settings-row="" id="${id}"
+                style="display: block; box-sizing: border-box; height: 44px; width: calc(100% + 24px); margin: 0 -12px">
+                Leave room
+            </button>
+        `;
+
+        it("puts a row alone on its card 4px from the card's top and bottom, as from its sides", () => {
+            renderTab(theme, section("general", "", subsection("leave", "", row("leave-row"))));
+            const card = box("#leave-card");
+            const style = getComputedStyle(get("#leave-card"));
+
+            expect([style.paddingTop, style.paddingBottom]).toEqual(["4px", "4px"]);
+            expect([box("#leave-row").top - card.top, card.bottom - box("#leave-row").bottom]).toEqual([4, 4]);
+            expect([box("#leave-row").left - card.left, card.right - box("#leave-row").right]).toEqual([4, 4]);
+            expect(card.height).toBe(52);
+        });
+
+        it("keeps the card's 12px padding at an edge where something else is", () => {
+            renderTab(
+                theme,
+                section(
+                    "help",
+                    "",
+                    subsection("advanced", "Advanced", `<div id="advanced-text">Homeserver</div>${row("clear-row")}`),
+                ),
+            );
+            const style = getComputedStyle(get("#advanced-card"));
+
+            expect([style.paddingTop, style.paddingBottom]).toEqual(["12px", "4px"]);
+            expect(box("#clear-row").top - box("#advanced-text").bottom).toBe(16);
+        });
+
+        it("puts a list of rows 4px from a fieldset's card, and a section's card that is its whole content", () => {
+            renderTab(
+                theme,
+                `<fieldset class="mx_SettingsFieldset" id="permissions">
+                    <legend class="mx_SettingsFieldset_legend">Permissions</legend>
+                    <div class="mx_SettingsFieldset_content" id="permissions-card">
+                        <div data-settings-row="" id="permissions-list">${row("first")}${row("second")}</div>
                     </div>
-                </div>
-            `;
+                </fieldset>` + section("voice", "Audio input", row("microphone")),
+            );
+
+            for (const [card, content] of [
+                ["#permissions-card", "#permissions-list"],
+                ["#voice-content", "#microphone"],
+            ]) {
+                expect(box(content).top - box(card).top).toBe(4);
+                expect(box(card).bottom - box(content).bottom).toBe(4);
+            }
+        });
+    });
+
+    describe("fields", () => {
+        it("spans the startup dropdown and the system font field across the card", () => {
             renderTab(
                 theme,
                 section(
                     "preferences",
                     "",
                     subsection(
-                        "language",
-                        "Language",
-                        `<div class="mx_SettingsSubsection_dropdown">${dropdown("language-input")}</div>`,
-                    ) +
-                        subsection(
-                            "startup",
-                            "Startup",
-                            `<div class="mx_SettingsDropdown"><label class="mx_SettingsDropdown_label">Start</label>${dropdown("startup-input")}</div>`,
-                        ),
+                        "startup",
+                        "Startup",
+                        `<div class="mx_SettingsDropdown">
+                            <label class="mx_SettingsDropdown_label">Start</label>
+                            <div class="mx_Dropdown">
+                                <span class="mx_Dropdown_label" aria-hidden="true">Start</span>
+                                <div class="mx_AccessibleButton mx_Dropdown_input mx_no_textinput" role="button" id="startup-input">
+                                    <div class="mx_Dropdown_option">No</div>
+                                </div>
+                            </div>
+                        </div>`,
+                    ),
                 ) +
                     `<div class="mx_SettingsSubsection">
                         <div class="mx_SettingsSubsection_content mx_SettingsSubsection_contentStretch" id="font-card">
-                            <div class="mx_Field mx_Field_select mx_FontScalingPanel_Dropdown" id="font">
-                                <select id="font-select"><option>16 (default)</option></select>
-                                <label for="font-select">Font size</label>
-                            </div>
                             <form>
                                 <div class="mx_Field mx_Field_input mx_AppearanceUserSettingsTab_checkboxControlledField" id="custom">
                                     <input id="custom-input"><label for="custom-input">Font</label>
@@ -674,57 +721,12 @@ describe.each(THEMES.map(([theme]) => theme))("Settings groups in %s", (theme) =
             );
 
             for (const [card, field] of [
-                ["#language-card", "#language-input"],
                 ["#startup-card", "#startup-input"],
-                ["#font-card", "#font"],
                 ["#font-card", "#custom"],
             ]) {
                 const edges = contentBox(card);
                 expect([box(field).left, box(field).right]).toEqual([edges.left, edges.right]);
             }
-        });
-
-        it("puts a dropdown with a floating label 16px under the top of its card, 12px over its end, its help under it", () => {
-            const dropdown = (id: string, label: string, value: string): string => `
-                <div class="mx_SettingsSubsection_dropdown">
-                    <div class="mx_Dropdown mx_LanguageDropdown">
-                        <span class="mx_Dropdown_label" aria-hidden="true" id="${id}-floated">${label}</span>
-                        <div class="mx_AccessibleButton mx_Dropdown_input mx_no_textinput" role="button" id="${id}-input">
-                            <div class="mx_Dropdown_option">${value}</div>
-                        </div>
-                    </div>
-                </div>
-            `;
-            renderTab(
-                theme,
-                section(
-                    "preferences",
-                    "",
-                    `<form>${subsection(
-                        "language",
-                        "Language",
-                        dropdown("language", "Application language", "English"),
-                        "The app will reload after selecting another language",
-                    )}</form>` +
-                        `<form>${subsection(
-                            "time",
-                            "Displaying time",
-                            dropdown("timezone", "Set timezone", "Browser default") +
-                                fieldMarkup(
-                                    createElement(SettingsToggleInput, { name: "12h", label: "12 hour", id: "12h" }),
-                                ),
-                        )}</form>`,
-                ),
-            );
-
-            for (const id of ["language", "timezone"]) {
-                const card = box(`#${id === "language" ? "language" : "time"}-card`);
-                // As far as fields one under another, which leaves the floating label as far inside as other content
-                expect(box(`#${id}-input`).top - card.top).toBe(16);
-                expect(box(`#${id}-floated`).top - card.top).toBeGreaterThanOrEqual(8);
-            }
-            expect(box("#language-card").bottom - box("#language-input").bottom).toBe(12);
-            expect(box("#language-help").top - box("#language-card").bottom).toBe(8);
         });
 
         it("spans a copy field with a label, such as the room's ID, across the card", () => {

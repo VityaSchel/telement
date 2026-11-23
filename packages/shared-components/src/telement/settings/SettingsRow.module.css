@@ -1,0 +1,141 @@
+/*
+Copyright 2026 Viktor Shchelochkov
+
+SPDX-License-Identifier: AGPL-3.0-only OR GPL-3.0-only
+Please see LICENSE files in the repository root for full details.
+*/
+
+/*
+ * A row of a settings card, as Telegram for macOS draws its settings: 44px, its label at the start and what it holds at
+ * the end. It sits on the card's 16px content edge like a menu row on a menu's: its hover fill reaches 4px from the
+ * card's sides, rounded by 8 and so concentric with the card's 12px corners (TELEMENT.md, "Radius and spacing"), and
+ * what it holds stays on the content edge. At the card's top or bottom, the card's padding there is the same 4px
+ * (`[data-settings-row]`, settingsGroupCard in the app's _common.pcss).
+ */
+.row,
+.list {
+    --settings-row-inset: calc(var(--cpd-space-4x) - var(--tl-inset-menu));
+}
+
+/* 44px: a 36px control, such as the field for a value of one's own, 4px from the row's top and bottom */
+.row {
+    display: flex;
+    align-items: center;
+    gap: var(--cpd-space-3x);
+    box-sizing: border-box;
+    inline-size: calc(100% + 2 * var(--settings-row-inset));
+    max-inline-size: none;
+    min-block-size: calc(var(--tl-control-size) + var(--cpd-space-2x));
+    margin-inline: calc(-1 * var(--settings-row-inset));
+    margin-block: 0;
+    padding: var(--cpd-space-2x) var(--settings-row-inset);
+    border: none;
+    border-radius: var(--tl-radius-row);
+    background: none;
+    color: var(--settings-row-color, var(--cpd-color-text-primary));
+    font: var(--cpd-font-body-md-regular);
+    letter-spacing: var(--cpd-font-letter-spacing-body-md);
+    text-align: start;
+}
+
+/* Rows that follow each other touch, without the gaps the card leaves between its other content */
+.list {
+    display: flex;
+    flex-direction: column;
+    inline-size: 100%;
+}
+
+/* A row with an avatar is a 52px two-line row like Explore rooms': the 36px avatar 8px from its top and bottom, on the
+   content edge with the labels of the rows around it, and the name over its 13px second line centered beside it */
+.twoLine {
+    min-block-size: calc(36px + 2 * var(--cpd-space-2x));
+    padding-block: var(--cpd-space-1x);
+}
+
+.avatar {
+    flex: none;
+}
+
+.text {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-inline-size: 0;
+}
+
+.label {
+    overflow-wrap: anywhere;
+}
+
+/* A second line in 13px secondary text, a Matrix ID drawn as typed */
+.description {
+    overflow: hidden;
+    color: var(--cpd-color-text-secondary);
+    font: var(--cpd-font-body-sm-regular);
+    letter-spacing: var(--cpd-font-letter-spacing-body-sm);
+    font-feature-settings: var(--tl-font-feature-settings-identifier);
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+/* The value and the chevron at the row's end, 4px apart, the value cut short before it takes more than half the row */
+.end {
+    display: flex;
+    flex: 0 1 auto;
+    align-items: center;
+    gap: var(--cpd-space-1x);
+    min-inline-size: 0;
+    max-inline-size: 50%;
+}
+
+.value {
+    overflow: hidden;
+    color: var(--cpd-color-text-secondary);
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+/* A menu icon's size, pulled out by the room its glyph leaves after it, so that what is drawn ends on the content edge
+   as a menu's chevrons do: Compound's down chevron leaves 6.425 of its 24 units, the right one 9 */
+.chevron {
+    flex: none;
+    inline-size: var(--cpd-space-4x);
+    block-size: var(--cpd-space-4x);
+    color: var(--cpd-color-icon-secondary);
+    margin-inline-end: calc(-1 * var(--cpd-space-4x) * 6.425 / 24);
+}
+
+.chevronRight {
+    margin-inline-end: calc(-1 * var(--cpd-space-4x) * 9 / 24);
+}
+
+/* A row that does something takes the row hover and pressed fills, as menu items do. Keyboard focus is Compound's ring
+   inside the fill, with the hover fill, only while the keyboard is in use (what-input in the app) */
+.interactive {
+    &:focus-visible {
+        outline: none;
+    }
+
+    :root:not([data-whatintent="mouse"]) &:focus-visible {
+        outline: var(--cpd-border-width-2) solid var(--cpd-color-border-focused);
+        outline-offset: calc(-1 * var(--cpd-border-width-2));
+        background-color: var(--settings-row-hovered, var(--cpd-color-bg-action-secondary-hovered));
+    }
+
+    @media (hover) {
+        &:hover {
+            background-color: var(--settings-row-hovered, var(--cpd-color-bg-action-secondary-hovered));
+        }
+    }
+
+    /* Pressed, and while the menu it opened is open */
+    &:active,
+    &[data-state="open"] {
+        background-color: var(--settings-row-pressed, var(--cpd-color-bg-action-secondary-pressed));
+    }
+
+    &:disabled {
+        background-color: transparent;
+        color: var(--cpd-color-text-disabled);
+    }
+}

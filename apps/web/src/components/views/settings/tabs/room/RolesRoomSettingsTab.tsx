@@ -7,6 +7,7 @@ Please see LICENSE files in the repository root for full details.
 */
 
 import React, { type JSX } from "react";
+import { ValueRowList } from "@element-hq/web-shared-components";
 import { EventType, type RoomMember, type RoomState, RoomStateEvent, type Room } from "matrix-js-sdk/src/matrix";
 import { logger } from "matrix-js-sdk/src/logger";
 import { throttle, get, set } from "lodash";
@@ -16,7 +17,6 @@ import { _t, _td } from "../../../../../languageHandler";
 import AccessibleButton from "../../../elements/AccessibleButton";
 import Modal from "../../../../../Modal";
 import ErrorDialog from "../../../dialogs/ErrorDialog";
-import PowerSelector from "../../../elements/PowerSelector";
 import SettingsFieldset from "../../SettingsFieldset";
 import SdkConfig, { DEFAULTS } from "../../../../../SdkConfig";
 import { AddPrivilegedUsers } from "../../AddPrivilegedUsers";
@@ -26,6 +26,7 @@ import MatrixClientContext from "../../../../../contexts/MatrixClientContext";
 import { PowerLevelSelector } from "../../PowerLevelSelector";
 import { ElementCallEventType, ElementCallMemberEventType } from "../../../../../call-types";
 import { objectClone } from "../../../../../utils/objects.ts";
+import { PowerLevelRow } from "../../../../../telement/settings/PowerLevelRow";
 
 interface IEventShowOpts {
     isState?: boolean;
@@ -402,18 +403,17 @@ export default class RolesRoomSettingsTab extends React.Component<IProps, RolesR
                 }
 
                 const value = parseIntWithDefault(get(plContent, key), descriptor.defaultValue);
+                // Telement: a value row, as Telegram lists settings with a value (PowerLevelRow)
                 return (
-                    <div key={key}>
-                        <PowerSelector
-                            label={descriptor.desc}
-                            value={value}
-                            usersDefault={defaultUserLevel}
-                            maxValue={currentUserLevel}
-                            disabled={!canChangeLevels || currentUserLevel < value}
-                            powerLevelKey={key} // Will be sent as the second parameter to `onChange`
-                            onChange={this.onPowerLevelsChanged}
-                        />
-                    </div>
+                    <PowerLevelRow
+                        key={key}
+                        label={descriptor.desc}
+                        value={value}
+                        usersDefault={defaultUserLevel}
+                        maxValue={currentUserLevel}
+                        disabled={!canChangeLevels || currentUserLevel < value}
+                        onChange={(level) => this.onPowerLevelsChanged(level, key)}
+                    />
                 );
             })
             .filter(Boolean);
@@ -440,17 +440,15 @@ export default class RolesRoomSettingsTab extends React.Component<IProps, RolesR
                     label = _t("room_settings|permissions|send_event_type", { eventType });
                 }
                 return (
-                    <div key={eventType}>
-                        <PowerSelector
-                            label={label}
-                            value={eventsLevels[eventType]}
-                            usersDefault={defaultUserLevel}
-                            maxValue={currentUserLevel}
-                            disabled={!canChangeLevels || currentUserLevel < eventsLevels[eventType]}
-                            powerLevelKey={EVENTS_LEVEL_PREFIX + eventType}
-                            onChange={this.onPowerLevelsChanged}
-                        />
-                    </div>
+                    <PowerLevelRow
+                        key={eventType}
+                        label={label}
+                        value={eventsLevels[eventType]}
+                        usersDefault={defaultUserLevel}
+                        maxValue={currentUserLevel}
+                        disabled={!canChangeLevels || currentUserLevel < eventsLevels[eventType]}
+                        onChange={(level) => this.onPowerLevelsChanged(level, EVENTS_LEVEL_PREFIX + eventType)}
+                    />
                 );
             })
             .filter(Boolean);
@@ -471,8 +469,11 @@ export default class RolesRoomSettingsTab extends React.Component<IProps, RolesR
                                     : _t("room_settings|permissions|permissions_section_description_room")
                             }
                         >
-                            {powerSelectors}
-                            {eventPowerSelectors}
+                            {/* Telement: one under another without gaps, as Telegram lists its rows */}
+                            <ValueRowList>
+                                {powerSelectors}
+                                {eventPowerSelectors}
+                            </ValueRowList>
                         </SettingsFieldset>
                     )}
                 </SettingsSection>

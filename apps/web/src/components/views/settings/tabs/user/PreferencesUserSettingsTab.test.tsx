@@ -10,7 +10,7 @@ Please see LICENSE files in the repository root for full details.
 
 import React from "react";
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import { fireEvent, render, type RenderResult, screen, within } from "test-utils-rtl";
+import { fireEvent, render, type RenderResult, screen, waitFor, within } from "test-utils-rtl";
 import {
     getMockClientWithEventEmitter,
     mockClientMethodsServer,
@@ -47,35 +47,28 @@ describe("PreferencesUserSettingsTab", () => {
         PlatformPeg.get()!.reload = reloadStub;
 
         renderTab();
-        const languageDropdown = await screen.findByRole("button", { name: "Application language" });
-        expect(languageDropdown).toBeInTheDocument();
+        const languageRow = await screen.findByRole("button", { name: /^Application language/ });
+        expect(languageRow).toBeInTheDocument();
 
-        await userEvent.click(languageDropdown);
+        await userEvent.click(languageRow);
 
-        const germanOption = await screen.findByText("Deutsch");
+        const germanOption = await screen.findByRole("menuitemradio", { name: "Deutsch" });
         await userEvent.click(germanOption);
         expect(reloadStub).toHaveBeenCalled();
     });
 
-    it("shows the language and timezone labels on their dropdowns rather than above them", async () => {
+    it("shows the language and the time zone as value rows, the label at the start and the value at the end", async () => {
         renderTab();
 
-        const language = await screen.findByRole("button", { name: "Application language" });
-        const timezone = screen.getByRole("button", { name: "Set timezone" });
-        for (const [dropdown, label] of [
-            [language, "Application language"],
-            [timezone, "Set timezone"],
-        ] as const) {
-            const root = dropdown.closest(".mx_Dropdown")!;
-            expect(root.querySelector(".mx_Dropdown_label")).toHaveTextContent(label);
-            const textAbove = [...root.parentElement!.childNodes].filter((node) => node.nodeType === Node.TEXT_NODE);
-            expect(textAbove).toHaveLength(0);
-        }
+        const language = await screen.findByRole("button", { name: /^Application language/ });
+        await waitFor(() => expect(language).toHaveTextContent("Application languageEnglish"));
+        expect(screen.getByRole("button", { name: /^Set timezone/ })).toHaveTextContent(/^Set timezoneBrowser default/);
+        expect(document.querySelector(".mx_Dropdown")).toBeNull();
     });
 
     it("puts the language's reload hint under its card, as the help of its group", async () => {
         renderTab();
-        const language = await screen.findByRole("button", { name: "Application language" });
+        const language = await screen.findByRole("button", { name: /^Application language/ });
         const hint = screen.getByText("The app will reload after selecting another language");
 
         expect(hint.closest(".mx_SettingsSubsection_description")).not.toBeNull();
@@ -93,26 +86,16 @@ describe("PreferencesUserSettingsTab", () => {
         renderTab();
 
         expect(await screen.findByText(/Browser default/)).toBeInTheDocument();
-        const timezoneDropdown = await screen.findByRole("button", { name: "Set timezone" });
-        await userEvent.click(timezoneDropdown);
+        const timezoneRow = await screen.findByRole("button", { name: /^Set timezone/ });
+        await userEvent.click(timezoneRow);
 
-        // Without filtering `expect(screen.queryByRole("option" ...` take over 1s.
-        await fireEvent.change(screen.getByRole("combobox", { name: "Set timezone" }), {
-            target: { value: "Africa/Abidjan" },
-        });
+        // The menu lists the browser's default first, then every time zone
+        const options = screen.getAllByRole("menuitemradio");
+        expect(options[0]).toHaveTextContent(/Browser default/);
+        expect(options[0]).toHaveAttribute("aria-checked", "true");
+        fireEvent.click(screen.getByRole("menuitemradio", { name: "Europe/Paris" }));
 
-        expect(screen.queryByRole("option", { name: "Africa/Abidjan" })).toBeInTheDocument();
-        expect(screen.queryByRole("option", { name: "Europe/Paris" })).not.toBeInTheDocument();
-
-        await fireEvent.change(screen.getByRole("combobox", { name: "Set timezone" }), {
-            target: { value: "Europe/Paris" },
-        });
-
-        expect(screen.queryByRole("option", { name: "Africa/Abidjan" })).not.toBeInTheDocument();
-        const option = await screen.getByRole("option", { name: "Europe/Paris" });
-        await userEvent.click(option);
-
-        expect(await screen.findByText("Europe/Paris")).toBeInTheDocument();
+        await waitFor(() => expect(timezoneRow).toHaveTextContent("Set timezoneEurope/Paris"));
     });
 
     it("should not show spell check setting if unsupported", async () => {

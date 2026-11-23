@@ -22,4 +22,5 @@ export * from "./core/icons/DoubleCheckIcon";
 export * from "./core/useOpenOnPress";
 export * from "./room-list/RoomListSyncStatusView";
 export * from "./media/VideoLightboxView";
+export * from "./settings/ValueRowView";
 export * from "./media/MediaDownloadProgressView";

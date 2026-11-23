@@ -7,15 +7,13 @@ SPDX-License-Identifier: AGPL-3.0-only OR GPL-3.0-only OR LicenseRef-Element-Com
 Please see LICENSE files in the repository root for full details.
 */
 
-import React, { type ChangeEvent, type JSX, type ReactElement, useCallback, useEffect, useState } from "react";
+import React, { type ChangeEvent, type JSX, useCallback, useEffect, useState } from "react";
 import { SettingsToggleInput } from "@vector-im/compound-web";
 import { type EmptyObject } from "matrix-js-sdk/src/matrix";
 
-import { type NonEmptyArray } from "../../../../../@types/common";
 import { _t, getCurrentLanguage } from "../../../../../languageHandler";
 import SettingsStore from "../../../../../settings/SettingsStore";
 import Field from "../../../elements/Field";
-import Dropdown from "../../../elements/Dropdown";
 import { SettingLevel } from "../../../../../settings/SettingLevel";
 import SettingsFlag from "../../../elements/SettingsFlag";
 import AccessibleButton from "../../../elements/AccessibleButton";
@@ -27,24 +25,40 @@ import SdkConfig from "../../../../../SdkConfig";
 import { SettingsSubsection } from "../../shared/SettingsSubsection";
 import SettingsTab from "../SettingsTab";
 import { SettingsSection } from "../../shared/SettingsSection";
-import LanguageDropdown from "../../../elements/LanguageDropdown";
+import { getAllLanguagesWithLabels } from "../../../../../i18n/utils";
 import PlatformPeg from "../../../../../PlatformPeg";
 import { IS_MAC } from "../../../../../Keyboard";
 import SpellCheckSettings from "../../SpellCheckSettings";
 import * as TimezoneHandler from "../../../../../TimezoneHandler";
 import { type BooleanSettingKey, type SettingKey } from "../../../../../settings/Settings.tsx";
 import SettingsDropdown from "../../../elements/SettingsDropdown.tsx";
+import { SettingsValueRow } from "../../../../../telement/settings/SettingsValueRow";
 
 interface IState {
     timezone: string | undefined;
-    timezones: string[];
     autocompleteDelay: string;
     readMarkerInViewThresholdMs: string;
     readMarkerOutOfViewThresholdMs: string;
 }
 
+type Languages = Awaited<ReturnType<typeof getAllLanguagesWithLabels>>;
+
 const LanguageSection: React.FC = () => {
     const [language, setLanguage] = useState(getCurrentLanguage());
+    const [languages, setLanguages] = useState<Languages | null>(null);
+
+    useEffect(() => {
+        let cancelled = false;
+        void getAllLanguagesWithLabels()
+            .then((langs) => langs.sort((a, b) => a.labelInTargetLanguage.localeCompare(b.labelInTargetLanguage)))
+            .catch((): Languages => [{ value: "en", label: "English", labelInTargetLanguage: "English" }])
+            .then((langs) => {
+                if (!cancelled) setLanguages(langs);
+            });
+        return () => {
+            cancelled = true;
+        };
+    }, []);
 
     const onLanguageChange = useCallback(
         (newLanguage: string) => {
@@ -61,14 +75,15 @@ const LanguageSection: React.FC = () => {
         [language],
     );
 
+    // Telement: a value row, each language in its own name, as the language dropdown listed them
     return (
-        <div className="mx_SettingsSubsection_dropdown">
-            <LanguageDropdown
-                onOptionChange={onLanguageChange}
-                value={language}
-                label={_t("settings|general|application_language")}
-            />
-        </div>
+        <SettingsValueRow
+            label={_t("settings|general|application_language")}
+            options={(languages ?? []).map((lang) => ({ key: lang.value, label: lang.labelInTargetLanguage }))}
+            selectedKey={language}
+            disabled={languages === null}
+            onSelect={onLanguageChange}
+        />
     );
 };
 
@@ -179,7 +194,6 @@ export default class PreferencesUserSettingsTab extends React.Component<EmptyObj
 
         this.state = {
             timezone: TimezoneHandler.getUserTimezone(),
-            timezones: TimezoneHandler.getAllTimezones(),
             autocompleteDelay: SettingsStore.getValueAt(SettingLevel.DEVICE, "autocompleteDelay").toString(10),
             readMarkerInViewThresholdMs: SettingsStore.getValueAt(
                 SettingLevel.DEVICE,
@@ -195,20 +209,6 @@ export default class PreferencesUserSettingsTab extends React.Component<EmptyObj
     private onTimezoneChange = (tz: string): void => {
         this.setState({ timezone: tz });
         void TimezoneHandler.setUserTimezone(tz);
-    };
-
-    /**
-     * If present filter the time zones matching the search term
-     */
-    private onTimezoneSearchChange = (search: string): void => {
-        const timezoneSearch = search.toLowerCase();
-        const timezones = timezoneSearch
-            ? TimezoneHandler.getAllTimezones().filter((tz) => {
-                  return tz.toLowerCase().includes(timezoneSearch);
-              })
-            : TimezoneHandler.getAllTimezones();
-
-        this.setState({ timezones });
     };
 
     private onAutocompleteDelayChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
@@ -255,11 +255,11 @@ export default class PreferencesUserSettingsTab extends React.Component<EmptyObj
 
         const brand = SdkConfig.get().brand;
 
-        const timezones = this.state.timezones.map((tz) => {
-            return <div key={tz}>{tz}</div>;
-        });
         // Always prepend the default option
-        timezones.unshift(<div key="">{browserTimezoneLabel}</div>);
+        const timezones = [
+            { key: "", label: browserTimezoneLabel },
+            ...TimezoneHandler.getAllTimezones().map((tz) => ({ key: tz, label: tz })),
+        ];
 
         return (
             <SettingsTab data-testid="mx_PreferencesUserSettingsTab">
@@ -343,22 +343,13 @@ export default class PreferencesUserSettingsTab extends React.Component<EmptyObj
                     </SettingsSubsection>
 
                     <SettingsSubsection heading={_t("settings|preferences|time_heading")} formWrap>
-                        <div className="mx_SettingsSubsection_dropdown">
-                            <Dropdown
-                                id="mx_dropdownUserTimezone"
-                                className="mx_dropdownUserTimezone"
-                                data-testid="mx_dropdownUserTimezone"
-                                searchEnabled={true}
-                                value={this.state.timezone}
-                                label={_t("settings|preferences|user_timezone")}
-                                showLabel
-                                placeholder={browserTimezoneLabel}
-                                onOptionChange={this.onTimezoneChange}
-                                onSearchChange={this.onTimezoneSearchChange}
-                            >
-                                {timezones as NonEmptyArray<ReactElement & { key: string }>}
-                            </Dropdown>
-                        </div>
+                        {/* Telement: a value row, as Telegram lists settings with a value */}
+                        <SettingsValueRow
+                            label={_t("settings|preferences|user_timezone")}
+                            options={timezones}
+                            selectedKey={this.state.timezone ?? ""}
+                            onSelect={this.onTimezoneChange}
+                        />
 
                         {this.renderGroup(PreferencesUserSettingsTab.TIME_SETTINGS)}
                     </SettingsSubsection>

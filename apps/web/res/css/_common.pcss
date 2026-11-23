@@ -83,6 +83,16 @@ Please see LICENSE files in the repository root for full details.
     /* Visible in high contrast themes, and in forced colors, which drop the fill */
     outline: 1px solid var(--tl-color-border-settings-card);
     outline-offset: -1px;
+
+    /* A row at the card's top or bottom (ValueRowView, ActionRowView), in a form or not, has its hover fill 4px from
+       the card's edge there, as it has at the card's sides and as a menu's rows have, concentric with the 12px corners */
+    &:has(> [data-settings-row]:first-child, > form:first-child > [data-settings-row]:first-child) {
+        padding-block-start: var(--tl-inset-menu);
+    }
+
+    &:has(> [data-settings-row]:last-child, > form:last-child > [data-settings-row]:last-child) {
+        padding-block-end: var(--tl-inset-menu);
+    }
 }
 
 @define-mixin settingsGroupHelp {

@@ -47,6 +47,32 @@ describe("RolesRoomSettingsTab", () => {
         room = mkStubRoom(roomId, "test room", cli);
     });
 
+    /** A member of the room at a power level, as the tab reads it. */
+    const member = (powerLevel: number): RoomMember =>
+        ({ powerLevel, name: "Alice", getMxcAvatarUrl: () => undefined }) as unknown as RoomMember;
+
+    /** The value row of a power level (PowerLevelRow), a button unless it can't be changed. */
+    const powerRow = (label: string): HTMLElement =>
+        screen.queryByRole("button", { name: new RegExp(`^${label} `) }) ??
+        screen.getByText(label, { selector: "span" }).closest<HTMLElement>("[aria-disabled]")!;
+
+    /** The value a power level's row shows. */
+    const valueOf = (label: string): string | null => powerRow(label).lastElementChild!.textContent;
+
+    /** Chooses a level in a power level's menu. */
+    const chooseLevel = async (label: string, level: string): Promise<void> => {
+        await userEvent.click(powerRow(label));
+        await userEvent.click(screen.getByRole("menuitemradio", { name: level }));
+    };
+
+    /** The levels a power level's menu offers. */
+    const optionsOf = async (label: string): Promise<(string | null)[]> => {
+        await userEvent.click(powerRow(label));
+        const options = screen.getAllByRole("menuitemradio").map((option) => option.textContent);
+        await userEvent.keyboard("{Escape}");
+        return options;
+    };
+
     it("should allow an Admin to demote themselves but not others", async () => {
         vi.mocked(cli.getRoom).mockReturnValue(room);
         // @ts-ignore - mocked doesn't support overloads properly
@@ -84,43 +110,27 @@ describe("RolesRoomSettingsTab", () => {
             SdkConfig.reset();
         });
 
-        const getStartCallSelect = (tab: RenderResult): HTMLSelectElement => {
-            return tab.container.querySelector("select[label='Start Element Call calls']")!;
-        };
-
-        // Happy-dom does not support the `:checked` CSS pseudo-class for <option> elements,
-        // so we use the standard `selectedOptions` DOM API instead of a `:checked`
-        // CSS query to find the currently-selected option.
-        const getStartCallSelectedOption = (tab: RenderResult): HTMLElement => {
-            return getStartCallSelect(tab)?.selectedOptions[0];
-        };
-
-        const getJoinCallSelect = (tab: RenderResult): HTMLSelectElement => {
-            return tab.container.querySelector("select[label='Join Element Call calls']")!;
-        };
-
-        const getJoinCallSelectedOption = (tab: RenderResult): HTMLElement => {
-            return getJoinCallSelect(tab)?.selectedOptions[0];
-        };
+        const START_CALLS = "Start Element Call calls";
+        const JOIN_CALLS = "Join Element Call calls";
 
         describe("Element Call enabled", () => {
             beforeEach(() => {
                 setGroupCallsEnabled(true);
+                vi.mocked(room.getMember).mockReturnValue(member(100));
             });
 
             describe("Join Element calls", () => {
                 it("defaults to moderator for joining calls", async () => {
-                    expect(getJoinCallSelectedOption(await renderTab())?.textContent).toBe("Moderator");
+                    await renderTab();
+                    expect(valueOf(JOIN_CALLS)).toBe("Moderator");
                 });
 
                 it("can change joining calls power level", async () => {
-                    const tab = await renderTab();
+                    await renderTab();
 
-                    fireEvent.change(getJoinCallSelect(tab), {
-                        target: { value: "0" },
-                    });
+                    await chooseLevel(JOIN_CALLS, "Default");
 
-                    expect(getJoinCallSelectedOption(tab)?.textContent).toBe("Default");
+                    expect(valueOf(JOIN_CALLS)).toBe("Default");
                     expect(cli.sendStateEvent).toHaveBeenCalledWith(roomId, EventType.RoomPowerLevels, {
                         events: {
                             [ElementCallMemberEventType.name]: 0,
@@ -131,17 +141,16 @@ describe("RolesRoomSettingsTab", () => {
 
             describe("Start Element calls", () => {
                 it("defaults to moderator for starting calls", async () => {
-                    expect(getStartCallSelectedOption(await renderTab())?.textContent).toBe("Moderator");
+                    await renderTab();
+                    expect(valueOf(START_CALLS)).toBe("Moderator");
                 });
 
                 it("can change starting calls power level", async () => {
-                    const tab = await renderTab();
+                    await renderTab();
 
-                    fireEvent.change(getStartCallSelect(tab), {
-                        target: { value: "0" },
-                    });
+                    await chooseLevel(START_CALLS, "Default");
 
-                    expect(getStartCallSelectedOption(tab)?.textContent).toBe("Default");
+                    expect(valueOf(START_CALLS)).toBe("Default");
                     expect(cli.sendStateEvent).toHaveBeenCalledWith(roomId, EventType.RoomPowerLevels, {
                         events: {
                             [ElementCallEventType.name]: 0,
@@ -154,13 +163,10 @@ describe("RolesRoomSettingsTab", () => {
         it("hides when group calls disabled", async () => {
             setGroupCallsEnabled(false);
 
-            const tab = await renderTab();
+            await renderTab();
 
-            expect(getStartCallSelect(tab)).toBeFalsy();
-            expect(getStartCallSelectedOption(tab)).toBeFalsy();
-
-            expect(getJoinCallSelect(tab)).toBeFalsy();
-            expect(getJoinCallSelectedOption(tab)).toBeFalsy();
+            expect(screen.queryByText(START_CALLS)).toBeNull();
+            expect(screen.queryByText(JOIN_CALLS)).toBeNull();
         });
     });
 
@@ -214,6 +220,21 @@ describe("RolesRoomSettingsTab", () => {
         });
     });
 
+    it("should roll back a permission's power level change on error", async () => {
+        const deferred = Promise.withResolvers<ISendEventResponse>();
+        vi.mocked(cli.sendStateEvent).mockReturnValue(deferred.promise);
+        vi.mocked(cli.getRoom).mockReturnValue(room);
+        vi.mocked(room.currentState.mayClientSendStateEvent).mockReturnValue(true);
+        vi.mocked(room.getMember).mockReturnValue(member(100));
+        await renderTab();
+
+        await chooseLevel("Remove users", "Default");
+        expect(valueOf("Remove users")).toBe("Default");
+
+        deferred.reject("Error");
+        await waitFor(() => expect(valueOf("Remove users")).toBe("Moderator"));
+    });
+
     it("should roll back power level change on error", async () => {
         const deferred = Promise.withResolvers<ISendEventResponse>();
         vi.mocked(cli.sendStateEvent).mockReturnValue(deferred.promise);
@@ -260,10 +281,10 @@ describe("RolesRoomSettingsTab", () => {
         vi.mocked(cli.sendStateEvent).mockResolvedValue({ event_id: "$eventId" });
         vi.mocked(cli.getRoom).mockReturnValue(room);
         vi.mocked(room.currentState.mayClientSendStateEvent).mockReturnValue(true);
-        const { container } = await renderTab();
+        vi.mocked(room.getMember).mockReturnValue(member(100));
+        await renderTab();
 
-        const selector = container.querySelector(`[placeholder="Change topic"]`)!;
-        fireEvent.change(selector, { target: { value: "0" } });
+        await chooseLevel("Change topic", "Default");
 
         expect(cli.sendStateEvent).toHaveBeenCalledWith(
             room.roomId,
@@ -304,12 +325,12 @@ describe("RolesRoomSettingsTab", () => {
             return null;
         });
         vi.mocked(room.currentState.mayClientSendStateEvent).mockReturnValue(true);
-        vi.mocked(room.getMember).mockReturnValue({ powerLevel: 100 } as any);
+        vi.mocked(room.getMember).mockReturnValue(member(100));
 
         await renderTab();
         expect(powerLevels()).toEqual(originalContent);
 
-        fireEvent.change(screen.getByRole("combobox", { name: "Change topic" }), { target: { value: "0" } });
+        await chooseLevel("Change topic", "Default");
         expect(powerLevels()).toEqual(originalContent);
 
         // Only the level the user actually changed is sent, rather than every default we displayed
@@ -323,10 +344,10 @@ describe("RolesRoomSettingsTab", () => {
         vi.mocked(cli.sendStateEvent).mockResolvedValue({ event_id: "$eventId" });
         vi.mocked(cli.getRoom).mockReturnValue(room);
         vi.mocked(room.currentState.mayClientSendStateEvent).mockReturnValue(true);
-        const { container } = await renderTab();
+        vi.mocked(room.getMember).mockReturnValue(member(100));
+        await renderTab();
 
-        const selector = container.querySelector(`[placeholder="Remove users"]`)!;
-        fireEvent.change(selector, { target: { value: "0" } });
+        await chooseLevel("Remove users", "Default");
 
         expect(cli.sendStateEvent).toHaveBeenCalledWith(
             room.roomId,
@@ -355,21 +376,18 @@ describe("RolesRoomSettingsTab", () => {
                 return null;
             });
             vi.mocked(room.currentState.mayClientSendStateEvent).mockReturnValue(true);
-            vi.mocked(room.getMember).mockReturnValue({ powerLevel: myLevel } as any);
+            vi.mocked(room.getMember).mockReturnValue(member(myLevel));
         };
-
-        const optionsOf = (container: HTMLElement, label: string): (string | null)[] =>
-            Array.from(container.querySelectorAll(`[placeholder="${label}"] option`)).map((o) => o.textContent);
 
         it("does not offer a moderator power levels above their own", async () => {
             mockPowerLevels(
                 { users: { [cli.getUserId()!]: 50 }, state_default: 50, events: { [EventType.RoomTopic]: 50 } },
                 50,
             );
-            const { container } = await renderTab();
+            await renderTab();
 
-            expect(optionsOf(container, "Change settings")).toEqual(["Default", "Moderator", "Custom level"]);
-            expect(optionsOf(container, "Change topic")).toEqual(["Default", "Moderator", "Custom level"]);
+            expect(await optionsOf("Change settings")).toEqual(["Default", "Moderator", "Custom…"]);
+            expect(await optionsOf("Change topic")).toEqual(["Default", "Moderator", "Custom…"]);
         });
 
         it("offers an admin every power level", async () => {
@@ -377,17 +395,18 @@ describe("RolesRoomSettingsTab", () => {
                 { users: { [cli.getUserId()!]: 100 }, state_default: 50, events: { [EventType.RoomTopic]: 50 } },
                 100,
             );
-            const { container } = await renderTab();
+            await renderTab();
 
-            expect(optionsOf(container, "Change settings")).toEqual(["Default", "Moderator", "Admin", "Custom level"]);
+            expect(await optionsOf("Change settings")).toEqual(["Default", "Moderator", "Admin", "Custom…"]);
         });
 
         it("keeps showing a level above the user's own when it is already set", async () => {
             mockPowerLevels({ users: { [cli.getUserId()!]: 50 }, state_default: 100 }, 50);
-            const { container } = await renderTab();
+            await renderTab();
 
-            expect(optionsOf(container, "Change settings")).toEqual(["Default", "Moderator", "Admin", "Custom level"]);
-            expect(container.querySelector(`[placeholder="Change settings"]`)).toBeDisabled();
+            // A level above the user's own can't be changed: its row shows it without a menu
+            expect(valueOf("Change settings")).toBe("Admin");
+            expect(powerRow("Change settings")).toHaveAttribute("aria-disabled", "true");
         });
     });
 });

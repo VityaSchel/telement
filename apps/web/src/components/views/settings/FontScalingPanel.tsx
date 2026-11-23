@@ -16,8 +16,8 @@ import { MatrixClientPeg } from "../../../MatrixClientPeg";
 import { SettingLevel } from "../../../settings/SettingLevel";
 import { _t } from "../../../languageHandler";
 import { SettingsSubsection } from "./shared/SettingsSubsection";
-import Field from "../elements/Field";
 import { FontWatcher } from "../../../settings/watchers/FontWatcher";
+import { SettingsValueRow } from "../../../telement/settings/SettingsValueRow";
 
 interface IState {
     browserFontSize: number;
@@ -102,28 +102,29 @@ export default class FontScalingPanel extends React.Component<EmptyObject, IStat
     };
 
     public render(): React.ReactNode {
+        const options = this.sizes.map((size) => ({
+            key: this.computeDeltaFontSize(size).toString(),
+            label:
+                size === this.state.browserFontSize
+                    ? _t("settings|appearance|font_size_default", { fontSize: size })
+                    : size.toString(),
+        }));
+
+        // Telement: the size is a value row named "Font size", as Telegram's Text Size row, so the group has no label
+        // saying it again; the preview under it shows the size chosen
         return (
-            <SettingsSubsection
-                heading={_t("settings|appearance|font_size")}
-                stretchContent
-                data-testid="mx_FontScalingPanel"
-            >
-                {/* The group's label names the dropdown, so it has no floated label repeating it */}
-                <Field
-                    element="select"
-                    className="mx_FontScalingPanel_Dropdown"
-                    aria-label={_t("settings|appearance|font_size")}
-                    value={this.state.fontSizeDelta.toString()}
-                    onChange={(e) => this.onFontSizeChanged(e.target.value)}
-                >
-                    {this.sizes.map((size) => (
-                        <option key={size} value={this.computeDeltaFontSize(size)}>
-                            {size === this.state.browserFontSize
-                                ? _t("settings|appearance|font_size_default", { fontSize: size })
-                                : size}
-                        </option>
-                    ))}
-                </Field>
+            <SettingsSubsection stretchContent data-testid="mx_FontScalingPanel">
+                <SettingsValueRow
+                    label={_t("settings|appearance|font_size")}
+                    options={options}
+                    selectedKey={this.state.fontSizeDelta.toString()}
+                    value={
+                        options.some((option) => option.key === this.state.fontSizeDelta.toString())
+                            ? undefined
+                            : (this.state.browserFontSize + this.state.fontSizeDelta).toString()
+                    }
+                    onSelect={this.onFontSizeChanged}
+                />
                 <EventTilePreview
                     className="mx_FontScalingPanel_preview"
                     message={this.MESSAGE_PREVIEW_TEXT}
