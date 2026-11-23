@@ -9,8 +9,9 @@ Please see LICENSE files in the repository root for full details.
 .mx_SpaceChildrenPicker {
     margin: 16px 0;
 
+    /* Telement: radios one under another are 12px apart, as Compound's radios in a list are in settings */
     .mx_StyledRadioButton + .mx_StyledRadioButton {
-        margin-top: 16px;
+        margin-top: var(--cpd-space-3x);
     }
 
     .mx_SearchBox {

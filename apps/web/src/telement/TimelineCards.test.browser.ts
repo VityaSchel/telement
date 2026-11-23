@@ -493,8 +493,8 @@ describe("Timeline cards", () => {
             expect(option.right - bar.right).toBe(13);
             // The vote count ends where the bar does, and the label's line starts as far from the top
             expect(countEnd).toBe(dir === "ltr" ? bar.right : bar.left);
-            // After the 20px radio and its 8px gap
-            expect(Math.abs(labelStart - (dir === "ltr" ? option.left : option.right))).toBe(41);
+            // After the 20px radio and its 12px gap, as every radio's label
+            expect(Math.abs(labelStart - (dir === "ltr" ? option.left : option.right))).toBe(45);
             expect(label.top - option.top).toBe(13);
         });
     });

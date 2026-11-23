@@ -43,6 +43,8 @@ import aliasSettingsStyles from "../../res/css/views/room_settings/_AliasSetting
 import betaCardStyles from "../../res/css/views/beta/_BetaCard.pcss?raw";
 import createRoomDialogStyles from "../../res/css/views/dialogs/_CreateRoomDialog.pcss?raw";
 import exportDialogStyles from "../../res/css/views/dialogs/_ExportDialog.pcss?raw";
+import serverPickerDialogStyles from "../../res/css/views/dialogs/_ServerPickerDialog.pcss?raw";
+import spaceChildrenPickerStyles from "../../res/css/views/spaces/_SpaceChildrenPicker.pcss?raw";
 import accessibleButtonStyles from "../../res/css/views/elements/_AccessibleButton.pcss?raw";
 import copyableTextStyles from "../../res/css/views/elements/_CopyableText.pcss?raw";
 import dropdownStyles from "../../res/css/views/elements/_Dropdown.pcss?raw";
@@ -71,6 +73,8 @@ const APP_STYLES = [
     // Before the copy field and radio rules they override, as in the app's bundle (_components.pcss)
     viewSourceStyles,
     exportDialogStyles,
+    serverPickerDialogStyles,
+    spaceChildrenPickerStyles,
     accessibleButtonStyles,
     fieldStyles,
     dropdownStyles,
@@ -716,6 +720,24 @@ describe.each(THEMES.map(([theme]) => theme))("Settings content in %s", (theme) 
             expect(box("#radio-Members").top - box("#radio-Invited").bottom).toBe(12);
             expect(box("#radio-Anyone").top - box("#radio-Members").bottom).toBe(12);
         });
+
+        /** A dialog's list of radios, as StyledRadioGroup renders it in the export dialog, the server picker and the
+         * leave space dialog's SpaceChildrenPicker. */
+        it.each([
+            ["the export dialog", `<div class="mx_ExportDialog"><div class="mx_ExportDialog_options">%s</div></div>`],
+            ["the server picker", `<div class="mx_ServerPickerDialog"><div class="mx_Dialog_content">%s</div></div>`],
+            ["the space children picker", `<div class="mx_SpaceChildrenPicker">%s</div>`],
+        ])(
+            "start the label 12px after the radio and keep the radios 12px apart in %s, as in settings",
+            (_name, dialog) => {
+                render(theme, dialog.replace("%s", radio("HTML", true) + radio("Text", false) + radio("JSON", false)));
+                const ring = box("#radio-HTML input + div");
+
+                expect(textStart("#radio-HTML .mx_StyledRadioButton_content") - ring.right).toBe(12);
+                expect(box("#radio-Text").top - box("#radio-HTML").bottom).toBe(12);
+                expect(box("#radio-JSON").top - box("#radio-Text").bottom).toBe(12);
+            },
+        );
     });
 
     describe("disclosures", () => {

@@ -69,9 +69,9 @@ Please see LICENSE files in the repository root for full details.
         align-items: center;
     }
 
-    .mx_StyledRadioButton > .mx_StyledRadioButton_content {
-        margin-top: 5px;
-        margin-bottom: 5px;
+    /* Telement: radios one under another are 12px apart, as Compound's radios in a list are in settings */
+    .mx_StyledRadioButton + .mx_StyledRadioButton {
+        margin-top: var(--cpd-space-3x);
     }
 
     .mx_Field {
