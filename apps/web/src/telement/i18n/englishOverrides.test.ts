@@ -179,6 +179,8 @@ describe("registerEnglishOverrides", () => {
         );
         // A value row is named after what it sets, so its label doesn't say to set it
         expect(_t("settings|preferences|user_timezone")).toBe("Time zone");
+        // Spelled as that row is
+        expect(_t("settings|preferences|publish_timezone")).toBe("Publish time zone on public profile");
     });
 
     it("leaves the translations of other languages alone", async () => {

@@ -681,6 +681,10 @@
         "upstream": "Audio and Video calls",
         "telement": "Audio and video calls"
     },
+    "settings|preferences|publish_timezone": {
+        "upstream": "Publish timezone on public profile",
+        "telement": "Publish time zone on public profile"
+    },
     "settings|preferences|rm_lifetime": {
         "upstream": "Read Marker lifetime (ms)",
         "telement": "Read marker lifetime (ms)"
