@@ -486,14 +486,14 @@ describe.each(THEMES.map(([theme]) => theme))("Settings content in %s", (theme) 
                     <div class="mx_SettingsSubsectionHeading">
                         <h3 class="mx_Heading_h4 mx_SettingsSubsectionHeading_heading">Versions</h3>
                     </div>
-                    <div class="mx_SettingsSubsection_content">
+                    <div class="mx_SettingsSubsection_content" id="versions-card">
                         <div class="mx_SettingsSubsection_text">
                             ${copyField("Telement version: 1.12.33<br>Crypto version: Rust SDK 0.19.1<br>")}
                         </div>
-                        <div role="button" tabindex="0" id="update"
-                            class="mx_AccessibleButton mx_AccessibleButton_hasKind mx_AccessibleButton_kind_primary_outline">
+                        <button data-settings-row="" id="update"
+                            style="display: block; box-sizing: border-box; height: 44px; width: calc(100% + 24px); margin: 0 -12px">
                             Check for update
-                        </div>
+                        </button>
                     </div>
                 </div>
                 <div class="mx_SettingsSubsection" id="credits">
@@ -549,12 +549,13 @@ describe.each(THEMES.map(([theme]) => theme))("Settings content in %s", (theme) 
             expect(box("#token").top - (summary.bottom + summaryGap + warningLine)).toBe(8);
         });
 
-        it("puts Check for update 16px under the versions and indents the credits' bullets 20px", () => {
+        it("puts the Check for update row 16px under the versions, ending the card 4px over its edge, and indents the credits' bullets 20px", () => {
             renderHelp();
 
             const card = document.querySelector("#credits .mx_SettingsSubsection_content")!;
 
             expect(box("#update").top - box("#copy").bottom).toBe(16);
+            expect(box("#versions-card").bottom - box("#update").bottom).toBe(4);
             expect(
                 box("#bullet").left -
                     (card.getBoundingClientRect().left + parseFloat(getComputedStyle(card).paddingLeft)),
