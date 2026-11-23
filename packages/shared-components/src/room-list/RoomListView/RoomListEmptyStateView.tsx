@@ -9,6 +9,7 @@ import React, { type JSX, type PropsWithChildren, type ReactNode } from "react";
 import { Button } from "@vector-im/compound-web";
 import ChatIcon from "@vector-im/compound-design-tokens/assets/web/icons/chat";
 import RoomIcon from "@vector-im/compound-design-tokens/assets/web/icons/room";
+import FilterIcon from "@vector-im/compound-design-tokens/assets/web/icons/filter";
 
 import { Flex } from "../../core/utils/Flex";
 import { _t } from "../../core/i18n/i18n";
@@ -62,51 +63,38 @@ export const RoomListEmptyStateView: React.FC<RoomListEmptyStateViewProps> = ({ 
         );
     }
 
-    // Handle different filter cases based on filter ID
-    switch (snapshot.activeFilterId) {
+    // Every filter with no rooms offers to clear it, so an empty filter is never a dead end
+    const activeFilterId = snapshot.activeFilterId;
+    const onClearFilters = (): void => vm.onToggleFilter(activeFilterId);
+    switch (activeFilterId) {
         case "people":
             return (
-                <GenericPlaceholder
+                <FilterPlaceholder
                     title={_t("room_list|empty|no_people")}
                     description={_t("room_list|empty|no_people_description")}
+                    onClearFilters={onClearFilters}
                 />
             );
         case "rooms":
             return (
-                <GenericPlaceholder
+                <FilterPlaceholder
                     title={_t("room_list|empty|no_rooms")}
                     description={_t("room_list|empty|no_rooms_description")}
+                    onClearFilters={onClearFilters}
                 />
             );
         case "unread":
-            return (
-                <ActionPlaceholder
-                    title={_t("room_list|empty|no_unread")}
-                    action={_t("room_list|empty|show_chats")}
-                    onAction={() => vm.onToggleFilter(snapshot.activeFilterId!)}
-                />
-            );
+            return <FilterPlaceholder title={_t("room_list|empty|no_unread")} onClearFilters={onClearFilters} />;
         case "invites":
-            return (
-                <ActionPlaceholder
-                    title={_t("room_list|empty|no_invites")}
-                    action={_t("room_list|empty|show_activity")}
-                    onAction={() => vm.onToggleFilter(snapshot.activeFilterId!)}
-                />
-            );
+            return <FilterPlaceholder title={_t("room_list|empty|no_invites")} onClearFilters={onClearFilters} />;
         case "mentions":
-            return (
-                <ActionPlaceholder
-                    title={_t("room_list|empty|no_mentions")}
-                    action={_t("room_list|empty|show_activity")}
-                    onAction={() => vm.onToggleFilter(snapshot.activeFilterId!)}
-                />
-            );
+            return <FilterPlaceholder title={_t("room_list|empty|no_mentions")} onClearFilters={onClearFilters} />;
         default:
             return (
-                <GenericPlaceholder
+                <FilterPlaceholder
                     title={_t("room_list|empty|no_chats")}
                     description={_t("room_list|empty|no_chats_description")}
+                    onClearFilters={onClearFilters}
                 />
             );
     }
@@ -141,27 +129,27 @@ function GenericPlaceholder({ title, description, children }: PropsWithChildren<
     );
 }
 
-interface ActionPlaceholderProps {
+interface FilterPlaceholderProps {
     /** The title to display */
     title: string;
-    /** The action button text */
-    action: string;
-    /** Callback when the action button is clicked */
-    onAction?: () => void;
+    /** The description of the placeholder */
+    description?: string;
+    /** Called when the "Clear filters" button is clicked */
+    onClearFilters: () => void;
 }
 
 /**
- * A placeholder for the room list when a filter is active
- * The user can take action to toggle the filter
+ * A placeholder for the room list when the active filter has no rooms, with a button that clears the filter, in the
+ * outline style of the unfiltered list's buttons.
  */
-function ActionPlaceholder({ title, action, onAction }: ActionPlaceholderProps): JSX.Element {
+function FilterPlaceholder({ title, description, onClearFilters }: FilterPlaceholderProps): JSX.Element {
     return (
-        <GenericPlaceholder title={title}>
-            {onAction && (
-                <Button kind="tertiary" onClick={onAction}>
-                    {action}
+        <GenericPlaceholder title={title} description={description}>
+            <Flex className={styles.defaultPlaceholder} align="center" justify="center" direction="column">
+                <Button size="md" kind="secondary" Icon={FilterIcon} onClick={onClearFilters}>
+                    {_t("telement|room_list|clear_filters")}
                 </Button>
-            )}
+            </Flex>
         </GenericPlaceholder>
     );
 }

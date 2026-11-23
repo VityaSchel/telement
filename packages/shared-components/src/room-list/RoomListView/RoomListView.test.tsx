@@ -128,31 +128,25 @@ describe("<RoomListView />", () => {
         expect(Empty.args.createChatRoom).toHaveBeenCalled();
     });
 
-    it("should call onToggleFilter when Show all chats is clicked in unread empty state", async () => {
+    it.each([
+        ["people", EmptyPeopleFilter],
+        ["rooms", EmptyRoomsFilter],
+        ["unread", EmptyUnreadFilter],
+        ["invites", EmptyInvitesFilter],
+        ["mentions", EmptyMentionsFilter],
+        // The unread story with the low priority filter on, whose empty state is the unfiltered list's text
+        ["low_priority", EmptyUnreadFilter],
+    ] as const)("offers only to clear filters when the %s filter has no rooms", async (filterId, Story) => {
         const user = userEvent.setup();
-        renderWithMockContext(<EmptyUnreadFilter />);
+        renderWithMockContext(<Story filterIds={[filterId]} activeFilterId={filterId} />);
+        const placeholder = screen.getByTestId("empty-room-list");
 
-        await user.click(screen.getByRole("button", { name: "Show all chats" }));
+        expect([...placeholder.querySelectorAll("button")].map((button) => button.textContent)).toEqual([
+            "Clear filters",
+        ]);
+        await user.click(screen.getByRole("button", { name: "Clear filters" }));
 
-        expect(EmptyUnreadFilter.args.onToggleFilter).toHaveBeenCalled();
-    });
-
-    it("should call onToggleFilter when See all activity is clicked in invites empty state", async () => {
-        const user = userEvent.setup();
-        renderWithMockContext(<EmptyInvitesFilter />);
-
-        await user.click(screen.getByRole("button", { name: "See all activity" }));
-
-        expect(EmptyInvitesFilter.args.onToggleFilter).toHaveBeenCalled();
-    });
-
-    it("should call onToggleFilter when See all activity is clicked in mentions empty state", async () => {
-        const user = userEvent.setup();
-        renderWithMockContext(<EmptyMentionsFilter />);
-
-        await user.click(screen.getByRole("button", { name: "See all activity" }));
-
-        expect(EmptyMentionsFilter.args.onToggleFilter).toHaveBeenCalled();
+        expect(Story.args.onToggleFilter).toHaveBeenLastCalledWith(filterId);
     });
 
     it("should call scrollToUnreadActivity when the unread activity toast is clicked", async () => {

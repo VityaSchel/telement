@@ -328,11 +328,8 @@ test.describe("Room list filters and sort", () => {
             },
         );
 
-        [
-            { filter: "Unread", action: "Show all chats" },
-            { filter: "Mentions", action: "See all activity" },
-            { filter: "Invites", action: "See all activity" },
-        ].forEach(({ filter, action }) => {
+        // Every empty filter offers to clear it
+        ["Unread", "Mentions", "Invites", "People", "Rooms"].forEach((filter) => {
             test(
                 `should render the placeholder for ${filter} filter`,
                 { tag: "@screenshot" },
@@ -345,24 +342,8 @@ test.describe("Room list filters and sort", () => {
                     const emptyRoomList = getEmptyRoomList(page);
                     await expect(emptyRoomList).toMatchScreenshot(`${filter}-empty-room-list.png`);
 
-                    await emptyRoomList.getByRole("button", { name: action }).click();
+                    await emptyRoomList.getByRole("button", { name: "Clear filters" }).click();
                     await expect(primaryFilters.getByRole("option", { name: filter })).not.toBeChecked();
-                },
-            );
-        });
-
-        ["People", "Rooms"].forEach((filter) => {
-            test(
-                `should render the placeholder for ${filter} filter`,
-                { tag: "@screenshot" },
-                async ({ page, app, user }) => {
-                    const primaryFilters = getPrimaryFilters(page);
-                    await getFilterExpandButton(page).click();
-
-                    await primaryFilters.getByRole("option", { name: filter }).click();
-
-                    const emptyRoomList = getEmptyRoomList(page);
-                    await expect(emptyRoomList).toMatchScreenshot(`${filter}-empty-room-list.png`);
                 },
             );
         });

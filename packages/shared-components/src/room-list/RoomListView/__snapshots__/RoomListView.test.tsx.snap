@@ -2616,15 +2616,32 @@ exports[`<RoomListView /> > renders EmptyInvitesFilter story 1`] = `
           >
             You don't have any unread invites
           </span>
-          <button
-            class="_button_1nw83_8"
-            data-kind="tertiary"
-            data-size="lg"
-            role="button"
-            tabindex="0"
+          <div
+            class="Flex-module_flex RoomListEmptyStateView-module_defaultPlaceholder"
+            style="--mx-flex-display: flex; --mx-flex-direction: column; --mx-flex-align: center; --mx-flex-justify: center; --mx-flex-gap: 0; --mx-flex-wrap: nowrap;"
           >
-            See all activity
-          </button>
+            <button
+              class="_button_1nw83_8 _has-icon_1nw83_60"
+              data-kind="secondary"
+              data-size="md"
+              role="button"
+              tabindex="0"
+            >
+              <svg
+                aria-hidden="true"
+                fill="currentColor"
+                height="20"
+                viewBox="0 0 24 24"
+                width="20"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M5 7a1 1 0 0 0 0 2h14a1 1 0 1 0 0-2zm3 4a1 1 0 1 0 0 2h8a1 1 0 1 0 0-2zm2 5a1 1 0 0 1 1-1h2a1 1 0 1 1 0 2h-2a1 1 0 0 1-1-1"
+                />
+              </svg>
+              Clear filters
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -2690,15 +2707,32 @@ exports[`<RoomListView /> > renders EmptyMentionsFilter story 1`] = `
           >
             You don't have any unread mentions
           </span>
-          <button
-            class="_button_1nw83_8"
-            data-kind="tertiary"
-            data-size="lg"
-            role="button"
-            tabindex="0"
+          <div
+            class="Flex-module_flex RoomListEmptyStateView-module_defaultPlaceholder"
+            style="--mx-flex-display: flex; --mx-flex-direction: column; --mx-flex-align: center; --mx-flex-justify: center; --mx-flex-gap: 0; --mx-flex-wrap: nowrap;"
           >
-            See all activity
-          </button>
+            <button
+              class="_button_1nw83_8 _has-icon_1nw83_60"
+              data-kind="secondary"
+              data-size="md"
+              role="button"
+              tabindex="0"
+            >
+              <svg
+                aria-hidden="true"
+                fill="currentColor"
+                height="20"
+                viewBox="0 0 24 24"
+                width="20"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M5 7a1 1 0 0 0 0 2h14a1 1 0 1 0 0-2zm3 4a1 1 0 1 0 0 2h8a1 1 0 1 0 0-2zm2 5a1 1 0 0 1 1-1h2a1 1 0 1 1 0 2h-2a1 1 0 0 1-1-1"
+                />
+              </svg>
+              Clear filters
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -2769,6 +2803,32 @@ exports[`<RoomListView /> > renders EmptyPeopleFilter story 1`] = `
           >
             You can deselect filters in order to see your other chats
           </span>
+          <div
+            class="Flex-module_flex RoomListEmptyStateView-module_defaultPlaceholder"
+            style="--mx-flex-display: flex; --mx-flex-direction: column; --mx-flex-align: center; --mx-flex-justify: center; --mx-flex-gap: 0; --mx-flex-wrap: nowrap;"
+          >
+            <button
+              class="_button_1nw83_8 _has-icon_1nw83_60"
+              data-kind="secondary"
+              data-size="md"
+              role="button"
+              tabindex="0"
+            >
+              <svg
+                aria-hidden="true"
+                fill="currentColor"
+                height="20"
+                viewBox="0 0 24 24"
+                width="20"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M5 7a1 1 0 0 0 0 2h14a1 1 0 1 0 0-2zm3 4a1 1 0 1 0 0 2h8a1 1 0 1 0 0-2zm2 5a1 1 0 0 1 1-1h2a1 1 0 1 1 0 2h-2a1 1 0 0 1-1-1"
+                />
+              </svg>
+              Clear filters
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -2839,6 +2899,32 @@ exports[`<RoomListView /> > renders EmptyRoomsFilter story 1`] = `
           >
             You can deselect filters in order to see your other chats
           </span>
+          <div
+            class="Flex-module_flex RoomListEmptyStateView-module_defaultPlaceholder"
+            style="--mx-flex-display: flex; --mx-flex-direction: column; --mx-flex-align: center; --mx-flex-justify: center; --mx-flex-gap: 0; --mx-flex-wrap: nowrap;"
+          >
+            <button
+              class="_button_1nw83_8 _has-icon_1nw83_60"
+              data-kind="secondary"
+              data-size="md"
+              role="button"
+              tabindex="0"
+            >
+              <svg
+                aria-hidden="true"
+                fill="currentColor"
+                height="20"
+                viewBox="0 0 24 24"
+                width="20"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M5 7a1 1 0 0 0 0 2h14a1 1 0 1 0 0-2zm3 4a1 1 0 1 0 0 2h8a1 1 0 1 0 0-2zm2 5a1 1 0 0 1 1-1h2a1 1 0 1 1 0 2h-2a1 1 0 0 1-1-1"
+                />
+              </svg>
+              Clear filters
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -2904,15 +2990,32 @@ exports[`<RoomListView /> > renders EmptyUnreadFilter story 1`] = `
           >
             Congrats! You don’t have any unread messages
           </span>
-          <button
-            class="_button_1nw83_8"
-            data-kind="tertiary"
-            data-size="lg"
-            role="button"
-            tabindex="0"
+          <div
+            class="Flex-module_flex RoomListEmptyStateView-module_defaultPlaceholder"
+            style="--mx-flex-display: flex; --mx-flex-direction: column; --mx-flex-align: center; --mx-flex-justify: center; --mx-flex-gap: 0; --mx-flex-wrap: nowrap;"
           >
-            Show all chats
-          </button>
+            <button
+              class="_button_1nw83_8 _has-icon_1nw83_60"
+              data-kind="secondary"
+              data-size="md"
+              role="button"
+              tabindex="0"
+            >
+              <svg
+                aria-hidden="true"
+                fill="currentColor"
+                height="20"
+                viewBox="0 0 24 24"
+                width="20"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M5 7a1 1 0 0 0 0 2h14a1 1 0 1 0 0-2zm3 4a1 1 0 1 0 0 2h8a1 1 0 1 0 0-2zm2 5a1 1 0 0 1 1-1h2a1 1 0 1 1 0 2h-2a1 1 0 0 1-1-1"
+                />
+              </svg>
+              Clear filters
+            </button>
+          </div>
         </div>
       </div>
     </div>

@@ -190,9 +190,7 @@
             "no_people_description": "You can deselect filters in order to see your other chats",
             "no_rooms": "You’re not in any room yet",
             "no_rooms_description": "You can deselect filters in order to see your other chats",
-            "no_unread": "Congrats! You don’t have any unread messages",
-            "show_activity": "See all activity",
-            "show_chats": "Show all chats"
+            "no_unread": "Congrats! You don’t have any unread messages"
         },
         "expand_filters": "Expand filter list",
         "filters": {
@@ -252,6 +250,7 @@
             "a11y": {
                 "pinned": "Pinned"
             },
+            "clear_filters": "Clear filters",
             "draft_preview": "<label>Draft:</label> %(draft)s",
             "message_preview": "<sender>%(senderName)s:</sender> %(message)s",
             "more_options": {
