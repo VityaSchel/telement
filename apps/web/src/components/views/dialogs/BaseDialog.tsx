@@ -106,6 +106,9 @@ export default class BaseDialog extends React.Component<IProps> {
     }
 
     private onKeyDown = (e: KeyboardEvent | React.KeyboardEvent): void => {
+        // Something inside has already acted on the key, such as a menu that Escape closed and that still fades out
+        if (e.defaultPrevented) return;
+
         this.props.onKeyDown?.(e);
 
         const action = getKeyBindingsManager().getAccessibilityAction(e);
