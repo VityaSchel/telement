@@ -100,7 +100,7 @@ import lightHighContrastTheme from "../../res/themes/light-high-contrast/css/_li
 import legacyLightTheme from "../../res/themes/legacy-light/css/_legacy-light.pcss?raw";
 import legacyDarkTheme from "../../res/themes/legacy-dark/css/_legacy-dark.pcss?raw";
 import { toBrowserCss } from "../test/telement/browserCss";
-import { tokenColor } from "../test/telement/computedStyle";
+import { mouseButton, settledStyle, tokenColor } from "../test/telement/computedStyle";
 
 interface Theme {
     name: string;
@@ -419,6 +419,23 @@ const POLL = `
             </div>
         </div>
         <div class="mx_MPollBody_totalVotes">Based on 3 votes</div>
+    </fieldset>
+`;
+
+/** A poll in a bubble that is still open and has no votes, so that its option can be chosen. */
+const OPEN_POLL = `
+    <fieldset class="mx_MPollBody mx_MPollBody_bubble">
+        <legend>Where shall we eat?</legend>
+        <div class="mx_MPollBody_allOptions">
+            <div class="mx_PollOption">
+                <div class="mx_StyledRadioButton mx_PollOption_live-option mx_StyledRadioButton_enabled">
+                    <label class="mx_StyledRadioButton_innerLabel"><input type="radio" name="poll"><div><div></div></div></label>
+                    <div class="mx_StyledRadioButton_content"><div class="mx_PollOption_content"><div>Pizza</div><div class="mx_PollOption_optionVoteCount"></div></div></div>
+                </div>
+                <div class="mx_PollOption_popularityBackground"><div class="mx_PollOption_popularityAmount" style="width: 0%"></div></div>
+            </div>
+        </div>
+        <div class="mx_MPollBody_totalVotes">No votes cast</div>
     </fieldset>
 `;
 
@@ -801,6 +818,47 @@ describe("Your own bubbles", () => {
             expect(color(list.querySelector(".mx_MPollBody_edited"))).toBe(theme.secondary);
             expect(getComputedStyle(list.querySelector(".mx_MPollBody_edited")!).opacity).toBe("1");
         });
+
+        it.each([
+            ["your own", true],
+            ["another person's", false],
+        ])(
+            "deepens the ring of a poll option's radio in %s bubble while pointed at, fills it while pressed, and never fills the option",
+            async (_name, own) => {
+                const list = render(tile(OPEN_POLL, { own }));
+                const option = list.querySelector<HTMLElement>(".mx_PollOption")!;
+                const ring = list.querySelector<HTMLElement>("input + div")!;
+                const deep = own ? WHITE : tokenColor("--cpd-color-border-accent-primary", ring.parentElement!);
+
+                expect(getComputedStyle(ring).borderTopWidth).toBe("1px");
+
+                // Anywhere a click votes, the bar included
+                await userEvent.hover(list.querySelector(".mx_PollOption_popularityBackground")!);
+                const hovered = settledStyle(ring);
+                expect(hovered.borderTopWidth).toBe("2px");
+                expect(hovered.borderTopColor).toBe(deep);
+                expect(hovered.boxShadow).toBe("none");
+                expect(hovered.backgroundColor).toBe(TRANSPARENT);
+                expect(fill(ring.firstElementChild)).toBe(TRANSPARENT);
+                expect(fill(option)).toBe(TRANSPARENT);
+
+                await mouseButton("mousePressed", option);
+                try {
+                    const pressed = settledStyle(ring);
+                    expect(pressed.borderTopWidth).toBe("2px");
+                    expect(pressed.borderTopColor).toBe(deep);
+                    expect(pressed.backgroundColor).toBe(
+                        tokenColor(
+                            own ? "--tl-color-bg-bubble-own-subtle-hovered" : "--tl-color-bg-badge-accent-hovered",
+                            ring.parentElement!,
+                        ),
+                    );
+                    expect(fill(option)).toBe(TRANSPARENT);
+                } finally {
+                    await mouseButton("mouseReleased", option);
+                }
+            },
+        );
 
         it("draws a link preview's card in translucent white with white text, its description included", () => {
             const list = render(tile(PREVIEW));

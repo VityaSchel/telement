@@ -83,6 +83,34 @@ $poll-max-width: 550px;
         .mx_MPollBody_totalVotes {
             padding-block: 0;
         }
+
+        /* An option has no fill of its own to deepen, so pointing at it, anywhere a click votes, deepens its radio's
+           ring instead: 2px in the accent, white in your own bubbles, without Compound's dot and shadow. Pressing it
+           also fills the ring with the accent's light tint, a translucent white in your own bubbles. */
+        .mx_PollOption:not(.mx_PollOption_checked, .mx_PollOption_ended) {
+            @media (hover) {
+                &:hover input[type="radio"]:enabled:not(:checked) + div {
+                    border-width: 2px;
+                    border-color: var(--cpd-color-border-accent-primary);
+                    box-shadow: none;
+
+                    > div {
+                        background: none;
+                    }
+                }
+            }
+
+            &:active input[type="radio"]:enabled:not(:checked) + div {
+                border-width: 2px;
+                border-color: var(--cpd-color-border-accent-primary);
+                box-shadow: none;
+                background-color: var(--tl-color-bg-badge-accent-hovered);
+
+                > div {
+                    background: none;
+                }
+            }
+        }
     }
 }
 
