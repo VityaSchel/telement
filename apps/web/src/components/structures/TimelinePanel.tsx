@@ -131,9 +131,6 @@ interface IProps {
 
     onEventScrolledIntoView?(eventId?: string): void;
 
-    // callback which is called when the read-up-to mark is updated.
-    onReadMarkerUpdated?(): void;
-
     // callback which is called when we wish to paginate the timeline window.
     onPaginationRequest?(timelineWindow: TimelineWindow, direction: string, size: number): Promise<boolean>;
 
@@ -708,7 +705,6 @@ class TimelinePanel extends React.Component<IProps, IState> {
                 liveEvents,
             };
 
-            let callRMUpdated = false;
             if (this.props.manageReadMarkers) {
                 // when a new event arrives when the user is not watching the
                 // window, but the window is in its auto-scroll mode, make sure the
@@ -719,7 +715,6 @@ class TimelinePanel extends React.Component<IProps, IState> {
                 // more than the timeout on userActiveRecently.
                 //
                 const myUserId = MatrixClientPeg.safeGet().credentials.userId;
-                callRMUpdated = false;
                 if (ev.getSender() !== myUserId && !UserActivity.sharedInstance().userActiveRecently()) {
                     updatedState.readMarkerVisible = true;
                 } else if (lastLiveEvent && this.getReadMarkerPosition() === 0) {
@@ -729,15 +724,11 @@ class TimelinePanel extends React.Component<IProps, IState> {
                     void this.setReadMarker(lastLiveEvent.getId() ?? null, lastLiveEvent.getTs(), true);
                     updatedState.readMarkerVisible = false;
                     updatedState.readMarkerEventId = lastLiveEvent.getId();
-                    callRMUpdated = true;
                 }
             }
 
             this.setState(updatedState as IState, () => {
                 this.messagePanel.current?.updateTimelineMinHeight();
-                if (callRMUpdated) {
-                    this.props.onReadMarkerUpdated?.();
-                }
             });
         });
     };
@@ -864,12 +855,9 @@ class TimelinePanel extends React.Component<IProps, IState> {
         // XXX: roomReadMarkerTsMap not updated here so it is now inconsistent. Replace
         // this mechanism of determining where the RM is relative to the view-port with
         // one supported by the server (the client needs more than an event ID).
-        this.setState(
-            {
-                readMarkerEventId: ev.getContent().event_id,
-            },
-            this.props.onReadMarkerUpdated,
-        );
+        this.setState({
+            readMarkerEventId: ev.getContent().event_id,
+        });
     };
 
     private onEventDecrypted = (ev: MatrixEvent): void => {
@@ -1334,17 +1322,6 @@ class TimelinePanel extends React.Component<IProps, IState> {
         return null;
     };
 
-    public canJumpToReadMarker = (): boolean => {
-        // 1. Do not show jump bar if neither the RM nor the RR are set.
-        // 3. We want to show the bar if the read-marker is off the top of the screen.
-        // 4. Also, if pos === null, the event might not be paginated - show the unread bar
-        const pos = this.getReadMarkerPosition();
-        const ret =
-            this.state.readMarkerEventId !== null && // 1.
-            (pos === null || pos < 0); // 3., 4.
-        return ret;
-    };
-
     /*
      * called by the parent component when PageUp/Down/etc is pressed.
      *
@@ -1758,10 +1735,7 @@ class TimelinePanel extends React.Component<IProps, IState> {
                 {
                     readMarkerEventId: eventId,
                 },
-                () => {
-                    this.props.onReadMarkerUpdated?.();
-                    resolve();
-                },
+                resolve,
             );
         });
     }

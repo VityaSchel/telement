@@ -22,6 +22,8 @@ import compoundDarkHcSemantic from "@vector-im/compound-design-tokens/assets/web
 // loaded from source
 // eslint-disable-next-line no-restricted-imports
 import eventTileViewStyles from "../../../../packages/shared-components/src/room/timeline/event-tile/EventTileView/EventTileView.module.css?raw";
+// eslint-disable-next-line no-restricted-imports
+import unreadMentionsButtonViewStyles from "../../../../packages/shared-components/src/telement/room/timeline/UnreadMentionsButtonView/UnreadMentionsButtonView.module.css?raw";
 // The package doesn't export its token stylesheet on its own
 // eslint-disable-next-line no-restricted-imports
 import telementTokens from "../../../../packages/shared-components/src/telement/tokens.css?raw";
@@ -29,6 +31,8 @@ import commonStyles from "../../res/css/_common.pcss?raw";
 import fontSizes from "../../res/css/_font-sizes.pcss?raw";
 import eventTileStyles from "../../res/css/views/rooms/_EventTile.pcss?raw";
 import focusRingStyles from "../../res/css/telement/FocusRing.pcss?raw";
+import unreadMentionsButtonStyles from "../../res/css/telement/_UnreadMentionsButton.pcss?raw";
+import jumpToBottomButtonStyles from "../../res/css/views/rooms/_JumpToBottomButton.pcss?raw";
 import lightTheme from "../../res/themes/light/css/_light.pcss?raw";
 import darkTheme from "../../res/themes/dark/css/_dark.pcss?raw";
 import lightHighContrastTheme from "../../res/themes/light-high-contrast/css/_light-high-contrast.pcss?raw";
@@ -117,6 +121,11 @@ function loadStyles({ reducedMotion }: { reducedMotion: boolean }): void {
         }
         @layer app-web { ${themed} }
     `;
+}
+
+/** A CSS module's stylesheet with its local class names prefixed by the module's name, as the library build does. */
+function moduleCss(source: string, name: string): string {
+    return source.replace(/\.(-?[_a-zA-Z][\w-]*)/g, `.${name}_$1`);
 }
 
 /** Shows the rows in a room timeline of the theme. */
@@ -388,6 +397,62 @@ describe("Timeline navigation", () => {
             // Its time is hidden while it is edited
             await tabTo(edited.querySelector<HTMLElement>(".mx_EventTile_body a")!);
             expect(getComputedStyle(edited, "::before").backgroundColor).toBe("rgba(0, 0, 0, 0)");
+        });
+    });
+
+    describe("the unread mentions button", () => {
+        beforeAll(() => {
+            stylesheet.textContent = `
+                @layer compound-tokens, compound-web, shared-components, app-web;
+                @layer compound-tokens { ${compoundBase} ${compoundSemantic} ${compoundLightTheme} ${compoundLightSemantic} }
+                @layer shared-components {
+                    ${telementTokens}
+                    ${moduleCss(unreadMentionsButtonViewStyles, "UnreadMentionsButtonView")}
+                }
+                @layer app-web {
+                    ${toBrowserCss(jumpToBottomButtonStyles, commonStyles, lightTheme)}
+                    ${toBrowserCss(unreadMentionsButtonStyles)}
+                }
+            `;
+        });
+
+        /** The timeline with the jump to bottom button, if shown, and the mentions button, as RoomView draws them. */
+        function renderButtons(jumpToBottom: boolean): { timeline: DOMRect; mentions: DOMRect; jump?: DOMRect } {
+            document.body.innerHTML = `
+                <main class="cpd-theme-light" style="position: relative; width: 600px; height: 400px">
+                    ${
+                        jumpToBottom
+                            ? `<div class="mx_JumpToBottomButton"><div class="mx_JumpToBottomButton_scrollDown" role="button"></div></div>`
+                            : ""
+                    }
+                    <div class="UnreadMentionsButtonView_unreadMentions mx_UnreadMentionsButton${jumpToBottom ? " mx_UnreadMentionsButton_stacked" : ""}">
+                        <button type="button" class="UnreadMentionsButtonView_button">@</button>
+                        <span class="UnreadMentionsButtonView_counter">2</span>
+                    </div>
+                </main>
+            `;
+            const box = (selector: string): DOMRect => document.querySelector(selector)!.getBoundingClientRect();
+            return {
+                timeline: box("main"),
+                mentions: box(".UnreadMentionsButtonView_button"),
+                jump: jumpToBottom ? box(".mx_JumpToBottomButton_scrollDown") : undefined,
+            };
+        }
+
+        it("stands 8px above the jump to bottom button, on its end", () => {
+            const { mentions, jump } = renderButtons(true);
+
+            expect(mentions.width).toBe(36);
+            expect(jump!.top - mentions.bottom).toBe(8);
+            expect(mentions.right).toBe(jump!.right);
+        });
+
+        it("takes the jump to bottom button's place while that is hidden", () => {
+            const { timeline, mentions } = renderButtons(false);
+
+            // Where the jump to bottom button's circle is: 24px from the timeline's bottom and end
+            expect(timeline.bottom - mentions.bottom).toBe(24);
+            expect(timeline.right - mentions.right).toBe(24);
         });
     });
 });

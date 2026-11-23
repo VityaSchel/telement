@@ -1958,7 +1958,6 @@
         "joining": "Joining…",
         "joining_room": "Joining room…",
         "joining_space": "Joining space…",
-        "jump_read_marker": "Scroll to first unread message.",
         "jump_to_bottom_button": "Scroll to most recent messages",
         "kick_reason": "Reason: %(reason)s",
         "kicked_by": "You were removed by %(memberName)s",

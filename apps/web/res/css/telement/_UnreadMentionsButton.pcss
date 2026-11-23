@@ -1,0 +1,21 @@
+/*
+Copyright 2026 Viktor Shchelochkov
+
+SPDX-License-Identifier: AGPL-3.0-only OR GPL-3.0-only
+Please see LICENSE files in the repository root for full details.
+*/
+
+/*
+ * Telegram's unread mentions button stands where the jump to bottom button's circle is, 24px from the timeline's bottom
+ * and end (_JumpToBottomButton.pcss), or 8px above that circle while it shows.
+ */
+.mx_UnreadMentionsButton {
+    position: absolute;
+    z-index: 1000;
+    right: var(--cpd-space-6x);
+    bottom: var(--cpd-space-6x);
+}
+
+.mx_UnreadMentionsButton_stacked {
+    bottom: calc(var(--cpd-space-6x) + var(--tl-control-size) + var(--cpd-space-2x));
+}

@@ -267,6 +267,13 @@
         "search_field": {
             "clear": "Clear search"
         },
+        "timeline": {
+            "next_unread_mention": "Next unread mention",
+            "unread_mentions": {
+                "one": "%(count)s unread mention",
+                "other": "%(count)s unread mentions"
+            }
+        },
         "video_lightbox": {
             "exit_full_screen": "Exit full screen",
             "forward": "Forward",

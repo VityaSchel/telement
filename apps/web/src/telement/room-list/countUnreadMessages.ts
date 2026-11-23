@@ -50,9 +50,9 @@ export function countUnreadMessages(room: Room): UnreadMessages {
 /**
  * Creates a push processor that applies the user's push rules without the room's mute rule.
  */
-function createUnmutedPushProcessor(room: Room): PushProcessor {
+export function createUnmutedPushProcessor(room: Room): PushProcessor {
     const { client, roomId } = room;
-    const pushRules: IPushRules | undefined = client.pushRules && {
+    const pushRules: IPushRules | undefined = client.pushRules?.global && {
         ...client.pushRules,
         global: {
             ...client.pushRules.global,

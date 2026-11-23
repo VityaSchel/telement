@@ -60,7 +60,7 @@ import RoomScrollStateStore, { type ScrollState } from "../../stores/RoomScrollS
 import WidgetEchoStore from "../../stores/WidgetEchoStore";
 import SettingsStore from "../../settings/SettingsStore";
 import { Layout } from "../../settings/enums/Layout";
-import AccessibleButton, { type ButtonEvent } from "../views/elements/AccessibleButton";
+import AccessibleButton from "../views/elements/AccessibleButton";
 import { TimelineRenderingType, MainSplitContentType } from "../../contexts/RoomContext";
 import { E2EStatus, shieldStatusForRoom } from "../../utils/ShieldUtils";
 import { Action } from "../../dispatcher/actions";
@@ -92,7 +92,6 @@ import ErrorDialog from "../views/dialogs/ErrorDialog";
 import UploadBar from "./UploadBar";
 import MessageComposer from "../views/rooms/MessageComposer";
 import JumpToBottomButton from "../views/rooms/JumpToBottomButton";
-import TopUnreadMessagesBar from "../views/rooms/TopUnreadMessagesBar";
 import { fetchInitialEvent } from "../../utils/EventUtils";
 import { type ComposerInsertPayload, ComposerType } from "../../dispatcher/payloads/ComposerInsertPayload";
 import AppsDrawer from "../views/rooms/AppsDrawer";
@@ -136,6 +135,7 @@ import { ModuleApi } from "../../modules/Api.ts";
 import { RoomUploadContextProvider } from "../../viewmodels/room/RoomUploadViewModel.tsx";
 import { EventPresentationContextProvider } from "../../utils/EventPresentationContextProvider";
 import { TimelineFloatingDate } from "../../telement/room/TimelineFloatingDate";
+import { UnreadMentionsButton } from "../../telement/room/UnreadMentionsButton";
 
 const DEBUG = false;
 const PREVENT_MULTIPLE_JITSI_WITHIN = 30_000;
@@ -240,7 +240,6 @@ export interface IRoomState {
     // the end of the live timeline. It has the effect of hiding the
     // 'scroll to bottom' knob, among a couple of other things.
     atEndOfLiveTimeline?: boolean;
-    showTopUnreadMessagesBar: boolean;
     statusBarVisible: boolean;
     // We load this later by asking the js-sdk to suggest a version for us.
     // This object is the result of Room#getRecommendedVersion()
@@ -472,7 +471,6 @@ export class RoomView extends React.Component<IRoomProps, IRoomState> {
             isPeeking: false,
             showRightPanel: false,
             joining: false,
-            showTopUnreadMessagesBar: false,
             statusBarVisible: false,
             canReact: false,
             canSendMessages: false,
@@ -1741,7 +1739,6 @@ export class RoomView extends React.Component<IRoomProps, IRoomState> {
                 atEndOfLiveTimeline: false,
             });
         }
-        this.updateTopUnreadMessagesBar();
     };
 
     private resetJumpToEvent = (eventId?: string): void => {
@@ -1972,24 +1969,6 @@ export class RoomView extends React.Component<IRoomProps, IRoomState> {
     // jump up to wherever our read marker is
     private jumpToReadMarker = (): void => {
         this.messagePanel?.jumpToReadMarker();
-    };
-
-    // update the read marker to match the read-receipt
-    private forgetReadMarker = (ev: ButtonEvent): void => {
-        ev.stopPropagation();
-        void this.messagePanel?.forgetReadMarker();
-    };
-
-    // decide whether or not the top 'unread messages' bar should be shown
-    private updateTopUnreadMessagesBar = (): void => {
-        if (!this.messagePanel) {
-            return;
-        }
-
-        const showBar = this.messagePanel.canJumpToReadMarker();
-        if (this.state.showTopUnreadMessagesBar != showBar) {
-            this.setState({ showTopUnreadMessagesBar: showBar });
-        }
     };
 
     // get the current scroll position of the room, so that it can be
@@ -2580,7 +2559,6 @@ export class RoomView extends React.Component<IRoomProps, IRoomState> {
                         eventPixelOffset={this.state.initialEventPixelOffset}
                         onScroll={this.onMessageListScroll}
                         onEventScrolledIntoView={this.resetJumpToEvent}
-                        onReadMarkerUpdated={this.updateTopUnreadMessagesBar}
                         showUrlPreview={this.state.showUrlPreview}
                         className={this.messagePanelClassNames}
                         membersLoaded={this.state.membersLoaded}
@@ -2598,13 +2576,6 @@ export class RoomView extends React.Component<IRoomProps, IRoomState> {
             }
         }
 
-        let topUnreadMessagesBar: JSX.Element | undefined;
-        // Do not show TopUnreadMessagesBar if we have search results showing, it makes no sense
-        if (this.state.showTopUnreadMessagesBar && !this.state.search) {
-            topUnreadMessagesBar = (
-                <TopUnreadMessagesBar onScrollUpClick={this.jumpToReadMarker} onCloseClick={this.forgetReadMarker} />
-            );
-        }
         let jumpToBottom;
         // Do not show JumpToBottomButton if we have search results showing, it makes no sense
         if (this.state.atEndOfLiveTimeline === false && !this.state.search) {
@@ -2614,6 +2585,14 @@ export class RoomView extends React.Component<IRoomProps, IRoomState> {
                     numUnreadMessages={this.state.numUnreadMessages}
                     onScrollToBottomClick={this.jumpToLiveTimeline}
                 />
+            );
+        }
+        // Telement: Telegram's unread mentions button, above the jump to bottom button while that shows. It takes the
+        // place of Element's jump to first unread message, which Shift+Page Up still does.
+        let unreadMentions: JSX.Element | undefined;
+        if (floatingDate) {
+            unreadMentions = (
+                <UnreadMentionsButton key={this.state.room.roomId} room={this.state.room} stacked={!!jumpToBottom} />
             );
         }
 
@@ -2661,8 +2640,8 @@ export class RoomView extends React.Component<IRoomProps, IRoomState> {
                         {pinnedMessageBanner}
                         <main className={timelineClasses} data-testid="timeline">
                             <FileDropTarget parent={this.roomView.current} />
-                            {topUnreadMessagesBar}
                             {jumpToBottom}
+                            {unreadMentions}
                             {messagePanel}
                             {floatingDate}
                             {searchResultsPanel}

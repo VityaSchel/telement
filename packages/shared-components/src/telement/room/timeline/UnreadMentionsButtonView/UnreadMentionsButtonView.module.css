@@ -1,0 +1,72 @@
+/*
+Copyright 2026 Viktor Shchelochkov
+
+SPDX-License-Identifier: AGPL-3.0-only OR GPL-3.0-only
+Please see LICENSE files in the repository root for full details.
+*/
+
+.unreadMentions {
+    position: relative;
+    inline-size: var(--tl-control-size);
+    block-size: var(--tl-control-size);
+}
+
+/* The timeline's jump to bottom button: an outlined circle around a 24px glyph, filled while hovered or pressed */
+.button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    inline-size: 100%;
+    block-size: 100%;
+    padding: 0;
+    border: 1.3px solid var(--cpd-color-icon-tertiary);
+    border-radius: 50%;
+    background: var(--cpd-color-bg-canvas-default);
+    color: var(--cpd-color-icon-tertiary);
+
+    svg {
+        inline-size: 24px;
+        block-size: 24px;
+    }
+
+    &:hover {
+        background: var(--cpd-color-bg-subtle-secondary);
+    }
+
+    &:active {
+        background: var(--cpd-color-bg-subtle-primary);
+    }
+}
+
+/*
+ * The room list's unread counter: 20px tall at the default font size, its digits trimmed to their cap height and padded
+ * by a whole number of pixels, so one digit makes a circle and more make a pill, white on the accent. It sits on the
+ * button's top end edge, its middle 6px in from the end and 4px down from the top.
+ */
+.counter {
+    --badge-inset: round(calc((1.25rem - 1cap) / 2), 1px);
+
+    position: absolute;
+    inset-block-start: calc(var(--cpd-space-1x) - (1cap / 2 + var(--badge-inset)));
+    inset-inline-end: calc(var(--cpd-space-1-5x) - (1cap / 2 + var(--badge-inset)));
+    box-sizing: content-box;
+    min-inline-size: 1cap;
+    block-size: 1cap;
+    padding: var(--badge-inset);
+    border-radius: var(--tl-radius-control);
+    font: var(--cpd-font-body-xs-semibold);
+    line-height: 1cap;
+    text-box: trim-both cap alphabetic;
+    text-align: center;
+    color: var(--tl-color-on-accent);
+    background-color: var(--cpd-color-bg-accent-rest);
+    pointer-events: none;
+}
+
+@media (forced-colors: active) {
+    /* Outlined in the system color, as forced colors drop the background */
+    .counter {
+        outline: 1px solid transparent;
+    }
+}
