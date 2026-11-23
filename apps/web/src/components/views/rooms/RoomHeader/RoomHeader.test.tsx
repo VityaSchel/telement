@@ -30,17 +30,7 @@ import {
 } from "matrix-js-sdk/src/matrix";
 import { KnownMembership } from "matrix-js-sdk/src/types";
 import { CryptoEvent, UserVerificationStatus } from "matrix-js-sdk/src/crypto-api";
-import {
-    act,
-    getAllByLabelText,
-    getByLabelText,
-    getByText,
-    queryByLabelText,
-    render,
-    type RenderOptions,
-    screen,
-    waitFor,
-} from "test-utils-rtl";
+import { act, getByLabelText, getByText, render, type RenderOptions, screen, waitFor } from "test-utils-rtl";
 import userEvent from "@testing-library/user-event";
 import { filterConsole, setupAsyncStoreWithClient, stubClient } from "test-utils";
 
@@ -373,8 +363,8 @@ describe("RoomHeader", () => {
 
         it("should not show call buttons in a room with more than 2 members", () => {
             mockRoomMembers(room, 3);
-            const { container } = render(<RoomHeader room={room} />, getWrapper());
-            expect(queryByLabelText(container, "Video call")).not.toBeInTheDocument();
+            render(<RoomHeader room={room} />, getWrapper());
+            expect(screen.queryByRole("button", { name: "Video call" })).not.toBeInTheDocument();
         });
     });
 
@@ -416,8 +406,8 @@ describe("RoomHeader", () => {
                 // The JS-SDK does not export the class `MatrixCall` only the type
                 {} as MatrixCall,
             );
-            const { container } = render(<RoomHeader room={room} />, getWrapper());
-            for (const button of getAllByLabelText(container, "Ongoing call")) {
+            render(<RoomHeader room={room} />, getWrapper());
+            for (const button of screen.getAllByRole("button", { name: "Ongoing call" })) {
                 expect(button).toHaveAttribute("aria-disabled", "true");
             }
         });
@@ -542,8 +532,8 @@ describe("RoomHeader", () => {
                 // The JS-SDK does not export the class `MatrixCall` only the type
                 {} as MatrixCall,
             );
-            const { container } = render(<RoomHeader room={room} />, getWrapper());
-            for (const button of getAllByLabelText(container, "Ongoing call")) {
+            render(<RoomHeader room={room} />, getWrapper());
+            for (const button of screen.getAllByRole("button", { name: "Ongoing call" })) {
                 expect(button).toHaveAttribute("aria-disabled", "true");
             }
         });
@@ -614,9 +604,9 @@ describe("RoomHeader", () => {
             vi.spyOn(CallStore.prototype, "connectedCalls", "get").mockReturnValue(
                 new Set([{ roomId: "some_other_room" } as Call]),
             );
-            const { container } = render(<RoomHeader room={room} />, getWrapper());
+            render(<RoomHeader room={room} />, getWrapper());
 
-            const [videoButton] = getAllByLabelText(container, "Ongoing call");
+            const [videoButton] = screen.getAllByRole("button", { name: "Ongoing call" });
 
             expect(videoButton).toHaveAttribute("aria-disabled", "true");
         });
@@ -788,9 +778,9 @@ describe("RoomHeader", () => {
 
             const [button] = screen.getAllByRole("button", { name: "Ongoing call" });
             expect(button).toHaveAttribute("aria-disabled", "true");
-            expect(document.getElementById(button.getAttribute("aria-labelledby")!)).toHaveTextContent(
-                button.getAttribute("aria-label")!,
-            );
+            // The tooltip alone names the button, so the name can't drift from what the tooltip shows
+            expect(button).not.toHaveAttribute("aria-label");
+            expect(document.getElementById(button.getAttribute("aria-labelledby")!)).toHaveTextContent("Ongoing call");
         });
     });
 
