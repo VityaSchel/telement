@@ -66,8 +66,8 @@ export interface ReactionsRowButtonViewSnapshot extends Pick<
      */
     tooltipVm: ReactionsRowButtonTooltipViewModel;
     /**
-     * The people who reacted, when there are few enough to show their avatars in place of the count, as Telegram does
-     * in groups. Shown in the bubble layout only.
+     * The people who reacted, when there are few enough to show their avatars in place of the count, as Telegram does.
+     * Shown in the bubble layout only.
      */
     reactors?: ReactionsRowButtonReactor[];
 }

@@ -103,7 +103,7 @@ export const WithTooltip: Story = {
     },
 };
 
-/** In a group's bubble, the avatars of the few people who reacted take the count's place, as in Telegram. */
+/** In a bubble, the avatars of the few people who reacted take the count's place, as in Telegram. */
 export const WithReactors: Story = {
     args: {
         layout: "bubble",

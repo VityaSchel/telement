@@ -106,10 +106,10 @@ img.reactionsRowButtonContent {
     text-box: trim-both cap alphabetic;
 }
 
-/* Telement: in a group, while three or fewer people reacted, their 16px avatars take the count's place, as in Telegram.
-   They sit in the middle of the 24px chip, 4px from its top and bottom, and the last one as far from its end; each one
-   is 4px under the next, cut away around it with a 1.5px gap rather than ringed, so that the gap shows the chip's own
-   fill whatever it is: tinted, your own accent, hovered or pressed. */
+/* Telement: while three or fewer people reacted, their 16px avatars take the count's place, as in Telegram. They sit in
+   the middle of the 24px chip, 4px from its top and bottom, and the last one as far from its end; each one is 4px under
+   the next, cut away around it with a 1.5px gap rather than ringed, so that the gap shows the chip's own fill whatever
+   it is: tinted, your own accent, hovered or pressed. */
 .reactionsRowButtonInBubble:has(> .reactionsRowButtonReactors) {
     padding-inline-end: calc(var(--cpd-space-1x) - 1px);
 }

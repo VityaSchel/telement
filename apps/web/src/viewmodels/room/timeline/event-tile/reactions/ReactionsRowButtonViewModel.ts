@@ -19,7 +19,6 @@ import { formatList } from "../../../../../utils/FormattingUtils";
 import dis from "../../../../../dispatcher/dispatcher";
 import { ReactionsRowButtonTooltipViewModel } from "./ReactionsRowButtonTooltipViewModel";
 import { REACTION_SHORTCODE_KEY } from "./reactionShortcode";
-import DMRoomMap from "../../../../../utils/DMRoomMap";
 
 /** Telement: how many people who reacted a chip shows as avatars, in place of the count, as Telegram does. */
 const MAX_REACTORS_SHOWN = 3;
@@ -141,17 +140,13 @@ export class ReactionsRowButtonViewModel
 
     /**
      * Telement: the people who reacted, while there are few enough for their avatars to stand in for the count, as in
-     * Telegram's groups. A direct chat keeps the count, as only its two members can react there.
+     * Telegram.
      */
     private static computeReactors(
         client: MatrixClient,
         room: Room,
         reactionEvents: MatrixEvent[],
     ): ReactionsRowButtonReactor[] | undefined {
-        // The map of direct chats is made once the client has started
-        const dmRoomMap = DMRoomMap.shared() as DMRoomMap | undefined;
-        if (dmRoomMap?.getUserIdForRoomId(room.roomId)) return undefined;
-
         const senders = [
             ...new Set(reactionEvents.map((event) => event.getSender()).filter((sender): sender is string => !!sender)),
         ];

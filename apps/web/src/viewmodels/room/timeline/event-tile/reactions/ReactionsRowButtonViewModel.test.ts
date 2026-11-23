@@ -118,7 +118,7 @@ describe("ReactionsRowButtonViewModel", () => {
             DMRoomMap.setShared(undefined as unknown as DMRoomMap);
         });
 
-        it("are shown as avatars, in the order they reacted, while there are three or fewer in a group", () => {
+        it("are shown as avatars, in the order they reacted, while there are three or fewer", () => {
             const vm = new ReactionsRowButtonViewModel(
                 createProps({
                     reactionEvents: [
@@ -165,14 +165,14 @@ describe("ReactionsRowButtonViewModel", () => {
             expect(vm.getSnapshot().reactors).toBeUndefined();
         });
 
-        it("leave the count in a direct chat, where only its two members react", () => {
+        it("are shown as avatars in a direct chat too", () => {
             DMRoomMap.setShared({
                 getUserIdForRoomId: (roomId: string) => (roomId === room.roomId ? "@bob:example.org" : undefined),
             } as unknown as DMRoomMap);
 
             const vm = new ReactionsRowButtonViewModel(createProps());
 
-            expect(vm.getSnapshot().reactors).toBeUndefined();
+            expect(vm.getSnapshot().reactors?.map(({ name }) => name)).toEqual(["Alice", "Bob"]);
         });
 
         it("follow the reactions as they change", () => {
