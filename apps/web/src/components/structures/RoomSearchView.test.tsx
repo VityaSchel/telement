@@ -10,7 +10,7 @@ Please see LICENSE files in the repository root for full details.
 
 import { vi, describe, it, expect, beforeEach, afterEach } from "vitest";
 import React from "react";
-import { render, screen } from "test-utils-rtl";
+import { render, screen, waitFor } from "test-utils-rtl";
 import {
     Room,
     type MatrixClient,
@@ -130,6 +130,24 @@ describe("<RoomSearchView/>", () => {
         await expect(screen.findByText("Before")).resolves.toBeVisible();
         await expect(screen.findByText("Foo Test Bar")).resolves.toBeVisible();
         await expect(screen.findByText("After")).resolves.toBeVisible();
+    });
+
+    it("leaves a search that found nothing without an end marker, as the search bar already says so", async () => {
+        render(
+            <RoomSearchView
+                inProgress={false}
+                term="zzqqxx"
+                scope={SearchScope.All}
+                promise={Promise.resolve<ISearchResults>({ results: [], highlights: [], count: 0 })}
+                className="someClass"
+                onUpdate={vi.fn()}
+            />,
+            clientAndSDKContextRenderOptions(client, sdkContext),
+        );
+
+        await waitFor(() => expect(screen.queryByTestId("messagePanelSearchSpinner")).not.toBeInTheDocument());
+        expect(screen.queryByRole("heading")).not.toBeInTheDocument();
+        expect(screen.queryByText("No results")).not.toBeInTheDocument();
     });
 
     it("should highlight words correctly", async () => {

@@ -679,6 +679,34 @@ describe("Spotlight Dialog", () => {
         await waitFor(() => expect(screen.getByText("Failed to query public rooms")).toBeInTheDocument());
     });
 
+    it("hides the public rooms' Suggestions title when the search finds none, keeping the server picker", async () => {
+        render(
+            <SpotlightDialog
+                initialFilter={Filter.PublicRooms}
+                initialText="zzzznothingmatchesthis"
+                onFinished={() => null}
+            />,
+        );
+
+        vi.advanceTimersByTime(200);
+        await flushPromisesWithFakeTimers();
+
+        await screen.findByText("No results found");
+        // Still the name of the section, which keeps the server picker to search another server
+        const section = screen.getByRole("group", { name: "Suggestions" });
+        expect(document.getElementById("mx_SpotlightDialog_section_publicRooms")).not.toBeVisible();
+        expect(section.querySelector(".mx_GenericDropdownMenu_button")).toBeVisible();
+    });
+
+    it("titles the public rooms Suggestions when the search finds some", async () => {
+        render(<SpotlightDialog initialFilter={Filter.PublicRooms} initialText="Room #247" onFinished={() => null} />);
+
+        vi.advanceTimersByTime(200);
+        await flushPromisesWithFakeTimers();
+
+        await waitFor(() => expect(screen.getByRole("heading", { name: "Suggestions" })).toBeVisible());
+    });
+
     describe("knock rooms", () => {
         const knockRoom: IPublicRoomsChunkRoom = {
             guest_can_join: false,

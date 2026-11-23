@@ -862,7 +862,14 @@ const SpotlightDialog: React.FC<IProps> = ({ initialText = "", initialFilter = n
                     aria-labelledby="mx_SpotlightDialog_section_publicRooms"
                 >
                     <div className="mx_SpotlightDialog_sectionHeader">
-                        <h4 id="mx_SpotlightDialog_section_publicRooms">{_t("common|suggestions")}</h4>
+                        {/* Telement: without rows the title would head nothing, so it's only the group's name; the
+                            server picker stays, to search another server */}
+                        <h4
+                            id="mx_SpotlightDialog_section_publicRooms"
+                            hidden={!publicRoomsError && !results[Section.PublicRoomsAndSpaces].length}
+                        >
+                            {_t("common|suggestions")}
+                        </h4>
                         <div className="mx_SpotlightDialog_options">
                             <NetworkDropdown protocols={protocols} config={config ?? null} setConfig={setConfig} />
                         </div>

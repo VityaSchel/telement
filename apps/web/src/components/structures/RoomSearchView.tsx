@@ -182,20 +182,13 @@ export const RoomSearchView = ({ term, scope, promise, className, onUpdate, inPr
         );
     }
 
-    if (!results.next_batch) {
-        if (!results?.results?.length) {
-            ret.push(
-                <li key="search-top-marker">
-                    <h2 className="mx_RoomView_topMarker">{_t("common|no_results")}</h2>
-                </li>,
-            );
-        } else {
-            ret.push(
-                <li key="search-top-marker">
-                    <h2 className="mx_RoomView_topMarker">{_t("no_more_results")}</h2>
-                </li>,
-            );
-        }
+    // Telement: no marker when nothing was found, which the search bar already says above the empty list
+    if (!results.next_batch && results?.results?.length) {
+        ret.push(
+            <li key="search-top-marker">
+                <h2 className="mx_RoomView_topMarker">{_t("no_more_results")}</h2>
+            </li>,
+        );
     }
 
     const onRef = (e: ScrollPanel | null): void => {

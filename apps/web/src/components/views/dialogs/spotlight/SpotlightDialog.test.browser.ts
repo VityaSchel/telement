@@ -589,4 +589,24 @@ describe("SpotlightDialog styles", () => {
             expect(getComputedStyle(element(selector)).fontSize).toBe("13px");
         }
     });
+
+    it.each([false, true])(
+        "keeps the server picker at the end of the public rooms' header line, its title hidden: %s",
+        (titleHidden) => {
+            document.body.innerHTML = spotlightDialog(["↓", "↑"]);
+            // The public rooms' header as SpotlightDialog draws it, its title hidden while no room is found
+            element("#mx_SpotlightDialog_content").innerHTML = `
+                <div class="mx_SpotlightDialog_section mx_SpotlightDialog_results" role="group">
+                    <div class="mx_SpotlightDialog_sectionHeader">
+                        <h4 ${titleHidden ? "hidden" : ""}>Suggestions</h4>
+                        <div class="mx_SpotlightDialog_options"><div id="picker" style="inline-size: 120px">matrix.org</div></div>
+                    </div>
+                    <div></div>
+                </div>`;
+            const header = element(".mx_SpotlightDialog_sectionHeader");
+            const headerEnd = header.getBoundingClientRect().right - parseFloat(getComputedStyle(header).paddingRight);
+
+            expect(element("#picker").getBoundingClientRect().right).toBe(headerEnd);
+        },
+    );
 });
