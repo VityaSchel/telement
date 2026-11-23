@@ -10,6 +10,7 @@
 import { EventType, MatrixEvent, Room } from "matrix-js-sdk/src/matrix";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { act, render, screen } from "test-utils-rtl";
+import userEvent from "@testing-library/user-event";
 import React from "react";
 
 import { createTestClient } from "test-utils";
@@ -102,12 +103,37 @@ describe("<MVvoiceMessageBody />", () => {
         );
 
         expect(screen.queryByTestId("recording-playback")).not.toBeInTheDocument();
-        expect(screen.queryByRole("progressbar")).not.toBeInTheDocument();
-        // The player's own containers, which size it, with its play button disabled as while it decodes
+        // The player's own containers, which size it, with the download's ring in place of its play button
         const player = container.querySelector(".mx_MVoiceMessageBody > .mx_VoiceMessagePrimaryContainer")!;
         expect(player).toHaveAttribute("aria-busy", "true");
-        expect(screen.getByRole("button", { name: "Play" })).toHaveAttribute("aria-disabled", "true");
+        expect(player).toContainElement(screen.getByRole("progressbar", { name: "Downloading" }));
+        expect(player).toContainElement(screen.getByRole("button", { name: "Cancel download" }));
+        expect(screen.queryByRole("button", { name: "Play" })).not.toBeInTheDocument();
         expect(player.querySelectorAll(".mx_RecordingPlayback_timelineLayoutMiddle .mx_Waveform_bar")).toHaveLength(39);
         expect(screen.getByRole("timer")).toHaveTextContent("00:03");
+    });
+
+    it("cancels the download from its ring without showing an error, and loads the player once it is started again", async () => {
+        let abort!: (error: Error) => void;
+        const first = new Promise<Blob>((_resolve, reject) => (abort = reject));
+        const values = [first, Promise.resolve({ arrayBuffer: () => new ArrayBuffer(8) })];
+        const mediaEventHelper = {
+            sourceBlob: {
+                get value() {
+                    return values.shift();
+                },
+            },
+        } as unknown as MediaEventHelper;
+        await act(() => render(<MVoiceMessageBody mxEvent={event} mediaEventHelper={mediaEventHelper} />));
+
+        await userEvent.click(screen.getByRole("button", { name: "Cancel download" }));
+        await act(async () => abort(new DOMException("The download was cancelled", "AbortError")));
+
+        expect(screen.queryByText("Error processing voice message")).not.toBeInTheDocument();
+        expect(screen.queryByRole("progressbar")).not.toBeInTheDocument();
+
+        await userEvent.click(screen.getByRole("button", { name: "Download" }));
+
+        expect(await screen.findByTestId("recording-playback")).toBeInTheDocument();
     });
 });

@@ -13,13 +13,13 @@ import { type MediaEventContent } from "matrix-js-sdk/src/types";
 import { AudioPlayerView, useCreateAutoDisposedViewModel } from "@element-hq/web-shared-components";
 
 import { type Playback } from "../../../audio/Playback";
-import InlineSpinner from "../elements/InlineSpinner";
 import { _t } from "../../../languageHandler";
 import { type IBodyProps } from "./IBodyProps";
 import { PlaybackManager } from "../../../audio/PlaybackManager";
 import MediaProcessingError from "./shared/MediaProcessingError";
 import { AudioPlayerViewModel } from "../../../viewmodels/room/timeline/event-tile/body/AudioPlayerViewModel";
 import { presentableTextForFile } from "../../../utils/FileUtils";
+import { AudioPlaceholder } from "../../../telement/media/AudioPlaceholder";
 
 interface IState {
     error?: boolean;
@@ -29,13 +29,31 @@ interface IState {
 export default class MAudioBody extends React.PureComponent<IBodyProps, IState> {
     public state: IState = {};
 
-    public async componentDidMount(): Promise<void> {
+    /** Telement: whether the user cancelled the file's download, which then fails without being an error. */
+    private downloadCancelled = false;
+
+    public componentDidMount(): Promise<void> {
+        return this.loadPlayback();
+    }
+
+    protected readonly onCancelDownload = (): void => {
+        this.downloadCancelled = true;
+    };
+
+    protected readonly onRestartDownload = (): void => {
+        this.downloadCancelled = false;
+        void this.loadPlayback();
+    };
+
+    private async loadPlayback(): Promise<void> {
         let buffer: ArrayBuffer;
         try {
             try {
                 const blob = await this.props.mediaEventHelper!.sourceBlob.value;
                 buffer = await blob.arrayBuffer();
             } catch (e) {
+                // The download ring shows the cancelled download, which the user can start again
+                if (this.downloadCancelled) return;
                 this.setState({ error: true });
                 logger.warn("Unable to decrypt audio message", e);
                 return; // stop processing the audio file
@@ -90,7 +108,11 @@ export default class MAudioBody extends React.PureComponent<IBodyProps, IState> 
         if (!this.state.playback) {
             return (
                 <span className="mx_MAudioBody">
-                    <InlineSpinner />
+                    <AudioPlaceholder
+                        mxEvent={this.props.mxEvent}
+                        onCancel={this.onCancelDownload}
+                        onRestart={this.onRestartDownload}
+                    />
                 </span>
             );
         }

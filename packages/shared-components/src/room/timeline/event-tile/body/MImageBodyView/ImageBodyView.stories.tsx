@@ -10,6 +10,7 @@ import { expect, fn, userEvent, within } from "storybook/test";
 
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { useMockedViewModel } from "../../../../../core/viewmodel/useMockedViewModel";
+import { MediaDownloadProgressView } from "../../../../../telement/media/MediaDownloadProgressView";
 import { withViewDocs } from "../../../../../../.storybook/withViewDocs";
 import {
     ImageBodyView,
@@ -34,6 +35,7 @@ type ImageBodyViewProps = ImageBodyViewSnapshot &
     ImageBodyViewActions & {
         className?: string;
         children?: ReactNode;
+        progress?: ReactNode;
     };
 
 const ImageBodyViewWrapperImpl = ({
@@ -43,6 +45,7 @@ const ImageBodyViewWrapperImpl = ({
     onImageError,
     className,
     children,
+    progress,
     ...snapshotProps
 }: ImageBodyViewProps): ReactNode => {
     const vm = useMockedViewModel(snapshotProps, {
@@ -53,7 +56,7 @@ const ImageBodyViewWrapperImpl = ({
     });
 
     return (
-        <ImageBodyView vm={vm} className={className}>
+        <ImageBodyView vm={vm} className={className} progress={progress}>
             {children}
         </ImageBodyView>
     );
@@ -121,6 +124,26 @@ export const LoadingWithSpinner: Story = {
 export const LoadingWithBlurhash: Story = {
     args: {
         placeholder: ImageBodyViewPlaceholder.BLURHASH,
+    },
+};
+
+/** Telement: a download's ring, which a picture shows while it downloads */
+const DownloadRing = (): ReactNode => {
+    const vm = useMockedViewModel({ state: "downloading", progress: 0.4 } as const, { cancel: fn(), restart: fn() });
+    return <MediaDownloadProgressView vm={vm} />;
+};
+
+export const LoadingWithProgress: Story = {
+    args: {
+        placeholder: ImageBodyViewPlaceholder.SPINNER,
+        progress: <DownloadRing />,
+    },
+};
+
+export const LoadingWithProgressOverBlurhash: Story = {
+    args: {
+        placeholder: ImageBodyViewPlaceholder.BLURHASH,
+        progress: <DownloadRing />,
     },
 };
 

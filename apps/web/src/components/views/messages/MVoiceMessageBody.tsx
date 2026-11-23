@@ -44,7 +44,11 @@ export default class MVoiceMessageBody extends MAudioBody {
         if (!this.state.playback) {
             return (
                 <span className="mx_MVoiceMessageBody">
-                    <VoiceMessagePlaceholder mxEvent={this.props.mxEvent} />
+                    <VoiceMessagePlaceholder
+                        mxEvent={this.props.mxEvent}
+                        onCancel={this.onCancelDownload}
+                        onRestart={this.onRestartDownload}
+                    />
                 </span>
             );
         }

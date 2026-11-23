@@ -1030,8 +1030,8 @@ describe("EventTile", () => {
             fireEvent.click(await screen.findByRole("menuitem", { name: "Copy image" }));
 
             await expect(vi.mocked(copyImageToClipboard).mock.calls[0][0]).resolves.toBeInstanceOf(Blob);
-            expect(fetchSpy).toHaveBeenCalledWith("http://this.is.a.url/example.org/cat");
-            expect(fetchSpy).not.toHaveBeenCalledWith("https://example.org/thumbnail.png");
+            // Only the addresses, as a media download also passes the signal that cancels it
+            expect(fetchSpy.mock.calls.map(([url]) => url)).toEqual(["http://this.is.a.url/example.org/cat"]);
         });
 
         it("opens only the reaction picker when the add-reaction button is right-clicked", async () => {

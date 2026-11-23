@@ -83,6 +83,8 @@ interface InternalState {
     placeholder: ImageBodyViewPlaceholder;
     imageSize: ImageSize;
     generatedThumbnailUrl: string | null;
+    /** Telement: whether the user cancelled the picture's download from its ring. */
+    downloadCancelled: boolean;
 }
 
 /**
@@ -135,6 +137,7 @@ export class ImageBodyViewModel
                 : ImageBodyViewPlaceholder.SPINNER,
             imageSize: SettingsStore.getValue("Images.size"),
             generatedThumbnailUrl: null,
+            downloadCancelled: false,
         };
     }
 
@@ -188,6 +191,8 @@ export class ImageBodyViewModel
             : state.isAnimated && autoplayGifs
               ? (contentUrl ?? undefined)
               : (state.thumbUrl ?? contentUrl ?? undefined);
+        // Telement: a cancelled download draws no picture, so that the browser stops loading it
+        const loadingCancelled = state.downloadCancelled && !state.imgLoaded;
 
         if (state.error || state.imgError) {
             return {
@@ -208,8 +213,8 @@ export class ImageBodyViewModel
         return {
             state: ImageBodyViewState.READY,
             alt: content.body,
-            src: contentUrl ?? undefined,
-            thumbnailSrc,
+            src: loadingCancelled ? undefined : (contentUrl ?? undefined),
+            thumbnailSrc: loadingCancelled ? undefined : thumbnailSrc,
             showAnimatedContentOnHover: state.isAnimated && !autoplayGifs && !!contentUrl,
             placeholder: !props.forExport && !state.imgLoaded ? state.placeholder : ImageBodyViewPlaceholder.NONE,
             blurhash: content.info?.[BLURHASH_FIELD],
@@ -231,6 +236,19 @@ export class ImageBodyViewModel
 
         return state.contentUrl;
     }
+
+    /** Telement: stops showing the picture while it loads, once the user cancelled its download from its ring. */
+    public cancelDownload = (): void => {
+        this.state = { ...this.state, downloadCancelled: true };
+        this.updateSnapshotFromState();
+    };
+
+    /** Telement: loads the picture again after the user cancelled its download. */
+    public restartDownload = (): void => {
+        this.state = { ...this.state, downloadCancelled: false };
+        this.updateSnapshotFromState();
+        void this.downloadImage();
+    };
 
     public loadInitialMediaIfVisible(): void {
         if (!this.props.mediaVisible) {
@@ -337,7 +355,8 @@ export class ImageBodyViewModel
                     this.props.mediaEventHelper.thumbnailUrl.value,
                 ]);
             } catch (error) {
-                if (this.isDisposed) {
+                // A download the user cancelled isn't an error: its ring offers to start it again
+                if (this.isDisposed || this.state.downloadCancelled) {
                     return;
                 }
 

@@ -80,4 +80,23 @@ describe("AudioPlayerView", () => {
         await user.type(screen.getByLabelText("Audio player"), "{arrowup}");
         expect(onKeyDown).toHaveBeenCalledWith(expect.objectContaining({ key: "ArrowUp" }));
     });
+
+    it("draws what it is given in place of the play button, such as a download's ring", () => {
+        const vm = new AudioPlayerViewModel({
+            playbackState: "decoding",
+            mediaName: "Test Audio",
+            durationSeconds: 300,
+            playedSeconds: 0,
+            percentComplete: 0,
+            error: false,
+        });
+
+        render(<AudioPlayerView vm={vm} playButton={<button type="button">Cancel download</button>} />, {
+            wrapper: ({ children }) => <I18nContext.Provider value={new I18nApi()}>{children}</I18nContext.Provider>,
+        });
+
+        expect(screen.getByRole("button", { name: "Cancel download" })).toBeInTheDocument();
+        expect(screen.queryByRole("button", { name: "Play" })).toBeNull();
+        expect(screen.getByTestId("audio-player-name")).toHaveTextContent("Test Audio");
+    });
 });

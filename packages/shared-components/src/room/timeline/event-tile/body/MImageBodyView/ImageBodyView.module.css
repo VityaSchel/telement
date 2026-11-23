@@ -51,6 +51,15 @@
     background-color: transparent;
 }
 
+/* Telement: the download's ring, in the middle of the placeholder and over the blurred preview */
+.progress {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
 .blurhash {
     width: 100%;
     height: 100%;

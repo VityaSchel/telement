@@ -1,0 +1,125 @@
+/*
+Copyright 2026 Viktor Shchelochkov
+
+SPDX-License-Identifier: AGPL-3.0-only OR GPL-3.0-only
+Please see LICENSE files in the repository root for full details.
+*/
+
+/* Over a picture the disc is the dark of the play button and the time drawn over media, with a white ring and glyph,
+   fixed rather than theme colors so that they read over any picture. In a player it takes the play button's colors. */
+.root {
+    --media-download-fill: rgb(0 0 0 / 55%);
+    --media-download-fill-hovered: rgb(0 0 0 / 65%);
+    --media-download-fill-pressed: rgb(0 0 0 / 75%);
+    --media-download-color: #fff;
+
+    position: relative;
+    display: inline-flex;
+    flex-shrink: 0;
+    inline-size: 48px;
+    block-size: 48px;
+}
+
+.small {
+    --media-download-fill: var(--tl-color-bg-media-play);
+    --media-download-fill-hovered: var(--tl-color-bg-media-play-hovered);
+    --media-download-fill-pressed: var(--tl-color-bg-media-play-pressed);
+    --media-download-color: var(--tl-color-on-media-play);
+
+    inline-size: 32px;
+    block-size: 32px;
+}
+
+.button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    inline-size: 100%;
+    block-size: 100%;
+    margin: 0;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background-color: var(--media-download-fill);
+    color: var(--media-download-color);
+    font: inherit;
+
+    &:hover {
+        background-color: var(--media-download-fill-hovered);
+    }
+
+    &:active {
+        background-color: var(--media-download-fill-pressed);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--cpd-color-border-focused);
+        outline-offset: 2px;
+    }
+
+    svg {
+        inline-size: 24px;
+        block-size: 24px;
+    }
+}
+
+.small .button svg {
+    inline-size: 20px;
+    block-size: 20px;
+}
+
+/* The ring starts at the top and fills clockwise, as Telegram's does */
+.ring {
+    position: absolute;
+    inset: 0;
+    inline-size: 100%;
+    block-size: 100%;
+    transform: rotate(-90deg);
+    pointer-events: none;
+}
+
+.arc {
+    fill: none;
+    stroke: var(--media-download-color);
+    stroke-width: 2;
+    stroke-linecap: round;
+    transition: stroke-dashoffset 0.2s linear;
+}
+
+.indeterminate {
+    animation: media-download-spin 1s linear infinite;
+}
+
+@keyframes media-download-spin {
+    from {
+        transform: rotate(-90deg);
+    }
+
+    to {
+        transform: rotate(270deg);
+    }
+}
+
+/* The arc still turns, so that a stalled download doesn't look like a finished one, but slowly */
+@media (prefers-reduced-motion: reduce) {
+    .arc {
+        transition: none;
+    }
+
+    .indeterminate {
+        animation-duration: 4s;
+    }
+}
+
+@media (forced-colors: active) {
+    .root {
+        --media-download-fill: Canvas;
+        --media-download-fill-hovered: Canvas;
+        --media-download-fill-pressed: Canvas;
+        --media-download-color: CanvasText;
+    }
+
+    .button {
+        border: 1px solid CanvasText;
+    }
+}

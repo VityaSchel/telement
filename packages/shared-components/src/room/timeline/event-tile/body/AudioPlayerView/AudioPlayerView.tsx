@@ -5,7 +5,13 @@
  * Please see LICENSE files in the repository root for full details.
  */
 
-import React, { type ChangeEventHandler, type JSX, type KeyboardEventHandler, type MouseEventHandler } from "react";
+import React, {
+    type ChangeEventHandler,
+    type JSX,
+    type KeyboardEventHandler,
+    type MouseEventHandler,
+    type ReactNode,
+} from "react";
 
 import { type ViewModel, useViewModel } from "../../../../../core/viewmodel";
 import { MediaBody } from "../MediaBody";
@@ -77,6 +83,10 @@ interface AudioPlayerViewProps {
      * The view model for the audio player.
      */
     vm: AudioPlayerViewModel;
+    /**
+     * Telement: drawn in place of the play button, such as the file's download ring while it downloads.
+     */
+    playButton?: ReactNode;
 }
 
 /**
@@ -88,7 +98,7 @@ interface AudioPlayerViewProps {
  * <AudioPlayerView vm={audioPlayerViewModel} />
  * ```
  */
-export function AudioPlayerView({ vm }: Readonly<AudioPlayerViewProps>): JSX.Element {
+export function AudioPlayerView({ vm, playButton }: Readonly<AudioPlayerViewProps>): JSX.Element {
     const { translate: _t } = useI18n();
 
     const {
@@ -115,14 +125,16 @@ export function AudioPlayerView({ vm }: Readonly<AudioPlayerViewProps>): JSX.Ele
                 role="region"
             >
                 <Flex gap="var(--cpd-space-2x)" align="center">
-                    <PlayPauseButton
-                        // Prevent tabbing into the button
-                        // Keyboard navigation is handled at the MediaBody level
-                        tabIndex={-1}
-                        disabled={disabled}
-                        playing={playbackState === "playing"}
-                        togglePlay={vm.togglePlay}
-                    />
+                    {playButton ?? (
+                        <PlayPauseButton
+                            // Prevent tabbing into the button
+                            // Keyboard navigation is handled at the MediaBody level
+                            tabIndex={-1}
+                            disabled={disabled}
+                            playing={playbackState === "playing"}
+                            togglePlay={vm.togglePlay}
+                        />
+                    )}
                     <Flex direction="column" className={styles.mediaInfo}>
                         <span className={styles.mediaName} data-testid="audio-player-name">
                             {mediaName}

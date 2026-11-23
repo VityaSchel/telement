@@ -12,6 +12,7 @@ import React, {
     type MouseEventHandler,
     type PropsWithChildren,
     type ReactEventHandler,
+    type ReactNode,
     type Ref,
     useState,
 } from "react";
@@ -161,6 +162,11 @@ interface ImageBodyViewProps {
      * Optional supplemental content rendered after the media frame.
      */
     children?: PropsWithChildren["children"];
+    /**
+     * Telement: the download's progress, drawn in the middle of the loading placeholder in place of its spinner, and
+     * over the blurred preview. While it shows, the picture doesn't open, so that it can be clicked.
+     */
+    progress?: ReactNode;
 }
 
 function renderPlaceholder({
@@ -218,6 +224,7 @@ export function ImageBodyView({
     imageClassName,
     imageRef,
     children,
+    progress,
 }: Readonly<ImageBodyViewProps>): JSX.Element {
     const { translate: _t } = useI18n();
     const {
@@ -290,14 +297,18 @@ export function ImageBodyView({
           }
         : undefined;
 
-    const placeholderNode = renderPlaceholder({
-        placeholder,
-        blurhash,
-        maxWidth,
-        maxHeight,
-        loadingLabel: _t("common|loading"),
-    });
-    const showPlaceholder = placeholderNode !== null;
+    const showProgress = !!progress && placeholder !== ImageBodyViewPlaceholder.NONE;
+    const placeholderNode =
+        showProgress && placeholder === ImageBodyViewPlaceholder.SPINNER
+            ? null
+            : renderPlaceholder({
+                  placeholder,
+                  blurhash,
+                  maxWidth,
+                  maxHeight,
+                  loadingLabel: _t("common|loading"),
+              });
+    const showPlaceholder = placeholderNode !== null || showProgress;
 
     const media =
         state === ImageBodyViewState.HIDDEN ? (
@@ -336,6 +347,7 @@ export function ImageBodyView({
                     })}
                 >
                     {placeholderNode}
+                    {showProgress && <div className={styles.progress}>{progress}</div>}
                 </div>
             )}
 
@@ -354,7 +366,7 @@ export function ImageBodyView({
         );
     }
 
-    if (state === ImageBodyViewState.READY && linkUrl) {
+    if (state === ImageBodyViewState.READY && linkUrl && !showProgress) {
         frame = (
             <a
                 href={linkUrl}

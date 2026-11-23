@@ -37,12 +37,19 @@ export class LazyValue<T> {
      */
     public get value(): Promise<T> {
         if (this.prom) return this.prom;
-        this.prom = this.getFn();
+        this.prom = this.getFn().then(
+            (v) => {
+                this.val = v;
+                this.done = true;
+                return v;
+            },
+            (error) => {
+                // Telement: a value that failed, such as a download the user cancelled, is fetched again next time
+                this.prom = undefined;
+                throw error;
+            },
+        );
 
-        return this.prom.then((v) => {
-            this.val = v;
-            this.done = true;
-            return v;
-        });
+        return this.prom;
     }
 }

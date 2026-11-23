@@ -31,6 +31,8 @@ import { VideoBodyViewModel } from "../../../viewmodels/message-body/VideoBodyVi
 import { isMimeTypeAllowed } from "../../../utils/blobs";
 import { type MediaEventHelper } from "../../../utils/MediaEventHelper";
 import { MBodyTileViewModel } from "../../../viewmodels/message-body/MBodyTileViewModel";
+import { MediaDownloadRing } from "../../../telement/media/MediaDownloadRing";
+import { getMediaDownloadParts } from "../../../telement/media/getMediaDownloadParts";
 
 type MBodyComponent = React.ComponentType<IBodyProps>;
 
@@ -243,6 +245,14 @@ export function ImageBodyFactory({
             containerClassName="mx_ImageBody_container"
             imageClassName="mx_ImageBody_image"
             imageRef={imageRef}
+            progress={
+                // Telement: Telegram's download ring while the picture downloads
+                <MediaDownloadRing
+                    parts={getMediaDownloadParts(mxEvent)}
+                    onCancel={vm.cancelDownload}
+                    onRestart={vm.restartDownload}
+                />
+            }
         />
     );
 }

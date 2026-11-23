@@ -384,6 +384,26 @@ describe("MBodyFactory", () => {
             expect(container.querySelector(".mx_MFileBody")).toBeNull();
         });
 
+        it("draws the download's ring on the picture while it loads, which stops and restarts the download", async () => {
+            const mediaEvent = mkEvent("m.image", imageContent);
+            const { container } = renderInRoomContext(
+                <ImageBodyFactory
+                    {...props}
+                    mxEvent={mediaEvent}
+                    mediaEventHelper={new MediaEventHelper(mediaEvent)}
+                />,
+                TimelineRenderingType.Room,
+            );
+            await waitFor(() => expect(container.querySelector(".mx_ImageBody img")).not.toBeNull());
+
+            await userEvent.click(screen.getByRole("button", { name: "Cancel download" }));
+
+            expect(container.querySelector(".mx_ImageBody img")).toBeNull();
+            await userEvent.click(screen.getByRole("button", { name: "Download" }));
+            expect(container.querySelector(".mx_ImageBody img")).not.toBeNull();
+            expect(screen.getByRole("button", { name: "Cancel download" })).toBeInTheDocument();
+        });
+
         it("renders only a file body for encrypted unsafe images without thumbnails", () => {
             const mediaEvent = mkEvent("m.image", {
                 file: { url: "mxc://server/encrypted-file" },

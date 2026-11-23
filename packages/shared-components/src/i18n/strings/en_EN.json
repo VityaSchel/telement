@@ -241,6 +241,7 @@
     },
     "telement": {
         "media": {
+            "cancel_download": "Cancel download",
             "save_as": "Save as…"
         },
         "message_status": {

@@ -461,6 +461,61 @@ describe("ImageBodyViewModel", () => {
         });
     });
 
+    it("stops drawing a picture whose download the user cancelled, and draws it again once restarted", () => {
+        const vm = createVm({ mediaVisible: true });
+        vm.loadInitialMediaIfVisible();
+        expect(vm.getSnapshot()).toMatchObject({ thumbnailSrc: "https://server/thumb.png" });
+
+        vm.cancelDownload();
+
+        expect(vm.getSnapshot()).toMatchObject({
+            state: ImageBodyViewState.READY,
+            src: undefined,
+            thumbnailSrc: undefined,
+            placeholder: ImageBodyViewPlaceholder.SPINNER,
+        });
+
+        vm.restartDownload();
+
+        expect(vm.getSnapshot()).toMatchObject({
+            src: "https://server/full.png",
+            thumbnailSrc: "https://server/thumb.png",
+        });
+    });
+
+    it("shows no error for an encrypted picture whose download the user cancelled, and downloads it again on restart", async () => {
+        let cancelled = true;
+        const mediaEventHelper = {
+            media: { isEncrypted: true },
+            isFromLocalUpload: false,
+            get sourceUrl() {
+                return {
+                    value: cancelled
+                        ? Promise.reject(new DownloadError(new Error("The download was cancelled")))
+                        : Promise.resolve("blob:image"),
+                };
+            },
+            thumbnailUrl: { value: Promise.resolve("blob:thumbnail") },
+        } as unknown as MediaEventHelper;
+        const vm = createVm({
+            mxEvent: createEvent({ content: { file: { url: "mxc://server/encrypted-image" } } }),
+            mediaEventHelper,
+            mediaVisible: true,
+        });
+
+        vm.cancelDownload();
+        vm.loadInitialMediaIfVisible();
+        await flushPromises();
+
+        expect(vm.getSnapshot()).toMatchObject({ state: ImageBodyViewState.READY, src: undefined });
+
+        cancelled = false;
+        vm.restartDownload();
+        await flushPromises();
+
+        expect(vm.getSnapshot()).toMatchObject({ state: ImageBodyViewState.READY, src: "blob:image" });
+    });
+
     it("uses the decrypt error label when encrypted media decryption fails", async () => {
         const vm = createVm({
             mxEvent: createEvent({
