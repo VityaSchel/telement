@@ -10,7 +10,7 @@ import React from "react";
 import { DATA_BY_CATEGORY } from "@matrix-org/emojibase-bindings";
 import userEvent from "@testing-library/user-event";
 import type { CDPSession } from "@vitest/browser-playwright";
-import { cdp } from "vitest/browser";
+import { cdp, userEvent as realKeyboard } from "vitest/browser";
 import { render, waitFor, screen, within } from "@test-utils";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 // The layout assertions need the real spacing tokens and Compound's pill radius
@@ -509,6 +509,62 @@ describe("EmojiPicker", function () {
 
             expect(screen.getByRole("textbox", { name: "Search" })).toHaveFocus();
             expect(container.querySelector('[role="gridcell"] [tabindex="0"]')).toBe(activeEmoji);
+        });
+
+        it("types into the search field from the category that has focus, which the field then takes", async () => {
+            await renderAndWait();
+            const search = screen.getByRole("textbox", { name: "Search" });
+            screen.getByRole("tab", { name: "😀" }).focus();
+
+            await realKeyboard.keyboard("Hea");
+
+            expect(search).toHaveFocus();
+            expect(search).toHaveValue("Hea");
+        });
+
+        it("types into the search field from an emoji too, after the query there is", async () => {
+            const container = await renderAndWait();
+            const search = screen.getByRole("textbox", { name: "Search" });
+            await realKeyboard.type(search, "he");
+            container.querySelector<HTMLElement>('[role="gridcell"] [tabindex="0"]')!.focus();
+            expect(document.activeElement?.parentElement).toHaveAttribute("role", "gridcell");
+            expect(search).not.toHaveFocus();
+
+            await realKeyboard.keyboard("a");
+
+            expect(search).toHaveFocus();
+            expect(search).toHaveValue("hea");
+        });
+
+        it("takes Backspace to the search field only while it has a query", async () => {
+            await renderAndWait();
+            const search = screen.getByRole("textbox", { name: "Search" });
+            const tab = screen.getByRole("tab", { name: "😀" });
+            tab.focus();
+            await realKeyboard.keyboard("{Backspace}");
+            expect(tab).toHaveFocus();
+
+            await realKeyboard.keyboard("hea");
+            const selectedTab = screen.getAllByRole("tab").find((t) => t.getAttribute("aria-selected") === "true")!;
+            selectedTab.focus();
+            await realKeyboard.keyboard("{Backspace}");
+
+            expect(search).toHaveFocus();
+            expect(search).toHaveValue("he");
+        });
+
+        it("leaves shortcuts and Space to the category that has focus", async () => {
+            await renderAndWait();
+            const search = screen.getByRole("textbox", { name: "Search" });
+            const tab = screen.getByRole("tab", { name: "🐕" });
+            tab.focus();
+
+            await realKeyboard.keyboard("{Control>}a{/Control}{Alt>}a{/Alt}{Meta>}a{/Meta}");
+            expect(tab).toHaveFocus();
+
+            await realKeyboard.keyboard(" ");
+            expect(tab).toHaveFocus();
+            expect(search).toHaveValue("");
         });
 
         it("reaches the search field below the category bar with Tab, and goes back with Shift+Tab", async () => {

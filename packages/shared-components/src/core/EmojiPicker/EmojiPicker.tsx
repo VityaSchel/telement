@@ -149,6 +149,16 @@ export interface EmojiPickerProps {
     autoFocus?: boolean;
 }
 
+/**
+ * Whether a key pressed outside the search field belongs in it: a character typed without Ctrl, Alt or Meta, or
+ * Backspace while there is a query to shorten. Space is left to the focused tab or emoji, which it activates.
+ */
+function isSearchKey(ev: React.KeyboardEvent, query: string): boolean {
+    if (ev.ctrlKey || ev.altKey || ev.metaKey || ev.nativeEvent.isComposing) return false;
+    if (ev.key === "Backspace") return query !== "";
+    return [...ev.key].length === 1 && ev.key.trim() !== "";
+}
+
 /** Convert recent emoji characters to emoji data, removing unknowns and duplicates */
 function resolveRecentEmojis(recentEmojis: string[] | undefined): IEmoji[] {
     return Array.from(
@@ -346,6 +356,15 @@ export function EmojiPicker({
 
     const onKeyDown = useCallback(
         (ev: React.KeyboardEvent, state: RovingState, dispatch: Dispatch<RovingAction>): void => {
+            // Typing anywhere else in the picker searches: the field takes the focus before the key's default action,
+            // so the browser types the key into it
+            const search = searchRef.current;
+            if (search && ev.target !== search && isSearchKey(ev, filter)) {
+                search.focus();
+                search.setSelectionRange(search.value.length, search.value.length);
+                return;
+            }
+
             // Up from the category bar goes to the search field below it, as Tab can't reach it in a menu
             const categoryTab =
                 ev.target instanceof HTMLElement ? ev.target.closest<HTMLElement>("[data-category-tab]") : null;
@@ -379,7 +398,7 @@ export function EmojiPicker({
                 }
             }
         },
-        [getCategoryEntry, showHighlight],
+        [filter, getCategoryEntry, showHighlight],
     );
 
     const shouldMoveFocus = useCallback((): boolean => {
