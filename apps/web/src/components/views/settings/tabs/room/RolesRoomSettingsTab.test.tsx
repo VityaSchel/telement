@@ -10,7 +10,7 @@ Please see LICENSE files in the repository root for full details.
 
 import React from "react";
 import { vi, describe, it, expect, beforeEach, afterEach } from "vitest";
-import { fireEvent, getByRole, render, type RenderResult, screen, waitFor } from "test-utils-rtl";
+import { render, type RenderResult, screen, waitFor, within } from "test-utils-rtl";
 import { mkStubRoom, withClientContextRenderOptions, stubClient } from "test-utils";
 import {
     type MatrixClient,
@@ -95,10 +95,12 @@ describe("RolesRoomSettingsTab", () => {
             return null;
         });
         vi.mocked(room.currentState.mayClientSendStateEvent).mockReturnValue(true);
-        const { container } = await renderTab();
+        await renderTab();
 
-        expect(container.querySelector(`[placeholder="${cli.getUserId()}"]`)).not.toBeDisabled();
-        expect(container.querySelector(`[placeholder="@admin:server"]`)).toBeDisabled();
+        // Each user is a row with their Matrix ID under their name; only the user's own can be changed
+        const privileged = screen.getByRole("group", { name: "Privileged Users" });
+        expect(within(privileged).getByText(cli.getUserId()!).closest("button")).toHaveTextContent("Admin");
+        expect(within(privileged).getByText("@admin:server").closest("[aria-disabled]")).toHaveTextContent("Admin");
     });
 
     describe("Element Call", () => {
@@ -235,7 +237,7 @@ describe("RolesRoomSettingsTab", () => {
         await waitFor(() => expect(valueOf("Remove users")).toBe("Moderator"));
     });
 
-    it("should roll back power level change on error", async () => {
+    it("should apply a user's power level as soon as it is chosen, and roll it back on error", async () => {
         const deferred = Promise.withResolvers<ISendEventResponse>();
         vi.mocked(cli.sendStateEvent).mockReturnValue(deferred.promise);
         vi.mocked(cli.getRoom).mockReturnValue(room);
@@ -261,20 +263,25 @@ describe("RolesRoomSettingsTab", () => {
             return null;
         });
         vi.mocked(room.currentState.mayClientSendStateEvent).mockReturnValue(true);
-        vi.mocked(room.getMember).mockReturnValue({ powerLevel: 100 } as any);
-        const { container } = await renderTab();
+        vi.mocked(room.getMember).mockReturnValue(member(100));
+        await renderTab();
 
-        const selector = container.querySelector(`[placeholder="${cli.getUserId()}"]`)!;
-        fireEvent.change(selector, { target: { value: "50" } });
-        expect(selector).toHaveValue("50");
+        // Promoting someone to one's own level asks first, as the member info does
+        const privileged = screen.getByRole("group", { name: "Privileged Users" });
+        const [mine] = within(privileged).getAllByRole("button");
+        await userEvent.click(mine);
+        await userEvent.click(screen.getByRole("menuitemradio", { name: "Moderator" }));
+        await userEvent.click(await screen.findByRole("button", { name: "Demote" }));
 
-        // Get the apply button of the privileged user section and click on it
-        const privilegedUsersSection = screen.getByRole("group", { name: "Privileged Users" });
-        const applyButton = getByRole(privilegedUsersSection, "button", { name: "Apply" });
-        await userEvent.click(applyButton);
+        expect(cli.sendStateEvent).toHaveBeenCalledWith(
+            roomId,
+            EventType.RoomPowerLevels,
+            expect.objectContaining({ users: expect.objectContaining({ [cli.getUserId()!]: 50 }) }),
+        );
+        expect(mine).toHaveTextContent("Moderator");
 
         deferred.reject("Error");
-        await waitFor(() => expect(selector).toHaveValue("100"));
+        await waitFor(() => expect(mine).toHaveTextContent("Admin"));
     });
 
     it("should allow changing events power levels", async () => {

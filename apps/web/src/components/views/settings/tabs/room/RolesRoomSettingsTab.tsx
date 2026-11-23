@@ -245,6 +245,9 @@ export default class RolesRoomSettingsTab extends React.Component<IProps, RolesR
                 title: _t("room_settings|permissions|error_changing_pl_title"),
                 description: _t("room_settings|permissions|error_changing_pl_description"),
             });
+
+            // Telement: rethrow so that the user's row puts the previous level back
+            throw e;
         }
     };
 
@@ -346,6 +349,7 @@ export default class RolesRoomSettingsTab extends React.Component<IProps, RolesR
             privilegedUsersSection = (
                 <PowerLevelSelector
                     title={_t("room_settings|permissions|privileged_users_section")}
+                    room={room}
                     userLevels={userLevels}
                     canChangeLevels={canChangeLevels}
                     currentUserLevel={currentUserLevel}
@@ -359,6 +363,7 @@ export default class RolesRoomSettingsTab extends React.Component<IProps, RolesR
             mutedUsersSection = (
                 <PowerLevelSelector
                     title={_t("room_settings|permissions|muted_users_section")}
+                    room={room}
                     userLevels={userLevels}
                     canChangeLevels={canChangeLevels}
                     currentUserLevel={currentUserLevel}

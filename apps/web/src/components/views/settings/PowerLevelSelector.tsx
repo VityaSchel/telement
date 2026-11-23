@@ -6,22 +6,30 @@
  * Please see LICENSE files in the repository root for full details.
  */
 
-import React, { useState, type JSX, type PropsWithChildren } from "react";
-import { Button } from "@vector-im/compound-web";
+import React, { type JSX, type PropsWithChildren } from "react";
+import { type Room } from "matrix-js-sdk/src/matrix";
+import { ValueRowList } from "@element-hq/web-shared-components";
 
 import { useMatrixClientContext } from "../../../contexts/MatrixClientContext";
-import PowerSelector from "../elements/PowerSelector";
 import { _t } from "../../../languageHandler";
 import SettingsFieldset from "./SettingsFieldset";
 import Modal from "../../../Modal";
 import QuestionDialog from "../dialogs/QuestionDialog";
+import { warnSelfDemote } from "../right_panel/UserInfo";
+import { mediaFromMxc } from "../../../customisations/Media";
+import { PowerLevelRow } from "../../../telement/settings/PowerLevelRow";
 
 /**
  * Display in a fieldset, the power level of the users and allow to change them.
- * The apply button is disabled until the power level of an user is changed.
+ * Telement: each user is a 52px row with their avatar, name and Matrix ID, and their role as a value at the row's end
+ * (PowerLevelRow), applied as soon as it is chosen, as Telegram lists a group's administrators.
  * If there is no user to display, the children is displayed instead.
  */
 interface PowerLevelSelectorProps {
+    /**
+     * The room whose users these are, which gives their names and avatars
+     */
+    room: Room;
     /**
      * The power levels of the users
      * The key is the user id and the value is the power level
@@ -36,11 +44,11 @@ interface PowerLevelSelectorProps {
      */
     currentUserLevel: number;
     /**
-     * The callback when the apply button is clicked
+     * Applies a new power level as soon as it is chosen. A rejected promise puts the previous one back.
      * @param value - new power level for the user
      * @param userId - the user id
      */
-    onClick: (value: number, userId: string) => void;
+    onClick: (value: number, userId: string) => void | Promise<void>;
     /**
      * Filter the users to display
      * @param user
@@ -52,7 +60,33 @@ interface PowerLevelSelectorProps {
     title: string;
 }
 
+/**
+ * Asks before a change that can't be undone, as the member info does: promoting someone to the user's own level, or
+ * demoting themselves.
+ * @returns whether to go ahead
+ */
+async function confirmPowerLevelChange(room: Room, isMe: boolean, value: number, myLevel: number): Promise<boolean> {
+    if (isMe && value < myLevel) return warnSelfDemote(room.isSpaceRoom());
+    if (!isMe && value >= myLevel) {
+        const { finished } = Modal.createDialog(QuestionDialog, {
+            title: _t("common|warning"),
+            description: (
+                <div>
+                    {_t("user_info|promote_warning")}
+                    <br />
+                    {_t("common|are_you_sure")}
+                </div>
+            ),
+            button: _t("action|continue"),
+        });
+        const [confirmed] = await finished;
+        return !!confirmed;
+    }
+    return true;
+}
+
 export function PowerLevelSelector({
+    room,
     userLevels,
     canChangeLevels,
     currentUserLevel,
@@ -62,12 +96,6 @@ export function PowerLevelSelector({
     children,
 }: PropsWithChildren<PowerLevelSelectorProps>): JSX.Element | null {
     const matrixClient = useMatrixClientContext();
-    const [currentPowerLevel, setCurrentPowerLevel] = useState<{ value: number; userId: string } | null>(null);
-
-    // If the power level has changed, we need to enable the apply button
-    const powerLevelChanged = Boolean(
-        currentPowerLevel && currentPowerLevel.value !== userLevels[currentPowerLevel?.userId],
-    );
 
     const collator = new Intl.Collator();
 
@@ -79,71 +107,46 @@ export function PowerLevelSelector({
     // No user to display, we return the children into fragment to convert it to JSX.Element type
     if (!users.length) return <>{children}</>;
 
-    // check at least one admin in the list
-    const roomHasAtLeastOneAdmin = (usersLevels: Record<string, number>): boolean => {
-        const userLevelValues = Object.values(usersLevels);
-        // At least one user as the pL 100 which means he is admin
-        return userLevelValues.some((uL) => uL === 100);
-    };
-
     return (
         <SettingsFieldset legend={title}>
-            {users.map((userId) => {
-                // We only want to display users with a valid power level aka an integer
-                if (!Number.isInteger(userLevels[userId])) return;
+            <ValueRowList>
+                {users.map((userId) => {
+                    // We only want to display users with a valid power level aka an integer
+                    if (!Number.isInteger(userLevels[userId])) return;
 
-                const isMe = userId === matrixClient.getUserId();
-                // If I can change levels, I can change the level of anyone with a lower level than mine
-                const canChange = canChangeLevels && (userLevels[userId] < currentUserLevel || isMe);
+                    const isMe = userId === matrixClient.getUserId();
+                    // If I can change levels, I can change the level of anyone with a lower level than mine
+                    const canChange = canChangeLevels && (userLevels[userId] < currentUserLevel || isMe);
 
-                // When the new power level is selected, the fields are rerendered and we need to keep the current value
-                const userLevel = currentPowerLevel?.userId === userId ? currentPowerLevel?.value : userLevels[userId];
+                    const member = room.getMember(userId);
+                    const name = member?.name || userId;
+                    const avatarMxc = member?.getMxcAvatarUrl();
 
-                return (
-                    <PowerSelector
-                        value={userLevel}
-                        disabled={!canChange}
-                        label={userId}
-                        key={userId}
-                        maxValue={currentUserLevel}
-                        onChange={async (value) => {
-                            const userLevelsTmp = Object.assign({}, userLevels);
-                            userLevelsTmp[userId] = value;
-                            if (!roomHasAtLeastOneAdmin(userLevelsTmp)) {
-                                const { finished } = Modal.createDialog(QuestionDialog, {
-                                    title: _t("common|warning"),
-                                    description: <div>{_t("user_info|demote_self_confirm_room")}</div>,
-                                    button: _t("action|continue"),
-                                });
-                                const [confirmed] = await finished;
-                                if (!confirmed) {
-                                    // if cancel, we reput initial value
-                                    setCurrentPowerLevel({ value: userLevels[userId], userId });
-                                    return;
+                    return (
+                        <PowerLevelRow
+                            key={userId}
+                            label={name}
+                            description={name === userId ? undefined : userId}
+                            avatar={{
+                                id: userId,
+                                name,
+                                src: avatarMxc
+                                    ? (mediaFromMxc(avatarMxc).getSquareThumbnailHttp(36) ?? undefined)
+                                    : undefined,
+                            }}
+                            value={userLevels[userId]}
+                            disabled={!canChange}
+                            maxValue={currentUserLevel}
+                            onChange={async (value) => {
+                                if (!(await confirmPowerLevelChange(room, isMe, value, currentUserLevel))) {
+                                    throw new Error("Power level change cancelled");
                                 }
-                            }
-                            setCurrentPowerLevel({ value, userId });
-                        }}
-                    />
-                );
-            })}
-
-            <Button
-                size="md"
-                kind="primary"
-                // mx_Dialog_nonDialogButton is necessary to avoid the Dialog CSS to override the button style
-                className="mx_Dialog_nonDialogButton mx_PowerLevelSelector_Button"
-                onClick={() => {
-                    if (currentPowerLevel !== null) {
-                        onClick(currentPowerLevel.value, currentPowerLevel.userId);
-                        setCurrentPowerLevel(null);
-                    }
-                }}
-                disabled={!powerLevelChanged}
-                aria-label={_t("action|apply")}
-            >
-                {_t("action|apply")}
-            </Button>
+                                await onClick(value, userId);
+                            }}
+                        />
+                    );
+                })}
+            </ValueRowList>
         </SettingsFieldset>
     );
 }

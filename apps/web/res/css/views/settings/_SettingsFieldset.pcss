@@ -46,9 +46,8 @@ Please see LICENSE files in the repository root for full details.
     flex-direction: column;
     gap: var(--cpd-space-2x);
 
-    /* Fields one under another, such as the power level selectors, are 16px apart, as elsewhere (_Field.pcss), so a
-       floated label keeps clear of the field above. The Roles tab wraps each selector twice, and its user search is
-       a field of its own */
+    /* Fields one under another, such as the room's addresses, are 16px apart, as elsewhere (_Field.pcss), so a floated
+       label keeps clear of the field above, wrapped or not; the Roles tab's user search is a field of its own */
     > :is(.mx_Field, :has(.mx_Field), .mx_AutocompleteInput) + :is(.mx_Field, :has(.mx_Field)) {
         margin-top: calc(var(--cpd-space-4x) - var(--cpd-space-2x));
     }
