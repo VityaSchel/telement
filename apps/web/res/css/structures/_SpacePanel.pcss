@@ -332,13 +332,18 @@ Please see LICENSE files in the repository root for full details.
             border: 3px solid var(--cpd-color-bg-canvas-default);
         }
 
-        /* The room list's counter, 20px at the default font size: with its 2px ring, centered 2px inside the avatar's
-           top right corner, as Element's 16px badge was. Longer counts and larger fonts grow it down and to the left:
-           on the first space its top already meets the top of the list's scroll area, which clips what is above. */
+        /* The room list's counter at its default 20px size: with its 2px ring, centered 2px inside the avatar's top
+           right corner, as Element's 16px badge was. The tiles stay 32px at every font size, so the counter keeps its
+           20px size and 11px digits too, rather than growing with the font as the room list's does, and covers no
+           more than the tile's corner. Longer counts grow it to the left: on the first space its top already meets
+           the top of the list's scroll area, which clips what is above. */
         [data-badge-type="badge_2char"],
         [data-badge-type="badge_3char"] {
+            --notification-badge-size: 20px;
+
             margin: -7px -7px 0 0;
             border: 2px solid var(--cpd-color-bg-canvas-default);
+            font-size: 11px;
         }
     }
 

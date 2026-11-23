@@ -397,19 +397,29 @@ describe("SpacePanel badges and create button", () => {
         }
     });
 
-    it("grows the counter down and to the left with the font, keeping it within the space button's top", () => {
-        renderBadge("badge_2char", "3");
-        const spaceButton = button("Home").getBoundingClientRect();
-        const before = badge().getBoundingClientRect();
-        document.documentElement.style.fontSize = "24px";
-        const after = badge().getBoundingClientRect();
-        document.documentElement.style.fontSize = "";
+    it.each(["badge_2char", "badge_3char"] as const)(
+        "keeps the %s counter at its default 20px size and in its place at every font size, as the tiles don't grow",
+        (badgeType) => {
+            renderBadge(badgeType, badgeType === "badge_2char" ? "3" : "128");
+            const spaceButton = button("Home").getBoundingClientRect();
+            const atDefault = badge().getBoundingClientRect();
+            try {
+                for (const fontSize of ["20px", "24px"]) {
+                    document.documentElement.style.fontSize = fontSize;
+                    const box = badge().getBoundingClientRect();
 
-        expect(after.height).toBeGreaterThan(before.height);
-        expect([after.top, after.right]).toEqual([before.top, before.right]);
-        // Inside its ring, as the list's scroll area clips what is above the first space's button
-        expect(after.top + 2).toBeCloseTo(spaceButton.top, 1);
-    });
+                    // 20px inside its 2px ring
+                    expect(box.height).toBe(24);
+                    expect([box.top, box.right, box.width]).toEqual([atDefault.top, atDefault.right, atDefault.width]);
+                    expect(getComputedStyle(badge()).fontSize).toBe("11px");
+                    // Inside its ring, as the list's scroll area clips what is above the first space's button
+                    expect(box.top + 2).toBeCloseTo(spaceButton.top, 1);
+                }
+            } finally {
+                document.documentElement.style.fontSize = "";
+            }
+        },
+    );
 
     it("grows a longer count to the left, keeping the counter's right edge and middle", () => {
         renderBadge("badge_2char", "3");
