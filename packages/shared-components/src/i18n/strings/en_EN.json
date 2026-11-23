@@ -246,6 +246,7 @@
         "message_status": {
             "failed": "Failed to send",
             "read": "Read",
+            "resend": "Resend",
             "sending": "Sending",
             "sent": "Sent"
         },

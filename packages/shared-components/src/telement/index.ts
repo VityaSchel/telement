@@ -9,6 +9,7 @@ import "./tokens.css";
 
 export * from "./room/timeline/VideoNoteBodyView";
 export * from "./room/timeline/MessageStatusView";
+export * from "./room/timeline/FailedMessageMarkView";
 export * from "./room/timeline/PinnedMarkView";
 export * from "./room/timeline/FloatingDateView";
 export * from "./room/timeline/UnreadMentionsButtonView";

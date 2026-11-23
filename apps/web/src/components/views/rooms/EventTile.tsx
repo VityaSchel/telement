@@ -120,6 +120,7 @@ import { UnreadNotificationBadgeViewModel } from "../../../viewmodels/room/notif
 import { getMessageContextMenuTarget } from "../../../telement/message-context-menu/getMessageContextMenuTarget";
 import { canReplyOnDoubleClick } from "../../../telement/timeline/canReplyOnDoubleClick";
 import { isReplyDoubleClick } from "../../../telement/timeline/isReplyDoubleClick";
+import { FailedMessageMark } from "../../../telement/timeline/FailedMessageMark";
 import { ThreadListTileContextMenu } from "../../../telement/message-context-menu/ThreadListTileContextMenu";
 
 /** Relation lookup type retained for EventTile consumers. */
@@ -1153,7 +1154,13 @@ export class UnwrappedEventTile extends React.Component<EventTileProps, IState> 
         const receiptState = this.receiptState;
         const isFileShape = eventTileRenderState.root.shape === "File";
         const messageStatus = this.messageStatus;
-        const status = messageStatus ? <MessageStatusView status={messageStatus} /> : undefined;
+        // Telement: the mark of a message that failed to send opens Resend and Delete
+        const status =
+            messageStatus === "failed" ? (
+                <FailedMessageMark mxEvent={this.props.mxEvent} />
+            ) : messageStatus ? (
+                <MessageStatusView status={messageStatus} />
+            ) : undefined;
         const receipt =
             !isFileShape &&
             this.props.layout !== Layout.Bubble &&

@@ -47,6 +47,7 @@ import DMRoomMap from "../../../utils/DMRoomMap";
 import dis from "../../../dispatcher/dispatcher";
 import { Action } from "../../../dispatcher/actions";
 import PinningUtils from "../../../utils/PinningUtils";
+import Resend from "../../../Resend";
 import { Layout } from "../../../settings/enums/Layout";
 import { ScopedRoomContextProvider } from "../../../contexts/ScopedRoomContext.tsx";
 import SettingsStore from "../../../settings/SettingsStore";
@@ -578,6 +579,26 @@ describe("EventTile", () => {
 
                 expect(getByRole("img", { name: label })).toBeInTheDocument();
                 expect(queryByRole("status")).toBeNull();
+            });
+
+            it("makes the failed mark a button opening Resend and Delete, which send the message again or remove it", async () => {
+                const ownEvent = ownMessage();
+                ownEvent.setStatus(EventStatus.NOT_SENT);
+                const resend = vi.spyOn(Resend, "resend").mockResolvedValue();
+                const removeFromQueue = vi.spyOn(Resend, "removeFromQueue").mockImplementation(() => {});
+                const { getByRole } = getComponent({
+                    mxEvent: ownEvent,
+                    layout: Layout.Bubble,
+                    eventSendStatus: EventStatus.NOT_SENT,
+                });
+
+                await userEvent.click(getByRole("button", { name: "Failed to send" }));
+                await userEvent.click(await screen.findByRole("menuitem", { name: "Resend" }));
+                expect(resend).toHaveBeenCalledWith(client, ownEvent);
+
+                await userEvent.click(getByRole("button", { name: "Failed to send" }));
+                await userEvent.click(await screen.findByRole("menuitem", { name: "Delete" }));
+                expect(removeFromQueue).toHaveBeenCalledWith(client, ownEvent);
             });
 
             it("shows neither checks nor receipts on other people's messages", () => {

@@ -1,0 +1,24 @@
+/*
+Copyright 2026 Viktor Shchelochkov
+
+SPDX-License-Identifier: AGPL-3.0-only OR GPL-3.0-only
+Please see LICENSE files in the repository root for full details.
+*/
+
+/* The mark itself is the button: nothing is drawn around it, so it sits where the mark did, after the time */
+.mark {
+    display: flex;
+    flex-shrink: 0;
+    margin: 0;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background: none;
+    color: inherit;
+    font: inherit;
+
+    &:focus-visible {
+        outline: 2px solid var(--cpd-color-border-focused);
+        outline-offset: 1px;
+    }
+}
