@@ -22,6 +22,7 @@ import accessibleButtonStyles from "../../../../res/css/views/elements/_Accessib
 import jumpToBottomButtonStyles from "../../../../res/css/views/rooms/_JumpToBottomButton.pcss?raw";
 import lightTheme from "../../../../res/themes/light/css/_light.pcss?raw";
 import { cornerRadii, toBrowserCss } from "../../../test/telement/browserCss";
+import { tokenColor } from "../../../test/telement/computedStyle";
 
 /** The DOM JumpToBottomButton renders with an unread count, inside the positioned timeline it sits on. */
 function render(style = "", count = 12): void {
@@ -157,6 +158,15 @@ describe("JumpToBottomButton styles", () => {
         const box = badge.getBoundingClientRect();
 
         expect(Math.abs(baseline - capHeight - box.top - (box.bottom - baseline))).toBeLessThanOrEqual(0.5);
+    });
+
+    it("draws the count of a room with mentions as the room list's accent counter, white on the accent", () => {
+        render();
+        const timeline = element("#timeline");
+        const badge = getComputedStyle(element(".mx_JumpToBottomButton_badge"));
+
+        expect(badge.backgroundColor).toBe(tokenColor("--cpd-color-bg-accent-rest", timeline));
+        expect(badge.color).toBe(tokenColor("--tl-color-on-accent", timeline));
     });
 
     it("centers the chevron vertically too, inside the button's border", () => {
