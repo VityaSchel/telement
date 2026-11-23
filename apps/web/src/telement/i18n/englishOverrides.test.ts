@@ -177,6 +177,8 @@ describe("registerEnglishOverrides", () => {
         expect(_t("room_settings|advanced|upgrade_warning_dialog_report_bug_prompt", { brand: "Telement" })).toBe(
             "This usually only affects how the room is processed on the server.",
         );
+        // A value row is named after what it sets, so its label doesn't say to set it
+        expect(_t("settings|preferences|user_timezone")).toBe("Time zone");
     });
 
     it("leaves the translations of other languages alone", async () => {

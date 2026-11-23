@@ -689,6 +689,10 @@
         "upstream": "Read Marker off-screen lifetime (ms)",
         "telement": "Read marker off-screen lifetime (ms)"
     },
+    "settings|preferences|user_timezone": {
+        "upstream": "Set timezone",
+        "telement": "Time zone"
+    },
     "settings|replace_plain_emoji": {
         "upstream": "Automatically replace plain text Emoji",
         "telement": "Automatically replace plain text emoji"
