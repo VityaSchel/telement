@@ -5,7 +5,7 @@
  * Please see LICENSE files in the repository root for full details.
  */
 
-import { JoinRule, type MatrixClient, type Room, RoomEvent, RoomType } from "matrix-js-sdk/src/matrix";
+import { ClientEvent, JoinRule, type MatrixClient, type Room, RoomEvent, RoomType } from "matrix-js-sdk/src/matrix";
 import {
     BaseViewModel,
     type RoomListHeaderViewSnapshot,
@@ -29,6 +29,7 @@ import SettingsStore from "../../settings/SettingsStore";
 import RoomListStoreV3 from "../../stores/room-list-v3/RoomListStoreV3";
 import { SortingAlgorithm } from "../../stores/room-list-v3/skip-list/sorters";
 import { createRoom, hasCreateRoomRights } from "./utils";
+import { getRoomListSyncStatus } from "../../telement/room-list/getRoomListSyncStatus";
 
 export interface Props {
     /**
@@ -75,7 +76,17 @@ export class RoomListHeaderViewModel
         if (this.activeSpace) {
             this.disposables.trackListener(this.activeSpace, RoomEvent.Name, this.onSpaceNameChange);
         }
+
+        // Listen for the sync state, which the header shows in place of its title while the list may be out of date
+        this.disposables.trackListener(props.matrixClient, ClientEvent.Sync, this.onSync);
     }
+
+    /**
+     * Handles sync state changes.
+     */
+    private readonly onSync = (): void => {
+        this.snapshot.merge({ syncStatus: getRoomListSyncStatus(this.props.matrixClient.getSyncState()) });
+    };
 
     /**
      * Handles space change events.
@@ -206,6 +217,7 @@ function getInitialSnapshot(spaceStore: SpaceStore, matrixClient: MatrixClient):
 
     return {
         activeSortOption,
+        syncStatus: getRoomListSyncStatus(matrixClient.getSyncState()),
         ...computeHeaderSpaceState(spaceStore, matrixClient),
     };
 }
@@ -237,7 +249,7 @@ function getCanCreateVideoRoom(canCreateRoom: boolean): boolean {
 function computeHeaderSpaceState(
     spaceStore: SpaceStore,
     matrixClient: MatrixClient,
-): Omit<RoomListHeaderViewSnapshot, "activeSortOption"> {
+): Omit<RoomListHeaderViewSnapshot, "activeSortOption" | "syncStatus"> {
     const activeSpace = spaceStore.activeSpaceRoom;
     const title = getHeaderTitle(spaceStore);
 

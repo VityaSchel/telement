@@ -13,6 +13,7 @@ import { type ViewModel, useViewModel } from "../../core/viewmodel";
 import { Flex } from "../../core/utils/Flex";
 import { useI18n } from "../../core/i18n/i18nContext";
 import { ComposeMenuView, OptionMenuView, SpaceMenuView } from "./menu";
+import { RoomListSyncStatusView, type RoomListSyncStatus } from "../../telement/room-list/RoomListSyncStatusView";
 import styles from "./RoomListHeaderView.module.css";
 
 /**
@@ -50,6 +51,10 @@ export interface RoomListHeaderViewSnapshot {
      * The currently active sort option.
      */
     activeSortOption: SortOption;
+    /**
+     * Why the room list may be out of date, shown in place of the title; undefined once it is up to date.
+     */
+    syncStatus?: RoomListSyncStatus;
 }
 
 export interface RoomListHeaderViewActions {
@@ -110,7 +115,7 @@ interface RoomListHeaderViewProps {
  */
 export function RoomListHeaderView({ vm }: Readonly<RoomListHeaderViewProps>): JSX.Element {
     const { translate: _t } = useI18n();
-    const { title, displaySpaceMenu, canCreateRoom, canCreateVideoRoom } = useViewModel(vm);
+    const { title, displaySpaceMenu, canCreateRoom, canCreateVideoRoom, syncStatus } = useViewModel(vm);
     const canOnlyStartChat = !canCreateRoom && !canCreateVideoRoom;
 
     return (
@@ -123,7 +128,10 @@ export function RoomListHeaderView({ vm }: Readonly<RoomListHeaderViewProps>): J
         >
             <Flex className={styles.container} justify="space-between" align="center" gap="var(--cpd-space-3x)">
                 <Flex className={styles.title} align="center" gap="var(--cpd-space-1x)">
-                    <H1 size="sm" title={title}>
+                    {/* While the list may be out of date, its status takes the title's place, as in Telegram; the
+                        title stays the heading for assistive technologies */}
+                    {syncStatus && <RoomListSyncStatusView status={syncStatus} />}
+                    <H1 size="sm" title={title} className={syncStatus ? styles.visuallyHidden : undefined}>
                         {title}
                     </H1>
                     {displaySpaceMenu && <SpaceMenuView vm={vm} />}

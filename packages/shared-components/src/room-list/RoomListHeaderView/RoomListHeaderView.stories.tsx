@@ -79,6 +79,19 @@ export const NoSpaceMenu: Story = {
     },
 };
 
+export const Updating: Story = {
+    args: {
+        syncStatus: "updating",
+    },
+};
+
+export const WaitingForNetwork: Story = {
+    args: {
+        displaySpaceMenu: false,
+        syncStatus: "waiting_for_network",
+    },
+};
+
 export const LongTitle: Story = {
     decorators: [
         (Story) => (

@@ -16,7 +16,7 @@ import React from "react";
 
 import * as stories from "./RoomListHeaderView.stories";
 
-const { Default, NoSpaceMenu, NoComposeMenu } = composeStories(stories);
+const { Default, NoSpaceMenu, NoComposeMenu, Updating, WaitingForNetwork } = composeStories(stories);
 
 describe("RoomListHeaderView", () => {
     it("renders the default state", () => {
@@ -33,6 +33,29 @@ describe("RoomListHeaderView", () => {
         const { getByRole } = render(<NoComposeMenu />);
         getByRole("button", { name: "Start chat" }).click();
         expect(NoComposeMenu.args?.createChatRoom).toHaveBeenCalled();
+    });
+
+    it.each([
+        ["Updating", Updating, "Updating…"],
+        ["WaitingForNetwork", WaitingForNetwork, "Waiting for network…"],
+    ])("shows the %s sync status after a spinner in place of the title, as Telegram does", (_, Story, text) => {
+        const { container } = render(<Story />);
+        const status = screen.getByRole("status");
+
+        expect(status).toHaveTextContent(text);
+        expect(status.querySelector("svg")).toHaveAttribute("aria-hidden", "true");
+        // The title stays the heading for assistive technologies, drawn nowhere
+        const heading = screen.getByRole("heading", { name: "Rooms" });
+        expect(heading.getBoundingClientRect().width).toBeLessThanOrEqual(1);
+        expect(status.compareDocumentPosition(heading) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+        expect(container).toMatchSnapshot();
+    });
+
+    it("shows the title and no status once the room list is up to date", () => {
+        render(<Default />);
+
+        expect(screen.queryByRole("status")).toBeNull();
+        expect(screen.getByRole("heading", { name: "Rooms" }).getBoundingClientRect().width).toBeGreaterThan(1);
     });
 });
 

@@ -14,4 +14,5 @@ export * from "./room/composer/ComposerDrawerView";
 export * from "./core/SearchFieldView";
 export * from "./core/icons/DoubleCheckIcon";
 export * from "./core/useOpenOnPress";
+export * from "./room-list/RoomListSyncStatusView";
 export * from "./media/VideoLightboxView";

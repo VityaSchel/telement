@@ -8,7 +8,15 @@
 // @vitest-environment happy-dom
 
 import { vi, describe, it, expect, beforeEach, afterEach } from "vitest";
-import { JoinRule, type MatrixClient, type Room, RoomEvent, RoomType } from "matrix-js-sdk/src/matrix";
+import {
+    ClientEvent,
+    JoinRule,
+    type MatrixClient,
+    type Room,
+    RoomEvent,
+    RoomType,
+    SyncState,
+} from "matrix-js-sdk/src/matrix";
 import { createTestClient, mkSpace, TestSDKContext } from "test-utils";
 
 import { RoomListHeaderViewModel } from "./RoomListHeaderViewModel";
@@ -166,6 +174,51 @@ describe("RoomListHeaderViewModel", () => {
             mockSpace.emit(RoomEvent.Name, mockSpace);
 
             expect(vm.getSnapshot().title).toBe("new name");
+        });
+
+        /** Moves the client to a sync state, as the SDK does: the state changes, then the event says so. */
+        function emitSyncState(syncState: SyncState, prevState: SyncState): void {
+            vi.mocked(matrixClient.getSyncState).mockReturnValue(syncState);
+            matrixClient.emit(ClientEvent.Sync, syncState, prevState);
+        }
+
+        it("should show no sync status while syncing", () => {
+            vm = new RoomListHeaderViewModel({ matrixClient, spaceStore: sdkContext.spaceStore });
+
+            expect(vm.getSnapshot().syncStatus).toBeUndefined();
+        });
+
+        it("should start with Updating while the first sync after a reload is pending", () => {
+            vi.mocked(matrixClient.getSyncState).mockReturnValue(SyncState.Prepared);
+
+            vm = new RoomListHeaderViewModel({ matrixClient, spaceStore: sdkContext.spaceStore });
+
+            expect(vm.getSnapshot().syncStatus).toBe("updating");
+        });
+
+        it.each([
+            [SyncState.Prepared, "updating"],
+            [SyncState.Reconnecting, "updating"],
+            [SyncState.Catchup, "updating"],
+            [SyncState.Error, "waiting_for_network"],
+            [SyncState.Syncing, undefined],
+            [SyncState.Stopped, undefined],
+        ])("should show the %s sync state as %s", (syncState, syncStatus) => {
+            vm = new RoomListHeaderViewModel({ matrixClient, spaceStore: sdkContext.spaceStore });
+
+            emitSyncState(SyncState.Error, SyncState.Syncing);
+            emitSyncState(syncState, SyncState.Error);
+
+            expect(vm.getSnapshot().syncStatus).toBe(syncStatus);
+        });
+
+        it("should stop following the sync state once disposed", () => {
+            vm = new RoomListHeaderViewModel({ matrixClient, spaceStore: sdkContext.spaceStore });
+            vm.dispose();
+
+            emitSyncState(SyncState.Error, SyncState.Syncing);
+
+            expect(vm.getSnapshot().syncStatus).toBeUndefined();
         });
     });
 

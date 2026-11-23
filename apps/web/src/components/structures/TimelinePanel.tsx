@@ -20,11 +20,9 @@ import {
     EventTimeline,
     EventType,
     type RelationType,
-    ClientEvent,
     type MatrixClient,
     type Relations,
     type MatrixError,
-    SyncState,
     TimelineWindow,
     Thread,
     ThreadEvent,
@@ -246,16 +244,11 @@ class TimelinePanel extends React.Component<IProps, IState> {
     // A map of <callId, LegacyCallEventGrouper>
     private callEventGroupers = new Map<string, LegacyCallEventGrouper>();
     private initialReadMarkerId: string | null = null;
-    private syncImpliesForwardPaginating: boolean;
 
     public constructor(props: IProps, context: React.ContextType<typeof RoomContext>) {
         super(props, context);
 
         debuglog("mounting");
-
-        this.syncImpliesForwardPaginating = TimelinePanel.isSyncForwardPaginating(
-            MatrixClientPeg.safeGet().getSyncState(),
-        );
 
         // XXX: we could track RM per TimelineSet rather than per Room.
         // but for now we just do it per room for simplicity.
@@ -304,7 +297,6 @@ class TimelinePanel extends React.Component<IProps, IState> {
         cli.on(RoomEvent.AccountData, this.onAccountData);
         cli.on(MatrixEventEvent.Decrypted, this.onEventDecrypted);
         cli.on(MatrixEventEvent.Replaced, this.onEventReplaced);
-        cli.on(ClientEvent.Sync, this.onSync);
 
         this.props.timelineSet.room?.on(ThreadEvent.Update, this.onThreadUpdate);
 
@@ -382,7 +374,6 @@ class TimelinePanel extends React.Component<IProps, IState> {
             client.removeListener(MatrixEventEvent.Decrypted, this.onEventDecrypted);
             client.removeListener(MatrixEventEvent.Replaced, this.onEventReplaced);
             client.removeListener(MatrixEventEvent.VisibilityChange, this.onEventVisibilityChange);
-            client.removeListener(ClientEvent.Sync, this.onSync);
             this.props.timelineSet.room?.removeListener(ThreadEvent.Update, this.onThreadUpdate);
         }
     }
@@ -898,19 +889,6 @@ class TimelinePanel extends React.Component<IProps, IState> {
         this.buildLegacyCallEventGroupers(this.state.events);
         this.forceUpdate();
     };
-
-    private onSync = (clientSyncState: SyncState, prevState: SyncState | null, data?: object): void => {
-        if (this.unmounted) return;
-        const nextSyncImpliesForwardPaginating = TimelinePanel.isSyncForwardPaginating(clientSyncState);
-        if (nextSyncImpliesForwardPaginating === this.syncImpliesForwardPaginating) return;
-
-        this.syncImpliesForwardPaginating = nextSyncImpliesForwardPaginating;
-        this.forceUpdate();
-    };
-
-    private static isSyncForwardPaginating(syncState: SyncState | null): boolean {
-        return syncState === SyncState.Prepared || syncState === SyncState.Catchup;
-    }
 
     private readMarkerTimeout(readMarkerPosition: number | null): number {
         return readMarkerPosition === 0
@@ -1848,9 +1826,9 @@ class TimelinePanel extends React.Component<IProps, IState> {
         // of paginating our way through the entire history of the room.
         const stickyBottom = !this.timelineWindow?.canPaginate(EventTimeline.FORWARDS);
 
-        // If the state is PREPARED or CATCHUP, we're still waiting for the js-sdk to sync with
-        // the HS and fetch the latest events, so we are effectively forward paginating.
-        const forwardPaginating = this.state.forwardPaginating || this.syncImpliesForwardPaginating;
+        // While the client catches up with the server after a reload, the room list's header says "Updating…", as
+        // Telegram does, so the timeline shows no spinner for it, which made it jump when the sync arrived
+        const forwardPaginating = this.state.forwardPaginating;
         const events = this.state.events;
         return (
             <MessagePanel

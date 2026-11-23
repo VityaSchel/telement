@@ -1,0 +1,23 @@
+/*
+Copyright 2026 Viktor Shchelochkov
+
+SPDX-License-Identifier: AGPL-3.0-only OR GPL-3.0-only
+Please see LICENSE files in the repository root for full details.
+*/
+
+/* On the title's line, in its place, in the room list's secondary text: a status, not a heading */
+.status {
+    min-width: 0;
+    font: var(--cpd-font-body-md-regular);
+    color: var(--cpd-color-text-secondary);
+}
+
+.spinner {
+    flex-shrink: 0;
+}
+
+.label {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}

@@ -513,38 +513,26 @@ describe("TimelinePanel", () => {
         });
     });
 
-    it("only re-renders when sync changes forward pagination state", async () => {
-        const [client, room, events] = setupTestData();
-        let timelinePanel: TimelinePanel | null = null;
+    it.each([SyncState.Prepared, SyncState.Catchup])(
+        "shows no spinner under the timeline while the sync state is %s, as the room list's header says it's updating",
+        async (syncState) => {
+            const [client, room, events] = setupTestData();
+            vi.mocked(client.getSyncState).mockReturnValue(syncState);
 
-        render(
-            <TimelinePanel
-                {...getProps(room, events)}
-                ref={(ref) => {
-                    timelinePanel = ref;
-                }}
-            />,
-            clientAndSDKContextRenderOptions(client, sdkContext),
-        );
-        await flushPromises();
-        await waitFor(() => expect(timelinePanel).toBeTruthy());
+            const { container } = render(
+                <TimelinePanel {...getProps(room, events)} />,
+                clientAndSDKContextRenderOptions(client, sdkContext),
+            );
+            await waitFor(() => expectEvents(container, events));
+            await act(async () => {
+                client.emit(ClientEvent.Sync, syncState, SyncState.Syncing);
+                await flushPromises();
+            });
 
-        const forceUpdateSpy = vi.spyOn(timelinePanel!, "forceUpdate");
-
-        await act(async () => {
-            client.emit(ClientEvent.Sync, SyncState.Syncing, SyncState.Syncing);
-            await flushPromises();
-        });
-
-        expect(forceUpdateSpy).not.toHaveBeenCalled();
-
-        await act(async () => {
-            client.emit(ClientEvent.Sync, SyncState.Prepared, SyncState.Syncing);
-            await flushPromises();
-        });
-
-        expect(forceUpdateSpy).toHaveBeenCalledTimes(1);
-    });
+            // So the timeline doesn't move up when the sync arrives and the spinner would have gone
+            expect(container.querySelector(".mx_RoomView_MessageList .mx_Spinner")).toBeNull();
+        },
+    );
 
     describe("onRoomTimeline", () => {
         it("ignores events for other timelines", () => {

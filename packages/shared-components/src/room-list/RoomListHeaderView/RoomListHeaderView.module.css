@@ -35,3 +35,13 @@
         user-select: none; /* currently supported by Chrome, Edge, Opera and Firefox */
     }
 }
+
+/* The title while the sync status takes its place: kept for assistive technologies only */
+.title h1.visuallyHidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+}

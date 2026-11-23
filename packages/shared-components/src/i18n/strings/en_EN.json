@@ -258,7 +258,11 @@
                 "pin": "Pin",
                 "unpin": "Unpin"
             },
-            "search_with_shortcut": "Search (%(shortcut)s)"
+            "search_with_shortcut": "Search (%(shortcut)s)",
+            "sync_status": {
+                "updating": "Updating…",
+                "waiting_for_network": "Waiting for network…"
+            }
         },
         "search_field": {
             "clear": "Clear search"

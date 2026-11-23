@@ -12,7 +12,7 @@ import "@vector-im/compound-web/dist/style.css";
 import "../telement/tokens.css";
 import React from "react";
 import { composeStories } from "@storybook/react-vite";
-import { render, screen, waitFor } from "@test-utils";
+import { cleanup, render, screen, waitFor } from "@test-utils";
 import { beforeAll, describe, expect, it } from "vitest";
 import { userEvent } from "vitest/browser";
 
@@ -20,7 +20,7 @@ import * as headerStories from "./RoomListHeaderView/RoomListHeaderView.stories"
 import * as searchStories from "./RoomListSearchView/RoomListSearchView.stories";
 import * as filterStories from "./RoomListPrimaryFilters/RoomListPrimaryFilters.stories";
 
-const { Default: Header, NoComposeMenu } = composeStories(headerStories);
+const { Default: Header, NoComposeMenu, Updating } = composeStories(headerStories);
 const { Default: Search } = composeStories(searchStories);
 const { Default: Filters } = composeStories(filterStories);
 
@@ -80,6 +80,35 @@ describe("Room list panel content edge", () => {
             expect(rect(menu).top - rect(button).bottom).toBeCloseTo(8, 0);
         },
     );
+
+    it("puts the sync status in the title's place on the content edge, the header and its buttons unmoved", () => {
+        const panel = renderInPanel(<Header />);
+        const header = rect(screen.getByTestId("room-list-header"));
+        const buttons = [...screen.getByTestId("room-list-header").querySelectorAll("button")].map(rect);
+        cleanup();
+        renderInPanel(<Updating />);
+        const status = screen.getByRole("status");
+        const spinner = status.querySelector("svg")!;
+        const label = status.querySelector("span")!;
+        const secondary = document.createElement("span");
+        secondary.style.color = "var(--cpd-color-text-secondary)";
+        document.body.append(secondary);
+
+        expect(rect(screen.getByTestId("room-list-header"))).toEqual(header);
+        expect([...screen.getByTestId("room-list-header").querySelectorAll("button")].map(rect)).toEqual(buttons);
+        // A 16px spinner on the edge, then the 15px secondary text 8px after it
+        expect(rect(spinner).left - panel.left).toBe(EDGE);
+        expect([rect(spinner).width, rect(spinner).height]).toEqual([16, 16]);
+        expect(rect(label).left - rect(spinner).right).toBe(8);
+        expect(getComputedStyle(label).fontSize).toBe("15px");
+        expect(getComputedStyle(label).fontWeight).toBe("400");
+        expect(getComputedStyle(label).color).toBe(getComputedStyle(secondary).color);
+        secondary.remove();
+        // On the line of the header's buttons
+        const middle = (box: DOMRect): number => box.top + box.height / 2;
+        expect(middle(rect(spinner))).toBeCloseTo(middle(buttons[0]), 0);
+        expect(middle(rect(label))).toBeCloseTo(middle(buttons[0]), 0);
+    });
 
     it("makes the header's start chat button a 36px control on the content edge too", () => {
         const panel = renderInPanel(<NoComposeMenu />);
