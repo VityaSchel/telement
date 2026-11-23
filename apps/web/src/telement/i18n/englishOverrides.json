@@ -351,6 +351,14 @@
         "upstream": "Language Dropdown",
         "telement": "Language dropdown"
     },
+    "leave_room_dialog|leave_room_title": {
+        "upstream": "Leave '%(roomName)s'?",
+        "telement": "Leave %(roomName)s?"
+    },
+    "leave_room_dialog|leave_space_title": {
+        "upstream": "Leave '%(spaceName)s'?",
+        "telement": "Leave %(spaceName)s?"
+    },
     "lightbox|rotate_left": {
         "upstream": "Rotate Left",
         "telement": "Rotate left"
@@ -468,6 +476,10 @@
     "room_settings|advanced|upgrade_dialog_title": {
         "upstream": "Upgrade Room Version",
         "telement": "Upgrade room version"
+    },
+    "room_settings|advanced|upgrade_warning_dialog_report_bug_prompt": {
+        "upstream": "This usually only affects how the room is processed on the server. If you're having problems with your %(brand)s, please report a bug.",
+        "telement": "This usually only affects how the room is processed on the server."
     },
     "room_settings|general|aliases_section": {
         "upstream": "Room Addresses",
@@ -759,6 +771,10 @@
         "upstream": "Direct Messages",
         "telement": "Direct messages"
     },
+    "space|leave_dialog_title": {
+        "upstream": "Leave %(spaceName)s",
+        "telement": "Leave %(spaceName)s?"
+    },
     "spotlight_dialog|count_of_members": {
         "upstream": {
             "one": "%(count)s Member",
@@ -768,6 +784,10 @@
             "one": "%(count)s member",
             "other": "%(count)s members"
         }
+    },
+    "spotlight_dialog|heading_with_query": {
+        "upstream": "Use \"%(query)s\" to search",
+        "telement": "Use “%(query)s” to search"
     },
     "spotlight_dialog|search_dialog": {
         "upstream": "Search Dialog",
@@ -788,6 +808,24 @@
     "terms|tos": {
         "upstream": "Terms of Service",
         "telement": "Terms of service"
+    },
+    "timeline|typing_indicator|more_users": {
+        "upstream": {
+            "one": "%(names)s and one other is typing …",
+            "other": "%(names)s and %(count)s others are typing …"
+        },
+        "telement": {
+            "one": "%(names)s and one other is typing…",
+            "other": "%(names)s and %(count)s others are typing…"
+        }
+    },
+    "timeline|typing_indicator|one_user": {
+        "upstream": "%(displayName)s is typing …",
+        "telement": "%(displayName)s is typing…"
+    },
+    "timeline|typing_indicator|two_users": {
+        "upstream": "%(names)s and %(lastPerson)s are typing …",
+        "telement": "%(names)s and %(lastPerson)s are typing…"
     },
     "update_room_access_modal|revert_access_description": {
         "upstream": "(This can be reverted to the previous value in the Room Settings: <b>Security & Privacy</b> / <b>Access</b>)",

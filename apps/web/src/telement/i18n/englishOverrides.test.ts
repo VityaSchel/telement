@@ -151,6 +151,28 @@ describe("registerEnglishOverrides", () => {
         );
     });
 
+    it("changes wording and punctuation in English", async () => {
+        await setLanguage("en");
+        expect(_t("leave_room_dialog|leave_room_title", { roomName: "Project 11" })).toBe("Leave Project 11?");
+        expect(_t("leave_room_dialog|leave_space_title", { spaceName: "Studio" })).toBe("Leave Studio?");
+        expect(_t("space|leave_dialog_title", { spaceName: "Studio" })).toBe("Leave Studio?");
+        expect(_t("spotlight_dialog|heading_with_query", { query: "zzqqxx" })).toBe("Use “zzqqxx” to search");
+        expect(_t("timeline|typing_indicator|one_user", { displayName: "BotBob" })).toBe("BotBob is typing…");
+        expect(_t("timeline|typing_indicator|two_users", { names: "Alice", lastPerson: "Bob" })).toBe(
+            "Alice and Bob are typing…",
+        );
+        expect(_t("timeline|typing_indicator|more_users", { names: "Alice, Bob", count: 1 })).toBe(
+            "Alice, Bob and one other is typing…",
+        );
+        expect(_t("timeline|typing_indicator|more_users", { names: "Alice, Bob", count: 2 })).toBe(
+            "Alice, Bob and 2 others are typing…",
+        );
+        // Telement has no bug reporting, so the dialog doesn't ask for a bug report
+        expect(_t("room_settings|advanced|upgrade_warning_dialog_report_bug_prompt", { brand: "Telement" })).toBe(
+            "This usually only affects how the room is processed on the server.",
+        );
+    });
+
     it("leaves the translations of other languages alone", async () => {
         await setLanguage("de");
         expect(_t("room_settings|security|title")).toBe(webStringsDe.room_settings.security.title);
