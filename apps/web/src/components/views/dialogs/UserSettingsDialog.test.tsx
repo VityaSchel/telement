@@ -11,6 +11,7 @@ Please see LICENSE files in the repository root for full details.
 import React, { type ReactElement } from "react";
 import { vi, describe, it, expect, beforeEach, type MockedObject } from "vitest";
 import { render, screen, waitFor } from "test-utils-rtl";
+import userEvent from "@testing-library/user-event";
 import { renderToStaticMarkup } from "react-dom/server";
 import ThemeIcon from "@vector-im/compound-design-tokens/assets/web/icons/theme";
 import { ClientEvent, MatrixEvent, type MatrixClient } from "matrix-js-sdk/src/matrix";
@@ -94,6 +95,22 @@ describe("<UserSettingsDialog />", () => {
 
     const getActiveTabLabel = (container: Element) =>
         container.querySelector(".mx_TabbedView_tabLabel_active")?.textContent;
+
+    it("searches the settings from a field above the tabs and opens the tab of what is chosen", async () => {
+        const { container } = render(getComponent());
+        const search = screen.getByRole("combobox", { name: "Search settings" });
+        expect(search.closest(".mx_TabbedView_tabsHeader")?.nextElementSibling).toHaveAttribute("role", "tablist");
+
+        await userEvent.type(search, "clear cache");
+        // Tests run on upstream's English, without Telement's sentence case
+        const options = screen.getAllByRole("option");
+        expect(options).toHaveLength(1);
+        expect(options[0]).toHaveTextContent(/^Help & about › Advanced › Clear cache and reload$/i);
+        await userEvent.keyboard("{Enter}");
+
+        expect(getActiveTabLabel(container)).toMatch(/^Help & about$/i);
+        expect(screen.queryByRole("listbox")).toBeNull();
+    });
 
     it("should render general settings tab when no initialTabId", () => {
         const { container } = render(getComponent());

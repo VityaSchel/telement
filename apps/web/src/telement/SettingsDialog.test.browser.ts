@@ -25,6 +25,7 @@ import tabbedViewStyles from "../../res/css/structures/_TabbedView.pcss?raw";
 import settingsDialogStyles from "../../res/css/views/dialogs/_SettingsDialog.pcss?raw";
 import themeChoicePanelStyles from "../../res/css/views/settings/_ThemeChoicePanel.pcss?raw";
 import deviceSecurityCardStyles from "../../res/css/components/views/settings/devices/_DeviceSecurityCard.pcss?raw";
+import settingsSearchStyles from "../../res/css/telement/_SettingsSearch.pcss?raw";
 import lightTheme from "../../res/themes/light/css/_light.pcss?raw";
 import darkTheme from "../../res/themes/dark/css/_dark.pcss?raw";
 import { cornerRadii, toBrowserCss } from "../test/telement/browserCss";
@@ -38,13 +39,16 @@ const TAB_NAMES = ["Account", "Sessions", "Appearance", "Notifications"];
  *
  * @param responsive - Whether the tabs collapse to their icons in a narrow window.
  * @param alertTabs - The tabs showing the red dot, as the Encryption tab does until recovery is set up.
+ * @param search - Whether the settings search is above the tabs, as in the user settings.
  */
 function renderSettingsDialog({
     responsive,
     alertTabs = [],
+    search = false,
 }: {
     responsive: boolean;
     alertTabs?: string[];
+    search?: boolean;
 }): HTMLElement {
     const tabs = TAB_NAMES.map(
         (name, index) => `
@@ -59,6 +63,7 @@ function renderSettingsDialog({
         <div class="mx_Dialog mx_UserSettingsDialog" style="position: relative; box-sizing: border-box; width: 900px; height: 600px; padding: 16px 24px 24px">
             <div class="mx_Dialog_header"><h1 class="mx_Dialog_title" style="margin: 0">Settings</h1></div>
             <div class="mx_TabbedView mx_TabbedView_tabsOnLeft ${responsive ? "mx_TabbedView_responsive" : ""}">
+                ${search ? `<div class="mx_TabbedView_tabsHeader"><div id="search" style="height: 36px"></div></div>` : ""}
                 <ul class="mx_TabbedView_tabLabels" role="tablist">${tabs}</ul>
                 <div class="mx_TabbedView_tabPanel"><div class="mx_TabbedView_tabPanelContent"></div></div>
             </div>
@@ -88,6 +93,7 @@ describe("Settings dialogs", () => {
                 ${toBrowserCss(settingsDialogStyles, lightTheme, fontSizes)}
                 ${toBrowserCss(themeChoicePanelStyles, lightTheme, fontSizes)}
                 ${toBrowserCss(deviceSecurityCardStyles, lightTheme, fontSizes)}
+                ${toBrowserCss(settingsSearchStyles, lightTheme, fontSizes)}
             }
         `;
         document.head.append(stylesheet);
@@ -133,6 +139,48 @@ describe("Settings dialogs", () => {
                 const icon = tab.querySelector("svg")!.getBoundingClientRect();
                 expect([icon.left - rect.left, icon.top - rect.top]).toEqual([8, 8]);
             }
+        });
+    });
+
+    describe("search", () => {
+        it("sits above the tabs at their width, on their edge, the tabs 16px under it", () => {
+            renderSettingsDialog({ responsive: false });
+            const tabsTop = tabs()[0].getBoundingClientRect().top;
+            renderSettingsDialog({ responsive: false, search: true });
+            const header = document.querySelector(".mx_TabbedView_tabsHeader")!.getBoundingClientRect();
+            const firstTab = tabs()[0].getBoundingClientRect();
+
+            expect(header.top).toBe(tabsTop);
+            expect([header.left, header.width, header.height]).toEqual([firstTab.left, 220, 36]);
+            expect(firstTab.top - header.bottom).toBe(16);
+            expect(getComputedStyle(document.querySelector(".mx_TabbedView_tabsHeader")!).zIndex).toBe("1");
+        });
+
+        it("is left out when the narrow dialog shows only the tabs' icons", () => {
+            renderSettingsDialog({ responsive: false });
+            const tabsTop = tabs()[0].getBoundingClientRect().top;
+            renderSettingsDialog({ responsive: true, search: true });
+
+            expect(getComputedStyle(document.querySelector(".mx_TabbedView_tabsHeader")!).display).toBe("none");
+            expect(tabs()[0].getBoundingClientRect().top).toBe(tabsTop);
+        });
+
+        it("fills the setting it opened with the row hover fill, to 4px from its card, without flashing under reduced motion", () => {
+            document.body.innerHTML = `
+                <div class="mx_SettingsSearch_found" id="found"
+                    style="--mx-settings-found-start: 12px; --mx-settings-found-end: 12px; --mx-settings-found-block: 10px">
+                    Enable Markdown
+                </div>
+            `;
+            const fill = getComputedStyle(document.querySelector("#found")!, "::before");
+
+            expect(fill.backgroundColor).toBe(tokenColor("--cpd-color-bg-action-secondary-hovered", document.body));
+            expect([fill.left, fill.right, fill.top, fill.bottom]).toEqual(["-12px", "-12px", "-10px", "-10px"]);
+            expect(fill.borderTopLeftRadius).toBe("8px");
+            expect(fill.zIndex).toBe("-1");
+            // The browser tests run with reduced motion
+            expect(window.matchMedia("(prefers-reduced-motion: reduce)").matches).toBe(true);
+            expect(fill.animationName).toBe("none");
         });
     });
 

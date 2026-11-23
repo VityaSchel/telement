@@ -10,7 +10,7 @@ Please see LICENSE files in the repository root for full details.
 
 import { describe, it, expect, vi } from "vitest";
 import React from "react";
-import { act, fireEvent, render } from "test-utils-rtl";
+import { act, fireEvent, render, screen } from "test-utils-rtl";
 import { SettingsSolidIcon, VisibilityOnIcon, LabsIcon } from "@vector-im/compound-design-tokens/assets/web/icons";
 
 import TabbedView, { Tab, TabLocation } from "./TabbedView";
@@ -41,6 +41,16 @@ describe("<TabbedView />", () => {
         container.getElementsByClassName("mx_TabbedView_tabLabel_active")[0];
     const getActiveTabBody = (container: HTMLElement): Element | undefined =>
         container.getElementsByClassName("mx_TabbedView_tabPanel")[0];
+
+    it("puts what goes above the tabs before their list", () => {
+        const { container } = render(
+            <TabbedView {...defaultProps} activeTabId="GENERAL" tabsHeader={<input aria-label="Search settings" />} />,
+        );
+
+        const header = container.querySelector(".mx_TabbedView_tabsHeader")!;
+        expect(header).toContainElement(screen.getByRole("textbox", { name: "Search settings" }));
+        expect(header.nextElementSibling).toHaveAttribute("role", "tablist");
+    });
 
     it("renders tabs", () => {
         const { container } = render(getComponent());

@@ -272,6 +272,11 @@
         "search_field": {
             "clear": "Clear search"
         },
+        "settings_search": {
+            "no_results": "No results",
+            "placeholder": "Search settings",
+            "results": "Settings found"
+        },
         "timeline": {
             "next_unread_mention": "Next unread mention",
             "unread_mentions": {

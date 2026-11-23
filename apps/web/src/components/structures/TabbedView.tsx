@@ -8,7 +8,7 @@ SPDX-License-Identifier: AGPL-3.0-only OR GPL-3.0-only OR LicenseRef-Element-Com
 Please see LICENSE files in the repository root for full details.
 */
 
-import React, { type JSX } from "react";
+import React, { type JSX, type ReactNode } from "react";
 import classNames from "classnames";
 import { AutoHideScrollbar } from "@element-hq/web-shared-components";
 
@@ -137,6 +137,10 @@ interface IProps<T extends string> {
      * Default: false.
      */
     responsive?: boolean;
+    /**
+     * Telement: what goes above the tabs on the left, such as the search in the user settings.
+     */
+    tabsHeader?: ReactNode;
 }
 
 /**
@@ -174,6 +178,9 @@ export default function TabbedView<T extends string>(props: IProps<T>): JSX.Elem
 
     return (
         <div className={tabbedViewClasses}>
+            {props.tabsHeader && tabLocation === TabLocation.LEFT && (
+                <div className="mx_TabbedView_tabsHeader">{props.tabsHeader}</div>
+            )}
             <RovingTabIndexProvider
                 handleLoop
                 handleHomeEnd

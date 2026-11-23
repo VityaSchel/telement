@@ -34,6 +34,18 @@ Please see LICENSE files in the repository root for full details.
         flex-direction: column;
     }
 
+    /* Telement: what goes above the tabs, such as the settings search, at the tabs' width and out of the flow as the
+       tabs are, which start 16px under it */
+    .mx_TabbedView_tabsHeader {
+        position: fixed;
+        z-index: 1;
+        width: 220px;
+
+        + .mx_TabbedView_tabLabels {
+            margin-top: calc(var(--tl-control-size) + var(--cpd-space-4x));
+        }
+    }
+
     /* Hovering a tab fills it in the room list's hover gray, and pressing it in the pressed fill, a step further */
     .mx_TabbedView_tabLabel:hover {
         color: $tab-label-active-fg-color;
@@ -162,6 +174,14 @@ Please see LICENSE files in the repository root for full details.
         }
         .mx_TabbedView_tabLabels {
             width: auto;
+        }
+        /* Telement: with only the tabs' icons, there is no room for what goes above them */
+        .mx_TabbedView_tabsHeader {
+            display: none;
+
+            + .mx_TabbedView_tabLabels {
+                margin-top: 0;
+            }
         }
         .mx_TabbedView_tabLabel {
             padding-inline: 0 0;

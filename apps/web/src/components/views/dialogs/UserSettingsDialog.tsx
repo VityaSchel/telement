@@ -9,7 +9,7 @@ Please see LICENSE files in the repository root for full details.
 
 import { ClientEvent, type MatrixEvent } from "matrix-js-sdk/src/matrix";
 import { Toast } from "@vector-im/compound-web";
-import React, { type JSX, useState } from "react";
+import React, { type JSX, useEffect, useRef, useState } from "react";
 import UserProfileIcon from "@vector-im/compound-design-tokens/assets/web/icons/user-profile";
 import DevicesIcon from "@vector-im/compound-design-tokens/assets/web/icons/devices";
 import ThemeIcon from "@vector-im/compound-design-tokens/assets/web/icons/theme";
@@ -23,7 +23,12 @@ import LockIcon from "@vector-im/compound-design-tokens/assets/web/icons/lock";
 import LabsIcon from "@vector-im/compound-design-tokens/assets/web/icons/labs";
 import BlockIcon from "@vector-im/compound-design-tokens/assets/web/icons/block";
 import HelpIcon from "@vector-im/compound-design-tokens/assets/web/icons/help";
-import { ToastContext, useActiveToast } from "@element-hq/web-shared-components";
+import {
+    SettingsSearchView,
+    ToastContext,
+    useActiveToast,
+    useCreateAutoDisposedViewModel,
+} from "@element-hq/web-shared-components";
 
 import TabbedView, { Tab, useActiveTabWithDefault } from "../../structures/TabbedView";
 import { _t, _td } from "../../../languageHandler";
@@ -49,6 +54,9 @@ import { type SDKContextClass } from "../../../contexts/SDKContextClass";
 import { useSettingValue } from "../../../hooks/useSettings";
 import { NoChange, useEventEmitterAsyncState, type AsyncStateCallbackResult } from "../../../hooks/useEventEmitter";
 import { EncryptionUserSettingsTab, type State } from "../settings/tabs/user/EncryptionUserSettingsTab";
+import { SettingsSearchViewModel } from "../../../viewmodels/telement/settings/SettingsSearchViewModel";
+import { getSettingsSearchTargets } from "../../../telement/settings/settingsSearchTargets";
+import { revealSetting } from "../../../telement/settings/revealSetting";
 
 interface IProps {
     initialTabId?: UserTab;
@@ -210,6 +218,24 @@ export default function UserSettingsDialog(props: IProps): JSX.Element {
         setStartCustomStatus(false);
     };
 
+    // Telement: search in settings, as in Telegram's. Choosing a result opens its tab and shows the setting there
+    const tabs = getTabs();
+    const tabsRef = useRef(tabs);
+    tabsRef.current = tabs;
+    const stopRevealing = useRef<() => void>(undefined);
+    const searchVm = useCreateAutoDisposedViewModel(
+        () =>
+            new SettingsSearchViewModel({
+                getTargets: () => getSettingsSearchTargets(tabsRef.current),
+                onChoose: (target) => {
+                    setActiveTabId(target.tabId as UserTab);
+                    stopRevealing.current?.();
+                    stopRevealing.current = revealSetting(target.tabId, target.group, target.label);
+                },
+            }),
+    );
+    useEffect(() => () => stopRevealing.current?.(), []);
+
     const [activeToast, toastRack] = useActiveToast();
 
     return (
@@ -227,10 +253,11 @@ export default function UserSettingsDialog(props: IProps): JSX.Element {
                 >
                     <div className="mx_SettingsDialog_content">
                         <TabbedView
-                            tabs={getTabs()}
+                            tabs={tabs}
                             activeTabId={activeTabId}
                             onChange={setActiveTabId}
                             responsive={true}
+                            tabsHeader={<SettingsSearchView vm={searchVm} />}
                         />
                     </div>
                     <div className="mx_SettingsDialog_toastContainer">

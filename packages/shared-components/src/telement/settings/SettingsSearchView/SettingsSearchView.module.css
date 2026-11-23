@@ -1,0 +1,76 @@
+/*
+Copyright 2026 Viktor Shchelochkov
+
+SPDX-License-Identifier: AGPL-3.0-only OR GPL-3.0-only
+Please see LICENSE files in the repository root for full details.
+*/
+
+.search {
+    position: relative;
+}
+
+/*
+ * The results, a menu 4px under the field, as a dropdown's menu opens under its field: 12px corners and 32px rows
+ * without gaps, their highlight inset 4px and rounded by 8, their text 16px from the menu's edges (TELEMENT.md, "Radius
+ * and spacing"). It is at least as wide as the field and grows with the longest result up to 480px, cutting longer
+ * ones short, and scrolls after eight and a half rows. Like every menu it is a floating surface.
+ */
+.results {
+    position: absolute;
+    inset-block-start: calc(100% + var(--cpd-space-1x));
+    inset-inline-start: 0;
+    z-index: 1;
+    box-sizing: border-box;
+    inline-size: max-content;
+    min-inline-size: 100%;
+    max-inline-size: 480px;
+    max-block-size: calc(var(--tl-menu-row-size) * 8.5 + var(--tl-inset-menu));
+    margin: 0;
+    padding: var(--tl-inset-menu) 0;
+    overflow-y: auto;
+    list-style: none;
+    border-radius: var(--tl-radius-menu);
+    background-color: var(--tl-color-bg-floating);
+    box-shadow: var(--tl-shadow-floating);
+    /* Compound's menu frame, which forced colors also draw */
+    outline: var(--cpd-border-width-1) solid var(--cpd-color-border-interactive-secondary);
+    outline-offset: calc(-1 * var(--cpd-border-width-1));
+    scrollbar-width: thin;
+}
+
+.result,
+.empty {
+    box-sizing: border-box;
+    min-block-size: var(--tl-menu-row-size);
+    margin: 0 var(--tl-inset-menu);
+    padding: var(--cpd-space-1x) calc(var(--cpd-space-4x) - var(--tl-inset-menu));
+    overflow: hidden;
+    border-radius: var(--tl-radius-row);
+    color: var(--cpd-color-text-primary);
+    font: var(--cpd-font-body-md-regular);
+    letter-spacing: var(--cpd-font-letter-spacing-body-md);
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+/* The tab and the group before the setting in secondary text, so that the setting reads first */
+.where,
+.separator {
+    color: var(--cpd-color-text-secondary);
+}
+
+/* One highlight, which the arrow keys and the pointer move: the menus' hover fill on their floating surface */
+.active {
+    background-color: var(--tl-color-bg-floating-hovered);
+}
+
+.empty {
+    color: var(--cpd-color-text-secondary);
+}
+
+@media (forced-colors: active) {
+    .active {
+        outline: 2px solid Highlight;
+        outline-offset: -2px;
+    }
+}

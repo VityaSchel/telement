@@ -1,0 +1,72 @@
+/*
+Copyright 2026 Viktor Shchelochkov
+
+SPDX-License-Identifier: AGPL-3.0-only OR GPL-3.0-only
+Please see LICENSE files in the repository root for full details.
+*/
+
+/*
+ * A setting search opened (revealSetting.ts): its row flashes the row hover fill for two seconds, reaching 4px from its
+ * card's sides and at least a row tall, rounded like a row. Under the row's content, over its card. With reduced
+ * motion the fill shows for the two seconds without flashing.
+ */
+.mx_SettingsSearch_found {
+    position: relative;
+    isolation: isolate;
+
+    &::before {
+        content: "";
+        position: absolute;
+        inset-block: calc(-1 * var(--mx-settings-found-block, 0px));
+        inset-inline-start: calc(-1 * var(--mx-settings-found-start, 0px));
+        inset-inline-end: calc(-1 * var(--mx-settings-found-end, 0px));
+        z-index: -1;
+        border-radius: var(--tl-radius-row);
+        background-color: var(--cpd-color-bg-action-secondary-hovered);
+        pointer-events: none;
+        animation: mx_SettingsSearch_flash 2s ease-out forwards;
+    }
+}
+
+/* A group found by its label alone fills its card */
+:is(
+        .mx_SettingsSubsection_content,
+        .mx_SettingsFieldset_content,
+        .mx_SettingsSection_content
+    ).mx_SettingsSearch_found::before {
+    border-radius: inherit;
+}
+
+/* Two flashes, then the fill fades out */
+@keyframes mx_SettingsSearch_flash {
+    0% {
+        opacity: 1;
+    }
+
+    15% {
+        opacity: 0.3;
+    }
+
+    30%,
+    70% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .mx_SettingsSearch_found::before {
+        animation: none;
+    }
+}
+
+/* Forced colors drop the fill, so the found row is outlined instead */
+@media (forced-colors: active) {
+    .mx_SettingsSearch_found::before {
+        outline: 2px solid Highlight;
+        outline-offset: -2px;
+    }
+}
