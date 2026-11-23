@@ -5,7 +5,8 @@
  * Please see LICENSE files in the repository root for full details.
  */
 
-import { Breadcrumb, Button, VisualList, VisualListItem } from "@vector-im/compound-web";
+import { Breadcrumb, VisualList, VisualListItem } from "@vector-im/compound-web";
+import { DialogFooterButton } from "@element-hq/web-shared-components";
 import CrossIcon from "@vector-im/compound-design-tokens/assets/web/icons/close";
 import ErrorIcon from "@vector-im/compound-design-tokens/assets/web/icons/error-solid";
 import React, { type JSX, useCallback, useState } from "react";
@@ -66,12 +67,10 @@ export function DeleteKeyStoragePanel({ onFinish }: Props): JSX.Element {
                     </VisualList>
                 </EncryptionCardEmphasisedContent>
                 <EncryptionCardButtons>
-                    <Button destructive={true} onClick={onDeleteClick} disabled={busy}>
+                    <DialogFooterButton onClick={onFinish}>{_t("action|cancel")}</DialogFooterButton>
+                    <DialogFooterButton destructive={true} onClick={onDeleteClick} disabled={busy}>
                         {_t("settings|encryption|delete_key_storage|confirm")}
-                    </Button>
-                    <Button kind="tertiary" onClick={onFinish}>
-                        {_t("action|cancel")}
-                    </Button>
+                    </DialogFooterButton>
                 </EncryptionCardButtons>
             </EncryptionCard>
         </>

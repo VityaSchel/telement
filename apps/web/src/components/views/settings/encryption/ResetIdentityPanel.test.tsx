@@ -39,9 +39,18 @@ describe("<ResetIdentityPanel />", () => {
         const { promise: resetEncryptionPromise, resolve: resolveResetEncryption } = Promise.withResolvers<void>();
         vi.spyOn(matrixClient.getCrypto()!, "resetEncryption").mockReturnValue(resetEncryptionPromise);
 
+        // In the footer, going back comes before the action
+        const footer = [...document.querySelectorAll(".mx_EncryptionCard_buttons button")];
+        expect(footer.map((button) => button.textContent)).toEqual(["Go back", "Continue"]);
+
         const continueButton = screen.getByRole("button", { name: "Continue" });
         await user.click(continueButton);
         expect(asFragment()).toMatchSnapshot();
+        expect(continueButton).toBeDisabled();
+        expect(screen.queryByRole("button", { name: "Go back" })).not.toBeInTheDocument();
+        // The warning is above the footer, in place of the way back
+        const warning = screen.getByText("Do not close this window until the reset is finished");
+        expect(warning.closest(".mx_EncryptionCard_buttons")).toBeNull();
         resolveResetEncryption!();
         await sleep(0);
 

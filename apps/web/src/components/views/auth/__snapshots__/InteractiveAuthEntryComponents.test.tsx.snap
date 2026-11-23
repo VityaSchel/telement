@@ -36,7 +36,7 @@ exports[`<EmailIdentityAuthEntry/> > should render 1`] = `
 exports[`<MasUnlockCrossSigningAuthEntry/> > should render 1`] = `
 <div>
   <div
-    class="mx_EncryptionCard"
+    class="mx_EncryptionCard mx_EncryptionCard_noBorder"
   >
     <div
       class="mx_EncryptionCard_header"
@@ -71,40 +71,19 @@ exports[`<MasUnlockCrossSigningAuthEntry/> > should render 1`] = `
       </span>
     </div>
     <div
-      class="mx_EncryptionCard_buttons"
+      class="_footer mx_EncryptionCard_buttons"
     >
       <button
-        class="_button mx_Dialog_nonDialogButton _has-icon"
-        data-kind="primary"
-        data-size="lg"
-        role="button"
-        tabindex="0"
-      >
-        <svg
-          aria-hidden="true"
-          fill="currentColor"
-          height="20"
-          viewBox="0 0 24 24"
-          width="20"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            d="M5 3h6a1 1 0 1 1 0 2H5v14h14v-6a1 1 0 1 1 2 0v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2"
-          />
-          <path
-            d="M15 3h5a1 1 0 0 1 1 1v5a1 1 0 1 1-2 0V6.414l-6.293 6.293a1 1 0 0 1-1.414-1.414L17.586 5H15a1 1 0 1 1 0-2"
-          />
-        </svg>
-        Continue to account
-      </button>
-      <button
-        class="_button mx_Dialog_nonDialogButton"
-        data-kind="tertiary"
-        data-size="lg"
-        role="button"
-        tabindex="0"
+        class="_button"
+        type="button"
       >
         Retry
+      </button>
+      <button
+        class="_button"
+        type="button"
+      >
+        Continue to account
       </button>
     </div>
   </div>

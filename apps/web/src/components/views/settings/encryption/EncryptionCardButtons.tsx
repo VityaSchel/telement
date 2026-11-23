@@ -6,11 +6,15 @@
  */
 
 import React, { type JSX, type PropsWithChildren } from "react";
+import { DialogFooterView } from "@element-hq/web-shared-components";
 
 /**
  * A component to present action buttons at the bottom of an {@link EncryptionCard}
  * (mostly as somewhere for the common CSS to live).
+ *
+ * Telement: the shared dialog footer, whose children are its `DialogFooterButton`s: Cancel or the other choices first,
+ * the card's action last.
  */
 export function EncryptionCardButtons({ children }: PropsWithChildren): JSX.Element {
-    return <div className="mx_EncryptionCard_buttons">{children}</div>;
+    return <DialogFooterView className="mx_EncryptionCard_buttons">{children}</DialogFooterView>;
 }

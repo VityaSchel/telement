@@ -27,6 +27,9 @@ import successDialogStyles from "../../res/css/compound/_SuccessDialog.pcss?raw"
 import spacePillButtonStyles from "../../res/css/structures/_SpacePillButton.pcss?raw";
 import tabbedViewStyles from "../../res/css/structures/_TabbedView.pcss?raw";
 import viewSourceStyles from "../../res/css/structures/_ViewSource.pcss?raw";
+import completeSecurityStyles from "../../res/css/structures/auth/_CompleteSecurity.pcss?raw";
+import setupEncryptionBodyStyles from "../../res/css/structures/auth/_SetupEncryptionBody.pcss?raw";
+import completeSecurityBodyStyles from "../../res/css/views/auth/_CompleteSecurityBody.pcss?raw";
 import interactiveAuthEntryStyles from "../../res/css/views/auth/_InteractiveAuthEntryComponents.pcss?raw";
 import addExistingToSpaceDialogStyles from "../../res/css/views/dialogs/_AddExistingToSpaceDialog.pcss?raw";
 import compoundDialogStyles from "../../res/css/views/dialogs/_CompoundDialog.pcss?raw";
@@ -76,6 +79,9 @@ const APP_STYLES = [
     spacePillButtonStyles,
     tabbedViewStyles,
     viewSourceStyles,
+    completeSecurityStyles,
+    setupEncryptionBodyStyles,
+    completeSecurityBodyStyles,
     interactiveAuthEntryStyles,
     addExistingToSpaceDialogStyles,
     compoundDialogStyles,
@@ -740,6 +746,94 @@ describe("Dialogs", () => {
 
             expect(box("[data-testid=text]").left - body.left).toBe(24);
             expect(footerEdges("[data-testid=action]", "[data-testid=text]")).toEqual(ON_THE_EDGES);
+        });
+
+        describe("with a hero card for its body", () => {
+            /** A hero card without a border in a dialog, as ResetIdentityDialog and the auth dialog's step draw it. */
+            function renderHeroCard(className: string, title: string): void {
+                renderDialog(
+                    className,
+                    title,
+                    `<div class="mx_EncryptionCard mx_EncryptionCard_noBorder" data-testid="card">
+                        <div class="mx_EncryptionCard_header" data-testid="text"><h2>Reset your digital identity</h2><span>You will lose your history.</span></div>
+                        ${footer(
+                            [{ label: "Go back" }, { label: "Continue", destructive: true, testId: "action" }],
+                            "mx_EncryptionCard_buttons",
+                        )}
+                    </div>`,
+                );
+            }
+
+            it.each([
+                { step: "resetting the identity", className: "", title: "" },
+                {
+                    step: "resetting cross-signing in the auth dialog",
+                    className: "mx_InteractiveAuthDialog",
+                    title: "Setting up keys",
+                },
+            ])("puts the card and its footer on the edges: $step", ({ className, title }) => {
+                renderHeroCard(className, title);
+
+                expect(box("[data-testid=card]").left - box("[data-testid=body]").left).toBe(24);
+                expect(footerEdges("[data-testid=action]", "[data-testid=text]", ".mx_EncryptionCard_buttons")).toEqual(
+                    ON_THE_EDGES,
+                );
+            });
+
+            it("starts the auth dialog's card 16px under its title", () => {
+                renderHeroCard("mx_InteractiveAuthDialog", "Setting up keys");
+
+                expect(box("[data-testid=card]").top - box(".mx_Dialog_title").bottom).toBe(16);
+            });
+        });
+
+        describe("in the login flow's card", () => {
+            /** CompleteSecurity's card, which holds a step of SetupEncryptionBody. */
+            function renderStep(step: string): void {
+                render(`
+                    <div class="mx_Dialog_border" style="width: fit-content">
+                        <div class="mx_CompleteSecurityBody" data-testid="body">
+                            <h1 class="mx_CompleteSecurity_header"></h1>
+                            <div class="mx_CompleteSecurity_body">${step}</div>
+                        </div>
+                    </div>
+                `);
+            }
+
+            it("ends confirming the identity on the edges, the other ways before the best one", () => {
+                renderStep(
+                    `<div class="mx_EncryptionCard mx_EncryptionCard_noBorder mx_SetupEncryptionBody">
+                        <div class="mx_EncryptionCard_header"><h2>Confirm your digital identity</h2></div>
+                        <div class="mx_EncryptionCard_emphasisedContent" data-testid="text"><span>Verify this device.</span></div>
+                        ${footer(
+                            [
+                                { label: "Sign out" },
+                                { label: "Can't confirm?" },
+                                { label: "Use recovery key" },
+                                { label: "Use another device", testId: "action" },
+                            ],
+                            "mx_EncryptionCard_buttons",
+                        )}
+                    </div>`,
+                );
+
+                expect(footerEdges("[data-testid=action]", "[data-testid=text]", ".mx_EncryptionCard_buttons")).toEqual(
+                    ON_THE_EDGES,
+                );
+                // On one line, as the card is 600px wide inside its edges
+                expect(box(".mx_EncryptionCard_buttons").height).toBeLessThan(36);
+            });
+
+            it("ends a step without a hero card on the edges too", () => {
+                renderStep(
+                    `<div>
+                        <p data-testid="text">Without verifying, you won't have access to all your messages.</p>
+                        ${footer([{ label: "Go back" }, { label: "I'll verify later", destructive: true, testId: "action" }])}
+                    </div>`,
+                );
+
+                expect(footerEdges("[data-testid=action]", "[data-testid=text]")).toEqual(ON_THE_EDGES);
+            });
         });
 
         it("ends the recovery key prompt's form in the footer, Cancel before Continue", () => {

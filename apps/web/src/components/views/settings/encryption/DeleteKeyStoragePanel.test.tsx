@@ -90,7 +90,7 @@ describe("<DeleteKeyStoragePanel />", () => {
         await user.click(screen.getByRole("button", { name: "Delete key storage" }));
 
         expect(onFinish).not.toHaveBeenCalled();
-        expect(screen.getByRole("button", { name: "Delete key storage" })).toHaveAttribute("aria-disabled", "true");
+        expect(screen.getByRole("button", { name: "Delete key storage" })).toBeDisabled();
         setEnabledDefer.resolve();
         await waitFor(() => expect(onFinish).toHaveBeenCalled());
     });

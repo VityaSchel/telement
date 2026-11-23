@@ -80,26 +80,20 @@ exports[`<ChangeRecoveryKeyBody /> > flow to change the recovery key > should as
         </div>
       </div>
       <div
-        class="mx_EncryptionCard_buttons"
+        class="_footer mx_EncryptionCard_buttons"
       >
         <button
-          aria-disabled="true"
           class="_button"
-          data-kind="primary"
-          data-size="lg"
-          role="button"
-          tabindex="0"
+          type="button"
         >
-          Confirm new recovery key
+          Cancel
         </button>
         <button
           class="_button"
-          data-kind="tertiary"
-          data-size="lg"
-          role="button"
-          tabindex="0"
+          disabled=""
+          type="submit"
         >
-          Cancel
+          Confirm new recovery key
         </button>
       </div>
     </form>
@@ -209,26 +203,20 @@ exports[`<ChangeRecoveryKeyBody /> > flow to change the recovery key > should as
         </span>
       </div>
       <div
-        class="mx_EncryptionCard_buttons"
+        class="_footer mx_EncryptionCard_buttons"
       >
         <button
-          aria-disabled="true"
           class="_button"
-          data-kind="primary"
-          data-size="lg"
-          role="button"
-          tabindex="0"
+          type="button"
         >
-          Confirm new recovery key
+          Cancel
         </button>
         <button
           class="_button"
-          data-kind="tertiary"
-          data-size="lg"
-          role="button"
-          tabindex="0"
+          disabled=""
+          type="submit"
         >
-          Cancel
+          Confirm new recovery key
         </button>
       </div>
     </form>
@@ -321,25 +309,19 @@ exports[`<ChangeRecoveryKeyBody /> > flow to change the recovery key > should di
       </button>
     </div>
     <div
-      class="mx_EncryptionCard_buttons"
+      class="_footer mx_EncryptionCard_buttons"
     >
       <button
         class="_button"
-        data-kind="primary"
-        data-size="lg"
-        role="button"
-        tabindex="0"
+        type="button"
       >
-        Continue
+        Cancel
       </button>
       <button
         class="_button"
-        data-kind="tertiary"
-        data-size="lg"
-        role="button"
-        tabindex="0"
+        type="button"
       >
-        Cancel
+        Continue
       </button>
     </div>
   </div>
@@ -426,26 +408,20 @@ exports[`<ChangeRecoveryKeyBody /> > flow to set up a recovery key > should ask 
         </div>
       </div>
       <div
-        class="mx_EncryptionCard_buttons"
+        class="_footer mx_EncryptionCard_buttons"
       >
         <button
-          aria-disabled="true"
           class="_button"
-          data-kind="primary"
-          data-size="lg"
-          role="button"
-          tabindex="0"
+          type="button"
         >
-          Finish set up
+          Cancel
         </button>
         <button
           class="_button"
-          data-kind="tertiary"
-          data-size="lg"
-          role="button"
-          tabindex="0"
+          disabled=""
+          type="submit"
         >
-          Cancel
+          Finish set up
         </button>
       </div>
     </form>
@@ -555,26 +531,20 @@ exports[`<ChangeRecoveryKeyBody /> > flow to set up a recovery key > should ask 
         </span>
       </div>
       <div
-        class="mx_EncryptionCard_buttons"
+        class="_footer mx_EncryptionCard_buttons"
       >
         <button
-          aria-disabled="true"
           class="_button"
-          data-kind="primary"
-          data-size="lg"
-          role="button"
-          tabindex="0"
+          type="button"
         >
-          Finish set up
+          Cancel
         </button>
         <button
           class="_button"
-          data-kind="tertiary"
-          data-size="lg"
-          role="button"
-          tabindex="0"
+          disabled=""
+          type="submit"
         >
-          Cancel
+          Finish set up
         </button>
       </div>
     </form>
@@ -667,25 +637,19 @@ exports[`<ChangeRecoveryKeyBody /> > flow to set up a recovery key > should disp
       </button>
     </div>
     <div
-      class="mx_EncryptionCard_buttons"
+      class="_footer mx_EncryptionCard_buttons"
     >
       <button
         class="_button"
-        data-kind="primary"
-        data-size="lg"
-        role="button"
-        tabindex="0"
+        type="button"
       >
-        Continue
+        Cancel
       </button>
       <button
         class="_button"
-        data-kind="tertiary"
-        data-size="lg"
-        role="button"
-        tabindex="0"
+        type="button"
       >
-        Cancel
+        Continue
       </button>
     </div>
   </div>

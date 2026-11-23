@@ -39,7 +39,7 @@ describe("InteractiveAuthComponent", function () {
         unmockClientPeg();
     });
 
-    const getSubmitButton = ({ container }: RenderResult) => container.querySelector(".mx_Dialog_nonDialogButton");
+    const getSubmitButton = ({ getByRole }: RenderResult) => getByRole("button", { name: "Continue to account" });
 
     it("should use an m.oauth stage", async () => {
         const authData = {
@@ -55,10 +55,9 @@ describe("InteractiveAuthComponent", function () {
         const wrapper = getComponent({ makeRequest, onAuthFinished, authData });
 
         const submitNode = getSubmitButton(wrapper);
-        expect(submitNode).toBeTruthy();
 
         // click button; should trigger the auth URL to be opened
-        fireEvent.click(submitNode!);
+        fireEvent.click(submitNode);
 
         expect(global.window.open).toHaveBeenCalledWith(authUrl, "_blank");
     });
@@ -77,10 +76,9 @@ describe("InteractiveAuthComponent", function () {
         const wrapper = getComponent({ makeRequest, onAuthFinished, authData });
 
         const submitNode = getSubmitButton(wrapper);
-        expect(submitNode).toBeTruthy();
 
         // click button; should trigger the auth URL to be opened
-        fireEvent.click(submitNode!);
+        fireEvent.click(submitNode);
 
         expect(global.window.open).toHaveBeenCalledWith(authUrl, "_blank");
     });
@@ -102,10 +100,9 @@ describe("InteractiveAuthComponent", function () {
         const wrapper = getComponent({ makeRequest, onAuthFinished, authData });
 
         const submitNode = getSubmitButton(wrapper);
-        expect(submitNode).toBeTruthy();
 
         // click button; should trigger the auth URL to be opened
-        fireEvent.click(submitNode!);
+        fireEvent.click(submitNode);
 
         expect(global.window.open).toHaveBeenCalledWith(authUrl, "_blank");
     });

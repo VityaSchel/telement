@@ -152,26 +152,19 @@ exports[`<ResetIdentityPanel /> > should display the 'forgot recovery key' varia
       </ul>
     </div>
     <div
-      class="mx_EncryptionCard_buttons"
+      class="_footer mx_EncryptionCard_buttons"
     >
       <button
-        aria-disabled="false"
-        class="_button _destructive"
-        data-kind="primary"
-        data-size="lg"
-        role="button"
-        tabindex="0"
-      >
-        Continue
-      </button>
-      <button
         class="_button"
-        data-kind="tertiary"
-        data-size="lg"
-        role="button"
-        tabindex="0"
+        type="button"
       >
         Go back
+      </button>
+      <button
+        class="_button _destructive"
+        type="button"
+      >
+        Continue
       </button>
     </div>
   </div>
@@ -330,26 +323,19 @@ exports[`<ResetIdentityPanel /> > should display the 'sync failed' variant corre
       </ul>
     </div>
     <div
-      class="mx_EncryptionCard_buttons"
+      class="_footer mx_EncryptionCard_buttons"
     >
       <button
-        aria-disabled="false"
-        class="_button _destructive"
-        data-kind="primary"
-        data-size="lg"
-        role="button"
-        tabindex="0"
-      >
-        Continue
-      </button>
-      <button
         class="_button"
-        data-kind="tertiary"
-        data-size="lg"
-        role="button"
-        tabindex="0"
+        type="button"
       >
         Go back
+      </button>
+      <button
+        class="_button _destructive"
+        type="button"
+      >
+        Continue
       </button>
     </div>
   </div>
@@ -511,26 +497,19 @@ exports[`<ResetIdentityPanel /> > should reset the encryption when the continue 
       </span>
     </div>
     <div
-      class="mx_EncryptionCard_buttons"
+      class="_footer mx_EncryptionCard_buttons"
     >
       <button
-        aria-disabled="false"
-        class="_button _destructive"
-        data-kind="primary"
-        data-size="lg"
-        role="button"
-        tabindex="0"
-      >
-        Continue
-      </button>
-      <button
         class="_button"
-        data-kind="tertiary"
-        data-size="lg"
-        role="button"
-        tabindex="0"
+        type="button"
       >
         Go back
+      </button>
+      <button
+        class="_button _destructive"
+        type="button"
+      >
+        Continue
       </button>
     </div>
   </div>
@@ -692,15 +671,22 @@ exports[`<ResetIdentityPanel /> > should reset the encryption when the continue 
       </span>
     </div>
     <div
-      class="mx_EncryptionCard_buttons"
+      class="_flex mx_EncryptionCard_emphasisedContent"
+      style="--mx-flex-display: flex; --mx-flex-direction: column; --mx-flex-align: normal; --mx-flex-justify: start; --mx-flex-gap: var(--cpd-space-3x); --mx-flex-wrap: nowrap;"
+    >
+      <span
+        class="mx_ResetIdentityPanel_warning"
+      >
+        Do not close this window until the reset is finished
+      </span>
+    </div>
+    <div
+      class="_footer mx_EncryptionCard_buttons"
     >
       <button
-        aria-disabled="true"
         class="_button _destructive"
-        data-kind="primary"
-        data-size="lg"
-        role="button"
-        tabindex="0"
+        disabled=""
+        type="button"
       >
         <svg
           class="_icon"
@@ -719,16 +705,6 @@ exports[`<ResetIdentityPanel /> > should reset the encryption when the continue 
         </svg>
          Reset in progress...
       </button>
-      <div
-        class="_flex mx_EncryptionCard_emphasisedContent"
-        style="--mx-flex-display: flex; --mx-flex-direction: column; --mx-flex-align: normal; --mx-flex-justify: start; --mx-flex-gap: var(--cpd-space-3x); --mx-flex-wrap: nowrap;"
-      >
-        <span
-          class="mx_ResetIdentityPanel_warning"
-        >
-          Do not close this window until the reset is finished
-        </span>
-      </div>
     </div>
   </div>
 </DocumentFragment>

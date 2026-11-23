@@ -28,6 +28,9 @@ import compoundStyles from "@vector-im/compound-web/dist/style.css?raw";
 // The package doesn't export its token stylesheet on its own
 // eslint-disable-next-line no-restricted-imports
 import telementTokens from "../../../../packages/shared-components/src/telement/tokens.css?raw";
+// The shared dialog footer's own stylesheet, its classes unhashed, as DialogFooterView's markup below names them
+// eslint-disable-next-line no-restricted-imports
+import dialogFooterStyles from "../../../../packages/shared-components/src/telement/core/DialogFooterView/DialogFooterView.module.css?raw";
 import commonStyles from "../../res/css/_common.pcss?raw";
 import fontSizes from "../../res/css/_font-sizes.pcss?raw";
 import autocompleteInputStyles from "../../res/css/structures/_AutocompleteInput.pcss?raw";
@@ -38,6 +41,7 @@ import deviceSecurityCardStyles from "../../res/css/components/views/settings/de
 import deviceDetailsStyles from "../../res/css/components/views/settings/devices/_DeviceDetails.pcss?raw";
 import filteredDeviceListStyles from "../../res/css/components/views/settings/devices/_FilteredDeviceList.pcss?raw";
 import filteredDeviceListHeaderStyles from "../../res/css/components/views/settings/devices/_FilteredDeviceListHeader.pcss?raw";
+import changeRecoveryKeyStyles from "../../res/css/views/settings/encryption/_ChangeRecoveryKey.pcss?raw";
 import encryptionCardStyles from "../../res/css/views/settings/encryption/_EncryptionCard.pcss?raw";
 import aliasSettingsStyles from "../../res/css/views/room_settings/_AliasSettings.pcss?raw";
 import betaCardStyles from "../../res/css/views/beta/_BetaCard.pcss?raw";
@@ -100,6 +104,7 @@ const APP_STYLES = [
     deviceDetailsStyles,
     filteredDeviceListStyles,
     filteredDeviceListHeaderStyles,
+    changeRecoveryKeyStyles,
     encryptionCardStyles,
     imageSizePanelStyles,
     createRoomDialogStyles,
@@ -130,7 +135,7 @@ beforeAll(async () => {
             ${compoundBase} ${compoundSemantic}
             ${compoundLightTheme} ${compoundLightSemantic} ${compoundDarkTheme} ${compoundDarkSemantic}
         }
-        @layer shared-components { ${telementTokens} }
+        @layer shared-components { ${telementTokens} ${dialogFooterStyles} }
         @layer compound-web { ${compoundStyles} }
         @layer app-web {
             body { margin: 0; }
@@ -438,13 +443,64 @@ describe.each(THEMES.map(([theme]) => theme))("Settings content in %s", (theme) 
 
         expect(card.backgroundColor).toBe(other.backgroundColor);
         expect(cornerRadii(document.querySelector("#card")!)).toEqual({ x: 12, y: 12 });
-        expect([card.paddingTop, card.paddingRight, card.paddingBottom, card.paddingLeft]).toEqual([
-            "12px",
-            "16px",
-            "12px",
-            "16px",
-        ]);
         expect([card.borderTopStyle, card.boxShadow]).toEqual(["none", "none"]);
+        // Their content is a hero card's, on a dialog's 24px edges, rather than rows
+        expect(card.padding).toBe("24px");
+    });
+
+    describe("the Encryption tab's cards", () => {
+        const footer = (cancel: string, action: string, actionClass = ""): string => `
+            <div class="footer mx_EncryptionCard_buttons" id="footer">
+                <button type="button" class="button" id="cancel">${cancel}</button>
+                <button type="button" class="button ${actionClass}" id="action">${action}</button>
+            </div>`;
+
+        it.each([
+            {
+                name: "a card whose footer follows its content",
+                content: `
+                    <div class="mx_EncryptionCard" id="card">
+                        <div class="mx_EncryptionCard_header"><h2>Delete key storage?</h2></div>
+                        <div class="mx_EncryptionCard_emphasisedContent" id="content">You will lose your history.</div>
+                        ${footer("Cancel", "Delete key storage", "destructive")}
+                    </div>`,
+            },
+            {
+                name: "a card whose footer ends its form",
+                content: `
+                    <div class="mx_EncryptionCard mx_ChangeRecoveryKey" id="card">
+                        <div class="mx_EncryptionCard_header"><h2>Enter your recovery key</h2></div>
+                        <form class="mx_KeyForm"><div id="content">Recovery key</div>${footer("Cancel", "Finish")}</form>
+                    </div>`,
+            },
+        ])("end in the shared dialog footer, its labels 24px from the edges and content: $name", ({ content }) => {
+            render(theme, `<div class="mx_SettingsTab mx_EncryptionUserSettingsTab">${content}</div>`);
+            const card = box("#card");
+            const action = box("#action");
+            const label = textRange("#action").getBoundingClientRect();
+
+            expect(Math.round(card.right - label.right)).toBe(24);
+            // The 36px button's box is 12px from the edges, so its label, in the middle, is as far from the bottom
+            expect([action.height, card.right - action.right, card.bottom - action.bottom]).toEqual([36, 12, 12]);
+            expect(box("#footer").top - box("#content").bottom).toBe(24);
+            expect(action.left - box("#cancel").right).toBe(8);
+            expect(Math.round(box("#content").left - card.left)).toBe(24);
+        });
+
+        it("write their labels in the accent, and a destructive action's in red", () => {
+            const container = render(
+                theme,
+                `<div class="mx_SettingsTab mx_EncryptionUserSettingsTab">
+                    <div class="mx_EncryptionCard">${footer("Cancel", "Delete key storage", "destructive")}</div>
+                </div>`,
+            );
+            const style = (selector: string): CSSStyleDeclaration =>
+                getComputedStyle(document.querySelector(selector)!);
+
+            expect(style("#cancel").color).toBe(tokenColor("--cpd-color-text-action-accent", container));
+            expect(style("#action").color).toBe(tokenColor("--cpd-color-text-critical-primary", container));
+            expect(style("#action").backgroundColor).toBe("rgba(0, 0, 0, 0)");
+        });
     });
 
     it("writes a beta card in Compound's sizes: a 20px title, body text, and 13px help with semibold questions", () => {

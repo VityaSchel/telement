@@ -132,26 +132,19 @@ exports[`<DeleteKeyStoragePanel /> > should match snapshot 1`] = `
       </ul>
     </div>
     <div
-      class="mx_EncryptionCard_buttons"
+      class="_footer mx_EncryptionCard_buttons"
     >
       <button
-        aria-disabled="false"
-        class="_button _destructive"
-        data-kind="primary"
-        data-size="lg"
-        role="button"
-        tabindex="0"
-      >
-        Delete key storage
-      </button>
-      <button
         class="_button"
-        data-kind="tertiary"
-        data-size="lg"
-        role="button"
-        tabindex="0"
+        type="button"
       >
         Cancel
+      </button>
+      <button
+        class="_button _destructive"
+        type="button"
+      >
+        Delete key storage
       </button>
     </div>
   </div>

@@ -11,8 +11,7 @@ import { type InternationalisedPolicy, type Terms, type MatrixClient } from "mat
 import { AuthType, type AuthDict, type IInputs, type IStageStatus } from "matrix-js-sdk/src/interactive-auth";
 import { logger } from "matrix-js-sdk/src/logger";
 import React, { type JSX, type ChangeEvent, createRef, type FormEvent, Fragment } from "react";
-import { Button } from "@vector-im/compound-web";
-import PopOutIcon from "@vector-im/compound-design-tokens/assets/web/icons/pop-out";
+import { DialogFooterButton } from "@element-hq/web-shared-components";
 import UserProfileSolidIcon from "@vector-im/compound-design-tokens/assets/web/icons/user-profile-solid";
 
 import EmailPromptIcon from "../../../../res/img/element-icons/email-prompt.svg";
@@ -990,20 +989,14 @@ export class MasUnlockCrossSigningAuthEntry extends FallbackAuthEntry<{
                 description={_t("auth|uia|mas_cross_signing_reset_description", {
                     serverName: this.props.matrixClient.getDomain(),
                 })}
+                // Telement: the card is the dialog's body, so that its footer sits on the dialog's edges
+                className="mx_EncryptionCard_noBorder"
             >
                 <EncryptionCardButtons>
-                    <Button
-                        Icon={PopOutIcon}
-                        onClick={this.onGoToAccountClick}
-                        autoFocus
-                        kind="primary"
-                        className="mx_Dialog_nonDialogButton"
-                    >
+                    <DialogFooterButton onClick={this.onRetryClick}>{_t("action|retry")}</DialogFooterButton>
+                    <DialogFooterButton onClick={this.onGoToAccountClick} autoFocus>
                         {_t("auth|uia|mas_cross_signing_reset_cta")}
-                    </Button>
-                    <Button onClick={this.onRetryClick} kind="tertiary" className="mx_Dialog_nonDialogButton">
-                        {_t("action|retry")}
-                    </Button>
+                    </DialogFooterButton>
                 </EncryptionCardButtons>
             </EncryptionCard>
         );

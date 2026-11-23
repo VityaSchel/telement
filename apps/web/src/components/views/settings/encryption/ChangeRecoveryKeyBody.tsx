@@ -7,7 +7,8 @@
  */
 
 import React, { type JSX, type MouseEventHandler, useCallback, useState } from "react";
-import { Button, ErrorMessage, Field, IconButton, Label, PasswordControl, Root, Text } from "@vector-im/compound-web";
+import { ErrorMessage, Field, IconButton, Label, PasswordControl, Root, Text } from "@vector-im/compound-web";
+import { DialogFooterButton } from "@element-hq/web-shared-components";
 import CopyIcon from "@vector-im/compound-design-tokens/assets/web/icons/copy";
 import KeyIcon from "@vector-im/compound-design-tokens/assets/web/icons/key-solid";
 import { logger } from "matrix-js-sdk/src/logger";
@@ -241,10 +242,8 @@ function KeyPanel({ recoveryKey, onConfirmClick, onCancelClick }: KeyPanelProps)
                 </IconButton>
             </div>
             <EncryptionCardButtons>
-                <Button onClick={onConfirmClick}>{_t("action|continue")}</Button>
-                <Button kind="tertiary" onClick={onCancelClick}>
-                    {_t("action|cancel")}
-                </Button>
+                <DialogFooterButton onClick={onCancelClick}>{_t("action|cancel")}</DialogFooterButton>
+                <DialogFooterButton onClick={onConfirmClick}>{_t("action|continue")}</DialogFooterButton>
             </EncryptionCardButtons>
         </>
     );
@@ -316,10 +315,10 @@ function KeyForm({ onCancelClick, onSubmit, recoveryKey, submitButtonLabel }: Ke
                 )}
             </Field>
             <EncryptionCardButtons>
-                <Button disabled={!isKeyValid || isKeyChangeInProgress}>{submitButtonLabel}</Button>
-                <Button kind="tertiary" onClick={onCancelClick}>
-                    {_t("action|cancel")}
-                </Button>
+                <DialogFooterButton onClick={onCancelClick}>{_t("action|cancel")}</DialogFooterButton>
+                <DialogFooterButton type="submit" disabled={!isKeyValid || isKeyChangeInProgress}>
+                    {submitButtonLabel}
+                </DialogFooterButton>
             </EncryptionCardButtons>
         </Root>
     );

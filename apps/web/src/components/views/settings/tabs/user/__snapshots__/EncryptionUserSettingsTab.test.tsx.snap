@@ -218,25 +218,19 @@ exports[`<EncryptionUserSettingsTab /> > should display the change recovery key 
           </button>
         </div>
         <div
-          class="mx_EncryptionCard_buttons"
+          class="_footer mx_EncryptionCard_buttons"
         >
           <button
             class="_button"
-            data-kind="primary"
-            data-size="lg"
-            role="button"
-            tabindex="0"
+            type="button"
           >
-            Continue
+            Cancel
           </button>
           <button
             class="_button"
-            data-kind="tertiary"
-            data-size="lg"
-            role="button"
-            tabindex="0"
+            type="button"
           >
-            Cancel
+            Continue
           </button>
         </div>
       </div>
@@ -556,26 +550,19 @@ exports[`<EncryptionUserSettingsTab /> > should display the reset identity panel
           </span>
         </div>
         <div
-          class="mx_EncryptionCard_buttons"
+          class="_footer mx_EncryptionCard_buttons"
         >
           <button
-            aria-disabled="false"
-            class="_button _destructive"
-            data-kind="primary"
-            data-size="lg"
-            role="button"
-            tabindex="0"
-          >
-            Continue
-          </button>
-          <button
             class="_button"
-            data-kind="tertiary"
-            data-size="lg"
-            role="button"
-            tabindex="0"
+            type="button"
           >
             Go back
+          </button>
+          <button
+            class="_button _destructive"
+            type="button"
+          >
+            Continue
           </button>
         </div>
       </div>
@@ -730,25 +717,19 @@ exports[`<EncryptionUserSettingsTab /> > should display the set up recovery key 
           </button>
         </div>
         <div
-          class="mx_EncryptionCard_buttons"
+          class="_footer mx_EncryptionCard_buttons"
         >
           <button
             class="_button"
-            data-kind="primary"
-            data-size="lg"
-            role="button"
-            tabindex="0"
+            type="button"
           >
-            Continue
+            Cancel
           </button>
           <button
             class="_button"
-            data-kind="tertiary"
-            data-size="lg"
-            role="button"
-            tabindex="0"
+            type="button"
           >
-            Cancel
+            Continue
           </button>
         </div>
       </div>

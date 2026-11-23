@@ -73,7 +73,13 @@ export function ResetIdentityDialog({
     return (
         <MatrixClientContext.Provider value={matrixClient}>
             <BaseDialog fixedWidth={true} hasCancel={false}>
-                <ResetIdentityBody onReset={onResetWrapper} onCancelClick={onCancelOrSignOut} variant={variant} />
+                {/* Telement: the card is the dialog's body, so that its footer sits on the dialog's edges */}
+                <ResetIdentityBody
+                    onReset={onResetWrapper}
+                    onCancelClick={onCancelOrSignOut}
+                    variant={variant}
+                    className="mx_EncryptionCard_noBorder"
+                />
             </BaseDialog>
         </MatrixClientContext.Provider>
     );

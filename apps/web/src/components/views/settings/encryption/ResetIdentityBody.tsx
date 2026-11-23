@@ -5,12 +5,13 @@
  * Please see LICENSE files in the repository root for full details.
  */
 
-import { Alert, Button, InlineSpinner, VisualList, VisualListItem } from "@vector-im/compound-web";
+import { Alert, InlineSpinner, VisualList, VisualListItem } from "@vector-im/compound-web";
 import CheckCircle from "@vector-im/compound-design-tokens/assets/web/icons/check-circle";
 import Group from "@vector-im/compound-design-tokens/assets/web/icons/group";
 import UserProfileSolid from "@vector-im/compound-design-tokens/assets/web/icons/user-profile-solid";
 import VisibilityOff from "@vector-im/compound-design-tokens/assets/web/icons/visibility-off";
 import React, { type JSX, useState } from "react";
+import { DialogFooterButton } from "@element-hq/web-shared-components";
 
 import { _t } from "../../../../languageHandler";
 import { EncryptionCard } from "./EncryptionCard";
@@ -35,6 +36,11 @@ interface ResetIdentityBodyProps {
      * this warning if they have to reset because they no longer have their key)
      */
     variant: ResetIdentityBodyVariant;
+
+    /**
+     * Extra class name for the card, e.g. `mx_EncryptionCard_noBorder` when shown in a dialog.
+     */
+    className?: string;
 }
 
 /**
@@ -62,7 +68,7 @@ export type ResetIdentityBodyVariant = "compromised" | "forgot" | "sync_failed" 
  *
  * Used by {@link ResetIdentityPanel}.
  */
-export function ResetIdentityBody({ onCancelClick, onReset, variant }: ResetIdentityBodyProps): JSX.Element {
+export function ResetIdentityBody({ onCancelClick, onReset, variant, className }: ResetIdentityBodyProps): JSX.Element {
     const matrixClient = useMatrixClientContext();
 
     // After the user clicks "Continue", we disable the button so it can't be
@@ -74,6 +80,7 @@ export function ResetIdentityBody({ onCancelClick, onReset, variant }: ResetIden
             Icon={UserProfileSolid}
             title={titleForVariant(variant)}
             description={descriptionForVariant(variant)}
+            className={className}
         >
             <EncryptionCardEmphasisedContent>
                 <VisualList>
@@ -90,8 +97,18 @@ export function ResetIdentityBody({ onCancelClick, onReset, variant }: ResetIden
                 {variant === "compromised" && <span>{_t("settings|encryption|advanced|breadcrumb_warning")}</span>}
             </EncryptionCardEmphasisedContent>
             {alertForVariant(variant)}
+            {inProgress && (
+                <EncryptionCardEmphasisedContent>
+                    <span className="mx_ResetIdentityPanel_warning">
+                        {_t("settings|encryption|advanced|do_not_close_warning")}
+                    </span>
+                </EncryptionCardEmphasisedContent>
+            )}
             <EncryptionCardButtons>
-                <Button
+                {!inProgress && (
+                    <DialogFooterButton onClick={onCancelClick}>{cancelTextForVariant(variant)}</DialogFooterButton>
+                )}
+                <DialogFooterButton
                     destructive={destructiveForVariant(variant)}
                     disabled={inProgress}
                     onClick={async () => {
@@ -109,18 +126,7 @@ export function ResetIdentityBody({ onCancelClick, onReset, variant }: ResetIden
                     ) : (
                         _t("action|continue")
                     )}
-                </Button>
-                {inProgress ? (
-                    <EncryptionCardEmphasisedContent>
-                        <span className="mx_ResetIdentityPanel_warning">
-                            {_t("settings|encryption|advanced|do_not_close_warning")}
-                        </span>
-                    </EncryptionCardEmphasisedContent>
-                ) : (
-                    <Button kind="tertiary" onClick={onCancelClick}>
-                        {cancelTextForVariant(variant)}
-                    </Button>
-                )}
+                </DialogFooterButton>
             </EncryptionCardButtons>
         </EncryptionCard>
     );

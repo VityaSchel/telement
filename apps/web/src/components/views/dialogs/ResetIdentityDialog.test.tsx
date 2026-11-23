@@ -38,6 +38,13 @@ describe("ResetIdentityDialog", () => {
         expect(client.getCrypto()?.resetEncryption).toHaveBeenCalled();
     });
 
+    it("draws the card as the dialog's body, so its footer sits on the dialog's edges", () => {
+        mockClient();
+        const dialog = render(<ResetIdentityDialog onFinished={vi.fn()} onReset={vi.fn()} variant="compromised" />);
+
+        expect(dialog.container.querySelector(".mx_EncryptionCard")).toHaveClass("mx_EncryptionCard_noBorder");
+    });
+
     it("should call onFinished when we click Go back", async () => {
         const client = mockClient();
 

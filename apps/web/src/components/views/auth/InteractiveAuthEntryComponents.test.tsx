@@ -86,6 +86,15 @@ describe("<MasUnlockCrossSigningAuthEntry/>", () => {
         expect(container).toMatchSnapshot();
     });
 
+    test("ends in text buttons, retrying before going to the account, on the dialog's edges", () => {
+        const { container } = renderAuth();
+        const buttons = [...container.querySelectorAll(".mx_EncryptionCard_buttons button")];
+
+        expect(buttons.map((button) => button.textContent)).toEqual(["Retry", "Continue to account"]);
+        expect(buttons[1]).toHaveFocus();
+        expect(container.querySelector(".mx_EncryptionCard")).toHaveClass("mx_EncryptionCard_noBorder");
+    });
+
     test("should open idp in new tab on click", async () => {
         const spy = vi.spyOn(global.window, "open").mockImplementation(() => null);
         renderAuth();

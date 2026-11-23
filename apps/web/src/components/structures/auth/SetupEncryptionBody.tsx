@@ -9,9 +9,9 @@ Please see LICENSE files in the repository root for full details.
 import React, { type JSX } from "react";
 import { type KeyBackupInfo, type VerificationRequest } from "matrix-js-sdk/src/crypto-api";
 import { logger } from "matrix-js-sdk/src/logger";
-import DevicesIcon from "@vector-im/compound-design-tokens/assets/web/icons/devices";
 import LockIcon from "@vector-im/compound-design-tokens/assets/web/icons/lock-solid";
-import { Button, Tooltip } from "@vector-im/compound-web";
+import { Tooltip } from "@vector-im/compound-web";
+import { DialogFooterButton, DialogFooterView } from "@element-hq/web-shared-components";
 
 import { _t } from "../../../languageHandler";
 import { MatrixClientPeg } from "../../../MatrixClientPeg";
@@ -19,7 +19,6 @@ import Modal from "../../../Modal";
 import VerificationRequestDialog from "../../views/dialogs/VerificationRequestDialog";
 import { SetupEncryptionStore, Phase } from "../../../stores/SetupEncryptionStore";
 import EncryptionPanel from "../../views/right_panel/EncryptionPanel";
-import AccessibleButton from "../../views/elements/AccessibleButton";
 import Spinner from "../../views/elements/Spinner";
 import { ResetIdentityDialog } from "../../views/dialogs/ResetIdentityDialog";
 import { EncryptionCard } from "../../views/settings/encryption/EncryptionCard";
@@ -176,16 +175,16 @@ export default class SetupEncryptionBody extends React.Component<IProps, IState>
             let verifyButton;
             if (store.hasDevicesToVerifyAgainst) {
                 verifyButton = (
-                    <Button kind="primary" onClick={this.onVerifyClick}>
-                        <DevicesIcon /> {_t("encryption|verification|use_another_device")}
-                    </Button>
+                    <DialogFooterButton onClick={this.onVerifyClick}>
+                        {_t("encryption|verification|use_another_device")}
+                    </DialogFooterButton>
                 );
             } else {
                 verifyButton = (
                     <Tooltip label={_t("encryption|verification|no_other_devices")}>
-                        <Button kind="primary" disabled={true}>
-                            <DevicesIcon /> {_t("encryption|verification|use_another_device")}
-                        </Button>
+                        <DialogFooterButton aria-disabled={true}>
+                            {_t("encryption|verification|use_another_device")}
+                        </DialogFooterButton>
                     </Tooltip>
                 );
             }
@@ -193,36 +192,32 @@ export default class SetupEncryptionBody extends React.Component<IProps, IState>
             let useRecoveryKeyButton;
             if (store.keyInfo) {
                 useRecoveryKeyButton = (
-                    <Button kind="primary" onClick={this.onUsePassphraseClick}>
+                    <DialogFooterButton onClick={this.onUsePassphraseClick}>
                         {_t("encryption|verification|use_recovery_key")}
-                    </Button>
+                    </DialogFooterButton>
                 );
             } else {
                 useRecoveryKeyButton = (
                     <Tooltip label={_t("encryption|verification|no_recovery_key")}>
-                        <Button disabled={true}>{_t("encryption|verification|use_recovery_key")}</Button>
+                        <DialogFooterButton aria-disabled={true}>
+                            {_t("encryption|verification|use_recovery_key")}
+                        </DialogFooterButton>
                     </Tooltip>
                 );
             }
 
-            // The "Can't confirm?" button is secondary if there is a better way
-            // to become verified available. If it's the only non-disabled
-            // button, it is primary.
-            const deviceOrRecoveryAvailable = store.keyInfo || store.hasDevicesToVerifyAgainst;
-            const cantConfirmKind = deviceOrRecoveryAvailable ? "secondary" : "primary";
-
             const cantConfirmButton = (
-                <Button kind={cantConfirmKind} onClick={this.onCantConfirmClick}>
+                <DialogFooterButton onClick={this.onCantConfirmClick}>
                     {_t("encryption|verification|cant_confirm")}
-                </Button>
+                </DialogFooterButton>
             );
 
             let signOutButton;
             if (this.props.allowLogout) {
                 signOutButton = (
-                    <Button kind="tertiary" onClick={this.onSignOutClick}>
+                    <DialogFooterButton onClick={this.onSignOutClick}>
                         {_t("action|sign_out_before_verify")}
-                    </Button>
+                    </DialogFooterButton>
                 );
             }
 
@@ -240,11 +235,12 @@ export default class SetupEncryptionBody extends React.Component<IProps, IState>
                             </ExternalLink>
                         </span>
                     </EncryptionCardEmphasisedContent>
+                    {/* Telement: the best way to confirm is the footer's last button, as an action is */}
                     <EncryptionCardButtons>
-                        {verifyButton}
-                        {useRecoveryKeyButton}
-                        {cantConfirmButton}
                         {signOutButton}
+                        {cantConfirmButton}
+                        {useRecoveryKeyButton}
+                        {verifyButton}
                     </EncryptionCardButtons>
                 </EncryptionCard>
             );
@@ -259,25 +255,21 @@ export default class SetupEncryptionBody extends React.Component<IProps, IState>
                 <div>
                     <E2EIcon className="mx_CompleteSecurity_heroIcon" status={E2EStatus.Verified} hideTooltip />
                     {message}
-                    <div className="mx_CompleteSecurity_actionRow">
-                        <AccessibleButton kind="primary" onClick={this.onDoneClick}>
-                            {_t("action|done")}
-                        </AccessibleButton>
-                    </div>
+                    <DialogFooterView className="mx_Dialog_buttons">
+                        <DialogFooterButton onClick={this.onDoneClick}>{_t("action|done")}</DialogFooterButton>
+                    </DialogFooterView>
                 </div>
             );
         } else if (phase === Phase.ConfirmSkip) {
             return (
                 <div>
                     <p>{_t("encryption|verification|verification_skip_warning")}</p>
-                    <div className="mx_CompleteSecurity_actionRow">
-                        <AccessibleButton kind="danger_outline" onClick={this.onSkipConfirmClick}>
+                    <DialogFooterView className="mx_Dialog_buttons">
+                        <DialogFooterButton onClick={this.onSkipBackClick}>{_t("action|go_back")}</DialogFooterButton>
+                        <DialogFooterButton destructive={true} onClick={this.onSkipConfirmClick}>
                             {_t("encryption|verification|verify_later")}
-                        </AccessibleButton>
-                        <AccessibleButton kind="primary" onClick={this.onSkipBackClick}>
-                            {_t("action|go_back")}
-                        </AccessibleButton>
-                    </div>
+                        </DialogFooterButton>
+                    </DialogFooterView>
                 </div>
             );
         } else if (phase === Phase.Busy || phase === Phase.Loading) {

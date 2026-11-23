@@ -83,13 +83,13 @@ describe("<ChangeRecoveryKeyBody />", () => {
 
             // The finish button should be disabled by default
             const finishButton = screen.getByRole("button", { name: "Finish set up" });
-            expect(finishButton).toHaveAttribute("aria-disabled", "true");
+            expect(finishButton).toBeDisabled();
 
             const input = screen.getByTitle("Enter recovery key");
             // If the user enters an incorrect recovery key, the finish button should be disabled
             // and we display an error message
             await userEvent.type(input, "wrong recovery key");
-            expect(finishButton).toHaveAttribute("aria-disabled", "true");
+            expect(finishButton).toBeDisabled();
             expect(screen.getByText("The recovery key you entered is not correct.")).toBeInTheDocument();
             expect(asFragment()).toMatchSnapshot();
 
@@ -97,7 +97,7 @@ describe("<ChangeRecoveryKeyBody />", () => {
             await userEvent.clear(input);
             // If the user enters the correct recovery key, the finish button should be enabled
             await userEvent.type(input, "encoded private key");
-            await waitFor(() => expect(finishButton).not.toHaveAttribute("aria-disabled", "true"));
+            await waitFor(() => expect(finishButton).toBeEnabled());
 
             await user.click(finishButton);
             expect(setAccountDataSpy).toHaveBeenCalledWith("io.element.recovery", { enabled: true });
@@ -249,13 +249,13 @@ describe("<ChangeRecoveryKeyBody />", () => {
 
             // The finish button should be disabled by default
             const finishButton = screen.getByRole("button", { name: "Confirm new recovery key" });
-            expect(finishButton).toHaveAttribute("aria-disabled", "true");
+            expect(finishButton).toBeDisabled();
 
             const input = screen.getByTitle("Enter recovery key");
             // If the user enters an incorrect recovery key, the finish button should be disabled
             // and we display an error message
             await userEvent.type(input, "wrong recovery key");
-            expect(finishButton).toHaveAttribute("aria-disabled", "true");
+            expect(finishButton).toBeDisabled();
             expect(screen.getByText("The recovery key you entered is not correct.")).toBeInTheDocument();
             expect(asFragment()).toMatchSnapshot();
 
@@ -263,7 +263,7 @@ describe("<ChangeRecoveryKeyBody />", () => {
             await userEvent.clear(input);
             // If the user enters the correct recovery key, the finish button should be enabled
             await userEvent.type(input, "encoded private key");
-            await waitFor(() => expect(finishButton).not.toHaveAttribute("aria-disabled", "true"));
+            await waitFor(() => expect(finishButton).toBeEnabled());
 
             await user.click(finishButton);
             expect(setAccountDataSpy).toHaveBeenCalledWith("io.element.recovery", { enabled: true });
