@@ -346,8 +346,37 @@ $left-gutter: 64px;
             border-radius: var(--tl-radius-inline);
 
             > pre {
+                --EventTile_codeBlock-fade-direction: to right;
+                --EventTile_codeBlock-fade-start: 0px;
+                --EventTile_codeBlock-fade-end: 0px;
+
                 background-color: transparent;
                 border-radius: 0;
+
+                /* Code cut off at the block's edge fades out over its last 24px on each side that has more to show, while
+                   the block can scroll there (useScrollEdges), so that a line clearly goes on. The fill is the
+                   container's, so it stays. The block's start is on the right in right-to-left text. */
+                &:dir(rtl) {
+                    --EventTile_codeBlock-fade-direction: to left;
+                }
+
+                &.mx_EventTile_codeBlock_hiddenAtStart {
+                    --EventTile_codeBlock-fade-start: var(--cpd-space-6x);
+                }
+
+                &.mx_EventTile_codeBlock_hiddenAtEnd {
+                    --EventTile_codeBlock-fade-end: var(--cpd-space-6x);
+                }
+
+                &:is(.mx_EventTile_codeBlock_hiddenAtStart, .mx_EventTile_codeBlock_hiddenAtEnd) {
+                    mask-image: linear-gradient(
+                        var(--EventTile_codeBlock-fade-direction),
+                        transparent,
+                        #000 var(--EventTile_codeBlock-fade-start),
+                        #000 calc(100% - var(--EventTile_codeBlock-fade-end)),
+                        transparent
+                    );
+                }
             }
         }
     }

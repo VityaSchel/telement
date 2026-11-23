@@ -16,6 +16,7 @@ import { CopyTextButton } from "../elements/CopyableText.tsx";
 import AccessibleButton from "../elements/AccessibleButton.tsx";
 import { _t } from "../../../i18n";
 import { getCodeBlockLanguage } from "../../../telement/code-block/getCodeBlockLanguage.ts";
+import { useScrollEdges } from "../../../telement/code-block/useScrollEdges.ts";
 
 const MAX_HIGHLIGHT_LENGTH = 4096;
 const MAX_LINES_BEFORE_COLLAPSE = 5;
@@ -45,6 +46,7 @@ const CodeBlock: React.FC<Props> = ({ preNode }) => {
     const showCodeLineNumbers = useSettingValue("showCodeLineNumbers");
     const expandCodeByDefault = useSettingValue("expandCodeByDefault");
     const [expanded, setExpanded] = useState(expandCodeByDefault);
+    const [preRef, scrollEdges] = useScrollEdges<HTMLPreElement>();
 
     const text = textContent(preNode);
     const language = getCodeBlockLanguage(preNode);
@@ -127,7 +129,7 @@ const CodeBlock: React.FC<Props> = ({ preNode }) => {
     }
 
     // Telement: a header line names the language and holds the buttons, always shown, so that they never cover the
-    // code
+    // code, and the code fades out on the side it is scrolled past
     return (
         <div className="mx_EventTile_pre_container">
             <div className="mx_EventTile_codeBlockHeader">
@@ -138,8 +140,11 @@ const CodeBlock: React.FC<Props> = ({ preNode }) => {
                 </CopyTextButton>
             </div>
             <pre
+                ref={preRef}
                 className={classNames({
                     mx_EventTile_collapsedCodeBlock: !expanded,
+                    mx_EventTile_codeBlock_hiddenAtStart: scrollEdges.hiddenAtStart,
+                    mx_EventTile_codeBlock_hiddenAtEnd: scrollEdges.hiddenAtEnd,
                 })}
             >
                 {lineNumbers}

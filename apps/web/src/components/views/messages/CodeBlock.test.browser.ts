@@ -468,6 +468,64 @@ describe("Code in a message", () => {
         expect(pre.getBoundingClientRect().right - textEnd).toBeLessThanOrEqual(12);
     });
 
+    describe("cut off at its edge", () => {
+        /** A block whose code is scrolled out of view on the given sides, as useScrollEdges marks it. */
+        function renderScrolled(sides: Array<"Start" | "End">, dir: "ltr" | "rtl" = "ltr"): HTMLElement {
+            const block = codeBlock().replace(
+                'class="mx_EventTile_collapsedCodeBlock"',
+                `class="mx_EventTile_collapsedCodeBlock ${sides.map((side) => `mx_EventTile_codeBlock_hiddenAt${side}`).join(" ")}"`,
+            );
+            render(formatted(dir === "ltr" ? block : `<p>הריצו:</p>${block}`));
+            return document.querySelector("pre")!;
+        }
+
+        const fade = (pre: HTMLElement): { image: string; start: string; end: string } => {
+            const style = getComputedStyle(pre);
+            return {
+                image: style.maskImage,
+                start: style.getPropertyValue("--EventTile_codeBlock-fade-start"),
+                end: style.getPropertyValue("--EventTile_codeBlock-fade-end"),
+            };
+        };
+
+        it.each([
+            ["its end", ["End"], "0px", "24px"],
+            ["its start", ["Start"], "24px", "0px"],
+            ["both sides", ["Start", "End"], "24px", "24px"],
+        ] as const)("fades the code out over 24px on %s, where more of it is hidden", (_, sides, start, end) => {
+            const { image, ...edges } = fade(renderScrolled([...sides]));
+
+            expect(image).toMatch(/^linear-gradient\(to right, /);
+            expect(edges).toEqual({ start, end });
+        });
+
+        it("fades from the right, its start, in right-to-left text", () => {
+            expect(fade(renderScrolled(["Start"], "rtl")).image).toMatch(/^linear-gradient\(to left, /);
+        });
+
+        it("fades nothing in a block that hides no code", () => {
+            expect(fade(renderScrolled([])).image).toBe("none");
+        });
+
+        it("fades only the code, as the fill and the header line are the block's", () => {
+            renderScrolled(["End"]);
+
+            expect(getComputedStyle(document.querySelector(BLOCK)!).maskImage).toBe("none");
+            expect(getComputedStyle(document.querySelector(".mx_EventTile_codeBlockHeader")!).maskImage).toBe("none");
+            expect(getComputedStyle(document.querySelector("pre")!).backgroundColor).toBe("rgba(0, 0, 0, 0)");
+        });
+
+        it("fades nothing in a reply's quote, which clips its code rather than scrolling it", () => {
+            const block = codeBlock().replace(
+                'class="mx_EventTile_collapsedCodeBlock"',
+                'class="mx_EventTile_collapsedCodeBlock mx_EventTile_codeBlock_hiddenAtEnd"',
+            );
+            render(`<blockquote class="mx_ReplyChain">${formatted(block)}</blockquote>`);
+
+            expect(getComputedStyle(document.querySelector("pre")!).maskImage).toBe("none");
+        });
+    });
+
     it("cuts a reply's quoted code block off at its padding, after the lines the quote shows", () => {
         const lines = ["pnpm install", "pnpm i18n", "pnpm lint:fmt:fix", "pnpm test:unit"];
         render(
