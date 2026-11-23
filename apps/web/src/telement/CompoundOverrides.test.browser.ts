@@ -6,6 +6,7 @@ Please see LICENSE files in the repository root for full details.
 */
 
 import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
+import { cdp } from "vitest/browser";
 import { createElement, type ReactNode } from "react";
 import { flushSync } from "react-dom";
 import { createRoot, type Root } from "react-dom/client";
@@ -66,6 +67,37 @@ function gapOn(side: Side, trigger: DOMRect, box: DOMRect): number {
         bottom: box.top - trigger.bottom,
         left: trigger.left - box.right,
     }[side];
+}
+
+/**
+ * The green channel of each row of pixels the screen shows down the middle of the element, top to bottom, at the
+ * screen's own resolution. The test runs in an iframe of the page CDP captures, which may scale it.
+ */
+async function greenDownTheMiddle(element: HTMLElement): Promise<number[]> {
+    const frame = window.frameElement!.getBoundingClientRect();
+    const scale = frame.width / document.documentElement.clientWidth;
+    const box = element.getBoundingClientRect();
+    const { data } = await cdp().send("Page.captureScreenshot", {
+        format: "png",
+        clip: {
+            x: frame.left + box.left * scale,
+            y: frame.top + box.top * scale,
+            width: box.width * scale,
+            height: box.height * scale,
+            scale: 1,
+        },
+    });
+    const image = new Image();
+    image.src = `data:image/png;base64,${data}`;
+    await image.decode();
+    const canvas = document.createElement("canvas");
+    canvas.width = image.width;
+    canvas.height = image.height;
+    const context = canvas.getContext("2d")!;
+    context.drawImage(image, 0, 0);
+    const middle = Math.floor(image.width / 2);
+    const pixels = context.getImageData(middle, 0, 1, image.height).data;
+    return Array.from({ length: image.height }, (_, row) => pixels[row * 4 + 1]);
 }
 
 /** Compound's floating arrow: an SVG straight inside the floating box, whatever its hashed class is called. */
@@ -195,6 +227,22 @@ describe("Telement's overrides of Compound", () => {
             expect(style.color).toBe("rgb(255, 255, 255)");
             expect(style.borderTopColor).toBe("rgba(0, 0, 0, 0)");
         }
+    });
+
+    it("runs a letter avatar's gradient to its edge, without a row of the other end's color at its top or bottom", async () => {
+        render(createElement(Avatar, { id: "@alice:example.org", name: "Alice", size: "48px" }));
+        const avatar = document.querySelector<HTMLElement>("[data-color]")!;
+        // Purple to violet, whose ends differ most in green: 177 at the top, 95 at the bottom
+        avatar.dataset.color = "4";
+
+        const green = await greenDownTheMiddle(avatar);
+        const [first, second] = [green[0], green[1]];
+        const [last, beforeLast] = [green[green.length - 1], green[green.length - 2]];
+
+        expect(first).toBeGreaterThan(last + 60);
+        // Each row is one small step of the gradient from the next, the outermost ones included
+        expect(Math.abs(first - second)).toBeLessThanOrEqual(6);
+        expect(Math.abs(last - beforeLast)).toBeLessThanOrEqual(6);
     });
 
     describe("an avatar whose photo is loading", () => {

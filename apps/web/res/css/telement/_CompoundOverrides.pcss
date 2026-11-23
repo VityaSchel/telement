@@ -283,14 +283,17 @@ input[class*="_control_"] + button[class*="_action_"] {
  * Letter avatars are Telegram's: a gradient from its avatar palette with white initials, in both themes, so they stand
  * out on hovered and selected rows as well as on the page. Compound's six colors take the Telegram gradient of the
  * nearest hue (Telegram for macOS's day palette: lime to green, cyan, fuchsia to pink, purple to violet, pink to red,
- * orange). The border Compound draws for high contrast mode would be a solid ring around the gradient. An avatar whose
- * photo is still loading is the letter avatar too (below).
+ * orange). The border Compound draws for high contrast mode would be a solid ring around the gradient. The gradient
+ * spans the border too: sized to the box inside the 1px transparent border, it would repeat under it, and the top and
+ * bottom rows of pixels would show the other end's color. An avatar whose photo is still loading is the letter avatar
+ * too (below).
  */
 [class*="_avatar-imageless_"],
 [class*="_avatar_"][data-initial] {
     --cpd-avatar-color: #ffffff;
 
     background: linear-gradient(var(--tl-avatar-top), var(--tl-avatar-bottom));
+    background-origin: border-box;
     border-color: transparent;
 
     &[data-color="1"] {
