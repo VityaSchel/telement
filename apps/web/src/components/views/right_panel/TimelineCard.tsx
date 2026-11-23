@@ -187,6 +187,7 @@ export default class TimelineCard extends React.Component<IProps, IState> {
         if (!this.state.atEndOfLiveTimeline) {
             jumpToBottom = (
                 <JumpToBottomButton
+                    room={this.props.room}
                     highlight={this.props.room.getUnreadNotificationCount(NotificationCountType.Highlight) > 0}
                     onScrollToBottomClick={this.jumpToLiveTimeline}
                 />

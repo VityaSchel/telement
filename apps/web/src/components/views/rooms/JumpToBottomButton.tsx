@@ -7,12 +7,18 @@ Please see LICENSE files in the repository root for full details.
 
 import React from "react";
 import classNames from "classnames";
+import { type Room } from "matrix-js-sdk/src/matrix";
 import { ChevronDownIcon } from "@vector-im/compound-design-tokens/assets/web/icons";
 
 import { _t } from "../../../languageHandler";
 import AccessibleButton, { type ButtonEvent } from "../elements/AccessibleButton";
+import { useTypedEventEmitterState } from "../../../hooks/useEventEmitter";
+import { NotificationStateEvents } from "../../../stores/notifications/NotificationState";
+import { RoomNotificationStateStore } from "../../../stores/notifications/RoomNotificationStateStore";
 
 interface IProps {
+    /** Telement: the room whose messages are counted: as in the room list, the count is gray while it is muted. */
+    room: Room;
     numUnreadMessages?: number;
     highlight: boolean;
     /** Telement: whether the button first returns to where the timeline jumped from, rather than to the bottom. */
@@ -21,9 +27,16 @@ interface IProps {
 }
 
 const JumpToBottomButton: React.FC<IProps> = (props) => {
+    const notificationState = RoomNotificationStateStore.instance.getRoomState(props.room);
+    const muted = useTypedEventEmitterState(
+        notificationState,
+        NotificationStateEvents.Update,
+        () => notificationState.muted,
+    );
     const className = classNames({
         mx_JumpToBottomButton: true,
         mx_JumpToBottomButton_highlight: props.highlight,
+        mx_JumpToBottomButton_muted: muted,
     });
     let badge;
     if (props.numUnreadMessages) {

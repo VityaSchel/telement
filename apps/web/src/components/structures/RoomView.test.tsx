@@ -55,7 +55,8 @@ import { RoomView } from "./RoomView";
 import SettingsStore from "../../settings/SettingsStore";
 import { SettingLevel } from "../../settings/SettingLevel";
 import DMRoomMap from "../../utils/DMRoomMap";
-import { NotificationState } from "../../stores/notifications/NotificationState";
+import { NotificationState, NotificationStateEvents } from "../../stores/notifications/NotificationState";
+import { RoomNotificationStateStore } from "../../stores/notifications/RoomNotificationStateStore";
 import { RightPanelPhases } from "../../stores/right-panel/RightPanelStorePhases";
 import { type LocalRoom, LocalRoomState } from "../../models/LocalRoom";
 import { DirectoryMember } from "../../utils/direct-messages";
@@ -394,6 +395,22 @@ describe("RoomView", () => {
 
             fireEvent.click(button());
             expect(internals(instance).messagePanel.jumpToLiveTimeline).toHaveBeenCalled();
+        });
+
+        it("counts unread messages in gray while the room is muted", async () => {
+            const { instance } = await mountScrolledUp();
+            act(() => instance.setState({ numUnreadMessages: 3 }));
+            const notificationState = RoomNotificationStateStore.instance.getRoomState(room);
+            const count = (): HTMLElement => document.querySelector<HTMLElement>(".mx_JumpToBottomButton_badge")!;
+            expect(count()).toHaveTextContent("3");
+            expect(count().closest(".mx_JumpToBottomButton_muted")).toBeNull();
+
+            vi.spyOn(notificationState, "muted", "get").mockReturnValue(true);
+            act(() => {
+                notificationState.emit(NotificationStateEvents.Update);
+            });
+
+            expect(count().closest(".mx_JumpToBottomButton_muted")).not.toBeNull();
         });
 
         it("returns from a pinned message to where the timeline was read", async () => {

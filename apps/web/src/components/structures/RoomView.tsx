@@ -2703,6 +2703,7 @@ export class RoomView extends React.Component<IRoomProps, IRoomState> {
         if (this.state.atEndOfLiveTimeline === false && (!this.state.search || this.state.search.hit !== undefined)) {
             jumpToBottom = (
                 <JumpToBottomButton
+                    room={this.state.room}
                     highlight={this.state.room.getUnreadNotificationCount(NotificationCountType.Highlight) > 0}
                     numUnreadMessages={this.state.numUnreadMessages}
                     jumpBack={this.state.canJumpBack}

@@ -25,11 +25,11 @@ import { cornerRadii, toBrowserCss } from "../../../test/telement/browserCss";
 import { tokenColor } from "../../../test/telement/computedStyle";
 
 /** The DOM JumpToBottomButton renders with an unread count, inside the positioned timeline it sits on. */
-function render(style = "", count = 12): void {
+function render(style = "", count = 12, states = ""): void {
     const chevron = renderToStaticMarkup(createElement(ChevronDownIcon));
     document.body.innerHTML = `
         <div class="cpd-theme-light" id="timeline" style="position: relative; width: 320px; height: 240px; ${style}">
-            <div class="mx_JumpToBottomButton mx_JumpToBottomButton_highlight">
+            <div class="mx_JumpToBottomButton ${states}">
                 <div class="mx_AccessibleButton mx_JumpToBottomButton_scrollDown" role="button" tabindex="0"
                     aria-label="Scroll to most recent messages">${chevron}</div>
                 <div class="mx_JumpToBottomButton_badge">${count}</div>
@@ -160,13 +160,26 @@ describe("JumpToBottomButton styles", () => {
         expect(Math.abs(baseline - capHeight - box.top - (box.bottom - baseline))).toBeLessThanOrEqual(0.5);
     });
 
-    it("draws the count of a room with mentions as the room list's accent counter, white on the accent", () => {
-        render();
+    it.each([
+        ["", "a room that isn't muted"],
+        ["mx_JumpToBottomButton_highlight", "a room with mentions"],
+        ["mx_JumpToBottomButton_highlight mx_JumpToBottomButton_muted", "a muted room with mentions"],
+    ])("draws the count as the room list's accent counter, white on the accent (%j: %s)", (states) => {
+        render("", 12, states);
         const timeline = element("#timeline");
         const badge = getComputedStyle(element(".mx_JumpToBottomButton_badge"));
 
         expect(badge.backgroundColor).toBe(tokenColor("--cpd-color-bg-accent-rest", timeline));
         expect(badge.color).toBe(tokenColor("--tl-color-on-accent", timeline));
+    });
+
+    it("draws the count of a muted room as the room list's gray counter", () => {
+        render("", 12, "mx_JumpToBottomButton_muted");
+        const timeline = element("#timeline");
+        const badge = getComputedStyle(element(".mx_JumpToBottomButton_badge"));
+
+        expect(badge.backgroundColor).toBe(tokenColor("--cpd-color-icon-secondary", timeline));
+        expect(badge.color).toBe(tokenColor("--cpd-color-text-on-solid-primary", timeline));
     });
 
     it("centers the chevron vertically too, inside the button's border", () => {

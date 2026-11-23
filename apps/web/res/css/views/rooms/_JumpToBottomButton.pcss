@@ -41,14 +41,15 @@ Please see LICENSE files in the repository root for full details.
     line-height: 1cap;
     text-box: trim-both cap alphabetic;
     text-align: center;
-    color: var(--cpd-color-text-on-solid-primary);
-    background-color: var(--cpd-color-icon-secondary);
-}
-
-/* Telement: with mentions, the room list's accent counter, white on the accent; red is left for failed messages */
-.mx_JumpToBottomButton_highlight .mx_JumpToBottomButton_badge {
+    /* Telement: the room list's accent counter, white on the accent; red is left for failed messages */
     color: var(--tl-color-on-accent);
     background-color: var(--cpd-color-bg-accent-rest);
+}
+
+/* Telement: the room list's gray counter while the room is muted, unless it has mentions */
+.mx_JumpToBottomButton_muted:not(.mx_JumpToBottomButton_highlight) .mx_JumpToBottomButton_badge {
+    color: var(--cpd-color-text-on-solid-primary);
+    background-color: var(--cpd-color-icon-secondary);
 }
 
 .mx_JumpToBottomButton_scrollDown {
