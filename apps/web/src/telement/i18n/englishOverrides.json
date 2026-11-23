@@ -409,6 +409,10 @@
         "upstream": "Confirm Removal",
         "telement": "Confirm removal"
     },
+    "report_content|hide_messages_from_user": {
+        "upstream": "Check if you want to hide all current and future messages from this user.",
+        "telement": "Hide all current and future messages from this user."
+    },
     "restore_key_backup_dialog|enter_key_description": {
         "upstream": "Access your secure message history and set up secure messaging by entering your Recovery Key.",
         "telement": "Access your secure message history and set up secure messaging by entering your recovery key."

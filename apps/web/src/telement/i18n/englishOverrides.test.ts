@@ -169,6 +169,10 @@ describe("registerEnglishOverrides", () => {
         );
         // Telegram's name for the room list's item that starts a chat, which also titles the dialog it opens
         expect(_t("action|start_chat" as TranslationKey)).toBe("New message");
+        // The Report message dialog's Ignore user is a switch rather than a checkbox, so its description says what it does
+        expect(_t("report_content|hide_messages_from_user")).toBe(
+            "Hide all current and future messages from this user.",
+        );
         // Telement has no bug reporting, so the dialog doesn't ask for a bug report
         expect(_t("room_settings|advanced|upgrade_warning_dialog_report_bug_prompt", { brand: "Telement" })).toBe(
             "This usually only affects how the room is processed on the server.",
