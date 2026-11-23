@@ -32,6 +32,7 @@ import { Action } from "../../../dispatcher/actions";
 import Modal from "../../../Modal";
 import { type ModuleApi } from "../../../modules/Api";
 import SettingsStore from "../../../settings/SettingsStore";
+import UIStore from "../../../stores/UIStore";
 import UserSettingsDialog from "../dialogs/UserSettingsDialog";
 
 describe("QuickSettingsButton", () => {
@@ -88,6 +89,8 @@ describe("QuickSettingsButton", () => {
         vi.spyOn(SettingsStore, "getValue").mockReturnValue(false);
         const sdkContext = new TestSDKContext();
         sdkContext._client = client;
+        // Wide enough for the tabs' names: where they are only icons, the focused tab's tooltip takes the first Escape
+        UIStore.instance.windowWidth = 1280;
         const { mxSdkContext, mxModuleApi } = window;
         window.mxSdkContext = sdkContext;
         window.mxModuleApi = { i18n: {} as I18nApi } as ModuleApi;
@@ -115,6 +118,7 @@ describe("QuickSettingsButton", () => {
             await waitFor(() => expect(settingsButton).toHaveFocus());
         } finally {
             defaultDispatcher.unregister(dispatcherRef);
+            UIStore.destroy();
             window.mxSdkContext = mxSdkContext;
             window.mxModuleApi = mxModuleApi;
         }

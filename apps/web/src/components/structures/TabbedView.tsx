@@ -156,6 +156,8 @@ export default function TabbedView<T extends string>(props: IProps<T>): JSX.Elem
     };
 
     const windowWidth = useWindowWidth();
+    // Only these tabs hide their labels, at the same width as in the stylesheet (_TabbedView.pcss)
+    const iconsOnly = !!props.responsive && tabLocation === TabLocation.LEFT && windowWidth <= 1024;
 
     const labels = props.tabs.map((tab) => (
         <TabLabel
@@ -163,14 +165,11 @@ export default function TabbedView<T extends string>(props: IProps<T>): JSX.Elem
             tab={tab}
             isActive={tab.id === props.activeTabId}
             onClick={() => props.onChange(tab.id)}
-            // This should be the same as the the CSS breakpoint at which the tab labels are hidden
-            showToolip={windowWidth < 1024 && tabLocation == TabLocation.LEFT}
+            showToolip={iconsOnly}
         />
     ));
     const tab = getTabById(props.activeTabId);
     const panel = tab ? <TabPanel tab={tab} /> : null;
-    // The same as the CSS breakpoint at which the tab labels are hidden (_TabbedView.pcss)
-    const iconsOnly = !!props.responsive && windowWidth <= 1024;
 
     const tabbedViewClasses = classNames({
         mx_TabbedView: true,

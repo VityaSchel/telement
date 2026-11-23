@@ -11,6 +11,7 @@ Please see LICENSE files in the repository root for full details.
 import { afterEach, describe, it, expect, vi } from "vitest";
 import React from "react";
 import { act, fireEvent, render, screen } from "test-utils-rtl";
+import userEvent from "@testing-library/user-event";
 import { SettingsSolidIcon, VisibilityOnIcon, LabsIcon } from "@vector-im/compound-design-tokens/assets/web/icons";
 
 import TabbedView, { Tab, TabLocation } from "./TabbedView";
@@ -101,6 +102,41 @@ describe("<TabbedView />", () => {
             resize(1280);
             expect(screen.getByRole("textbox", { name: "Search settings" })).toBeInTheDocument();
         });
+    });
+
+    describe("with the tabs' labels hidden in narrow windows", () => {
+        afterEach(() => {
+            UIStore.destroy();
+        });
+
+        it.each([
+            { width: 1025, responsive: true, tabLocation: TabLocation.LEFT, tooltips: 0 },
+            // At the width the stylesheet hides the tabs' labels from
+            { width: 1024, responsive: true, tabLocation: TabLocation.LEFT, tooltips: 1 },
+            { width: 800, responsive: true, tabLocation: TabLocation.LEFT, tooltips: 1 },
+            // Tabs that keep their labels in narrow windows
+            { width: 800, responsive: false, tabLocation: TabLocation.LEFT, tooltips: 0 },
+            { width: 800, responsive: true, tabLocation: TabLocation.TOP, tooltips: 0 },
+        ])(
+            "shows $tooltips tooltip(s) on the focused tab in a $width px wide window, where responsive is $responsive and the tabs are on the $tabLocation",
+            async ({ width, responsive, tabLocation, tooltips }) => {
+                UIStore.instance.windowWidth = width;
+                render(
+                    <TabbedView
+                        {...defaultProps}
+                        activeTabId="GENERAL"
+                        responsive={responsive}
+                        tabLocation={tabLocation}
+                    />,
+                );
+
+                // Focus shows a tooltip at once
+                await userEvent.tab();
+
+                expect(screen.getByRole("tab", { name: "General" })).toHaveFocus();
+                expect(screen.queryAllByRole("tooltip", { name: "General" })).toHaveLength(tooltips);
+            },
+        );
     });
 
     it("renders tabs", () => {
