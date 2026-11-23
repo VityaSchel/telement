@@ -8,7 +8,7 @@ Please see LICENSE files in the repository root for full details.
 import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { Form, SettingsToggleInput } from "@vector-im/compound-web";
+import { Field, Form, Label, RadioControl, SettingsToggleInput } from "@vector-im/compound-web";
 import compoundBase from "@vector-im/compound-design-tokens/assets/web/css/cpd-common-base.css?raw";
 import compoundSemantic from "@vector-im/compound-design-tokens/assets/web/css/cpd-common-semantic.css?raw";
 import compoundLightTheme from "@vector-im/compound-design-tokens/assets/web/css/cpd-theme-light-base.css?raw";
@@ -44,7 +44,9 @@ import tagComposerStyles from "../../res/css/views/elements/_TagComposer.pcss?ra
 import pollHistoryStyles from "../../res/css/views/polls/pollHistory/_PollHistory.pcss?raw";
 import pollHistoryListStyles from "../../res/css/views/polls/pollHistory/_PollHistoryList.pcss?raw";
 import fontScalingPanelStyles from "../../res/css/views/settings/_FontScalingPanel.pcss?raw";
+import imageSizePanelStyles from "../../res/css/views/settings/_ImageSizePanel.pcss?raw";
 import joinRuleSettingsStyles from "../../res/css/views/settings/_JoinRuleSettings.pcss?raw";
+import layoutSwitcherStyles from "../../res/css/views/settings/_LayoutSwitcher.pcss?raw";
 import notificationsStyles from "../../res/css/views/settings/_Notifications.pcss?raw";
 import phoneNumbersStyles from "../../res/css/views/settings/_PhoneNumbers.pcss?raw";
 import roomProfileSettingsStyles from "../../res/css/views/settings/_RoomProfileSettings.pcss?raw";
@@ -62,6 +64,8 @@ import compoundOverrides from "../../res/css/telement/_CompoundOverrides.pcss?ra
 import lightTheme from "../../res/themes/light/css/_light.pcss?raw";
 import lightHcTheme from "../../res/themes/light-high-contrast/css/_light-high-contrast.pcss?raw";
 import darkTheme from "../../res/themes/dark/css/_dark.pcss?raw";
+import imageSizeNormal from "../../res/img/element-icons/settings/img-size-normal.svg?raw";
+import imageSizeLarge from "../../res/img/element-icons/settings/img-size-large.svg?raw";
 import { cornerRadii, toBrowserCss } from "../test/telement/browserCss";
 import { tokenColor } from "../test/telement/computedStyle";
 import { loadInter } from "../test/telement/fonts";
@@ -88,7 +92,9 @@ const APP_STYLES = [
     pollHistoryStyles,
     pollHistoryListStyles,
     fontScalingPanelStyles,
+    imageSizePanelStyles,
     joinRuleSettingsStyles,
+    layoutSwitcherStyles,
     notificationsStyles,
     phoneNumbersStyles,
     roomProfileSettingsStyles,
@@ -687,6 +693,104 @@ describe.each(THEMES.map(([theme]) => theme))("Settings groups in %s", (theme) =
             expect([prefix.borderLeftStyle, prefix.borderRightStyle]).toEqual(["none", "none"]);
             expect(box("#phone-field").height).toBe(36);
         });
+    });
+
+    describe("the Appearance tab", () => {
+        /** The message layout choices, as LayoutSwitcher renders them in its subsection that stretches its content. */
+        const layouts = renderToStaticMarkup(
+            createElement(
+                Form.Root,
+                { className: "mx_LayoutSwitcher_LayoutSelector" },
+                ["Modern", "Message bubbles", "IRC"].map((name) =>
+                    createElement(
+                        Field,
+                        { key: name, name: "layout", className: "mxLayoutSwitcher_LayoutSelector_LayoutRadio" },
+                        createElement(
+                            Label,
+                            {},
+                            createElement(
+                                "div",
+                                { className: "mxLayoutSwitcher_LayoutSelector_LayoutRadio_inline" },
+                                createElement(RadioControl, { name: "layout", value: name }),
+                                createElement("span", {}, name),
+                            ),
+                            createElement("hr", { className: "mxLayoutSwitcher_LayoutSelector_LayoutRadio_separator" }),
+                            createElement("div", {
+                                className: "mxLayoutSwitcher_LayoutSelector_LayoutRadio_EventTilePreview",
+                                style: { height: "40px" },
+                            }),
+                        ),
+                    ),
+                ),
+            ),
+        );
+
+        /** The image sizes, as ImageSizePanel renders them, the drawings inline as SVGR inlines them. */
+        const imageSize = (id: string, drawing: string, checked: boolean): string => `
+            <label id="${id}">
+                ${drawing.replace("<svg ", `<svg class="mx_ImageSizePanel_size" id="${id}-drawing" `)}
+                <label class="mx_StyledRadioButton mx_StyledRadioButton_enabled" id="${id}-radio">
+                    <input type="radio" name="image_size" value="${id}" ${checked ? "checked" : ""} />
+                    <div><div></div></div>
+                    <div class="mx_StyledRadioButton_content">${id}</div>
+                    <div class="mx_StyledRadioButton_spacer"></div>
+                </label>
+            </label>
+        `;
+
+        /** A subsection whose content is stretched across its card, as `stretchContent` renders it. */
+        const stretched = (id: string, heading: string, content: string, newUi = false): string => `
+            <div class="mx_SettingsSubsection${newUi ? " mx_SettingsSubsection_newUi" : ""}" id="${id}">
+                <div class="mx_SettingsSubsectionHeading">
+                    <h3 class="mx_Heading_h4 mx_SettingsSubsectionHeading_heading">${heading}</h3>
+                </div>
+                <div class="mx_SettingsSubsection_content mx_SettingsSubsection_contentStretch${newUi ? " mx_SettingsSubsection_content_newUi" : ""}"
+                    id="${id}-card">${content}</div>
+            </div>
+        `;
+
+        it("stretches the layout cards across their group's card", () => {
+            renderTab(theme, section("appearance", "", stretched("layout", "Message layout", layouts, true)));
+            const edges = contentBox("#layout-card");
+
+            for (const card of document.querySelectorAll(".mxLayoutSwitcher_LayoutSelector_LayoutRadio")) {
+                const rect = card.getBoundingClientRect();
+                expect([rect.left, rect.right]).toEqual([edges.left, edges.right]);
+            }
+        });
+
+        it.each<"ltr" | "rtl">(["ltr", "rtl"])(
+            "lays the image sizes out as two equal columns 16px apart, each drawing as wide as its column and 12px over its radio (%s)",
+            (dir) => {
+                renderTab(
+                    theme,
+                    section(
+                        "appearance",
+                        "",
+                        stretched(
+                            "size",
+                            "Image size in the timeline",
+                            `<div class="mx_ImageSizePanel_radios">${imageSize("default", imageSizeNormal, true)}${imageSize("large", imageSizeLarge, false)}</div>`,
+                        ),
+                    ),
+                    dir,
+                );
+                const edges = contentBox("#size-card");
+                const [first, second] = dir === "ltr" ? ["#default", "#large"] : ["#large", "#default"];
+
+                expect(box(first).left).toBe(edges.left);
+                expect(box(second).right).toBe(edges.right);
+                expect(box(second).left - box(first).right).toBe(16);
+                expect(box("#default").width).toBe(box("#large").width);
+                for (const id of ["#default", "#large"]) {
+                    const drawing = box(`${id}-drawing`);
+                    expect([drawing.left, drawing.right]).toEqual([box(id).left, box(id).right]);
+                    // Scaled with its 221 × 148 drawing
+                    expect(Math.abs(drawing.height - (drawing.width * 148) / 221)).toBeLessThanOrEqual(0.5);
+                    expect(box(`${id}-radio`).top - drawing.bottom).toBe(12);
+                }
+            },
+        );
     });
 
     describe("the user Notifications tab", () => {

@@ -59,6 +59,13 @@ describe("<LayoutSwitcher />", () => {
     });
 
     describe("layout selection", () => {
+        it("should stretch the layout cards across their group's card", async () => {
+            await renderLayoutSwitcher();
+            expect(screen.getByRole("radio", { name: "Modern" }).closest(".mx_SettingsSubsection_content")).toHaveClass(
+                "mx_SettingsSubsection_contentStretch",
+            );
+        });
+
         it("should display the modern layout", async () => {
             await renderLayoutSwitcher();
             expect(screen.getByRole("radio", { name: "Modern" })).toBeChecked();

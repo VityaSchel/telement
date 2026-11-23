@@ -40,7 +40,7 @@ export default class ImageSizePanel extends React.Component<EmptyObject, IState>
 
     public render(): React.ReactNode {
         return (
-            <SettingsSubsection heading={_t("settings|appearance|timeline_image_size")}>
+            <SettingsSubsection heading={_t("settings|appearance|timeline_image_size")} stretchContent>
                 <div className="mx_ImageSizePanel_radios">
                     <label>
                         <ImgSizeNormalIcon className="mx_ImageSizePanel_size" />

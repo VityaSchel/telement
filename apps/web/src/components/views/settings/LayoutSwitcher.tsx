@@ -23,7 +23,12 @@ import { useMatrixClientContext } from "../../../contexts/MatrixClientContext";
  */
 export function LayoutSwitcher(): JSX.Element {
     return (
-        <SettingsSubsection heading={_t("common|message_layout")} legacy={false} data-testid="layoutPanel">
+        <SettingsSubsection
+            heading={_t("common|message_layout")}
+            legacy={false}
+            stretchContent
+            data-testid="layoutPanel"
+        >
             <LayoutSelector />
             <ToggleCompactLayout />
         </SettingsSubsection>

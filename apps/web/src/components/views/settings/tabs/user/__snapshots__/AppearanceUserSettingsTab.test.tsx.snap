@@ -153,7 +153,7 @@ exports[`AppearanceUserSettingsTab > should render 1`] = `
               </h2>
             </div>
             <div
-              class="mx_SettingsSubsection_content mx_SettingsSubsection_content_newUi"
+              class="mx_SettingsSubsection_content mx_SettingsSubsection_contentStretch mx_SettingsSubsection_content_newUi"
             >
               <form
                 class="_root mx_LayoutSwitcher_LayoutSelector"
@@ -732,7 +732,7 @@ exports[`AppearanceUserSettingsTab > should render 1`] = `
               </h2>
             </div>
             <div
-              class="mx_SettingsSubsection_content"
+              class="mx_SettingsSubsection_content mx_SettingsSubsection_contentStretch"
             >
               <div
                 class="mx_ImageSizePanel_radios"

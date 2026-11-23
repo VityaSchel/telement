@@ -7,12 +7,16 @@ Please see LICENSE files in the repository root for full details.
 */
 
 .mx_ImageSizePanel_radios {
-    display: flex;
-    flex-direction: row;
+    /* Telement: two equal columns 16px apart across the card, each drawing scaled to its column and 12px above its
+       radio, rather than fixed drawings that lined up with nothing */
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: var(--cpd-space-4x);
 
     > label {
-        margin-right: 68px; /* keep the boxes separate */
+        display: flex;
+        flex-direction: column;
+        gap: var(--cpd-space-3x);
         cursor: pointer;
     }
 
@@ -21,9 +25,8 @@ Please see LICENSE files in the repository root for full details.
         /* Telement: the drawing's lines in Compound's separator, which a dark theme's raised dialogs (_common.pcss)
            move a step further, as they do their other lines */
         color: var(--cpd-color-separator-primary);
-        width: 221px;
-        height: 148px;
-        margin-bottom: 14px; /* move radio button away from bottom edge a bit */
+        width: 100%;
+        height: auto;
         /* Telement: the drawing's own 1px edge is covered by Compound's outline gray, as on the theme chips, 3:1 or
            more against the card, or by the accent ring when its size is selected. The outline follows the drawing's
            8px corners. */
