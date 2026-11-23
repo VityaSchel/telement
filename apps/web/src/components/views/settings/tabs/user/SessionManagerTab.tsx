@@ -34,6 +34,8 @@ import { SettingsSection } from "../../shared/SettingsSection";
 import { getManageDeviceUrl } from "../../../../../utils/oauth/urls.ts";
 import { SDKContext } from "../../../../../contexts/SDKContext";
 import Spinner from "../../../elements/Spinner";
+import SettingsFlag from "../../../elements/SettingsFlag";
+import { SettingLevel } from "../../../../../settings/SettingLevel";
 
 // We import `LoginWithQR` asynchronously to avoid importing the entire Rust Crypto WASM into the main bundle.
 const LoginWithQR = lazy(() => import("../../../auth/LoginWithQR"));
@@ -334,6 +336,19 @@ const SessionManagerTab: React.FC<{
                         />
                     </SettingsSubsection>
                 )}
+                {/* Telement: this device's offline backup and what devices record about themselves, which were on the
+                    Security & privacy tab */}
+                {dehydratedDeviceId && (
+                    <SettingsSubsection
+                        heading={_t("common|secure_backup")}
+                        description={_t("settings|security|dehydrated_device_description")}
+                    >
+                        <div className="mx_SettingsFlag_label">{_t("settings|security|dehydrated_device_enabled")}</div>
+                    </SettingsSubsection>
+                )}
+                <SettingsSubsection formWrap>
+                    <SettingsFlag name="deviceClientInformationOptIn" level={SettingLevel.ACCOUNT} />
+                </SettingsSubsection>
             </SettingsSection>
         </SettingsTab>
     );

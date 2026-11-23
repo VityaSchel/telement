@@ -272,6 +272,17 @@ describe("<SessionManagerTab />", () => {
         window.location = realWindowLocation;
     });
 
+    it("ends with the setting to record each device's client information, moved here from Security & privacy", async () => {
+        const { getByRole, container } = render(getComponent());
+        await act(async () => {
+            await flushPromises();
+        });
+
+        const toggle = getByRole("switch", { name: /Record the client name, version, and url/ });
+        const groups = container.querySelectorAll(".mx_SettingsSection_subSections > *");
+        expect(groups[groups.length - 1]).toContainElement(toggle);
+    });
+
     it("renders spinner while devices load", () => {
         const { container } = render(getComponent());
         expect(container.getElementsByClassName("mx_Spinner").length).toBeTruthy();
@@ -646,6 +657,25 @@ describe("<SessionManagerTab />", () => {
     });
 
     describe("device dehydration", () => {
+        it("says the offline device is enabled, at the bottom of the tab", async () => {
+            mockClient.getDevices.mockResolvedValue({
+                devices: [alicesDevice, alicesMobileDevice, alicesDehydratedDevice],
+            });
+            const devicesMap = new Map<string, Device>([
+                [alicesDeviceObj.deviceId, alicesDeviceObj],
+                [alicesMobileDeviceObj.deviceId, alicesMobileDeviceObj],
+                [alicesDehydratedDeviceObj.deviceId, alicesDehydratedDeviceObj],
+            ]);
+            mockCrypto.getUserDeviceInfo.mockResolvedValue(new Map([[aliceId, devicesMap]]));
+
+            const { getByText } = render(getComponent());
+            await act(async () => {
+                await flushPromises();
+            });
+
+            expect(getByText("Offline device enabled")).toBeInTheDocument();
+        });
+
         it("Hides a verified dehydrated device", async () => {
             mockClient.getDevices.mockResolvedValue({
                 devices: [alicesDevice, alicesMobileDevice, alicesDehydratedDevice],

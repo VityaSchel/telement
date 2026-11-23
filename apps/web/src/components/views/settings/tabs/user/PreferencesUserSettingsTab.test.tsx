@@ -10,23 +10,19 @@ Please see LICENSE files in the repository root for full details.
 
 import React from "react";
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import { fireEvent, render, type RenderResult, screen, waitFor } from "test-utils-rtl";
+import { fireEvent, render, type RenderResult, screen, within } from "test-utils-rtl";
 import {
     getMockClientWithEventEmitter,
     mockClientMethodsServer,
     mockClientMethodsUser,
     mockPlatformPeg,
-    stubClient,
 } from "test-utils";
 import userEvent from "@testing-library/user-event";
 
 import PreferencesUserSettingsTab from "./PreferencesUserSettingsTab";
-import { MatrixClientPeg } from "../../../../../MatrixClientPeg";
 import SettingsStore from "../../../../../settings/SettingsStore";
-import { SettingLevel } from "../../../../../settings/SettingLevel";
 import MatrixClientBackedController from "../../../../../settings/controllers/MatrixClientBackedController";
 import PlatformPeg from "../../../../../PlatformPeg";
-import { type SettingKey } from "../../../../../settings/Settings.tsx";
 
 describe("PreferencesUserSettingsTab", () => {
     beforeEach(() => {
@@ -141,96 +137,44 @@ describe("PreferencesUserSettingsTab", () => {
         expect(spellCheckEnableFn).toHaveBeenCalledWith(true);
     });
 
-    describe("send read receipts", () => {
-        beforeEach(() => {
-            stubClient();
-            vi.spyOn(SettingsStore, "setValue");
-            vi.spyOn(window, "matchMedia").mockReturnValue({ matches: false } as MediaQueryList);
+    describe("groups", () => {
+        const group = (heading: string): HTMLElement =>
+            screen.getByRole("heading", { name: heading }).closest<HTMLElement>(".mx_SettingsSubsection")!;
+
+        it("puts the desktop app's toggles under Start-up and window behaviour, shown when any of them can be set", () => {
+            const original = SettingsStore.canSetValue;
+            vi.spyOn(SettingsStore, "canSetValue").mockImplementation((setting, roomId, level) =>
+                setting === "Electron.warnBeforeExit" ? true : original(setting, roomId, level),
+            );
+            renderTab();
+
+            expect(
+                within(group("Start-up and window behaviour")).getByRole("switch", { name: "Warn before quitting" }),
+            ).toBeInTheDocument();
+            vi.mocked(SettingsStore.canSetValue).mockRestore();
         });
 
-        afterEach(() => {
-            vi.resetAllMocks();
+        it("puts sending with Ctrl + Enter under Keyboard shortcuts rather than Composer", () => {
+            renderTab();
+
+            expect(
+                within(group("Keyboard shortcuts")).getByRole("switch", { name: /Enter to send a message/ }),
+            ).toBeInTheDocument();
+            expect(within(group("Composer")).queryByRole("switch", { name: /Enter to send a message/ })).toBeNull();
         });
 
-        const getToggle = () => renderTab().getByRole("switch", { name: "Send read receipts" });
+        it("calls the last group Advanced, and leaves privacy to the Security & privacy tab", () => {
+            renderTab();
 
-        const mockIsVersionSupported = (val: boolean) => {
-            const client = MatrixClientPeg.safeGet();
-            vi.spyOn(client, "doesServerSupportUnstableFeature").mockResolvedValue(false);
-            vi.spyOn(client, "isVersionSupported").mockImplementation(async (version: string) => {
-                if (version === "v1.4") return val;
-                return false;
-            });
-            MatrixClientBackedController.matrixClient = client;
-        };
-
-        const mockGetValue = (val: boolean) => {
-            const copyOfGetValueAt = SettingsStore.getValueAt;
-
-            SettingsStore.getValueAt = (
-                level: SettingLevel,
-                name: SettingKey,
-                roomId?: string,
-                isExplicit?: boolean,
-            ) => {
-                if (name === "sendReadReceipts") return val;
-                return copyOfGetValueAt(level, name, roomId, isExplicit);
-            };
-        };
-
-        const expectSetValueToHaveBeenCalled = (
-            name: string,
-            roomId: string | null,
-            level: SettingLevel,
-            value: boolean,
-        ) => expect(SettingsStore.setValue).toHaveBeenCalledWith(name, roomId, level, value);
-
-        describe("with server support", () => {
-            beforeEach(() => {
-                mockIsVersionSupported(true);
-            });
-
-            it("can be enabled", async () => {
-                mockGetValue(false);
-                const toggle = getToggle();
-
-                await waitFor(() => expect(toggle).not.toBeDisabled());
-                fireEvent.click(toggle);
-                expectSetValueToHaveBeenCalled("sendReadReceipts", null, SettingLevel.ACCOUNT, true);
-            });
-
-            it("can be disabled", async () => {
-                mockGetValue(true);
-                const toggle = getToggle();
-
-                await waitFor(() => expect(toggle).not.toBeDisabled());
-                fireEvent.click(toggle);
-                expectSetValueToHaveBeenCalled("sendReadReceipts", null, SettingLevel.ACCOUNT, false);
-            });
-        });
-
-        describe("without server support", () => {
-            beforeEach(() => {
-                mockIsVersionSupported(false);
-            });
-
-            it("is forcibly enabled", async () => {
-                const toggle = getToggle();
-                await waitFor(() => {
-                    expect(toggle).toBeChecked();
-                    expect(toggle).toBeDisabled();
-                });
-            });
-
-            it("cannot be disabled", async () => {
-                mockGetValue(true);
-                const toggle = getToggle();
-
-                await waitFor(() => expect(toggle).toBeDisabled());
-                console.log(toggle.innerHTML);
-                fireEvent.click(toggle);
-                expect(SettingsStore.setValue).not.toHaveBeenCalled();
-            });
+            expect(
+                within(group("Advanced")).getByRole("switch", { name: /Prompt before sending invites/ }),
+            ).toBeVisible();
+            for (const moved of ["Presence", "Moderation and safety", "Show media in timeline", "General"]) {
+                expect(screen.queryByRole("heading", { name: moved })).toBeNull();
+            }
+            for (const moved of ["Send read receipts", "Publish timezone on public profile"]) {
+                expect(screen.queryByRole("switch", { name: moved })).toBeNull();
+            }
         });
     });
 

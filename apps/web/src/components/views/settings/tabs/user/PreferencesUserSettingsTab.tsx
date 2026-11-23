@@ -32,9 +32,7 @@ import PlatformPeg from "../../../../../PlatformPeg";
 import { IS_MAC } from "../../../../../Keyboard";
 import SpellCheckSettings from "../../SpellCheckSettings";
 import * as TimezoneHandler from "../../../../../TimezoneHandler";
-import { type BooleanSettingKey } from "../../../../../settings/Settings.tsx";
-import { InviteAvatarsAccountSetting, MediaPreviewAccountSettings } from "./MediaPreviewAccountSettings.tsx";
-import { InviteRulesAccountSetting } from "./InviteRulesAccountSettings.tsx";
+import { type BooleanSettingKey, type SettingKey } from "../../../../../settings/Settings.tsx";
 import SettingsDropdown from "../../../elements/SettingsDropdown.tsx";
 
 interface IState {
@@ -120,15 +118,16 @@ export default class PreferencesUserSettingsTab extends React.Component<EmptyObj
     // Telement: previews are always on and sections always off, so the section only shows if a setting is added here
     private static ROOM_LIST_SETTINGS: BooleanSettingKey[] = [];
 
-    private static KEYBINDINGS_SETTINGS: BooleanSettingKey[] = ["ctrlFForSearch"];
-
-    private static PRESENCE_SETTINGS: BooleanSettingKey[] = ["sendReadReceipts", "sendTypingNotifications"];
+    // Telement: sending with Ctrl/Cmd + Enter is a shortcut too, so it is here rather than under Composer
+    private static KEYBINDINGS_SETTINGS: BooleanSettingKey[] = [
+        "ctrlFForSearch",
+        "MessageComposerInput.ctrlEnterToSend",
+    ];
 
     private static COMPOSER_SETTINGS: BooleanSettingKey[] = [
         "MessageComposerInput.autoReplaceEmoji",
         "MessageComposerInput.useMarkdown",
         "MessageComposerInput.suggestEmoji",
-        "MessageComposerInput.ctrlEnterToSend",
         "MessageComposerInput.surroundWith",
         "MessageComposerInput.insertTrailingColon",
     ];
@@ -163,6 +162,16 @@ export default class PreferencesUserSettingsTab extends React.Component<EmptyObj
         "promptBeforeInviteUnknownUsers",
         // Start automatically after startup (electron-only)
         // Autocomplete delay (niche text box)
+    ];
+
+    /** Telement: the desktop app's settings, which are together under Start-up and window behaviour. */
+    private static DESKTOP_SETTINGS: SettingKey[] = [
+        "Electron.autoLaunch",
+        "Electron.showTrayIcon",
+        "Electron.enableHardwareAcceleration",
+        "Electron.enableContentProtection",
+        "Electron.alwaysShowMenuBar",
+        "Electron.warnBeforeExit",
     ];
 
     public constructor(props: EmptyObject) {
@@ -266,7 +275,11 @@ export default class PreferencesUserSettingsTab extends React.Component<EmptyObj
                         <SpellCheckSection />
                     </SettingsSubsection>
 
-                    {SettingsStore.canSetValue("Electron.autoLaunch", null, SettingLevel.PLATFORM) && (
+                    {/* Telement: with the desktop app's toggles, which were under General, so that its settings are
+                        in one group */}
+                    {PreferencesUserSettingsTab.DESKTOP_SETTINGS.some((setting) =>
+                        SettingsStore.canSetValue(setting, null, SettingLevel.PLATFORM),
+                    ) && (
                         <SettingsSubsection
                             heading={_t("settings|preferences|startup_window_behaviour_label")}
                             formWrap
@@ -274,6 +287,31 @@ export default class PreferencesUserSettingsTab extends React.Component<EmptyObj
                             <SettingsDropdown
                                 settingKey="Electron.autoLaunch"
                                 label={_t("settings|start_automatically|label", { brand })}
+                                level={SettingLevel.PLATFORM}
+                                hideIfCannotSet
+                            />
+                            <SettingsFlag name="Electron.showTrayIcon" level={SettingLevel.PLATFORM} hideIfCannotSet />
+                            <SettingsFlag
+                                name="Electron.enableHardwareAcceleration"
+                                level={SettingLevel.PLATFORM}
+                                hideIfCannotSet
+                                label={_t("settings|preferences|Electron.enableHardwareAcceleration", {
+                                    appName: brand,
+                                })}
+                            />
+                            <SettingsFlag
+                                name="Electron.enableContentProtection"
+                                level={SettingLevel.PLATFORM}
+                                hideIfCannotSet
+                                label={_t("settings|preferences|Electron.enableContentProtection")}
+                            />
+                            <SettingsFlag
+                                name="Electron.alwaysShowMenuBar"
+                                level={SettingLevel.PLATFORM}
+                                hideIfCannotSet
+                            />
+                            <SettingsFlag
+                                name="Electron.warnBeforeExit"
                                 level={SettingLevel.PLATFORM}
                                 hideIfCannotSet
                             />
@@ -323,15 +361,6 @@ export default class PreferencesUserSettingsTab extends React.Component<EmptyObj
                         </div>
 
                         {this.renderGroup(PreferencesUserSettingsTab.TIME_SETTINGS)}
-                        <SettingsFlag name="userTimezonePublish" level={SettingLevel.DEVICE} />
-                    </SettingsSubsection>
-
-                    <SettingsSubsection
-                        heading={_t("common|presence")}
-                        description={_t("settings|preferences|presence_description")}
-                        formWrap
-                    >
-                        {this.renderGroup(PreferencesUserSettingsTab.PRESENCE_SETTINGS)}
                     </SettingsSubsection>
 
                     <SettingsSubsection heading={_t("settings|preferences|composer_heading")} formWrap>
@@ -370,44 +399,13 @@ export default class PreferencesUserSettingsTab extends React.Component<EmptyObj
                         {this.renderGroup(PreferencesUserSettingsTab.TIMELINE_SETTINGS)}
                     </SettingsSubsection>
 
-                    <SettingsSubsection heading={_t("common|moderation_and_safety")} legacy={false}>
-                        <InviteAvatarsAccountSetting />
-                        <InviteRulesAccountSetting />
-                    </SettingsSubsection>
-
-                    {/* Telement: the choices are a group of their own, labelled above their card */}
-                    <SettingsSubsection
-                        heading={_t("settings|media_preview|media_preview_label")}
-                        description={_t("settings|media_preview|media_preview_description")}
-                        legacy={false}
-                    >
-                        <MediaPreviewAccountSettings />
-                    </SettingsSubsection>
-
                     <SettingsSubsection heading={_t("settings|preferences|room_directory_heading")} formWrap>
                         {this.renderGroup(PreferencesUserSettingsTab.ROOM_DIRECTORY_SETTINGS)}
                     </SettingsSubsection>
 
-                    <SettingsSubsection heading={_t("common|general")} stretchContent formWrap>
+                    {/* Telement: "Advanced" rather than "General", as what is left here is for fine tuning */}
+                    <SettingsSubsection heading={_t("common|advanced")} stretchContent formWrap>
                         {this.renderGroup(PreferencesUserSettingsTab.GENERAL_SETTINGS)}
-
-                        <SettingsFlag name="Electron.showTrayIcon" level={SettingLevel.PLATFORM} hideIfCannotSet />
-                        <SettingsFlag
-                            name="Electron.enableHardwareAcceleration"
-                            level={SettingLevel.PLATFORM}
-                            hideIfCannotSet
-                            label={_t("settings|preferences|Electron.enableHardwareAcceleration", {
-                                appName: brand,
-                            })}
-                        />
-                        <SettingsFlag
-                            name="Electron.enableContentProtection"
-                            level={SettingLevel.PLATFORM}
-                            hideIfCannotSet
-                            label={_t("settings|preferences|Electron.enableContentProtection")}
-                        />
-                        <SettingsFlag name="Electron.alwaysShowMenuBar" level={SettingLevel.PLATFORM} hideIfCannotSet />
-                        <SettingsFlag name="Electron.warnBeforeExit" level={SettingLevel.PLATFORM} hideIfCannotSet />
 
                         <Field
                             label={_t("settings|preferences|autocomplete_delay")}

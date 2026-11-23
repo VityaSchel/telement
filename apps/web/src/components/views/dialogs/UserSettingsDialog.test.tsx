@@ -11,6 +11,8 @@ Please see LICENSE files in the repository root for full details.
 import React, { type ReactElement } from "react";
 import { vi, describe, it, expect, beforeEach, type MockedObject } from "vitest";
 import { render, screen, waitFor } from "test-utils-rtl";
+import { renderToStaticMarkup } from "react-dom/server";
+import ThemeIcon from "@vector-im/compound-design-tokens/assets/web/icons/theme";
 import { ClientEvent, MatrixEvent, type MatrixClient } from "matrix-js-sdk/src/matrix";
 import {
     getMockClientWithEventEmitter,
@@ -118,6 +120,40 @@ describe("<UserSettingsDialog />", () => {
         });
         const { container } = render(getComponent());
         expect(container.querySelectorAll(".mx_TabbedView_tabLabel")).toMatchSnapshot();
+    });
+
+    it("orders the tabs: account, notifications, look and behaviour, calls, privacy, encryption and devices, then the shortcuts, labs and help", () => {
+        SdkConfig.add({
+            show_labs_settings: true,
+        });
+        mockSettingsStore.getValue.mockImplementation(
+            (settingName: any): any => settingName === UIFeature.Voip || settingName === "feature_mjolnir",
+        );
+        const { container } = render(getComponent());
+
+        expect([...container.querySelectorAll(".mx_TabbedView_tabLabel")].map((tab) => tab.textContent)).toEqual([
+            "Account",
+            "Notifications",
+            "Appearance",
+            "Sidebar",
+            "Preferences",
+            "Voice & Video",
+            "Security & Privacy",
+            "Encryption",
+            "Devices",
+            "Keyboard",
+            "Labs",
+            "Ignored users",
+            "Help & About",
+        ]);
+    });
+
+    it("marks the Appearance tab with the theme icon", () => {
+        const { getByTestId } = render(getComponent());
+
+        expect(getByTestId(`settings-tab-${UserTab.Appearance}`).querySelector("svg")!.outerHTML).toBe(
+            renderToStaticMarkup(<ThemeIcon />),
+        );
     });
 
     it("renders ignored users tab when feature_mjolnir is enabled", () => {

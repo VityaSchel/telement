@@ -12,7 +12,6 @@ import { type Room, RoomEvent, type EmptyObject } from "matrix-js-sdk/src/matrix
 import { KnownMembership, type Membership } from "matrix-js-sdk/src/types";
 import { logger } from "matrix-js-sdk/src/logger";
 import { WarningIcon } from "@vector-im/compound-design-tokens/assets/web/icons";
-import { Form } from "@vector-im/compound-web";
 
 import { _t } from "../../../../../languageHandler";
 import { MatrixClientPeg } from "../../../../../MatrixClientPeg";
@@ -23,37 +22,23 @@ import SettingsStore from "../../../../../settings/SettingsStore";
 import { UIFeature } from "../../../../../settings/UIFeature";
 import { type ActionPayload } from "../../../../../dispatcher/payloads";
 import SettingsFlag from "../../../elements/SettingsFlag";
+import { type BooleanSettingKey } from "../../../../../settings/Settings.tsx";
 import EventIndexPanel from "../../EventIndexPanel";
 import InlineSpinner from "../../../elements/InlineSpinner";
 import { privateShouldBeEncrypted } from "../../../../../utils/rooms";
 import SettingsTab from "../SettingsTab";
 import { SettingsSection } from "../../shared/SettingsSection";
 import { SettingsSubsection, SettingsSubsectionText } from "../../shared/SettingsSubsection";
-import { useOwnDevices } from "../../devices/useOwnDevices";
 import { DiscoverySettings } from "../../discovery/DiscoverySettings";
 import SetIntegrationManager from "../../SetIntegrationManager";
+import { InviteAvatarsAccountSetting, MediaPreviewAccountSettings } from "./MediaPreviewAccountSettings.tsx";
+import { InviteRulesAccountSetting } from "./InviteRulesAccountSettings.tsx";
 
 interface IIgnoredUserProps {
     userId: string;
     onUnignored: (userId: string) => void;
     inProgress: boolean;
 }
-
-const SecureBackup: React.FC = () => {
-    const { dehydratedDeviceId } = useOwnDevices();
-    if (!dehydratedDeviceId) return null;
-
-    return (
-        <SettingsSubsection heading={_t("common|secure_backup")}>
-            <div className="mx_SettingsSubsection_content">
-                <div className="mx_SettingsFlag_label">{_t("settings|security|dehydrated_device_enabled")}</div>
-                <div className="mx_SettingsSubsection_text">
-                    {_t("settings|security|dehydrated_device_description")}
-                </div>
-            </div>
-        </SettingsSubsection>
-    );
-};
 
 export class IgnoredUser extends React.Component<IIgnoredUserProps> {
     private onUnignoreClicked = (): void => {
@@ -86,6 +71,9 @@ interface IState {
 }
 
 export default class SecurityUserSettingsTab extends React.Component<EmptyObject, IState> {
+    // Telement: what you share with others, moved here from Preferences so that every privacy setting is on this tab
+    private static PRESENCE_SETTINGS: BooleanSettingKey[] = ["sendReadReceipts", "sendTypingNotifications"];
+
     private dispatcherRef?: string;
 
     public constructor(props: EmptyObject) {
@@ -285,8 +273,6 @@ export default class SecurityUserSettingsTab extends React.Component<EmptyObject
     }
 
     public render(): React.ReactNode {
-        const secureBackup = <SecureBackup />;
-
         const eventIndex = (
             <SettingsSubsection heading={_t("settings|security|message_search_section")}>
                 <EventIndexPanel />
@@ -302,20 +288,6 @@ export default class SecurityUserSettingsTab extends React.Component<EmptyObject
                 </div>
             );
         }
-
-        const sessionsSection = (
-            <Form.Root
-                onSubmit={(evt) => {
-                    evt.preventDefault();
-                    evt.stopPropagation();
-                }}
-                className="mx_SecurityUserSettingsTab_sessionsSection"
-            >
-                <SettingsSubsection heading={_t("settings|sessions|title")}>
-                    <SettingsFlag name="deviceClientInformationOptIn" level={SettingLevel.ACCOUNT} />
-                </SettingsSubsection>
-            </Form.Root>
-        );
 
         let advancedSection;
         if (SettingsStore.getValue(UIFeature.AdvancedSettings)) {
@@ -337,23 +309,45 @@ export default class SecurityUserSettingsTab extends React.Component<EmptyObject
             discoverySection = <DiscoverySettings />;
         }
 
+        // Telement: every privacy setting is here: what you share (moved from Preferences), what others' rooms and
+        // invites can show you, and how people find you. This device's settings are on the Devices tab
         const privacySection = (
             <SettingsSection heading={_t("common|privacy")}>
+                <SettingsSubsection
+                    heading={_t("common|presence")}
+                    description={_t("settings|preferences|presence_description")}
+                    formWrap
+                >
+                    {SecurityUserSettingsTab.PRESENCE_SETTINGS.map((setting) => (
+                        <SettingsFlag key={setting} name={setting} level={SettingLevel.ACCOUNT} />
+                    ))}
+                    <SettingsFlag name="userTimezonePublish" level={SettingLevel.DEVICE} />
+                </SettingsSubsection>
+                <SettingsSubsection heading={_t("common|moderation_and_safety")} legacy={false}>
+                    <InviteAvatarsAccountSetting />
+                    <InviteRulesAccountSetting />
+                </SettingsSubsection>
+                {/* The choices are a group of their own, labelled above their card */}
+                <SettingsSubsection
+                    heading={_t("settings|media_preview|media_preview_label")}
+                    description={_t("settings|media_preview|media_preview_description")}
+                    legacy={false}
+                >
+                    <MediaPreviewAccountSettings />
+                </SettingsSubsection>
                 {discoverySection}
-                {sessionsSection}
             </SettingsSection>
         );
 
+        // Telement: the privacy settings first, then message search without the "Encryption" label it shared with the
+        // offline device (now on the Devices tab), and the integration manager last
         return (
             <SettingsTab>
                 {warning}
-                <SetIntegrationManager />
-                <SettingsSection heading={_t("settings|security|encryption_section")}>
-                    {secureBackup}
-                    {eventIndex}
-                </SettingsSection>
                 {privacySection}
+                <SettingsSection>{eventIndex}</SettingsSection>
                 {advancedSection}
+                <SetIntegrationManager />
             </SettingsTab>
         );
     }

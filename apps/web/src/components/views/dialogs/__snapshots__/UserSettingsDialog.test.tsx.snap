@@ -37,60 +37,6 @@ NodeList [
     </span>
   </li>,
   <li
-    aria-controls="mx_tabpanel_USER_SESSION_MANAGER_TAB"
-    aria-labelledby="mx_tabpanel_USER_SESSION_MANAGER_TAB_label"
-    aria-selected="false"
-    class="mx_AccessibleButton mx_TabbedView_tabLabel"
-    data-testid="settings-tab-USER_SESSION_MANAGER_TAB"
-    role="tab"
-    tabindex="-1"
-  >
-    <svg
-      fill="currentColor"
-      height="1em"
-      viewBox="0 0 24 24"
-      width="1em"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <path
-        d="M3.5 20q-.625 0-1.062-.437A1.45 1.45 0 0 1 2 18.5q0-.625.438-1.062A1.45 1.45 0 0 1 3.5 17H4V6q0-.824.588-1.412A1.93 1.93 0 0 1 6 4h14q.424 0 .712.287Q21 4.576 21 5t-.288.713A.97.97 0 0 1 20 6H6v11h4.5q.624 0 1.063.438.437.437.437 1.062t-.437 1.063A1.45 1.45 0 0 1 10.5 20zM15 20a.97.97 0 0 1-.713-.288A.97.97 0 0 1 14 19V9q0-.424.287-.713A.97.97 0 0 1 15 8h6q.424 0 .712.287Q22 8.576 22 9v10q0 .424-.288.712A.97.97 0 0 1 21 20zm1-3h4v-7h-4z"
-      />
-    </svg>
-    <span
-      class="mx_TabbedView_tabLabel_text"
-      id="mx_tabpanel_USER_SESSION_MANAGER_TAB_label"
-    >
-      Devices
-    </span>
-  </li>,
-  <li
-    aria-controls="mx_tabpanel_USER_APPEARANCE_TAB"
-    aria-labelledby="mx_tabpanel_USER_APPEARANCE_TAB_label"
-    aria-selected="false"
-    class="mx_AccessibleButton mx_TabbedView_tabLabel"
-    data-testid="settings-tab-USER_APPEARANCE_TAB"
-    role="tab"
-    tabindex="-1"
-  >
-    <svg
-      fill="currentColor"
-      height="1em"
-      viewBox="0 0 24 24"
-      width="1em"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <path
-        d="M12 16q1.875 0 3.188-1.312Q16.5 13.375 16.5 11.5t-1.312-3.187T12 7 8.813 8.313 7.5 11.5t1.313 3.188T12 16m0-1.8q-1.125 0-1.912-.787A2.6 2.6 0 0 1 9.3 11.5q0-1.125.787-1.912A2.6 2.6 0 0 1 12 8.8q1.125 0 1.912.787.788.788.788 1.913t-.787 1.912A2.6 2.6 0 0 1 12 14.2m0 4.8q-3.475 0-6.35-1.837Q2.775 15.324 1.3 12.2a.8.8 0 0 1-.1-.312 3 3 0 0 1 0-.775.8.8 0 0 1 .1-.313q1.475-3.125 4.35-4.962Q8.525 4 12 4t6.35 1.838T22.7 10.8a.8.8 0 0 1 .1.313 3 3 0 0 1 0 .774.8.8 0 0 1-.1.313q-1.475 3.125-4.35 4.963Q15.475 19 12 19m0-2a9.54 9.54 0 0 0 5.188-1.488A9.77 9.77 0 0 0 20.8 11.5a9.77 9.77 0 0 0-3.613-4.012A9.54 9.54 0 0 0 12 6a9.55 9.55 0 0 0-5.187 1.487A9.77 9.77 0 0 0 3.2 11.5a9.77 9.77 0 0 0 3.613 4.012A9.54 9.54 0 0 0 12 17"
-      />
-    </svg>
-    <span
-      class="mx_TabbedView_tabLabel_text"
-      id="mx_tabpanel_USER_APPEARANCE_TAB_label"
-    >
-      Appearance
-    </span>
-  </li>,
-  <li
     aria-controls="mx_tabpanel_USER_NOTIFICATIONS_TAB"
     aria-labelledby="mx_tabpanel_USER_NOTIFICATIONS_TAB_label"
     aria-selected="false"
@@ -118,11 +64,11 @@ NodeList [
     </span>
   </li>,
   <li
-    aria-controls="mx_tabpanel_USER_PREFERENCES_TAB"
-    aria-labelledby="mx_tabpanel_USER_PREFERENCES_TAB_label"
+    aria-controls="mx_tabpanel_USER_APPEARANCE_TAB"
+    aria-labelledby="mx_tabpanel_USER_APPEARANCE_TAB_label"
     aria-selected="false"
     class="mx_AccessibleButton mx_TabbedView_tabLabel"
-    data-testid="settings-tab-USER_PREFERENCES_TAB"
+    data-testid="settings-tab-USER_APPEARANCE_TAB"
     role="tab"
     tabindex="-1"
   >
@@ -134,48 +80,14 @@ NodeList [
       xmlns="http://www.w3.org/2000/svg"
     >
       <path
-        clip-rule="evenodd"
-        d="M6.5 2h11a4.5 4.5 0 1 1 0 9h-11a4.5 4.5 0 0 1 0-9m0 2h7.258A4.5 4.5 0 0 0 13 6.5c0 .925.28 1.785.758 2.5H6.5a2.5 2.5 0 0 1 0-5M15 6.5a2.5 2.5 0 1 1 5 0 2.5 2.5 0 0 1-5 0m-13 11A4.5 4.5 0 0 1 6.5 13h11a4.5 4.5 0 1 1 0 9h-11q-.233 0-.46-.023A4.5 4.5 0 0 1 2 17.5m8.242-2.5H17.5a2.5 2.5 0 0 1 0 5h-7.258A4.5 4.5 0 0 0 11 17.5c0-.925-.28-1.785-.758-2.5M6.5 15a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5"
-        fill-rule="evenodd"
+        d="M12 22c5.52 0 10-4.48 10-10S17.52 2 12 2 2 6.48 2 12s4.48 10 10 10m1-17.93c3.94.49 7 3.85 7 7.93s-3.05 7.44-7 7.93z"
       />
     </svg>
     <span
       class="mx_TabbedView_tabLabel_text"
-      id="mx_tabpanel_USER_PREFERENCES_TAB_label"
+      id="mx_tabpanel_USER_APPEARANCE_TAB_label"
     >
-      Preferences
-    </span>
-  </li>,
-  <li
-    aria-controls="mx_tabpanel_USER_KEYBOARD_TAB"
-    aria-labelledby="mx_tabpanel_USER_KEYBOARD_TAB_label"
-    aria-selected="false"
-    class="mx_AccessibleButton mx_TabbedView_tabLabel"
-    data-testid="settings-tab-USER_KEYBOARD_TAB"
-    role="tab"
-    tabindex="-1"
-  >
-    <svg
-      fill="currentColor"
-      height="1em"
-      viewBox="0 0 24 24"
-      width="1em"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <path
-        d="M5.188 8v2h2V8zm3.875 0v2h2V8zm3.875 0v2h2V8zm3.875 0v2h2V8zM5.188 11.531v2h2v-2zm3.875 0v2h2v-2zm3.875 0v2h2v-2zm3.875 0v2h2v-2zM9 15a1 1 0 1 0 0 2h6a1 1 0 1 0 0-2z"
-      />
-      <path
-        clip-rule="evenodd"
-        d="M2 6a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2zm2 0h16v12H4z"
-        fill-rule="evenodd"
-      />
-    </svg>
-    <span
-      class="mx_TabbedView_tabLabel_text"
-      id="mx_tabpanel_USER_KEYBOARD_TAB_label"
-    >
-      Keyboard
+      Appearance
     </span>
   </li>,
   <li
@@ -205,6 +117,35 @@ NodeList [
       id="mx_tabpanel_USER_SIDEBAR_TAB_label"
     >
       Sidebar
+    </span>
+  </li>,
+  <li
+    aria-controls="mx_tabpanel_USER_PREFERENCES_TAB"
+    aria-labelledby="mx_tabpanel_USER_PREFERENCES_TAB_label"
+    aria-selected="false"
+    class="mx_AccessibleButton mx_TabbedView_tabLabel"
+    data-testid="settings-tab-USER_PREFERENCES_TAB"
+    role="tab"
+    tabindex="-1"
+  >
+    <svg
+      fill="currentColor"
+      height="1em"
+      viewBox="0 0 24 24"
+      width="1em"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        clip-rule="evenodd"
+        d="M6.5 2h11a4.5 4.5 0 1 1 0 9h-11a4.5 4.5 0 0 1 0-9m0 2h7.258A4.5 4.5 0 0 0 13 6.5c0 .925.28 1.785.758 2.5H6.5a2.5 2.5 0 0 1 0-5M15 6.5a2.5 2.5 0 1 1 5 0 2.5 2.5 0 0 1-5 0m-13 11A4.5 4.5 0 0 1 6.5 13h11a4.5 4.5 0 1 1 0 9h-11q-.233 0-.46-.023A4.5 4.5 0 0 1 2 17.5m8.242-2.5H17.5a2.5 2.5 0 0 1 0 5h-7.258A4.5 4.5 0 0 0 11 17.5c0-.925-.28-1.785-.758-2.5M6.5 15a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5"
+        fill-rule="evenodd"
+      />
+    </svg>
+    <span
+      class="mx_TabbedView_tabLabel_text"
+      id="mx_tabpanel_USER_PREFERENCES_TAB_label"
+    >
+      Preferences
     </span>
   </li>,
   <li
@@ -259,6 +200,65 @@ NodeList [
       id="mx_tabpanel_USER_ENCRYPTION_TAB_label"
     >
       Encryption
+    </span>
+  </li>,
+  <li
+    aria-controls="mx_tabpanel_USER_SESSION_MANAGER_TAB"
+    aria-labelledby="mx_tabpanel_USER_SESSION_MANAGER_TAB_label"
+    aria-selected="false"
+    class="mx_AccessibleButton mx_TabbedView_tabLabel"
+    data-testid="settings-tab-USER_SESSION_MANAGER_TAB"
+    role="tab"
+    tabindex="-1"
+  >
+    <svg
+      fill="currentColor"
+      height="1em"
+      viewBox="0 0 24 24"
+      width="1em"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M3.5 20q-.625 0-1.062-.437A1.45 1.45 0 0 1 2 18.5q0-.625.438-1.062A1.45 1.45 0 0 1 3.5 17H4V6q0-.824.588-1.412A1.93 1.93 0 0 1 6 4h14q.424 0 .712.287Q21 4.576 21 5t-.288.713A.97.97 0 0 1 20 6H6v11h4.5q.624 0 1.063.438.437.437.437 1.062t-.437 1.063A1.45 1.45 0 0 1 10.5 20zM15 20a.97.97 0 0 1-.713-.288A.97.97 0 0 1 14 19V9q0-.424.287-.713A.97.97 0 0 1 15 8h6q.424 0 .712.287Q22 8.576 22 9v10q0 .424-.288.712A.97.97 0 0 1 21 20zm1-3h4v-7h-4z"
+      />
+    </svg>
+    <span
+      class="mx_TabbedView_tabLabel_text"
+      id="mx_tabpanel_USER_SESSION_MANAGER_TAB_label"
+    >
+      Devices
+    </span>
+  </li>,
+  <li
+    aria-controls="mx_tabpanel_USER_KEYBOARD_TAB"
+    aria-labelledby="mx_tabpanel_USER_KEYBOARD_TAB_label"
+    aria-selected="false"
+    class="mx_AccessibleButton mx_TabbedView_tabLabel"
+    data-testid="settings-tab-USER_KEYBOARD_TAB"
+    role="tab"
+    tabindex="-1"
+  >
+    <svg
+      fill="currentColor"
+      height="1em"
+      viewBox="0 0 24 24"
+      width="1em"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M5.188 8v2h2V8zm3.875 0v2h2V8zm3.875 0v2h2V8zm3.875 0v2h2V8zM5.188 11.531v2h2v-2zm3.875 0v2h2v-2zm3.875 0v2h2v-2zm3.875 0v2h2v-2zM9 15a1 1 0 1 0 0 2h6a1 1 0 1 0 0-2z"
+      />
+      <path
+        clip-rule="evenodd"
+        d="M2 6a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2zm2 0h16v12H4z"
+        fill-rule="evenodd"
+      />
+    </svg>
+    <span
+      class="mx_TabbedView_tabLabel_text"
+      id="mx_tabpanel_USER_KEYBOARD_TAB_label"
+    >
+      Keyboard
     </span>
   </li>,
   <li

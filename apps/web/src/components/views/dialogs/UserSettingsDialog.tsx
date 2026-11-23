@@ -12,7 +12,7 @@ import { Toast } from "@vector-im/compound-web";
 import React, { type JSX, useState } from "react";
 import UserProfileIcon from "@vector-im/compound-design-tokens/assets/web/icons/user-profile";
 import DevicesIcon from "@vector-im/compound-design-tokens/assets/web/icons/devices";
-import VisibilityOnIcon from "@vector-im/compound-design-tokens/assets/web/icons/visibility-on";
+import ThemeIcon from "@vector-im/compound-design-tokens/assets/web/icons/theme";
 import NotificationsIcon from "@vector-im/compound-design-tokens/assets/web/icons/notifications";
 import PreferencesIcon from "@vector-im/compound-design-tokens/assets/web/icons/preferences";
 import KeyboardIcon from "@vector-im/compound-design-tokens/assets/web/icons/keyboard";
@@ -132,6 +132,8 @@ export default function UserSettingsDialog(props: IProps): JSX.Element {
     const getTabs = (): NonEmptyArray<Tab<UserTab>> => {
         const tabs: Tab<UserTab>[] = [];
 
+        // Telement: Element's tabs in the order of what people look for: the account, notifications, how the app looks
+        // and behaves, calls, then privacy, encryption and devices together, then the shortcuts reference, labs and help
         tabs.push(
             new Tab(
                 UserTab.Account,
@@ -142,23 +144,14 @@ export default function UserSettingsDialog(props: IProps): JSX.Element {
         );
         tabs.push(
             new Tab(
-                UserTab.SessionManager,
-                _td("settings|sessions|title"),
-                <DevicesIcon />,
-                <SessionManagerTab showMsc4108QrCode={showMsc4108QrCode} />,
-            ),
-        );
-        tabs.push(
-            new Tab(UserTab.Appearance, _td("common|appearance"), <VisibilityOnIcon />, <AppearanceUserSettingsTab />),
-        );
-        tabs.push(
-            new Tab(
                 UserTab.Notifications,
                 _td("notifications|enable_prompt_toast_title"),
                 <NotificationsIcon />,
                 <NotificationUserSettingsTab />,
             ),
         );
+        tabs.push(new Tab(UserTab.Appearance, _td("common|appearance"), <ThemeIcon />, <AppearanceUserSettingsTab />));
+        tabs.push(new Tab(UserTab.Sidebar, _td("settings|sidebar|title"), <SidebarIcon />, <SidebarUserSettingsTab />));
         tabs.push(
             new Tab(
                 UserTab.Preferences,
@@ -167,10 +160,6 @@ export default function UserSettingsDialog(props: IProps): JSX.Element {
                 <PreferencesUserSettingsTab />,
             ),
         );
-        tabs.push(
-            new Tab(UserTab.Keyboard, _td("settings|keyboard|title"), <KeyboardIcon />, <KeyboardUserSettingsTab />),
-        );
-        tabs.push(new Tab(UserTab.Sidebar, _td("settings|sidebar|title"), <SidebarIcon />, <SidebarUserSettingsTab />));
 
         if (voipEnabled) {
             tabs.push(new Tab(UserTab.Voice, _td("settings|voip|title"), <MicOnIcon />, <VoiceUserSettingsTab />));
@@ -188,6 +177,17 @@ export default function UserSettingsDialog(props: IProps): JSX.Element {
                 <EncryptionUserSettingsTab initialState={initialEncryptionState} />,
                 showSetupRecoveryIndicator ? "mx_SettingsDialog_tabLabelsAlert" : undefined,
             ),
+        );
+        tabs.push(
+            new Tab(
+                UserTab.SessionManager,
+                _td("settings|sessions|title"),
+                <DevicesIcon />,
+                <SessionManagerTab showMsc4108QrCode={showMsc4108QrCode} />,
+            ),
+        );
+        tabs.push(
+            new Tab(UserTab.Keyboard, _td("settings|keyboard|title"), <KeyboardIcon />, <KeyboardUserSettingsTab />),
         );
 
         if (showLabsFlags() || SettingsStore.getFeatureSettingNames().some((k) => SettingsStore.getBetaInfo(k))) {
