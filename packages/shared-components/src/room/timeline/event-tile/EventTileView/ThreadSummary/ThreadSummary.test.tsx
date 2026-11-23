@@ -21,7 +21,7 @@ import {
 } from "./ThreadSummaryView";
 import * as stories from "./ThreadSummary.stories";
 
-const { Default, Narrow, WithNotification, DecryptionFailure, Hidden } = composeStories(stories);
+const { Default, Narrow, Open, WithNotification, DecryptionFailure, Hidden } = composeStories(stories);
 
 describe("ThreadSummaryView", () => {
     it("renders the default thread summary", () => {
@@ -32,6 +32,17 @@ describe("ThreadSummaryView", () => {
     it("renders the narrow thread summary", () => {
         const { container } = render(<Narrow />);
         expect(container).toMatchSnapshot();
+    });
+
+    it("marks the summary of the thread open beside the timeline as the current one", () => {
+        const { container } = render(<Open />);
+        expect(screen.getByRole("button", { name: "Open thread" })).toHaveAttribute("aria-current", "true");
+        expect(container).toMatchSnapshot();
+    });
+
+    it("leaves the summaries of other threads unmarked", () => {
+        render(<Default />);
+        expect(screen.getByRole("button", { name: "Open thread" })).not.toHaveAttribute("aria-current");
     });
 
     it("renders a notification indicator", () => {

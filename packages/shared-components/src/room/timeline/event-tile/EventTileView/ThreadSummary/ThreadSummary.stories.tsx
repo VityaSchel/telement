@@ -83,6 +83,12 @@ export const Narrow: Story = {
     },
 };
 
+export const Open: Story = {
+    args: {
+        isOpen: true,
+    },
+};
+
 export const WithNotification: Story = {
     args: {
         notificationIndicator: "critical",

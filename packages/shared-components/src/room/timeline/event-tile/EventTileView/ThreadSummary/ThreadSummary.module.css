@@ -39,6 +39,19 @@
     border-color: var(--cpd-color-border-interactive-secondary);
 }
 
+/* Telement: the thread open beside the timeline keeps a selected look, as Telegram marks the open chat or topic in the
+   list beside the conversation: a 2px accent border, its inner pixel a ring so the row keeps its size, and the count
+   and icon in the accent, as open header controls are. */
+.threadSummary.open {
+    border-color: var(--cpd-color-border-accent-primary);
+    box-shadow: inset 0 0 0 1px var(--cpd-color-border-accent-primary);
+}
+
+.threadSummary.open .repliesAmount,
+.threadSummary.open .threadIcon {
+    color: var(--cpd-color-text-action-accent);
+}
+
 .threadSummary:hover .chevron,
 .threadSummary:focus .chevron {
     opacity: 1;

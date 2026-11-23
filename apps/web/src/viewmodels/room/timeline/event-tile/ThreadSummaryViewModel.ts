@@ -40,6 +40,9 @@ import { notificationLevelToIndicator } from "../../../../utils/notifications";
 import { mediaFromMxc } from "../../../../customisations/Media";
 import { TimelineRenderingType } from "../../../../contexts/RoomContext";
 import { keepIfSame } from "../../../../utils/keepIfSame";
+import RightPanelStore from "../../../../stores/right-panel/RightPanelStore";
+import { RightPanelPhases } from "../../../../stores/right-panel/RightPanelStorePhases";
+import { UPDATE_EVENT } from "../../../../stores/AsyncStore";
 import {
     EventPreviewContentCache,
     getEventPreviewContent,
@@ -438,6 +441,7 @@ export class ThreadSummaryViewModel
         super(props, ThreadSummaryViewModel.computeSnapshot(props, previewVm));
         this.previewVm = previewVm;
         this.disposables.track(previewVm);
+        this.disposables.trackListener(RightPanelStore.instance, UPDATE_EVENT, this.onRightPanelUpdate);
         this.setupListeners();
     }
 
@@ -557,6 +561,10 @@ export class ThreadSummaryViewModel
         this.updateNotificationSnapshot();
     };
 
+    private readonly onRightPanelUpdate = (): void => {
+        this.snapshot.merge({ isOpen: ThreadSummaryViewModel.computeIsOpen(this.props) });
+    };
+
     /**
      * An event which has not been decrypted yet has no renderer, so it does not count towards the
      * unread state. The room key often only turns up after the event itself, so re-evaluate the
@@ -571,6 +579,7 @@ export class ThreadSummaryViewModel
         this.snapshot.merge({
             ...ThreadSummaryViewModel.computeLayoutSnapshot(this.props),
             notificationIndicator: ThreadSummaryViewModel.computeNotificationIndicator(this.props),
+            isOpen: ThreadSummaryViewModel.computeIsOpen(this.props),
         });
     }
 
@@ -588,8 +597,21 @@ export class ThreadSummaryViewModel
             openThreadLabel: _t("threads|open_thread"),
             previewVm,
             notificationIndicator: ThreadSummaryViewModel.computeNotificationIndicator(props),
+            isOpen: ThreadSummaryViewModel.computeIsOpen(props),
             ...ThreadSummaryViewModel.computeLayoutSnapshot(props),
         };
+    }
+
+    /**
+     * Telement: whether the right panel of the thread's room shows this thread, as Telegram keeps the open chat or
+     * topic marked in the list beside the conversation.
+     */
+    private static computeIsOpen(props: ThreadSummaryViewModelProps): boolean {
+        const roomId = props.thread.room.roomId;
+        const store = RightPanelStore.instance;
+        if (!store.isOpenForRoom(roomId)) return false;
+        const card = store.currentCardForRoom(roomId);
+        return card.phase === RightPanelPhases.ThreadView && card.state?.threadHeadEvent?.getId() === props.thread.id;
     }
 
     private static computeLayoutSnapshot(

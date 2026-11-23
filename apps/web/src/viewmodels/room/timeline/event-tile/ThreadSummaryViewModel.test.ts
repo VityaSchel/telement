@@ -33,6 +33,9 @@ import { TimelineRenderingType } from "../../../../contexts/RoomContext";
 import { MessagePreviewStore } from "../../../../stores/message-preview";
 import defaultDispatcher from "../../../../dispatcher/dispatcher";
 import { determineUnreadState } from "../../../../RoomNotifs";
+import RightPanelStore from "../../../../stores/right-panel/RightPanelStore";
+import { RightPanelPhases } from "../../../../stores/right-panel/RightPanelStorePhases";
+import { UPDATE_EVENT } from "../../../../stores/AsyncStore";
 import {
     ThreadMessagePreviewViewModel,
     type ThreadMessagePreviewViewModelProps,
@@ -379,6 +382,37 @@ describe("ThreadSummaryViewModel", () => {
 
         expect(nextThread.listenerCount(ThreadEvent.Update)).toBe(0);
         expect(nextRoom.listenerCount(RoomEvent.Receipt)).toBe(0);
+    });
+
+    it("marks the summary of the thread open in its room's right panel, and follows the panel", () => {
+        const store = RightPanelStore.instance;
+        const isOpenForRoom = vi.spyOn(store, "isOpenForRoom").mockReturnValue(false);
+        const threadCard = (threadId: string) => ({
+            phase: RightPanelPhases.ThreadView,
+            state: { threadHeadEvent: { getId: () => threadId } as MatrixEvent },
+        });
+        const currentCardForRoom = vi.spyOn(store, "currentCardForRoom").mockReturnValue(threadCard("$root"));
+        const { vm } = makeSummaryVm();
+        const listeners = store.listenerCount(UPDATE_EVENT);
+
+        expect(vm.getSnapshot().isOpen).toBe(false);
+
+        isOpenForRoom.mockReturnValue(true);
+        store.emit(UPDATE_EVENT);
+        expect(vm.getSnapshot().isOpen).toBe(true);
+        expect(isOpenForRoom).toHaveBeenLastCalledWith(roomId);
+        expect(currentCardForRoom).toHaveBeenLastCalledWith(roomId);
+
+        currentCardForRoom.mockReturnValue(threadCard("$another-root"));
+        store.emit(UPDATE_EVENT);
+        expect(vm.getSnapshot().isOpen).toBe(false);
+
+        currentCardForRoom.mockReturnValue({ phase: RightPanelPhases.RoomSummary, state: {} });
+        store.emit(UPDATE_EVENT);
+        expect(vm.getSnapshot().isOpen).toBe(false);
+
+        vm.dispose();
+        expect(store.listenerCount(UPDATE_EVENT)).toBe(listeners - 1);
     });
 
     it("dispatches ShowThread on click", () => {

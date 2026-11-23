@@ -94,6 +94,11 @@ export interface ThreadSummaryViewSnapshot {
      */
     narrow: boolean;
     /**
+     * Whether the thread is the one open beside the timeline, which marks its summary as selected.
+     * @default false
+     */
+    isOpen?: boolean;
+    /**
      * View model for the last-message preview.
      */
     previewVm: ThreadMessagePreviewViewModel;
@@ -158,19 +163,32 @@ export function ThreadSummaryView({
     type = "button",
     ...props
 }: Readonly<ThreadSummaryViewProps>): JSX.Element {
-    const { isVisible, replyCountLabel, openThreadLabel, notificationIndicator, narrow, previewVm } = useViewModel(vm);
+    const { isVisible, replyCountLabel, openThreadLabel, notificationIndicator, narrow, isOpen, previewVm } =
+        useViewModel(vm);
 
     if (!isVisible) {
         return <></>;
     }
 
-    const buttonClassName = [styles.threadSummary, className, narrow ? styles.narrow : undefined]
+    const buttonClassName = [
+        styles.threadSummary,
+        className,
+        narrow ? styles.narrow : undefined,
+        isOpen ? styles.open : undefined,
+    ]
         .filter(Boolean)
         .join(" ");
 
     return (
-        // oxlint-disable-next-line react/button-has-type
-        <button {...props} type={type} className={buttonClassName} onClick={vm.onClick} aria-label={openThreadLabel}>
+        <button
+            {...props}
+            // oxlint-disable-next-line react/button-has-type
+            type={type}
+            className={buttonClassName}
+            onClick={vm.onClick}
+            aria-label={openThreadLabel}
+            aria-current={isOpen || undefined}
+        >
             <IndicatorIcon size="24px" indicator={notificationIndicator} className={styles.threadIcon}>
                 <ThreadsSolidIcon />
             </IndicatorIcon>

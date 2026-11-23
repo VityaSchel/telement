@@ -12,10 +12,21 @@ import React from "react";
 import { composeStories } from "@storybook/react-vite";
 import { render, screen } from "@test-utils";
 import { describe, expect, it } from "vitest";
+import { userEvent } from "vitest/browser";
 
 import * as stories from "./ThreadSummary.stories";
 
-const { Default } = composeStories(stories);
+const { Default, Open } = composeStories(stories);
+
+/** What a color token resolves to inside `scope`, as a computed color. */
+function tokenColor(token: string, scope: Element): string {
+    const probe = document.createElement("div");
+    probe.style.color = `var(${token})`;
+    scope.append(probe);
+    const color = getComputedStyle(probe).color;
+    probe.remove();
+    return color;
+}
 
 describe("Thread summary insets", () => {
     it("is a 40px row with its icon 8px from the start as from the top and bottom", () => {
@@ -61,4 +72,37 @@ describe("Thread summary's chevron", () => {
             );
         },
     );
+});
+
+describe("The summary of the thread open beside the timeline", () => {
+    it.each(["cpd-theme-light", "cpd-theme-dark", "cpd-theme-light-hc", "cpd-theme-dark-hc"])(
+        "is drawn as selected in %s: a 2px accent border, and its count and icon in the accent",
+        (theme) => {
+            render(
+                <div className={theme}>
+                    <Open />
+                </div>,
+            );
+            const summary = screen.getByRole("button");
+            const style = getComputedStyle(summary);
+            const accent = tokenColor("--cpd-color-border-accent-primary", summary);
+            const count = summary.querySelector("[class*='repliesAmount']")!;
+            const icon = summary.querySelector("svg")!;
+
+            expect(style.borderTopColor).toBe(accent);
+            expect(style.boxShadow).toBe(`${accent} 0px 0px 0px 1px inset`);
+            expect(getComputedStyle(count).color).toBe(tokenColor("--cpd-color-text-action-accent", summary));
+            expect(getComputedStyle(icon).color).toBe(tokenColor("--cpd-color-text-action-accent", summary));
+            // The ring is inside its border, so it is still a 40px row
+            expect(summary.getBoundingClientRect().height).toBe(40);
+        },
+    );
+
+    it("keeps its accent border while hovered", async () => {
+        render(<Open />);
+        const summary = screen.getByRole("button");
+        await userEvent.hover(summary);
+
+        expect(getComputedStyle(summary).borderTopColor).toBe(tokenColor("--cpd-color-border-accent-primary", summary));
+    });
 });
