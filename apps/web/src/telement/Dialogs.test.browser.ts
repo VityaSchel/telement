@@ -364,11 +364,11 @@ describe("Dialogs", () => {
             expect(box("[data-testid=body]").width).toBe(480);
         });
 
-        it("keeps the unpin all dialog 396px wide, with the shared title on the close button's line", () => {
+        it("makes the unpin all dialog a 400px confirmation, with the shared title on the close button's line", () => {
             renderDialog("mx_UnpinAllDialog", "Unpin all messages?", "", "mx_UnpinAllDialog_title", false);
             const title = box(".mx_Dialog_title");
 
-            expect(box("[data-testid=body]").width).toBe(396);
+            expect(box("[data-testid=body]").width).toBe(400);
             expect([title.height, getComputedStyle(get(".mx_Dialog_title")).fontSize]).toEqual([28, "20px"]);
             expect(middle(title)).toBe(middle(box(".mx_Dialog_cancelButton")));
         });

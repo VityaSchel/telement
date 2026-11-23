@@ -7,8 +7,8 @@
  */
 
 .mx_UnpinAllDialog {
-    /* 396 is coming from figma and we remove the left and right paddings of the dialog */
-    width: calc(396px - (var(--cpd-space-6x) * 2));
+    /* Telement: a 400px confirmation, with the dialog's 24px padding (TELEMENT.md, "Colors, type and components") */
+    width: calc(400px - 2 * var(--cpd-space-6x));
 
     /* Telement: every dialog title is heading-sm now (_common.pcss), on the close button's line */
     .mx_UnpinAllDialog_title {
