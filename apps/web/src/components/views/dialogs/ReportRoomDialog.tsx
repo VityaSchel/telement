@@ -6,21 +6,14 @@ Please see LICENSE files in the repository root for full details.
 */
 
 import React, { type JSX, type ChangeEventHandler, useCallback, useState } from "react";
-import {
-    Root,
-    Field,
-    Label,
-    InlineSpinner,
-    ErrorMessage,
-    HelpMessage,
-    SettingsToggleInput,
-} from "@vector-im/compound-web";
+import { Root, InlineSpinner, SettingsToggleInput } from "@vector-im/compound-web";
 
 import { _t } from "../../../languageHandler";
 import SdkConfig from "../../../SdkConfig";
 import Markdown from "../../../Markdown";
 import BaseDialog from "./BaseDialog";
 import DialogButtons from "../elements/DialogButtons";
+import Field from "../elements/Field";
 import { MatrixClientPeg } from "../../../MatrixClientPeg";
 
 interface IProps {
@@ -75,22 +68,28 @@ export const ReportRoomDialog: React.FC<IProps> = function ({ roomId, onFinished
             contentId="mx_ReportEventDialog"
         >
             <Root id="mx_ReportEventDialog" onSubmit={onSubmit}>
-                <Field name="reason">
-                    <Label htmlFor="mx_ReportRoomDialog_reason">{_t("report_room|reason_label")}</Label>
-                    <textarea
-                        id="mx_ReportRoomDialog_reason"
-                        rows={5}
-                        onChange={onReasonChange}
-                        value={reason}
-                        disabled={busy}
-                    />
-                    {error ? <ErrorMessage>{error}</ErrorMessage> : null}
-                    <HelpMessage>{_t("report_room|description")}</HelpMessage>
-                </Field>
+                {/* Telement: Report message's field, its label on its top border, with the help under it */}
+                <Field
+                    id="mx_ReportRoomDialog_reason"
+                    element="textarea"
+                    label={_t("report_room|reason_label")}
+                    placeholder=""
+                    usePlaceholderAsHint
+                    rows={5}
+                    onChange={onReasonChange}
+                    value={reason}
+                    disabled={busy}
+                    aria-describedby="mx_ReportRoomDialog_help"
+                />
+                <p className="mx_ReportRoomDialog_help" id="mx_ReportRoomDialog_help">
+                    {_t("report_room|description")}
+                </p>
+                {error ? <div className="error">{error}</div> : null}
                 {adminMessage}
                 {busy ? <InlineSpinner /> : null}
                 <SettingsToggleInput
                     name="leave-room"
+                    className="mx_ReportRoomDialog_leaveRoom"
                     label={_t("room_list|more_options|leave_room")}
                     checked={leaveRoom}
                     onChange={onLeaveRoomChanged}

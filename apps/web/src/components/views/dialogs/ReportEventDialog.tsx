@@ -11,6 +11,7 @@ Please see LICENSE files in the repository root for full details.
 import React, { type JSX, type ChangeEvent } from "react";
 import { type MatrixEvent } from "matrix-js-sdk/src/matrix";
 import { logger } from "matrix-js-sdk/src/logger";
+import { Root, SettingsToggleInput } from "@vector-im/compound-web";
 
 import { _t } from "../../../languageHandler";
 import { MatrixClientPeg } from "../../../MatrixClientPeg";
@@ -20,7 +21,6 @@ import BaseDialog from "./BaseDialog";
 import DialogButtons from "../elements/DialogButtons";
 import Field from "../elements/Field";
 import Spinner from "../elements/Spinner";
-import LabelledCheckbox from "../elements/LabelledCheckbox";
 
 interface IProps {
     mxEvent: MatrixEvent;
@@ -51,8 +51,8 @@ export default class ReportEventDialog extends React.Component<IProps, IState> {
         };
     }
 
-    private onIgnoreUserTooChanged = (newVal: boolean): void => {
-        this.setState({ ignoreUserToo: newVal });
+    private onIgnoreUserTooChanged = ({ target: { checked } }: ChangeEvent<HTMLInputElement>): void => {
+        this.setState({ ignoreUserToo: checked });
     };
 
     // The user has written down a freeform description of the abuse.
@@ -121,11 +121,14 @@ export default class ReportEventDialog extends React.Component<IProps, IState> {
             );
         }
 
+        // Telement: a switch row, as Report room's "Leave room" is
         const ignoreUserCheckbox = (
-            <LabelledCheckbox
-                value={this.state.ignoreUserToo}
+            <SettingsToggleInput
+                name="ignore-user"
+                className="mx_ReportEventDialog_ignoreUser"
                 label={_t("report_content|ignore_user")}
-                byline={_t("report_content|hide_messages_from_user")}
+                helpMessage={_t("report_content|hide_messages_from_user")}
+                checked={this.state.ignoreUserToo}
                 onChange={this.onIgnoreUserTooChanged}
                 disabled={this.state.busy}
             />
@@ -145,13 +148,16 @@ export default class ReportEventDialog extends React.Component<IProps, IState> {
                 title={_t("report_content|report_content_to_homeserver")}
                 contentId="mx_ReportEventDialog"
             >
-                <div className="mx_ReportEventDialog" id="mx_ReportEventDialog">
+                {/* Telement: Report room's form, the reason a field with its label on its top border */}
+                <Root className="mx_ReportEventDialog" id="mx_ReportEventDialog" onSubmit={(e) => e.preventDefault()}>
                     <p>{_t("report_content|description")}</p>
                     {adminMessage}
                     <Field
                         className="mx_ReportEventDialog_reason"
                         element="textarea"
                         label={_t("room_settings|permissions|ban_reason")}
+                        placeholder=""
+                        usePlaceholderAsHint
                         rows={5}
                         onChange={this.onReasonChange}
                         value={this.state.reason}
@@ -160,7 +166,7 @@ export default class ReportEventDialog extends React.Component<IProps, IState> {
                     {progress}
                     {error}
                     {ignoreUserCheckbox}
-                </div>
+                </Root>
                 <DialogButtons
                     primaryButton={_t("action|send_report")}
                     onPrimaryButtonClick={this.onSubmit}

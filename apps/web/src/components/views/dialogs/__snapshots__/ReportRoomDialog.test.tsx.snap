@@ -24,25 +24,28 @@ exports[`ReportRoomDialog > displays admin message 1`] = `
       id="mx_ReportEventDialog"
     >
       <div
-        class="_field"
+        class="mx_Field mx_Field_textarea mx_Field_labelAlwaysTopLeft mx_Field_placeholderIsHint"
       >
+        <textarea
+          aria-describedby="mx_ReportRoomDialog_help"
+          id="mx_ReportRoomDialog_reason"
+          label="Describe the reason"
+          placeholder=""
+          rows="5"
+          type="text"
+        />
         <label
-          class="_label"
           for="mx_ReportRoomDialog_reason"
         >
           Describe the reason
         </label>
-        <textarea
-          id="mx_ReportRoomDialog_reason"
-          rows="5"
-        />
-        <span
-          class="_message _help-message"
-          id="radix-react-use-id-1"
-        >
-          Report this chat to your account provider. If the messages are encrypted, your account provider will not be able to read them.
-        </span>
       </div>
+      <p
+        class="mx_ReportRoomDialog_help"
+        id="mx_ReportRoomDialog_help"
+      >
+        Report this chat to your account provider. If the messages are encrypted, your account provider will not be able to read them.
+      </p>
       <p>
         <h1>
           You should know
@@ -60,7 +63,7 @@ exports[`ReportRoomDialog > displays admin message 1`] = `
 
       </p>
       <div
-        class="_inline-field"
+        class="_inline-field mx_ReportRoomDialog_leaveRoom"
       >
         <div
           class="_inline-field-control"
@@ -70,7 +73,7 @@ exports[`ReportRoomDialog > displays admin message 1`] = `
           >
             <input
               class="_input"
-              id="react-use-id-2"
+              id="react-use-id-1"
               role="switch"
               type="checkbox"
             />
@@ -84,7 +87,7 @@ exports[`ReportRoomDialog > displays admin message 1`] = `
         >
           <label
             class="_label"
-            for="react-use-id-2"
+            for="react-use-id-1"
           >
             Leave room
           </label>

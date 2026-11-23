@@ -50,6 +50,16 @@ This doesn't actually go **anywhere**.`,
         expect(onFinished).toHaveBeenCalledWith(false);
     });
 
+    it("asks for the reason in Report message's field, its label on its top border, with the help under it", () => {
+        const { getByLabelText } = render(<ReportRoomDialog roomId={ROOM_ID} onFinished={onFinished} />);
+        const reason = getByLabelText("Describe the reason");
+
+        expect(reason.closest(".mx_Field")).toHaveClass("mx_Field_textarea", "mx_Field_labelAlwaysTopLeft");
+        expect(reason).toHaveAccessibleDescription(
+            "Report this chat to your account provider. If the messages are encrypted, your account provider will not be able to read them.",
+        );
+    });
+
     it("displays admin message", async () => {
         const { container } = render(<ReportRoomDialog roomId={ROOM_ID} onFinished={onFinished} />);
         expect(container).toMatchSnapshot();

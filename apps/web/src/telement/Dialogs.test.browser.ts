@@ -35,6 +35,7 @@ import leaveRoomDialogStyles from "../../res/css/views/dialogs/_LeaveRoomDialog.
 import leaveSpaceDialogStyles from "../../res/css/views/dialogs/_LeaveSpaceDialog.pcss?raw";
 import logoutDialogStyles from "../../res/css/views/dialogs/_LogoutDialog.pcss?raw";
 import pollCreateDialogStyles from "../../res/css/views/dialogs/_PollCreateDialog.pcss?raw";
+import reportRoomDialogStyles from "../../res/css/views/dialogs/_ReportRoomDialog.pcss?raw";
 import roomSettingsDialogStyles from "../../res/css/views/dialogs/_RoomSettingsDialog.pcss?raw";
 import roomUpgradeWarningDialogStyles from "../../res/css/views/dialogs/_RoomUpgradeWarningDialog.pcss?raw";
 import settingsDialogStyles from "../../res/css/views/dialogs/_SettingsDialog.pcss?raw";
@@ -74,6 +75,7 @@ const APP_STYLES = [
     leaveSpaceDialogStyles,
     logoutDialogStyles,
     pollCreateDialogStyles,
+    reportRoomDialogStyles,
     roomSettingsDialogStyles,
     roomUpgradeWarningDialogStyles,
     settingsDialogStyles,
@@ -133,6 +135,9 @@ function renderDialog(className: string, title: string, children: string, titleC
     `);
 }
 
+/** The class of Compound's form (Root), which the test's stylesheet lays out as Compound does. */
+const COMPOUND_FORM = "compoundFormRoot";
+
 /** DialogButtons: Cancel, then the primary action. */
 const FOOTER = `
     <div class="mx_Dialog_buttons">
@@ -171,8 +176,10 @@ describe("Dialogs", () => {
         await page.viewport(WINDOW.width, WINDOW.height);
         stylesheet = document.createElement("style");
         stylesheet.textContent = `
-            @layer compound-tokens, shared-components, app-web;
+            @layer compound-tokens, compound-web, shared-components, app-web;
             @layer compound-tokens { ${compoundBase} ${compoundSemantic} ${compoundLightTheme} ${compoundLightSemantic} }
+            /* Compound's form (Root), a column of its fields 20px apart */
+            @layer compound-web { .${COMPOUND_FORM} { display: flex; flex-direction: column; gap: var(--cpd-space-5x); } }
             @layer shared-components { ${telementTokens} }
             @layer app-web {
                 body { margin: 0; }
@@ -484,6 +491,73 @@ describe("Dialogs", () => {
                 colorIn("--cpd-color-border-interactive-secondary"),
                 "1",
             ]);
+        });
+    });
+
+    describe("report dialogs", () => {
+        /** Compound's switch row (SettingsToggleInput): the switch, then the label over its help. */
+        function switchRow(className: string, label: string, help = ""): string {
+            return `
+                <div class="${className}" data-testid="option" style="display: flex; gap: 12px">
+                    <input type="checkbox" role="switch" id="option">
+                    <div><label for="option">${label}</label>${help ? `<span>${help}</span>` : ""}</div>
+                </div>
+            `;
+        }
+
+        /** The reason as Field draws a textarea whose label always sits on its top border. */
+        const reasonField = (label: string): string => `
+            <div class="mx_Field mx_Field_textarea mx_Field_labelAlwaysTopLeft mx_Field_placeholderIsHint" data-testid="field">
+                <textarea id="reason" rows="5" placeholder=""></textarea>
+                <label for="reason">${label}</label>
+            </div>
+        `;
+
+        it("put Report room's help 4px under its field and the switch row 16px under the help", () => {
+            renderDialog(
+                "mx_ReportRoomDialog",
+                "Report room",
+                `<form class="${COMPOUND_FORM}">
+                    ${reasonField("Describe the reason")}
+                    <p class="mx_ReportRoomDialog_help" data-testid="help">Report this chat to your account provider.</p>
+                    ${switchRow("mx_ReportRoomDialog_leaveRoom", "Leave room")}
+                    ${FOOTER}
+                </form>`,
+            );
+            const help = getComputedStyle(get("[data-testid=help]"));
+
+            expect(box("[data-testid=help]").top - box("[data-testid=field]").bottom).toBe(4);
+            expect(box("[data-testid=option]").top - box("[data-testid=help]").bottom).toBe(16);
+            expect(box(".mx_Dialog_buttons").top - box("[data-testid=option]").bottom).toBe(24);
+            expect([help.fontSize, help.color]).toEqual(["13px", colorOf("--cpd-color-text-secondary")]);
+        });
+
+        it("put Report message's field 16px under its text and the switch row 16px under the field", () => {
+            renderDialog(
+                "mx_ReportEventDialog",
+                "Report content to your account provider",
+                `<form class="${COMPOUND_FORM} mx_ReportEventDialog">
+                    <p data-testid="text">Reporting this message will send its unique 'event ID' to your account provider.</p>
+                    ${reasonField("Reason")}
+                    ${switchRow("mx_ReportEventDialog_ignoreUser", "Ignore user", "Hide their messages.")}
+                </form>
+                ${FOOTER}`,
+            );
+
+            expect(box("[data-testid=field]").top - box("[data-testid=text]").bottom).toBe(16);
+            expect(box("[data-testid=option]").top - box("[data-testid=field]").bottom).toBe(16);
+            expect(box(".mx_Dialog_buttons").top - box("[data-testid=option]").bottom).toBe(24);
+        });
+
+        it("float both fields' labels onto their top border", () => {
+            renderDialog(
+                "mx_ReportRoomDialog",
+                "Report room",
+                `<form class="${COMPOUND_FORM}">${reasonField("Reason")}</form>`,
+            );
+            const field = box("[data-testid=field]");
+
+            expect(Math.abs(middle(box("[data-testid=field] label")) - (field.top + 0.5))).toBeLessThanOrEqual(0.5);
         });
     });
 
