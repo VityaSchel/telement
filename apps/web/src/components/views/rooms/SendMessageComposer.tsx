@@ -67,7 +67,7 @@ import { type RoomUploadViewModel, useRoomUploadViewModel } from "../../../viewm
 import { type MessageComposerUrlPreviewViewModel } from "../../../viewmodels/composer/MessageComposerUrlPreviewViewModel";
 import { linksIn } from "../../../utils/UrlUtils";
 import { notifyDraftChanged } from "../../../telement/room-list/roomDrafts";
-import { WALK_REPLY_TARGET, type WalkReplyTargetPayload } from "../../../telement/room/replyWalk";
+import { replyWalkEventId, WALK_REPLY_TARGET, type WalkReplyTargetPayload } from "../../../telement/room/replyWalk";
 import { type MessageComposerUrlPreviewSnapshot } from "@element-hq/web-shared-components";
 
 // The prefix used when persisting editor drafts to localstorage.
@@ -262,6 +262,7 @@ export class SendMessageComposer extends React.Component<ISendMessageComposerPro
             case KeyBindingAction.ReplyToPrevMessage:
             case KeyBindingAction.ReplyToNextMessage:
                 // Telement: pick the message to reply to without leaving the composer, as in Telegram
+                if (!this.canWalkReplyTargets()) break;
                 event.preventDefault();
                 dis.dispatch<WalkReplyTargetPayload>({
                     action: WALK_REPLY_TARGET,
@@ -282,6 +283,14 @@ export class SendMessageComposer extends React.Component<ISendMessageComposerPro
                 break;
         }
     };
+
+    // Telement: whether the room's composer takes Ctrl+Up and Ctrl+Down (Cmd on macOS) to pick the message to reply to.
+    // With text in it they move the caret, as Cmd+Up and Cmd+Down do in every macOS field, unless they are already
+    // picking one.
+    private canWalkReplyTargets(): boolean {
+        if (this.context.timelineRenderingType !== TimelineRenderingType.Room) return false;
+        return this.model.isEmpty || replyWalkEventId(this.context) !== undefined;
+    }
 
     // we keep sent messages/commands in a separate history (separate from undo history)
     // so you can alt+up/down in them

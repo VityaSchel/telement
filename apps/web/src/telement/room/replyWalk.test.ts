@@ -10,17 +10,18 @@ Please see LICENSE files in the repository root for full details.
 import { describe, expect, it } from "vitest";
 import { EventType, MatrixEvent, MsgType } from "matrix-js-sdk/src/matrix";
 
-import { findReplyTarget } from "./replyWalk";
+import { findReplyTarget, replyWalkEventId } from "./replyWalk";
+
+const message = (eventId: string): MatrixEvent =>
+    new MatrixEvent({
+        type: EventType.RoomMessage,
+        event_id: eventId,
+        room_id: "!room:server",
+        sender: "@alice:server",
+        content: { msgtype: MsgType.Text, body: eventId },
+    });
 
 describe("findReplyTarget", () => {
-    const message = (eventId: string): MatrixEvent =>
-        new MatrixEvent({
-            type: EventType.RoomMessage,
-            event_id: eventId,
-            room_id: "!room:server",
-            sender: "@alice:server",
-            content: { msgtype: MsgType.Text, body: eventId },
-        });
     const membership = (eventId: string): MatrixEvent =>
         new MatrixEvent({
             type: EventType.RoomMember,
@@ -62,5 +63,18 @@ describe("findReplyTarget", () => {
 
     it("finds nothing in a timeline without messages", () => {
         expect(findReplyTarget([membership("$joined")], undefined, "previous")).toBeUndefined();
+    });
+});
+
+describe("replyWalkEventId", () => {
+    it("is the message the keys chose, while it is the one replied to", () => {
+        const replyToEvent = message("$chosen");
+
+        expect(replyWalkEventId({ replyToEvent, keyboardReplyEventId: "$chosen" })).toBe("$chosen");
+        // Chosen another way since, or the reply sent or cancelled
+        expect(replyWalkEventId({ replyToEvent, keyboardReplyEventId: "$earlier" })).toBeUndefined();
+        expect(replyWalkEventId({ keyboardReplyEventId: "$chosen" })).toBeUndefined();
+        expect(replyWalkEventId({ replyToEvent })).toBeUndefined();
+        expect(replyWalkEventId({})).toBeUndefined();
     });
 });

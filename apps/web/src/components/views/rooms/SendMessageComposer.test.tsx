@@ -9,7 +9,7 @@ Please see LICENSE files in the repository root for full details.
 // @vitest-environment happy-dom
 
 import React from "react";
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { fireEvent, render, waitFor } from "test-utils-rtl";
 import { type MatrixClient, MsgType } from "matrix-js-sdk/src/matrix";
 import userEvent from "@testing-library/user-event";
@@ -46,6 +46,14 @@ vi.mock("../../../utils/messages", async (importOriginal) => {
     const actual = await importOriginal<typeof import("../../../utils/messages")>();
     return { ...actual, attachUrlPreviews: vi.fn(actual.attachUrlPreviews) };
 });
+
+const platform = vi.hoisted(() => ({ isMac: false }));
+vi.mock("../../../Keyboard", async (importOriginal) => ({
+    ...(await importOriginal<typeof import("../../../Keyboard")>()),
+    get IS_MAC() {
+        return platform.isMac;
+    },
+}));
 
 describe("<SendMessageComposer/>", () => {
     const defaultRoomContext: RoomContextType = {
@@ -451,18 +459,95 @@ describe("<SendMessageComposer/>", () => {
             );
         });
 
-        it.each([
-            ["ArrowUp", "previous"],
-            ["ArrowDown", "next"],
-        ])("asks the room for the message to reply to on Ctrl+%s, as Telegram does", (key, direction) => {
-            const { container } = getComponent();
+        describe.each([
+            { modifier: "Ctrl", isMac: false, held: { ctrlKey: true } },
+            { modifier: "Cmd", isMac: true, held: { metaKey: true } },
+        ])("choosing the message to reply to with $modifier+Up and $modifier+Down", ({ isMac, held }) => {
+            beforeEach(() => {
+                platform.isMac = isMac;
+            });
 
-            fireEvent.keyDown(container.querySelector(".mx_SendMessageComposer")!, { key, ctrlKey: true });
+            afterEach(() => {
+                platform.isMac = false;
+            });
 
-            expect(defaultDispatcher.dispatch).toHaveBeenCalledWith({
-                action: WALK_REPLY_TARGET,
-                direction,
-                timelineRenderingType: TimelineRenderingType.Room,
+            /** Presses the arrow with the modifier in the composer. Returns whether the composer left it to the browser. */
+            const press = (container: HTMLElement, key: string): boolean =>
+                fireEvent.keyDown(container.querySelector('[role="textbox"]')!, { key, ...held });
+
+            const expectNoWalk = (): void =>
+                expect(defaultDispatcher.dispatch).not.toHaveBeenCalledWith(
+                    expect.objectContaining({ action: WALK_REPLY_TARGET }),
+                );
+
+            it.each([
+                ["ArrowUp", "previous"],
+                ["ArrowDown", "next"],
+            ])("asks the room for it while the composer is empty, as Telegram does (%s)", (key, direction) => {
+                const { container } = getComponent();
+
+                expect(press(container, key)).toBe(false);
+                expect(defaultDispatcher.dispatch).toHaveBeenCalledWith({
+                    action: WALK_REPLY_TARGET,
+                    direction,
+                    timelineRenderingType: TimelineRenderingType.Room,
+                });
+            });
+
+            it.each(["ArrowUp", "ArrowDown"])("leaves the keys to the caret once there is text (%s)", (key) => {
+                const { container } = getComponent();
+                addTextToComposer(container, "On my way");
+
+                expect(press(container, key)).toBe(true);
+                expectNoWalk();
+            });
+
+            it.each([
+                ["ArrowUp", "previous"],
+                ["ArrowDown", "next"],
+            ])("goes on choosing with text in the composer (%s)", (key, direction) => {
+                const { container } = getComponent(
+                    {},
+                    { ...defaultRoomContext, replyToEvent: mockEvent, keyboardReplyEventId: mockEvent.getId() },
+                );
+                addTextToComposer(container, "On my way");
+
+                expect(press(container, key)).toBe(false);
+                expect(defaultDispatcher.dispatch).toHaveBeenCalledWith({
+                    action: WALK_REPLY_TARGET,
+                    direction,
+                    timelineRenderingType: TimelineRenderingType.Room,
+                });
+            });
+
+            it("leaves the keys to the caret with text and a reply chosen another way", () => {
+                const { container } = getComponent(
+                    {},
+                    { ...defaultRoomContext, replyToEvent: mockEvent, keyboardReplyEventId: "$another" },
+                );
+                addTextToComposer(container, "On my way");
+
+                expect(press(container, "ArrowUp")).toBe(true);
+                expectNoWalk();
+            });
+
+            it("leaves the keys to the caret in a thread's composer, whose replies the room doesn't choose", () => {
+                const { container } = getComponent(
+                    {},
+                    { ...defaultRoomContext, timelineRenderingType: TimelineRenderingType.Thread },
+                );
+
+                expect(press(container, "ArrowUp")).toBe(true);
+                expectNoWalk();
+            });
+
+            it("leaves the other platform's keys alone", () => {
+                const { container } = getComponent();
+                const textbox = container.querySelector('[role="textbox"]')!;
+                const other = isMac ? { ctrlKey: true } : { metaKey: true };
+
+                expect(fireEvent.keyDown(textbox, { key: "ArrowUp", ...other })).toBe(true);
+                expectNoWalk();
             });
         });
 

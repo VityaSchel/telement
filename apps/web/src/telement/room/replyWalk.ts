@@ -13,7 +13,8 @@ import { isContentActionable } from "../../utils/EventUtils";
 
 /**
  * Asks the room to make the message before or after the one being replied to the reply's target, as Telegram Desktop's
- * Ctrl+Up and Ctrl+Down do in the message field.
+ * Ctrl+Up and Ctrl+Down do in the message field. The composer asks only while it is empty or the keys are already
+ * choosing, as with text in it they move the caret.
  */
 export const WALK_REPLY_TARGET = "telement_walk_reply_target";
 
@@ -46,4 +47,20 @@ export function findReplyTarget(
     }
     if (current === -1) return undefined;
     return messages[current + 1] ?? null;
+}
+
+/**
+ * The message the composer's keys chose to reply to, until the reply is sent, cancelled or given another target.
+ *
+ * @param replyToEvent - The message the composer replies to now, if any.
+ * @param keyboardReplyEventId - The message the composer's keys chose last, if any.
+ */
+export function replyWalkEventId({
+    replyToEvent,
+    keyboardReplyEventId,
+}: {
+    replyToEvent?: MatrixEvent;
+    keyboardReplyEventId?: string;
+}): string | undefined {
+    return keyboardReplyEventId === replyToEvent?.getId() ? keyboardReplyEventId : undefined;
 }

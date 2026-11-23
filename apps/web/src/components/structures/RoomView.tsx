@@ -137,7 +137,12 @@ import { EventPresentationContextProvider } from "../../utils/EventPresentationC
 import { TimelineFloatingDate } from "../../telement/room/TimelineFloatingDate";
 import { UnreadMentionsButton } from "../../telement/room/UnreadMentionsButton";
 import { TimelineReturns } from "../../telement/room/TimelineReturns";
-import { findReplyTarget, WALK_REPLY_TARGET, type WalkReplyTargetPayload } from "../../telement/room/replyWalk";
+import {
+    findReplyTarget,
+    replyWalkEventId,
+    WALK_REPLY_TARGET,
+    type WalkReplyTargetPayload,
+} from "../../telement/room/replyWalk";
 import { searchHighlights, searchHitEvents, searchHitIndex, type SearchStep } from "../../telement/room/searchHits";
 
 const DEBUG = false;
@@ -2670,11 +2675,7 @@ export class RoomView extends React.Component<IRoomProps, IRoomState> {
                                 ? searchHighlights(this.state.search.results, this.state.search.term)
                                 : undefined
                         }
-                        keyboardTargetEventId={
-                            this.state.keyboardReplyEventId === this.state.replyToEvent?.getId()
-                                ? this.state.keyboardReplyEventId
-                                : undefined
-                        }
+                        keyboardTargetEventId={replyWalkEventId(this.state)}
                         eventId={this.state.initialEventId}
                         eventScrollIntoView={this.state.initialEventScrollIntoView}
                         eventPixelOffset={this.state.initialEventPixelOffset}
