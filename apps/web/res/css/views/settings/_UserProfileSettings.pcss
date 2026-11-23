@@ -53,6 +53,12 @@ Please see LICENSE files in the repository root for full details.
     .mx_UserProfileSettings_accountmanageIcon {
         margin-right: var(--cpd-space-2x);
     }
+
+    /* Telement: the red Remove this device row (ActionRowView) ends the card, 16px under what is above it as the
+       card's other rows are; its hover fill reaches 4px from the card's bottom edge, as at its sides */
+    .mx_UserProfileSettings_signOut {
+        margin-block: var(--cpd-space-4x) calc(var(--tl-inset-menu) - var(--cpd-space-3x));
+    }
 }
 
 @media (max-width: 768px) {

@@ -7,6 +7,7 @@ Please see LICENSE files in the repository root for full details.
 */
 
 import React, { type JSX, type ReactNode, useState } from "react";
+import { ActionRowView } from "@element-hq/web-shared-components";
 
 import { UpdateCheckStatus } from "../../../BasePlatform";
 import PlatformPeg from "../../../PlatformPeg";
@@ -65,22 +66,25 @@ const UpdateCheckButton: React.FC = () => {
 
     const busy = !!state && !doneStatuses.includes(state.status);
 
-    let suffix: JSX.Element | undefined;
-    if (state) {
-        suffix = (
-            <span className="mx_UpdateCheckButton_summary">
+    // Telement: an accent text row, as Telegram's one-off actions, its status at its end. A ready update's status holds
+    // a link to install it, which can't sit inside the row's button, so it goes under the row
+    const ready = state?.status === UpdateCheckStatus.Ready;
+    let status: JSX.Element | undefined;
+    if (state && !ready) {
+        status = (
+            <>
                 {getStatusText(state.status, state.detail)}
                 {busy && <InlineSpinner />}
-            </span>
+            </>
         );
     }
 
     return (
         <React.Fragment>
-            <AccessibleButton onClick={onCheckForUpdateClick} kind="primary_outline" disabled={busy}>
+            <ActionRowView kind="accent" onClick={onCheckForUpdateClick} disabled={busy} value={status}>
                 {_t("update|check_action")}
-            </AccessibleButton>
-            {suffix}
+            </ActionRowView>
+            {ready && <span className="mx_UpdateCheckButton_summary">{getStatusText(state.status, state.detail)}</span>}
         </React.Fragment>
     );
 };

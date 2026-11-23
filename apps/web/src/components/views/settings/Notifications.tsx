@@ -20,6 +20,7 @@ import {
 } from "matrix-js-sdk/src/matrix";
 import { logger } from "matrix-js-sdk/src/logger";
 import { Form, SettingsToggleInput } from "@vector-im/compound-web";
+import { ActionRowView } from "@element-hq/web-shared-components";
 
 import Spinner from "../elements/Spinner";
 import { MatrixClientPeg } from "../../../MatrixClientPeg";
@@ -38,7 +39,6 @@ import { SettingLevel } from "../../../settings/SettingLevel";
 import Modal from "../../../Modal";
 import ErrorDialog from "../dialogs/ErrorDialog";
 import SdkConfig from "../../../SdkConfig";
-import AccessibleButton from "../elements/AccessibleButton";
 import TagComposer from "../elements/TagComposer";
 import { objectClone } from "../../../utils/objects";
 import { arrayDiff, filterBoolean } from "../../../utils/arrays";
@@ -869,18 +869,18 @@ export default class Notifications extends React.PureComponent<EmptyObject, ISta
                 .getRooms()
                 .some((r) => doesRoomHaveUnreadMessages(r, true))
         ) {
-            // On a card of its own like the tab's other settings, and not red, as marking rooms read destroys nothing
+            // On a card of its own like the tab's other settings, an accent text row rather than red, as marking rooms
+            // read destroys nothing
             clearNotifsButton = (
                 <SettingsSubsection>
-                    <AccessibleButton
+                    <ActionRowView
+                        kind="accent"
                         onClick={this.onClearNotificationsClicked}
                         disabled={this.state.clearingNotifications}
-                        kind="primary_outline"
-                        className="mx_UserNotifSettings_clearNotifsButton"
                         data-testid="clear-notifications"
                     >
                         {_t("notifications|mark_all_read")}
-                    </AccessibleButton>
+                    </ActionRowView>
                 </SettingsSubsection>
             );
         }

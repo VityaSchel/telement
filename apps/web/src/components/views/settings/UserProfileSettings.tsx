@@ -12,6 +12,7 @@ import { EditInPlace, Alert, ErrorMessage } from "@vector-im/compound-web";
 import PopOutIcon from "@vector-im/compound-design-tokens/assets/web/icons/pop-out";
 import SignOutIcon from "@vector-im/compound-design-tokens/assets/web/icons/sign-out";
 import {
+    ActionRowView,
     Flex,
     SetStatusView,
     useCreateAutoDisposedViewModel,
@@ -90,11 +91,11 @@ const SignOutButton: React.FC = () => {
         }
     }, [client]);
 
+    // Telement: a red text row at the end of the profile's card, as Telegram's Log Out
     return (
-        <AccessibleButton onClick={onClick} kind="danger_outline">
-            <SignOutIcon className="mx_UserProfileSettings_accountmanageIcon" width="24" height="24" />
+        <ActionRowView kind="critical" Icon={SignOutIcon} className="mx_UserProfileSettings_signOut" onClick={onClick}>
             {_t("action|sign_out")}
-        </AccessibleButton>
+        </ActionRowView>
     );
 };
 
@@ -248,12 +249,12 @@ const UserProfileSettings: React.FC<UserProfileSettingsProps> = ({
                     </Alert>
                 )}
                 <UsernameBox username={client.getSafeUserId()} />
-                <Flex gap="var(--cpd-space-4x)" className="mx_UserProfileSettings_profile_buttons">
-                    {externalAccountManagementUrl && (
+                {externalAccountManagementUrl && (
+                    <Flex gap="var(--cpd-space-4x)" className="mx_UserProfileSettings_profile_buttons">
                         <ManageAccountButton externalAccountManagementUrl={externalAccountManagementUrl} />
-                    )}
-                    <SignOutButton />
-                </Flex>
+                    </Flex>
+                )}
+                <SignOutButton />
             </div>
         </SettingsSection>
     );

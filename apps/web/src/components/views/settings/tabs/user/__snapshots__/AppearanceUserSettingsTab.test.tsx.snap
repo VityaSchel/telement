@@ -621,14 +621,22 @@ exports[`AppearanceUserSettingsTab > should render 1`] = `
             <div
               class="mx_SettingsSubsection_content mx_SettingsSubsection_contentStretch"
             >
-              <div
+              <button
                 aria-expanded="false"
-                class="mx_AccessibleButton mx_AccessibleButton_hasKind mx_AccessibleButton_kind_link"
-                role="button"
-                tabindex="0"
+                class="_row _interactive _accent"
+                data-settings-row=""
+                type="button"
               >
-                Show advanced
-              </div>
+                <span
+                  class="_text"
+                >
+                  <span
+                    class="_label"
+                  >
+                    Show advanced
+                  </span>
+                </span>
+              </button>
             </div>
           </div>
           <div

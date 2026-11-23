@@ -183,18 +183,23 @@ describe("<AccountUserSettingsTab />", () => {
             );
             render(getComponent());
 
-            expect(screen.getByText("Deactivate Account", { selector: "h2" }).parentElement!).toMatchSnapshot();
+            expect(screen.getByTestId("account-management-section")).toMatchSnapshot();
         });
-        it("should label the section once, with no Account management label under its heading", () => {
+        it("should draw Deactivate account as a red row alone on its card, without a label saying it again", () => {
             vi.spyOn(SettingsStore, "getValue").mockImplementation(
                 (settingName) => settingName === UIFeature.Deactivate,
             );
             render(getComponent());
 
-            expect(screen.getByRole("group", { name: "Deactivate Account" })).toContainElement(
-                screen.getByRole("button", { name: "Deactivate Account" }),
-            );
+            const row = screen.getByRole("button", { name: "Deactivate Account" });
+            expect(row.className).toMatch(/(^|\s)_critical_/);
+            expect(row.parentElement).toHaveClass("mx_SettingsSubsection_content");
+            expect(row.parentElement!.children).toHaveLength(1);
+            expect(screen.getAllByText("Deactivate Account")).toHaveLength(1);
             expect(screen.queryByText("Account management")).not.toBeInTheDocument();
+            expect(
+                screen.getByText("Deactivating your account is a permanent action — be careful!"),
+            ).toBeInTheDocument();
         });
         it("should display the deactivate account dialog when clicked", async () => {
             vi.spyOn(SettingsStore, "getValue").mockImplementation(

@@ -180,43 +180,35 @@ exports[`<AccountUserSettingsTab /> > 3pids > should display 3pid email addresse
 
 exports[`<AccountUserSettingsTab /> > deactivate account > should render section when account deactivation feature is enabled 1`] = `
 <div
-  aria-labelledby="react-use-id-1"
-  class="mx_SettingsSection"
-  role="group"
+  class="mx_SettingsSubsection"
+  data-testid="account-management-section"
 >
-  <h2
-    class="mx_Heading_h3"
-    id="react-use-id-1"
-  >
-    Deactivate Account
-  </h2>
   <div
-    class="mx_SettingsSection_subSections"
+    class="mx_SettingsSubsection_content"
   >
-    <div
-      class="mx_SettingsSubsection"
-      data-testid="account-management-section"
+    <button
+      class="_row _interactive _critical"
+      data-settings-row=""
+      type="button"
     >
-      <div
-        class="mx_SettingsSubsection_content"
+      <span
+        class="_text"
       >
-        <div
-          class="mx_AccessibleButton mx_AccessibleButton_hasKind mx_AccessibleButton_kind_danger"
-          role="button"
-          tabindex="0"
+        <span
+          class="_label"
         >
           Deactivate Account
-        </div>
-      </div>
-      <div
-        class="mx_SettingsSubsection_description"
-      >
-        <div
-          class="mx_SettingsSubsection_text"
-        >
-          Deactivating your account is a permanent action — be careful!
-        </div>
-      </div>
+        </span>
+      </span>
+    </button>
+  </div>
+  <div
+    class="mx_SettingsSubsection_description"
+  >
+    <div
+      class="mx_SettingsSubsection_text"
+    >
+      Deactivating your account is a permanent action — be careful!
     </div>
   </div>
 </div>

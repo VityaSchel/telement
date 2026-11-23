@@ -16,9 +16,9 @@ import {
     type MatrixClient,
 } from "matrix-js-sdk/src/matrix";
 import { Form, SettingsToggleInput } from "@vector-im/compound-web";
+import { ActionRowView } from "@element-hq/web-shared-components";
 
 import { _t } from "../../../languageHandler";
-import AccessibleButton from "../elements/AccessibleButton";
 import AliasSettings from "../room_settings/AliasSettings";
 import { useStateToggle } from "../../../hooks/useStateToggle";
 import { useLocalEcho } from "../../../hooks/useLocalEcho";
@@ -96,17 +96,18 @@ const SpaceSettingsVisibilityTab: React.FC<IProps> = ({ matrixClient: cli, space
 
     let advancedSection;
     if (joinRule === JoinRule.Public) {
+        // Telement: straight in the card's form, so that the card hugs the row as its last row
         advancedSection = (
-            <div>
-                <AccessibleButton
+            <>
+                {/* Telement: an accent text row, as Telegram's one-off actions */}
+                <ActionRowView
+                    kind="accent"
                     data-testid="toggle-guest-access-btn"
                     onClick={toggleAdvancedSection}
-                    kind="link"
-                    className="mx_SettingsTab_showAdvanced"
                     aria-expanded={showAdvancedSection}
                 >
                     {showAdvancedSection ? _t("action|hide_advanced") : _t("action|show_advanced")}
-                </AccessibleButton>
+                </ActionRowView>
 
                 {showAdvancedSection && (
                     <SettingsToggleInput
@@ -119,7 +120,7 @@ const SpaceSettingsVisibilityTab: React.FC<IProps> = ({ matrixClient: cli, space
                         label={_t("room_settings|visibility|guest_access_label")}
                     />
                 )}
-            </div>
+            </>
         );
     }
 

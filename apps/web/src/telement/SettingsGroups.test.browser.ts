@@ -591,6 +591,26 @@ describe.each(THEMES.map(([theme]) => theme))("Settings groups in %s", (theme) =
         }
     });
 
+    it("ends the account's profile card with the Remove this device row, 16px under the username and 4px over the card's edge", () => {
+        renderTab(
+            theme,
+            section(
+                "account",
+                "Profile",
+                `<div class="mx_UserProfileSettings">
+                    <div class="mx_UserProfileSettings_profile_controls_userId" id="username" style="height: 36px"></div>
+                    <button data-settings-row="" class="mx_UserProfileSettings_signOut" id="sign-out"
+                        style="display: block; box-sizing: border-box; height: 44px; width: calc(100% + 24px); margin-inline: -12px">
+                        Remove this device
+                    </button>
+                </div>`,
+            ),
+        );
+
+        expect(box("#sign-out").top - box("#username").bottom).toBe(16);
+        expect(box("#account-content").bottom - box("#sign-out").bottom).toBe(4);
+    });
+
     it("draws the Labs tab's beta cards as settings cards on the pane, padded 12 × 16 like the others", () => {
         const container = renderTab(
             theme,

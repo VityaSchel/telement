@@ -10,11 +10,11 @@ Please see LICENSE files in the repository root for full details.
 import React, { type JSX, useCallback, useContext, useEffect } from "react";
 import { type Capabilities, HTTPError } from "matrix-js-sdk/src/matrix";
 import { logger } from "matrix-js-sdk/src/logger";
+import { ActionRowView } from "@element-hq/web-shared-components";
 
 import { UserFriendlyError, _t } from "../../../../../languageHandler";
 import UserProfileSettings from "../../UserProfileSettings";
 import SettingsStore from "../../../../../settings/SettingsStore";
-import AccessibleButton from "../../../elements/AccessibleButton";
 import DeactivateAccountDialog from "../../../dialogs/DeactivateAccountDialog";
 import Modal from "../../../../../Modal";
 import { UIFeature } from "../../../../../settings/UIFeature";
@@ -72,15 +72,16 @@ interface ManagementSectionProps {
 
 const ManagementSection: React.FC<ManagementSectionProps> = ({ onDeactivateClicked }) => {
     return (
-        <SettingsSection heading={_t("settings|general|deactivate_section")}>
-            {/* Telement: no "Account management" label under "Deactivate account", one label per group */}
+        <SettingsSection>
+            {/* Telement: a red text row alone on its card, as Telegram's Delete account, with its warning under the card
+                and no label saying it again, nor "Account management" */}
             <SettingsSubsection
                 data-testid="account-management-section"
                 description={_t("settings|general|deactivate_warning")}
             >
-                <AccessibleButton onClick={onDeactivateClicked} kind="danger">
+                <ActionRowView kind="critical" onClick={onDeactivateClicked}>
                     {_t("settings|general|deactivate_section")}
-                </AccessibleButton>
+                </ActionRowView>
             </SettingsSubsection>
         </SettingsSection>
     );

@@ -8,10 +8,10 @@ Please see LICENSE files in the repository root for full details.
 import React, { type ContextType } from "react";
 import { type Room } from "matrix-js-sdk/src/matrix";
 import { KnownMembership } from "matrix-js-sdk/src/types";
+import { ActionRowView } from "@element-hq/web-shared-components";
 
 import { _t } from "../../../../../languageHandler";
 import RoomProfileSettings from "../../../room_settings/RoomProfileSettings";
-import AccessibleButton, { type ButtonEvent } from "../../../elements/AccessibleButton";
 import dis from "../../../../../dispatcher/dispatcher";
 import MatrixClientContext from "../../../../../contexts/MatrixClientContext";
 import { SettingsSubsection } from "../../shared/SettingsSubsection";
@@ -38,7 +38,7 @@ export default class GeneralRoomSettingsTab extends React.Component<IProps, ISta
         };
     }
 
-    private onLeaveClick = (ev: ButtonEvent): void => {
+    private onLeaveClick = (): void => {
         dis.dispatch({
             action: "leave_room",
             room_id: this.props.room.roomId,
@@ -50,11 +50,12 @@ export default class GeneralRoomSettingsTab extends React.Component<IProps, ISta
 
         let leaveSection;
         if (room.getMyMembership() === KnownMembership.Join) {
+            // Telement: a red text row alone on its card, as Telegram's Leave, without a label saying it again
             leaveSection = (
-                <SettingsSubsection heading={_t("action|leave_room")}>
-                    <AccessibleButton kind="danger" onClick={this.onLeaveClick}>
+                <SettingsSubsection>
+                    <ActionRowView kind="critical" onClick={this.onLeaveClick}>
                         {_t("action|leave_room")}
-                    </AccessibleButton>
+                    </ActionRowView>
                 </SettingsSubsection>
             );
         }

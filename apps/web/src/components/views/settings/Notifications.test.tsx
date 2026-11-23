@@ -1237,12 +1237,12 @@ describe("<Notifications />", () => {
 
             fireEvent.click(clearNotificationEl);
 
-            expect(clearNotificationEl.className).toContain("mx_AccessibleButton_disabled");
-            await waitFor(() => expect(clearNotificationEl.className).not.toContain("mx_AccessibleButton_disabled"));
+            expect(clearNotificationEl).toBeDisabled();
+            await waitFor(() => expect(clearNotificationEl).toBeEnabled());
             expect(mockClient.sendReadReceipt).toHaveBeenCalled();
         });
 
-        it("offers to mark everything read as an outline button on a card of its own, not a red one", async () => {
+        it("offers to mark everything read as an accent text row alone on its card", async () => {
             const room = new Room("room123", mockClient, "@alice:example.org");
             mockClient.getRooms.mockReset().mockReturnValue([room]);
             const message = mkMessage({ event: true, room: "room123", user: "@alice:example.org", ts: 1 });
@@ -1251,9 +1251,12 @@ describe("<Notifications />", () => {
             const { container } = await getComponentAndWait();
             const clearNotificationEl = getByTestId(container, "clear-notifications");
 
-            expect(clearNotificationEl).toHaveClass("mx_AccessibleButton_kind_primary_outline");
-            expect(clearNotificationEl).not.toHaveClass("mx_AccessibleButton_kind_danger");
+            // An accent row (ActionRowView), as marking rooms read destroys nothing
+            expect(clearNotificationEl).toHaveAttribute("data-settings-row");
+            expect(clearNotificationEl.className).toMatch(/(^|\s)_accent_/);
+            expect(clearNotificationEl).toHaveAccessibleName("Mark all as read");
             expect(clearNotificationEl.parentElement).toHaveClass("mx_SettingsSubsection_content");
+            expect(clearNotificationEl.parentElement!.children).toHaveLength(1);
         });
     });
 });

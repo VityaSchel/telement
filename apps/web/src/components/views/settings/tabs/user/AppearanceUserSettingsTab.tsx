@@ -10,12 +10,12 @@ Please see LICENSE files in the repository root for full details.
 import React, { type ChangeEvent, type ReactNode } from "react";
 import { type EmptyObject } from "matrix-js-sdk/src/matrix";
 import { Form } from "@vector-im/compound-web";
+import { ActionRowView } from "@element-hq/web-shared-components";
 
 import { _t } from "../../../../../languageHandler";
 import SettingsStore from "../../../../../settings/SettingsStore";
 import SettingsFlag from "../../../elements/SettingsFlag";
 import Field from "../../../elements/Field";
-import AccessibleButton from "../../../elements/AccessibleButton";
 import { SettingLevel } from "../../../../../settings/SettingLevel";
 import { UIFeature } from "../../../../../settings/UIFeature";
 import { LayoutSwitcher } from "../../LayoutSwitcher";
@@ -48,14 +48,15 @@ export default class AppearanceUserSettingsTab extends React.Component<EmptyObje
     private renderAdvancedSection(): ReactNode {
         if (!SettingsStore.getValue(UIFeature.AdvancedSettings)) return null;
 
+        // Telement: an accent text row, as Telegram's one-off actions
         const toggle = (
-            <AccessibleButton
-                kind="link"
+            <ActionRowView
+                kind="accent"
                 onClick={() => this.setState({ showAdvanced: !this.state.showAdvanced })}
                 aria-expanded={this.state.showAdvanced}
             >
                 {this.state.showAdvanced ? _t("action|hide_advanced") : _t("action|show_advanced")}
-            </AccessibleButton>
+            </ActionRowView>
         );
 
         let advanced: React.ReactNode;

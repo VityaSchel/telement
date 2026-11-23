@@ -1,0 +1,23 @@
+/*
+Copyright 2026 Viktor Shchelochkov
+
+SPDX-License-Identifier: AGPL-3.0-only OR GPL-3.0-only
+Please see LICENSE files in the repository root for full details.
+*/
+
+.accent {
+    --settings-row-color: var(--cpd-color-text-action-accent);
+}
+
+/* Red, with the menus' red hover and pressed fills, as strong as the gray ones (telement/tokens.css) */
+.critical {
+    --settings-row-hovered: var(--tl-color-bg-menu-critical-hovered);
+    --settings-row-pressed: var(--tl-color-bg-menu-critical-pressed);
+    --settings-row-color: var(--cpd-color-text-critical-primary);
+}
+
+.icon {
+    flex: none;
+    inline-size: var(--cpd-space-5x);
+    block-size: var(--cpd-space-5x);
+}

@@ -19,6 +19,7 @@ import {
 import { logger } from "matrix-js-sdk/src/logger";
 import { Form, InlineSpinner, SettingsToggleInput } from "@vector-im/compound-web";
 import { WarningIcon } from "@vector-im/compound-design-tokens/assets/web/icons";
+import { ActionRowView } from "@element-hq/web-shared-components";
 
 import { _t } from "../../../../../languageHandler";
 import Modal from "../../../../../Modal";
@@ -285,18 +286,19 @@ export default class SecurityRoomSettingsTab extends React.Component<IProps, ISt
 
         let advanced: JSX.Element | undefined;
         if (room.getJoinRule() === JoinRule.Public) {
+            // Telement: an accent text row, as Telegram's one-off actions, straight on the card so that the card hugs it
+            // as its last row
             advanced = (
-                <div>
-                    <AccessibleButton
+                <>
+                    <ActionRowView
+                        kind="accent"
                         onClick={this.toggleAdvancedSection}
-                        kind="link"
-                        className="mx_SettingsTab_showAdvanced"
                         aria-expanded={this.state.showAdvancedSection}
                     >
                         {this.state.showAdvancedSection ? _t("action|hide_advanced") : _t("action|show_advanced")}
-                    </AccessibleButton>
+                    </ActionRowView>
                     {this.state.showAdvancedSection && this.renderAdvanced()}
-                </div>
+                </>
             );
         }
 

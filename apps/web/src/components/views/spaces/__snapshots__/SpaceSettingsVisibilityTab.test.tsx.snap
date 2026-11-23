@@ -96,17 +96,23 @@ exports[`<SpaceSettingsVisibilityTab /> > for a public space > renders addresses
               <form
                 class="_root"
               >
-                <div>
-                  <div
-                    aria-expanded="false"
-                    class="mx_AccessibleButton mx_SettingsTab_showAdvanced mx_AccessibleButton_hasKind mx_AccessibleButton_kind_link"
-                    data-testid="toggle-guest-access-btn"
-                    role="button"
-                    tabindex="0"
+                <button
+                  aria-expanded="false"
+                  class="_row _interactive _accent"
+                  data-settings-row=""
+                  data-testid="toggle-guest-access-btn"
+                  type="button"
+                >
+                  <span
+                    class="_text"
                   >
-                    Show advanced
-                  </div>
-                </div>
+                    <span
+                      class="_label"
+                    >
+                      Show advanced
+                    </span>
+                  </span>
+                </button>
               </form>
             </div>
             <div

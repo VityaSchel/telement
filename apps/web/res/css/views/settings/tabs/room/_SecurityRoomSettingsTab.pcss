@@ -5,8 +5,10 @@ SPDX-License-Identifier: AGPL-3.0-only OR GPL-3.0-only OR LicenseRef-Element-Com
 Please see LICENSE files in the repository root for full details.
 */
 
+/* Telement: the Show advanced row above it (ActionRowView) keeps its own room around its text, so the section follows
+   it at the card's gap */
 .mx_SecurityRoomSettingsTab_advancedSection {
-    margin-top: var(--cpd-space-4x);
+    margin-top: 0;
 }
 
 .mx_SecurityRoomSettingsTab_warning {

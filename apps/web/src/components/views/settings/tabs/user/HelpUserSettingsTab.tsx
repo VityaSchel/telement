@@ -9,8 +9,8 @@ Please see LICENSE files in the repository root for full details.
 import React, { type JSX, type ReactNode } from "react";
 import { logger } from "matrix-js-sdk/src/logger";
 import { type EmptyObject } from "matrix-js-sdk/src/matrix";
+import { ActionRowView } from "@element-hq/web-shared-components";
 
-import AccessibleButton from "../../../elements/AccessibleButton";
 import { _t } from "../../../../../languageHandler";
 import SdkConfig from "../../../../../SdkConfig";
 import PlatformPeg from "../../../../../PlatformPeg";
@@ -271,9 +271,10 @@ export default class HelpUserSettingsTab extends React.Component<EmptyObject, IS
                                 </CopyableText>
                             </details>
                         </SettingsSubsectionText>
-                        <AccessibleButton onClick={this.onClearCacheAndReload} kind="danger_outline">
+                        {/* Telement: a red text row ending the card, as Telegram's Clear cache */}
+                        <ActionRowView kind="critical" onClick={this.onClearCacheAndReload}>
                             {_t("setting|help_about|clear_cache_reload")}
-                        </AccessibleButton>
+                        </ActionRowView>
                     </SettingsSubsection>
                 </SettingsSection>
             </SettingsTab>

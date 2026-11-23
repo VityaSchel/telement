@@ -10,6 +10,7 @@ import React, { type ChangeEvent, useState } from "react";
 import classNames from "classnames";
 import { type Room, EventType, type MatrixClient } from "matrix-js-sdk/src/matrix";
 import { logger } from "matrix-js-sdk/src/logger";
+import { ActionRowView } from "@element-hq/web-shared-components";
 
 import { _t } from "../../../languageHandler";
 import AccessibleButton from "../elements/AccessibleButton";
@@ -153,15 +154,16 @@ const SpaceSettingsGeneralTab: React.FC<IProps> = ({ matrixClient: cli, space })
                     </div>
                 </form>
 
-                <SettingsSubsection heading={_t("room_settings|general|leave_space")}>
-                    <AccessibleButton
-                        kind="danger"
+                {/* Telement: a red text row alone on its card, as Telegram's Leave, without a label saying it again */}
+                <SettingsSubsection>
+                    <ActionRowView
+                        kind="critical"
                         onClick={() => {
                             leaveSpace(space);
                         }}
                     >
                         {_t("room_settings|general|leave_space")}
-                    </AccessibleButton>
+                    </ActionRowView>
                 </SettingsSubsection>
             </SettingsSection>
         </SettingsTab>

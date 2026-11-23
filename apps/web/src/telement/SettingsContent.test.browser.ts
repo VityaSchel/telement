@@ -673,7 +673,7 @@ describe.each(THEMES.map(([theme]) => theme))("Settings content in %s", (theme) 
             expect(next.top - (description.top + descriptionLine)).toBe(16);
         });
 
-        it("end the join rules' card 16px under Show advanced, as under the last option", () => {
+        it("end the join rules' card 4px under the Show advanced row, as a card ends under its last row", () => {
             render(
                 theme,
                 `<fieldset class="mx_SettingsFieldset">
@@ -681,10 +681,10 @@ describe.each(THEMES.map(([theme]) => theme))("Settings content in %s", (theme) 
                     <div class="mx_SettingsFieldset_content" id="access-card">
                         ${radio("Anyone", true, "mx_JoinRuleSettings_radioButton")}
                         <span id="description">Anyone can join.</span>
-                        <div>
-                            <div class="mx_AccessibleButton mx_AccessibleButton_hasKind mx_AccessibleButton_kind_link mx_SettingsTab_showAdvanced"
-                                role="button" id="show-advanced">Show advanced</div>
-                        </div>
+                        <button data-settings-row="" id="show-advanced"
+                            style="display: block; box-sizing: border-box; height: 44px; margin: 0 -12px">
+                            Show advanced
+                        </button>
                     </div>
                 </fieldset>`,
             );
@@ -692,7 +692,7 @@ describe.each(THEMES.map(([theme]) => theme))("Settings content in %s", (theme) 
             const descriptionLine = parseFloat(getComputedStyle(document.querySelector("#description")!).lineHeight);
 
             expect(box("#show-advanced").top - (box("#description").top + descriptionLine)).toBe(16);
-            expect(box("#access-card").bottom - box("#show-advanced").bottom).toBe(16);
+            expect(box("#access-card").bottom - box("#show-advanced").bottom).toBe(4);
         });
 
         /** Who can read the history, as StyledRadioGroup renders it in a SettingsFieldset of a settings tab. */
