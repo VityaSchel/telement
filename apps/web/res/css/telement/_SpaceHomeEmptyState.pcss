@@ -1,0 +1,12 @@
+/*
+Copyright 2026 Viktor Shchelochkov
+
+SPDX-License-Identifier: AGPL-3.0-only OR GPL-3.0-only
+Please see LICENSE files in the repository root for full details.
+*/
+
+/* A space home's empty state sits under the "Rooms and spaces" header with its tile 44px below the header's buttons:
+   a 28px margin, which takes in the header's own 12px one, and the empty state's 16px padding */
+.mx_SpaceHomeEmptyState {
+    margin-block-start: calc(var(--cpd-space-6x) + var(--cpd-space-1x));
+}

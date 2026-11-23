@@ -73,6 +73,7 @@ import SettingsStore from "../../settings/SettingsStore";
 import { filterBoolean } from "../../utils/arrays.ts";
 import { type RoomViewStore } from "../../stores/RoomViewStore.tsx";
 import RoomContext from "../../contexts/RoomContext.ts";
+import { SpaceHomeEmptyState } from "../../telement/spaces/SpaceHomeEmptyState";
 
 interface IProps {
     space: Room;
@@ -856,6 +857,10 @@ const SpaceHierarchy: React.FC<IProps> = ({ space, initialText = "", showRoom, a
                         space.currentState.maySendStateEvent(EventType.SpaceChild, cli.getSafeUserId());
 
                     const root = hierarchy.roomMap.get(space.roomId);
+                    // Telement: whether the list shows a room besides the space itself, which the bulk buttons could
+                    // act on; a space without one shows an empty state in place of the empty list
+                    const hasListedRooms = [...filteredRoomSet].some((room) => room.room_id !== space.roomId);
+                    const isEmptySpace = !query.trim() && !hasListedRooms && !hierarchy.canLoadMore && !errorText;
                     let results: JSX.Element | undefined;
                     if (filteredRoomSet.size && root) {
                         results = (
@@ -905,7 +910,7 @@ const SpaceHierarchy: React.FC<IProps> = ({ space, initialText = "", showRoom, a
                                 </h4>
                                 <div className="mx_SpaceHierarchy_listHeader_buttons">
                                     {additionalButtons}
-                                    {hasPermissions && (
+                                    {hasPermissions && hasListedRooms && (
                                         <ManageButtons
                                             hierarchy={hierarchy}
                                             selected={selected}
@@ -916,14 +921,18 @@ const SpaceHierarchy: React.FC<IProps> = ({ space, initialText = "", showRoom, a
                                 </div>
                             </div>
                             {errorText && <div className="mx_SpaceHierarchy_error">{errorText}</div>}
-                            <ul
-                                className="mx_SpaceHierarchy_list"
-                                onKeyDown={onKeyDownHandler}
-                                role="tree"
-                                aria-label={_t("common|space")}
-                            >
-                                {results}
-                            </ul>
+                            {isEmptySpace ? (
+                                <SpaceHomeEmptyState space={space} canAddRooms={hasPermissions} />
+                            ) : (
+                                <ul
+                                    className="mx_SpaceHierarchy_list"
+                                    onKeyDown={onKeyDownHandler}
+                                    role="tree"
+                                    aria-label={_t("common|space")}
+                                >
+                                    {results}
+                                </ul>
+                            )}
                             {loader}
                         </>
                     );

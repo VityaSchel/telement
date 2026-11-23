@@ -10,7 +10,7 @@ Please see LICENSE files in the repository root for full details.
 import { vi, describe, it, expect, beforeEach, afterEach, type MockedObject } from "vitest";
 import React from "react";
 import { type MatrixClient, MatrixEvent, Preset, Room } from "matrix-js-sdk/src/matrix";
-import { render, cleanup, screen, fireEvent, waitFor, act } from "test-utils-rtl";
+import { render, cleanup, screen, fireEvent, waitFor, act, within } from "test-utils-rtl";
 import { stubClient, mockPlatformPeg, unmockPlatformPeg, clientAndSDKContextRenderOptions } from "test-utils";
 
 import { RightPanelPhases } from "../../stores/right-panel/RightPanelStorePhases";
@@ -123,11 +123,13 @@ describe("SpaceRoomView", () => {
             await renderSpaceRoomView();
             await expect(screen.findByText("Welcome to")).resolves.toBeVisible();
 
-            const addButton = screen.getByRole("button", { name: /add/i });
+            // Telement: the empty space's own "Add existing room" and "New room" buttons are beside it
+            const addButton = screen.getByRole("button", { name: "Add" });
             fireEvent.click(addButton);
 
-            expect(await screen.findByText(/new room/i)).toBeInTheDocument();
-            expect(screen.getByText(/add existing room/i)).toBeInTheDocument();
+            const menu = await screen.findByRole("menu");
+            expect(within(menu).getByText(/new room/i)).toBeInTheDocument();
+            expect(within(menu).getByText(/add existing room/i)).toBeInTheDocument();
         });
     });
 

@@ -9,7 +9,8 @@ import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
 import { userEvent } from "vitest/browser";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { Avatar, CheckboxInput, InlineField, Root } from "@vector-im/compound-web";
+import { Avatar, Button, CheckboxInput, InlineField, Root } from "@vector-im/compound-web";
+import { PlusIcon, RoomIcon } from "@vector-im/compound-design-tokens/assets/web/icons";
 import compoundBase from "@vector-im/compound-design-tokens/assets/web/css/cpd-common-base.css?raw";
 import compoundSemantic from "@vector-im/compound-design-tokens/assets/web/css/cpd-common-semantic.css?raw";
 import compoundLightTheme from "@vector-im/compound-design-tokens/assets/web/css/cpd-theme-light-base.css?raw";
@@ -23,10 +24,12 @@ import telementTokens from "../../../../packages/shared-components/src/telement/
 import fontSizes from "../../res/css/_font-sizes.pcss?raw";
 import homePageStyles from "../../res/css/structures/_HomePage.pcss?raw";
 import spaceHierarchyStyles from "../../res/css/structures/_SpaceHierarchy.pcss?raw";
+import spaceHomeEmptyStateStyles from "../../res/css/telement/_SpaceHomeEmptyState.pcss?raw";
 import lightTheme from "../../res/themes/light/css/_light.pcss?raw";
 import darkTheme from "../../res/themes/dark/css/_dark.pcss?raw";
 import { cornerRadii, toBrowserCss } from "../test/telement/browserCss";
 import { settledStyle, tokenColor } from "../test/telement/computedStyle";
+import { EMPTY_STATE_VIEW_STYLES, emptyStateView } from "../test/telement/emptyStateView";
 
 /** A SpaceHierarchy tile as Tile renders it: the room's avatar, name and member count, and its actions. */
 function tile(name: string, { subspace = false }: { subspace?: boolean } = {}): string {
@@ -83,15 +86,17 @@ describe("Home and space home", () => {
     beforeAll(() => {
         stylesheet = document.createElement("style");
         stylesheet.textContent = `
-            @layer compound-tokens, compound-web, app-web;
+            @layer compound-tokens, compound-web, shared-components, app-web;
             @layer compound-tokens {
                 ${compoundBase} ${compoundSemantic} ${compoundLightTheme} ${compoundLightSemantic} ${telementTokens}
             }
             @layer compound-web { ${compoundStyles} }
+            @layer shared-components { ${EMPTY_STATE_VIEW_STYLES} }
             @layer app-web {
                 body { margin: 0; background: var(--cpd-color-bg-canvas-default); }
                 ${toBrowserCss(homePageStyles, lightTheme, fontSizes)}
                 ${toBrowserCss(spaceHierarchyStyles, lightTheme, fontSizes)}
+                ${toBrowserCss(spaceHomeEmptyStateStyles, lightTheme, fontSizes)}
             }
         `;
         document.head.append(stylesheet);
@@ -187,6 +192,43 @@ describe("Home and space home", () => {
 
             expect(getComputedStyle(subspace).backgroundColor).not.toBe("rgba(0, 0, 0, 0)");
             expect(getComputedStyle(toggle).backgroundColor).toBe("rgba(0, 0, 0, 0)");
+        });
+
+        it("centers an empty space's empty state under the header, its tile 44px below the header's buttons", () => {
+            const button = (label: string, Icon: typeof RoomIcon): string =>
+                renderToStaticMarkup(createElement(Button, { size: "md", kind: "secondary", Icon }, label));
+            // SpaceHierarchy's header with the Add button, then SpaceHomeEmptyState in place of the list
+            document.body.innerHTML = `
+                <div class="mx_SpaceRoomView_landing" style="width: 800px">
+                    <div class="mx_SpaceHierarchy_listHeader">
+                        <h4 class="mx_SpaceHierarchy_listHeader_header">Rooms and spaces</h4>
+                        <div class="mx_SpaceHierarchy_listHeader_buttons">
+                            <div class="mx_AccessibleButton" role="button" style="block-size: 36px">Add</div>
+                        </div>
+                    </div>
+                    ${emptyStateView({
+                        className: "mx_SpaceHomeEmptyState",
+                        Icon: RoomIcon,
+                        title: "No rooms yet",
+                        description: "Add an existing room or create a new one.",
+                        actions: button("Add existing room", PlusIcon) + button("New room", RoomIcon),
+                    })}
+                </div>
+            `;
+            const landing = document.querySelector(".mx_SpaceRoomView_landing")!.getBoundingClientRect();
+            const header = document.querySelector(".mx_SpaceHierarchy_listHeader")!.getBoundingClientRect();
+            const tile = document.querySelector(".mx_SpaceHomeEmptyState svg")!.getBoundingClientRect();
+            const buttons = [...document.querySelectorAll(".mx_SpaceHomeEmptyState button")].map((element) =>
+                element.getBoundingClientRect(),
+            );
+            const centre = (box: DOMRect): number => box.left + box.width / 2;
+
+            expect(tile.top - header.bottom).toBe(44);
+            expect(centre(tile)).toBeCloseTo(centre(landing), 0);
+            for (const box of buttons) {
+                expect(centre(box)).toBeCloseTo(centre(landing), 0);
+                expect(box.width).toBe(360);
+            }
         });
     });
 });

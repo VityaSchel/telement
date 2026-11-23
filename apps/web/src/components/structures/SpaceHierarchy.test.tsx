@@ -442,5 +442,71 @@ describe("SpaceHierarchy", () => {
             expect(checkbox.checked).toBe(true);
             expect(roomTile).toHaveAttribute("aria-selected", "true");
         });
+
+        describe("in a space without rooms", () => {
+            beforeEach(() => {
+                vi.mocked(client.getRoomHierarchy).mockResolvedValue({
+                    rooms: [{ ...hierarchyRoot, children_state: [] }],
+                });
+            });
+
+            it("offers to add an existing room or create one, without the bulk buttons, which have nothing to act on", async () => {
+                vi.mocked(root.currentState.maySendStateEvent).mockReturnValue(true);
+                render(getComponent());
+                await waitForElementToBeRemoved(screen.getAllByRole("progressbar"));
+
+                expect(screen.getByText("No rooms yet")).toBeInTheDocument();
+                expect(screen.getByText("Add an existing room or create a new one.")).toBeInTheDocument();
+                expect(screen.getByRole("button", { name: "Add existing room" })).toBeInTheDocument();
+                expect(screen.getByRole("button", { name: "New room" })).toBeInTheDocument();
+                expect(screen.queryByRole("button", { name: "Remove" })).not.toBeInTheDocument();
+                expect(screen.queryByRole("button", { name: "Mark as not suggested" })).not.toBeInTheDocument();
+                expect(screen.queryByRole("tree")).not.toBeInTheDocument();
+
+                const dispatch = vi.spyOn(dispatcher, "dispatch");
+                fireEvent.click(screen.getByRole("button", { name: "Add existing room" }));
+                expect(dispatch).toHaveBeenCalledWith({ action: Action.OpenAddToExistingSpaceDialog, space: root });
+            });
+
+            it("only says so to people who may not add rooms", async () => {
+                vi.mocked(root.currentState.maySendStateEvent).mockReturnValue(false);
+                render(getComponent());
+                await waitForElementToBeRemoved(screen.getAllByRole("progressbar"));
+
+                expect(screen.getByText("No rooms yet")).toBeInTheDocument();
+                expect(screen.getByText("Rooms added to this space will appear here.")).toBeInTheDocument();
+                expect(screen.queryByRole("button", { name: "Add existing room" })).not.toBeInTheDocument();
+                expect(screen.queryByRole("button", { name: "New room" })).not.toBeInTheDocument();
+            });
+        });
+
+        const roomsOfTheSpace = [
+            hierarchyRoot,
+            hierarchyRoom1,
+            hierarchyRoom2,
+            hierarchySpace1,
+            hierarchyRoom3,
+            hierarchyKnockRoom1,
+        ];
+
+        it("keeps search's no results text, without the bulk buttons, when a search finds no rooms", async () => {
+            vi.mocked(client.getRoomHierarchy).mockResolvedValue({ rooms: roomsOfTheSpace });
+            vi.mocked(root.currentState.maySendStateEvent).mockReturnValue(true);
+            render(getComponent({ initialText: "zzqqxx" }));
+            await waitForElementToBeRemoved(screen.getAllByRole("progressbar"));
+
+            expect(screen.getByText("No results found")).toBeInTheDocument();
+            expect(screen.queryByText("No rooms yet")).not.toBeInTheDocument();
+            expect(screen.queryByRole("button", { name: "Remove" })).not.toBeInTheDocument();
+        });
+
+        it("keeps the bulk buttons while the list has rooms to select", async () => {
+            vi.mocked(client.getRoomHierarchy).mockResolvedValue({ rooms: roomsOfTheSpace });
+            vi.mocked(root.currentState.maySendStateEvent).mockReturnValue(true);
+            render(getComponent());
+            await waitForElementToBeRemoved(screen.getAllByRole("progressbar"));
+
+            expect(screen.getByRole("button", { name: "Remove" })).toBeInTheDocument();
+        });
     });
 });

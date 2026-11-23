@@ -3194,6 +3194,11 @@
             "failed_unpin": "Failed to unpin room",
             "you": "You"
         },
+        "space_home": {
+            "empty_description": "Add an existing room or create a new one.",
+            "empty_description_no_rights": "Rooms added to this space will appear here.",
+            "empty_title": "No rooms yet"
+        },
         "space_settings": {
             "preview": "Preview"
         },
