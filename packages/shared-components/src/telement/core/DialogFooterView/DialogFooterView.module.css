@@ -39,6 +39,8 @@ Please see LICENSE files in the repository root for full details.
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    /* Between a spinner and the label, while the action runs */
+    column-gap: var(--cpd-space-2x);
     box-sizing: border-box;
     min-block-size: var(--tl-control-size);
     margin: calc(-1 * var(--cpd-space-3x)) 0;
@@ -58,24 +60,24 @@ Please see LICENSE files in the repository root for full details.
 
 /* The one hover and pressed fills (telement/tokens.css), red for a destructive button as for a menu's red items */
 @media (hover) {
-    .button:not(:disabled):hover {
+    .button:not(:disabled, [aria-disabled="true"]):hover {
         background-color: var(--cpd-color-bg-action-secondary-hovered);
     }
 
-    .destructive:not(:disabled):hover {
+    .destructive:not(:disabled, [aria-disabled="true"]):hover {
         background-color: var(--tl-color-bg-menu-critical-hovered);
     }
 }
 
-.button:not(:disabled):active {
+.button:not(:disabled, [aria-disabled="true"]):active {
     background-color: var(--cpd-color-bg-action-secondary-pressed);
 }
 
-.destructive:not(:disabled):active {
+.destructive:not(:disabled, [aria-disabled="true"]):active {
     background-color: var(--tl-color-bg-menu-critical-pressed);
 }
 
-.button:disabled {
+.button:is(:disabled, [aria-disabled="true"]) {
     color: var(--cpd-color-text-disabled);
     cursor: not-allowed;
 }

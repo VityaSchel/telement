@@ -57,7 +57,9 @@ export interface DialogFooterButtonProps extends ButtonHTMLAttributes<HTMLButton
 
 /**
  * A button of a {@link DialogFooterView}: its label in the accent, or in red when destructive, without a fill until it
- * is hovered or pressed. A plain button rather than a form's submit button unless `type` says otherwise.
+ * is hovered or pressed. A plain button rather than a form's submit button unless `type` says otherwise. One that can't
+ * be used but has a tooltip saying why takes `aria-disabled`, which looks disabled and, unlike `disabled`, shows the
+ * tooltip.
  */
 export const DialogFooterButton = forwardRef<HTMLButtonElement, DialogFooterButtonProps>(function DialogFooterButton(
     { destructive = false, type = "button", className, ...props },

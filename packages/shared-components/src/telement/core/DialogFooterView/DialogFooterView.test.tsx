@@ -117,6 +117,40 @@ describe("DialogFooterView", () => {
         );
     });
 
+    it("draws a button that can't be used but says why in a tooltip as a disabled one, which still takes the focus", async () => {
+        render(
+            <div data-testid="dialog">
+                <DialogFooterView>
+                    <DialogFooterButton aria-disabled={true}>Use recovery key</DialogFooterButton>
+                </DialogFooterView>
+            </div>,
+        );
+        const button = screen.getByRole("button", { name: "Use recovery key" });
+        await pointer.hover(button);
+        for (const animation of button.getAnimations()) animation.finish();
+
+        expect(getComputedStyle(button).color).toBe(tokenColor("--cpd-color-text-disabled"));
+        expect(getComputedStyle(button).backgroundColor).toBe("rgba(0, 0, 0, 0)");
+        button.focus();
+        expect(button).toHaveFocus();
+        await pointer.unhover(button);
+    });
+
+    it("keeps a running action's spinner 8px from its label", () => {
+        render(
+            <DialogFooterView>
+                <DialogFooterButton disabled>
+                    <svg data-testid="spinner" width={20} height={20} /> Reset in progress…
+                </DialogFooterButton>
+            </DialogFooterView>,
+        );
+        const spinner = screen.getByTestId("spinner");
+        const label = document.createRange();
+        label.selectNodeContents(spinner.nextSibling!);
+
+        expect(label.getBoundingClientRect().left - spinner.getBoundingClientRect().right).toBeCloseTo(8, 0);
+    });
+
     it("ends the action's label on the dialog's 24px edge, 24px under the content, its box 12px inside the corner", () => {
         render(<Default />);
         const dialog = screen.getByTestId("dialog").getBoundingClientRect();
