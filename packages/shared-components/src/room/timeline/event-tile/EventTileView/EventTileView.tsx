@@ -159,6 +159,7 @@ export function EventTileView({
                 [styles.stateHighlighted]: root.state?.highlighted,
                 [styles.stateSelected]: root.state?.selected,
                 [styles.stateJumpedTo]: root.state?.jumpedTo,
+                [styles.stateKeyboardTarget]: root.state?.keyboardTarget,
                 [styles.stateEditing]: root.state?.editing,
                 [styles.stateContinuation]: root.state?.continuation,
                 [styles.stateLastInSection]: root.state?.lastInSection,

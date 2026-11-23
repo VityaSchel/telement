@@ -305,6 +305,13 @@ describe("EventTile", () => {
             expect(getTile(container).className).not.toMatch(/_stateSelected_/);
         });
 
+        it("marks the event the composer's keys chose to reply to", () => {
+            const { container } = getComponent({ isKeyboardTarget: true });
+
+            expect(getTile(container).className).toMatch(/_stateKeyboardTarget_/);
+            expect(getTile(container).className).not.toMatch(/_stateSelected_/);
+        });
+
         it("selects the event while its context menu is open", async () => {
             const { container } = getComponent();
 

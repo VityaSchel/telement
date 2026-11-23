@@ -17,6 +17,7 @@ import { createTestClient, mkEvent, mkStubRoom, stubClient, mockPlatformPeg } fr
 import { addTextToComposer } from "./__mocks__/composer.ts";
 
 import SendMessageComposer, { createMessageContent, isQuickReaction } from "./SendMessageComposer";
+import { WALK_REPLY_TARGET } from "../../../telement/room/replyWalk";
 import MatrixClientContext from "../../../contexts/MatrixClientContext";
 import { type RoomContextType, TimelineRenderingType, MainSplitContentType } from "../../../contexts/RoomContext";
 import EditorModel from "../../../editor/model";
@@ -448,6 +449,21 @@ describe("<SendMessageComposer/>", () => {
             await waitFor(() =>
                 expect(defaultDispatcher.dispatch).toHaveBeenCalledWith({ action: `effects.confetti` }),
             );
+        });
+
+        it.each([
+            ["ArrowUp", "previous"],
+            ["ArrowDown", "next"],
+        ])("asks the room for the message to reply to on Ctrl+%s, as Telegram does", (key, direction) => {
+            const { container } = getComponent();
+
+            fireEvent.keyDown(container.querySelector(".mx_SendMessageComposer")!, { key, ctrlKey: true });
+
+            expect(defaultDispatcher.dispatch).toHaveBeenCalledWith({
+                action: WALK_REPLY_TARGET,
+                direction,
+                timelineRenderingType: TimelineRenderingType.Room,
+            });
         });
 
         it("not to send chat effects on message sending for threads", async () => {

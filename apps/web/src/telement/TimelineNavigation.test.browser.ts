@@ -386,6 +386,20 @@ describe("Timeline navigation", () => {
             expect(contrastOver(tokenColor("--cpd-color-text-secondary", tile), band)).toBeGreaterThanOrEqual(4.5);
         });
 
+        it.each<Layout>(["Bubble", "Group"])(
+            "marks the message the composer's keys chose to reply to, while the focus stays in the composer (%s)",
+            (layout) => {
+                const scope = render("cpd-theme-light", row("Chosen", { layout, states: ["stateKeyboardTarget"] }));
+                const tile = scope.querySelector<HTMLElement>(".root")!;
+                const band =
+                    layout === "Bubble"
+                        ? getComputedStyle(tile, "::before").backgroundColor
+                        : getComputedStyle(tile.querySelector(".line")!).backgroundColor;
+
+                expect(colorDistance(band, tokenColor("--tl-color-bg-message-focused", scope))).toBeLessThanOrEqual(1);
+            },
+        );
+
         it("leaves a message focused with the mouse, or being edited, without the band", async () => {
             const scope = render("cpd-theme-light", row("Clicked"), row("Edited", { states: ["stateEditing"] }));
             const [clicked, edited] = scope.querySelectorAll<HTMLElement>(".root");

@@ -28,6 +28,10 @@ export enum KeyBindingAction {
     EditNextMessage = "KeyBinding.editNextMessage",
     /** Cancel editing a message or cancel replying to a message */
     CancelReplyOrEdit = "KeyBinding.cancelReplyInComposer",
+    /** Telement: reply to the message before the one being replied to, or to the last message */
+    ReplyToPrevMessage = "KeyBinding.telementReplyToPreviousMessage",
+    /** Telement: reply to the message after the one being replied to, or stop replying after the last message */
+    ReplyToNextMessage = "KeyBinding.telementReplyToNextMessage",
     /** Show the sticker picker */
     ShowStickerPicker = "KeyBinding.showStickerPicker",
 
@@ -234,6 +238,8 @@ export const CATEGORIES: Record<CategoryName, ICategory> = {
             KeyBindingAction.MoveCursorToStart,
             KeyBindingAction.MoveCursorToEnd,
             KeyBindingAction.CancelReplyOrEdit,
+            KeyBindingAction.ReplyToPrevMessage,
+            KeyBindingAction.ReplyToNextMessage,
             KeyBindingAction.EditNextMessage,
             KeyBindingAction.EditPrevMessage,
             KeyBindingAction.SelectNextSendHistory,
@@ -386,6 +392,21 @@ export const KEYBOARD_SHORTCUTS: IKeyboardShortcuts = {
             key: Key.ESCAPE,
         },
         displayName: _td("keyboard|cancel_reply"),
+    },
+    // Telement: Telegram Desktop's keys, which are Cmd+Up/Down on macOS, where Ctrl+Up/Down are Mission Control's
+    [KeyBindingAction.ReplyToPrevMessage]: {
+        default: {
+            ctrlOrCmdKey: true,
+            key: Key.ARROW_UP,
+        },
+        displayName: _td("telement|keyboard|reply_to_previous_message"),
+    },
+    [KeyBindingAction.ReplyToNextMessage]: {
+        default: {
+            ctrlOrCmdKey: true,
+            key: Key.ARROW_DOWN,
+        },
+        displayName: _td("telement|keyboard|reply_to_next_message"),
     },
     [KeyBindingAction.EditNextMessage]: {
         default: {

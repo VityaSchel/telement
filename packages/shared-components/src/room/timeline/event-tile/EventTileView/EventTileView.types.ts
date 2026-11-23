@@ -46,6 +46,8 @@ export interface EventTileViewRootState {
     selected?: boolean;
     /** Whether the timeline has just jumped to the event, which lights it up and then fades. */
     jumpedTo?: boolean;
+    /** Whether the keyboard chose the event, as the message to reply to, which marks it as keyboard focus does. */
+    keyboardTarget?: boolean;
     /** Whether the event is currently being edited. */
     editing?: boolean;
     /** Whether the event continues the previous event block. */

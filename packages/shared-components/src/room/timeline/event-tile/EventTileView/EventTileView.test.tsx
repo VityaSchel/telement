@@ -126,6 +126,7 @@ const rootStateMatrix = [
     { name: "reply chain", state: { hasReply: true }, hook: "stateHasReply" },
     { name: "editing", state: { editing: true }, hook: "stateEditing" },
     { name: "jumped to", state: { jumpedTo: true }, hook: "stateJumpedTo" },
+    { name: "keyboard target", state: { keyboardTarget: true }, hook: "stateKeyboardTarget" },
     { name: "continuation", state: { continuation: true }, hook: "stateContinuation" },
     { name: "contextual", state: { contextual: true }, hook: "stateContextual" },
     { name: "action bar focused", state: { actionBarFocused: true }, hook: "stateActionBarFocused" },

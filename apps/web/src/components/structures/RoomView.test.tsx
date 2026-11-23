@@ -18,6 +18,7 @@ import {
     type MatrixClient,
     MatrixError,
     MatrixEvent,
+    MsgType,
     Room,
     RoomEvent,
     RoomMember,
@@ -49,6 +50,7 @@ import { MatrixClientPeg } from "../../MatrixClientPeg";
 import { Action } from "../../dispatcher/actions";
 import defaultDispatcher from "../../dispatcher/dispatcher";
 import { type ViewRoomPayload } from "../../dispatcher/payloads/ViewRoomPayload";
+import { type ActionPayload } from "../../dispatcher/payloads";
 import { RoomView } from "./RoomView";
 import SettingsStore from "../../settings/SettingsStore";
 import { SettingLevel } from "../../settings/SettingLevel";
@@ -74,6 +76,7 @@ import Modal, { type ComponentProps } from "../../Modal.tsx";
 import ErrorDialog from "../views/dialogs/ErrorDialog.tsx";
 import * as pinnedEventHooks from "../../hooks/usePinnedEvents";
 import { TimelineRenderingType } from "../../contexts/RoomContext";
+import { WALK_REPLY_TARGET } from "../../telement/room/replyWalk";
 import { ModuleApi } from "../../modules/Api";
 import MatrixClientBackedController from "../../settings/controllers/MatrixClientBackedController.ts";
 import { type ComposerInsertPayload, ComposerType } from "../../dispatcher/payloads/ComposerInsertPayload.ts";
@@ -331,6 +334,14 @@ describe("RoomView", () => {
         expect(asFragment()).toMatchSnapshot();
     });
 
+    /** The private parts of RoomView that the Telement tests reach: its timeline panel and its handlers. */
+    interface RoomViewInternals {
+        messagePanel: Record<string, unknown>;
+        onAction(payload: ActionPayload): Promise<void>;
+        onMessageListScroll(): void;
+    }
+    const internals = (instance: RoomView): RoomViewInternals => instance as unknown as RoomViewInternals;
+
     describe("jumping back (Telement)", () => {
         afterEach(() => {
             vi.mocked(defaultDispatcher.dispatch).mockRestore?.();
@@ -343,8 +354,7 @@ describe("RoomView", () => {
             await mountRoomView(ref);
             await waitFor(() => expect(screen.getByTestId("timeline")).not.toBeNull());
             const instance = ref.current!;
-            // @ts-ignore - the timeline panel is private
-            instance.messagePanel = {
+            internals(instance).messagePanel = {
                 getScrollState: () => ({ stuckAtBottom: false, trackedScrollToken: "$reading" }),
                 isAtEndOfLiveTimeline: () => false,
                 jumpToLiveTimeline: vi.fn(),
@@ -359,8 +369,9 @@ describe("RoomView", () => {
         };
 
         const jump = async (instance: RoomView, payload: Partial<ViewRoomPayload>): Promise<void> => {
-            // @ts-ignore - RoomView hears the dispatcher through its private action handler
-            await act(() => instance.onAction({ action: Action.ViewRoom, room_id: room.roomId, ...payload }));
+            await act(() =>
+                internals(instance).onAction({ action: Action.ViewRoom, room_id: room.roomId, ...payload }),
+            );
         };
 
         it("returns from a quote's message to the reply it was clicked in, then goes to the bottom", async () => {
@@ -381,9 +392,7 @@ describe("RoomView", () => {
             expect(button()).toHaveAccessibleName("Scroll to most recent messages");
 
             fireEvent.click(button());
-
-            // @ts-ignore - the timeline panel is private
-            expect(instance.messagePanel.jumpToLiveTimeline).toHaveBeenCalled();
+            expect(internals(instance).messagePanel.jumpToLiveTimeline).toHaveBeenCalled();
         });
 
         it("returns from a pinned message to where the timeline was read", async () => {
@@ -419,11 +428,8 @@ describe("RoomView", () => {
                 highlighted: true,
                 telement_jump_origin: { eventId: "$reply" },
             });
-
-            // @ts-ignore - the timeline panel is private
-            instance.messagePanel.isAtEndOfLiveTimeline = () => true;
-            // @ts-ignore - the scroll handler is private
-            act(() => instance.onMessageListScroll());
+            internals(instance).messagePanel.isAtEndOfLiveTimeline = () => true;
+            act(() => internals(instance).onMessageListScroll());
 
             expect(instance.state.canJumpBack).toBe(false);
         });
@@ -433,6 +439,81 @@ describe("RoomView", () => {
             await jump(instance, { event_id: "$linked", highlighted: true });
 
             expect(instance.state.canJumpBack).toBeFalsy();
+        });
+    });
+
+    describe("choosing the message to reply to with the composer's keys (Telement)", () => {
+        afterEach(() => {
+            vi.mocked(defaultDispatcher.dispatch).mockRestore?.();
+        });
+
+        it("replies to the timeline's messages one after another, marking and scrolling to each", async () => {
+            vi.spyOn(room, "getMyMembership").mockReturnValue(KnownMembership.Join);
+            const ref = createRef<RoomView>();
+            await mountRoomView(ref);
+            const instance = ref.current!;
+            const [older, newer] = ["$older", "$newer"].map(
+                (eventId) =>
+                    new MatrixEvent({
+                        type: EventType.RoomMessage,
+                        event_id: eventId,
+                        room_id: room.roomId,
+                        sender: "@alice:example.org",
+                        content: { msgtype: MsgType.Text, body: eventId },
+                    }),
+            );
+            const scrollToEventIfNeeded = vi.fn();
+            internals(instance).messagePanel = {
+                state: { events: [older, newer] },
+                scrollToEventIfNeeded,
+                getScrollState: () => null,
+                isAtEndOfLiveTimeline: () => true,
+            };
+            const replies: unknown[] = [];
+            vi.spyOn(defaultDispatcher, "dispatch").mockImplementation((payload) => {
+                if (payload.action === "reply_to_event") replies.push(payload.event);
+            });
+            const walk = async (direction: "previous" | "next"): Promise<void> => {
+                await act(() =>
+                    internals(instance).onAction({
+                        action: WALK_REPLY_TARGET,
+                        direction,
+                        timelineRenderingType: TimelineRenderingType.Room,
+                    }),
+                );
+            };
+
+            await walk("previous");
+
+            expect(replies).toEqual([newer]);
+            expect(instance.state.keyboardReplyEventId).toBe("$newer");
+            expect(scrollToEventIfNeeded).toHaveBeenCalledWith("$newer");
+
+            act(() => instance.setState({ replyToEvent: newer }));
+            await walk("previous");
+            act(() => instance.setState({ replyToEvent: older }));
+            await walk("next");
+            act(() => instance.setState({ replyToEvent: newer }));
+            await walk("next");
+
+            // Past the newest message it stops replying
+            expect(replies).toEqual([newer, older, newer, null]);
+            expect(instance.state.keyboardReplyEventId).toBeUndefined();
+        });
+
+        it("leaves a thread's composer to its thread", async () => {
+            const ref = createRef<RoomView>();
+            await mountRoomView(ref);
+            const dispatch = vi.spyOn(defaultDispatcher, "dispatch").mockImplementation(() => {});
+            await act(() =>
+                internals(ref.current!).onAction({
+                    action: WALK_REPLY_TARGET,
+                    direction: "previous",
+                    timelineRenderingType: TimelineRenderingType.Thread,
+                }),
+            );
+
+            expect(dispatch).not.toHaveBeenCalled();
         });
     });
 

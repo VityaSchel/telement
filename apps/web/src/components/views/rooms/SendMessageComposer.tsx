@@ -67,6 +67,7 @@ import { type RoomUploadViewModel, useRoomUploadViewModel } from "../../../viewm
 import { type MessageComposerUrlPreviewViewModel } from "../../../viewmodels/composer/MessageComposerUrlPreviewViewModel";
 import { linksIn } from "../../../utils/UrlUtils";
 import { notifyDraftChanged } from "../../../telement/room-list/roomDrafts";
+import { WALK_REPLY_TARGET, type WalkReplyTargetPayload } from "../../../telement/room/replyWalk";
 import { type MessageComposerUrlPreviewSnapshot } from "@element-hq/web-shared-components";
 
 // The prefix used when persisting editor drafts to localstorage.
@@ -257,6 +258,16 @@ export class SendMessageComposer extends React.Component<ISendMessageComposerPro
                         });
                     }
                 }
+                break;
+            case KeyBindingAction.ReplyToPrevMessage:
+            case KeyBindingAction.ReplyToNextMessage:
+                // Telement: pick the message to reply to without leaving the composer, as in Telegram
+                event.preventDefault();
+                dis.dispatch<WalkReplyTargetPayload>({
+                    action: WALK_REPLY_TARGET,
+                    direction: action === KeyBindingAction.ReplyToPrevMessage ? "previous" : "next",
+                    timelineRenderingType: this.context.timelineRenderingType,
+                });
                 break;
             case KeyBindingAction.CancelReplyOrEdit:
                 if (!!this.context.replyToEvent) {

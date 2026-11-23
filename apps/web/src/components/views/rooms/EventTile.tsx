@@ -195,6 +195,9 @@ export interface EventTileProps {
     /** Whether this is the event the timeline jumped to, which lights up and then fades. */
     isSelectedEvent?: boolean;
 
+    /** Telement: whether the composer's keys chose this event to reply to, which is marked like keyboard focus. */
+    isKeyboardTarget?: boolean;
+
     /** Resize observer used by the parent timeline, if any. */
     resizeObserver?: ResizeObserver;
 
@@ -943,6 +946,7 @@ export class UnwrappedEventTile extends React.Component<EventTileProps, IState> 
                 }),
                 isSelected: !!this.state.interaction.contextMenu,
                 isJumpedTo: this.props.isSelectedEvent,
+                isKeyboardTarget: this.props.isKeyboardTarget,
                 isLastInSection: this.props.lastInSection,
                 isContextual: this.props.contextual,
             },

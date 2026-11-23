@@ -137,6 +137,7 @@ import { EventPresentationContextProvider } from "../../utils/EventPresentationC
 import { TimelineFloatingDate } from "../../telement/room/TimelineFloatingDate";
 import { UnreadMentionsButton } from "../../telement/room/UnreadMentionsButton";
 import { TimelineReturns } from "../../telement/room/TimelineReturns";
+import { findReplyTarget, WALK_REPLY_TARGET, type WalkReplyTargetPayload } from "../../telement/room/replyWalk";
 
 const DEBUG = false;
 const PREVENT_MULTIPLE_JITSI_WITHIN = 30_000;
@@ -243,6 +244,8 @@ export interface IRoomState {
     atEndOfLiveTimeline?: boolean;
     // Telement: whether jump to bottom first returns to where the timeline jumped from
     canJumpBack?: boolean;
+    // Telement: the message the composer's keys made the reply's target, which the timeline marks
+    keyboardReplyEventId?: string;
     statusBarVisible: boolean;
     // We load this later by asking the js-sdk to suggest a version for us.
     // This object is the result of Room#getRecommendedVersion()
@@ -1329,6 +1332,12 @@ export class RoomView extends React.Component<IRoomProps, IRoomState> {
                 this.recordTimelineJump(payload as ViewRoomPayload);
                 break;
 
+            case WALK_REPLY_TARGET:
+                if (payload.timelineRenderingType === TimelineRenderingType.Room) {
+                    this.walkReplyTarget(payload as WalkReplyTargetPayload);
+                }
+                break;
+
             case "scroll_to_bottom":
                 if (payload.timelineRenderingType === TimelineRenderingType.Room) {
                     this.messagePanel?.jumpToLiveTimeline();
@@ -2004,6 +2013,18 @@ export class RoomView extends React.Component<IRoomProps, IRoomState> {
         });
     };
 
+    // Telement: makes the message before or after the one replied to the reply's target, from the timeline's messages,
+    // marks it and scrolls to it, as Telegram Desktop's Ctrl+Up and Ctrl+Down do
+    private walkReplyTarget({ direction }: WalkReplyTargetPayload): void {
+        const events = this.messagePanel?.state.events ?? [];
+        const target = findReplyTarget(events, this.state.replyToEvent?.getId(), direction);
+        if (target === undefined) return;
+
+        defaultDispatcher.dispatch({ action: "reply_to_event", event: target, context: TimelineRenderingType.Room });
+        this.setState({ keyboardReplyEventId: target?.getId() });
+        if (target) this.messagePanel?.scrollToEventIfNeeded(target.getId()!);
+    }
+
     // jump up to wherever our read marker is
     private jumpToReadMarker = (): void => {
         this.messagePanel?.jumpToReadMarker();
@@ -2592,6 +2613,11 @@ export class RoomView extends React.Component<IRoomProps, IRoomState> {
                         manageReadMarkers={!this.state.isPeeking}
                         hidden={hideMessagePanel}
                         highlightedEventId={highlightedEventId}
+                        keyboardTargetEventId={
+                            this.state.keyboardReplyEventId === this.state.replyToEvent?.getId()
+                                ? this.state.keyboardReplyEventId
+                                : undefined
+                        }
                         eventId={this.state.initialEventId}
                         eventScrollIntoView={this.state.initialEventScrollIntoView}
                         eventPixelOffset={this.state.initialEventPixelOffset}

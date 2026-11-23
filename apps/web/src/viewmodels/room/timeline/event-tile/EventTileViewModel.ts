@@ -151,6 +151,8 @@ export interface EventTileDisplayInput {
     isSelected: boolean;
     /** Whether the timeline has just jumped to the tile, from a reply's quote, a pin, a search result or a link. */
     isJumpedTo?: boolean;
+    /** Whether the composer's keys chose the tile's event to reply to, which is marked like keyboard focus. */
+    isKeyboardTarget?: boolean;
     /** Whether the tile is the last event in its section. */
     isLastInSection?: boolean;
     /** Whether the tile is being rendered in contextual mode. */
@@ -663,6 +665,7 @@ export class EventTileViewModel extends BaseViewModel<EventTileViewModelRenderSt
             highlighted: display.isHighlighted,
             selected: display.isSelected,
             jumpedTo: display.isJumpedTo,
+            keyboardTarget: display.isKeyboardTarget,
             editing: event.isEditing,
             continuation: isContinuation || event.isCallInvite || ElementCallEventType.matches(event.eventType),
             lastInSection: display.isLastInSection,

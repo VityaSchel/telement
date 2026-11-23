@@ -3158,6 +3158,8 @@
             "use_mobile_heading_after_desktop": "Or use a Matrix client on your phone"
         },
         "keyboard": {
+            "reply_to_next_message": "Reply to the next message",
+            "reply_to_previous_message": "Reply to the previous message",
             "space_bar_collapse_space": "Collapse a space in the space bar",
             "space_bar_expand_space": "Expand a space in the space bar"
         },

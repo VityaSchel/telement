@@ -275,6 +275,74 @@ exports[`KeyboardUserSettingsTab > renders list of keyboard shortcuts 1`] = `
                 <li
                   class="mx_KeyboardShortcut_shortcutRow"
                 >
+                  Reply to the previous message
+                  <div
+                    class="mx_KeyboardShortcut"
+                  >
+                    <kbd>
+                       
+                      Ctrl
+                       
+                    </kbd>
+                    +
+                    <kbd>
+                      <svg
+                        aria-hidden="true"
+                        fill="currentColor"
+                        height="16px"
+                        viewBox="0 0 24 24"
+                        width="16px"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M12 19.5a1 1 0 0 0 1-1V7.914l4.293 4.293a1 1 0 0 0 1.414-1.414l-6-6a1 1 0 0 0-1.414 0l-6 6a1 1 0 1 0 1.414 1.414L11 7.914V18.5a1 1 0 0 0 1 1"
+                        />
+                      </svg>
+                      <span
+                        class="mx_KeyboardKey_text"
+                      >
+                        ↑
+                      </span>
+                    </kbd>
+                  </div>
+                </li>
+                <li
+                  class="mx_KeyboardShortcut_shortcutRow"
+                >
+                  Reply to the next message
+                  <div
+                    class="mx_KeyboardShortcut"
+                  >
+                    <kbd>
+                       
+                      Ctrl
+                       
+                    </kbd>
+                    +
+                    <kbd>
+                      <svg
+                        aria-hidden="true"
+                        fill="currentColor"
+                        height="16px"
+                        viewBox="0 0 24 24"
+                        width="16px"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M12 4.5a1 1 0 0 1 1 1v10.586l4.293-4.293a1 1 0 0 1 1.414 1.414l-6 6a1 1 0 0 1-1.414 0l-6-6a1 1 0 1 1 1.414-1.414L11 16.086V5.5a1 1 0 0 1 1-1"
+                        />
+                      </svg>
+                      <span
+                        class="mx_KeyboardKey_text"
+                      >
+                        ↓
+                      </span>
+                    </kbd>
+                  </div>
+                </li>
+                <li
+                  class="mx_KeyboardShortcut_shortcutRow"
+                >
                   Navigate to next message to edit
                   <div
                     class="mx_KeyboardShortcut"

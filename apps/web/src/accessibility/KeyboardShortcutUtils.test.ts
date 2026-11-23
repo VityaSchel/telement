@@ -68,10 +68,55 @@ describe("KeyboardShortcutUtils", () => {
             "telement|keyboard|space_bar_collapse_space",
             "telement|keyboard|space_bar_expand_space",
         ]);
-        expect(strings.telement.keyboard).toEqual({
+        expect(strings.telement.keyboard).toMatchObject({
             space_bar_collapse_space: "Collapse a space in the space bar",
             space_bar_expand_space: "Expand a space in the space bar",
         });
+    });
+
+    it("lists Telegram's keys for choosing the message to reply to under Composer, Cmd+Up/Down on macOS", async () => {
+        vi.doUnmock(PATH_TO_KEYBOARD_SHORTCUTS);
+        const { CATEGORIES, CategoryName, KEYBOARD_SHORTCUTS, KeyBindingAction } = await getFile();
+        const { default: strings } = await import("../i18n/strings/en_EN.json");
+        const walking = [KeyBindingAction.ReplyToPrevMessage, KeyBindingAction.ReplyToNextMessage];
+
+        expect(CATEGORIES[CategoryName.COMPOSER].settingNames).toEqual(expect.arrayContaining(walking));
+        expect(walking.map((action) => KEYBOARD_SHORTCUTS[action].default)).toEqual([
+            { ctrlOrCmdKey: true, key: "ArrowUp" },
+            { ctrlOrCmdKey: true, key: "ArrowDown" },
+        ]);
+        expect(strings.telement.keyboard).toMatchObject({
+            reply_to_previous_message: "Reply to the previous message",
+            reply_to_next_message: "Reply to the next message",
+        });
+    });
+
+    it("binds no other composer keys to Ctrl or Cmd with Up or Down, as editing and send history use Up and Ctrl+Alt+Up", async () => {
+        vi.doUnmock(PATH_TO_KEYBOARD_SHORTCUTS);
+        const { KeyBindingAction } = await getFile();
+        const { default: SettingsStore } = await import("../settings/SettingsStore");
+        vi.spyOn(SettingsStore, "getValue").mockReturnValue(false);
+        const { defaultBindingsProvider } = await import("../KeyBindingsDefaults");
+        const arrows = ["ArrowUp", "ArrowDown"];
+        const clashing = [
+            ...defaultBindingsProvider.getMessageComposerBindings!(),
+            ...defaultBindingsProvider.getRoomBindings!(),
+            ...defaultBindingsProvider.getNavigationBindings!(),
+            ...defaultBindingsProvider.getAutocompleteBindings!(),
+            ...defaultBindingsProvider.getRoomListBindings!(),
+            ...defaultBindingsProvider.getAccessibilityBindings!(),
+            ...defaultBindingsProvider.getCallBindings!(),
+        ].filter(
+            ({ keyCombo }) =>
+                arrows.includes(keyCombo.key!) &&
+                (keyCombo.ctrlOrCmdKey || keyCombo.ctrlKey || keyCombo.metaKey) &&
+                !keyCombo.altKey &&
+                !keyCombo.shiftKey,
+        );
+
+        expect(clashing.map(({ action }) => action).sort()).toEqual(
+            [KeyBindingAction.ReplyToNextMessage, KeyBindingAction.ReplyToPrevMessage].sort(),
+        );
     });
 
     it("shows the room list panel shortcuts without binding them", async () => {

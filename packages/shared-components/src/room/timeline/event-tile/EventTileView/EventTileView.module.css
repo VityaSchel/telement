@@ -2403,13 +2403,14 @@
 }
 
 /*
- * The message the keyboard is on, when focus is inside it from the keyboard, takes a band in a tint of the accent, as
- * Telegram marks the message being acted on, while the focused link, chip or button keeps its ring. The tint stands
- * apart from the page, from other people's gray bubbles and from the gray selected and hovered bands in every theme.
- * Secondary text drawn on it takes a deeper gray, which keeps it at 4.5:1. A message being edited keeps its own look,
- * and the side panels' lists have no band.
+ * The message the keyboard is on, when focus is inside it from the keyboard or the composer's keys chose it to reply to
+ * (.stateKeyboardTarget), takes a band in a tint of the accent, as Telegram marks the message being acted on, while the
+ * focused link, chip or button keeps its ring. The tint stands apart from the page, from other people's gray bubbles
+ * and from the gray selected and hovered bands in every theme. Secondary text drawn on it takes a deeper gray, which
+ * keeps it at 4.5:1. A message being edited keeps its own look, and the side panels' lists have no band.
  */
 .root:not(.stateEditing, .shapeCard, .shapeThreadsList, .shapeNotification, .shapeFile):is(
+        .stateKeyboardTarget,
         :focus-visible,
         :has(:focus-visible)
     ) {
