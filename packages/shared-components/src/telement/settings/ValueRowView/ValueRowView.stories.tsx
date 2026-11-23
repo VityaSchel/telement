@@ -6,7 +6,7 @@ Please see LICENSE files in the repository root for full details.
 */
 
 import React, { type JSX } from "react";
-import { fn } from "storybook/test";
+import { expect, fn, screen, userEvent, waitFor } from "storybook/test";
 
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { ValueRowList, ValueRowView, type ValueRowViewActions, type ValueRowViewSnapshot } from "./ValueRowView";
@@ -39,6 +39,31 @@ const ROLES = [
     { key: "50", label: "Moderator" },
     { key: "100", label: "Admin" },
 ];
+
+const TIME_ZONES = [
+    "Africa/Abidjan",
+    "Africa/Cairo",
+    "Africa/Johannesburg",
+    "Africa/Lagos",
+    "America/Argentina/Buenos_Aires",
+    "America/Bogota",
+    "America/Chicago",
+    "America/Los_Angeles",
+    "America/New_York",
+    "America/Sao_Paulo",
+    "Asia/Dubai",
+    "Asia/Kolkata",
+    "Asia/Singapore",
+    "Asia/Tokyo",
+    "Atlantic/Reykjavik",
+    "Australia/Sydney",
+    "Europe/Berlin",
+    "Europe/Istanbul",
+    "Europe/Kyiv",
+    "Europe/London",
+    "Europe/Paris",
+    "Pacific/Auckland",
+].map((timeZone) => ({ key: timeZone, label: timeZone }));
 
 const meta = {
     title: "Telement/Settings/ValueRowView",
@@ -91,6 +116,47 @@ export const LongValue: Story = {
         value: "MacBook Pro Speakers (Built-in, with a very long device name)",
         options: [{ key: "default", label: "MacBook Pro Speakers (Built-in, with a very long device name)" }],
         selectedKey: "default",
+    },
+};
+
+/** More than 20 options: the menu starts with a search pill that filters them, and the list shows the chosen one. */
+export const ManyOptions: Story = {
+    args: { label: "Time zone", value: "Europe/Berlin", options: TIME_ZONES, selectedKey: "Europe/Berlin" },
+    decorators: [
+        // Room for the menu under the row
+        (StoryComponent) => (
+            <div style={{ blockSize: 480 }}>
+                <StoryComponent />
+            </div>
+        ),
+    ],
+    parameters: {
+        a11y: {
+            config: {
+                rules: [
+                    // The menu is opened over the row, which it hides from assistive technologies
+                    { id: "aria-hidden-focus", enabled: false },
+                    // The arrow keys scroll the list from the pill, which keeps the focus
+                    { id: "scrollable-region-focusable", enabled: false },
+                    // The value's secondary text on the pressed fill the row has while its menu is open
+                    { id: "color-contrast", enabled: false },
+                ],
+            },
+        },
+    },
+    play: async ({ canvas }) => {
+        await userEvent.click(canvas.getByRole("button", { name: /^Time zone/ }));
+        await waitFor(() => expect(screen.getByRole("textbox", { name: "Search" })).toHaveFocus());
+    },
+};
+
+/** The choices that hold what is typed, in any case and without accents, the first one highlighted. */
+export const FilteredOptions: Story = {
+    ...ManyOptions,
+    play: async (context) => {
+        await ManyOptions.play?.(context);
+        await userEvent.keyboard("pa");
+        await waitFor(() => expect(screen.getAllByRole("menuitemradio")).toHaveLength(3));
     },
 };
 

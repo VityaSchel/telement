@@ -17,11 +17,18 @@ import "@vector-im/compound-web/dist/style.css";
 import "../../tokens.css";
 
 import * as stories from "./ValueRowView.stories";
-import { ValueRowList, ValueRowView, type ValueRowViewActions, type ValueRowViewSnapshot } from "./ValueRowView";
+import {
+    ValueRowList,
+    type ValueRowOption,
+    ValueRowView,
+    type ValueRowViewActions,
+    type ValueRowViewSnapshot,
+} from "./ValueRowView";
 import { MockViewModel } from "../../../core/viewmodel/MockViewModel";
 import { SettingsStoryCard as Card } from "../SettingsStoryCard";
 
-const { Default, Disabled, CustomValue, EditingCustomValue, Person, LongValue, List } = composeStories(stories);
+const { Default, Disabled, CustomValue, EditingCustomValue, Person, LongValue, List, ManyOptions } =
+    composeStories(stories);
 
 /** A view model of the row with mocked actions. */
 function rowViewModel(
@@ -286,5 +293,239 @@ describe("ValueRowView", () => {
 
         expect(textBox(screen.getByText("Send messages")).right).toBeCloseTo(card().right - 16, 0);
         expect(glyph.left - card().left).toBeCloseTo(16, 0);
+    });
+
+    describe("a menu of more than 20 options", () => {
+        const LANGUAGES: ValueRowOption[] = [
+            { key: "cs", label: "čeština", searchTerms: ["Czech"] },
+            { key: "de", label: "Deutsch", searchTerms: ["German"] },
+            { key: "en", label: "English", searchTerms: ["English"] },
+            { key: "fr", label: "français", searchTerms: ["French"] },
+            { key: "pt", label: "português", searchTerms: ["Portuguese"] },
+            { key: "pt_BR", label: "português (Brasil)", searchTerms: ["Brazilian Portuguese"] },
+            ...Array.from({ length: 24 }, (_, i) => ({
+                key: `zone-${i}`,
+                label: `America/Somewhere/Zone_${String(i).padStart(2, "0")}`,
+            })),
+        ];
+
+        const pill = (): HTMLElement => screen.getByRole("textbox", { name: "Search" });
+        const labels = (): (string | null)[] => screen.queryAllByRole("menuitemradio").map((item) => item.textContent);
+        const highlighted = (): (string | null)[] =>
+            screen
+                .getAllByRole("menuitemradio")
+                .filter((item) => getComputedStyle(item).backgroundColor !== "rgba(0, 0, 0, 0)")
+                .map((item) => item.textContent);
+        const list = (): HTMLElement => document.getElementById(pill().getAttribute("aria-controls")!)!;
+
+        async function openMenu(
+            snapshot: Partial<ValueRowViewSnapshot> = {},
+        ): Promise<MockViewModel<ValueRowViewSnapshot> & ValueRowViewActions> {
+            const vm = rowViewModel({ options: LANGUAGES, selectedKey: "en", value: "English", ...snapshot });
+            render(<ValueRowView vm={vm} />);
+            await pointer.click(screen.getByRole("button", { name: /^Send messages/ }));
+            await vi.waitFor(() => expect(pill()).toHaveFocus());
+            return vm;
+        }
+
+        it("starts with a search pill, which a menu of 20 options doesn't", async () => {
+            const { unmount } = render(<ValueRowView vm={rowViewModel({ options: LANGUAGES.slice(0, 20) })} />);
+            await userEvent.click(screen.getByRole("button"));
+            expect(labels()).toHaveLength(20);
+            expect(screen.queryByRole("textbox")).toBeNull();
+            unmount();
+
+            await openMenu({ options: LANGUAGES.slice(0, 21) });
+            expect(labels()).toHaveLength(21);
+            expect(pill()).toHaveAttribute("placeholder", "Search");
+        });
+
+        it("filters the options as the user types, in their order, in any case and without accents", async () => {
+            await openMenu();
+
+            // Typed, so that the menu's own search by the start of an item's name would take the keys
+            await pointer.keyboard("POR");
+            expect(labels()).toEqual(["português", "português (Brasil)"]);
+            expect(pill()).toHaveFocus();
+
+            await pointer.fill(pill(), "portugues bra");
+            expect(labels()).toEqual(["português (Brasil)"]);
+
+            await pointer.fill(pill(), "CESTINA");
+            expect(labels()).toEqual(["čeština"]);
+
+            await pointer.fill(pill(), "somewhere zone 07");
+            expect(labels()).toEqual(["America/Somewhere/Zone_07"]);
+        });
+
+        it("finds an option by what else it is called", async () => {
+            await openMenu();
+
+            await pointer.fill(pill(), "german");
+            expect(labels()).toEqual(["Deutsch"]);
+        });
+
+        it("says when no option matches, and Enter then chooses nothing", async () => {
+            const vm = await openMenu();
+
+            await pointer.fill(pill(), "klingon");
+            await pointer.keyboard("{Enter}");
+
+            expect(labels()).toEqual([]);
+            expect(list().textContent).toBe("No results");
+            expect(vm.select).not.toHaveBeenCalled();
+        });
+
+        it("highlights the current choice, checked and in view, and then the first match", async () => {
+            await openMenu({ selectedKey: "zone-20" });
+            const current = screen.getByRole("menuitemradio", { name: "America/Somewhere/Zone_20" });
+            const check = current.querySelector("svg")!;
+
+            expect(highlighted()).toEqual(["America/Somewhere/Zone_20"]);
+            expect(pill()).toHaveAttribute("aria-activedescendant", current.id);
+            expect(current).toHaveAttribute("aria-checked", "true");
+            expect(current.lastElementChild).toBe(check);
+            // In the middle of what the list shows
+            const middle = (box: DOMRect): number => box.top + box.height / 2;
+            expect(
+                Math.abs(middle(current.getBoundingClientRect()) - middle(list().getBoundingClientRect())),
+            ).toBeLessThanOrEqual(1);
+
+            await pointer.fill(pill(), "zone");
+            expect(highlighted()).toEqual(["America/Somewhere/Zone_00"]);
+            expect(list().scrollTop).toBe(0);
+            // It stays checked wherever it is
+            expect(current).toHaveAttribute("aria-checked", "true");
+
+            await pointer.clear(pill());
+            expect(highlighted()).toEqual(["America/Somewhere/Zone_20"]);
+        });
+
+        it("moves the highlight with the arrow keys around the list, keeping the focus in the pill, and chooses with Enter", async () => {
+            const vm = await openMenu();
+            await pointer.keyboard("{ArrowDown}");
+            expect(highlighted()).toEqual(["français"]);
+            await pointer.keyboard("{ArrowUp}{ArrowUp}{ArrowUp}");
+            expect(highlighted()).toEqual(["čeština"]);
+            await pointer.keyboard("{ArrowUp}");
+            expect(highlighted()).toEqual(["America/Somewhere/Zone_23"]);
+            const last = screen.getByRole("menuitemradio", { name: "America/Somewhere/Zone_23" });
+            expect(last.getBoundingClientRect().bottom).toBeLessThanOrEqual(list().getBoundingClientRect().bottom);
+            expect(pill()).toHaveFocus();
+            expect(pill()).toHaveAttribute("aria-activedescendant", last.id);
+
+            await pointer.keyboard("{ArrowDown}{Enter}");
+            expect(vm.select).toHaveBeenCalledExactlyOnceWith("cs");
+            await vi.waitFor(() => expect(screen.queryByRole("menu")).toBeNull());
+            await vi.waitFor(() => expect(screen.getByRole("button")).toHaveFocus());
+        });
+
+        it("keeps the highlight clear of the fade at the list's end", async () => {
+            await openMenu();
+            await pointer.fill(pill(), "zone");
+            await pointer.keyboard("{ArrowDown}".repeat(12));
+            const active = screen.getByRole("menuitemradio", { name: "America/Somewhere/Zone_12" });
+
+            expect(highlighted()).toEqual(["America/Somewhere/Zone_12"]);
+            expect(list()).toHaveAttribute("data-more-below");
+            // Compound fades the last 40px out
+            expect(
+                list().getBoundingClientRect().bottom - active.getBoundingClientRect().bottom,
+            ).toBeGreaterThanOrEqual(40);
+        });
+
+        it("moves the one highlight to the option under the pointer, which keeps the focus in the pill, and chooses a clicked one", async () => {
+            const vm = await openMenu();
+
+            await pointer.hover(screen.getByRole("menuitemradio", { name: "Deutsch" }));
+            expect(highlighted()).toEqual(["Deutsch"]);
+            expect(pill()).toHaveFocus();
+            // The option under the resting pointer isn't highlighted once the keys move on
+            await pointer.keyboard("{ArrowUp}");
+            expect(highlighted()).toEqual(["čeština"]);
+
+            await pointer.click(screen.getByRole("menuitemradio", { name: "français" }));
+            expect(vm.select).toHaveBeenCalledExactlyOnceWith("fr");
+            await vi.waitFor(() => expect(screen.queryByRole("menu")).toBeNull());
+        });
+
+        it("empties the pill on Escape, then closes the menu, the key going no further", async () => {
+            const onKeyDown = vi.fn();
+            render(
+                <div onKeyDown={(event) => onKeyDown(event.key)}>
+                    <ValueRowView vm={rowViewModel({ options: LANGUAGES, selectedKey: "en" })} />
+                </div>,
+            );
+            const row = screen.getByRole("button");
+            await pointer.click(row);
+            await vi.waitFor(() => expect(pill()).toHaveFocus());
+            await pointer.fill(pill(), "ger");
+            expect(labels()).toEqual(["Deutsch"]);
+
+            await pointer.keyboard("{Escape}");
+            expect(pill()).toHaveValue("");
+            expect(labels()).toHaveLength(30);
+            expect(pill()).toHaveFocus();
+
+            await pointer.keyboard("{Escape}");
+            await vi.waitFor(() => expect(screen.queryByRole("menu")).toBeNull());
+            await vi.waitFor(() => expect(row).toHaveFocus());
+            expect(onKeyDown).not.toHaveBeenCalledWith("Escape");
+
+            // Nothing typed is left for the next time
+            await pointer.click(row);
+            await vi.waitFor(() => expect(pill()).toHaveFocus());
+            expect(pill()).toHaveValue("");
+        });
+
+        it("puts the 36px pill 8px from the edges of the menu, whose corners stay 12px, over a list of eight and a half rows", async () => {
+            await openMenu();
+            const menu = screen.getByRole("menu").getBoundingClientRect();
+            const field = pill().parentElement!.getBoundingClientRect();
+            const choices = list().getBoundingClientRect();
+
+            expect(getComputedStyle(screen.getByRole("menu")).borderTopLeftRadius).toBe("12px");
+            expect(field.height).toBe(36);
+            expect([field.left - menu.left, menu.right - field.right, field.top - menu.top]).toEqual([8, 8, 8]);
+            // The first option's highlight is 4px into the list, so 8px under the pill
+            expect(choices.top - field.bottom).toBe(4);
+            expect(getComputedStyle(list()).paddingTop).toBe("4px");
+            expect(choices.height).toBe(8.5 * 32 + 4);
+            expect(choices.bottom).toBe(menu.bottom);
+        });
+
+        it("keeps the menu's place, width and height whatever the filter leaves", async () => {
+            await openMenu();
+            const { left, top, width, height } = screen.getByRole("menu").getBoundingClientRect();
+            expect(width).toBeGreaterThan(220);
+
+            for (const query of ["engl", "klingon"]) {
+                await pointer.fill(pill(), query);
+                expect(labels().length).toBeLessThan(2);
+                const menu = screen.getByRole("menu").getBoundingClientRect();
+                expect([menu.left, menu.top, menu.width, menu.height]).toEqual([left, top, width, height]);
+            }
+        });
+
+        it("opens from the keyboard with the focus in the pill", async () => {
+            render(<ManyOptions />);
+            screen.getByRole("button").focus();
+
+            await pointer.keyboard("{Enter}");
+
+            await vi.waitFor(() => expect(pill()).toHaveFocus());
+            expect(highlighted()).toEqual(["Europe/Berlin"]);
+        });
+
+        it("offers a value of one's own among the options", async () => {
+            const vm = await openMenu({ selectedKey: undefined, customLabel: "Custom…" });
+            expect(labels().at(-1)).toBe("Custom…");
+            expect(highlighted()).toEqual(["Custom…"]);
+
+            await pointer.fill(pill(), "custom");
+            await pointer.keyboard("{Enter}");
+            expect(vm.startCustom).toHaveBeenCalledOnce();
+            expect(vm.select).not.toHaveBeenCalled();
+        });
     });
 });

@@ -29,50 +29,52 @@ test.describe("Preferences user settings tab", () => {
         // Assert that the top heading is rendered
         await expect(tab.getByRole("heading", { name: "Preferences" })).toBeVisible();
         await expect(tab).toMatchScreenshot("Preferences-user-settings-tab-should-be-rendered-properly-1.png", {
-            // masked with fixed-width due to daylight saving time making the text content vary
-            mask: [tab.locator("#mx_dropdownUserTimezone_value")],
-            css: `
-                #mx_dropdownUserTimezone_value {
-                    width: 200px;
-                }
-            `,
+            // masked due to daylight saving time making the text content vary
+            mask: [tab.getByRole("button", { name: /^Time zone/ })],
         });
 
         await expect(axe).toHaveNoViolations();
     });
 
-    test("should be able to change the app language", { tag: ["@no-firefox", "@no-webkit"] }, async ({ uut, user }) => {
-        // Check language and region setting dropdown
-        const languageInput = uut.getByRole("button", { name: "Application language" });
-        await languageInput.scrollIntoViewIfNeeded();
-        // Check the default value
-        await expect(languageInput.getByText("English")).toBeVisible();
-        // Click the button to display the dropdown menu
-        await languageInput.click();
-        // Assert that the default option is rendered and highlighted
-        languageInput.getByRole("option", { name: /Albanian/ });
-        await expect(languageInput.getByRole("option", { name: /Albanian/ })).toHaveClass(
-            /mx_Dropdown_option_highlight/,
-        );
-        await expect(languageInput.getByRole("option", { name: /Deutsch/ })).toBeVisible();
-        // Click again to close the dropdown
-        await languageInput.click();
-        // Assert that the default value is rendered again
-        await expect(languageInput.getByText("English")).toBeVisible();
-    });
+    test(
+        "should be able to find and change the app language",
+        { tag: ["@no-firefox", "@no-webkit"] },
+        async ({ uut, page, user }) => {
+            const languageRow = uut.getByRole("button", { name: /^Application language/ });
+            await languageRow.scrollIntoViewIfNeeded();
+            // Check the default value
+            await expect(languageRow).toContainText("English");
+            // Open the menu of languages, the current one checked
+            await languageRow.click();
+            const menu = page.getByRole("menu", { name: "Application language" });
+            await expect(menu.getByRole("menuitemradio", { name: "English", exact: true })).toBeChecked();
+            // Find a language by its name in English
+            const search = menu.getByRole("textbox", { name: "Search" });
+            await expect(search).toBeFocused();
+            await search.fill("german");
+            await expect(menu.getByRole("menuitemradio")).toHaveText(["Deutsch"]);
+            // Escape empties the search, then closes the menu without choosing
+            await search.press("Escape");
+            await expect(search).toHaveValue("");
+            await search.press("Escape");
+            await expect(menu).toBeHidden();
+            await expect(languageRow).toContainText("English");
+        },
+    );
 
-    test("should be able to change the timezone", async ({ uut, user }) => {
-        // Check language and region setting dropdown
-        const timezoneInput = uut.locator(".mx_dropdownUserTimezone");
-        const timezoneValue = uut.locator("#mx_dropdownUserTimezone_value");
-        await timezoneInput.scrollIntoViewIfNeeded();
+    test("should be able to change the timezone", async ({ uut, page, user }) => {
+        const timezoneRow = uut.getByRole("button", { name: /^Time zone/ });
+        await timezoneRow.scrollIntoViewIfNeeded();
         // Check the default value
-        await expect(timezoneValue.getByText("Browser default")).toBeVisible();
-        // Click the button to display the dropdown menu
-        await timezoneInput.getByRole("button", { name: "Set timezone" }).click();
-        // Select a different value
-        await timezoneInput.getByRole("option", { name: /Africa\/Abidjan/ }).click();
+        await expect(timezoneRow).toContainText("Browser default");
+        // Find a different value in the menu and choose it
+        await timezoneRow.click();
+        const menu = page.getByRole("menu", { name: "Time zone" });
+        await menu.getByRole("textbox", { name: "Search" }).fill("abidjan");
+        await expect(menu.getByRole("menuitemradio")).toHaveText(["Africa/Abidjan"]);
+        await page.keyboard.press("Enter");
         // Check the new value
-        await expect(timezoneValue.getByText("Africa/Abidjan")).toBeVisible();
+        await expect(menu).toBeHidden();
+        await expect(timezoneRow).toContainText("Africa/Abidjan");
     });
 });

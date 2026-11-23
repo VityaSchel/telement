@@ -13,6 +13,67 @@ Please see LICENSE files in the repository root for full details.
 }
 
 /*
+ * A menu of many options: the shared 36px search pill 8px from the menu's edges and from the highlight of the first
+ * option, over a list of its own that scrolls after eight and a half rows, as the settings search's results do. The
+ * list is that tall whatever the filter leaves, so that the menu neither moves nor changes sides while the user types.
+ */
+.filterable > [role="none"] {
+    gap: 0;
+    padding-block: 0 var(--cpd-menu-padding-block-end);
+
+    --cpd-menu-padding-block-end: var(--tl-inset-menu);
+}
+
+.filter {
+    flex: none;
+    padding: var(--cpd-space-2x) var(--cpd-space-2x) calc(var(--cpd-space-2x) - var(--tl-inset-menu));
+}
+
+.choices {
+    /* What the choices' offsets are from */
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+    block-size: calc(var(--tl-menu-row-size) * 8.5 + var(--tl-inset-menu));
+    padding-block: var(--tl-inset-menu);
+    /* The arrow keys keep the highlight clear of the fade Compound ends a list that scrolls with */
+    scroll-padding-block: var(--tl-inset-menu) calc(var(--cpd-space-4x) + var(--cpd-space-6x));
+
+    > * {
+        flex: none;
+    }
+}
+
+/* One highlight, which the arrow keys and the pointer move, in the menus' hover fill: the option under a resting pointer
+   has none once the keys moved it on */
+.choices > .choice[role="menuitemradio"][data-kind]:not(:active) {
+    background-color: transparent;
+
+    &.active {
+        background-color: var(--cpd-color-bg-action-secondary-hovered);
+    }
+}
+
+@media (forced-colors: active) {
+    .choices > .active {
+        outline: 2px solid Highlight;
+        outline-offset: -2px;
+    }
+}
+
+/* Said in a row of its own, in line with the options */
+.empty {
+    box-sizing: border-box;
+    min-block-size: var(--tl-menu-row-size);
+    margin: 0 var(--tl-inset-menu);
+    padding: var(--cpd-space-1x) calc(var(--cpd-space-4x) - var(--tl-inset-menu));
+    color: var(--cpd-color-text-secondary);
+    font: var(--cpd-font-body-md-regular);
+    letter-spacing: var(--cpd-font-letter-spacing-body-md);
+}
+
+/*
  * The field for a value of one's own, in the value's place: the shared 36px field (1px border, 8px corners, 15px text
  * 12px inside the border) with its box on the content edge, 4px from the row's top and bottom so that the row stays
  * 44px. Its number is at its end, where the value was.

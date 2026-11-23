@@ -31,12 +31,14 @@ Please see LICENSE files in the repository root for full details.
  * Menus of items, separators and titles only get the geometry of the message menu (_IconizedContextMenu.pcss) and the
  * room menus: the item highlights are inset 4px from the menu's edge and rounded by 8, concentric with its 12px
  * corners, and follow each other as 32px rows with 16px icons and regular text, the label 10px after the icon. What an
- * item holds stays 16px from the menu's edge. Separators span the highlights with 2px above and below. Menus with a
- * layout of their own (the user menu, threads, jump to date, the room menus) style themselves. Compound puts its class
- * after the caller's on menus and items.
+ * item holds stays 16px from the menu's edge. Separators span the highlights with 2px above and below. A group of items
+ * under something else, such as the search pill of a menu with many options (ValueRowView), is laid out the same way.
+ * Menus with a layout of their own (the user menu, threads, jump to date, the room menus) style themselves. Compound
+ * puts its class after the caller's on menus and items.
  */
 :is([class^="_menu_"], [class*=" _menu_"])[role="menu"]
-    > [role="none"]:not(:has(> :not([role^="menuitem"], [role="separator"], [class*="_menu-title_"]))) {
+    > [role="none"]:not(:has(> :not([role^="menuitem"], [role="separator"], [class*="_menu-title_"]))),
+:is([class^="_menu_"], [class*=" _menu_"])[role="menu"] > [role="none"] > [role="group"] {
     gap: 0;
     padding-block: var(--tl-inset-menu);
 

@@ -10,7 +10,7 @@ Please see LICENSE files in the repository root for full details.
 
 import React from "react";
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import { fireEvent, render, type RenderResult, screen, waitFor, within } from "test-utils-rtl";
+import { render, type RenderResult, screen, waitFor, within } from "test-utils-rtl";
 import {
     getMockClientWithEventEmitter,
     mockClientMethodsServer,
@@ -23,6 +23,9 @@ import PreferencesUserSettingsTab from "./PreferencesUserSettingsTab";
 import SettingsStore from "../../../../../settings/SettingsStore";
 import MatrixClientBackedController from "../../../../../settings/controllers/MatrixClientBackedController";
 import PlatformPeg from "../../../../../PlatformPeg";
+import { getAllLanguagesWithLabels } from "../../../../../i18n/utils";
+
+vi.mock("../../../../../i18n/utils", { spy: true });
 
 describe("PreferencesUserSettingsTab", () => {
     beforeEach(() => {
@@ -55,6 +58,27 @@ describe("PreferencesUserSettingsTab", () => {
         const germanOption = await screen.findByRole("menuitemradio", { name: "Deutsch" });
         await userEvent.click(germanOption);
         expect(reloadStub).toHaveBeenCalled();
+    });
+
+    it("finds a language by its own name and by its name in the user's language", async () => {
+        // Enough for the menu to have a search pill; the tests otherwise offer three
+        const codes = "ar bg cs cy da de el en eo es et fi fr ga gl he hu id it ja ko lt".split(" ");
+        const name = (code: string, inLanguage: string): string =>
+            new Intl.DisplayNames([inLanguage], { type: "language", style: "short" }).of(code)!;
+        vi.mocked(getAllLanguagesWithLabels).mockResolvedValueOnce(
+            codes.map((value) => ({ value, label: name(value, "en"), labelInTargetLanguage: name(value, value) })),
+        );
+        renderTab();
+        const languageRow = await screen.findByRole("button", { name: /^Application language/ });
+        await waitFor(() => expect(languageRow).toHaveTextContent("Application languageEnglish"));
+        await userEvent.click(languageRow);
+        const search = screen.getByRole("textbox", { name: "Search" });
+
+        await userEvent.type(search, "german");
+        expect(screen.getAllByRole("menuitemradio").map((option) => option.textContent)).toEqual(["Deutsch"]);
+        await userEvent.clear(search);
+        await userEvent.type(search, "cestina");
+        expect(screen.getAllByRole("menuitemradio").map((option) => option.textContent)).toEqual(["čeština"]);
     });
 
     it("shows the language and the time zone as value rows, the label at the start and the value at the end", async () => {
@@ -93,7 +117,10 @@ describe("PreferencesUserSettingsTab", () => {
         const options = screen.getAllByRole("menuitemradio");
         expect(options[0]).toHaveTextContent(/Browser default/);
         expect(options[0]).toHaveAttribute("aria-checked", "true");
-        fireEvent.click(screen.getByRole("menuitemradio", { name: "Europe/Paris" }));
+        // A search pill filters them, as the dropdown did
+        await userEvent.type(screen.getByRole("textbox", { name: "Search" }), "europe paris");
+        expect(screen.getAllByRole("menuitemradio")).toHaveLength(1);
+        await userEvent.keyboard("{Enter}");
 
         await waitFor(() => expect(timezoneRow).toHaveTextContent("Set timezoneEurope/Paris"));
     });

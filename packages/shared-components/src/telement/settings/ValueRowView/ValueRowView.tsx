@@ -7,15 +7,19 @@ Please see LICENSE files in the repository root for full details.
 
 import React, { type JSX, type KeyboardEvent, type ReactNode, useEffect, useRef, useState } from "react";
 import classNames from "classnames";
-import { Menu, MenuItem } from "@vector-im/compound-web";
+import { Menu } from "@vector-im/compound-web";
 import ChevronDownIcon from "@vector-im/compound-design-tokens/assets/web/icons/chevron-down";
-import CheckIcon from "@vector-im/compound-design-tokens/assets/web/icons/check";
 
 import { type ViewModel } from "../../../core/viewmodel/ViewModel";
 import { useViewModel } from "../../../core/viewmodel/useViewModel";
 import { Avatar } from "../../core/Avatar";
 import rowStyles from "../SettingsRow.module.css";
+import { FilterableChoices, type ValueRowChoice } from "./FilterableChoices";
+import { ValueRowMenuItem } from "./ValueRowMenuItem";
 import styles from "./ValueRowView.module.css";
+
+/** A menu of more options than this starts with a search pill that filters them. The 19 font sizes have none. */
+const MAX_OPTIONS_WITHOUT_FILTER = 20;
 
 /** One of the choices a {@link ValueRowView} offers in its menu. */
 export interface ValueRowOption {
@@ -23,6 +27,11 @@ export interface ValueRowOption {
     key: string;
     /** The choice as the menu, and the row once it is chosen, show it. */
     label: string;
+    /**
+     * What else a long menu's filter finds the choice by, such as a language's name in the user's own language where
+     * the label is its own name.
+     */
+    searchTerms?: string[];
 }
 
 /** The person or room a {@link ValueRowView} is about, drawn as a 36px avatar before its label. */
@@ -88,9 +97,10 @@ export interface ValueRowViewProps {
 /**
  * A setting with a value, as Telegram for macOS draws one: its label at the start and its value at the end in
  * secondary text, followed by a chevron. The whole row opens the shared menu of the choices, the chosen one checked at
- * the item's end. A row sits on a settings card's content edge like a menu row: its hover fill reaches 4px from the
- * card's sides, and rows one under another follow each other without gaps (see {@link ValueRowList}). A card puts a
- * row at its top or bottom 4px from its edge there too, which `data-settings-row` tells it.
+ * the item's end; a menu of more than 20 options starts with a search pill that filters them. A row sits on a settings
+ * card's content edge like a menu row: its hover fill reaches 4px from the card's sides, and rows one under another
+ * follow each other without gaps (see {@link ValueRowList}). A card puts a row at its top or bottom 4px from its edge
+ * there too, which `data-settings-row` tells it.
  *
  * @example
  * ```tsx
@@ -144,9 +154,22 @@ export function ValueRowView({ vm, className }: Readonly<ValueRowViewProps>): JS
         );
     }
 
-    const customChecked = customLabel !== undefined && !options.some((option) => option.key === selectedKey);
+    const choices: ValueRowChoice[] = options.map(({ key, label: optionLabel, searchTerms }) => ({
+        key: `option-${key}`,
+        label: optionLabel,
+        searchTerms,
+        checked: key === selectedKey,
+        onSelect: () => vm.select(key),
+    }));
+    if (customLabel !== undefined) {
+        const checked = choices.every((choice) => !choice.checked);
+        choices.push({ key: "custom", label: customLabel, checked, onSelect: vm.startCustom });
+    }
+    const filterable = options.length > MAX_OPTIONS_WITHOUT_FILTER;
+
     return (
         <Menu
+            className={filterable ? styles.filterable : undefined}
             open={open}
             onOpenChange={setOpen}
             title={label}
@@ -163,35 +186,14 @@ export function ValueRowView({ vm, className }: Readonly<ValueRowViewProps>): JS
                 </button>
             }
         >
-            {options.map((option) => (
-                <ValueRowMenuItem
-                    key={option.key}
-                    label={option.label}
-                    checked={option.key === selectedKey}
-                    onSelect={() => vm.select(option.key)}
-                />
-            ))}
-            {customLabel !== undefined && (
-                <ValueRowMenuItem label={customLabel} checked={customChecked} onSelect={vm.startCustom} />
+            {filterable ? (
+                <FilterableChoices choices={choices} onClose={() => setOpen(false)} />
+            ) : (
+                choices.map(({ key, label: choiceLabel, checked, onSelect }) => (
+                    <ValueRowMenuItem key={key} label={choiceLabel} checked={checked} onSelect={onSelect} />
+                ))
             )}
         </Menu>
-    );
-}
-
-/** A choice in the row's menu: a radio item without the radio, its check at the item's end, as in Telegram's menus. */
-function ValueRowMenuItem({
-    label,
-    checked,
-    onSelect,
-}: {
-    label: string;
-    checked: boolean;
-    onSelect: () => void;
-}): JSX.Element {
-    return (
-        <MenuItem role="menuitemradio" aria-checked={checked} label={label} onSelect={onSelect} hideChevron>
-            {checked && <CheckIcon className={styles.check} aria-hidden />}
-        </MenuItem>
     );
 }
 

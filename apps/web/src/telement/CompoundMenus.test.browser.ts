@@ -10,7 +10,15 @@ import { userEvent } from "vitest/browser";
 import { createElement, type ReactNode } from "react";
 import { flushSync } from "react-dom";
 import { createRoot, type Root } from "react-dom/client";
-import { Menu, MenuItem, MenuTitle, RadioMenuItem, Separator, TooltipProvider } from "@vector-im/compound-web";
+import {
+    Menu,
+    MenuItem,
+    MenuScrollArea,
+    MenuTitle,
+    RadioMenuItem,
+    Separator,
+    TooltipProvider,
+} from "@vector-im/compound-web";
 import { AttachmentIcon, CheckIcon, ImageIcon, PollsIcon } from "@vector-im/compound-design-tokens/assets/web/icons";
 import compoundBase from "@vector-im/compound-design-tokens/assets/web/css/cpd-common-base.css?raw";
 import compoundSemantic from "@vector-im/compound-design-tokens/assets/web/css/cpd-common-semantic.css?raw";
@@ -131,6 +139,27 @@ describe("Compound's menus", () => {
         // One row after another, with no gap
         const tops = items.map((row) => row.getBoundingClientRect().top);
         expect(tops).toEqual(items.map((_, index) => tops[0] + 32 * index));
+    });
+
+    it("lays out a group of items under something else, such as a search pill, the same way", async () => {
+        const menu = await renderMenu([
+            createElement("div", { key: "search", role: "menuitem" }, createElement("input")),
+            createElement(MenuScrollArea, { key: "choices", role: "group" }, [
+                item("Africa/Abidjan"),
+                item("Asia/Tokyo"),
+            ]),
+        ]);
+        const edge = menu.getBoundingClientRect();
+        const group = menu.querySelector('[role="group"]')!.getBoundingClientRect();
+        const items = [...menu.querySelectorAll<HTMLElement>('[role="group"] > [role="menuitem"]')];
+        const [first, second] = items.map((row) => row.getBoundingClientRect());
+
+        expect([first.top - group.top, first.left - edge.left, edge.right - first.right]).toEqual([4, 4, 4]);
+        expect([first.height, second.height, second.top - first.bottom]).toEqual([32, 32, 0]);
+        expect(getComputedStyle(items[0]).borderRadius).toBe("8px");
+        const label = items[0].querySelector("span")!;
+        expect(label.getBoundingClientRect().left - edge.left).toBe(16);
+        expect(getComputedStyle(label).fontWeight).toBe("400");
     });
 
     it("spans the item highlights with separators, 2px above and below", async () => {

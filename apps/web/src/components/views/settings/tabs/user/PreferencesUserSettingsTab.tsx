@@ -75,11 +75,16 @@ const LanguageSection: React.FC = () => {
         [language],
     );
 
-    // Telement: a value row, each language in its own name, as the language dropdown listed them
+    // Telement: a value row, each language in its own name, as the language dropdown listed them. Its menu's filter finds
+    // a language by its name in the user's language too, as the dropdown's did
     return (
         <SettingsValueRow
             label={_t("settings|general|application_language")}
-            options={(languages ?? []).map((lang) => ({ key: lang.value, label: lang.labelInTargetLanguage }))}
+            options={(languages ?? []).map((lang) => ({
+                key: lang.value,
+                label: lang.labelInTargetLanguage,
+                searchTerms: [lang.label],
+            }))}
             selectedKey={language}
             disabled={languages === null}
             onSelect={onLanguageChange}
