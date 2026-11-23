@@ -6,7 +6,7 @@ Please see LICENSE files in the repository root for full details.
 */
 
 import React, { type ChangeEventHandler, useCallback } from "react";
-import { Field, HelpMessage, InlineField, Label, RadioInput, Root, SettingsToggleInput } from "@vector-im/compound-web";
+import { Field, InlineField, Label, RadioInput, Root, SettingsToggleInput } from "@vector-im/compound-web";
 
 import { type MediaPreviewConfig, MediaPreviewValue } from "../../../../../@types/media_preview";
 import { _t } from "../../../../../languageHandler";
@@ -14,6 +14,41 @@ import { useSettingValue } from "../../../../../hooks/useSettings";
 import SettingsStore from "../../../../../settings/SettingsStore";
 import { SettingLevel } from "../../../../../settings/SettingLevel";
 
+/**
+ * Telement: the "Hide avatars of room and inviter" toggle on its own, so that it stays in "Moderation and safety" while
+ * the choices of media to show are a group of their own ({@link MediaPreviewAccountSettings}), as Telegram groups each
+ * list of choices.
+ */
+export const InviteAvatarsAccountSetting: React.FC = () => {
+    const currentMediaPreview = useSettingValue("mediaPreviewConfig");
+
+    const avatarOnChange = useCallback<ChangeEventHandler<HTMLInputElement>>(
+        (evt) => {
+            void SettingsStore.setValue("mediaPreviewConfig", null, SettingLevel.ACCOUNT, {
+                ...currentMediaPreview,
+                // Switch is inverted. "Hide avatars..."
+                invite_avatars: evt.target.checked ? MediaPreviewValue.Off : MediaPreviewValue.On,
+            });
+        },
+        [currentMediaPreview],
+    );
+
+    return (
+        <Root className="mx_MediaPreviewAccountSetting_Form">
+            <SettingsToggleInput
+                name="hide_avatars"
+                label={_t("settings|media_preview|hide_avatars")}
+                checked={currentMediaPreview.invite_avatars === MediaPreviewValue.Off}
+                onChange={avatarOnChange}
+            />
+        </Root>
+    );
+};
+
+/**
+ * The choices of media to show in the timeline, for the account or for one room. Telement: they are a group of their
+ * own, so the group's label ("Show media in timeline") and help are its subsection's heading and description.
+ */
 export const MediaPreviewAccountSettings: React.FC<{ roomId?: string }> = ({ roomId }) => {
     const currentMediaPreview = useSettingValue("mediaPreviewConfig", roomId);
 
@@ -27,17 +62,6 @@ export const MediaPreviewAccountSettings: React.FC<{ roomId?: string }> = ({ roo
             );
         },
         [roomId],
-    );
-
-    const avatarOnChange = useCallback<ChangeEventHandler<HTMLInputElement>>(
-        (evt) => {
-            changeSetting({
-                ...currentMediaPreview,
-                // Switch is inverted. "Hide avatars..."
-                invite_avatars: evt.target.checked ? MediaPreviewValue.Off : MediaPreviewValue.On,
-            });
-        },
-        [changeSetting, currentMediaPreview],
     );
 
     const mediaPreviewOnChangeOff = useCallback<ChangeEventHandler<HTMLInputElement>>(
@@ -81,14 +105,6 @@ export const MediaPreviewAccountSettings: React.FC<{ roomId?: string }> = ({ roo
 
     return (
         <Root className="mx_MediaPreviewAccountSetting_Form">
-            {!roomId && (
-                <SettingsToggleInput
-                    name="hide_avatars"
-                    label={_t("settings|media_preview|hide_avatars")}
-                    checked={currentMediaPreview.invite_avatars === MediaPreviewValue.Off}
-                    onChange={avatarOnChange}
-                />
-            )}
             {/* Explict label here because htmlFor is not supported for linking to radiogroups */}
             <Field
                 id="mx_media_previews"
@@ -96,10 +112,6 @@ export const MediaPreviewAccountSettings: React.FC<{ roomId?: string }> = ({ roo
                 name="media_previews"
                 aria-label={_t("settings|media_preview|media_preview_label")}
             >
-                <Label>{_t("settings|media_preview|media_preview_label")}</Label>
-                <HelpMessage className="mx_MediaPreviewAccountSetting_RadioHelp">
-                    {_t("settings|media_preview|media_preview_description")}
-                </HelpMessage>
                 <InlineField
                     name="media_preview_off"
                     className="mx_MediaPreviewAccountSetting_Radio"

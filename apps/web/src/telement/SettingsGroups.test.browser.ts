@@ -8,7 +8,15 @@ Please see LICENSE files in the repository root for full details.
 import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { Field, Form, Label, RadioControl, SettingsToggleInput } from "@vector-im/compound-web";
+import {
+    Field,
+    Form,
+    InlineField,
+    Label,
+    RadioControl,
+    RadioInput,
+    SettingsToggleInput,
+} from "@vector-im/compound-web";
 import compoundBase from "@vector-im/compound-design-tokens/assets/web/css/cpd-common-base.css?raw";
 import compoundSemantic from "@vector-im/compound-design-tokens/assets/web/css/cpd-common-semantic.css?raw";
 import compoundLightTheme from "@vector-im/compound-design-tokens/assets/web/css/cpd-theme-light-base.css?raw";
@@ -58,6 +66,7 @@ import settingsSectionStyles from "../../res/css/views/settings/tabs/_SettingsSe
 import settingsTabStyles from "../../res/css/views/settings/tabs/_SettingsTab.pcss?raw";
 import notificationSettingsTabStyles from "../../res/css/views/settings/tabs/room/_NotificationSettingsTab.pcss?raw";
 import appearanceTabStyles from "../../res/css/views/settings/tabs/user/_AppearanceUserSettingsTab.pcss?raw";
+import mediaPreviewAccountSettingsStyles from "../../res/css/views/settings/tabs/user/_MediaPreviewAccountSettings.pcss?raw";
 import sidebarTabStyles from "../../res/css/views/settings/tabs/user/_SidebarUserSettingsTab.pcss?raw";
 import headingStyles from "../../res/css/views/typography/_Heading.pcss?raw";
 import compoundOverrides from "../../res/css/telement/_CompoundOverrides.pcss?raw";
@@ -106,6 +115,7 @@ const APP_STYLES = [
     settingsTabStyles,
     notificationSettingsTabStyles,
     appearanceTabStyles,
+    mediaPreviewAccountSettingsStyles,
     sidebarTabStyles,
     headingStyles,
     compoundOverrides,
@@ -748,6 +758,60 @@ describe.each(THEMES.map(([theme]) => theme))("Settings groups in %s", (theme) =
             expect([prefix.borderLeftStyle, prefix.borderRightStyle]).toEqual(["none", "none"]);
             expect(box("#phone-field").height).toBe(36);
         });
+    });
+
+    it("draws the media choices as a group of their own: labelled above their card, the help under it", () => {
+        const choice = (id: string, label: string): ReturnType<typeof createElement> =>
+            createElement(
+                InlineField,
+                {
+                    key: id,
+                    name: id,
+                    className: "mx_MediaPreviewAccountSetting_Radio",
+                    control: createElement(RadioInput, { id }),
+                },
+                createElement(Label, { htmlFor: id }, label),
+            );
+        const choices = renderToStaticMarkup(
+            createElement(
+                Form.Root,
+                { className: "mx_MediaPreviewAccountSetting_Form" },
+                createElement(
+                    Field,
+                    { "name": "media_previews", "role": "radiogroup", "aria-label": "Show media in timeline" },
+                    choice("off", "Always hide"),
+                    choice("private", "In private rooms"),
+                    choice("on", "Always show"),
+                ),
+            ),
+        );
+        const container = renderTab(
+            theme,
+            section(
+                "privacy",
+                "",
+                subsection(
+                    "media",
+                    "Show media in timeline",
+                    choices,
+                    "Hidden media can always be shown by selecting it",
+                ),
+            ),
+        );
+        const card = box("#media-card");
+        const rows = [...document.querySelectorAll(".mx_MediaPreviewAccountSetting_Radio")].map((row) =>
+            row.getBoundingClientRect(),
+        );
+
+        expectCard("#media-card", container);
+        expect(card.top - box("#media-label").bottom).toBe(8);
+        expect(box("#media-help").top - card.bottom).toBe(8);
+        expect(getComputedStyle(get("#media-help")).fontSize).toBe("13px");
+        // On the card's 12px content edges, 12px apart, as a settings list of radios
+        expect(rows[0].top - card.top).toBe(12);
+        expect(card.bottom - rows[2].bottom).toBe(12);
+        expect(rows[1].top - rows[0].bottom).toBe(12);
+        expect(rows[2].top - rows[1].bottom).toBe(12);
     });
 
     describe("the Appearance tab", () => {

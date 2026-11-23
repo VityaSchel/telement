@@ -33,7 +33,7 @@ import { IS_MAC } from "../../../../../Keyboard";
 import SpellCheckSettings from "../../SpellCheckSettings";
 import * as TimezoneHandler from "../../../../../TimezoneHandler";
 import { type BooleanSettingKey } from "../../../../../settings/Settings.tsx";
-import { MediaPreviewAccountSettings } from "./MediaPreviewAccountSettings.tsx";
+import { InviteAvatarsAccountSetting, MediaPreviewAccountSettings } from "./MediaPreviewAccountSettings.tsx";
 import { InviteRulesAccountSetting } from "./InviteRulesAccountSettings.tsx";
 import SettingsDropdown from "../../../elements/SettingsDropdown.tsx";
 
@@ -369,8 +369,17 @@ export default class PreferencesUserSettingsTab extends React.Component<EmptyObj
                     </SettingsSubsection>
 
                     <SettingsSubsection heading={_t("common|moderation_and_safety")} legacy={false}>
-                        <MediaPreviewAccountSettings />
+                        <InviteAvatarsAccountSetting />
                         <InviteRulesAccountSetting />
+                    </SettingsSubsection>
+
+                    {/* Telement: the choices are a group of their own, labelled above their card */}
+                    <SettingsSubsection
+                        heading={_t("settings|media_preview|media_preview_label")}
+                        description={_t("settings|media_preview|media_preview_description")}
+                        legacy={false}
+                    >
+                        <MediaPreviewAccountSettings />
                     </SettingsSubsection>
 
                     <SettingsSubsection heading={_t("settings|preferences|room_directory_heading")} formWrap>

@@ -14,7 +14,7 @@ import { getMockClientWithEventEmitter, mockClientMethodsServer, mockClientMetho
 import userEvent from "@testing-library/user-event";
 import { type MatrixClient, MatrixEvent } from "matrix-js-sdk/src/matrix";
 
-import { MediaPreviewAccountSettings } from "./MediaPreviewAccountSettings";
+import { InviteAvatarsAccountSetting, MediaPreviewAccountSettings } from "./MediaPreviewAccountSettings";
 import MatrixClientBackedController from "../../../../../settings/controllers/MatrixClientBackedController";
 import MatrixClientBackedSettingsHandler from "../../../../../settings/handlers/MatrixClientBackedSettingsHandler";
 import {
@@ -43,7 +43,12 @@ describe("MediaPreviewAccountSettings", () => {
     });
 
     it("should render", () => {
-        const { getByLabelText } = render(<MediaPreviewAccountSettings />);
+        const { getByLabelText } = render(
+            <>
+                <InviteAvatarsAccountSetting />
+                <MediaPreviewAccountSettings />
+            </>,
+        );
         // Defaults
         expect(getByLabelText("Hide avatars of room and inviter")).not.toBeChecked();
         expect(getByLabelText("Always hide")).not.toBeChecked();
@@ -51,8 +56,17 @@ describe("MediaPreviewAccountSettings", () => {
         expect(getByLabelText("Always show")).toBeChecked();
     });
 
+    it("should leave the avatar toggle, the group's label and its help out of the choices of media", () => {
+        const { getByRole, queryByLabelText, queryByText } = render(<MediaPreviewAccountSettings />);
+
+        expect(getByRole("radiogroup", { name: "Show media in timeline" })).toBeInTheDocument();
+        expect(queryByLabelText("Hide avatars of room and inviter")).not.toBeInTheDocument();
+        expect(queryByText("Show media in timeline")).not.toBeInTheDocument();
+        expect(queryByText("Hidden media can always be shown by selecting it")).not.toBeInTheDocument();
+    });
+
     it("should be able to toggle hide avatar", async () => {
-        const { getByLabelText } = render(<MediaPreviewAccountSettings />);
+        const { getByLabelText } = render(<InviteAvatarsAccountSetting />);
         // Defaults
         const element = getByLabelText("Hide avatars of room and inviter");
         await userEvent.click(element);
