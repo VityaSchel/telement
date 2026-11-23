@@ -221,6 +221,11 @@ describe("InviteDialog", () => {
         expect(screen.queryByText("Invite to Space")).toBeTruthy();
     });
 
+    it("should title a new chat like the room list's item that opens it", () => {
+        render(<InviteDialog kind={InviteKind.Dm} onFinished={vi.fn()} />);
+        expect(screen.getByRole("heading", { name: "Start chat" })).toBeInTheDocument();
+    });
+
     it("should label with room name", () => {
         render(<InviteDialog kind={InviteKind.Invite} roomId={roomId} onFinished={vi.fn()} />);
         expect(screen.getByText(`Invite to ${roomId}`)).toBeInTheDocument();

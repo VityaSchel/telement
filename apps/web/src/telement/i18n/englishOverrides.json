@@ -1,4 +1,8 @@
 {
+    "action|start_chat": {
+        "upstream": "Start chat",
+        "telement": "New message"
+    },
     "auth|change_password_action": {
         "upstream": "Change Password",
         "telement": "Change password"

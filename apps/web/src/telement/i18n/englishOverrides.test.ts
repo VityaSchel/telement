@@ -167,6 +167,8 @@ describe("registerEnglishOverrides", () => {
         expect(_t("timeline|typing_indicator|more_users", { names: "Alice, Bob", count: 2 })).toBe(
             "Alice, Bob and 2 others are typing…",
         );
+        // Telegram's name for the room list's item that starts a chat, which also titles the dialog it opens
+        expect(_t("action|start_chat" as TranslationKey)).toBe("New message");
         // Telement has no bug reporting, so the dialog doesn't ask for a bug report
         expect(_t("room_settings|advanced|upgrade_warning_dialog_report_bug_prompt", { brand: "Telement" })).toBe(
             "This usually only affects how the room is processed on the server.",

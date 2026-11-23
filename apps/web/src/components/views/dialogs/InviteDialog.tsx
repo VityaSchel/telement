@@ -1322,7 +1322,9 @@ export default class InviteDialog extends React.PureComponent<Props, IInviteDial
 
         let title;
         if (this.props.kind === InviteKind.Dm) {
-            title = _t("space|add_existing_room_space|dm_heading");
+            // Telement: named like the room list's item that opens it, so the two read the same in every language. The
+            // key is shared-components', which apps/web's list of keys doesn't include
+            title = _t("action|start_chat" as TranslationKey);
         } else if (this.props.kind === InviteKind.Invite) {
             const roomId = this.props.roomId;
             const room = MatrixClientPeg.get()?.getRoom(roomId);
