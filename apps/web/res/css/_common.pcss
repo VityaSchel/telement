@@ -93,6 +93,19 @@ Please see LICENSE files in the repository root for full details.
     &:has(> [data-settings-row]:last-child, > form:last-child > [data-settings-row]:last-child) {
         padding-block-end: var(--tl-inset-menu);
     }
+
+    /* A field at the card's top, such as the phone number, sits 16px under the card's edge, as far as fields one under
+       another are apart (_Field.pcss), so that the label floating on its border is as far inside the card as the card's
+       other content. Only as specific as the card, so that a fieldset inside a card keeps no padding */
+    &:where(
+        :has(
+            > :is(.mx_Field, .mx_CopyableText_field):first-child,
+            > form:first-child > .mx_Field:first-child,
+            > form:first-child > div:first-child > .mx_Field:first-child
+        )
+    ) {
+        padding-block-start: var(--cpd-space-4x);
+    }
 }
 
 @define-mixin settingsGroupHelp {

@@ -817,6 +817,109 @@ describe.each(THEMES.map(([theme]) => theme))("Settings groups in %s", (theme) =
             expect([prefix.borderLeftStyle, prefix.borderRightStyle]).toEqual(["none", "none"]);
             expect(box("#phone-field").height).toBe(36);
         });
+
+        it.each([
+            [
+                "the phone number, whose label always floats",
+                `<form>
+                    <div class="mx_Field mx_Field_input mx_Field_labelAlwaysTopLeft" id="field">
+                        <span class="mx_Field_prefix">
+                            <div class="mx_Dropdown mx_PhoneNumbers_country mx_CountryDropdown">+1</div>
+                        </span>
+                        <input type="text" id="input" placeholder="Phone number" />
+                        <label for="input" id="label">Phone number</label>
+                    </div>
+                    <div class="mx_AccessibleButton" id="last">Add</div>
+                </form>`,
+            ],
+            [
+                "an email address",
+                `<form>
+                    <div class="mx_Field mx_Field_input" id="field">
+                        <input type="text" id="input" placeholder="Email address" value="a@example.org" />
+                        <label for="input" id="label">Email address</label>
+                    </div>
+                    <div class="mx_AccessibleButton" id="last">Add</div>
+                </form>`,
+            ],
+            [
+                "a password on a row of its own",
+                `<form>
+                    <div class="">
+                        <div class="mx_Field mx_Field_input" id="field">
+                            <input type="password" id="input" placeholder="Current password" value="secret" />
+                            <label for="input" id="label">Current password</label>
+                        </div>
+                    </div>
+                    <div class="mx_AccessibleButton" id="last">Change password</div>
+                </form>`,
+            ],
+            [
+                "the room's main address",
+                `<div class="mx_Field mx_Field_select" id="field">
+                    <select id="input"><option>not specified</option></select>
+                    <label for="input" id="label">Main address</label>
+                </div>
+                <div id="last">Publish this room</div>`,
+            ],
+            [
+                "the room's ID",
+                `<div class="mx_CopyableText_field" id="field">
+                    <span class="mx_CopyableText_label" id="label">Internal room ID</span>
+                    <span class="mx_CopyableText mx_CopyableText_border">!room:server.org</span>
+                </div>
+                <div id="last">This room isn’t bridging messages</div>`,
+            ],
+        ])(
+            "puts %s 16px under its card's edge when it is first on it, its floating label as far inside as other content",
+            (_name, content) => {
+                for (const card of [
+                    subsection("group", "Phone numbers", content),
+                    `<fieldset class="mx_SettingsFieldset">
+                        <legend class="mx_SettingsFieldset_legend">Phone numbers</legend>
+                        <div class="mx_SettingsFieldset_content" id="group-card">${content}</div>
+                    </fieldset>`,
+                ]) {
+                    renderTab(theme, section("account", "", card));
+
+                    expect(box("#field").top - box("#group-card").top).toBe(16);
+                    expect(box("#label").top - box("#group-card").top).toBeGreaterThanOrEqual(8);
+                    expect(box("#group-card").bottom - box("#last").bottom).toBe(12);
+                }
+            },
+        );
+
+        it("leaves a field under a card's other content, and one in a fieldset inside a card, where they are", () => {
+            const field = (id: string): string => `
+                <div class="mx_Field mx_Field_input mx_Field_labelAlwaysTopLeft" id="${id}">
+                    <input type="text" id="${id}-input" placeholder="Phone number" />
+                    <label for="${id}-input">Phone number</label>
+                </div>
+            `;
+            renderTab(
+                theme,
+                section(
+                    "account",
+                    "",
+                    subsection(
+                        "numbers",
+                        "Phone numbers",
+                        `<div id="number">+1 555</div><form>${field("new")}</form>`,
+                    ) +
+                        subsection(
+                            "discovery",
+                            "Discovery",
+                            `<fieldset class="mx_SettingsFieldset">
+                                <div class="mx_SettingsFieldset_content" id="nested">${field("server")}</div>
+                            </fieldset>`,
+                        ),
+                ),
+            );
+
+            expect(box("#number").top - box("#numbers-card").top).toBe(12);
+            expect(box("#new").top - box("#number").bottom).toBe(16);
+            expect(box("#server").top - box("#nested").top).toBe(0);
+        });
     });
 
     it("draws the media choices as a group of their own: labelled above their card, the help under it", () => {
