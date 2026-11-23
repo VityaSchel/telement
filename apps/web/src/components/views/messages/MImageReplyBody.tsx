@@ -27,7 +27,6 @@ import ImageView from "../elements/ImageView";
 import { type IBodyProps } from "./IBodyProps";
 import { suggestedSize as suggestedImageSize } from "../../../settings/enums/ImageSize";
 import { MatrixClientPeg } from "../../../MatrixClientPeg";
-import RoomContext, { TimelineRenderingType } from "../../../contexts/RoomContext";
 import { blobIsAnimated, mayBeAnimated } from "../../../utils/Image";
 import { createReconnectedListener } from "../../../utils/connection";
 import MediaProcessingError from "./shared/MediaProcessingError";
@@ -63,9 +62,6 @@ export interface ImageBodyBaseProps extends IBodyProps {
 }
 
 export class ImageBodyBaseInner extends React.Component<ImageBodyBaseProps, IState> {
-    public static contextType = RoomContext;
-    declare public context: React.ContextType<typeof RoomContext>;
-
     private unmounted = false;
     private image = createRef<HTMLImageElement>();
     private placeholder = createRef<HTMLDivElement>();
@@ -536,19 +532,6 @@ export class ImageBodyBaseInner extends React.Component<ImageBodyBaseProps, ISta
         return null;
     }
 
-    protected getFileBody(): ReactNode {
-        if (this.props.forExport) return null;
-        const hasMessageActionBar =
-            this.context.timelineRenderingType === TimelineRenderingType.Room ||
-            this.context.timelineRenderingType === TimelineRenderingType.Pinned ||
-            this.context.timelineRenderingType === TimelineRenderingType.Search ||
-            this.context.timelineRenderingType === TimelineRenderingType.Thread ||
-            this.context.timelineRenderingType === TimelineRenderingType.ThreadsList;
-        if (!hasMessageActionBar) {
-            return renderMBody({ ...this.props, showFileInfo: false }, FileBodyFactory);
-        }
-    }
-
     public render(): React.ReactNode {
         const content = this.props.mxEvent.getContent<ImageContent>();
 
@@ -587,14 +570,8 @@ export class ImageBodyBaseInner extends React.Component<ImageBodyBaseProps, ISta
         }
 
         const thumbnail = this.messageContent(contentUrl, thumbUrl, content);
-        const fileBody = this.getFileBody();
 
-        return (
-            <div className="mx_MImageBody">
-                {thumbnail}
-                {fileBody}
-            </div>
-        );
+        return <div className="mx_MImageBody">{thumbnail}</div>;
     }
 }
 

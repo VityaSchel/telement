@@ -5,7 +5,7 @@
  * Please see LICENSE files in the repository root for full details.
  */
 
-import React, { type ComponentType, type JSX, type MouseEvent } from "react";
+import React, { type ComponentType, type JSX } from "react";
 import classNames from "classnames";
 import { Button, IconButton, Tooltip } from "@vector-im/compound-web";
 import {
@@ -28,11 +28,9 @@ import { MediaBody } from "../MediaBody";
 export enum FileBodyViewState {
     /** Export-only rendering where the info row links to the source file. */
     EXPORT = "EXPORT",
-    /** Encrypted file before decryption has completed; shows the button that starts the flow. */
-    DECRYPTION_PENDING = "DECRYPTION_PENDING",
-    /** Encrypted file after decryption; renders the sandboxed iframe download path. */
+    /** Encrypted file. */
     ENCRYPTED = "ENCRYPTED",
-    /** Unencrypted file with a direct download link. */
+    /** Unencrypted file. */
     UNENCRYPTED = "UNENCRYPTED",
     /** Fallback for missing or unusable file metadata. */
     INVALID = "INVALID",
@@ -75,22 +73,9 @@ export interface FileBodyViewSnapshot {
      */
     infoHref?: string;
     /**
-     * Whether to render download controls for the current rendering branch.
-     */
-    showDownload?: boolean;
-    /**
-     * Optional download label (normally file/action text). Defaults to 'Download'.
+     * Optional label of the download control in the info row. Defaults to 'Download'.
      */
     downloadLabel?: string;
-    /**
-     * Optional title for encrypted iframe download flow.
-     * Defaults to `downloadLabel`.
-     */
-    downloadTitle?: string;
-    /**
-     * Optional URL used for `UNENCRYPTED` download links.
-     */
-    downloadHref?: string;
     /**
      * Whether to render a control, inside the info row, that opens the file in a viewer. Only set for
      * file types the host knows how to display, so no action icons appear by default.
@@ -104,33 +89,20 @@ export interface FileBodyViewSnapshot {
     openLabel?: string;
     /**
      * Whether to render a download control inside the info row. Set alongside {@link showOpen} so that
-     * downloading stays visible as an explicit action once the row has an action for opening. Distinct
-     * from {@link showDownload}, which is the separate full-width download control below the row.
+     * downloading stays visible as an explicit action once the row has an action for opening.
      */
     showInlineDownload?: boolean;
 }
 
 export interface FileBodyViewActions {
     /**
-     * Click handler for the info row.
+     * Click handler for the info row and its download control.
      */
     onInfoClick?: () => void;
-    /**
-     * Click handler for a download button.
-     */
-    onDownloadClick?: () => void;
     /**
      * Click handler for the open-in-viewer button.
      */
     onOpenClick?: () => void;
-    /**
-     * Click handler for the unencrypted download anchor.
-     */
-    onDownloadLinkClick?: (event: MouseEvent<HTMLAnchorElement>) => void;
-    /**
-     * Load handler for encrypted-download iframe.
-     */
-    onDownloadIframeLoad?: () => void;
 }
 
 /**
@@ -148,16 +120,6 @@ interface FileBodyViewProps {
      * Optional CSS class for host-level styling.
      */
     className?: string;
-
-    /**
-     * Optional iframe ref for encrypted download flow
-     */
-    refIFrame?: React.RefObject<HTMLIFrameElement>;
-
-    /**
-     * Optional hidden anchor ref used for encrypted download flow
-     */
-    refLink?: React.RefObject<HTMLAnchorElement>;
 }
 
 /**
@@ -175,34 +137,19 @@ function getInfoIcon(infoIcon?: FileBodyViewInfoIcon): ComponentType<React.SVGAt
 }
 
 /**
- * Renders the body of a file message for info, export, and download flows.
+ * Renders the body of a file message: its info row, which links to the source file in an export (`EXPORT`), or a
+ * message for a file it can't use (`INVALID`).
  *
- * Rendering is selected by `snapshot.state` from the view model and supports:
- * - export link (`EXPORT`)
- * - encrypted download flows (`DECRYPTION_PENDING`, `ENCRYPTED`)
- * - unencrypted download flow (`UNENCRYPTED`)
- * - invalid-file fallback (`INVALID`)
- *
- * Visibility/content for the info row and download controls are driven by snapshot fields:
- * - `showInfo`, `infoLabel`, `infoTooltip`, `infoIcon`, `infoHref`
- * - `showDownload`, `downloadLabel`, `downloadTitle`, `downloadHref`
- *
- * Common usage patterns:
- * - info-only display: set `showInfo: true`, `showDownload: false`
- * - export link (`EXPORT`)
- * - download-only display: set `showInfo: false`, `showDownload: true`
- *
- * Note on using the encrypted iframe, `ENCRYPTED`:
- * To make this rendering branch work, it is expected that a `usercontent/` target
- * is available relative to the root of the application as is described in detail here,
- * https://github.com/element-hq/element-web/blob/develop/docs/usercontent.md
+ * Visibility and content of the info row are driven by the snapshot's `showInfo`, `infoLabel`, `infoTooltip`,
+ * `infoIcon` and `infoHref`, and its actions by `showOpen`, `openLabel`, `showInlineDownload` and `downloadLabel`.
+ * Telement has no download control under the row: the message menu's "Save as…" saves the file.
  *
  * @example
  * ```tsx
  * <FileBodyView vm={fileBodyViewModel} />
  * ```
  */
-export function FileBodyView({ vm, refIFrame, refLink, className }: Readonly<FileBodyViewProps>): JSX.Element {
+export function FileBodyView({ vm, className }: Readonly<FileBodyViewProps>): JSX.Element {
     const { translate: _t } = useI18n();
 
     const {
@@ -212,10 +159,7 @@ export function FileBodyView({ vm, refIFrame, refLink, className }: Readonly<Fil
         infoTooltip,
         infoIcon,
         infoHref,
-        showDownload,
         downloadLabel,
-        downloadTitle,
-        downloadHref,
         showOpen,
         openLabel,
         showInlineDownload,
@@ -289,8 +233,6 @@ export function FileBodyView({ vm, refIFrame, refLink, className }: Readonly<Fil
 
     const classes = classNames(styles.content, className);
 
-    const resolvedDownloadTitle = downloadTitle ?? resolvedDownloadLabel;
-
     switch (state) {
         case FileBodyViewState.EXPORT:
             return (
@@ -299,79 +241,9 @@ export function FileBodyView({ vm, refIFrame, refLink, className }: Readonly<Fil
                 </span>
             );
 
-        case FileBodyViewState.DECRYPTION_PENDING:
-            return (
-                <span className={classes}>
-                    {info}
-                    {showDownload && (
-                        <div data-type="download">
-                            {/* Decrypt/download is triggered by the view model action, not by an anchor `href`. */}
-                            <Button size="md" kind="secondary" Icon={DownloadIcon} onClick={vm.onDownloadClick}>
-                                {resolvedDownloadLabel}
-                            </Button>
-                        </div>
-                    )}
-                </span>
-            );
-
         case FileBodyViewState.ENCRYPTED:
-            return (
-                <span className={classes}>
-                    {info}
-                    {showDownload && (
-                        <div data-type="download">
-                            <div aria-hidden style={{ display: "none" }}>
-                                {/*
-                                 * Add dummy copy of the button
-                                 * We'll use it to learn how the download button
-                                 * would have been styled if it was rendered inline.
-                                 * this violates multiple eslint rules so ignore it completely */}
-                                {/* oxlint-disable-next-line jsx-a11y/control-has-associated-label */}
-                                <Button size="md" kind="secondary" Icon={DownloadIcon} as="a" ref={refLink} />
-                            </div>
-                            {/*
-                            TODO: Move iframe (and dummy link) into FileDownloader.
-                            We currently have it set up this way because of styles applied to the iframe
-                            itself which cannot be easily handled/overridden by the FileDownloader. In
-                            future, the download link may disappear entirely at which point it could also
-                            be suitable to just remove this bit of code.
-                            */}
-                            <iframe
-                                aria-hidden
-                                title={resolvedDownloadTitle}
-                                src="usercontent/"
-                                onLoad={vm.onDownloadIframeLoad}
-                                ref={refIFrame}
-                                sandbox="allow-scripts allow-downloads"
-                            />
-                        </div>
-                    )}
-                </span>
-            );
-
         case FileBodyViewState.UNENCRYPTED:
-            return (
-                <span className={classes}>
-                    {info}
-                    {showDownload && (
-                        <div data-type="download">
-                            {/* Unencrypted media uses an anchor element with VM-controlled click behavior. */}
-                            <Button
-                                size="md"
-                                kind="secondary"
-                                Icon={DownloadIcon}
-                                as="a"
-                                href={downloadHref}
-                                target="_blank"
-                                rel="noreferrer noopener"
-                                onClick={vm.onDownloadLinkClick}
-                            >
-                                {resolvedDownloadLabel}
-                            </Button>
-                        </div>
-                    )}
-                </span>
-            );
+            return <span className={classes}>{info}</span>;
 
         case FileBodyViewState.INVALID:
         default:

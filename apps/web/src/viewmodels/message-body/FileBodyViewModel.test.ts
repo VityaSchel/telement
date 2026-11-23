@@ -8,28 +8,13 @@
 // @vitest-environment happy-dom
 
 import { EventType, MatrixEvent } from "matrix-js-sdk/src/matrix";
-import { logger } from "matrix-js-sdk/src/logger";
-import { createRef, type RefObject } from "react";
 import { FileBodyViewInfoIcon, FileBodyViewState } from "@element-hq/web-shared-components";
 import { vi, describe, it, expect, beforeEach } from "vitest";
 
-import Modal from "../../Modal";
-import { TimelineRenderingType } from "../../contexts/RoomContext";
 import { type MediaEventHelper } from "../../utils/MediaEventHelper";
 import { FileBodyViewModel } from "./FileBodyViewModel";
-import ErrorDialog from "../../components/views/dialogs/ErrorDialog";
 import { openDocumentViewer } from "../../utils/documentViewer";
 import { saveMediaAs } from "../../telement/media/saveMediaAs";
-
-const mockDownload = vi.fn();
-
-vi.mock("../../utils/FileDownloader", () => ({
-    FileDownloader: vi.fn().mockImplementation(function () {
-        return {
-            download: mockDownload,
-        };
-    }),
-}));
 
 vi.mock("../../telement/media/saveMediaAs", () => ({ saveMediaAs: vi.fn().mockResolvedValue(undefined) }));
 
@@ -86,11 +71,7 @@ describe("FileBodyViewModel", () => {
         new FileBodyViewModel({
             mxEvent: mkMediaEvent({}),
             mediaEventHelper: mkMediaEventHelper({ encrypted: false }),
-            showFileInfo: false,
             forExport: false,
-            timelineRenderingType: TimelineRenderingType.File,
-            refIFrame: createRef<HTMLIFrameElement>() as RefObject<HTMLIFrameElement>,
-            refLink: createRef<HTMLAnchorElement>() as RefObject<HTMLAnchorElement>,
             documentPreviewsEnabled: false,
             ...overrides,
         });
@@ -99,13 +80,32 @@ describe("FileBodyViewModel", () => {
         vi.clearAllMocks();
     });
 
-    it("shows unencrypted download snapshot in file rendering type", () => {
+    it("shows the file's info row with no download control under it, as the message menu saves the file", () => {
         const vm = createVm();
-        expect(vm.getSnapshot()).toMatchObject({
+
+        expect(vm.getSnapshot()).toEqual({
             state: FileBodyViewState.UNENCRYPTED,
-            showInfo: false,
-            showDownload: true,
-            downloadHref: "https://server/file",
+            showInfo: true,
+            infoLabel: "alt",
+            infoTooltip: "alt",
+            infoIcon: FileBodyViewInfoIcon.ATTACHMENT,
+            downloadLabel: "Save as…",
+            showOpen: false,
+            openLabel: undefined,
+            showInlineDownload: false,
+        });
+    });
+
+    it("shows an encrypted file's info row", () => {
+        const vm = createVm({
+            mediaEventHelper: mkMediaEventHelper({ encrypted: true }),
+            mxEvent: mkMediaEvent({ body: "my-file.pdf", file: { url: "mxc://server/file" } }),
+        });
+
+        expect(vm.getSnapshot()).toMatchObject({
+            state: FileBodyViewState.ENCRYPTED,
+            showInfo: true,
+            infoLabel: "my-file.pdf",
         });
     });
 
@@ -114,24 +114,19 @@ describe("FileBodyViewModel", () => {
         { msgtype: "m.audio", expectedIcon: FileBodyViewInfoIcon.AUDIO },
         { msgtype: "m.video", expectedIcon: FileBodyViewInfoIcon.VIDEO },
     ])("shows generic placeholder info for $msgtype", ({ msgtype, expectedIcon }) => {
-        const vm = createVm({
-            mxEvent: mkMediaEvent({ msgtype }),
-            showFileInfo: true,
-        });
+        const vm = createVm({ mxEvent: mkMediaEvent({ msgtype }) });
 
         expect(vm.getSnapshot()).toMatchObject({
             state: FileBodyViewState.UNENCRYPTED,
             showInfo: true,
             infoLabel: "alt",
             infoIcon: expectedIcon,
-            showDownload: false,
         });
     });
 
     it("shows export snapshot with export href", () => {
         const vm = createVm({
             forExport: true,
-            showFileInfo: true,
             mxEvent: mkMediaEvent({ url: "https://server/export-file" }),
         });
 
@@ -148,161 +143,23 @@ describe("FileBodyViewModel", () => {
         async (encrypted) => {
             const mxEvent = mkMediaEvent({});
             const mediaEventHelper = mkMediaEventHelper({ encrypted, fileName: "placeholder.txt" });
-            const vm = createVm({ showFileInfo: true, mxEvent, mediaEventHelper });
+            const vm = createVm({ mxEvent, mediaEventHelper });
 
             await vm.onInfoClick();
 
             expect(saveMediaAs).toHaveBeenCalledWith(mxEvent, mediaEventHelper);
-            expect(mockDownload).not.toHaveBeenCalled();
         },
     );
 
-    it("labels the download control in the info row Save as…", () => {
-        const vm = createVm({ showFileInfo: true, timelineRenderingType: TimelineRenderingType.Room });
+    it("doesn't save from an export, or without a media helper to fetch the file", async () => {
+        await createVm({ forExport: true }).onInfoClick();
+        await createVm({ mediaEventHelper: undefined }).onInfoClick();
 
-        expect(vm.getSnapshot().downloadLabel).toBe("Save as…");
-    });
-
-    it("decrypts encrypted content and downloads on iframe load", async () => {
-        const blob = new Blob(["encrypted"], { type: "application/octet-stream" });
-        const vm = createVm({
-            mediaEventHelper: mkMediaEventHelper({ encrypted: true, blob, fileName: "encrypted.bin" }),
-            mxEvent: mkMediaEvent({ file: { url: "mxc://server/file" } }),
-        });
-
-        await vm.onDownloadClick();
-
-        expect(vm.getSnapshot().state).toBe(FileBodyViewState.ENCRYPTED);
-
-        vm.onDownloadIframeLoad();
-
-        expect(mockDownload).toHaveBeenCalledWith(
-            expect.objectContaining({
-                blob,
-                name: "encrypted.bin",
-                autoDownload: true,
-                opts: expect.objectContaining({
-                    textContent: expect.any(String),
-                }),
-            }),
-        );
-    });
-
-    it("downloads unencrypted source as blob in onDownloadLinkClick", async () => {
-        const blob = new Blob(["direct-download"], { type: "text/plain" });
-        const vm = createVm({
-            mediaEventHelper: mkMediaEventHelper({ encrypted: false, blob, fileName: "direct.txt" }),
-            mxEvent: mkMediaEvent({ msgtype: "m.file", url: "https://server/direct.txt" }),
-        });
-
-        const click = vi.spyOn(HTMLAnchorElement.prototype, "click");
-        vi.spyOn(URL, "createObjectURL");
-        const event = {
-            preventDefault: vi.fn(),
-            stopPropagation: vi.fn(),
-        } as any;
-
-        vm.onDownloadLinkClick(event);
-        await Promise.resolve();
-
-        expect(event.preventDefault).toHaveBeenCalled();
-        expect(event.stopPropagation).toHaveBeenCalled();
-        expect(URL.createObjectURL).toHaveBeenCalledWith(blob);
-        expect(click).toHaveBeenCalled();
-    });
-
-    it("shows decrypt error dialog when decrypt fails", async () => {
-        const vm = createVm({
-            mediaEventHelper: {
-                media: { isEncrypted: true },
-                sourceBlob: { value: Promise.reject(new Error("decrypt failed")) },
-                fileName: "broken.bin",
-            } as unknown as MediaEventHelper,
-            mxEvent: mkMediaEvent({ file: { url: "mxc://server/file" } }),
-        });
-        const warnSpy = vi.spyOn(logger, "warn").mockImplementation(() => {});
-        const dialogSpy = vi.spyOn(Modal, "createDialog").mockReturnValue({ close: vi.fn() } as any);
-
-        await vm.onDownloadClick();
-
-        expect(warnSpy).toHaveBeenCalled();
-        expect(dialogSpy).toHaveBeenCalledWith(
-            ErrorDialog,
-            expect.objectContaining({
-                title: "Error",
-                description: expect.stringMatching(/decrypt/i),
-            }),
-        );
-        expect(vm.getSnapshot().state).toBe(FileBodyViewState.DECRYPTION_PENDING);
-    });
-
-    it("resets decrypted state when mxEvent changes", async () => {
-        const vm = createVm({
-            mediaEventHelper: mkMediaEventHelper({ encrypted: true }),
-            mxEvent: mkMediaEvent({ file: { url: "mxc://server/file-a" } }),
-        });
-
-        await vm.onDownloadClick();
-        expect(vm.getSnapshot().state).toBe(FileBodyViewState.ENCRYPTED);
-
-        vm.setProps({
-            mxEvent: mkMediaEvent({ body: "new", file: { url: "mxc://server/file-b" } }),
-        });
-
-        expect(vm.getSnapshot()).toMatchObject({
-            state: FileBodyViewState.DECRYPTION_PENDING,
-        });
-    });
-
-    it("keeps decrypted state when non-event props change", async () => {
-        const vm = createVm({
-            mediaEventHelper: mkMediaEventHelper({ encrypted: true }),
-            mxEvent: mkMediaEvent({ file: { url: "mxc://server/file-a" } }),
-        });
-
-        await vm.onDownloadClick();
-        expect(vm.getSnapshot().state).toBe(FileBodyViewState.ENCRYPTED);
-
-        vm.setProps({
-            timelineRenderingType: TimelineRenderingType.Thread,
-        });
-
-        expect(vm.getSnapshot()).toMatchObject({
-            state: FileBodyViewState.ENCRYPTED,
-            showDownload: false,
-        });
-    });
-
-    it("uses filename-like downloadTitle in encrypted mode when showFileInfo is false", () => {
-        const vm = createVm({
-            showFileInfo: false,
-            mediaEventHelper: mkMediaEventHelper({ encrypted: true }),
-            mxEvent: mkMediaEvent({ body: "my-file.pdf", file: { url: "mxc://server/file" } }),
-        });
-
-        expect(vm.getSnapshot()).toMatchObject({
-            state: FileBodyViewState.DECRYPTION_PENDING,
-            downloadTitle: "my-file.pdf",
-        });
-    });
-
-    it("hides download in thread rendering even when showFileInfo is false", () => {
-        const vm = createVm({
-            showFileInfo: false,
-            timelineRenderingType: TimelineRenderingType.Thread,
-        });
-
-        expect(vm.getSnapshot()).toMatchObject({
-            state: FileBodyViewState.UNENCRYPTED,
-            showDownload: false,
-        });
+        expect(saveMediaAs).not.toHaveBeenCalled();
     });
 
     it("returns INVALID snapshot when content URL is missing", () => {
-        const vm = createVm({
-            mxEvent: mkMediaEvent({ url: undefined }),
-            showFileInfo: true,
-        });
+        const vm = createVm({ mxEvent: mkMediaEvent({ url: undefined }) });
 
         expect(vm.getSnapshot()).toMatchObject({
             state: FileBodyViewState.INVALID,
@@ -312,22 +169,19 @@ describe("FileBodyViewModel", () => {
         });
     });
 
-    it("does not download on info click when showFileInfo is false", async () => {
-        const vm = createVm({ showFileInfo: false });
+    it("follows a new event", () => {
+        const vm = createVm();
 
-        await vm.onInfoClick();
+        vm.setProps({ mxEvent: mkMediaEvent({ body: "new.txt" }) });
 
-        expect(mockDownload).not.toHaveBeenCalled();
-        expect(saveMediaAs).not.toHaveBeenCalled();
+        expect(vm.getSnapshot()).toMatchObject({ state: FileBodyViewState.UNENCRYPTED, infoLabel: "new.txt" });
     });
 
-    it("keeps unencrypted snapshot when download is clicked without mediaEventHelper", async () => {
+    it("keeps the encrypted state when the media helper is unknown", () => {
         const vm = createVm({
             mediaEventHelper: undefined,
             mxEvent: mkMediaEvent({ file: { url: "mxc://server/file" } }),
         });
-
-        await vm.onDownloadClick();
 
         expect(vm.getSnapshot().state).toBe(FileBodyViewState.UNENCRYPTED);
     });
@@ -344,8 +198,6 @@ describe("FileBodyViewModel", () => {
             const vm = createPdfVm({
                 documentPreviewsEnabled: false,
                 mxEvent: mkMediaEvent(pdf),
-                showFileInfo: true,
-                timelineRenderingType: TimelineRenderingType.Room,
             });
 
             expect(vm.getSnapshot().showOpen).toBe(false);
@@ -355,8 +207,6 @@ describe("FileBodyViewModel", () => {
         it("offers the viewer for a PDF shown as a file in the timeline", () => {
             const vm = createPdfVm({
                 mxEvent: mkMediaEvent(pdf),
-                showFileInfo: true,
-                timelineRenderingType: TimelineRenderingType.Room,
             });
 
             expect(vm.getSnapshot()).toMatchObject({ showOpen: true, openLabel: "Open PDF" });
@@ -366,12 +216,10 @@ describe("FileBodyViewModel", () => {
             const vm = createPdfVm({
                 mxEvent: mkMediaEvent({ ...pdf, file: { url: "mxc://server/file" } }),
                 mediaEventHelper: mkMediaEventHelper({ encrypted: true }),
-                showFileInfo: true,
-                timelineRenderingType: TimelineRenderingType.Room,
             });
 
             expect(vm.getSnapshot()).toMatchObject({
-                state: FileBodyViewState.DECRYPTION_PENDING,
+                state: FileBodyViewState.ENCRYPTED,
                 showOpen: true,
             });
         });
@@ -382,34 +230,26 @@ describe("FileBodyViewModel", () => {
         ])("does not offer the viewer for %s", (_label, content) => {
             const vm = createPdfVm({
                 mxEvent: mkMediaEvent(content),
-                showFileInfo: true,
-                timelineRenderingType: TimelineRenderingType.Room,
             });
 
             expect(vm.getSnapshot().showOpen).toBe(false);
         });
 
-        it("does not offer the viewer in the download-only panels", () => {
-            const vm = createPdfVm({ mxEvent: mkMediaEvent(pdf), showFileInfo: false });
-
-            expect(vm.getSnapshot().showOpen).toBe(false);
-        });
-
         it("does not offer the viewer in an export", () => {
-            const vm = createPdfVm({ mxEvent: mkMediaEvent(pdf), showFileInfo: true, forExport: true });
+            const vm = createPdfVm({ mxEvent: mkMediaEvent(pdf), forExport: true });
 
             expect(vm.getSnapshot().showOpen).toBeUndefined();
         });
 
         it("does not offer the viewer without a media helper to fetch the bytes", () => {
-            const vm = createPdfVm({ mxEvent: mkMediaEvent(pdf), mediaEventHelper: undefined, showFileInfo: true });
+            const vm = createPdfVm({ mxEvent: mkMediaEvent(pdf), mediaEventHelper: undefined });
 
             expect(vm.getSnapshot().showOpen).toBe(false);
         });
 
         it("opens the viewer for its own event on click", () => {
             const mxEvent = mkMediaEvent(pdf);
-            const vm = createPdfVm({ mxEvent, showFileInfo: true, timelineRenderingType: TimelineRenderingType.Room });
+            const vm = createPdfVm({ mxEvent });
 
             vm.onOpenClick();
 
@@ -423,8 +263,6 @@ describe("FileBodyViewModel", () => {
                 const vm = createVm({
                     documentPreviewsEnabled: true,
                     mxEvent: mkMediaEvent(markdown),
-                    showFileInfo: true,
-                    timelineRenderingType: TimelineRenderingType.Room,
                 });
 
                 expect(vm.getSnapshot()).toMatchObject({ showOpen: true, openLabel: "Open Markdown" });
@@ -434,8 +272,6 @@ describe("FileBodyViewModel", () => {
                 const vm = createVm({
                     documentPreviewsEnabled: false,
                     mxEvent: mkMediaEvent(markdown),
-                    showFileInfo: true,
-                    timelineRenderingType: TimelineRenderingType.Room,
                 });
 
                 expect(vm.getSnapshot().showOpen).toBe(false);
@@ -446,8 +282,6 @@ describe("FileBodyViewModel", () => {
                 const vm = createVm({
                     documentPreviewsEnabled: true,
                     mxEvent,
-                    showFileInfo: true,
-                    timelineRenderingType: TimelineRenderingType.Room,
                 });
 
                 vm.onOpenClick();

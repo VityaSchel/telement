@@ -130,23 +130,6 @@ describe("MBodyFactory", () => {
         });
 
     describe("renderMBody", () => {
-        it("renders download button for m.file in file rendering type", () => {
-            const mediaEvent = mkEvent("m.file");
-
-            const { container } = renderInRoomContext(
-                renderMBody({
-                    ...props,
-                    mxEvent: mediaEvent,
-                    mediaEventHelper: new MediaEventHelper(mediaEvent),
-                    showFileInfo: false,
-                }),
-                TimelineRenderingType.File,
-            );
-
-            expect(screen.getByRole("link", { name: "Download" })).toBeInTheDocument();
-            expect(container).toMatchSnapshot();
-        });
-
         it.each(["m.audio", "m.text"])("returns null for unsupported msgtype %s", (msgtype) => {
             expect(renderMBody({ ...props, mxEvent: mkEvent(msgtype) })).toBeNull();
         });
@@ -180,7 +163,7 @@ describe("MBodyFactory", () => {
         });
     });
 
-    describe("media in the files panel", () => {
+    describe("media in lists of messages", () => {
         const renderMedia = (msgtype: string, timelineRenderingType: TimelineRenderingType): RenderResult => {
             const mimetype = msgtype === "m.image" ? "image/png" : "video/mp4";
             const mediaEvent = mkEvent(msgtype, { body: "holiday", info: { mimetype, w: 320, h: 240, size: 1024 } });
@@ -190,21 +173,24 @@ describe("MBodyFactory", () => {
             );
         };
 
-        it.each(["m.image", "m.video"])(
-            "puts no download button under %s, which the message menu's Save as… saves",
-            async (msgtype) => {
-                renderMedia(msgtype, TimelineRenderingType.File);
+        it.each(
+            ["m.image", "m.video"].flatMap((msgtype) =>
+                Object.values(TimelineRenderingType).map((type) => [msgtype, type] as const),
+            ),
+        )(
+            "puts no download button under %s in the %s timeline, which the message menu's Save as… saves",
+            async (msgtype, timelineRenderingType) => {
+                const { container } = renderMedia(msgtype, timelineRenderingType);
 
-                await waitFor(() => expect(document.querySelector(".mx_MFileBody")).toBeNull());
+                await waitFor(() =>
+                    expect(
+                        container.querySelector(msgtype === "m.image" ? ".mx_ImageBody" : ".mx_MVideoBody"),
+                    ).not.toBeNull(),
+                );
+                expect(container.querySelector(".mx_MFileBody")).toBeNull();
                 expect(screen.queryByText(/^Download/)).not.toBeInTheDocument();
             },
         );
-
-        it("still puts one under a video in the notifications panel", async () => {
-            renderMedia("m.video", TimelineRenderingType.Notification);
-
-            expect(await screen.findByText(/^Download/)).toBeInTheDocument();
-        });
     });
 
     describe("FileBodyFactory and the document previews lab, for a PDF", () => {
@@ -262,7 +248,7 @@ describe("MBodyFactory", () => {
         });
     });
 
-    it("renderMBody fallback shows m.audio generic placeholder when showFileInfo is true", async () => {
+    it("renderMBody fallback shows m.audio generic placeholder", async () => {
         const mediaEvent = new MatrixEvent({
             room_id: "!room:server",
             sender: userId,
@@ -280,7 +266,6 @@ describe("MBodyFactory", () => {
                     ...props,
                     mxEvent: mediaEvent,
                     mediaEventHelper: new MediaEventHelper(mediaEvent),
-                    showFileInfo: true,
                 },
                 FileBodyFactory,
             ),
@@ -314,7 +299,6 @@ describe("MBodyFactory", () => {
                         ...props,
                         mxEvent: mediaEvent,
                         mediaEventHelper: new MediaEventHelper(mediaEvent),
-                        showFileInfo: true,
                     },
                     FileBodyFactory,
                 ),
@@ -341,7 +325,7 @@ describe("MBodyFactory", () => {
 
         const renderPreview = (mediaEvent: MatrixEvent, mediaEventHelper: MediaEventHelper) =>
             renderInRoomContext(
-                <FileBodyFactory mxEvent={mediaEvent} mediaEventHelper={mediaEventHelper} showFileInfo={true} />,
+                <FileBodyFactory mxEvent={mediaEvent} mediaEventHelper={mediaEventHelper} />,
                 TimelineRenderingType.Room,
             );
 
@@ -398,23 +382,6 @@ describe("MBodyFactory", () => {
 
             expect(container.querySelector(".mx_ImageBody")).not.toBeNull();
             expect(container.querySelector(".mx_MFileBody")).toBeNull();
-        });
-
-        it("renders the file fallback child in notification timelines", () => {
-            const mediaEvent = mkEvent("m.image", imageContent);
-
-            const { container } = renderInRoomContext(
-                <ImageBodyFactory
-                    {...props}
-                    mxEvent={mediaEvent}
-                    mediaEventHelper={new MediaEventHelper(mediaEvent)}
-                />,
-                TimelineRenderingType.Notification,
-            );
-
-            expect(container.querySelector(".mx_ImageBody")).not.toBeNull();
-            expect(container.querySelector(".mx_MFileBody")).not.toBeNull();
-            expect(screen.getByRole("link", { name: /Download/ })).toBeInTheDocument();
         });
 
         it("renders only a file body for encrypted unsafe images without thumbnails", () => {
@@ -484,23 +451,6 @@ describe("MBodyFactory", () => {
 
             expect(container.querySelector(".mx_MVideoBody")).not.toBeNull();
             expect(container.querySelector(".mx_MFileBody")).toBeNull();
-        });
-
-        it("renders the file fallback child outside room timelines", () => {
-            const mediaEvent = mkEvent("m.video", videoContent);
-
-            const { container } = renderInRoomContext(
-                <VideoBodyFactory
-                    mxEvent={mediaEvent}
-                    mediaEventHelper={new MediaEventHelper(mediaEvent)}
-                    forExport={false}
-                />,
-                TimelineRenderingType.Notification,
-            );
-
-            expect(container.querySelector(".mx_MVideoBody")).not.toBeNull();
-            expect(container.querySelector(".mx_MFileBody")).not.toBeNull();
-            expect(screen.getByRole("link", { name: /Download/ })).toBeInTheDocument();
         });
     });
 

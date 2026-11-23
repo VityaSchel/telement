@@ -62,24 +62,27 @@ describe("<MVvoiceMessageBody />", () => {
         expect(await screen.findByTestId("recording-playback")).toBeInTheDocument();
     });
 
-    it("puts no download button under the player in the files panel, which saves it from the message menu", async () => {
-        const mediaEventHelper = {
-            sourceBlob: { value: { arrayBuffer: () => new ArrayBuffer(8) } },
-        } as unknown as MediaEventHelper;
+    it.each(Object.values(TimelineRenderingType))(
+        "puts no download button under the player in the %s timeline, as the message menu saves it",
+        async (timelineRenderingType) => {
+            const mediaEventHelper = {
+                sourceBlob: { value: { arrayBuffer: () => new ArrayBuffer(8) } },
+            } as unknown as MediaEventHelper;
 
-        const { container } = await act(() =>
-            render(
-                // Only the rendering type matters here, so the rest of the room's state is left out
-                <ScopedRoomContextProvider {...({ timelineRenderingType: TimelineRenderingType.File } as any)}>
-                    <MVoiceMessageBody mxEvent={event} mediaEventHelper={mediaEventHelper} />
-                </ScopedRoomContextProvider>,
-            ),
-        );
+            const { container } = await act(() =>
+                render(
+                    // Only the rendering type matters here, so the rest of the room's state is left out
+                    <ScopedRoomContextProvider {...({ timelineRenderingType } as any)}>
+                        <MVoiceMessageBody mxEvent={event} mediaEventHelper={mediaEventHelper} />
+                    </ScopedRoomContextProvider>,
+                ),
+            );
 
-        expect(await screen.findByTestId("recording-playback")).toBeInTheDocument();
-        expect(container.querySelector(".mx_MFileBody")).toBeNull();
-        expect(screen.queryByText(/^Download/)).not.toBeInTheDocument();
-    });
+            expect(await screen.findByTestId("recording-playback")).toBeInTheDocument();
+            expect(container.querySelector(".mx_MFileBody")).toBeNull();
+            expect(screen.queryByText(/^Download/)).not.toBeInTheDocument();
+        },
+    );
 
     it("lays out the player while the file downloads rather than a spinner, so the message keeps its size once it loads", async () => {
         const downloading = {

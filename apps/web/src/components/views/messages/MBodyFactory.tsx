@@ -5,7 +5,7 @@ SPDX-License-Identifier: AGPL-3.0-only OR GPL-3.0-only OR LicenseRef-Element-Com
 Please see LICENSE files in the repository root for full details.
 */
 
-import React, { type JSX, type RefObject, useContext, useEffect, useRef } from "react";
+import React, { type JSX, useContext, useEffect, useRef } from "react";
 import { type MatrixEvent, MsgType } from "matrix-js-sdk/src/matrix";
 import { type ImageContent } from "matrix-js-sdk/src/types";
 import {
@@ -19,7 +19,6 @@ import {
 } from "@element-hq/web-shared-components";
 
 import { type IBodyProps } from "./IBodyProps";
-import RoomContext, { TimelineRenderingType } from "../../../contexts/RoomContext";
 import { LocalDeviceVerificationStateContext } from "../../../contexts/LocalDeviceVerificationStateContext";
 import { useMediaVisible } from "../../../hooks/useMediaVisible";
 import { useSettingValue } from "../../../hooks/useSettings";
@@ -35,14 +34,12 @@ import { MBodyTileViewModel } from "../../../viewmodels/message-body/MBodyTileVi
 
 type MBodyComponent = React.ComponentType<IBodyProps>;
 
-type FileBodyProps = Pick<IBodyProps, "mxEvent" | "mediaEventHelper" | "forExport" | "showFileInfo">;
+type FileBodyProps = Pick<IBodyProps, "mxEvent" | "mediaEventHelper" | "forExport">;
 
 export function FileBodyFactory(props: FileBodyProps): JSX.Element {
     // Only the standalone m.file body uses the preview tile. Image/video/audio bodies embed this as a
-    // fallback for media they cannot render themselves — sometimes download-only (`showFileInfo: false`)
-    // in the panels which don't render the media, e.g. the files and notification panels — and those,
-    // like exports, keep the classic file body.
-    if (props.forExport || props.showFileInfo === false || props.mxEvent.getContent().msgtype !== MsgType.File) {
+    // fallback for media they cannot render themselves, and those, like exports, keep the classic file body.
+    if (props.forExport || props.mxEvent.getContent().msgtype !== MsgType.File) {
         return <LegacyFileBody {...props} />;
     }
 
@@ -55,10 +52,7 @@ export function FileBodyFactory(props: FileBodyProps): JSX.Element {
 }
 
 /// the old look for files, still used for images, videos, audio, voice messages
-function LegacyFileBody({ mxEvent, mediaEventHelper, forExport, showFileInfo }: FileBodyProps): JSX.Element {
-    const { timelineRenderingType } = useContext(RoomContext);
-    const refIFrame = useRef<HTMLIFrameElement>(null) as RefObject<HTMLIFrameElement>;
-    const refLink = useRef<HTMLAnchorElement>(null) as RefObject<HTMLAnchorElement>;
+function LegacyFileBody({ mxEvent, mediaEventHelper, forExport }: FileBodyProps): JSX.Element {
     const documentPreviewsEnabled = useSettingValue("feature_pdf_viewer");
 
     const vm = useCreateAutoDisposedViewModel(
@@ -67,10 +61,6 @@ function LegacyFileBody({ mxEvent, mediaEventHelper, forExport, showFileInfo }: 
                 mxEvent,
                 mediaEventHelper,
                 forExport,
-                showFileInfo,
-                timelineRenderingType,
-                refIFrame,
-                refLink,
                 documentPreviewsEnabled,
             }),
     );
@@ -80,13 +70,11 @@ function LegacyFileBody({ mxEvent, mediaEventHelper, forExport, showFileInfo }: 
             mxEvent,
             mediaEventHelper,
             forExport,
-            showFileInfo,
-            timelineRenderingType,
             documentPreviewsEnabled,
         });
-    }, [mxEvent, mediaEventHelper, forExport, showFileInfo, timelineRenderingType, documentPreviewsEnabled, vm]);
+    }, [mxEvent, mediaEventHelper, forExport, documentPreviewsEnabled, vm]);
 
-    return <FileBodyView vm={vm} refIFrame={refIFrame} refLink={refLink} className="mx_MFileBody" />;
+    return <FileBodyView vm={vm} className="mx_MFileBody" />;
 }
 
 interface PreviewFileBodyProps {
@@ -122,7 +110,6 @@ export function VideoBodyFactory({
 }: Readonly<
     Pick<IBodyProps, "mxEvent" | "mediaEventHelper" | "forExport" | "inhibitInteraction" | "permalinkCreator">
 >): JSX.Element {
-    const { timelineRenderingType } = useContext(RoomContext);
     const [mediaVisible, setMediaVisible] = useMediaVisible(mxEvent);
 
     const vm = useCreateAutoDisposedViewModel(
@@ -166,26 +153,7 @@ export function VideoBodyFactory({
         vm.setPermalinkCreator(permalinkCreator);
     }, [permalinkCreator, vm]);
 
-    // Telement: the files panel saves videos from the message menu's "Save as…", with no download button under them
-    const showFileBody =
-        !forExport &&
-        timelineRenderingType !== TimelineRenderingType.Room &&
-        timelineRenderingType !== TimelineRenderingType.Pinned &&
-        timelineRenderingType !== TimelineRenderingType.Search &&
-        timelineRenderingType !== TimelineRenderingType.File;
-
-    return (
-        <VideoBodyView vm={vm} className="mx_MVideoBody" containerClassName="mx_MVideoBody_container">
-            {showFileBody ? (
-                <FileBodyFactory
-                    mxEvent={mxEvent}
-                    mediaEventHelper={mediaEventHelper}
-                    forExport={forExport}
-                    showFileInfo={false}
-                />
-            ) : null}
-        </VideoBodyView>
-    );
+    return <VideoBodyView vm={vm} className="mx_MVideoBody" containerClassName="mx_MVideoBody_container" />;
 }
 
 /**
@@ -204,14 +172,9 @@ export function ImageBodyFactory({
     forExport,
     maxImageHeight,
     permalinkCreator,
-    showFileInfo,
 }: Readonly<
-    Pick<
-        IBodyProps,
-        "mxEvent" | "mediaEventHelper" | "forExport" | "maxImageHeight" | "permalinkCreator" | "showFileInfo"
-    >
+    Pick<IBodyProps, "mxEvent" | "mediaEventHelper" | "forExport" | "maxImageHeight" | "permalinkCreator">
 >): JSX.Element {
-    const { timelineRenderingType } = useContext(RoomContext);
     const [mediaVisible, setMediaVisible] = useMediaVisible(mxEvent);
     const imageRef = useRef<HTMLImageElement>(null);
     const content = mxEvent.getContent<ImageContent>();
@@ -269,26 +232,8 @@ export function ImageBodyFactory({
         vm.setSetMediaVisible(setMediaVisible);
     }, [setMediaVisible, shouldFallbackToFileBody, vm]);
 
-    // Telement: the files panel saves pictures from the message menu's "Save as…" and the image viewer, with no
-    // download button under them
-    const showFileBody =
-        !forExport &&
-        timelineRenderingType !== TimelineRenderingType.Room &&
-        timelineRenderingType !== TimelineRenderingType.Pinned &&
-        timelineRenderingType !== TimelineRenderingType.Search &&
-        timelineRenderingType !== TimelineRenderingType.Thread &&
-        timelineRenderingType !== TimelineRenderingType.ThreadsList &&
-        timelineRenderingType !== TimelineRenderingType.File;
-
     if (shouldFallbackToFileBody) {
-        return (
-            <FileBodyFactory
-                mxEvent={mxEvent}
-                mediaEventHelper={mediaEventHelper}
-                forExport={forExport}
-                showFileInfo={showFileInfo}
-            />
-        );
+        return <FileBodyFactory mxEvent={mxEvent} mediaEventHelper={mediaEventHelper} forExport={forExport} />;
     }
 
     return (
@@ -298,16 +243,7 @@ export function ImageBodyFactory({
             containerClassName="mx_ImageBody_container"
             imageClassName="mx_ImageBody_image"
             imageRef={imageRef}
-        >
-            {showFileBody ? (
-                <FileBodyFactory
-                    mxEvent={mxEvent}
-                    mediaEventHelper={mediaEventHelper}
-                    forExport={forExport}
-                    showFileInfo={false}
-                />
-            ) : null}
-        </ImageBodyView>
+        />
     );
 }
 

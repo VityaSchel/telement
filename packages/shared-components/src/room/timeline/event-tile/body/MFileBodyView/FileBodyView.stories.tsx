@@ -23,18 +23,12 @@ type FileBodyViewProps = FileBodyViewSnapshot & FileBodyViewActions;
 
 const FileBodyViewWrapperImpl = ({
     onInfoClick,
-    onDownloadClick,
-    onDownloadLinkClick,
-    onDownloadIframeLoad,
     onOpenClick,
     className,
     ...snapshotProps
 }: FileBodyViewProps & { className?: string }): ReactNode => {
     const vm = useMockedViewModel(snapshotProps, {
         onInfoClick,
-        onDownloadClick,
-        onDownloadLinkClick,
-        onDownloadIframeLoad,
         onOpenClick,
     });
 
@@ -61,7 +55,6 @@ const meta = {
             control: { type: "select" },
         },
         showInfo: { control: "boolean" },
-        showDownload: { control: "boolean" },
         showOpen: { control: "boolean" },
         showInlineDownload: { control: "boolean" },
         className: { control: "text" },
@@ -73,10 +66,7 @@ const meta = {
         infoTooltip: "spec.pdf (22 KB)",
         infoIcon: FileBodyViewInfoIcon.ATTACHMENT,
         infoHref: "https://example.org/spec.pdf",
-        showDownload: true,
-        downloadLabel: "Download file",
-        downloadTitle: "Download title",
-        downloadHref: "https://example.org/download/spec.pdf",
+        downloadLabel: "Save as…",
         className: undefined,
     },
 } satisfies Meta<typeof FileBodyViewWrapper>;
@@ -100,7 +90,6 @@ export const Invalid: Story = {
 
 export const LongFilenameInfo: Story = {
     args: {
-        showDownload: false,
         infoLabel: "a very long filename to show ellipsis.pdf",
         infoTooltip: "a very long filename to show ellipsis.pdf (12 kB)",
     },
@@ -115,7 +104,6 @@ export const LongFilenameInfo: Story = {
 
 export const AudioInfo: Story = {
     args: {
-        showDownload: false,
         infoIcon: FileBodyViewInfoIcon.AUDIO,
         infoLabel: "voice-message.ogg",
     },
@@ -123,45 +111,13 @@ export const AudioInfo: Story = {
 
 export const VideoInfo: Story = {
     args: {
-        showDownload: false,
         infoIcon: FileBodyViewInfoIcon.VIDEO,
         infoLabel: "clip.mp4",
     },
 };
 
-export const UnencryptedDownload: Story = {
-    args: {
-        state: FileBodyViewState.UNENCRYPTED,
-        showInfo: false,
-    },
-};
-
-export const EncryptedIframeDownload: Story = {
-    args: {
-        state: FileBodyViewState.ENCRYPTED,
-        showInfo: false,
-    },
-};
-
-export const DecryptionPendingDownload: Story = {
-    args: {
-        state: FileBodyViewState.DECRYPTION_PENDING,
-        showInfo: false,
-    },
-};
-
-export const LongFilenameDownload: Story = {
-    args: {
-        state: FileBodyViewState.UNENCRYPTED,
-        showInfo: false,
-        showDownload: true,
-        downloadLabel: "a very long filename that show no ellipsis.pdf",
-    },
-};
-
 export const OpenableInfo: Story = {
     args: {
-        showDownload: false,
         showOpen: true,
         openLabel: "Open PDF",
         showInlineDownload: true,
@@ -170,7 +126,6 @@ export const OpenableInfo: Story = {
 
 export const OpenableLongFilenameInfo: Story = {
     args: {
-        showDownload: false,
         showOpen: true,
         openLabel: "Open PDF",
         showInlineDownload: true,

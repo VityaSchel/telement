@@ -191,20 +191,22 @@ test.describe("FilePanel", () => {
     test.describe("download", () => {
         test.skip(isDendrite, "due to a Dendrite sending Content-Disposition inline");
 
-        test("should download an image via the link on the panel", async ({ page, app, context }) => {
+        test("should save an image from the panel with the message menu's Save as…", async ({ page, app }) => {
             // Upload an image file
             await uploadFile(app, "riot.png");
 
-            // Detect the image file on the panel
+            // Detect the image file on the panel, which has no download button under it
             const imageTile = page
                 .locator(".mx_FilePanel .mx_RoomView_MessageList .mx_EventTile")
                 .filter({ has: page.locator("img[alt='riot.png']") });
-            const link = imageTile.getByTestId("event-tile-slot-body").getByRole("link", { name: /^Download/ });
+            await expect(imageTile.getByRole("link", { name: /^Download/ })).toHaveCount(0);
 
             const downloadPromise = page.waitForEvent("download");
 
-            // Click the anchor link (not the image itself)
-            await link.click();
+            // "Save as…" saves through the browser's download without the browser's save dialog
+            await page.evaluate(() => delete (window as { showSaveFilePicker?: unknown }).showSaveFilePicker);
+            await imageTile.getByTestId("event-tile-slot-body").click({ button: "right" });
+            await page.getByRole("menuitem", { name: "Save as…" }).click();
 
             const download = await downloadPromise;
             expect(download.suggestedFilename()).toBe("riot.png");

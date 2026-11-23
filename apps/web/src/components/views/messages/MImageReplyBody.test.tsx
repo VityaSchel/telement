@@ -201,19 +201,20 @@ describe("<MImageReplyBody />", () => {
         vi.restoreAllMocks();
     });
 
-    it("renders a visible unencrypted image and file fallback outside room timelines", async () => {
+    it("renders a visible unencrypted image with no download button under it outside room timelines", async () => {
         const { container } = renderBase({ timelineRenderingType: TimelineRenderingType.Notification });
 
-        await waitFor(() => expect(screen.getAllByRole("img", { name: "demo image" })).toHaveLength(2));
+        await waitFor(() => expect(screen.getByRole("img", { name: "demo image" })).toBeInTheDocument());
 
         expect(container.querySelector(".mx_MImageBody")).not.toBeNull();
-        expect(container.querySelector(".mx_MFileBody")).not.toBeNull();
         expect(container.querySelector("a[href='https://server/full.png']")).not.toBeNull();
         expect(container.querySelector("img.mx_MImageBody_thumbnail")).toHaveAttribute(
             "src",
             "https://server/thumb.png",
         );
-        expect(screen.getByRole("link", { name: /Download/ })).toBeInTheDocument();
+        // Telement: the message menu's "Save as…" saves the picture
+        expect(container.querySelector(".mx_MFileBody")).toBeNull();
+        expect(screen.queryByRole("link", { name: /Download/ })).toBeNull();
     });
 
     it("reveals hidden media through the supplied setter", () => {

@@ -369,10 +369,7 @@ const StoryFileBody = (): React.ReactElement => {
         infoTooltip: "spec.pdf (22 KB)",
         infoIcon: FileBodyViewInfoIcon.ATTACHMENT,
         infoHref: "https://example.org/spec.pdf",
-        showDownload: true,
-        downloadLabel: "Download file",
-        downloadTitle: "Download spec.pdf",
-        downloadHref: "https://example.org/download/spec.pdf",
+        downloadLabel: "Save as…",
     };
     const vm = useMockedViewModel(snapshot, {});
     return <FileBodyView vm={vm} />;

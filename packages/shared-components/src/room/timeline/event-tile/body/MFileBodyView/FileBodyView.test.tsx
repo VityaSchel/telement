@@ -5,7 +5,7 @@
  * Please see LICENSE files in the repository root for full details.
  */
 
-import React, { type MouseEvent } from "react";
+import React from "react";
 import { composeStories } from "@storybook/react-vite";
 import { fireEvent, render, screen } from "@test-utils";
 import { describe, it, expect, vi } from "vitest";
@@ -21,20 +21,8 @@ const renderWithI18n = (ui: React.ReactElement): ReturnType<typeof render> =>
         wrapper: ({ children }) => <I18nContext.Provider value={new I18nApi()}>{children}</I18nContext.Provider>,
     });
 
-const {
-    Default,
-    Export,
-    Invalid,
-    AudioInfo,
-    VideoInfo,
-    LongFilenameInfo,
-    UnencryptedDownload,
-    EncryptedIframeDownload,
-    DecryptionPendingDownload,
-    LongFilenameDownload,
-    OpenableInfo,
-    OpenableLongFilenameInfo,
-} = composeStories(stories);
+const { Default, Export, Invalid, AudioInfo, VideoInfo, LongFilenameInfo, OpenableInfo, OpenableLongFilenameInfo } =
+    composeStories(stories);
 
 const defaultSnapshot: FileBodyViewSnapshot = {
     state: FileBodyViewState.UNENCRYPTED,
@@ -43,17 +31,11 @@ const defaultSnapshot: FileBodyViewSnapshot = {
 
 class TestViewModel extends MockViewModel<FileBodyViewSnapshot> implements FileBodyViewActions {
     public onInfoClick?: () => void;
-    public onDownloadClick?: () => void;
-    public onDownloadLinkClick?: (event: MouseEvent<HTMLAnchorElement>) => void;
-    public onDownloadIframeLoad?: () => void;
     public onOpenClick?: () => void;
 
     public constructor(snapshot: FileBodyViewSnapshot, actions: FileBodyViewActions = {}) {
         super(snapshot);
         this.onInfoClick = actions.onInfoClick;
-        this.onDownloadClick = actions.onDownloadClick;
-        this.onDownloadLinkClick = actions.onDownloadLinkClick;
-        this.onDownloadIframeLoad = actions.onDownloadIframeLoad;
         this.onOpenClick = actions.onOpenClick;
     }
 }
@@ -66,10 +48,6 @@ describe("FileBodyView", () => {
         ["long-filename-info", LongFilenameInfo],
         ["audio-info", AudioInfo],
         ["video-info", VideoInfo],
-        ["unencrypted-download", UnencryptedDownload],
-        ["encrypted-iframe-download", EncryptedIframeDownload],
-        ["decryption-pending-download", DecryptionPendingDownload],
-        ["long-filename-download", LongFilenameDownload],
         ["openable-info", OpenableInfo],
         ["openable-long-filename-info", OpenableLongFilenameInfo],
     ])("matches snapshot for %s story", (_name, Story) => {
@@ -113,21 +91,6 @@ describe("FileBodyView", () => {
         expect(link).toHaveAttribute("href", "https://example.org/export.pdf");
     });
 
-    it("uses href in unencrypted download mode", () => {
-        const vm = new TestViewModel({
-            state: FileBodyViewState.UNENCRYPTED,
-            showDownload: true,
-            downloadHref: "https://example.org/download.pdf",
-        });
-
-        renderWithI18n(<FileBodyView vm={vm} />);
-
-        const link = screen.getByRole("link", { name: "Download" });
-        expect(link).toHaveAttribute("href", "https://example.org/download.pdf");
-        expect(link).toHaveAttribute("target", "_blank");
-        expect(link).toHaveAttribute("rel", "noreferrer noopener");
-    });
-
     it("renders safely when href is missing in EXPORT mode", () => {
         const vm = new TestViewModel({ state: FileBodyViewState.EXPORT, showInfo: true });
 
@@ -136,14 +99,6 @@ describe("FileBodyView", () => {
         expect(screen.getByRole("button", { name: "Attachment" })).toBeInTheDocument();
         expect(screen.queryByRole("link")).not.toBeInTheDocument();
         expect(container.querySelector("a")).toBeInTheDocument();
-    });
-
-    it("renders safely when href is missing in UNENCRYPTED mode", () => {
-        const vm = new TestViewModel({ state: FileBodyViewState.UNENCRYPTED, showDownload: true });
-
-        renderWithI18n(<FileBodyView vm={vm} />);
-
-        expect(screen.getByText("Download")).toBeInTheDocument();
     });
 
     it("uses label as fallback tooltip content", () => {
@@ -157,19 +112,6 @@ describe("FileBodyView", () => {
         expect(screen.getByRole("button", { name: "spec.pdf" })).toBeInTheDocument();
     });
 
-    it("renders download button in decryption-pending mode", () => {
-        const vm = new TestViewModel({
-            ...defaultSnapshot,
-            state: FileBodyViewState.DECRYPTION_PENDING,
-            showDownload: true,
-        });
-
-        renderWithI18n(<FileBodyView vm={vm} />);
-
-        expect(screen.getByRole("button", { name: "Download" })).toBeInTheDocument();
-        expect(screen.queryByRole("button", { name: "spec.pdf" })).not.toBeInTheDocument();
-    });
-
     it("invokes onInfoClick when info row is clicked", () => {
         const onInfoClick = vi.fn();
         const vm = new TestViewModel(defaultSnapshot, { onInfoClick });
@@ -180,99 +122,26 @@ describe("FileBodyView", () => {
         expect(onInfoClick).toHaveBeenCalledTimes(1);
     });
 
-    it("invokes onDownloadClick in encrypted-pending mode", () => {
-        const onDownloadClick = vi.fn();
-        const vm = new TestViewModel(
-            {
-                ...defaultSnapshot,
-                state: FileBodyViewState.DECRYPTION_PENDING,
-                showDownload: true,
-            },
-            { onDownloadClick },
-        );
-
-        renderWithI18n(<FileBodyView vm={vm} />);
-
-        fireEvent.click(screen.getByRole("button", { name: "Download" }));
-        expect(onDownloadClick).toHaveBeenCalledTimes(1);
-    });
-
-    it("invokes onDownloadLinkClick in unencrypted-download mode", () => {
-        const onDownloadLinkClick = vi.fn((event: MouseEvent<HTMLAnchorElement>) => event.preventDefault());
-        const vm = new TestViewModel(
-            {
-                ...defaultSnapshot,
-                state: FileBodyViewState.UNENCRYPTED,
-                showDownload: true,
-            },
-            { onDownloadLinkClick },
-        );
-
-        renderWithI18n(<FileBodyView vm={vm} />);
-
-        fireEvent.click(screen.getByRole("link", { name: "Download" }));
-        expect(onDownloadLinkClick).toHaveBeenCalledTimes(1);
-    });
-
-    it("invokes onDownloadIframeLoad in encrypted-iframe-download mode", () => {
-        const onDownloadIframeLoad = vi.fn();
-        const vm = new TestViewModel(
-            {
-                ...defaultSnapshot,
-                state: FileBodyViewState.ENCRYPTED,
-                showDownload: true,
-            },
-            { onDownloadIframeLoad },
-        );
-
-        renderWithI18n(<FileBodyView vm={vm} />);
-
-        const iframe = screen.getByTitle("Download");
-        fireEvent.load(iframe);
-        expect(onDownloadIframeLoad).toHaveBeenCalledTimes(1);
-    });
-
-    it("wires refLink in encrypted-iframe-download mode", () => {
-        const vm = new TestViewModel({
-            ...defaultSnapshot,
-            state: FileBodyViewState.ENCRYPTED,
-            showDownload: true,
-        });
-        const refLink = React.createRef<HTMLAnchorElement>() as React.RefObject<HTMLAnchorElement>;
-
-        renderWithI18n(<FileBodyView vm={vm} refLink={refLink} />);
-
-        expect(refLink.current).toBeInstanceOf(HTMLAnchorElement);
-    });
-
-    it("wires refIFrame in encrypted-iframe-download mode", () => {
-        const vm = new TestViewModel({
-            ...defaultSnapshot,
-            state: FileBodyViewState.ENCRYPTED,
-            showDownload: true,
-        });
-        const refIFrame = React.createRef<HTMLIFrameElement>() as React.RefObject<HTMLIFrameElement>;
-
-        renderWithI18n(<FileBodyView vm={vm} refIFrame={refIFrame} />);
-
-        expect(refIFrame.current).toBeInstanceOf(HTMLIFrameElement);
-    });
-
-    it.each([FileBodyViewState.UNENCRYPTED, FileBodyViewState.DECRYPTION_PENDING, FileBodyViewState.ENCRYPTED])(
-        "hides info row in %s mode",
+    it.each([FileBodyViewState.UNENCRYPTED, FileBodyViewState.ENCRYPTED])(
+        "puts no download control under the info row in %s mode, as the message menu saves the file",
         (state) => {
-            const vm = new TestViewModel({
-                ...defaultSnapshot,
-                state,
-                showInfo: false,
-                showDownload: true,
-            });
+            const { container } = renderWithI18n(
+                <FileBodyView vm={new TestViewModel({ ...defaultSnapshot, state })} />,
+            );
 
-            renderWithI18n(<FileBodyView vm={vm} />);
-
-            expect(screen.queryByRole("button", { name: "Attachment" })).not.toBeInTheDocument();
+            expect(screen.getAllByRole("button")).toEqual([screen.getByRole("button", { name: "Attachment" })]);
+            expect(screen.queryByRole("link")).toBeNull();
+            expect(container.querySelector("iframe")).toBeNull();
         },
     );
+
+    it.each([FileBodyViewState.UNENCRYPTED, FileBodyViewState.ENCRYPTED])("hides info row in %s mode", (state) => {
+        const vm = new TestViewModel({ ...defaultSnapshot, state, showInfo: false });
+
+        renderWithI18n(<FileBodyView vm={vm} />);
+
+        expect(screen.queryByRole("button", { name: "Attachment" })).not.toBeInTheDocument();
+    });
 
     it("shows message in invalid mode", () => {
         const vm = new TestViewModel({
@@ -340,6 +209,14 @@ describe("FileBodyView", () => {
             fireEvent.click(screen.getByRole("button", { name: "Download" }));
 
             expect(onInfoClick).toHaveBeenCalledTimes(1);
+        });
+
+        it("names the download icon with the given label", () => {
+            const vm = new TestViewModel({ ...openableSnapshot, downloadLabel: "Save as…" });
+
+            renderWithI18n(<FileBodyView vm={vm} />);
+
+            expect(screen.getByRole("button", { name: "Save as…" })).toBeInTheDocument();
         });
 
         it("omits the open icon when no label is given for it", () => {

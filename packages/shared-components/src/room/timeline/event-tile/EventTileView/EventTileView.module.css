@@ -3020,7 +3020,6 @@
 
     /* Slots. */
     .slotBody {
-        --event-tile-file-download-margin-block-start: var(--cpd-space-4x);
         --image-body-content-gap: 0;
     }
 

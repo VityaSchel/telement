@@ -17,10 +17,8 @@ import InlineSpinner from "../elements/InlineSpinner";
 import { _t } from "../../../languageHandler";
 import { type IBodyProps } from "./IBodyProps";
 import { PlaybackManager } from "../../../audio/PlaybackManager";
-import RoomContext, { TimelineRenderingType } from "../../../contexts/RoomContext";
 import MediaProcessingError from "./shared/MediaProcessingError";
 import { AudioPlayerViewModel } from "../../../viewmodels/room/timeline/event-tile/body/AudioPlayerViewModel";
-import { FileBodyFactory, renderMBody } from "./MBodyFactory";
 import { presentableTextForFile } from "../../../utils/FileUtils";
 
 interface IState {
@@ -29,9 +27,6 @@ interface IState {
 }
 
 export default class MAudioBody extends React.PureComponent<IBodyProps, IState> {
-    public static contextType = RoomContext;
-    declare public context: React.ContextType<typeof RoomContext>;
-
     public state: IState = {};
 
     public async componentDidMount(): Promise<void> {
@@ -70,17 +65,6 @@ export default class MAudioBody extends React.PureComponent<IBodyProps, IState> 
 
     public componentWillUnmount(): void {
         this.state.playback?.destroy();
-    }
-
-    // Telement: the files panel saves voice messages and audio from the message menu's "Save as…", as the room does,
-    // with no download button under them
-    protected get showFileBody(): boolean {
-        return (
-            this.context.timelineRenderingType !== TimelineRenderingType.Room &&
-            this.context.timelineRenderingType !== TimelineRenderingType.Pinned &&
-            this.context.timelineRenderingType !== TimelineRenderingType.Search &&
-            this.context.timelineRenderingType !== TimelineRenderingType.File
-        );
     }
 
     public render(): React.ReactNode {
@@ -122,7 +106,6 @@ export default class MAudioBody extends React.PureComponent<IBodyProps, IState> 
                         false,
                     )}
                 />
-                {this.showFileBody && renderMBody({ ...this.props, showFileInfo: false }, FileBodyFactory)}
             </span>
         );
     }

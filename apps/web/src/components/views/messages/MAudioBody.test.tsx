@@ -17,6 +17,8 @@ import { type Playback, PlaybackState } from "../../../audio/Playback";
 import MAudioBody from "./MAudioBody";
 import { PlaybackManager } from "../../../audio/PlaybackManager";
 import { type MediaEventHelper } from "../../../utils/MediaEventHelper";
+import { TimelineRenderingType } from "../../../contexts/RoomContext";
+import { ScopedRoomContextProvider } from "../../../contexts/ScopedRoomContext";
 
 describe("<MAudioBody />", () => {
     let event: MatrixEvent;
@@ -55,6 +57,24 @@ describe("<MAudioBody />", () => {
         expect(await screen.findByRole("region", { name: "Audio player" })).toBeInTheDocument();
         expect(screen.getByText("audio name")).toBeInTheDocument();
     });
+
+    it.each(Object.values(TimelineRenderingType))(
+        "puts no download button under the player in the %s timeline, as the message menu saves it",
+        async (timelineRenderingType) => {
+            const { container } = await act(() =>
+                render(
+                    // Only the rendering type matters here, so the rest of the room's state is left out
+                    <ScopedRoomContextProvider {...({ timelineRenderingType } as any)}>
+                        <MAudioBody mxEvent={event} mediaEventHelper={mediaEventHelper} />
+                    </ScopedRoomContextProvider>,
+                ),
+            );
+
+            expect(await screen.findByRole("region", { name: "Audio player" })).toBeInTheDocument();
+            expect(container.querySelector(".mx_MFileBody")).toBeNull();
+            expect(screen.queryByText(/^Download/)).not.toBeInTheDocument();
+        },
+    );
 
     it("should prefer the filename over the body as the title", async () => {
         // A caption puts the human readable text in `body` and the actual file name in `filename`.

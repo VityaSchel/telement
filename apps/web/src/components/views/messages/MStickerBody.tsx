@@ -66,11 +66,6 @@ class MStickerBodyInner extends ImageBodyBaseInner {
             description: content.body,
         };
     }
-
-    // Don't show "Download this_file.png ..."
-    protected getFileBody(): ReactNode {
-        return null;
-    }
 }
 
 const MStickerBody: React.FC<IBodyProps> = (props) => {
