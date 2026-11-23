@@ -20,7 +20,7 @@ export interface ReactionsRowButtonTooltipViewSnapshot {
      */
     formattedSenders?: string;
     /**
-     * The caption to display (e.g., the shortcode of the reaction).
+     * The caption to display, such as "reacted with 👍".
      */
     caption?: string;
     /**

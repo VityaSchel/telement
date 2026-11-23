@@ -15,14 +15,6 @@ import {
     ReactionsRowButtonTooltipViewModel,
     type ReactionsRowButtonTooltipViewModelProps,
 } from "./ReactionsRowButtonTooltipViewModel";
-import { unicodeToShortcode } from "../../../../../HtmlUtils";
-
-vi.mock("../../../../../HtmlUtils", async () => ({
-    ...(await vi.importActual("../../../../../HtmlUtils")),
-    unicodeToShortcode: vi.fn(),
-}));
-
-const mockedUnicodeToShortcode = vi.mocked(unicodeToShortcode);
 
 describe("ReactionsRowButtonTooltipViewModel", () => {
     let client: MatrixClient;
@@ -65,16 +57,10 @@ describe("ReactionsRowButtonTooltipViewModel", () => {
             user: "@sender:example.org",
             content: { body: "Test message", msgtype: "m.text" },
         });
-
-        mockedUnicodeToShortcode.mockImplementation((char: string) => {
-            if (char === "👍") return ":thumbsup:";
-            return "";
-        });
     });
 
     afterEach(() => {
         vi.restoreAllMocks();
-        mockedUnicodeToShortcode.mockReset();
     });
 
     it("should return undefined snapshot when room is not found", () => {
@@ -103,7 +89,19 @@ describe("ReactionsRowButtonTooltipViewModel", () => {
         const snapshot = vm.getSnapshot();
 
         expect(snapshot.formattedSenders).toBe("Alice");
-        expect(snapshot.caption).toContain(":thumbsup:");
+        // The emoji itself, as Telegram writes it, rather than its shortcode
+        expect(snapshot.caption).toBe("reacted with 👍");
+    });
+
+    it("names a reaction that isn't an emoji as it was written", () => {
+        const reactionEvent = createReactionEvent("@alice:example.org");
+        vi.spyOn(room, "getMember").mockReturnValue({ name: "Alice", userId: "@alice:example.org" } as RoomMember);
+
+        const vm = new ReactionsRowButtonTooltipViewModel(
+            createProps({ content: "lol", reactionEvents: [reactionEvent] }),
+        );
+
+        expect(vm.getSnapshot().caption).toBe("reacted with lol");
     });
 
     it("should fall back to sender ID when member is not found", () => {
@@ -116,7 +114,6 @@ describe("ReactionsRowButtonTooltipViewModel", () => {
     });
 
     it("should use custom reaction shortcode when customReactionImagesEnabled is true", () => {
-        mockedUnicodeToShortcode.mockReturnValue("");
         const reactionEvent = createReactionEvent("@alice:example.org", {
             "com.beeper.reaction.shortcode": "custom_emoji",
         });
@@ -134,7 +131,6 @@ describe("ReactionsRowButtonTooltipViewModel", () => {
     });
 
     it("should not use custom reaction shortcode when customReactionImagesEnabled is false", () => {
-        mockedUnicodeToShortcode.mockReturnValue("");
         const reactionEvent = createReactionEvent("@alice:example.org", {
             "com.beeper.reaction.shortcode": "custom_emoji",
         });

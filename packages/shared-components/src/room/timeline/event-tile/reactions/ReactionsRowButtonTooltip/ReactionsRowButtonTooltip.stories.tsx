@@ -45,7 +45,7 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {
     args: {
         formattedSenders: "Alice, Bob and Charlie",
-        caption: ":thumbsup:",
+        caption: "reacted with 👍",
         tooltipOpen: true,
     },
 };
@@ -53,7 +53,7 @@ export const Default: Story = {
 export const ManySenders: Story = {
     args: {
         formattedSenders: "Alice, Bob, Charlie, David, Eve, Frank and 2 others",
-        caption: ":heart:",
+        caption: "reacted with ❤️",
         children: <button>❤️ 8</button>,
         tooltipOpen: true,
     },

@@ -10,4 +10,5 @@ export {
     type ReactionsRowButtonViewSnapshot,
     type ReactionsRowButtonViewModel,
     type ReactionsRowButtonViewActions,
+    type ReactionsRowButtonReactor,
 } from "./ReactionsRowButtonView";

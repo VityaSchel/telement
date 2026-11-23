@@ -5,9 +5,10 @@
  * Please see LICENSE files in the repository root for full details.
  */
 
-import { EventType, type MatrixClient, type MatrixEvent, RelationType } from "matrix-js-sdk/src/matrix";
+import { EventType, type MatrixClient, type MatrixEvent, RelationType, type Room } from "matrix-js-sdk/src/matrix";
 import {
     BaseViewModel,
+    type ReactionsRowButtonReactor,
     type ReactionsRowButtonViewSnapshot,
     type ReactionsRowButtonViewModel as ReactionsRowButtonViewModelInterface,
 } from "@element-hq/web-shared-components";
@@ -18,6 +19,11 @@ import { formatList } from "../../../../../utils/FormattingUtils";
 import dis from "../../../../../dispatcher/dispatcher";
 import { ReactionsRowButtonTooltipViewModel } from "./ReactionsRowButtonTooltipViewModel";
 import { REACTION_SHORTCODE_KEY } from "./reactionShortcode";
+import DMRoomMap from "../../../../../utils/DMRoomMap";
+
+/** Telement: how many people who reacted a chip shows as avatars, in place of the count, as Telegram does. */
+const MAX_REACTORS_SHOWN = 3;
+const REACTOR_AVATAR_SIZE_PX = 16;
 
 export interface ReactionsRowButtonViewModelProps {
     /**
@@ -127,10 +133,59 @@ export class ReactionsRowButtonViewModel
             imageSrc,
             imageAlt,
             tooltipVm,
+            reactors: room ? ReactionsRowButtonViewModel.computeReactors(client, room, reactionEvents) : undefined,
         };
 
         return snapshot;
     };
+
+    /**
+     * Telement: the people who reacted, while there are few enough for their avatars to stand in for the count, as in
+     * Telegram's groups. A direct chat keeps the count, as only its two members can react there.
+     */
+    private static computeReactors(
+        client: MatrixClient,
+        room: Room,
+        reactionEvents: MatrixEvent[],
+    ): ReactionsRowButtonReactor[] | undefined {
+        // The map of direct chats is made once the client has started
+        const dmRoomMap = DMRoomMap.shared() as DMRoomMap | undefined;
+        if (dmRoomMap?.getUserIdForRoomId(room.roomId)) return undefined;
+
+        const senders = [
+            ...new Set(reactionEvents.map((event) => event.getSender()).filter((sender): sender is string => !!sender)),
+        ];
+        if (senders.length === 0 || senders.length > MAX_REACTORS_SHOWN) return undefined;
+
+        const thumbnailSize = Math.round(REACTOR_AVATAR_SIZE_PX * window.devicePixelRatio);
+        return senders.map((userId) => {
+            const member = room.getMember(userId);
+            const mxcAvatarUrl = member?.getMxcAvatarUrl();
+            return {
+                id: userId,
+                name: member?.name || userId,
+                avatarUrl: mxcAvatarUrl
+                    ? (mediaFromMxc(mxcAvatarUrl, client).getThumbnailOfSourceHttp(
+                          thumbnailSize,
+                          thumbnailSize,
+                          "crop",
+                      ) ?? undefined)
+                    : undefined,
+            };
+        });
+    }
+
+    private static sameReactors(
+        a: ReactionsRowButtonReactor[] | undefined,
+        b: ReactionsRowButtonReactor[] | undefined,
+    ): boolean {
+        if (a === b) return true;
+        if (!a || !b || a.length !== b.length) return false;
+        return a.every(
+            (reactor, i) =>
+                reactor.id === b[i].id && reactor.name === b[i].name && reactor.avatarUrl === b[i].avatarUrl,
+        );
+    }
 
     public constructor(props: ReactionsRowButtonViewModelProps) {
         const tooltipVm = new ReactionsRowButtonTooltipViewModel({
@@ -156,7 +211,8 @@ export class ReactionsRowButtonViewModel
             nextSnapshot.isSelected === currentSnapshot.isSelected &&
             nextSnapshot.isDisabled === currentSnapshot.isDisabled &&
             nextSnapshot.imageSrc === currentSnapshot.imageSrc &&
-            nextSnapshot.imageAlt === currentSnapshot.imageAlt
+            nextSnapshot.imageAlt === currentSnapshot.imageAlt &&
+            ReactionsRowButtonViewModel.sameReactors(nextSnapshot.reactors, currentSnapshot.reactors)
         ) {
             return;
         }

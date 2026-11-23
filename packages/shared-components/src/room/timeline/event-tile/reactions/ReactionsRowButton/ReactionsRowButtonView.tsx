@@ -7,11 +7,30 @@
 
 import React, { type HTMLAttributes, type JSX } from "react";
 import classNames from "classnames";
+import { Avatar } from "@vector-im/compound-web";
 
 import { type ViewModel, useViewModel } from "../../../../../core/viewmodel";
 import { useEventPresentation } from "../../../EventPresentation";
 import { ReactionsRowButtonTooltipView, type ReactionsRowButtonTooltipViewModel } from "../ReactionsRowButtonTooltip";
 import styles from "./ReactionsRowButton.module.css";
+
+/**
+ * Someone who reacted, as their avatar shows them.
+ */
+export interface ReactionsRowButtonReactor {
+    /**
+     * Their Matrix user ID, which also picks the color of a letter avatar.
+     */
+    id: string;
+    /**
+     * Their display name, whose first letter a letter avatar shows.
+     */
+    name: string;
+    /**
+     * Their avatar's picture, if they have one.
+     */
+    avatarUrl?: string;
+}
 
 export interface ReactionsRowButtonViewSnapshot extends Pick<
     HTMLAttributes<HTMLButtonElement>,
@@ -46,6 +65,11 @@ export interface ReactionsRowButtonViewSnapshot extends Pick<
      * View model for the tooltip wrapper.
      */
     tooltipVm: ReactionsRowButtonTooltipViewModel;
+    /**
+     * The people who reacted, when there are few enough to show their avatars in place of the count, as Telegram does
+     * in groups. Shown in the bubble layout only.
+     */
+    reactors?: ReactionsRowButtonReactor[];
 }
 
 export interface ReactionsRowButtonViewActions {
@@ -74,7 +98,8 @@ interface ReactionsRowButtonViewProps {
 export function ReactionsRowButtonView({ vm }: Readonly<ReactionsRowButtonViewProps>): JSX.Element {
     const snapshot = useViewModel(vm) as ReactionsRowButtonViewSnapshot & { ariaLabel?: string };
     const { layout } = useEventPresentation();
-    const { content, count, className, isSelected, isDisabled, imageSrc, imageAlt, tooltipVm } = snapshot;
+    const { content, count, className, isSelected, isDisabled, imageSrc, imageAlt, tooltipVm, reactors } = snapshot;
+    const showReactors = layout === "bubble" && !!reactors?.length;
     const ariaLabel = snapshot["aria-label"] ?? snapshot.ariaLabel;
     const ariaDisabled = isDisabled ? true : undefined;
     const classes = classNames(className, styles.reactionsRowButton, {
@@ -102,9 +127,25 @@ export function ReactionsRowButtonView({ vm }: Readonly<ReactionsRowButtonViewPr
                 onClick={isDisabled ? undefined : vm.onClick}
             >
                 {reactionContent}
-                <span className={styles.reactionsRowButtonCount} aria-hidden="true">
-                    {count}
-                </span>
+                {showReactors ? (
+                    <span className={styles.reactionsRowButtonReactors} aria-hidden="true">
+                        {reactors.map(({ id, name, avatarUrl }) => (
+                            <Avatar
+                                key={id}
+                                id={id}
+                                name={name}
+                                src={avatarUrl}
+                                size="16px"
+                                type="round"
+                                className={styles.reactionsRowButtonReactor}
+                            />
+                        ))}
+                    </span>
+                ) : (
+                    <span className={styles.reactionsRowButtonCount} aria-hidden="true">
+                        {count}
+                    </span>
+                )}
             </button>
         </ReactionsRowButtonTooltipView>
     );

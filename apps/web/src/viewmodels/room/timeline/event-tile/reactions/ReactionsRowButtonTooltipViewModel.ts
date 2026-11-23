@@ -14,7 +14,6 @@ import {
 
 import { _t } from "../../../../../languageHandler";
 import { formatList } from "../../../../../utils/FormattingUtils";
-import { unicodeToShortcode } from "../../../../../HtmlUtils";
 import { REACTION_SHORTCODE_KEY } from "./reactionShortcode";
 
 export interface ReactionsRowButtonTooltipViewModelProps {
@@ -72,9 +71,13 @@ export class ReactionsRowButtonTooltipViewModel
                     undefined;
             }
 
-            const shortName = unicodeToShortcode(content) || customReactionName;
+            // Telement: the reaction itself, "reacted with 👍" rather than ":+1:", as Telegram writes it; a custom
+            // reaction's picture has only its shortcode to show
+            const shownReaction = content.startsWith("mxc://") ? customReactionName : content;
             const formattedSenders = formatList(senders, 6);
-            const caption = shortName ? _t("timeline|reactions|tooltip_caption", { shortName }) : undefined;
+            const caption = shownReaction
+                ? _t("timeline|reactions|tooltip_caption", { shortName: shownReaction })
+                : undefined;
 
             return {
                 formattedSenders,

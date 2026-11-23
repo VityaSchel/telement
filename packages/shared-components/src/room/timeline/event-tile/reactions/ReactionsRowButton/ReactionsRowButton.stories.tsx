@@ -12,6 +12,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import { useMockedViewModel } from "../../../../../core/viewmodel";
 import { withViewDocs } from "../../../../../../.storybook/withViewDocs";
 import { type ReactionsRowButtonTooltipViewSnapshot } from "../ReactionsRowButtonTooltip";
+import { DEFAULT_EVENT_PRESENTATION, type EventLayout, EventPresentationProvider } from "../../../EventPresentation";
 import {
     ReactionsRowButtonView,
     type ReactionsRowButtonViewSnapshot,
@@ -24,6 +25,8 @@ type WrapperProps = Omit<ReactionsRowButtonViewSnapshot, "tooltipVm"> &
         tooltipFormattedSenders?: ReactionsRowButtonTooltipViewSnapshot["formattedSenders"];
         tooltipCaption?: ReactionsRowButtonTooltipViewSnapshot["caption"];
         tooltipOpen?: ReactionsRowButtonTooltipViewSnapshot["tooltipOpen"];
+        /** The timeline's layout, which decides the chip's look. */
+        layout?: EventLayout;
     };
 
 const ReactionsRowButtonViewWrapperImpl = ({
@@ -31,6 +34,7 @@ const ReactionsRowButtonViewWrapperImpl = ({
     tooltipCaption,
     tooltipOpen,
     onClick,
+    layout,
     ...snapshotProps
 }: WrapperProps): JSX.Element => {
     const tooltipVm = useMockedViewModel(
@@ -52,7 +56,11 @@ const ReactionsRowButtonViewWrapperImpl = ({
         },
     );
 
-    return <ReactionsRowButtonView vm={vm} />;
+    const view = <ReactionsRowButtonView vm={vm} />;
+    if (!layout) return view;
+    return (
+        <EventPresentationProvider value={{ ...DEFAULT_EVENT_PRESENTATION, layout }}>{view}</EventPresentationProvider>
+    );
 };
 
 const ReactionsRowButtonViewWrapper = withViewDocs(ReactionsRowButtonViewWrapperImpl, ReactionsRowButtonView);
@@ -90,7 +98,32 @@ export const WithTooltip: Story = {
     args: {
         count: 3,
         tooltipFormattedSenders: "Alice, Bob and Charlie",
-        tooltipCaption: ":thumbsup:",
+        tooltipCaption: "reacted with 👍",
         tooltipOpen: true,
+    },
+};
+
+/** In a group's bubble, the avatars of the few people who reacted take the count's place, as in Telegram. */
+export const WithReactors: Story = {
+    args: {
+        layout: "bubble",
+        count: 3,
+        ariaLabel: "Alice, Bob and Charlie reacted with 👍",
+        tooltipFormattedSenders: "Alice, Bob and Charlie",
+        tooltipCaption: "reacted with 👍",
+        tooltipOpen: false,
+        reactors: [
+            { id: "@alice:example.org", name: "Alice" },
+            { id: "@bob:example.org", name: "Bob" },
+            { id: "@charlie:example.org", name: "Charlie" },
+        ],
+    },
+};
+
+/** Your own reaction among them, in the accent's fill. */
+export const WithReactorsSelected: Story = {
+    args: {
+        ...WithReactors.args,
+        isSelected: true,
     },
 };

@@ -7,17 +7,29 @@
 
 // @vitest-environment happy-dom
 
-import { EventType, type MatrixClient, type MatrixEvent, RelationType, type Room } from "matrix-js-sdk/src/matrix";
-import { vi, describe, it, expect, beforeEach } from "vitest";
+import {
+    EventType,
+    type MatrixClient,
+    type MatrixEvent,
+    RelationType,
+    type Room,
+    type RoomMember,
+} from "matrix-js-sdk/src/matrix";
+import { vi, describe, it, expect, beforeEach, afterEach } from "vitest";
 import { createTestClient, mkEvent, mkStubRoom } from "test-utils";
 
 import { ReactionsRowButtonViewModel, type ReactionsRowButtonViewModelProps } from "./ReactionsRowButtonViewModel";
 import { type ReactionsRowButtonTooltipViewModel } from "./ReactionsRowButtonTooltipViewModel";
 import dis from "../../../../../dispatcher/dispatcher";
+import DMRoomMap from "../../../../../utils/DMRoomMap";
 
 vi.mock("../../../../../dispatcher/dispatcher");
 vi.mock("../../../../../customisations/Media", () => ({
-    mediaFromMxc: vi.fn(() => ({ srcHttp: "https://example.org/_matrix/media/reaction.png" })),
+    mediaFromMxc: vi.fn((mxc: string) => ({
+        srcHttp: "https://example.org/_matrix/media/reaction.png",
+        getThumbnailOfSourceHttp: (width: number, height: number, method: string) =>
+            `https://example.org/_matrix/media/thumbnail/${mxc.slice("mxc://".length)}?${width}x${height}&${method}`,
+    })),
 }));
 
 describe("ReactionsRowButtonViewModel", () => {
@@ -86,6 +98,98 @@ describe("ReactionsRowButtonViewModel", () => {
         vm.setCount(6);
 
         expect(listener).toHaveBeenCalledTimes(2);
+    });
+
+    describe("the people who reacted", () => {
+        const member = (userId: string, name: string, mxc?: string): RoomMember =>
+            ({ userId, name, getMxcAvatarUrl: () => mxc }) as unknown as RoomMember;
+
+        beforeEach(() => {
+            vi.spyOn(room, "getMember").mockImplementation(
+                (userId: string) =>
+                    ({
+                        "@alice:example.org": member("@alice:example.org", "Alice", "mxc://example.org/alice"),
+                        "@bob:example.org": member("@bob:example.org", "Bob"),
+                    })[userId] ?? null,
+            );
+        });
+
+        afterEach(() => {
+            DMRoomMap.setShared(undefined as unknown as DMRoomMap);
+        });
+
+        it("are shown as avatars, in the order they reacted, while there are three or fewer in a group", () => {
+            const vm = new ReactionsRowButtonViewModel(
+                createProps({
+                    reactionEvents: [
+                        createReactionEvent("@alice:example.org"),
+                        createReactionEvent("@bob:example.org"),
+                        createReactionEvent("@carol:example.org"),
+                    ],
+                    count: 3,
+                }),
+            );
+
+            expect(vm.getSnapshot().reactors).toEqual([
+                {
+                    id: "@alice:example.org",
+                    name: "Alice",
+                    avatarUrl: "https://example.org/_matrix/media/thumbnail/example.org/alice?16x16&crop",
+                },
+                { id: "@bob:example.org", name: "Bob", avatarUrl: undefined },
+                { id: "@carol:example.org", name: "@carol:example.org", avatarUrl: undefined },
+            ]);
+        });
+
+        it("are counted once each", () => {
+            const vm = new ReactionsRowButtonViewModel(
+                createProps({
+                    reactionEvents: [
+                        createReactionEvent("@alice:example.org"),
+                        createReactionEvent("@alice:example.org"),
+                    ],
+                }),
+            );
+
+            expect(vm.getSnapshot().reactors?.map(({ id }) => id)).toEqual(["@alice:example.org"]);
+        });
+
+        it("leave the count to stand for them once there are more than three", () => {
+            const vm = new ReactionsRowButtonViewModel(
+                createProps({
+                    reactionEvents: ["@a:x", "@b:x", "@c:x", "@d:x"].map((userId) => createReactionEvent(userId)),
+                    count: 4,
+                }),
+            );
+
+            expect(vm.getSnapshot().reactors).toBeUndefined();
+        });
+
+        it("leave the count in a direct chat, where only its two members react", () => {
+            DMRoomMap.setShared({
+                getUserIdForRoomId: (roomId: string) => (roomId === room.roomId ? "@bob:example.org" : undefined),
+            } as unknown as DMRoomMap);
+
+            const vm = new ReactionsRowButtonViewModel(createProps());
+
+            expect(vm.getSnapshot().reactors).toBeUndefined();
+        });
+
+        it("follow the reactions as they change", () => {
+            const vm = new ReactionsRowButtonViewModel(
+                createProps({ reactionEvents: [createReactionEvent("@alice:example.org")], count: 1 }),
+            );
+            const listener = vi.fn();
+            vm.subscribe(listener);
+
+            vm.setReactionData("👍", [
+                createReactionEvent("@alice:example.org"),
+                createReactionEvent("@bob:example.org"),
+            ]);
+
+            expect(listener).toHaveBeenCalled();
+            expect(vm.getSnapshot().reactors?.map(({ name }) => name)).toEqual(["Alice", "Bob"]);
+        });
     });
 
     it("includes an ariaLabel in the snapshot", () => {
