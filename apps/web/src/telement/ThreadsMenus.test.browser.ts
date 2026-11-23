@@ -35,34 +35,27 @@ import decoratedRoomAvatarStyles from "../../res/css/views/avatars/_DecoratedRoo
 import lightTheme from "../../res/themes/light/css/_light.pcss?raw";
 import { cornerRadii, toBrowserCss } from "../test/telement/browserCss";
 import { settledStyle, tokenColor } from "../test/telement/computedStyle";
+import { EMPTY_STATE_VIEW_STYLES, emptyStateView } from "../test/telement/emptyStateView";
 
 let stylesheet: HTMLStyleElement;
 let root: Root | undefined;
 
 /**
- * What ThreadsActivityCentre shows without threads: Compound's threads icon over the caption, in a column that Flex
- * centers.
+ * What ThreadsActivityCentre shows without threads: the compact size of the shared empty state, Compound's threads icon
+ * over the caption. The wrapper leaves no box of its own.
  */
 const emptyState = (caption: string): ReturnType<typeof createElement> =>
-    createElement(
-        "div",
-        {
-            className: "mx_ThreadsActivityCentre_emptyState",
-            style: {
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: "var(--cpd-space-4x)",
-            },
+    createElement("div", {
+        style: { display: "contents" },
+        dangerouslySetInnerHTML: {
+            __html: emptyStateView({
+                size: "compact",
+                className: "mx_ThreadsActivityCentre_emptyState",
+                Icon: ThreadsIcon,
+                description: caption,
+            }),
         },
-        createElement(ThreadsIcon, { "className": "mx_ThreadsActivityCentre_emptyIcon", "aria-hidden": true }),
-        createElement(
-            Text,
-            { as: "div", size: "sm", weight: "regular", className: "mx_ThreadsActivityCentre_emptyCaption" },
-            caption,
-        ),
-    );
+    });
 
 /**
  * ThreadsActivityCentre's open menu: the tabs, then a row per thread as ThreadsActivityCentreThreadRow renders it, or
@@ -204,7 +197,10 @@ describe("Thread menus", () => {
                 ${compoundBase} ${compoundSemantic} ${compoundLightTheme} ${compoundLightSemantic} ${telementTokens}
             }
             @layer compound-web { ${compoundStyles} }
-            @layer shared-components { ${eventTileViewStyles.replace(/:global\(([^)]*)\)/g, "$1")} }
+            @layer shared-components {
+                ${eventTileViewStyles.replace(/:global\(([^)]*)\)/g, "$1")}
+                ${EMPTY_STATE_VIEW_STYLES}
+            }
             @layer app-web {
                 ${toBrowserCss(autoHideScrollbarStyles, lightTheme)}
                 ${toBrowserCss(roomViewStyles, lightTheme, fontSizes)}
@@ -276,8 +272,8 @@ describe("Thread menus", () => {
         it("keeps its height without threads and centers the threads icon in a 56px tile over the caption in it", async () => {
             const menu = await renderActivityCentre([]);
             const list = menu.querySelector<HTMLElement>(".mx_ThreadsActivityCentre_rows")!;
-            const icon = menu.querySelector<SVGElement>(".mx_ThreadsActivityCentre_emptyIcon")!;
-            const caption = menu.querySelector<HTMLElement>(".mx_ThreadsActivityCentre_emptyCaption")!;
+            const icon = menu.querySelector<SVGElement>(".mx_ThreadsActivityCentre_emptyState svg")!;
+            const caption = menu.querySelector<HTMLElement>(".mx_ThreadsActivityCentre_emptyState p")!;
             const listBox = list.getBoundingClientRect();
             const listBottom = listBox.bottom - parseFloat(getComputedStyle(list).paddingBottom);
             const iconBox = icon.getBoundingClientRect();

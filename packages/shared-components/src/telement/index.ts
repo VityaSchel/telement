@@ -13,6 +13,7 @@ export * from "./room/timeline/PinnedMarkView";
 export * from "./room/composer/ComposerDrawerView";
 export * from "./core/DialogFooterView";
 export * from "./core/Avatar";
+export * from "./core/EmptyStateView";
 export * from "./core/SearchFieldView";
 export * from "./core/icons/DoubleCheckIcon";
 export * from "./core/useOpenOnPress";

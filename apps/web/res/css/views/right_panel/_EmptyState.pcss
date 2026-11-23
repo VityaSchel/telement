@@ -6,27 +6,8 @@ SPDX-License-Identifier: AGPL-3.0-only OR GPL-3.0-only OR LicenseRef-Element-Com
 Please see LICENSE files in the repository root for full details.
 */
 
+/* Telement: the layout is the shared EmptyStateView's; the card adds its glow */
 .mx_EmptyState {
-    height: 100%;
-    box-sizing: border-box;
-    /* The right panel card's content edge, the card header's 12px inset */
-    padding: var(--cpd-space-4x) var(--cpd-space-3x);
-    text-align: center;
-
-    /* Telement: Compound's Text is a paragraph with the browser's 1em margins, which would add to the gaps */
-    p {
-        margin: 0;
-    }
-
-    svg {
-        width: 56px;
-        height: 56px;
-        box-sizing: border-box;
-        border-radius: 8px;
-        padding: var(--cpd-space-3x);
-        background-color: $panel-actions;
-    }
-
     &::before {
         /* Bloom using magic numbers directly out of Figma. Telement: in the accent, at the strength of Element's green */
         content: "";

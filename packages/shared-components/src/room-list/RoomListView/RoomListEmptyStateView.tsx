@@ -5,15 +5,20 @@
  * Please see LICENSE files in the repository root for full details.
  */
 
-import React, { type JSX, type PropsWithChildren, type ReactNode } from "react";
+import React, { type ComponentType, type JSX, type PropsWithChildren, type ReactNode, type SVGAttributes } from "react";
 import { Button } from "@vector-im/compound-web";
+import ArrowDownIcon from "@vector-im/compound-design-tokens/assets/web/icons/arrow-down";
 import ChatIcon from "@vector-im/compound-design-tokens/assets/web/icons/chat";
+import EmailIcon from "@vector-im/compound-design-tokens/assets/web/icons/email";
+import MarkAsUnreadIcon from "@vector-im/compound-design-tokens/assets/web/icons/mark-as-unread";
+import MentionIcon from "@vector-im/compound-design-tokens/assets/web/icons/mention";
 import RoomIcon from "@vector-im/compound-design-tokens/assets/web/icons/room";
 import FilterIcon from "@vector-im/compound-design-tokens/assets/web/icons/filter";
+import UserIcon from "@vector-im/compound-design-tokens/assets/web/icons/user";
 
-import { Flex } from "../../core/utils/Flex";
 import { _t } from "../../core/i18n/i18n";
 import { useViewModel } from "../../core/viewmodel";
+import { EmptyStateView } from "../../telement/core/EmptyStateView";
 import type { RoomListViewModel } from "./RoomListView";
 import styles from "./RoomListEmptyStateView.module.css";
 
@@ -36,6 +41,7 @@ export const RoomListEmptyStateView: React.FC<RoomListEmptyStateViewProps> = ({ 
     if (!snapshot.activeFilterId) {
         return (
             <GenericPlaceholder
+                Icon={ChatIcon}
                 title={_t("room_list|empty|no_chats")}
                 description={
                     snapshot.canCreateRoom
@@ -43,22 +49,14 @@ export const RoomListEmptyStateView: React.FC<RoomListEmptyStateViewProps> = ({ 
                         : _t("room_list|empty|no_chats_description_no_room_rights")
                 }
             >
-                <Flex
-                    className={styles.defaultPlaceholder}
-                    align="center"
-                    justify="center"
-                    direction="column"
-                    gap="var(--cpd-space-4x)"
-                >
-                    <Button size="md" kind="secondary" Icon={ChatIcon} onClick={vm.createChatRoom}>
-                        {_t("action|start_chat")}
+                <Button size="md" kind="secondary" Icon={ChatIcon} onClick={vm.createChatRoom}>
+                    {_t("action|start_chat")}
+                </Button>
+                {snapshot.canCreateRoom && (
+                    <Button size="md" kind="secondary" Icon={RoomIcon} onClick={vm.createRoom}>
+                        {_t("action|new_room")}
                     </Button>
-                    {snapshot.canCreateRoom && (
-                        <Button size="md" kind="secondary" Icon={RoomIcon} onClick={vm.createRoom}>
-                            {_t("action|new_room")}
-                        </Button>
-                    )}
-                </Flex>
+                )}
             </GenericPlaceholder>
         );
     }
@@ -70,6 +68,7 @@ export const RoomListEmptyStateView: React.FC<RoomListEmptyStateViewProps> = ({ 
         case "people":
             return (
                 <FilterPlaceholder
+                    Icon={UserIcon}
                     title={_t("room_list|empty|no_people")}
                     description={_t("room_list|empty|no_people_description")}
                     onClearFilters={onClearFilters}
@@ -78,20 +77,40 @@ export const RoomListEmptyStateView: React.FC<RoomListEmptyStateViewProps> = ({ 
         case "rooms":
             return (
                 <FilterPlaceholder
+                    Icon={RoomIcon}
                     title={_t("room_list|empty|no_rooms")}
                     description={_t("room_list|empty|no_rooms_description")}
                     onClearFilters={onClearFilters}
                 />
             );
         case "unread":
-            return <FilterPlaceholder title={_t("room_list|empty|no_unread")} onClearFilters={onClearFilters} />;
+            return (
+                <FilterPlaceholder
+                    Icon={MarkAsUnreadIcon}
+                    title={_t("room_list|empty|no_unread")}
+                    onClearFilters={onClearFilters}
+                />
+            );
         case "invites":
-            return <FilterPlaceholder title={_t("room_list|empty|no_invites")} onClearFilters={onClearFilters} />;
+            return (
+                <FilterPlaceholder
+                    Icon={EmailIcon}
+                    title={_t("room_list|empty|no_invites")}
+                    onClearFilters={onClearFilters}
+                />
+            );
         case "mentions":
-            return <FilterPlaceholder title={_t("room_list|empty|no_mentions")} onClearFilters={onClearFilters} />;
+            return (
+                <FilterPlaceholder
+                    Icon={MentionIcon}
+                    title={_t("room_list|empty|no_mentions")}
+                    onClearFilters={onClearFilters}
+                />
+            );
         default:
             return (
                 <FilterPlaceholder
+                    Icon={activeFilterId === "low_priority" ? ArrowDownIcon : ChatIcon}
                     title={_t("room_list|empty|no_chats")}
                     description={_t("room_list|empty|no_chats_description")}
                     onClearFilters={onClearFilters}
@@ -101,6 +120,8 @@ export const RoomListEmptyStateView: React.FC<RoomListEmptyStateViewProps> = ({ 
 };
 
 interface GenericPlaceholderProps {
+    /** The icon of the placeholder's tile, that of the filter it stands for */
+    Icon: ComponentType<SVGAttributes<SVGElement>>;
     /** The title of the placeholder */
     title: string;
     /** The description of the placeholder */
@@ -110,26 +131,30 @@ interface GenericPlaceholderProps {
 }
 
 /**
- * A generic placeholder for the room list
+ * A generic placeholder for the room list: the right panel's empty state, centered in the list
  */
-function GenericPlaceholder({ title, description, children }: PropsWithChildren<GenericPlaceholderProps>): JSX.Element {
+function GenericPlaceholder({
+    Icon,
+    title,
+    description,
+    children,
+}: PropsWithChildren<GenericPlaceholderProps>): JSX.Element {
     return (
-        <Flex
+        <EmptyStateView
             data-testid="empty-room-list"
             className={styles.genericPlaceholder}
-            direction="column"
-            align="stretch"
-            justify="center"
-            gap="var(--cpd-space-2x)"
+            Icon={Icon}
+            title={title}
+            description={description}
         >
-            <span className={styles.title}>{title}</span>
-            {description && <span className={styles.description}>{description}</span>}
             {children}
-        </Flex>
+        </EmptyStateView>
     );
 }
 
 interface FilterPlaceholderProps {
+    /** The icon of the filter */
+    Icon: ComponentType<SVGAttributes<SVGElement>>;
     /** The title to display */
     title: string;
     /** The description of the placeholder */
@@ -142,14 +167,12 @@ interface FilterPlaceholderProps {
  * A placeholder for the room list when the active filter has no rooms, with a button that clears the filter, in the
  * outline style of the unfiltered list's buttons.
  */
-function FilterPlaceholder({ title, description, onClearFilters }: FilterPlaceholderProps): JSX.Element {
+function FilterPlaceholder({ Icon, title, description, onClearFilters }: FilterPlaceholderProps): JSX.Element {
     return (
-        <GenericPlaceholder title={title} description={description}>
-            <Flex className={styles.defaultPlaceholder} align="center" justify="center" direction="column">
-                <Button size="md" kind="secondary" Icon={FilterIcon} onClick={onClearFilters}>
-                    {_t("telement|room_list|clear_filters")}
-                </Button>
-            </Flex>
+        <GenericPlaceholder Icon={Icon} title={title} description={description}>
+            <Button size="md" kind="secondary" Icon={FilterIcon} onClick={onClearFilters}>
+                {_t("telement|room_list|clear_filters")}
+            </Button>
         </GenericPlaceholder>
     );
 }

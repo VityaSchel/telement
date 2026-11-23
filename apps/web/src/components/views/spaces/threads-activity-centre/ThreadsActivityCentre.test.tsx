@@ -316,9 +316,7 @@ describe("ThreadsActivityCentre", () => {
         renderTAC();
         await userEvent.click(getTACButton());
 
-        expect(screen.getByRole("menu").getElementsByClassName("mx_ThreadsActivityCentre_emptyCaption").length).toEqual(
-            1,
-        );
+        expect(screen.getByRole("menu")).toHaveTextContent("You don't have unread threads you've participated in.");
     });
 
     it("should show Compound's outline threads icon above the caption, hidden from screen readers", async () => {
@@ -329,10 +327,11 @@ describe("ThreadsActivityCentre", () => {
         const emptyState = screen.getByRole("menu").querySelector(".mx_ThreadsActivityCentre_emptyState")!;
         const [icon, caption] = emptyState.children;
         const { container: outline } = render(<ThreadsIcon />);
-        expect(icon).toHaveClass("mx_ThreadsActivityCentre_emptyIcon");
+        expect(icon.tagName).toBe("svg");
         expect(icon).toHaveAttribute("aria-hidden", "true");
         expect(icon.innerHTML).toBe(outline.querySelector("svg")!.innerHTML);
-        expect(caption).toHaveClass("mx_ThreadsActivityCentre_emptyCaption");
+        // The shared empty state's compact size: a caption alone, without a title
+        expect(caption.querySelectorAll("p")).toHaveLength(1);
         expect(caption).toHaveTextContent("You don't have unread threads you've participated in.");
     });
 

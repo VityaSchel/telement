@@ -11,6 +11,10 @@ import userEvent from "@testing-library/user-event";
 import { VirtuosoMockContext } from "react-virtuoso";
 import { composeStories } from "@storybook/react-vite";
 import { describe, it, expect } from "vitest";
+// The empty state's layout assertions need the real type and spacing tokens and Telement's radius tokens
+import "@vector-im/compound-design-tokens/assets/web/css/compound-design-tokens.css";
+import "@vector-im/compound-web/dist/style.css";
+import "../../telement/tokens.css";
 
 import * as stories from "./RoomListView.stories";
 
@@ -147,6 +151,30 @@ describe("<RoomListView />", () => {
         await user.click(screen.getByRole("button", { name: "Clear filters" }));
 
         expect(Story.args.onToggleFilter).toHaveBeenLastCalledWith(filterId);
+    });
+
+    it.each([
+        ["no rooms", Empty],
+        ["no rooms the user can't add to", EmptyWithoutCreatePermission],
+        ["the People filter", EmptyPeopleFilter],
+        ["the Unread filter", EmptyUnreadFilter],
+    ])("centers the empty state for %s in the list both ways, as the right panel's are", (_, Story) => {
+        renderWithMockContext(<Story />);
+        const placeholder = screen.getByTestId("empty-room-list");
+        const list = placeholder.parentElement!.getBoundingClientRect();
+        const tile = placeholder.querySelector("svg")!.getBoundingClientRect();
+        const lastButton = [...placeholder.querySelectorAll("button")].at(-1)!.getBoundingClientRect();
+
+        expect([tile.width, tile.height]).toEqual([56, 56]);
+        expect(Math.abs(tile.top - list.top - (list.bottom - lastButton.bottom))).toBeLessThanOrEqual(1);
+        expect(Math.abs(lastButton.left - list.left - (list.right - lastButton.right))).toBeLessThanOrEqual(1);
+        expect(Math.abs(tile.left - list.left - (list.right - tile.right))).toBeLessThanOrEqual(1);
+    });
+
+    it("titles the empty list in the right panel's 20px", () => {
+        renderWithMockContext(<EmptyPeopleFilter />);
+
+        expect(getComputedStyle(screen.getByText("You don’t have direct chats with anyone yet")).fontSize).toBe("20px");
     });
 
     it.each([

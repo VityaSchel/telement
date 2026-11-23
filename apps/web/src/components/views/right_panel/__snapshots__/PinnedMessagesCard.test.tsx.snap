@@ -51,14 +51,16 @@ exports[`<PinnedMessagesCard /> > should show the empty state when there are no 
       tabindex="-1"
     >
       <div
-        class="_flex mx_EmptyState"
+        class="_flex _emptyState _panel mx_EmptyState"
         style="--mx-flex-display: flex; --mx-flex-direction: column; --mx-flex-align: center; --mx-flex-justify: center; --mx-flex-gap: var(--cpd-space-4x); --mx-flex-wrap: nowrap;"
       >
         <svg
+          aria-hidden="true"
+          class="_tile"
           fill="currentColor"
-          height="32px"
+          height="1em"
           viewBox="0 0 24 24"
-          width="32px"
+          width="1em"
           xmlns="http://www.w3.org/2000/svg"
         >
           <path
@@ -68,16 +70,15 @@ exports[`<PinnedMessagesCard /> > should show the empty state when there are no 
           />
         </svg>
         <div
-          class="_flex"
-          style="--mx-flex-display: flex; --mx-flex-direction: column; --mx-flex-align: center; --mx-flex-justify: start; --mx-flex-gap: var(--cpd-space-2x); --mx-flex-wrap: nowrap;"
+          class="_text"
         >
           <p
-            class="_typography _font-body-lg-semibold"
+            class="_title"
           >
             Pin important messages so that they can be easily discovered
           </p>
           <p
-            class="_typography _font-body-md-regular"
+            class="_description"
           >
             Right-click a message and choose “Pin” to add it here.
           </p>

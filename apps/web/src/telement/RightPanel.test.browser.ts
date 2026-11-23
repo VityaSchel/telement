@@ -18,7 +18,6 @@ import {
     MenuItem,
     Search,
     Separator,
-    Text,
     ToggleMenuItem,
 } from "@vector-im/compound-web";
 import {
@@ -62,6 +61,7 @@ import compoundOverrides from "../../res/css/telement/_CompoundOverrides.pcss?ra
 import lightTheme from "../../res/themes/light/css/_light.pcss?raw";
 import { cornerRadii, toBrowserCss } from "../test/telement/browserCss";
 import { settledStyle, tokenColor } from "../test/telement/computedStyle";
+import { EMPTY_STATE_VIEW_STYLES, emptyStateView } from "../test/telement/emptyStateView";
 
 /** The right panel's width less its 1px border, which is what the cards inside it get. */
 const CARD_WIDTH = 351;
@@ -192,25 +192,14 @@ function renderMemberList(dir = "ltr"): HTMLElement {
     return document.querySelector(".mx_MemberListView")!;
 }
 
-/**
- * EmptyState as the files card shows it when the room has no files: the icon, then the title and description in a
- * group of their own, in shared-components' Flex with Compound's Text paragraphs.
- */
-const filesEmptyState = (): string => {
-    const centered = (gap: string): string =>
-        `display: flex; flex-direction: column; align-items: center; justify-content: center; gap: ${gap}`;
-    const text = (size: "lg" | "md", weight: "semibold" | "regular", content: string): string =>
-        html(createElement(Text, { size, weight }, content));
-    return `
-        <div class="mx_EmptyState" style="${centered("var(--cpd-space-4x)")}">
-            ${html(createElement(FilesIcon, { width: "32px", height: "32px" }))}
-            <div style="${centered("var(--cpd-space-2x)")}">
-                ${text("lg", "semibold", "No files in this room")}
-                ${text("md", "regular", "Use the attachment button in the composer, or drag and drop files into the room.")}
-            </div>
-        </div>
-    `;
-};
+/** EmptyState as the files card shows it when the room has no files: the shared empty state, with the card's glow. */
+const filesEmptyState = (): string =>
+    emptyStateView({
+        className: "mx_EmptyState",
+        Icon: FilesIcon,
+        title: "No files in this room",
+        description: "Use the attachment button in the composer, or drag and drop files into the room.",
+    });
 
 function rows(card: HTMLElement): HTMLElement[] {
     return [...card.querySelectorAll<HTMLElement>('[class*="_item_"]')];
@@ -271,7 +260,7 @@ describe("Right panel", () => {
                 ${compoundBase} ${compoundSemantic} ${compoundLightTheme} ${compoundLightSemantic} ${telementTokens}
             }
             @layer compound-web { ${compoundStyles} }
-            @layer shared-components { ${mediaBodyStyles} }
+            @layer shared-components { ${mediaBodyStyles} ${EMPTY_STATE_VIEW_STYLES} }
             @layer app-web {
                 body { margin: 0; }
                 ${[
@@ -740,13 +729,11 @@ describe("Right panel", () => {
     describe("empty states and other cards", () => {
         it("lays the empty state of the files, notifications, pinned messages and extensions cards out between the content edges", () => {
             document.body.innerHTML = `
-                <div class="mx_BaseCard" style="width: ${CARD_WIDTH}px; position: relative">
-                    <div class="mx_EmptyState"><p>Attach files from the chat or just drag and drop them anywhere in a room.</p></div>
-                </div>
+                <div class="mx_BaseCard" style="width: ${CARD_WIDTH}px; position: relative">${filesEmptyState()}</div>
             `;
             const card = document.querySelector(".mx_BaseCard")!;
 
-            expect(insets(card.querySelector(".mx_EmptyState p")!, card)).toEqual({
+            expect(insets(card.querySelector(".mx_EmptyState p:last-child")!, card)).toEqual({
                 start: CONTENT_EDGE,
                 end: CONTENT_EDGE,
             });
