@@ -89,6 +89,7 @@ exports[`<Notifications /> > correctly handles the loading/disabled state 1`] = 
               >
                 <input
                   class="_input"
+                  disabled=""
                   id="mx_SettingsFlag_QgU2PomxwKpa"
                   role="switch"
                   type="checkbox"
@@ -1141,6 +1142,7 @@ exports[`<Notifications /> > matches the snapshot 1`] = `
               >
                 <input
                   class="_input"
+                  disabled=""
                   id="mx_SettingsFlag_QgU2PomxwKpa"
                   role="switch"
                   type="checkbox"

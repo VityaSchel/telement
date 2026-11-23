@@ -79,34 +79,38 @@ exports[`<Notifications /> > main notification switches > renders only enable no
       </div>
     </div>
     <div
-      class="_inline-field"
+      class="mx_UserNotifSettings_dependentToggle"
     >
       <div
-        class="_inline-field-control"
+        class="_inline-field"
       >
         <div
-          class="_container"
+          class="_inline-field-control"
         >
-          <input
-            class="_input"
-            id="mx_SettingsFlag_testid_1"
-            role="switch"
-            type="checkbox"
-          />
           <div
-            class="_ui"
-          />
+            class="_container"
+          >
+            <input
+              class="_input"
+              id="mx_SettingsFlag_testid_1"
+              role="switch"
+              type="checkbox"
+            />
+            <div
+              class="_ui"
+            />
+          </div>
         </div>
-      </div>
-      <div
-        class="_inline-field-body"
-      >
-        <label
-          class="_label"
-          for="mx_SettingsFlag_testid_1"
+        <div
+          class="_inline-field-body"
         >
-          Consider all new activity as an unread message
-        </label>
+          <label
+            class="_label"
+            for="mx_SettingsFlag_testid_1"
+          >
+            Consider all new activity as an unread message
+          </label>
+        </div>
       </div>
     </div>
     <div

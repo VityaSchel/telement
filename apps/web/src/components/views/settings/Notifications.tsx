@@ -217,11 +217,14 @@ const NotificationActivitySettings = (): JSX.Element => {
             }}
         >
             <SettingsFlag name="Notifications.showbold" level={SettingLevel.DEVICE} />
-            <SettingsFlag
-                name="Notifications.activityIsUnread"
-                level={SettingLevel.DEVICE}
-                requires={["Notifications.showbold"]}
-            />
+            {/* Telement: it only applies while the toggle above is on, so it sits in under it */}
+            <div className="mx_UserNotifSettings_dependentToggle">
+                <SettingsFlag
+                    name="Notifications.activityIsUnread"
+                    level={SettingLevel.DEVICE}
+                    requires={["Notifications.showbold"]}
+                />
+            </div>
             <SettingsFlag name="Notifications.tac_only_notifications" level={SettingLevel.DEVICE} />
         </Form.Root>
     );
@@ -727,7 +730,14 @@ export default class Notifications extends React.PureComponent<EmptyObject, ISta
                     {this.state.deviceNotificationsEnabled && (
                         <>
                             <SettingsFlag name="notificationsEnabled" level={SettingLevel.DEVICE} />
-                            <SettingsFlag name="notificationBodyEnabled" level={SettingLevel.DEVICE} />
+                            {/* Telement: it only applies while desktop notifications are on, so it sits in under them */}
+                            <div className="mx_UserNotifSettings_dependentToggle">
+                                <SettingsFlag
+                                    name="notificationBodyEnabled"
+                                    level={SettingLevel.DEVICE}
+                                    requires={["notificationsEnabled"]}
+                                />
+                            </div>
                             <SettingsFlag name="audioNotificationsEnabled" level={SettingLevel.DEVICE} />
                         </>
                     )}

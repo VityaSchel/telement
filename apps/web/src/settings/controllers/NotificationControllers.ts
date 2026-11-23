@@ -62,4 +62,12 @@ export class NotificationBodyEnabledController extends SettingController {
 
         return calculatedValue;
     }
+
+    /**
+     * Telement: the message is only shown in desktop notifications, so it can't be changed while they are off. It keeps
+     * its value, as Show all rooms does under Home in the Sidebar tab.
+     */
+    public get settingDisabled(): boolean {
+        return !this.settingsStore.getValue("notificationsEnabled");
+    }
 }

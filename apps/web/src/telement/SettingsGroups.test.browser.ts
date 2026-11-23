@@ -864,6 +864,31 @@ describe.each(THEMES.map(([theme]) => theme))("Settings groups in %s", (theme) =
             expectCard("#clear-card", container);
             expect(box("#clear").left - box("#clear-card").left).toBe(16);
         });
+
+        it.each<"ltr" | "rtl">(["ltr", "rtl"])(
+            "indents a toggle that needs the one above it 24px under that one, as Sidebar does (%s)",
+            (dir) => {
+                const toggle = (id: string, label: string, disabled = false): string =>
+                    fieldMarkup(createElement(SettingsToggleInput, { name: id, label, id, disabled }));
+                renderTab(
+                    theme,
+                    `<div class="mx_SettingsSection"><div class="mx_SettingsSection_subSections">
+                        <div class="mx_SettingsSubsection"><div class="mx_SettingsSubsection_content" id="top-card"><form>
+                            ${toggle("desktop", "Enable desktop notifications for this device")}
+                            <div class="mx_UserNotifSettings_dependentToggle" id="body-row">
+                                ${toggle("body", "Show message in desktop notification", true)}
+                            </div>
+                            ${toggle("audio", "Enable audible notifications for this device")}
+                        </form></div></div>
+                    </div></div>`,
+                    dir,
+                );
+                const start = (id: string): number => box(`#${id}`)[dir === "ltr" ? "left" : "right"];
+
+                expect(Math.abs(start("body") - start("desktop"))).toBe(24);
+                expect(start("audio")).toBe(start("desktop"));
+            },
+        );
     });
 
     it("ends the Link new device card 12px under its last line", () => {

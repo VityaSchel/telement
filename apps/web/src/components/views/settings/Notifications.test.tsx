@@ -476,6 +476,41 @@ describe("<Notifications />", () => {
             });
         });
 
+        it("disables Show message in desktop notification, indented under desktop notifications, while they are off", async () => {
+            await getComponentAndWait();
+            const body = screen.getByLabelText("Show message in desktop notification");
+
+            expect(SettingsStore.getValue("notificationsEnabled")).toBe(false);
+            expect(body).toBeDisabled();
+            expect(body.closest(".mx_UserNotifSettings_dependentToggle")).not.toBeNull();
+            expect(
+                screen
+                    .getByLabelText("Enable desktop notifications for this device")
+                    .closest(".mx_UserNotifSettings_dependentToggle"),
+            ).toBeNull();
+        });
+
+        it("lets Show message in desktop notification change while desktop notifications are on", async () => {
+            const original = SettingsStore.getValue;
+            vi.spyOn(SettingsStore, "getValue").mockImplementation((setting, ...rest) =>
+                setting === "notificationsEnabled" ? true : original(setting, ...rest),
+            );
+            await getComponentAndWait();
+
+            expect(screen.getByLabelText("Show message in desktop notification")).toBeEnabled();
+            vi.mocked(SettingsStore.getValue).mockRestore();
+        });
+
+        it("indents Consider all new activity as an unread message under the room list toggle it needs", async () => {
+            await getComponentAndWait();
+
+            expect(
+                screen
+                    .getByLabelText("Consider all new activity as an unread message")
+                    .closest(".mx_UserNotifSettings_dependentToggle"),
+            ).not.toBeNull();
+        });
+
         it("toggles master switch correctly", async () => {
             await getComponentAndWait();
 
