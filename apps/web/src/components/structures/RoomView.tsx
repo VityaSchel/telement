@@ -136,6 +136,7 @@ import { RoomUploadContextProvider } from "../../viewmodels/room/RoomUploadViewM
 import { EventPresentationContextProvider } from "../../utils/EventPresentationContextProvider";
 import { TimelineFloatingDate } from "../../telement/room/TimelineFloatingDate";
 import { UnreadMentionsButton } from "../../telement/room/UnreadMentionsButton";
+import { TimelineReturns } from "../../telement/room/TimelineReturns";
 
 const DEBUG = false;
 const PREVENT_MULTIPLE_JITSI_WITHIN = 30_000;
@@ -240,6 +241,8 @@ export interface IRoomState {
     // the end of the live timeline. It has the effect of hiding the
     // 'scroll to bottom' knob, among a couple of other things.
     atEndOfLiveTimeline?: boolean;
+    // Telement: whether jump to bottom first returns to where the timeline jumped from
+    canJumpBack?: boolean;
     statusBarVisible: boolean;
     // We load this later by asking the js-sdk to suggest a version for us.
     // This object is the result of Room#getRecommendedVersion()
@@ -430,6 +433,7 @@ export class RoomView extends React.Component<IRoomProps, IRoomState> {
     private roomView = createRef<HTMLDivElement>();
     private searchResultsPanel = createRef<ScrollPanel>();
     private messagePanel: TimelinePanel | null = null;
+    private readonly timelineReturns = new TimelineReturns((canJumpBack) => this.setState({ canJumpBack }));
     private roomViewBody = createRef<HTMLDivElement>();
 
     private roomViewStore: RoomViewStore;
@@ -1143,6 +1147,7 @@ export class RoomView extends React.Component<IRoomProps, IRoomState> {
         const action = getKeyBindingsManager().getRoomAction(ev);
         switch (action) {
             case KeyBindingAction.DismissReadMarker:
+                this.timelineReturns.clear();
                 void this.messagePanel?.forgetReadMarker();
                 this.jumpToLiveTimeline();
                 handled = true;
@@ -1319,6 +1324,10 @@ export class RoomView extends React.Component<IRoomProps, IRoomState> {
                 });
                 break;
             }
+
+            case Action.ViewRoom:
+                this.recordTimelineJump(payload as ViewRoomPayload);
+                break;
 
             case "scroll_to_bottom":
                 if (payload.timelineRenderingType === TimelineRenderingType.Room) {
@@ -1730,6 +1739,7 @@ export class RoomView extends React.Component<IRoomProps, IRoomState> {
 
     private onMessageListScroll = (): void => {
         if (this.messagePanel?.isAtEndOfLiveTimeline()) {
+            this.timelineReturns.clear();
             this.setState({
                 numUnreadMessages: 0,
                 atEndOfLiveTimeline: true,
@@ -1964,6 +1974,34 @@ export class RoomView extends React.Component<IRoomProps, IRoomState> {
             this.messagePanel?.jumpToLiveTimeline();
             defaultDispatcher.fire(Action.FocusSendMessageComposer);
         }
+    };
+
+    // Telement: remembers where a jump of this room's timeline came from, which jump to bottom returns to. Opening a
+    // search result jumps from where the timeline was read before the search.
+    private recordTimelineJump(payload: ViewRoomPayload): void {
+        if (payload.room_id !== this.state.roomId || !payload.event_id) return;
+        const origin = payload.telement_jump_origin ?? (this.state.search ? "readingPosition" : undefined);
+        if (origin) this.timelineReturns.recordJump(payload.event_id, origin, this.getReadingPosition);
+    }
+
+    // Telement: the message the timeline is read at, unless it is at the bottom
+    private getReadingPosition = (): string | undefined =>
+        this.state.atEndOfLiveTimeline ? undefined : this.messagePanel?.getScrollState()?.trackedScrollToken;
+
+    // Telement: jump to bottom first returns to where the timeline jumped from and highlights it, as Telegram's does
+    private onJumpToBottomClick = (): void => {
+        const eventId = this.timelineReturns.pop();
+        if (!eventId) {
+            this.jumpToLiveTimeline();
+            return;
+        }
+        defaultDispatcher.dispatch<ViewRoomPayload>({
+            action: Action.ViewRoom,
+            room_id: this.getRoomId(),
+            event_id: eventId,
+            highlighted: true,
+            scroll_into_view: true,
+        });
     };
 
     // jump up to wherever our read marker is
@@ -2583,7 +2621,8 @@ export class RoomView extends React.Component<IRoomProps, IRoomState> {
                 <JumpToBottomButton
                     highlight={this.state.room.getUnreadNotificationCount(NotificationCountType.Highlight) > 0}
                     numUnreadMessages={this.state.numUnreadMessages}
-                    onScrollToBottomClick={this.jumpToLiveTimeline}
+                    jumpBack={this.state.canJumpBack}
+                    onScrollToBottomClick={this.onJumpToBottomClick}
                 />
             );
         }

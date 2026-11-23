@@ -155,6 +155,7 @@ function PinMenu({ event, room, permalinkCreator, contentId }: PinMenuProps): JS
             event_id: event.getId(),
             highlighted: true,
             room_id: event.getRoomId(),
+            telement_jump_origin: "readingPosition",
         });
     }, [event]);
 

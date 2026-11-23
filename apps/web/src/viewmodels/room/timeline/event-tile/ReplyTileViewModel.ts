@@ -346,11 +346,15 @@ export class ReplyTileViewModel
             if (this.props.toggleExpandedQuote && event.shiftKey) {
                 this.props.toggleExpandedQuote();
             } else {
+                // Telement: jump to bottom returns to the message holding the quote, or where the timeline was read when
+                // the quote is the composer's
+                const replyingEventId = event.currentTarget.closest<HTMLElement>("[data-event-id]")?.dataset.eventId;
                 dis.dispatch<ViewRoomPayload>({
                     action: Action.ViewRoom,
                     event_id: this.props.mxEvent.getId(),
                     highlighted: true,
                     room_id: this.props.mxEvent.getRoomId(),
+                    telement_jump_origin: replyingEventId ? { eventId: replyingEventId } : "readingPosition",
                 });
             }
         }

@@ -74,6 +74,7 @@ export function PinnedMessageBanner({ room, permalinkCreator }: PinnedMessageBan
             event_id: pinnedEvent.getId(),
             highlighted: true,
             room_id: room.roomId,
+            telement_jump_origin: "readingPosition",
         });
 
         // Cycle through the pinned messages

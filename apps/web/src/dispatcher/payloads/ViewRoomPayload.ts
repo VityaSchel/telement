@@ -14,6 +14,7 @@ import { type IOOBData, type IThreepidInvite } from "../../stores/ThreepidInvite
 import { type IOpts } from "../../createRoom";
 import { type JoinRoomPayload } from "./JoinRoomPayload";
 import { type AtLeastOne } from "../../@types/common";
+import { type TimelineJumpOrigin } from "../../telement/room/TimelineReturns";
 
 export type FocusNextType = "composer" | "threadsPanel" | undefined;
 
@@ -41,6 +42,7 @@ interface BaseViewRoomPayload extends Pick<ActionPayload, "action"> {
     opts?: JoinRoomPayload["opts"];
 
     deferred_action?: ActionPayload; // Action to fire after MatrixChat handles this ViewRoom action
+    telement_jump_origin?: TimelineJumpOrigin; // Where a jump to `event_id` came from, which jump to bottom returns to
 }
 
 export type ViewRoomPayload = BaseViewRoomPayload &

@@ -3210,7 +3210,8 @@
                 "expand_quotes": "Expand quotes",
                 "hide_media": "Hide",
                 "quick_reactions": "Quick reactions"
-            }
+            },
+            "jump_back": "Back to where you were"
         },
         "video_note": {
             "pause": "Pause video message",

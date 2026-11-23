@@ -9,7 +9,7 @@
 
 import React from "react";
 import { EventType, type MatrixClient, MatrixEvent, MsgType } from "matrix-js-sdk/src/matrix";
-import { vi, describe, it, expect, beforeEach } from "vitest";
+import { vi, describe, it, expect, beforeEach, afterEach } from "vitest";
 import { stubClient } from "test-utils";
 
 import { FileBodyFactory, ReplyVideoBodyFactory } from "../../../../components/views/messages/MBodyFactory";
@@ -19,6 +19,8 @@ import MVoiceMessageBody from "../../../../components/views/messages/MVoiceMessa
 import { renderReplyTile } from "../../../../events/EventTileFactory";
 import { getEventDisplayInfo } from "../../../../utils/EventRenderingUtils";
 import { ReplyTileViewModel } from "./ReplyTileViewModel";
+import dis from "../../../../dispatcher/dispatcher";
+import { Action } from "../../../../dispatcher/actions";
 
 type ReplyTileRenderProps = Parameters<typeof renderReplyTile>[0];
 type ReplyTileBodyOverrides = NonNullable<ReplyTileRenderProps["overrideBodyTypes"]>;
@@ -90,6 +92,47 @@ describe("ReplyTileViewModel", () => {
             isAlignedBetweenBubbles: false,
         });
         vi.mocked(renderReplyTile).mockReturnValue(<span>Reply body</span>);
+    });
+
+    describe("jumping to the quoted message", () => {
+        afterEach(() => {
+            vi.mocked(dis.dispatch).mockRestore?.();
+        });
+
+        /** Clicks the reply's link, drawn in the message with the given event ID, or in the composer without one. */
+        const clickReply = (replyingEventId?: string): void => {
+            const container = document.createElement("li");
+            if (replyingEventId) container.dataset.eventId = replyingEventId;
+            const link = document.createElement("a");
+            container.append(link);
+            const vm = new ReplyTileViewModel({ mxEvent: createEvent(), cli });
+            vm.onClick({
+                target: link,
+                currentTarget: link,
+                preventDefault: vi.fn(),
+                shiftKey: false,
+            } as unknown as React.MouseEvent<HTMLAnchorElement>);
+        };
+
+        it("tells the timeline to come back to the message holding the quote", () => {
+            const dispatch = vi.spyOn(dis, "dispatch").mockImplementation(() => {});
+            clickReply("$replying");
+
+            expect(dispatch).toHaveBeenCalledWith({
+                action: Action.ViewRoom,
+                event_id: "$reply",
+                highlighted: true,
+                room_id: "!room:server",
+                telement_jump_origin: { eventId: "$replying" },
+            });
+        });
+
+        it("tells the timeline to come back to where it was read for the composer's quote", () => {
+            const dispatch = vi.spyOn(dis, "dispatch").mockImplementation(() => {});
+            clickReply();
+
+            expect(dispatch).toHaveBeenCalledWith(expect.objectContaining({ telement_jump_origin: "readingPosition" }));
+        });
     });
 
     it("renders regular text replies with the default reply body", () => {

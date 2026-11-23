@@ -15,6 +15,8 @@ import AccessibleButton, { type ButtonEvent } from "../elements/AccessibleButton
 interface IProps {
     numUnreadMessages?: number;
     highlight: boolean;
+    /** Telement: whether the button first returns to where the timeline jumped from, rather than to the bottom. */
+    jumpBack?: boolean;
     onScrollToBottomClick: (e: ButtonEvent) => void;
 }
 
@@ -31,7 +33,7 @@ const JumpToBottomButton: React.FC<IProps> = (props) => {
         <div className={className}>
             <AccessibleButton
                 className="mx_JumpToBottomButton_scrollDown"
-                title={_t("room|jump_to_bottom_button")}
+                title={props.jumpBack ? _t("telement|timeline|jump_back") : _t("room|jump_to_bottom_button")}
                 onClick={props.onScrollToBottomClick}
             >
                 <ChevronDownIcon />

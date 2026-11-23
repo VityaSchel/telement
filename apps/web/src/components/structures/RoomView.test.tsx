@@ -331,6 +331,111 @@ describe("RoomView", () => {
         expect(asFragment()).toMatchSnapshot();
     });
 
+    describe("jumping back (Telement)", () => {
+        afterEach(() => {
+            vi.mocked(defaultDispatcher.dispatch).mockRestore?.();
+        });
+
+        /** A room view whose timeline is read at `$reading`, away from its bottom, and the jumps it dispatches. */
+        const mountScrolledUp = async (): Promise<{ instance: RoomView; dispatched: ViewRoomPayload[] }> => {
+            vi.spyOn(room, "getMyMembership").mockReturnValue(KnownMembership.Join);
+            const ref = createRef<RoomView>();
+            await mountRoomView(ref);
+            await waitFor(() => expect(screen.getByTestId("timeline")).not.toBeNull());
+            const instance = ref.current!;
+            // @ts-ignore - the timeline panel is private
+            instance.messagePanel = {
+                getScrollState: () => ({ stuckAtBottom: false, trackedScrollToken: "$reading" }),
+                isAtEndOfLiveTimeline: () => false,
+                jumpToLiveTimeline: vi.fn(),
+            };
+            act(() => instance.setState({ atEndOfLiveTimeline: false }));
+
+            const dispatched: ViewRoomPayload[] = [];
+            vi.spyOn(defaultDispatcher, "dispatch").mockImplementation((payload) => {
+                if (payload.action === Action.ViewRoom) dispatched.push(payload as ViewRoomPayload);
+            });
+            return { instance, dispatched };
+        };
+
+        const jump = async (instance: RoomView, payload: Partial<ViewRoomPayload>): Promise<void> => {
+            // @ts-ignore - RoomView hears the dispatcher through its private action handler
+            await act(() => instance.onAction({ action: Action.ViewRoom, room_id: room.roomId, ...payload }));
+        };
+
+        it("returns from a quote's message to the reply it was clicked in, then goes to the bottom", async () => {
+            const { instance, dispatched } = await mountScrolledUp();
+            const button = (): HTMLElement => screen.getByRole("button", { name: /Back to where you were|Scroll to/ });
+            expect(button()).toHaveAccessibleName("Scroll to most recent messages");
+
+            await jump(instance, {
+                event_id: "$quoted",
+                highlighted: true,
+                telement_jump_origin: { eventId: "$reply" },
+            });
+            expect(button()).toHaveAccessibleName("Back to where you were");
+
+            fireEvent.click(button());
+
+            expect(dispatched.at(-1)).toMatchObject({ event_id: "$reply", highlighted: true });
+            expect(button()).toHaveAccessibleName("Scroll to most recent messages");
+
+            fireEvent.click(button());
+
+            // @ts-ignore - the timeline panel is private
+            expect(instance.messagePanel.jumpToLiveTimeline).toHaveBeenCalled();
+        });
+
+        it("returns from a pinned message to where the timeline was read", async () => {
+            const { instance, dispatched } = await mountScrolledUp();
+
+            await jump(instance, { event_id: "$pinned", highlighted: true, telement_jump_origin: "readingPosition" });
+            fireEvent.click(screen.getByRole("button", { name: "Back to where you were" }));
+
+            expect(dispatched.at(-1)).toMatchObject({ event_id: "$reading", highlighted: true });
+        });
+
+        it("returns from a search result to where the timeline was read before the search", async () => {
+            const { instance, dispatched } = await mountScrolledUp();
+            const search = {
+                searchId: 1,
+                term: "pizza",
+                scope: SearchScope.Room,
+                promise: new Promise<never>(() => {}),
+            };
+            act(() => instance.setState({ search }));
+
+            await jump(instance, { event_id: "$result", highlighted: true });
+            act(() => instance.setState({ search: undefined }));
+            fireEvent.click(screen.getByRole("button", { name: "Back to where you were" }));
+
+            expect(dispatched.at(-1)).toMatchObject({ event_id: "$reading", highlighted: true });
+        });
+
+        it("forgets where it came from once the timeline reaches its bottom", async () => {
+            const { instance } = await mountScrolledUp();
+            await jump(instance, {
+                event_id: "$quoted",
+                highlighted: true,
+                telement_jump_origin: { eventId: "$reply" },
+            });
+
+            // @ts-ignore - the timeline panel is private
+            instance.messagePanel.isAtEndOfLiveTimeline = () => true;
+            // @ts-ignore - the scroll handler is private
+            act(() => instance.onMessageListScroll());
+
+            expect(instance.state.canJumpBack).toBe(false);
+        });
+
+        it("doesn't remember other jumps, such as to a link in a message", async () => {
+            const { instance } = await mountScrolledUp();
+            await jump(instance, { event_id: "$linked", highlighted: true });
+
+            expect(instance.state.canJumpBack).toBeFalsy();
+        });
+    });
+
     describe("enableReadReceiptsAndMarkersOnActivity", () => {
         it.each([
             {
