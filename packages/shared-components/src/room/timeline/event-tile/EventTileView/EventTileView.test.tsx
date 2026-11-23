@@ -1260,16 +1260,16 @@ describe("EventTileView placement", () => {
             expect(box.bottom - time.bottom).toBeCloseTo(8, 1);
         });
 
-        it("draws a selected row's band a gray step darker than another person's bubble, which stays visible in it", () => {
+        it("draws a selected row's band in a tint of the accent, apart from another person's gray bubble", () => {
             renderTiles("bubble", { state: { selected: true }, slots: { body: textBody("Hello") } });
             const band = getComputedStyle(screen.getByTestId("event-tile"), "::before").backgroundColor;
-            const darkerGray = document.createElement("div");
-            darkerGray.style.backgroundColor = "var(--cpd-color-bg-subtle-primary)";
-            document.body.append(darkerGray);
+            const tint = document.createElement("div");
+            tint.style.backgroundColor = "var(--tl-color-bg-message-selected)";
+            document.body.append(tint);
 
-            expect(band).toBe(getComputedStyle(darkerGray).backgroundColor);
+            expect(band).toBe(getComputedStyle(tint).backgroundColor);
             expect(band).not.toBe(getComputedStyle(screen.getByTestId("event-tile-line")).backgroundColor);
-            darkerGray.remove();
+            tint.remove();
         });
 
         it("separates a quoted reply from the text below it by 4px", () => {

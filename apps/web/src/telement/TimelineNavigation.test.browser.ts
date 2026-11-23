@@ -83,9 +83,9 @@ function row(text: string, { own = false, layout = "Bubble", states = [] }: RowO
 }
 
 /** An informational row ("Alice joined the room"), whose text is drawn on the row's band in the secondary color. */
-function infoRow(text: string): string {
+function infoRow(text: string, states: string[] = []): string {
     return `
-        <li class="root mx_EventTile layoutBubble stateInfo stateLastInSection" data-testid="event-tile">
+        <li class="${["root mx_EventTile layoutBubble stateInfo stateLastInSection", ...states].join(" ")}" data-testid="event-tile">
             <div class="line mx_EventTile_line">
                 <div class="slotBody"><div class="info" style="color: var(--cpd-color-text-secondary)">${text}</div></div>
                 <div class="slotTimestamp"><a class="mx_MessageTimestamp" href="#">12:48</a></div>
@@ -169,6 +169,14 @@ function colorDistance(actual: string, expected: string): number {
 
 const alphaOf = (color: string): number => colorChannels(color)[3];
 
+/** The opaque color that a color drawn on an opaque one gives. */
+function blend(color: string, background: string): string {
+    const [red, green, blue, alpha] = colorChannels(color);
+    const under = colorChannels(background);
+    const [r, g, b] = [red, green, blue].map((channel, i) => channel * alpha + under[i] * (1 - alpha));
+    return `rgb(${r}, ${g}, ${b})`;
+}
+
 /** How far apart two opaque colors look: their distance in OKLab, in hundredths, where about 2 is just noticeable. */
 function perceivedDistance(first: string, second: string): number {
     const oklab = (color: string): number[] => {
@@ -225,7 +233,7 @@ describe("Timeline navigation", () => {
             ({ name }) => {
                 const scope = render(name, row("Here it is", { states: ["stateJumpedTo"] }));
                 const tile = scope.querySelector(".root")!;
-                const band = tokenColor("--cpd-color-bg-subtle-primary", scope);
+                const band = tokenColor("--tl-color-bg-message-selected", scope);
 
                 seekJump(tile, 0);
                 expect(
@@ -272,7 +280,7 @@ describe("Timeline navigation", () => {
             expect(
                 colorDistance(
                     gradientColor(getComputedStyle(line).backgroundImage),
-                    tokenColor("--event-tile-state-selected-background", tile),
+                    tokenColor("--tl-color-bg-message-selected", tile),
                 ),
             ).toBeLessThanOrEqual(1);
             expect(
@@ -297,7 +305,7 @@ describe("Timeline navigation", () => {
             expect(
                 colorDistance(
                     getComputedStyle(tile, "::before").backgroundColor,
-                    tokenColor("--cpd-color-bg-subtle-primary", scope),
+                    tokenColor("--tl-color-bg-message-selected", scope),
                 ),
             ).toBeLessThanOrEqual(1);
             expect(
@@ -305,6 +313,22 @@ describe("Timeline navigation", () => {
                     getComputedStyle(tile.querySelector(".line")!).backgroundColor,
                     tokenColor("--tl-color-bg-bubble-own-highlighted", scope),
                 ),
+            ).toBeLessThanOrEqual(1);
+        });
+
+        it.each(THEMES)("keeps the secondary text on the fading band at 4.5:1 ($name)", ({ name }) => {
+            const scope = render(name, infoRow("Alice joined the room", ["stateJumpedTo"]));
+            const tile = scope.querySelector(".root")!;
+            const text = tile.querySelector(".info")!;
+            const page = getComputedStyle(scope).backgroundColor;
+
+            for (const time of [0, 0.25, 0.5, 0.75, 1].map((progress) => progress * end)) {
+                seekJump(tile, time);
+                const band = blend(gradientColor(getComputedStyle(tile, "::before").backgroundImage), page);
+                expect(contrastOver(getComputedStyle(text).color, band)).toBeGreaterThanOrEqual(4.5);
+            }
+            expect(
+                colorDistance(getComputedStyle(text).color, tokenColor("--cpd-color-text-secondary", scope)),
             ).toBeLessThanOrEqual(1);
         });
 
@@ -317,36 +341,47 @@ describe("Timeline navigation", () => {
         });
     });
 
-    describe("the message the keyboard is on", () => {
+    /** The ways a message is marked as the one being acted on, each with the states that mark it. */
+    const MARKED: { name: string; states: string[]; mark: (tile: HTMLElement) => Promise<void> | void }[] = [
+        {
+            name: "the keyboard is on",
+            states: [],
+            mark: (tile) => tabTo(tile.querySelector<HTMLElement>(".mx_MessageTimestamp")!),
+        },
+        { name: "is right-clicked", states: ["stateSelected"], mark: () => {} },
+        { name: "is jumped to", states: ["stateJumpedTo"], mark: (tile) => seekJump(tile, 0) },
+    ];
+
+    /** The band drawn behind a bubble layout's row: its own fill, or a jump's, which is drawn over it. */
+    function bandOf(tile: Element): string {
+        const { backgroundColor, backgroundImage } = getComputedStyle(tile, "::before");
+        return backgroundImage === "none" ? backgroundColor : gradientColor(backgroundImage);
+    }
+
+    describe.each(MARKED)("the message that $name", ({ states, mark }) => {
         beforeAll(() => loadStyles({ reducedMotion: true }));
 
         it.each(THEMES)(
             "takes the accent's tint, which stands apart from the page and every bubble ($name)",
             async ({ name }) => {
-                const scope = render(
-                    name,
-                    row("Mine", { own: true }),
-                    row("Focused"),
-                    row("Selected", { states: ["stateSelected"] }),
-                );
-                const [own, focused, selected] = scope.querySelectorAll<HTMLElement>(".root");
-                await tabTo(focused.querySelector<HTMLElement>(".mx_MessageTimestamp")!);
+                const scope = render(name, row("Mine", { own: true }), row("Marked", { states }));
+                const [own, marked] = scope.querySelectorAll<HTMLElement>(".root");
+                await mark(marked);
 
                 const page = getComputedStyle(scope).backgroundColor;
-                const band = getComputedStyle(focused, "::before").backgroundColor;
-                const grayBand = getComputedStyle(selected, "::before").backgroundColor;
-                const bubble = getComputedStyle(focused.querySelector(".line")!).backgroundColor;
+                const band = bandOf(marked);
+                // The gray band of earlier versions, a step from other people's bubbles
+                const grayBand = tokenColor("--cpd-color-bg-subtle-primary", scope);
+                const bubble = getComputedStyle(marked.querySelector(".line")!).backgroundColor;
                 const ownBubble = getComputedStyle(own.querySelector(".line")!).backgroundColor;
-                const hoverBand = tokenColor("--event-tile-state-hover-background", focused);
+                const hoverBand = tokenColor("--event-tile-state-hover-background", marked);
 
-                expect(colorDistance(band, tokenColor("--tl-color-bg-message-focused", scope))).toBeLessThanOrEqual(1);
-                // At least the room list's hover (about 1.12:1) on the page
-                expect(contrastOver(band, page)).toBeGreaterThanOrEqual(1.2);
-                // Other people's bubbles stand out on it clearly more than on the gray band, which is a step from them
+                expect(colorDistance(band, tokenColor("--tl-color-bg-message-selected", scope))).toBeLessThanOrEqual(1);
+                expect(contrastOver(band, page)).toBeGreaterThanOrEqual(1.24);
+                // Other people's bubbles stand out on it clearly more than on the gray band
                 expect(perceivedDistance(band, bubble)).toBeGreaterThanOrEqual(
                     Math.max(6, 1.5 * perceivedDistance(grayBand, bubble)),
                 );
-                expect(perceivedDistance(band, grayBand)).toBeGreaterThanOrEqual(3);
                 expect(perceivedDistance(band, hoverBand)).toBeGreaterThanOrEqual(6);
                 // Your own bubble keeps 3:1 on it, or as much as it has on the gray band where that is less
                 expect(contrastOver(ownBubble, band)).toBeGreaterThanOrEqual(
@@ -356,16 +391,73 @@ describe("Timeline navigation", () => {
         );
 
         it.each(THEMES)("keeps the secondary text drawn on it at 4.5:1 ($name)", async ({ name }) => {
-            const scope = render(name, infoRow("Alice joined the room"));
+            const scope = render(name, infoRow("Alice joined the room", states));
             const tile = scope.querySelector<HTMLElement>(".root")!;
-            await tabTo(tile.querySelector<HTMLElement>(".mx_MessageTimestamp")!);
+            await mark(tile);
 
-            const band = getComputedStyle(tile, "::before").backgroundColor;
-            expect(colorDistance(band, tokenColor("--tl-color-bg-message-focused", scope))).toBeLessThanOrEqual(1);
+            const band = bandOf(tile);
+            expect(colorDistance(band, tokenColor("--tl-color-bg-message-selected", scope))).toBeLessThanOrEqual(1);
             expect(contrastOver(getComputedStyle(tile.querySelector(".info")!).color, band)).toBeGreaterThanOrEqual(
                 4.5,
             );
         });
+
+        it.each<Layout>(["Group", "Irc"])("fills the %s layout's line with it", async (layout) => {
+            const scope = render("cpd-theme-light", row("Marked", { layout, states }));
+            const tile = scope.querySelector<HTMLElement>(".root")!;
+            await mark(tile);
+
+            const { backgroundColor, backgroundImage } = getComputedStyle(tile.querySelector(".line")!);
+            const band = backgroundImage === "none" ? backgroundColor : gradientColor(backgroundImage);
+            expect(colorDistance(band, tokenColor("--tl-color-bg-message-selected", scope))).toBeLessThanOrEqual(1);
+            expect(contrastOver(tokenColor("--cpd-color-text-secondary", tile), band)).toBeGreaterThanOrEqual(4.5);
+        });
+
+        it("takes it over the highlight of a mention", async () => {
+            const scope = render("cpd-theme-light", row("Marked", { states: ["stateHighlighted", ...states] }));
+            const tile = scope.querySelector<HTMLElement>(".root")!;
+            await mark(tile);
+
+            expect(
+                colorDistance(bandOf(tile), tokenColor("--tl-color-bg-message-selected", scope)),
+            ).toBeLessThanOrEqual(1);
+        });
+    });
+
+    describe.each(MARKED.slice(1))("your own message that $name", ({ states, mark }) => {
+        beforeAll(() => loadStyles({ reducedMotion: true }));
+
+        it.each(THEMES)("stands apart from the tint in its highlighted fill ($name)", async ({ name }) => {
+            const scope = render(name, row("Mine", { own: true, states }));
+            const tile = scope.querySelector<HTMLElement>(".root")!;
+            await mark(tile);
+
+            const fill = getComputedStyle(tile.querySelector(".line")!).backgroundColor;
+            const grayBand = tokenColor("--cpd-color-bg-subtle-primary", scope);
+            expect(colorDistance(fill, tokenColor("--tl-color-bg-bubble-own-highlighted", scope))).toBeLessThanOrEqual(
+                1,
+            );
+            expect(contrastOver(fill, bandOf(tile))).toBeGreaterThanOrEqual(
+                Math.min(3, contrastOver(fill, grayBand)) - 0.05,
+            );
+        });
+    });
+
+    describe("a message being edited", () => {
+        beforeAll(() => loadStyles({ reducedMotion: true }));
+
+        it.each<Layout>(["Group", "Irc"])("keeps the gray hover band in the %s layout", (layout) => {
+            const scope = render("cpd-theme-light", row("Edited", { layout, states: ["stateEditing"] }));
+            const tile = scope.querySelector(".root")!;
+
+            expect(getComputedStyle(tile.querySelector(".line")!).backgroundColor).toBe(
+                tokenColor("--event-tile-state-hover-background", tile),
+            );
+        });
+    });
+
+    describe("the message the keyboard is on", () => {
+        beforeAll(() => loadStyles({ reducedMotion: true }));
 
         it("keeps the ring on the focused link", async () => {
             const scope = render("cpd-theme-light", row("Focused"));
@@ -374,16 +466,6 @@ describe("Timeline navigation", () => {
 
             expect(getComputedStyle(link).outlineStyle).toBe("solid");
             expect(getComputedStyle(link).outlineWidth).toBe("2px");
-        });
-
-        it.each<Layout>(["Group", "Irc"])("fills the %s layout's line with it", async (layout) => {
-            const scope = render("cpd-theme-light", row("Focused", { layout }));
-            const tile = scope.querySelector<HTMLElement>(".root")!;
-            await tabTo(tile.querySelector<HTMLElement>(".mx_MessageTimestamp")!);
-
-            const band = getComputedStyle(tile.querySelector(".line")!).backgroundColor;
-            expect(colorDistance(band, tokenColor("--tl-color-bg-message-focused", scope))).toBeLessThanOrEqual(1);
-            expect(contrastOver(tokenColor("--cpd-color-text-secondary", tile), band)).toBeGreaterThanOrEqual(4.5);
         });
 
         it.each<Layout>(["Bubble", "Group"])(
@@ -396,7 +478,7 @@ describe("Timeline navigation", () => {
                         ? getComputedStyle(tile, "::before").backgroundColor
                         : getComputedStyle(tile.querySelector(".line")!).backgroundColor;
 
-                expect(colorDistance(band, tokenColor("--tl-color-bg-message-focused", scope))).toBeLessThanOrEqual(1);
+                expect(colorDistance(band, tokenColor("--tl-color-bg-message-selected", scope))).toBeLessThanOrEqual(1);
             },
         );
 

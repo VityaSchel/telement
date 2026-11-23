@@ -310,24 +310,26 @@ Please see LICENSE files in the repository root for full details.
 }
 
 /*
- * The band of the message the keyboard is on, a tint of the accent as Telegram's message selection is. The gray selected
- * band is barely apart from other people's gray bubbles, so this one is a hue away from them: about 1.3:1 on the page in
- * light themes and 1.25:1 in dark ones, more than the room list's hover, with your own bubble at least as clear on it as
- * on the gray band. Light themes take the step 60% of the way from accent 400 to 500, dark ones 40% from 300 to 400.
+ * The band of a message being acted on, a tint of the accent as Telegram's message selection is: while its right-click
+ * menu is open, as the timeline jumps to it (where the band fades), and while the keyboard is on it. A gray band would
+ * barely be apart from other people's gray bubbles, so this one is a hue away from them: about 1.3:1 on the page in
+ * light themes and 1.25:1 in dark ones, more than the room list's hover, with your own bubble, at rest or highlighted,
+ * 3:1 on it or as clear as on a gray band a step darker than other people's bubbles. Light themes take the step 60% of
+ * the way from accent 400 to 500, dark ones 40% from 300 to 400.
  */
 :root,
 [class*="cpd-theme-"] {
-    --tl-color-bg-message-focused: color-mix(in srgb, var(--tl-accent-400) 40%, var(--tl-accent-500));
+    --tl-color-bg-message-selected: color-mix(in srgb, var(--tl-accent-400) 40%, var(--tl-accent-500));
 }
 
 .cpd-theme-dark.cpd-theme-dark,
 .cpd-theme-dark-hc.cpd-theme-dark-hc {
-    --tl-color-bg-message-focused: color-mix(in srgb, var(--tl-accent-300) 60%, var(--tl-accent-400));
+    --tl-color-bg-message-selected: color-mix(in srgb, var(--tl-accent-300) 60%, var(--tl-accent-400));
 }
 
 @media (prefers-color-scheme: dark) {
     :root {
-        --tl-color-bg-message-focused: color-mix(in srgb, var(--tl-accent-300) 60%, var(--tl-accent-400));
+        --tl-color-bg-message-selected: color-mix(in srgb, var(--tl-accent-300) 60%, var(--tl-accent-400));
     }
 }
 

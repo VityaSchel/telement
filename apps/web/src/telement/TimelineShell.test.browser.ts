@@ -607,7 +607,7 @@ describe("Timeline shell", () => {
                 row("bubble", text("Or the pizza place"), { states: ["stateSelected"] }),
             );
             const [hovered, selected] = all(".root");
-            const band = tokenColor("--event-tile-bubble-hover-background", selected);
+            const band = tokenColor("--tl-color-bg-message-selected", selected);
             await userEvent.hover(hovered.querySelector(".line")!);
 
             expect(hovered.matches(":hover")).toBe(true);
@@ -712,8 +712,8 @@ describe("Timeline shell", () => {
             const selected = document.querySelector(".root")!;
             const band = getComputedStyle(selected, "::before").backgroundColor;
 
-            // One gray step darker than the bubble
-            expect(band).toBe(tokenColor("--cpd-color-bg-subtle-primary", selected));
+            // A tint of the accent, as the bubble is gray
+            expect(band).toBe(tokenColor("--tl-color-bg-message-selected", selected));
             expect(getComputedStyle(selected.querySelector(".line")!).backgroundColor).toBe(
                 tokenColor("--cpd-color-bg-subtle-secondary", selected),
             );
