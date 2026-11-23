@@ -9,7 +9,7 @@ import React from "react";
 import userEvent from "@testing-library/user-event";
 import { userEvent as pointer } from "vitest/browser";
 import { render, screen } from "@test-utils";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 // The layout assertions need the real spacing tokens and Telement's tokens
 import "@vector-im/compound-design-tokens/assets/web/css/compound-design-tokens.css";
 import "@vector-im/compound-web/dist/style.css";
@@ -198,5 +198,133 @@ describe("SettingsSearchView", () => {
             tokenColor("--tl-color-bg-floating-hovered", "backgroundColor"),
         );
         expect(getComputedStyle(second).backgroundColor).toBe("rgba(0, 0, 0, 0)");
+    });
+
+    describe("with room for an icon only", () => {
+        const onKeyDown = vi.fn<(key: string) => void>();
+
+        /** The compact search above a tab, as narrow settings dialogs have it. */
+        const compactSearch = (
+            vm: SettingsSearchViewActions & MockViewModel<SettingsSearchViewSnapshot>,
+        ): React.JSX.Element => (
+            <div style={{ width: 600, padding: 16 }} onKeyDown={(event) => onKeyDown(event.key)}>
+                <SettingsSearchView vm={vm} compact />
+                <button>Account</button>
+            </div>
+        );
+
+        beforeEach(() => onKeyDown.mockClear());
+
+        const button = (): HTMLElement => screen.getByRole("button", { name: "Search settings" });
+        const field = (): HTMLElement => screen.getByRole("combobox", { name: "Search settings" });
+
+        it("is a round 36px button in the field's fill, its 20px magnifier in the middle, with a tooltip", async () => {
+            render(compactSearch(searchViewModel({ query: "" })));
+            const box = button().getBoundingClientRect();
+            const icon = button().querySelector("svg")!.getBoundingClientRect();
+
+            expect(screen.queryByRole("combobox")).toBeNull();
+            expect(button()).toHaveAttribute("aria-expanded", "false");
+            expect([box.width, box.height]).toEqual([36, 36]);
+            expect(parseFloat(getComputedStyle(button()).borderTopLeftRadius)).toBeGreaterThanOrEqual(18);
+            expect(getComputedStyle(button()).backgroundColor).toBe(
+                tokenColor("--cpd-color-bg-subtle-secondary", "backgroundColor"),
+            );
+            expect([icon.width, icon.left - box.left, icon.top - box.top]).toEqual([20, 8, 8]);
+
+            await pointer.hover(button());
+            // The tooltip, which also names the button
+            await vi.waitFor(() => expect(screen.getByText("Search settings")).toBeVisible());
+        });
+
+        it("opens the same search over what is beside it, with the focus in the field, moving nothing", async () => {
+            const vm = searchViewModel();
+            render(compactSearch(vm));
+            const start = button().getBoundingClientRect();
+            const tab = screen.getByRole("button", { name: "Account" });
+            const { left, top } = tab.getBoundingClientRect();
+
+            await userEvent.click(button());
+
+            expect(field()).toHaveFocus();
+            const pill = field().parentElement!.getBoundingClientRect();
+            expect([pill.left, pill.top, pill.width, pill.height]).toEqual([start.left, start.top, 220, 36]);
+            expect([tab.getBoundingClientRect().left, tab.getBoundingClientRect().top]).toEqual([left, top]);
+            // Over what is beside it, as a menu is
+            const surface = getComputedStyle(field().parentElement!.parentElement!);
+            expect(surface.backgroundColor).toBe(tokenColor("--tl-color-bg-floating", "backgroundColor"));
+            expect(surface.boxShadow).not.toBe("none");
+            expect(surface.zIndex).toBe("1");
+
+            // The results, as in a wide window
+            const list = screen.getByRole("listbox").getBoundingClientRect();
+            expect(screen.getAllByRole("option")).toHaveLength(3);
+            expect([list.left, list.top - pill.bottom]).toEqual([pill.left, 4]);
+            expect(list.width).toBeGreaterThanOrEqual(220);
+            await userEvent.keyboard("{ArrowDown}");
+            expect(vm.moveActive).toHaveBeenLastCalledWith(1);
+        });
+
+        it("empties the field on Escape, then becomes the button again with the focus, leaving the settings open", async () => {
+            const vm = searchViewModel({ query: "font" });
+            const { rerender } = render(compactSearch(vm));
+            await userEvent.click(button());
+
+            await userEvent.keyboard("{Escape}");
+            expect(vm.setQuery).toHaveBeenCalledWith("");
+            expect(field()).toHaveFocus();
+
+            rerender(compactSearch(searchViewModel({ query: "", results: [] })));
+            await userEvent.keyboard("{Escape}");
+            expect(screen.queryByRole("combobox")).toBeNull();
+            expect(button()).toHaveFocus();
+            expect(onKeyDown).not.toHaveBeenCalledWith("Escape");
+        });
+
+        it("opens the active result with Enter, and becomes the button again", async () => {
+            const vm = searchViewModel();
+            render(compactSearch(vm));
+            await userEvent.click(button());
+
+            await userEvent.keyboard("{Enter}");
+
+            expect(vm.choose).toHaveBeenCalledWith("previews");
+            expect(button()).toBeVisible();
+            expect(button()).not.toHaveFocus();
+        });
+
+        it("opens a clicked result", async () => {
+            const vm = searchViewModel();
+            render(compactSearch(vm));
+            await userEvent.click(button());
+
+            await pointer.click(screen.getAllByRole("option")[2]);
+
+            expect(vm.choose).toHaveBeenCalledWith("font");
+            expect(screen.queryByRole("combobox")).toBeNull();
+        });
+
+        it("becomes the button again once the focus is elsewhere, but not while it is on the field's clear button", async () => {
+            render(compactSearch(searchViewModel()));
+            await userEvent.click(button());
+
+            await userEvent.tab();
+            expect(screen.getByRole("button", { name: "Clear search" })).toHaveFocus();
+            expect(field()).toBeVisible();
+
+            await userEvent.tab();
+            expect(screen.queryByRole("combobox")).toBeNull();
+            expect(button()).toBeVisible();
+        });
+
+        it("opens from the keyboard", async () => {
+            render(compactSearch(searchViewModel({ query: "" })));
+
+            await userEvent.tab();
+            expect(button()).toHaveFocus();
+            await userEvent.keyboard("{Enter}");
+
+            expect(field()).toHaveFocus();
+        });
     });
 });

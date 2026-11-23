@@ -257,7 +257,7 @@ export default function UserSettingsDialog(props: IProps): JSX.Element {
                             activeTabId={activeTabId}
                             onChange={setActiveTabId}
                             responsive={true}
-                            tabsHeader={<SettingsSearchView vm={searchVm} />}
+                            renderTabsHeader={(iconsOnly) => <SettingsSearchView vm={searchVm} compact={iconsOnly} />}
                         />
                     </div>
                     <div className="mx_SettingsDialog_toastContainer">

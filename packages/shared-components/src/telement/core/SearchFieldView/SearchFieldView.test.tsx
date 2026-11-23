@@ -21,7 +21,7 @@ import { SearchFieldView, type SearchFieldViewProps } from "./SearchFieldView";
 import { SearchFieldButtonView } from "./SearchFieldButtonView";
 
 const { Default, WithValue, CustomPlaceholder } = composeStories(stories);
-const { Default: DefaultButton } = composeStories(buttonStories);
+const { Default: DefaultButton, IconOnly: IconOnlyButton } = composeStories(buttonStories);
 
 // The magnifier and the placeholder, which the field centers at rest and moves to its left edge
 function getDecoration(field: HTMLElement): HTMLElement {
@@ -254,6 +254,17 @@ describe("SearchFieldButtonView", () => {
             expect(buttonStyle[property]).toBe(fieldStyle[property]);
         }
         expect(getInsets(button, buttonLabel.parentElement!)).toEqual(getInsets(field, getDecoration(field)));
+    });
+
+    it("is a circle as tall as the field around the magnifier without a label", () => {
+        render(<IconOnlyButton />);
+        const button = screen.getByRole("button", { name: "Search settings" });
+        const box = button.getBoundingClientRect();
+        const icon = button.querySelector("svg")!.getBoundingClientRect();
+
+        expect([box.width, box.height]).toEqual([36, 36]);
+        expect(parseFloat(getComputedStyle(button).borderTopLeftRadius)).toBeGreaterThanOrEqual(18);
+        expect([icon.left - box.left, box.right - icon.right, icon.top - box.top]).toEqual([8, 8, 8]);
     });
 
     it("is a button named after its label", async () => {

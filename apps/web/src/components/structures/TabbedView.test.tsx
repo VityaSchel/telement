@@ -8,7 +8,7 @@ Please see LICENSE files in the repository root for full details.
 
 // @vitest-environment happy-dom
 
-import { describe, it, expect, vi } from "vitest";
+import { afterEach, describe, it, expect, vi } from "vitest";
 import React from "react";
 import { act, fireEvent, render, screen } from "test-utils-rtl";
 import { SettingsSolidIcon, VisibilityOnIcon, LabsIcon } from "@vector-im/compound-design-tokens/assets/web/icons";
@@ -16,6 +16,7 @@ import { SettingsSolidIcon, VisibilityOnIcon, LabsIcon } from "@vector-im/compou
 import TabbedView, { Tab, TabLocation } from "./TabbedView";
 import { type NonEmptyArray } from "../../@types/common";
 import { _t } from "../../languageHandler";
+import UIStore, { UI_EVENTS } from "../../stores/UIStore";
 
 describe("<TabbedView />", () => {
     const generalTab = new Tab("GENERAL", "common|general", <SettingsSolidIcon />, <div>general</div>);
@@ -42,14 +43,64 @@ describe("<TabbedView />", () => {
     const getActiveTabBody = (container: HTMLElement): Element | undefined =>
         container.getElementsByClassName("mx_TabbedView_tabPanel")[0];
 
-    it("puts what goes above the tabs before their list", () => {
-        const { container } = render(
-            <TabbedView {...defaultProps} activeTabId="GENERAL" tabsHeader={<input aria-label="Search settings" />} />,
+    describe("with something above the tabs", () => {
+        afterEach(() => {
+            UIStore.destroy();
+        });
+
+        const renderTabsHeader = (iconsOnly: boolean): React.ReactElement =>
+            iconsOnly ? <button aria-label="Search settings" /> : <input aria-label="Search settings" />;
+
+        it("puts it before their list", () => {
+            const { container } = render(
+                <TabbedView {...defaultProps} activeTabId="GENERAL" renderTabsHeader={renderTabsHeader} />,
+            );
+
+            const header = container.querySelector(".mx_TabbedView_tabsHeader")!;
+            expect(header).toContainElement(screen.getByRole("textbox", { name: "Search settings" }));
+            expect(header.nextElementSibling).toHaveAttribute("role", "tablist");
+        });
+
+        it.each([
+            { width: 1025, responsive: true, role: "textbox" },
+            // At the width the stylesheet hides the tabs' labels from
+            { width: 1024, responsive: true, role: "button" },
+            { width: 800, responsive: true, role: "button" },
+            // Tabs that keep their labels in narrow windows
+            { width: 800, responsive: false, role: "textbox" },
+        ])(
+            "draws it as a $role in a $width px wide window, where responsive is $responsive",
+            ({ width, responsive, role }) => {
+                UIStore.instance.windowWidth = width;
+                render(
+                    <TabbedView
+                        {...defaultProps}
+                        activeTabId="GENERAL"
+                        responsive={responsive}
+                        renderTabsHeader={renderTabsHeader}
+                    />,
+                );
+
+                expect(screen.getByRole(role, { name: "Search settings" })).toBeInTheDocument();
+            },
         );
 
-        const header = container.querySelector(".mx_TabbedView_tabsHeader")!;
-        expect(header).toContainElement(screen.getByRole("textbox", { name: "Search settings" }));
-        expect(header.nextElementSibling).toHaveAttribute("role", "tablist");
+        it("follows the window as it gets narrower and wider", () => {
+            UIStore.instance.windowWidth = 1280;
+            render(
+                <TabbedView {...defaultProps} activeTabId="GENERAL" responsive renderTabsHeader={renderTabsHeader} />,
+            );
+            const resize = (width: number): void =>
+                act(() => {
+                    UIStore.instance.windowWidth = width;
+                    UIStore.instance.emit(UI_EVENTS.Resize);
+                });
+
+            resize(900);
+            expect(screen.getByRole("button", { name: "Search settings" })).toBeInTheDocument();
+            resize(1280);
+            expect(screen.getByRole("textbox", { name: "Search settings" })).toBeInTheDocument();
+        });
     });
 
     it("renders tabs", () => {

@@ -138,9 +138,10 @@ interface IProps<T extends string> {
      */
     responsive?: boolean;
     /**
-     * Telement: what goes above the tabs on the left, such as the search in the user settings.
+     * Telement: renders what goes above the tabs on the left, such as the search in the user settings.
+     * @param iconsOnly - Whether the tabs, and so what goes above them, have only room for their icons.
      */
-    tabsHeader?: ReactNode;
+    renderTabsHeader?: (iconsOnly: boolean) => ReactNode;
 }
 
 /**
@@ -168,6 +169,8 @@ export default function TabbedView<T extends string>(props: IProps<T>): JSX.Elem
     ));
     const tab = getTabById(props.activeTabId);
     const panel = tab ? <TabPanel tab={tab} /> : null;
+    // The same as the CSS breakpoint at which the tab labels are hidden (_TabbedView.pcss)
+    const iconsOnly = !!props.responsive && windowWidth <= 1024;
 
     const tabbedViewClasses = classNames({
         mx_TabbedView: true,
@@ -178,8 +181,8 @@ export default function TabbedView<T extends string>(props: IProps<T>): JSX.Elem
 
     return (
         <div className={tabbedViewClasses}>
-            {props.tabsHeader && tabLocation === TabLocation.LEFT && (
-                <div className="mx_TabbedView_tabsHeader">{props.tabsHeader}</div>
+            {props.renderTabsHeader && tabLocation === TabLocation.LEFT && (
+                <div className="mx_TabbedView_tabsHeader">{props.renderTabsHeader(iconsOnly)}</div>
             )}
             <RovingTabIndexProvider
                 handleLoop

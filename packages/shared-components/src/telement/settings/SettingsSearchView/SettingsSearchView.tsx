@@ -5,13 +5,23 @@ SPDX-License-Identifier: AGPL-3.0-only OR GPL-3.0-only
 Please see LICENSE files in the repository root for full details.
 */
 
-import React, { type FocusEvent, type JSX, type KeyboardEvent, useEffect, useId, useRef, useState } from "react";
+import React, {
+    type FocusEvent,
+    type JSX,
+    type KeyboardEvent,
+    useEffect,
+    useId,
+    useLayoutEffect,
+    useRef,
+    useState,
+} from "react";
 import classNames from "classnames";
+import { Tooltip } from "@vector-im/compound-web";
 
 import { _t } from "../../../core/i18n/i18n";
 import { type ViewModel } from "../../../core/viewmodel/ViewModel";
 import { useViewModel } from "../../../core/viewmodel/useViewModel";
-import { SearchFieldView } from "../../core/SearchFieldView";
+import { SearchFieldButtonView, SearchFieldView } from "../../core/SearchFieldView";
 import styles from "./SettingsSearchView.module.css";
 
 /** A setting the search found. */
@@ -51,6 +61,8 @@ export type SettingsSearchViewModel = ViewModel<SettingsSearchViewSnapshot, Sett
 export interface SettingsSearchViewProps {
     /** The view model of the search. */
     vm: SettingsSearchViewModel;
+    /** Whether there is room for an icon only, as above tabs that are only icons. */
+    compact?: boolean;
     /** Extra class name for the search's box. */
     className?: string;
 }
@@ -60,17 +72,26 @@ export interface SettingsSearchViewProps {
  * has focus, the matching settings in a menu under it, one row each, "Tab › Group › Setting". Typing filters, the arrow
  * keys and the pointer move one highlight, and Enter or a click opens the setting. Escape empties the field.
  *
+ * With room for an icon only, the search is a round button with the magnifier, which opens the same field over what is
+ * beside it. Escape in the empty field, choosing a setting or leaving the field makes it the button again.
+ *
  * @example
  * ```tsx
  * <SettingsSearchView vm={settingsSearchViewModel} />
  * ```
  */
-export function SettingsSearchView({ vm, className }: Readonly<SettingsSearchViewProps>): JSX.Element {
+export function SettingsSearchView({ vm, compact = false, className }: Readonly<SettingsSearchViewProps>): JSX.Element {
     const { query, results, activeIndex } = useViewModel(vm);
     const [focused, setFocused] = useState(false);
+    // Whether the button of a compact search has opened the field
+    const [expanded, setExpanded] = useState(false);
     const listRef = useRef<HTMLUListElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
+    const buttonRef = useRef<HTMLButtonElement>(null);
+    // Set when Escape closed the field, so that the focus goes back to the button it opened from
+    const returnFocus = useRef(false);
     const listId = useId();
+    const label = _t("telement|settings_search|placeholder");
 
     const open = focused && query.trim() !== "";
     const activeResult = results[activeIndex];
@@ -81,6 +102,15 @@ export function SettingsSearchView({ vm, className }: Readonly<SettingsSearchVie
         if (!open) return;
         listRef.current?.querySelector(`[data-index="${activeIndex}"]`)?.scrollIntoView({ block: "nearest" });
     }, [open, activeIndex]);
+
+    useLayoutEffect(() => {
+        if (expanded) {
+            inputRef.current?.focus();
+        } else if (returnFocus.current) {
+            returnFocus.current = false;
+            buttonRef.current?.focus();
+        }
+    }, [expanded]);
 
     // The field lets go of the focus, closing the list, so that the setting can take it
     const openResult = (id: string): void => {
@@ -102,81 +132,106 @@ export function SettingsSearchView({ vm, className }: Readonly<SettingsSearchVie
                 openResult(activeResult.id);
                 break;
             case "Escape":
-                // Only empties the field: with nothing typed, Escape closes the settings as before
-                if (query === "") return;
+                // Empties the field. With nothing typed, it makes a compact search the button again, and otherwise
+                // closes the settings as before
+                if (query !== "") {
+                    vm.setQuery("");
+                } else if (compact) {
+                    returnFocus.current = true;
+                    setExpanded(false);
+                } else {
+                    return;
+                }
                 event.preventDefault();
                 event.stopPropagation();
-                vm.setQuery("");
                 break;
         }
     };
 
     const onBlur = (event: FocusEvent<HTMLDivElement>): void => {
-        if (!event.currentTarget.contains(event.relatedTarget)) setFocused(false);
+        if (event.currentTarget.contains(event.relatedTarget)) return;
+        setFocused(false);
+        setExpanded(false);
     };
 
+    if (compact && !expanded) {
+        return (
+            <div className={classNames(styles.compact, className)}>
+                <Tooltip label={label} placement="right">
+                    <SearchFieldButtonView ref={buttonRef} aria-expanded={false} onClick={() => setExpanded(true)} />
+                </Tooltip>
+            </div>
+        );
+    }
+
     return (
-        <div className={classNames(styles.search, className)} onFocus={() => setFocused(true)} onBlur={onBlur}>
-            <SearchFieldView
-                ref={inputRef}
-                value={query}
-                onChange={vm.setQuery}
-                placeholder={_t("telement|settings_search|placeholder")}
-                onKeyDown={onKeyDown}
-                role="combobox"
-                aria-expanded={open}
-                aria-controls={listId}
-                aria-autocomplete="list"
-                aria-activedescendant={open && activeResult ? optionId(activeIndex) : undefined}
-            />
-            {open && (
-                <ul
-                    ref={listRef}
-                    id={listId}
-                    className={styles.results}
-                    role="listbox"
-                    aria-label={_t("telement|settings_search|results")}
-                >
-                    {results.length === 0 && (
-                        <li className={styles.empty} role="presentation">
-                            {_t("telement|settings_search|no_results")}
-                        </li>
-                    )}
-                    {results.map((result, index) => {
-                        const setting = result.path[result.path.length - 1];
-                        const where = result.path.slice(0, -1);
-                        return (
-                            // The keys move the highlight from the field, which keeps the focus, as in a combobox
-                            // oxlint-disable-next-line jsx-a11y/click-events-have-key-events
-                            <li
-                                key={result.id}
-                                id={optionId(index)}
-                                data-index={index}
-                                className={classNames(styles.result, { [styles.active]: index === activeIndex })}
-                                role="option"
-                                aria-selected={index === activeIndex}
-                                // Keep the focus in the field, which would otherwise close the list before the click
-                                onMouseDown={(event) => event.preventDefault()}
-                                // The pointer moves the one highlight the arrow keys move
-                                onPointerMove={() => {
-                                    if (index !== activeIndex) vm.setActiveIndex(index);
-                                }}
-                                onClick={() => openResult(result.id)}
-                            >
-                                {where.map((part, partIndex) => (
-                                    // The parts of a path are fixed for the result, and the same name can repeat in it
-                                    // oxlint-disable-next-line react/no-array-index-key
-                                    <React.Fragment key={partIndex}>
-                                        <span className={styles.where}>{part}</span>
-                                        <span className={styles.separator}>{" › "}</span>
-                                    </React.Fragment>
-                                ))}
-                                <span className={styles.setting}>{setting}</span>
+        <div
+            className={classNames({ [styles.compact]: compact }, className)}
+            onFocus={() => setFocused(true)}
+            onBlur={onBlur}
+        >
+            <div className={styles.field}>
+                <SearchFieldView
+                    ref={inputRef}
+                    value={query}
+                    onChange={vm.setQuery}
+                    placeholder={label}
+                    onKeyDown={onKeyDown}
+                    role="combobox"
+                    aria-expanded={open}
+                    aria-controls={listId}
+                    aria-autocomplete="list"
+                    aria-activedescendant={open && activeResult ? optionId(activeIndex) : undefined}
+                />
+                {open && (
+                    <ul
+                        ref={listRef}
+                        id={listId}
+                        className={styles.results}
+                        role="listbox"
+                        aria-label={_t("telement|settings_search|results")}
+                    >
+                        {results.length === 0 && (
+                            <li className={styles.empty} role="presentation">
+                                {_t("telement|settings_search|no_results")}
                             </li>
-                        );
-                    })}
-                </ul>
-            )}
+                        )}
+                        {results.map((result, index) => {
+                            const setting = result.path[result.path.length - 1];
+                            const where = result.path.slice(0, -1);
+                            return (
+                                // The keys move the highlight from the field, which keeps the focus, as in a combobox
+                                // oxlint-disable-next-line jsx-a11y/click-events-have-key-events
+                                <li
+                                    key={result.id}
+                                    id={optionId(index)}
+                                    data-index={index}
+                                    className={classNames(styles.result, { [styles.active]: index === activeIndex })}
+                                    role="option"
+                                    aria-selected={index === activeIndex}
+                                    // Keep the focus in the field, which would otherwise close the list before the click
+                                    onMouseDown={(event) => event.preventDefault()}
+                                    // The pointer moves the one highlight the arrow keys move
+                                    onPointerMove={() => {
+                                        if (index !== activeIndex) vm.setActiveIndex(index);
+                                    }}
+                                    onClick={() => openResult(result.id)}
+                                >
+                                    {where.map((part, partIndex) => (
+                                        // The parts of a path are fixed for the result, and the same name can repeat in it
+                                        // oxlint-disable-next-line react/no-array-index-key
+                                        <React.Fragment key={partIndex}>
+                                            <span className={styles.where}>{part}</span>
+                                            <span className={styles.separator}>{" › "}</span>
+                                        </React.Fragment>
+                                    ))}
+                                    <span className={styles.setting}>{setting}</span>
+                                </li>
+                            );
+                        })}
+                    </ul>
+                )}
+            </div>
         </div>
     );
 }

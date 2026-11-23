@@ -5,8 +5,34 @@ SPDX-License-Identifier: AGPL-3.0-only OR GPL-3.0-only
 Please see LICENSE files in the repository root for full details.
 */
 
-.search {
+.field {
     position: relative;
+}
+
+/*
+ * With room for an icon only: a button as wide as it is tall. The field it opens lies over what is beside it, as wide
+ * as it is above the tabs with their names, on a floating surface, so that nothing moves as it comes and goes.
+ */
+.compact {
+    position: relative;
+    inline-size: var(--tl-control-size);
+    block-size: var(--tl-control-size);
+
+    .field {
+        position: absolute;
+        inset-block-start: 0;
+        inset-inline-start: 0;
+        z-index: 1;
+        inline-size: 220px;
+        border-radius: var(--tl-radius-control);
+        background-color: var(--tl-color-bg-floating);
+        box-shadow: var(--tl-shadow-floating);
+    }
+
+    /* A window this narrow may end before the widest results do */
+    .results {
+        max-inline-size: min(480px, 80vw);
+    }
 }
 
 /*

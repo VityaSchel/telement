@@ -5,7 +5,7 @@ SPDX-License-Identifier: AGPL-3.0-only OR GPL-3.0-only
 Please see LICENSE files in the repository root for full details.
 */
 
-import React, { type ButtonHTMLAttributes, type JSX, type PropsWithChildren } from "react";
+import React, { type ButtonHTMLAttributes, type JSX, type PropsWithChildren, type Ref } from "react";
 import classNames from "classnames";
 import { SearchIcon } from "@vector-im/compound-design-tokens/assets/web/icons";
 
@@ -13,9 +13,14 @@ import styles from "./SearchFieldView.module.css";
 
 export interface SearchFieldButtonViewProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, "type"> {
     /**
-     * The label shown next to the magnifier, such as "Search (Ctrl+K)".
+     * The label shown next to the magnifier, such as "Search (Ctrl+K)". Without one the button is a circle as tall as
+     * the field with only the magnifier, which takes its name from a tooltip.
      */
-    children: PropsWithChildren["children"];
+    children?: PropsWithChildren["children"];
+    /**
+     * Ref to the button.
+     */
+    ref?: Ref<HTMLButtonElement>;
 }
 
 /**
@@ -33,10 +38,14 @@ export function SearchFieldButtonView({
     ...buttonProps
 }: Readonly<SearchFieldButtonViewProps>): JSX.Element {
     return (
-        <button type="button" className={classNames(styles.field, styles.button, className)} {...buttonProps}>
+        <button
+            type="button"
+            className={classNames(styles.field, styles.button, { [styles.iconOnly]: !children }, className)}
+            {...buttonProps}
+        >
             <span className={styles.decoration}>
                 <SearchIcon className={styles.icon} aria-hidden />
-                <span className={styles.placeholder}>{children}</span>
+                {children && <span className={styles.placeholder}>{children}</span>}
             </span>
         </button>
     );

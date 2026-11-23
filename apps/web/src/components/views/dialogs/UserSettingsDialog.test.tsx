@@ -9,7 +9,7 @@ Please see LICENSE files in the repository root for full details.
 // @vitest-environment happy-dom
 
 import React, { type ReactElement } from "react";
-import { vi, describe, it, expect, beforeEach, type MockedObject } from "vitest";
+import { vi, describe, it, expect, afterEach, beforeEach, type MockedObject } from "vitest";
 import { render, screen, waitFor } from "test-utils-rtl";
 import userEvent from "@testing-library/user-event";
 import { renderToStaticMarkup } from "react-dom/server";
@@ -32,6 +32,7 @@ import SdkConfig from "../../../SdkConfig";
 import { UserTab } from "./UserTab";
 import UserSettingsDialog from "./UserSettingsDialog";
 import { UIFeature } from "../../../settings/UIFeature";
+import UIStore from "../../../stores/UIStore";
 import { SettingLevel } from "../../../settings/SettingLevel";
 import { type FeatureSettingKey } from "../../../settings/Settings.tsx";
 
@@ -96,7 +97,12 @@ describe("<UserSettingsDialog />", () => {
     const getActiveTabLabel = (container: Element) =>
         container.querySelector(".mx_TabbedView_tabLabel_active")?.textContent;
 
+    afterEach(() => {
+        UIStore.destroy();
+    });
+
     it("searches the settings from a field above the tabs and opens the tab of what is chosen", async () => {
+        UIStore.instance.windowWidth = 1280;
         const { container } = render(getComponent());
         const search = screen.getByRole("combobox", { name: "Search settings" });
         expect(search.closest(".mx_TabbedView_tabsHeader")?.nextElementSibling).toHaveAttribute("role", "tablist");
@@ -110,6 +116,25 @@ describe("<UserSettingsDialog />", () => {
 
         expect(getActiveTabLabel(container)).toMatch(/^Help & about$/i);
         expect(screen.queryByRole("listbox")).toBeNull();
+    });
+
+    it("opens the search from a button where the tabs are only icons, and makes it the button again on Escape", async () => {
+        UIStore.instance.windowWidth = 1024;
+        const { container } = render(getComponent());
+        const button = screen.getByRole("button", { name: "Search settings" });
+        expect(button.closest(".mx_TabbedView_tabsHeader")?.nextElementSibling).toHaveAttribute("role", "tablist");
+        expect(screen.queryByRole("combobox", { name: "Search settings" })).toBeNull();
+
+        await userEvent.click(button);
+        expect(screen.getByRole("combobox", { name: "Search settings" })).toHaveFocus();
+        await userEvent.keyboard("{Escape}");
+        expect(defaultProps.onFinished).not.toHaveBeenCalled();
+        expect(screen.getByRole("button", { name: "Search settings" })).toHaveFocus();
+
+        await userEvent.click(screen.getByRole("button", { name: "Search settings" }));
+        await userEvent.keyboard("clear cache{Enter}");
+        expect(getActiveTabLabel(container)).toMatch(/^Help & about$/i);
+        expect(screen.queryByRole("combobox", { name: "Search settings" })).toBeNull();
     });
 
     it("should render general settings tab when no initialTabId", () => {

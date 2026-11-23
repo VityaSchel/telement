@@ -6,7 +6,7 @@ Please see LICENSE files in the repository root for full details.
 */
 
 import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
-import { userEvent } from "vitest/browser";
+import { page, userEvent } from "vitest/browser";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { InlineField, Label, RadioControl, Root, ToggleControl } from "@vector-im/compound-web";
@@ -156,13 +156,36 @@ describe("Settings dialogs", () => {
             expect(getComputedStyle(document.querySelector(".mx_TabbedView_tabsHeader")!).zIndex).toBe("1");
         });
 
-        it("is left out when the narrow dialog shows only the tabs' icons", () => {
-            renderSettingsDialog({ responsive: false });
+        it("is as wide as the tabs when the narrow dialog shows only their icons, the tabs 16px under it", () => {
+            renderSettingsDialog({ responsive: true });
+            // The test viewport is narrower than the 1024px up to which the labels are hidden
+            expect(window.matchMedia("(max-width: 1024px)").matches).toBe(true);
             const tabsTop = tabs()[0].getBoundingClientRect().top;
             renderSettingsDialog({ responsive: true, search: true });
+            const header = document.querySelector(".mx_TabbedView_tabsHeader")!.getBoundingClientRect();
+            const firstTab = tabs()[0].getBoundingClientRect();
 
-            expect(getComputedStyle(document.querySelector(".mx_TabbedView_tabsHeader")!).display).toBe("none");
-            expect(tabs()[0].getBoundingClientRect().top).toBe(tabsTop);
+            expect(header.top).toBe(tabsTop);
+            expect([header.left, header.width, header.height]).toEqual([firstTab.left, 36, 36]);
+            expect(firstTab.width).toBe(36);
+            expect(firstTab.top - header.bottom).toBe(16);
+        });
+
+        describe("at the width up to which the tabs' labels are hidden", () => {
+            afterEach(async () => {
+                await page.viewport(960, 720);
+            });
+
+            it.each([
+                [1024, 36],
+                [1025, 220],
+            ])("in a %ipx wide window, is %ipx wide like the tabs", async (windowWidth, width) => {
+                await page.viewport(windowWidth, 720);
+                renderSettingsDialog({ responsive: true, search: true });
+
+                expect(tabs()[0].getBoundingClientRect().width).toBe(width);
+                expect(document.querySelector(".mx_TabbedView_tabsHeader")!.getBoundingClientRect().width).toBe(width);
+            });
         });
 
         it("fills the setting it opened with the row hover fill, to 4px from its card, without flashing under reduced motion", () => {

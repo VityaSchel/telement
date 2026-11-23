@@ -165,6 +165,15 @@ Please see LICENSE files in the repository root for full details.
     }
 }
 
+/* Without a label, the pill is a circle around the magnifier */
+.iconOnly {
+    inline-size: var(--tl-control-size);
+
+    .decoration {
+        max-inline-size: none;
+    }
+}
+
 @media (hover) {
     .button:hover {
         background-color: var(--cpd-color-bg-subtle-primary);

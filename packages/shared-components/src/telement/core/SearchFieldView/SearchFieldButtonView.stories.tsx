@@ -32,3 +32,8 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
+
+/** Without a label, a circle with only the magnifier. */
+export const IconOnly: Story = {
+    args: { "children": undefined, "aria-label": "Search settings" },
+};
