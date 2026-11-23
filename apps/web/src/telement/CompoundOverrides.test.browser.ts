@@ -196,4 +196,63 @@ describe("Telement's overrides of Compound", () => {
             expect(style.borderTopColor).toBe("rgba(0, 0, 0, 0)");
         }
     });
+
+    describe("an avatar whose photo is loading", () => {
+        // A 1px transparent GIF, which shows nothing either way
+        const photo = "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==";
+
+        /** Bob's avatar with his photo, marked with his letter as Avatar (shared-components) marks it while it loads */
+        function renderAvatars(loading: boolean): { withPhoto: HTMLElement; letter: HTMLElement } {
+            // Built apart from the calls, which check for data attributes that Compound's props don't list
+            const bob = { id: "@bob:example.org", name: "Bob", size: "48px" };
+            const withPhoto = { ...bob, "key": "photo", "src": photo, "data-initial": loading ? "B" : undefined };
+            const letter = { ...bob, key: "letter" };
+            render([
+                createElement(Avatar, { ...withPhoto, "data-testid": "with-photo" } as typeof withPhoto),
+                createElement(Avatar, { ...letter, "data-testid": "letter" } as typeof letter),
+            ]);
+            return {
+                withPhoto: document.querySelector<HTMLElement>('[data-testid="with-photo"]')!,
+                letter: document.querySelector<HTMLElement>('[data-testid="letter"]')!,
+            };
+        }
+
+        it("shows its letter avatar, as Telegram does, rather than a blank circle", () => {
+            const { withPhoto, letter } = renderAvatars(true);
+            const style = getComputedStyle(withPhoto);
+            const drawnLetter = getComputedStyle(withPhoto, "::before");
+
+            expect(style.backgroundImage).toBe(getComputedStyle(letter).backgroundImage);
+            expect(style.color).toBe(getComputedStyle(letter).color);
+            expect(drawnLetter.content).toBe('"B"');
+            // Where the letter avatar draws its letter: inside its 1px border, in its font and line
+            expect([drawnLetter.position, drawnLetter.top, drawnLetter.left]).toEqual(["absolute", "1px", "1px"]);
+            for (const property of ["fontSize", "fontWeight", "lineHeight", "textAlign", "textTransform"] as const) {
+                expect(drawnLetter[property]).toBe(getComputedStyle(letter)[property]);
+            }
+            expect(getComputedStyle(withPhoto.querySelector("img")!).visibility).toBe("hidden");
+        });
+
+        it("keeps the photo's place and its own size, so nothing moves when the photo shows", () => {
+            const { withPhoto, letter } = renderAvatars(true);
+            const box = withPhoto.getBoundingClientRect();
+            const image = withPhoto.querySelector("img")!.getBoundingClientRect();
+
+            expect([box.width, box.height]).toEqual([48, 48]);
+            expect([box.width, box.height]).toEqual([
+                letter.getBoundingClientRect().width,
+                letter.getBoundingClientRect().height,
+            ]);
+            // Where it will be seen, so that the browser loads it, lazy as it is
+            expect([image.left, image.top, image.width]).toEqual([box.left, box.top, 48]);
+        });
+
+        it("shows the photo alone once it has loaded", () => {
+            const { withPhoto } = renderAvatars(false);
+
+            expect(getComputedStyle(withPhoto).backgroundImage).toBe("none");
+            expect(getComputedStyle(withPhoto, "::before").content).toBe("none");
+            expect(getComputedStyle(withPhoto.querySelector("img")!).visibility).toBe("visible");
+        });
+    });
 });

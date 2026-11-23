@@ -8,10 +8,11 @@
  */
 
 import React, { type ComponentPropsWithoutRef, type JSX, type MouseEventHandler, type ReactNode } from "react";
-import { Avatar, IndicatorIcon, Tooltip } from "@vector-im/compound-web";
+import { IndicatorIcon, Tooltip } from "@vector-im/compound-web";
 import { ChevronRightIcon, ThreadsSolidIcon } from "@vector-im/compound-design-tokens/assets/web/icons";
 
 import { type ViewModel, useViewModel } from "../../../../../core/viewmodel";
+import { Avatar } from "../../../../../telement/core/Avatar";
 import styles from "./ThreadSummary.module.css";
 
 export type ThreadSummaryNotificationIndicator = ComponentPropsWithoutRef<typeof IndicatorIcon>["indicator"];

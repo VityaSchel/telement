@@ -7,11 +7,11 @@
 
 import React, { type HTMLAttributes, type JSX } from "react";
 import classNames from "classnames";
-import { Avatar } from "@vector-im/compound-web";
 
 import { type ViewModel, useViewModel } from "../../../../../core/viewmodel";
 import { useEventPresentation } from "../../../EventPresentation";
 import { ReactionsRowButtonTooltipView, type ReactionsRowButtonTooltipViewModel } from "../ReactionsRowButtonTooltip";
+import { Avatar } from "../../../../../telement/core/Avatar";
 import styles from "./ReactionsRowButton.module.css";
 
 /**

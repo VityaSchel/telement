@@ -11,6 +11,7 @@ export * from "./room/timeline/VideoNoteBodyView";
 export * from "./room/timeline/MessageStatusView";
 export * from "./room/timeline/PinnedMarkView";
 export * from "./room/composer/ComposerDrawerView";
+export * from "./core/Avatar";
 export * from "./core/SearchFieldView";
 export * from "./core/icons/DoubleCheckIcon";
 export * from "./core/useOpenOnPress";

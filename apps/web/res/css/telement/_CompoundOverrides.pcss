@@ -283,9 +283,11 @@ input[class*="_control_"] + button[class*="_action_"] {
  * Letter avatars are Telegram's: a gradient from its avatar palette with white initials, in both themes, so they stand
  * out on hovered and selected rows as well as on the page. Compound's six colors take the Telegram gradient of the
  * nearest hue (Telegram for macOS's day palette: lime to green, cyan, fuchsia to pink, purple to violet, pink to red,
- * orange). The border Compound draws for high contrast mode would be a solid ring around the gradient.
+ * orange). The border Compound draws for high contrast mode would be a solid ring around the gradient. An avatar whose
+ * photo is still loading is the letter avatar too (below).
  */
-[class*="_avatar-imageless_"] {
+[class*="_avatar-imageless_"],
+[class*="_avatar_"][data-initial] {
     --cpd-avatar-color: #ffffff;
 
     background: linear-gradient(var(--tl-avatar-top), var(--tl-avatar-bottom));
@@ -319,6 +321,27 @@ input[class*="_control_"] + button[class*="_action_"] {
     &[data-color="6"] {
         --tl-avatar-top: #ffcd6a;
         --tl-avatar-bottom: #ffa85c;
+    }
+}
+
+/*
+ * Until its photo has loaded, an avatar shows its letter avatar, as Telegram does, rather than a blank circle, and a
+ * photo that fails to load leaves the letter. Avatar (shared-components) puts the letter in data-initial meanwhile. The
+ * letter is drawn over the photo's place, 1px inside the edge as the letter avatar's border puts it, so nothing moves
+ * when the photo shows. The photo stays laid out where it would be seen, so that the browser loads it.
+ */
+[class*="_avatar_"][data-initial] {
+    position: relative;
+    color: var(--cpd-avatar-color);
+
+    &::before {
+        content: attr(data-initial);
+        position: absolute;
+        inset: 1px;
+    }
+
+    > img {
+        visibility: hidden;
     }
 }
 

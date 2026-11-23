@@ -6,7 +6,7 @@
  */
 
 import React from "react";
-import { Avatar } from "@vector-im/compound-web";
+import { Avatar } from "../../telement/core/Avatar";
 
 import { useViewModel, type ViewModel } from "../viewmodel";
 

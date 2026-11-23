@@ -10,14 +10,19 @@ import "@vector-im/compound-design-tokens/assets/web/css/compound-design-tokens.
 import { composeStories } from "@storybook/react-vite";
 import { render } from "@test-utils";
 import React from "react";
-import { describe, it, expect } from "vitest";
+import { beforeAll, describe, it, expect } from "vitest";
 import userEvent from "@testing-library/user-event";
 
 import * as stories from "./UserMenu.stories.tsx";
+import { loadAvatarPhotos } from "../../telement/core/Avatar/loadAvatarPhotos";
+import avatarUrl from "../../../static/element.png";
 
 const { Default, LongerName, Condensed, Guest, Open, NoAvatar, WithStatus, WithStatusOpen } = composeStories(stories);
 
 describe("UserMenu", () => {
+    // Avatars show their letter until their photo has loaded, so the snapshots load the photos first
+    beforeAll(() => loadAvatarPhotos(avatarUrl));
+
     it("renders a button", async () => {
         const { container } = render(<Default />);
         expect(container).toMatchSnapshot();

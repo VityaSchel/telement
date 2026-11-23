@@ -8,7 +8,7 @@ Please see LICENSE files in the repository root for full details.
 import React from "react";
 import { composeStories } from "@storybook/react-vite";
 import { act, fireEvent, render, screen } from "@test-utils";
-import { describe, expect, it, vi } from "vitest";
+import { beforeAll, describe, expect, it, vi } from "vitest";
 import { userEvent } from "vitest/browser";
 // The layout assertions need the real spacing tokens, Compound's pill radius and Telement's radius tokens.
 import "@vector-im/compound-design-tokens/assets/web/css/compound-design-tokens.css";
@@ -18,6 +18,8 @@ import "../../tokens.css";
 import { BaseViewModel } from "../../../core/viewmodel/BaseViewModel";
 import { MockViewModel } from "../../../core/viewmodel/MockViewModel";
 import * as stories from "./VideoLightboxView.stories";
+import { loadAvatarPhotos } from "../../core/Avatar/loadAvatarPhotos";
+import avatarImage from "../../../../static/profile-pics/profile1.png";
 import {
     VideoLightboxView,
     VideoLightboxViewState,
@@ -123,6 +125,9 @@ function videoSpaceBottom(): number {
 }
 
 describe("VideoLightboxView", () => {
+    // Avatars show their letter until their photo has loaded, so the snapshots load the photos first
+    beforeAll(() => loadAvatarPhotos(avatarImage));
+
     it.each([
         ["paused", Paused],
         ["playing", Playing],

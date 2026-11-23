@@ -12,7 +12,8 @@ Please see LICENSE files in the repository root for full details.
 import React, { type AriaRole, type JSX, type Ref, useCallback, useContext, useEffect, useState } from "react";
 import classNames from "classnames";
 import { ClientEvent, type SyncState } from "matrix-js-sdk/src/matrix";
-import { Avatar } from "@vector-im/compound-web";
+// Compound's avatar, which shows the letter avatar until the photo has loaded, as Telegram does
+import { Avatar } from "@element-hq/web-shared-components";
 
 import SettingsStore from "../../../settings/SettingsStore";
 import { type ButtonEvent } from "../elements/AccessibleButton";

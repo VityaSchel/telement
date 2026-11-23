@@ -9,7 +9,7 @@ import { composeStories } from "@storybook/react-vite";
 import { fireEvent, render, screen } from "@test-utils";
 import React from "react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it, vi } from "vitest";
+import { beforeAll, describe, expect, it, vi } from "vitest";
 
 import { MockViewModel } from "../../../core/viewmodel";
 import {
@@ -19,10 +19,15 @@ import {
     type RoomAvatarViewSnapshot,
 } from "./RoomAvatarView";
 import * as stories from "./RoomAvatar.stories";
+import { loadAvatarPhotos } from "../../../telement/core/Avatar/loadAvatarPhotos";
+import avatarUrl from "../../../../static/element.png";
 
 const { Default, SpaceRoom, Clickable } = composeStories(stories);
 
 describe("RoomAvatarView", () => {
+    // Avatars show their letter until their photo has loaded, so the snapshots load the photos first
+    beforeAll(() => loadAvatarPhotos(avatarUrl));
+
     it("renders a round avatar with initial letter", () => {
         const { container } = render(<Default />);
         expect(container).toMatchSnapshot();

@@ -6,7 +6,7 @@
  */
 
 import React, { type AriaRole, type JSX, type Ref, useCallback, useEffect, useState } from "react";
-import { Avatar } from "@vector-im/compound-web";
+import { Avatar } from "../../../telement/core/Avatar";
 
 import { type ViewModel, useViewModel } from "../../../core/viewmodel";
 

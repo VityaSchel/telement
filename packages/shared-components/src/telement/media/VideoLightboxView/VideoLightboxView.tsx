@@ -30,10 +30,11 @@ import {
     VolumeOffSolidIcon,
     VolumeOnSolidIcon,
 } from "@vector-im/compound-design-tokens/assets/web/icons";
-import { Avatar, IconButton, InlineSpinner, RadioInput } from "@vector-im/compound-web";
+import { IconButton, InlineSpinner, RadioInput } from "@vector-im/compound-web";
 
 import { _t } from "../../../core/i18n/i18n";
 import { type ViewModel, useViewModel } from "../../../core/viewmodel";
+import { Avatar } from "../../core/Avatar";
 import styles from "./VideoLightboxView.module.css";
 
 const noop = (): void => {};

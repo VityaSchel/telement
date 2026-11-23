@@ -6,11 +6,14 @@
  */
 
 import { composeStories } from "@storybook/react-vite";
-import { describe, expect, it } from "vitest";
+import { beforeAll, describe, expect, it } from "vitest";
 import React from "react";
 import { render } from "@test-utils";
 
 import * as Stories from "./DmOngoingCallTileView.stories";
+import { loadAvatarPhotos } from "../../../../../../telement/core/Avatar/loadAvatarPhotos";
+import profileLink1 from "../../../../../../../static/profile-pics/profile1.png";
+import profileLink2 from "../../../../../../../static/profile-pics/profile2.png";
 
 const {
     IncomingVideoCall,
@@ -22,6 +25,9 @@ const {
 } = composeStories(Stories);
 
 describe("DmOngoingCallTileView", () => {
+    // Avatars show their letter until their photo has loaded, so the snapshots load the photos first
+    beforeAll(() => loadAvatarPhotos(profileLink1, profileLink2));
+
     describe("renders the tile", () => {
         it("IncomingVideoCall", () => {
             const { container } = render(<IncomingVideoCall />);

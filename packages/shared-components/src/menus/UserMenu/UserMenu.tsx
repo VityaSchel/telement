@@ -6,12 +6,13 @@
  */
 
 import React, { type JSX } from "react";
-import { Avatar, Button, Link, Menu, MenuItem, Separator, Text } from "@vector-im/compound-web";
+import { Button, Link, Menu, MenuItem, Separator, Text } from "@vector-im/compound-web";
 import { DevicesIcon, HomeIcon, LockIcon, SettingsIcon } from "@vector-im/compound-design-tokens/assets/web/icons";
 import classNames from "classnames";
 
 import styles from "./UserMenu.module.css";
 import { useViewModel, type ViewModel } from "../../core/viewmodel";
+import { Avatar } from "../../telement/core/Avatar";
 import { useI18n } from "../../core/i18n/i18nContext";
 import { type UserStatus } from "../../core/userStatus";
 import { SetStatusView, type SetStatusViewModel } from "../../status/SetStatusView";
