@@ -76,6 +76,13 @@ Please see LICENSE files in the repository root for full details.
         flex-direction: column;
         gap: var(--cpd-space-1x);
 
+        /* At the top of the card, as the language and time zone are, the dropdown sits 16px under the card's edge, as
+           far as fields one under another are apart, so that the label floating on its border is as far inside the
+           card as the card's other content */
+        &:first-child {
+            margin-top: calc(var(--cpd-space-4x) - var(--cpd-space-3x));
+        }
+
         .mx_Dropdown_input {
             box-sizing: border-box;
             width: 100%;

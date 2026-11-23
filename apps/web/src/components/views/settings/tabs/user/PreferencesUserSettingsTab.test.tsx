@@ -77,6 +77,15 @@ describe("PreferencesUserSettingsTab", () => {
         }
     });
 
+    it("puts the language's reload hint under its card, as the help of its group", async () => {
+        renderTab();
+        const language = await screen.findByRole("button", { name: "Application language" });
+        const hint = screen.getByText("The app will reload after selecting another language");
+
+        expect(hint.closest(".mx_SettingsSubsection_description")).not.toBeNull();
+        expect(language.closest(".mx_SettingsSubsection_content")).not.toContainElement(hint);
+    });
+
     it("leaves showing all rooms in Home to the Sidebar tab, where the other spaces to show are", () => {
         renderTab();
 

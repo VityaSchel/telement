@@ -690,6 +690,49 @@ describe.each(THEMES.map(([theme]) => theme))("Settings groups in %s", (theme) =
             }
         });
 
+        it("puts a dropdown with a floating label 16px under the top of its card, 12px over its end, its help under it", () => {
+            const dropdown = (id: string, label: string, value: string): string => `
+                <div class="mx_SettingsSubsection_dropdown">
+                    <div class="mx_Dropdown mx_LanguageDropdown">
+                        <span class="mx_Dropdown_label" aria-hidden="true" id="${id}-floated">${label}</span>
+                        <div class="mx_AccessibleButton mx_Dropdown_input mx_no_textinput" role="button" id="${id}-input">
+                            <div class="mx_Dropdown_option">${value}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            renderTab(
+                theme,
+                section(
+                    "preferences",
+                    "",
+                    `<form>${subsection(
+                        "language",
+                        "Language",
+                        dropdown("language", "Application language", "English"),
+                        "The app will reload after selecting another language",
+                    )}</form>` +
+                        `<form>${subsection(
+                            "time",
+                            "Displaying time",
+                            dropdown("timezone", "Set timezone", "Browser default") +
+                                fieldMarkup(
+                                    createElement(SettingsToggleInput, { name: "12h", label: "12 hour", id: "12h" }),
+                                ),
+                        )}</form>`,
+                ),
+            );
+
+            for (const id of ["language", "timezone"]) {
+                const card = box(`#${id === "language" ? "language" : "time"}-card`);
+                // As far as fields one under another, which leaves the floating label as far inside as other content
+                expect(box(`#${id}-input`).top - card.top).toBe(16);
+                expect(box(`#${id}-floated`).top - card.top).toBeGreaterThanOrEqual(8);
+            }
+            expect(box("#language-card").bottom - box("#language-input").bottom).toBe(12);
+            expect(box("#language-help").top - box("#language-card").bottom).toBe(8);
+        });
+
         it("spans a copy field with a label, such as the room's ID, across the card", () => {
             renderTab(
                 theme,

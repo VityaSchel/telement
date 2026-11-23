@@ -58,11 +58,15 @@ exports[`PreferencesUserSettingsTab > should render 1`] = `
                       />
                     </svg>
                   </div>
-                  <div
-                    class="mx_PreferencesUserSettingsTab_section_hint"
-                  >
-                    The app will reload after selecting another language
-                  </div>
+                </div>
+              </div>
+              <div
+                class="mx_SettingsSubsection_description"
+              >
+                <div
+                  class="mx_SettingsSubsection_text"
+                >
+                  The app will reload after selecting another language
                 </div>
               </div>
             </div>

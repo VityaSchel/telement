@@ -70,9 +70,6 @@ const LanguageSection: React.FC = () => {
                 value={language}
                 label={_t("settings|general|application_language")}
             />
-            <div className="mx_PreferencesUserSettingsTab_section_hint">
-                {_t("settings|general|application_language_reload_hint")}
-            </div>
         </div>
     );
 };
@@ -259,7 +256,12 @@ export default class PreferencesUserSettingsTab extends React.Component<EmptyObj
             <SettingsTab data-testid="mx_PreferencesUserSettingsTab">
                 <SettingsSection>
                     {/* The heading string is still 'general' from where it was moved, but this section should become 'general' */}
-                    <SettingsSubsection heading={_t("settings|general|language_section")} formWrap>
+                    {/* Telement: the reload hint is help under the card, like every group's help */}
+                    <SettingsSubsection
+                        heading={_t("settings|general|language_section")}
+                        description={_t("settings|general|application_language_reload_hint")}
+                        formWrap
+                    >
                         <LanguageSection />
                         <SpellCheckSection />
                     </SettingsSubsection>
