@@ -94,7 +94,20 @@ enum SendState {
 
 const Entry: React.FC<IEntryProps<any>> = ({ room, type, content, matrixClient: cli, onFinished }) => {
     const [sendState, setSendState] = useState<SendState>(SendState.CanSend);
-    const [onFocus, isActive, ref] = useRovingTabIndex<HTMLDivElement>();
+    const [onFocus, isActive, ref, nodeRef] = useRovingTabIndex<HTMLDivElement>();
+
+    // Telement: the pointer moves the selection, as in Telegram's lists and the search dialog, so only one row is ever
+    // highlighted and Enter sends to the row under the pointer. While the keyboard's focus is on a row, it moves along
+    // with the selection, as a menu's does.
+    const onPointerMove = (): void => {
+        if (isActive) return;
+        const focusedRow = document.activeElement?.closest(".mx_ForwardList_entry");
+        if (focusedRow && focusedRow !== nodeRef.current) {
+            nodeRef.current?.querySelector<HTMLElement>(".mx_ForwardList_roomButton")?.focus({ preventScroll: true });
+        } else {
+            onFocus();
+        }
+    };
 
     const jumpToRoom = (ev: ButtonEvent): void => {
         dis.dispatch<ViewRoomPayload>({
@@ -159,6 +172,7 @@ const Entry: React.FC<IEntryProps<any>> = ({ room, type, content, matrixClient: 
             role="listitem"
             ref={ref}
             onFocus={onFocus}
+            onPointerMove={onPointerMove}
             id={id}
         >
             <AccessibleButton

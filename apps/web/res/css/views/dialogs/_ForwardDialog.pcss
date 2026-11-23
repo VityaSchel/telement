@@ -89,24 +89,27 @@ Please see LICENSE files in the repository root for full details.
             margin-inline: var(--cpd-space-2x);
         }
 
-        /* Telement: the row the arrow keys select while the search field has the focus, which Enter sends to, in the
-           pressed fill, so it can't be mistaken for the row under the pointer */
-        .mx_SearchBox:focus-within + .mx_ForwardList_content .mx_ForwardList_entry_active {
+        /* Telement: the selected row, which Enter sends to, in the pressed fill. The pointer selects the row it moves
+           over (ForwardDialog.tsx) and the arrow keys move the same selection, so it is the only highlighted row while
+           the search field has the focus or the pointer is over the list */
+        .mx_SearchBox:focus-within + .mx_ForwardList_content .mx_ForwardList_entry_active,
+        .mx_ForwardList_content:hover .mx_ForwardList_entry_active {
             background-color: var(--cpd-color-bg-action-secondary-pressed);
         }
 
-        /* Telement: the send button rests hidden, so ten of them don't outweigh the rooms' names, and shows on the row
-           under the pointer, on the row the arrow keys select and while it has the focus. It stays in the page, so it is
-           still there for the keyboard and screen readers, and the state of a forward, once sent, always shows. It hides
-           only where a pointer can hover, as nothing would ever show it on a touch screen */
+        /* Telement: the send button rests hidden, so ten of them don't outweigh the rooms' names, and shows on the
+           selected row and while it has the focus. It stays in the page, so it is still there for the keyboard and
+           screen readers, and the state of a forward, once sent, always shows. It hides only where a pointer can hover,
+           as nothing would ever show it on a touch screen */
         @media (hover) {
             .mx_ForwardList_sendButton.mx_ForwardList_canSend {
                 opacity: 0;
             }
         }
 
-        .mx_ForwardList_entry:is(:hover, :focus-within) .mx_ForwardList_sendButton,
-        .mx_SearchBox:focus-within + .mx_ForwardList_content .mx_ForwardList_entry_active .mx_ForwardList_sendButton {
+        .mx_ForwardList_entry:focus-within .mx_ForwardList_sendButton,
+        .mx_SearchBox:focus-within + .mx_ForwardList_content .mx_ForwardList_entry_active .mx_ForwardList_sendButton,
+        .mx_ForwardList_content:hover .mx_ForwardList_entry_active .mx_ForwardList_sendButton {
             opacity: 1;
         }
 
@@ -125,8 +128,8 @@ Please see LICENSE files in the repository root for full details.
                 padding: var(--cpd-space-2x);
                 border-radius: var(--tl-radius-row);
 
-                /* Telement: the one hover fill, which a row also gets while the keyboard has its focus */
-                &:hover,
+                /* Telement: the one hover fill, while the keyboard has the row's focus. A row under the pointer is
+                   the selected one, in the pressed fill, so hovering doesn't fill a second row */
                 &:has(:focus-visible) {
                     background-color: var(--cpd-color-bg-action-secondary-hovered);
                 }

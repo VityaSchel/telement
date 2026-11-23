@@ -176,6 +176,13 @@ function sendButton(name: string): HTMLElement {
     return row(name).querySelector<HTMLElement>(".mx_ForwardList_sendButton")!;
 }
 
+/** Selects the room, as ForwardDialog.tsx does when the pointer moves over its row or the arrow keys reach it. */
+function select(name: string): void {
+    for (const entry of document.querySelectorAll(".mx_ForwardList_entry")) {
+        entry.classList.toggle("mx_ForwardList_entry_active", entry === row(name));
+    }
+}
+
 function fill(element: Element): string {
     return getComputedStyle(element).backgroundColor;
 }
@@ -366,17 +373,29 @@ describe("The Forward dialog", () => {
             expect(getComputedStyle(sendButton("Bob")).borderTopStyle).toBe("none");
         });
 
-        it("hide the paper plane until the row is hovered, and fill the plane's circle when it is hovered itself", async () => {
+        it("hide the paper plane until the pointer selects the row, then fill the row and, hovered, the plane's circle", async () => {
             renderDialog();
 
             expect(getComputedStyle(sendButton("Bob")).opacity).toBe("0");
             await userEvent.hover(row("Bob").querySelector(".mx_ForwardList_entry_name")!);
+            select("Bob");
             expect(getComputedStyle(sendButton("Bob")).opacity).toBe("1");
-            expect(fill(row("Bob"))).toBe(dialogColor("--cpd-color-bg-action-secondary-hovered"));
+            expect(fill(row("Bob"))).toBe(dialogColor("--cpd-color-bg-action-secondary-pressed"));
             expect(fill(sendButton("Bob"))).toBe("rgba(0, 0, 0, 0)");
 
             await userEvent.hover(sendButton("Bob"));
             expect(fill(sendButton("Bob"))).toBe(dialogColor("--cpd-color-alpha-gray-200"));
+        });
+
+        it("highlight only the selected row, not the one the pointer rests on after the arrow keys moved away", async () => {
+            renderDialog();
+            get("[data-testid=search]").focus();
+            await userEvent.hover(row("Bob").querySelector(".mx_ForwardList_entry_name")!);
+
+            expect(fill(row("Bob"))).toBe("rgba(0, 0, 0, 0)");
+            expect(getComputedStyle(sendButton("Bob")).opacity).toBe("0");
+            expect(fill(row("Media and more"))).toBe(dialogColor("--cpd-color-bg-action-secondary-pressed"));
+            expect(getComputedStyle(sendButton("Media and more")).opacity).toBe("1");
         });
 
         it("hide the plane only where a pointer can hover, as nothing would ever show it on a touch screen", () => {
@@ -408,10 +427,6 @@ describe("The Forward dialog", () => {
             get("[data-testid=search]").focus();
             expect(getComputedStyle(sendButton("Media and more")).opacity).toBe("1");
             expect(fill(selected)).toBe(dialogColor("--cpd-color-bg-action-secondary-pressed"));
-
-            await userEvent.hover(row("Bob").querySelector(".mx_ForwardList_entry_name")!);
-            expect(fill(row("Bob"))).toBe(dialogColor("--cpd-color-bg-action-secondary-hovered"));
-            expect(fill(row("Bob"))).not.toBe(fill(selected));
         });
 
         it("show the plane, and the hover fill, while the keyboard has its focus", async () => {
@@ -487,30 +502,44 @@ describe("The Forward dialog", () => {
     });
 
     describe.each(THEMES)("in %s", (theme) => {
-        it("fills hovered and selected rows with the dialog's raised hover and pressed grays, apart from its body", async () => {
+        it("fills the selected row and the keyboard's row with the dialog's raised pressed and hover grays, apart from its body", async () => {
             renderDialog(theme);
-            get("[data-testid=search]").focus();
-            await userEvent.hover(row("Bob").querySelector(".mx_ForwardList_entry_name")!);
             const surface = fill(get("[data-testid=body]"));
+            get("[data-testid=search]").focus();
+            const selected = fill(row("Media and more"));
+            await userEvent.tab();
+            const focused = fill(row("Media and more"));
 
-            expect(fill(row("Bob"))).toBe(tokenColor("--tl-color-bg-floating-hovered", get(`.${theme}`)));
-            expect(fill(row("Media and more"))).toBe(tokenColor("--tl-color-bg-floating-pressed", get(`.${theme}`)));
-            expect(fill(row("Bob"))).not.toBe(surface);
-            expect(fill(row("Media and more"))).not.toBe(fill(row("Bob")));
+            expect(selected).toBe(tokenColor("--tl-color-bg-floating-pressed", get(`.${theme}`)));
+            expect(focused).toBe(tokenColor("--tl-color-bg-floating-hovered", get(`.${theme}`)));
+            expect(focused).not.toBe(surface);
+            expect(selected).not.toBe(focused);
         });
 
-        it("fills the hovered plane's circle a step over its row, hovered or selected, with the plane 3:1 on it", async () => {
+        it("fills the hovered plane's circle a step over its row, selected or holding the keyboard's focus, with the plane 3:1 on it", async () => {
             renderDialog(theme);
             const surface = fill(get("[data-testid=body]"));
+            const plane = sendButton("Media and more");
+            const circleOverRow = (): [string, string] => {
+                const behind = over(fill(row("Media and more")), surface);
+                return [behind, over(fill(plane), behind)];
+            };
+
             get("[data-testid=search]").focus();
+            await userEvent.hover(plane);
+            const [selectedRow, overSelected] = circleOverRow();
+            await userEvent.tab();
+            await userEvent.tab();
+            expect(document.activeElement).toBe(plane);
+            const [focusedRow, overFocused] = circleOverRow();
 
-            for (const name of ["Bob", "Media and more"]) {
-                await userEvent.hover(sendButton(name));
-                const behind = over(fill(row(name)), surface);
-                const circle = over(fill(sendButton(name)), behind);
-
+            expect(selectedRow).not.toBe(focusedRow);
+            for (const [behind, circle] of [
+                [selectedRow, overSelected],
+                [focusedRow, overFocused],
+            ]) {
                 expect(circle).not.toBe(behind);
-                expect(contrast(getComputedStyle(sendButton(name)).color, circle)).toBeGreaterThanOrEqual(3);
+                expect(contrast(getComputedStyle(plane).color, circle)).toBeGreaterThanOrEqual(3);
             }
         });
 

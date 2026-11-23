@@ -227,6 +227,42 @@ describe("ForwardDialog", () => {
         });
     });
 
+    it("selects the room the pointer moves over, so the arrow keys and Enter go on from the one selected row", async () => {
+        const { container } = mountForwardDialog();
+        const searchBox = getByTestId(container, "searchbox-input");
+        searchBox.focus();
+        const entries = container.querySelectorAll(".mx_ForwardList_entry");
+        await waitFor(() => expect(entries[0]).toHaveClass("mx_ForwardList_entry_active"));
+
+        fireEvent.pointerMove(entries[2]);
+        await waitFor(() => expect(entries[2]).toHaveClass("mx_ForwardList_entry_active"));
+        expect(container.querySelectorAll(".mx_ForwardList_entry_active")).toHaveLength(1);
+        expect(searchBox).toHaveFocus();
+
+        await userEvent.keyboard("[ArrowUp]");
+        await waitFor(() => expect(entries[1]).toHaveClass("mx_ForwardList_entry_active"));
+        fireEvent.pointerMove(entries[0]);
+        await waitFor(() => expect(entries[0]).toHaveClass("mx_ForwardList_entry_active"));
+
+        await userEvent.keyboard("[Enter]");
+        expect(mockClient.sendEvent).toHaveBeenCalledWith("a", "m.room.message", {
+            "body": "Hello world!",
+            "msgtype": "m.text",
+            "m.mentions": {},
+        });
+    });
+
+    it("moves the keyboard's focus along with the selection while it is on a row", async () => {
+        const { container } = mountForwardDialog();
+        const entries = container.querySelectorAll(".mx_ForwardList_entry");
+        entries[0].querySelector<HTMLElement>(".mx_ForwardList_roomButton")!.focus();
+
+        fireEvent.pointerMove(entries[1]);
+        await waitFor(() => expect(entries[1]).toHaveClass("mx_ForwardList_entry_active"));
+        expect(entries[1].querySelector(".mx_ForwardList_roomButton")).toHaveFocus();
+        expect(container.querySelectorAll(".mx_ForwardList_entry_active")).toHaveLength(1);
+    });
+
     it("tracks message sending progress across multiple rooms", async () => {
         mockPlatformPeg();
         const { container } = mountForwardDialog();
