@@ -49,6 +49,7 @@ import reportRoomDialogStyles from "../../res/css/views/dialogs/_ReportRoomDialo
 import roomSettingsDialogStyles from "../../res/css/views/dialogs/_RoomSettingsDialog.pcss?raw";
 import roomUpgradeWarningDialogStyles from "../../res/css/views/dialogs/_RoomUpgradeWarningDialog.pcss?raw";
 import settingsDialogStyles from "../../res/css/views/dialogs/_SettingsDialog.pcss?raw";
+import shareDialogStyles from "../../res/css/views/dialogs/_ShareDialog.pcss?raw";
 import unpinAllDialogStyles from "../../res/css/views/dialogs/_UnpinAllDialog.pcss?raw";
 import userSettingsDialogStyles from "../../res/css/views/dialogs/_UserSettingsDialog.pcss?raw";
 import widgetCapabilitiesPromptDialogStyles from "../../res/css/views/dialogs/_WidgetCapabilitiesPromptDialog.pcss?raw";
@@ -101,6 +102,7 @@ const APP_STYLES = [
     roomSettingsDialogStyles,
     roomUpgradeWarningDialogStyles,
     settingsDialogStyles,
+    shareDialogStyles,
     unpinAllDialogStyles,
     userSettingsDialogStyles,
     widgetCapabilitiesPromptDialogStyles,
@@ -834,6 +836,41 @@ describe("Dialogs", () => {
 
                 expect(footerEdges("[data-testid=action]", "[data-testid=text]")).toEqual(ON_THE_EDGES);
             });
+        });
+
+        it("ends Unpin all on the edges, its action in red", () => {
+            renderDialog(
+                "mx_UnpinAllDialog",
+                "Unpin all messages?",
+                `<div data-testid="text">This can't be undone.</div>
+                ${footer([{ label: "Cancel" }, { label: "Continue", destructive: true, testId: "action" }])}`,
+                "mx_UnpinAllDialog_title",
+                false,
+            );
+
+            expect(footerEdges("[data-testid=action]", "[data-testid=text]")).toEqual(ON_THE_EDGES);
+            expect(getComputedStyle(get("[data-testid=action]")).color).toBe(
+                colorOf("--cpd-color-text-critical-primary"),
+            );
+        });
+
+        it("ends Share on the edges, under the social links", () => {
+            renderDialog(
+                "mx_ShareDialog",
+                "Share room",
+                `<div class="mx_ShareDialog_content">
+                    <div class="mx_ShareDialog_top"><span>https://matrix.to/#/!1:example.org</span></div>
+                    <div class="mx_ShareDialog_social" data-testid="text"><a href="#">X</a></div>
+                    ${footer([{ label: "Copy link", testId: "action" }], "mx_ShareDialog_footer")}
+                </div>`,
+                "",
+                false,
+            );
+
+            expect(footerEdges("[data-testid=action]", "[data-testid=text]", ".mx_ShareDialog_footer")).toEqual(
+                ON_THE_EDGES,
+            );
+            expect(box("[data-testid=action]").width).toBeLessThan(120);
         });
 
         it("ends the recovery key prompt's form in the footer, Cancel before Continue", () => {

@@ -30,28 +30,23 @@ exports[`<UnpinAllDialog /> > should render 1`] = `
       Make sure that you really want to remove all pinned messages. This action can’t be undone.
     </span>
     <div
-      class="mx_UnpinAllDialog_buttons"
+      class="_footer mx_Dialog_buttons"
     >
       <button
-        class="_button _destructive"
-        data-kind="primary"
-        data-size="lg"
-        role="button"
-        tabindex="0"
-      >
-        Continue
-      </button>
-      <button
         class="_button"
-        data-kind="tertiary"
-        data-size="lg"
-        role="button"
-        tabindex="0"
+        type="button"
       >
         Cancel
       </button>
+      <button
+        class="_button _destructive"
+        type="button"
+      >
+        Continue
+      </button>
     </div>
     <div
+      aria-describedby="react-use-id-1"
       aria-label="Close dialog"
       class="mx_AccessibleButton mx_Dialog_cancelButton"
       role="button"

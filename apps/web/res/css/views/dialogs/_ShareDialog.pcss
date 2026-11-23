@@ -48,8 +48,10 @@ Please see LICENSE files in the repository root for full details.
             font: var(--cpd-font-body-md-medium);
         }
 
-        button {
-            width: 100%;
+        /* Telement: the dialog's footer (DialogFooterView) spans the content, which the column centers; its gap keeps the
+           label 24px under the content */
+        .mx_ShareDialog_footer {
+            align-self: stretch;
         }
 
         .mx_ShareDialog_social {

@@ -7,9 +7,10 @@
  */
 
 import React, { type JSX } from "react";
-import { Button, Text } from "@vector-im/compound-web";
+import { Text } from "@vector-im/compound-web";
 import { type MatrixClient } from "matrix-js-sdk/src/matrix";
 import { logger } from "matrix-js-sdk/src/logger";
+import { DialogFooterButton, DialogFooterView } from "@element-hq/web-shared-components";
 
 import BaseDialog from "../dialogs/BaseDialog";
 import { _t } from "../../../languageHandler";
@@ -47,8 +48,9 @@ export function UnpinAllDialog({ matrixClient, roomId, onFinished }: UnpinAllDia
             fixedWidth={false}
         >
             <Text as="span">{_t("right_panel|pinned_messages|unpin_all|content")}</Text>
-            <div className="mx_UnpinAllDialog_buttons">
-                <Button
+            <DialogFooterView className="mx_Dialog_buttons">
+                <DialogFooterButton onClick={onFinished}>{_t("action|cancel")}</DialogFooterButton>
+                <DialogFooterButton
                     destructive={true}
                     onClick={async () => {
                         try {
@@ -60,11 +62,8 @@ export function UnpinAllDialog({ matrixClient, roomId, onFinished }: UnpinAllDia
                     }}
                 >
                     {_t("action|continue")}
-                </Button>
-                <Button kind="tertiary" onClick={onFinished}>
-                    {_t("action|cancel")}
-                </Button>
-            </div>
+                </DialogFooterButton>
+            </DialogFooterView>
         </BaseDialog>
     );
 }

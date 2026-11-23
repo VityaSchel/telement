@@ -109,6 +109,16 @@ describe("ShareDialog", () => {
         expect(screen.getByText("https://matrix.to/#/!1:example.org")).toBeInTheDocument();
     });
 
+    it("ends in the dialog footer, copying the link being its action, after the social links", () => {
+        const { container } = renderComponent(room);
+        const footer = container.querySelector(".mx_ShareDialog_footer")!;
+        const social = container.querySelector(".mx_ShareDialog_social")!;
+
+        expect([...footer.querySelectorAll("button")].map((button) => button.textContent)).toEqual(["Copy link"]);
+        expect(footer.querySelector("svg")).toBeNull();
+        expect(social.compareDocumentPosition(footer) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    });
+
     it("should change the copy button text when clicked", async () => {
         vi.useFakeTimers();
         // To not be bother with rtl warnings about QR code state update

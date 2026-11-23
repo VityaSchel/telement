@@ -9,10 +9,9 @@ Please see LICENSE files in the repository root for full details.
 
 import React, { type JSX, useMemo, useRef, useState } from "react";
 import { Room, RoomMember, MatrixEvent, User } from "matrix-js-sdk/src/matrix";
-import { Checkbox, Button } from "@vector-im/compound-web";
-import LinkIcon from "@vector-im/compound-design-tokens/assets/web/icons/link";
-import CheckIcon from "@vector-im/compound-design-tokens/assets/web/icons/check";
+import { Checkbox } from "@vector-im/compound-web";
 import { copyPlainTextToClipboard } from "@element-hq/element-web-shared-utils";
+import { DialogFooterButton, DialogFooterView } from "@element-hq/web-shared-components";
 
 import { _t } from "../../../languageHandler";
 import QRCode from "../elements/QRCode";
@@ -135,18 +134,20 @@ export function ShareDialog({ target, customTitle, onFinished, permalinkCreator 
                         {checkboxLabel}
                     </label>
                 )}
-                <Button
-                    Icon={isCopied ? CheckIcon : LinkIcon}
-                    onClick={async () => {
-                        clearTimeout(timeoutIdRef.current);
-                        await copyPlainTextToClipboard(url);
-                        setIsCopied(true);
-                        timeoutIdRef.current = setTimeout(() => setIsCopied(false), 2000);
-                    }}
-                >
-                    {isCopied ? _t("share|link_copied") : _t("action|copy_link")}
-                </Button>
                 {showSocials && <SocialLinks url={url} />}
+                {/* Telement: the shared dialog footer, so copying is its action, after the other ways to share */}
+                <DialogFooterView className="mx_ShareDialog_footer">
+                    <DialogFooterButton
+                        onClick={async () => {
+                            clearTimeout(timeoutIdRef.current);
+                            await copyPlainTextToClipboard(url);
+                            setIsCopied(true);
+                            timeoutIdRef.current = setTimeout(() => setIsCopied(false), 2000);
+                        }}
+                    >
+                        {isCopied ? _t("share|link_copied") : _t("action|copy_link")}
+                    </DialogFooterButton>
+                </DialogFooterView>
             </div>
         </BaseDialog>
     );

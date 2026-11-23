@@ -30,6 +30,18 @@ describe("<UnpinAllDialog />", () => {
         expect(asFragment()).toMatchSnapshot();
     });
 
+    it("ends in the dialog footer, Cancel before the action", async () => {
+        const onFinished = vi.fn();
+        renderDialog(onFinished);
+        const buttons = [...document.querySelectorAll(".mx_Dialog_buttons button")];
+
+        expect(buttons.map((button) => button.textContent)).toEqual(["Cancel", "Continue"]);
+
+        await userEvent.click(screen.getByRole("button", { name: "Cancel" }));
+        expect(onFinished).toHaveBeenCalled();
+        expect(client.sendStateEvent).not.toHaveBeenCalled();
+    });
+
     it("should remove all pinned events when clicked on Continue", async () => {
         const onFinished = vi.fn();
         renderDialog(onFinished);

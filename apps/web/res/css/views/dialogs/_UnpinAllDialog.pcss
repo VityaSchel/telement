@@ -9,21 +9,9 @@
 .mx_UnpinAllDialog {
     /* 396 is coming from figma and we remove the left and right paddings of the dialog */
     width: calc(396px - (var(--cpd-space-6x) * 2));
-    padding-bottom: var(--cpd-space-2x);
 
     /* Telement: every dialog title is heading-sm now (_common.pcss), on the close button's line */
     .mx_UnpinAllDialog_title {
         margin-bottom: var(--cpd-space-3x);
-    }
-
-    .mx_UnpinAllDialog_buttons {
-        display: flex;
-        flex-direction: column;
-        gap: var(--cpd-space-4x);
-        margin: var(--cpd-space-8x) var(--cpd-space-2x) 0 var(--cpd-space-2x);
-
-        button {
-            width: 100%;
-        }
     }
 }
