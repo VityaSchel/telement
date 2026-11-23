@@ -1358,6 +1358,16 @@ exports[`RoomView > should hide the composer when hideComposer=true 1`] = `
               />
             </div>
           </div>
+          <div
+            style="display: contents;"
+          >
+            <div
+              aria-hidden="true"
+              class="_floatingDate"
+              data-testid="floating-date"
+              style="inset-inline-end: 0;"
+            />
+          </div>
         </main>
         <div
           aria-label="Room status bar"
@@ -1427,6 +1437,16 @@ exports[`RoomView > should hide the header when hideHeader=true 1`] = `
                 style="height: 400px;"
               />
             </div>
+          </div>
+          <div
+            style="display: contents;"
+          >
+            <div
+              aria-hidden="true"
+              class="_floatingDate"
+              data-testid="floating-date"
+              style="inset-inline-end: 0;"
+            />
           </div>
         </main>
         <div
@@ -1921,6 +1941,16 @@ exports[`RoomView > should hide the pinned message banner when hidePinnedMessage
               />
             </div>
           </div>
+          <div
+            style="display: contents;"
+          >
+            <div
+              aria-hidden="true"
+              class="_floatingDate"
+              data-testid="floating-date"
+              style="inset-inline-end: 0;"
+            />
+          </div>
         </main>
         <div
           aria-label="Room status bar"
@@ -2413,6 +2443,16 @@ exports[`RoomView > should hide the right panel when hideRightPanel=true 1`] = `
                 style="height: 400px;"
               />
             </div>
+          </div>
+          <div
+            style="display: contents;"
+          >
+            <div
+              aria-hidden="true"
+              class="_floatingDate"
+              data-testid="floating-date"
+              style="inset-inline-end: 0;"
+            />
           </div>
         </main>
         <div
@@ -3167,6 +3207,16 @@ exports[`RoomView > should not display the timeline when the room encryption is 
                 style="height: 400px;"
               />
             </div>
+          </div>
+          <div
+            style="display: contents;"
+          >
+            <div
+              aria-hidden="true"
+              class="_floatingDate"
+              data-testid="floating-date"
+              style="inset-inline-end: 0;"
+            />
           </div>
         </main>
         <div

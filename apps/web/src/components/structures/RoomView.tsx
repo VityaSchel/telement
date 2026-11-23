@@ -135,6 +135,7 @@ import { EncryptionEventViewModel } from "../../viewmodels/room/timeline/event-t
 import { ModuleApi } from "../../modules/Api.ts";
 import { RoomUploadContextProvider } from "../../viewmodels/room/RoomUploadViewModel.tsx";
 import { EventPresentationContextProvider } from "../../utils/EventPresentationContextProvider";
+import { TimelineFloatingDate } from "../../telement/room/TimelineFloatingDate";
 
 const DEBUG = false;
 const PREVENT_MULTIPLE_JITSI_WITHIN = 30_000;
@@ -2540,6 +2541,7 @@ export class RoomView extends React.Component<IRoomProps, IRoomState> {
         }
 
         let messagePanel: JSX.Element | undefined;
+        let floatingDate: JSX.Element | undefined;
         if (!isRoomEncryptionLoading && SettingsStore.getValue("feature_new_timeline")) {
             // New MVVM timeline behind the Labs flag. It manages its own scrolling, read
             // receipts and read marker, so none of TimelinePanel's plumbing is mounted.
@@ -2590,6 +2592,10 @@ export class RoomView extends React.Component<IRoomProps, IRoomState> {
                     />
                 </EventPresentationContextProvider>
             );
+            // Telement: the date of the first message in view, held at the top while the timeline scrolls
+            if (!hideMessagePanel) {
+                floatingDate = <TimelineFloatingDate key={this.state.room.roomId} room={this.state.room} />;
+            }
         }
 
         let topUnreadMessagesBar: JSX.Element | undefined;
@@ -2658,6 +2664,7 @@ export class RoomView extends React.Component<IRoomProps, IRoomState> {
                             {topUnreadMessagesBar}
                             {jumpToBottom}
                             {messagePanel}
+                            {floatingDate}
                             {searchResultsPanel}
                         </main>
                         {statusBarArea}

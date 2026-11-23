@@ -10,6 +10,7 @@ import "./tokens.css";
 export * from "./room/timeline/VideoNoteBodyView";
 export * from "./room/timeline/MessageStatusView";
 export * from "./room/timeline/PinnedMarkView";
+export * from "./room/timeline/FloatingDateView";
 export * from "./room/composer/ComposerDrawerView";
 export * from "./core/DialogFooterView";
 export * from "./core/Avatar";

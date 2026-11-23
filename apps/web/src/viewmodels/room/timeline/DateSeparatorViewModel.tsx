@@ -116,7 +116,14 @@ export class DateSeparatorViewModel
         return new Intl.RelativeTimeFormat(getUserLanguage(), { style: "long", numeric: "auto" });
     }
 
-    private static computeLabel(props: DateSeparatorViewModelProps, relativeDatesEnabled: boolean): string {
+    /**
+     * The label of a separator before the day of `props.ts`: "Today", "Yesterday", a weekday within the week, or the
+     * date. Also used by the timeline's floating date pill.
+     */
+    public static computeLabel(
+        props: Pick<DateSeparatorViewModelProps, "ts" | "forExport">,
+        relativeDatesEnabled: boolean,
+    ): string {
         try {
             const date = new Date(props.ts);
 

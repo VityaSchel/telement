@@ -1,0 +1,36 @@
+/*
+Copyright 2026 Viktor Shchelochkov
+
+SPDX-License-Identifier: AGPL-3.0-only OR GPL-3.0-only
+Please see LICENSE files in the repository root for full details.
+*/
+
+/*
+ * Held 8px under the top of the timeline, which starts under the room header or the pinned message banner, and centered
+ * on the timeline's content as its own date pills are. Above the messages, under the jump buttons.
+ */
+.floatingDate {
+    position: absolute;
+    z-index: 1;
+    inset-block-start: var(--cpd-space-2x);
+    inset-inline-start: 0;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 200ms ease-out;
+}
+
+/* The separator's own margin spaces it in the timeline, and its rule is as specific as one class */
+.floatingDate.floatingDate > * {
+    margin: 0;
+}
+
+.visible {
+    opacity: 1;
+}
+
+/* Without motion it shows and hides at once */
+@media (prefers-reduced-motion: reduce) {
+    .floatingDate {
+        transition: none;
+    }
+}
