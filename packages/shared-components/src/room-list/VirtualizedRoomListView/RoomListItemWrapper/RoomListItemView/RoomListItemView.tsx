@@ -18,6 +18,7 @@ import styles from "./RoomListItemView.module.css";
 import { useViewModel, type ViewModel } from "../../../../core/viewmodel";
 import { type UserStatus } from "../../../../core/userStatus";
 import { _t } from "../../../../core/i18n/i18n";
+import { useOpenOnPress } from "../../../../telement/core/useOpenOnPress";
 
 /**
  * Opaque type representing a Room object from the parent application
@@ -171,6 +172,8 @@ export const RoomListItemView = memo(function RoomListItemView({
     const internalRef = useRef<HTMLButtonElement>(null);
     const mergedRef = useMergeRefs([ref, internalRef]);
     const item = useViewModel(vm);
+    // The room opens as the mouse button goes down, as a chat does in Telegram
+    const openOnPress = useOpenOnPress(vm.onOpenRoom);
 
     // Reveal the hover menu when the row is focused via the keyboard (not the mouse), and keep it
     // revealed while focus moves onto the menu buttons so they stay reachable by Tab. A pure CSS
@@ -224,7 +227,8 @@ export const RoomListItemView = memo(function RoomListItemView({
                 type="button"
                 aria-label={a11yLabel}
                 aria-describedby={item.isFavourite ? pinnedDescriptionId : undefined}
-                onClick={vm.onOpenRoom}
+                onPointerDown={openOnPress.onPointerDown}
+                onClick={openOnPress.onClick}
                 onFocus={onItemFocus}
                 onBlur={onItemBlur}
                 tabIndex={isFocused ? 0 : -1}

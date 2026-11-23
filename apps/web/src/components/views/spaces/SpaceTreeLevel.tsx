@@ -26,6 +26,7 @@ import {
     ChevronRightIcon,
     OverflowHorizontalIcon,
 } from "@vector-im/compound-design-tokens/assets/web/icons";
+import { useOpenOnPress } from "@element-hq/web-shared-components";
 
 import RoomAvatar from "../avatars/RoomAvatar";
 import { type SpaceKey } from "../../../stores/spaces";
@@ -145,6 +146,10 @@ export const SpaceButton = <T extends keyof HTMLElementTagNameMap>({
         if (spaceKey) sdkContext.spaceStore.setActiveSpace(spaceKey);
     };
     const onClick = props.onClick ?? (selected && space ? viewSpaceHome : activateSpace);
+    // A space opens as the mouse button goes down, as a chat folder does in Telegram. Buttons given an action of their
+    // own, such as creating a space, keep acting on the click.
+    const openOnPress = useOpenOnPress(onClick);
+    const pressProps = props.onClick ? { onClick } : openOnPress;
 
     return (
         <AccessibleButton
@@ -157,7 +162,7 @@ export const SpaceButton = <T extends keyof HTMLElementTagNameMap>({
             })}
             aria-label={label}
             title={!isNarrow || menuDisplayed ? undefined : label}
-            onClick={onClick}
+            {...pressProps}
             onContextMenu={openMenu}
             ref={ref}
             tabIndex={tabIndex}

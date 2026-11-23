@@ -9,7 +9,7 @@ Please see LICENSE files in the repository root for full details.
 // @vitest-environment happy-dom
 
 import { vi, describe, it, expect, afterEach } from "vitest";
-import React from "react";
+import React, { type ComponentProps } from "react";
 import { fireEvent, getByTestId, render } from "test-utils-rtl";
 import { clientAndSDKContextRenderOptions, mkRoom, stubClient } from "test-utils";
 
@@ -133,6 +133,81 @@ describe("SpaceButton", () => {
 
             expect(getByTestId(container, "notification-badge")).toHaveTextContent("8");
             expect(asFragment()).toMatchSnapshot();
+        });
+    });
+
+    describe("opening on press, like Telegram", () => {
+        const press = { button: 0, pointerType: "mouse" };
+
+        function renderSpaceButton(
+            selected: boolean,
+            props: Partial<ComponentProps<typeof SpaceButton>> = {},
+        ): HTMLElement {
+            const { container } = render(
+                <SpaceButton
+                    space={space}
+                    selected={selected}
+                    label="My space"
+                    data-testid="space-button"
+                    size="32px"
+                    {...props}
+                />,
+                clientAndSDKContextRenderOptions(cli, SDKContextClass.instance),
+            );
+            return getByTestId(container, "space-button");
+        }
+
+        it("activates the space as the primary mouse button goes down, and not again on the click", () => {
+            const button = renderSpaceButton(false);
+
+            fireEvent.pointerDown(button, press);
+            expect(SDKContextClass.instance.spaceStore.setActiveSpace).toHaveBeenCalledTimes(1);
+            expect(SDKContextClass.instance.spaceStore.setActiveSpace).toHaveBeenCalledWith("!1:example.org");
+            fireEvent.click(button, { detail: 1 });
+            expect(SDKContextClass.instance.spaceStore.setActiveSpace).toHaveBeenCalledTimes(1);
+        });
+
+        it("navigates to the space home as the button goes down if already active", () => {
+            const button = renderSpaceButton(true);
+
+            fireEvent.pointerDown(button, press);
+            expect(dispatchSpy).toHaveBeenCalledWith({ action: Action.ViewRoom, room_id: "!1:example.org" });
+            fireEvent.click(button, { detail: 1 });
+            expect(dispatchSpy).toHaveBeenCalledTimes(1);
+        });
+
+        it("activates the space on the click when a modifier key is held, as before", () => {
+            const button = renderSpaceButton(false);
+
+            fireEvent.pointerDown(button, { ...press, shiftKey: true });
+            expect(SDKContextClass.instance.spaceStore.setActiveSpace).not.toHaveBeenCalled();
+            fireEvent.click(button, { detail: 1, shiftKey: true });
+            expect(SDKContextClass.instance.spaceStore.setActiveSpace).toHaveBeenCalledTimes(1);
+        });
+
+        it("leaves a press on the space's badge to the badge", () => {
+            const notificationState = new StaticNotificationState(null, 8, NotificationLevel.Notification);
+            renderSpaceButton(false, { notificationState });
+
+            fireEvent.pointerDown(document.querySelector(".mx_SpacePanel_notificationBadge")!, press);
+            expect(SDKContextClass.instance.spaceStore.setActiveSpace).not.toHaveBeenCalled();
+        });
+
+        it("activates the space from the keyboard", () => {
+            const button = renderSpaceButton(false);
+
+            fireEvent.keyDown(button, { key: "Enter", code: "Enter" });
+            expect(SDKContextClass.instance.spaceStore.setActiveSpace).toHaveBeenCalledTimes(1);
+        });
+
+        it("keeps a button with an action of its own, such as creating a space, acting on the click", () => {
+            const onClick = vi.fn();
+            const button = renderSpaceButton(false, { onClick, space: undefined, spaceKey: undefined });
+
+            fireEvent.pointerDown(button, press);
+            expect(onClick).not.toHaveBeenCalled();
+            fireEvent.click(button, { detail: 1 });
+            expect(onClick).toHaveBeenCalledTimes(1);
         });
     });
 });

@@ -12,7 +12,7 @@ import React from "react";
 import { render, screen, waitFor } from "@test-utils";
 import userEvent from "@testing-library/user-event";
 import { composeStories } from "@storybook/react-vite";
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 
 import * as stories from "./RoomListItemView.stories";
 import styles from "./RoomListItemView.module.css";
@@ -384,6 +384,80 @@ describe("<RoomListItemView />", () => {
 
         await user.click(screen.getByRole("option"));
         expect(Default.args.onOpenRoom).toHaveBeenCalled();
+    });
+
+    describe("opening on press, like Telegram", () => {
+        it("should open the room as the primary mouse button goes down, and not again when it is released", async () => {
+            const user = userEvent.setup();
+            const onOpenRoom = vi.fn();
+            render(<Default onOpenRoom={onOpenRoom} />);
+            const row = screen.getByRole("option");
+
+            await user.pointer({ keys: "[MouseLeft>]", target: row });
+            expect(onOpenRoom).toHaveBeenCalledTimes(1);
+            await user.pointer({ keys: "[/MouseLeft]", target: row });
+            expect(onOpenRoom).toHaveBeenCalledTimes(1);
+        });
+
+        it("should open the room on the click when a modifier key is held, as before", async () => {
+            const user = userEvent.setup();
+            const onOpenRoom = vi.fn();
+            render(<Default onOpenRoom={onOpenRoom} />);
+            const row = screen.getByRole("option");
+
+            await user.keyboard("{Shift>}");
+            await user.pointer({ keys: "[MouseLeft>]", target: row });
+            expect(onOpenRoom).not.toHaveBeenCalled();
+            await user.pointer({ keys: "[/MouseLeft]", target: row });
+            await user.keyboard("{/Shift}");
+            expect(onOpenRoom).toHaveBeenCalledTimes(1);
+        });
+
+        it("should open the room on the click of a touch, so a swipe over the list scrolls it", async () => {
+            const user = userEvent.setup();
+            const onOpenRoom = vi.fn();
+            render(<Default onOpenRoom={onOpenRoom} />);
+            const row = screen.getByRole("option");
+
+            await user.pointer({ keys: "[TouchA>]", target: row });
+            expect(onOpenRoom).not.toHaveBeenCalled();
+            await user.pointer({ keys: "[/TouchA]", target: row });
+            expect(onOpenRoom).toHaveBeenCalledTimes(1);
+        });
+
+        it("should not open the room on a right-click", async () => {
+            const user = userEvent.setup();
+            const onOpenRoom = vi.fn();
+            render(<Default onOpenRoom={onOpenRoom} />);
+
+            await user.pointer({ keys: "[MouseRight]", target: screen.getByRole("option") });
+            expect(onOpenRoom).not.toHaveBeenCalled();
+        });
+
+        it("should not open the room when its more options button is pressed", async () => {
+            const user = userEvent.setup();
+            const onOpenRoom = vi.fn();
+            // isFocused reveals the hover menu, as hovering does
+            render(<WithHoverMenu isFocused={true} onOpenRoom={onOpenRoom} />);
+
+            await user.pointer({ keys: "[MouseLeft>]", target: screen.getByRole("button", { name: "More Options" }) });
+            expect(onOpenRoom).not.toHaveBeenCalled();
+            await user.keyboard("{Escape}");
+        });
+
+        it("should open the room from the keyboard after a press elsewhere", async () => {
+            const user = userEvent.setup();
+            const onOpenRoom = vi.fn();
+            render(<Default onOpenRoom={onOpenRoom} />);
+            const row = screen.getByRole("option");
+
+            // A press that opened the room, released away from it, so that no click follows
+            await user.pointer({ keys: "[MouseLeft>]", target: row });
+            await user.pointer({ keys: "[/MouseLeft]", target: document.body });
+            row.focus();
+            await user.keyboard("{Enter}");
+            expect(onOpenRoom).toHaveBeenCalledTimes(2);
+        });
     });
 
     it("should have aria-selected true when selected", () => {
