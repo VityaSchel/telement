@@ -8,8 +8,7 @@ Please see LICENSE files in the repository root for full details.
 import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
 import { userEvent } from "vitest/browser";
 import { createElement } from "react";
-import { flushSync } from "react-dom";
-import { createRoot, type Root } from "react-dom/client";
+import { renderToStaticMarkup } from "react-dom/server";
 import { IconButton } from "@vector-im/compound-web";
 import { CopyIcon } from "@vector-im/compound-design-tokens/assets/web/icons";
 import compoundBase from "@vector-im/compound-design-tokens/assets/web/css/cpd-common-base.css?raw";
@@ -40,17 +39,29 @@ import { loadFiraCode, loadInter } from "../../../test/telement/fonts";
 
 const CODE_LINES = ["pnpm i18n", "pnpm lint:fmt:fix"];
 
-/** The block CodeBlock renders in place of a message's `pre`, with line numbers and its expand button. */
-function codeBlock(lines = CODE_LINES): string {
+/** The block as a whole, its header line and its code, which owns its fill and corners. */
+const BLOCK = ".mx_EventTile_pre_container";
+
+/** CopyTextButton: a Compound IconButton with the code block's button classes. */
+const COPY_BUTTON = renderToStaticMarkup(
+    createElement(
+        IconButton,
+        { className: "mx_EventTile_button mx_EventTile_copyButton", size: "28px", style: { padding: "4px" } },
+        createElement(CopyIcon),
+    ),
+);
+
+/**
+ * The block CodeBlock renders in place of a message's `pre`: its header line, with the language the fence names and
+ * the expand and copy buttons, over the code with its line numbers.
+ */
+function codeBlock(lines = CODE_LINES, language = "sh"): string {
     const numbers = lines.map((_, i) => `<span>${i + 1}</span>`).join("");
     return `
         <div class="mx_EventTile_pre_container">
-            <pre class="mx_EventTile_collapsedCodeBlock"><span class="mx_EventTile_lineNumbers" data-event-tile-line-numbers="true">${numbers}</span><div style="display: contents"><code>${lines.join("\n")}
+            <div class="mx_EventTile_codeBlockHeader">${language ? `<span class="mx_EventTile_codeBlockLanguage">${language}</span>` : ""}<button class="mx_AccessibleButton mx_EventTile_button" aria-label="Expand"><svg viewBox="0 0 24 24"><path d="M4 4h16v16H4z" /></svg></button>${COPY_BUTTON}</div>
+            <pre class="mx_EventTile_collapsedCodeBlock"><span class="mx_EventTile_lineNumbers" data-event-tile-line-numbers="true">${numbers}</span><div style="display: contents"><code class="language-${language}">${lines.join("\n")}
 </code></div></pre>
-            <button class="mx_AccessibleButton mx_EventTile_button" aria-label="Expand">
-                <svg viewBox="0 0 24 24"><path d="M4 4h16v16H4z" /></svg>
-            </button>
-            <div class="copy"></div>
         </div>
     `;
 }
@@ -117,31 +128,12 @@ function contrast(first: number[], second: number[]): number {
     return (lighter + 0.05) / (darker + 0.05);
 }
 
-let reactRoot: Root | undefined;
-
 function render(html: string, style = "", theme = "cpd-theme-light"): void {
     document.body.innerHTML = `
         <div class="${theme}" style="--emoji-font-family: ''; font-family: Inter; line-height: 1.375rem; width: 480px; ${style}">
             ${html}
         </div>
     `;
-    // CopyTextButton: a Compound IconButton with the code block's button classes
-    const copy = document.querySelector(".copy");
-    if (!copy) return;
-    reactRoot = createRoot(copy);
-    flushSync(() =>
-        reactRoot!.render(
-            createElement(
-                IconButton,
-                {
-                    className: "mx_EventTile_button mx_EventTile_copyButton mx_EventTile_buttonBottom",
-                    size: "28px",
-                    style: { padding: "4px" },
-                },
-                createElement(CopyIcon),
-            ),
-        ),
-    );
 }
 
 function box(selector: string): DOMRect {
@@ -216,8 +208,6 @@ describe("Code in a message", () => {
     });
 
     afterEach(() => {
-        reactRoot?.unmount();
-        reactRoot = undefined;
         document.body.innerHTML = "";
     });
 
@@ -225,14 +215,14 @@ describe("Code in a message", () => {
         render(MESSAGE);
 
         expect(radius("p code")).toBe("4px");
-        expect(radius("pre")).toBe("4px");
+        expect(radius(BLOCK)).toBe("4px");
     });
 
     it("takes the radius of inline code and code blocks from --tl-radius-inline", () => {
         render(MESSAGE, "--tl-radius-inline: 3px");
 
         expect(radius("p code")).toBe("3px");
-        expect(radius("pre")).toBe("3px");
+        expect(radius(BLOCK)).toBe("3px");
     });
 
     describe.each([
@@ -244,17 +234,19 @@ describe("Code in a message", () => {
             ["your own", true],
         ])("fills a code block one gray step from %s bubble, with no outline", (_, own) => {
             render(bubble(MESSAGE, own), "", theme);
+            const block = document.querySelector(BLOCK)!;
             const pre = document.querySelector("pre")!;
             const bubbleColor = getComputedStyle(document.querySelector(".line")!).backgroundColor;
             const ratio = contrast(
-                composite(getComputedStyle(pre).backgroundColor, bubbleColor),
+                composite(getComputedStyle(block).backgroundColor, bubbleColor),
                 channels(bubbleColor),
             );
 
             expect(ratio).toBeGreaterThanOrEqual(1.1);
             expect(ratio).toBeLessThan(1.25);
             expect(getComputedStyle(pre).borderTopColor).toBe("rgba(0, 0, 0, 0)");
-            // The fill is translucent, so the code paints none of its own over it
+            // The fill is translucent and the block's, so neither the code nor its lines paint one of their own over it
+            expect(getComputedStyle(pre).backgroundColor).toBe("rgba(0, 0, 0, 0)");
             expect(getComputedStyle(pre.querySelector("code")!).backgroundColor).toBe("rgba(0, 0, 0, 0)");
         });
     });
@@ -277,7 +269,7 @@ describe("Code in a message", () => {
         `);
         const [sent, draft] = [...document.querySelectorAll("pre")].map((pre) => getComputedStyle(pre));
 
-        expect(draft.backgroundColor).toBe(sent.backgroundColor);
+        expect(draft.backgroundColor).toBe(getComputedStyle(document.querySelector(BLOCK)!).backgroundColor);
         expect(draft.borderTopColor).toBe(sent.borderTopColor);
     });
 
@@ -333,7 +325,7 @@ describe("Code in a message", () => {
         expect(firstTextLine(code).left - code.getBoundingClientRect().left).toBe(5);
     });
 
-    it("insets a code block's text and line numbers 12px from its edge, border included, and its end by the buttons' room too", () => {
+    it("insets a code block's text and line numbers 12px from its edge, border included, at its end too", () => {
         // Shrunk to fit, as in a bubble, so that the longest line ends at the block's end padding
         render(formatted(codeBlock()), "width: fit-content");
         const pre = box("pre");
@@ -344,41 +336,37 @@ describe("Code in a message", () => {
         expect(numbers.top - pre.top).toBe(12);
         expect(pre.bottom - numbers.bottom).toBe(12);
         expect(code.top - pre.top).toBe(12);
-        // The 12px, then the buttons' 28px and 8px between them and the code
-        expect(pre.right - code.right).toBe(12 + 28 + 8);
+        // No room kept for buttons over the code: they are on the header line
+        expect(pre.right - code.right).toBe(12);
         expect(pre.bottom - code.bottom).toBe(12);
     });
 
     it.each(["ltr", "rtl"])(
-        "keeps the end of a block's first line clear of its buttons in %s text when the block fits its longest line, as in a bubble",
+        "keeps the code clear of its buttons in %s text, on the header line above it, when the block fits its longest line, as in a bubble",
         (dir) => {
-            // The first line is the longest, where the buttons sit. A message that starts in Hebrew is right to left.
+            // The first line is the longest. A message that starts in Hebrew is right to left.
             const block = codeBlock(["const accent = '#2481cc';", "x"]);
             render(formatted(dir === "ltr" ? block : `<p>הריצו:</p>${block}`), "width: fit-content");
             const firstLine = textBoxes(document.querySelector("pre code")!)[0];
-            const buttons = [...document.querySelectorAll(".mx_EventTile_button")].map((button) =>
-                button.getBoundingClientRect(),
-            );
 
-            for (const button of buttons) {
-                const gap = dir === "ltr" ? button.left - firstLine.right : firstLine.left - button.right;
-                expect(gap).toBeGreaterThanOrEqual(12);
+            for (const button of document.querySelectorAll(".mx_EventTile_button")) {
+                expect(firstLine.top - button.getBoundingClientRect().bottom).toBeGreaterThanOrEqual(12);
             }
         },
     );
 
-    it("puts the buttons at the end of a right-to-left block, away from its line numbers at its start", () => {
+    it("puts the header line's buttons at the end of a right-to-left block and its language at the start, with the line numbers", () => {
         render(formatted(`<p>הריצו את הפקודות:</p>${codeBlock()}`));
-        const pre = box("pre");
+        const block = box(BLOCK);
         const numbers = box(".mx_EventTile_lineNumbers");
-        const icons = [...document.querySelectorAll(".mx_EventTile_button svg")].map((icon) =>
+        const [expandIcon, copyIcon] = [...document.querySelectorAll(".mx_EventTile_button svg")].map((icon) =>
             icon.getBoundingClientRect(),
         );
 
-        for (const icon of icons) {
-            expect(icon.left - pre.left).toBe(12);
-            expect(icon.right).toBeLessThan(numbers.left);
-        }
+        expect(copyIcon.left - block.left).toBe(8);
+        expect(expandIcon.left).toBeGreaterThan(copyIcon.right);
+        expect(block.right - firstTextLine(document.querySelector(".mx_EventTile_codeBlockLanguage")!).right).toBe(12);
+        expect(block.right - numbers.right).toBe(12);
     });
 
     it("starts the code 8px after its line numbers", () => {
@@ -398,9 +386,10 @@ describe("Code in a message", () => {
         expect(numbers.left - textEnd).toBe(8);
     });
 
-    it("aligns the icons of the expand and copy buttons with the block's 12px inset", () => {
+    it("puts a 28px header line inside the block's top, its line under it, with the expand and copy buttons at its end", () => {
         render(MESSAGE);
-        const pre = box("pre");
+        const block = box(BLOCK);
+        const header = document.querySelector(".mx_EventTile_codeBlockHeader")!;
         const [expand, copy] = [...document.querySelectorAll(".mx_EventTile_button")].map((button) =>
             button.getBoundingClientRect(),
         );
@@ -408,13 +397,51 @@ describe("Code in a message", () => {
             icon.getBoundingClientRect(),
         );
 
+        expect(header.getBoundingClientRect().top).toBe(block.top);
+        expect(header.getBoundingClientRect().height).toBe(28 + 1);
+        expect(getComputedStyle(header).borderBottomColor).toBe(tokenColor("--cpd-color-alpha-gray-400", header));
+        expect(box("pre").top).toBe(header.getBoundingClientRect().bottom);
+
         for (const button of [expand, copy]) expect([button.width, button.height]).toEqual([28, 28]);
         for (const icon of [expandIcon, copyIcon]) expect([icon.width, icon.height]).toEqual([20, 20]);
-        expect(copy.top).toBe(expand.bottom);
+        // Side by side on the line, copy last, both always shown
+        expect(copy.left - expand.right).toBe(4);
+        expect(expand.top).toBe(block.top);
+        expect(copy.top).toBe(block.top);
+        expect(block.right - copyIcon.right).toBe(8);
+        for (const button of document.querySelectorAll(".mx_EventTile_button")) {
+            expect(getComputedStyle(button).visibility).toBe("visible");
+        }
+    });
 
-        expect(expandIcon.top - pre.top).toBe(12);
-        expect(pre.right - expandIcon.right).toBe(12);
-        expect(pre.right - copyIcon.right).toBe(12);
+    it("names the fence's language at the start of the header line, in 13px secondary text on the code's 12px edge", () => {
+        render(MESSAGE);
+        const block = box(BLOCK);
+        const header = box(".mx_EventTile_codeBlockHeader");
+        const language = document.querySelector(".mx_EventTile_codeBlockLanguage")!;
+        const text = firstTextLine(language);
+
+        expect(language.textContent).toBe("sh");
+        expect(text.left - block.left).toBe(12);
+        expect(Math.abs((text.top + text.bottom) / 2 - (header.top + 14))).toBeLessThanOrEqual(0.5);
+        expect(getComputedStyle(language).fontSize).toBe("13px");
+        expect(getComputedStyle(language).color).toBe(tokenColor("--cpd-color-text-secondary", language));
+    });
+
+    it("keeps the buttons at the end of the header line of a block that names no language", () => {
+        render(formatted(codeBlock(CODE_LINES, "")));
+        const block = box(BLOCK);
+        const copyIcon = box(".mx_EventTile_copyButton svg");
+
+        expect(document.querySelector(".mx_EventTile_codeBlockLanguage")).toBeNull();
+        expect(block.right - copyIcon.right).toBe(8);
+    });
+
+    it("draws the language in white in your own bubble, where secondary white would be too faint on the block", () => {
+        render(bubble(MESSAGE, true));
+        const language = document.querySelector(".mx_EventTile_codeBlockLanguage")!;
+
+        expect(getComputedStyle(language).color).toBe("rgb(255, 255, 255)");
     });
 
     it("keeps every line of a numbered block visible when the block shrinks to fit, as in a bubble", () => {
@@ -436,10 +463,9 @@ describe("Code in a message", () => {
         const textEnd = Math.max(...textBoxes(pre.querySelector("code")!).map((line) => line.right));
 
         expect(pre.scrollLeft).toBeGreaterThan(0);
-        // The 12px and the buttons' room, less a fraction of a pixel, as the scroll position is whole pixels and the
-        // text isn't
-        expect(pre.getBoundingClientRect().right - textEnd).toBeGreaterThan(47);
-        expect(pre.getBoundingClientRect().right - textEnd).toBeLessThanOrEqual(48);
+        // The 12px, less a fraction of a pixel, as the scroll position is whole pixels and the text isn't
+        expect(pre.getBoundingClientRect().right - textEnd).toBeGreaterThan(11);
+        expect(pre.getBoundingClientRect().right - textEnd).toBeLessThanOrEqual(12);
     });
 
     it("cuts a reply's quoted code block off at its padding, after the lines the quote shows", () => {
@@ -452,6 +478,16 @@ describe("Code in a message", () => {
         // In the bottom padding, where the top of the third line would show
         const hit = document.elementFromPoint(pre.left + 20, pre.bottom - 6);
         expect(hit).toBe(document.querySelector("pre"));
+    });
+
+    it("shows only the code in a reply's quote, in its own fill, without the header line", () => {
+        render(`<blockquote class="mx_ReplyChain"><div class="ReplyTileView_body">${MESSAGE}</div></blockquote>`);
+
+        expect(getComputedStyle(document.querySelector(".mx_EventTile_codeBlockHeader")!).display).toBe("none");
+        expect(getComputedStyle(document.querySelector(BLOCK)!).backgroundColor).toBe("rgba(0, 0, 0, 0)");
+        expect(getComputedStyle(document.querySelector("pre")!).backgroundColor).toBe(
+            tokenColor("--cpd-color-alpha-gray-300", document.querySelector("pre")!),
+        );
     });
 
     it("leaves the code in a reply's quote inline, for the quote to clamp it to its first lines", () => {
@@ -472,12 +508,12 @@ describe("Code in a message", () => {
             </li>
         `);
         const bubble = box(".line");
-        const pre = box("pre");
+        const block = box(BLOCK);
         const bubbleRadius = parseFloat(getComputedStyle(document.querySelector(".line")!).borderTopLeftRadius);
-        const inset = Math.min(pre.top - bubble.top, pre.left - bubble.left, bubble.right - pre.right);
+        const inset = Math.min(block.top - bubble.top, block.left - bubble.left, bubble.right - block.right);
 
         expect(bubbleRadius).toBe(12);
-        expect(parseFloat(radius("pre"))).toBe(Math.max(bubbleRadius - inset, 4));
-        expect(radius("pre")).toBe("4px");
+        expect(parseFloat(radius(BLOCK))).toBe(Math.max(bubbleRadius - inset, 4));
+        expect(radius(BLOCK)).toBe("4px");
     });
 });

@@ -429,6 +429,24 @@ describe("<TextualBody />", () => {
             expect(content).toMatchSnapshot();
         });
 
+        it("names a code block's language and holds its buttons on a header line above the code", () => {
+            const ev = mkFormattedMessage(
+                "```ts\nconst accent = 1;\n```\n```\nplain\n```",
+                '<pre><code class="language-ts">const accent = 1;\n</code></pre>\n<pre><code>plain\n</code></pre>\n',
+            );
+            const { container } = getComponent({ mxEvent: ev }, matrixClient);
+            const [named, unnamed] = container.querySelectorAll(".mx_EventTile_pre_container");
+
+            for (const block of [named, unnamed]) {
+                const header = block.firstElementChild!;
+                expect(header).toHaveClass("mx_EventTile_codeBlockHeader");
+                expect(header.nextElementSibling!.tagName).toBe("PRE");
+                expect(header.querySelector(".mx_EventTile_copyButton")).toBeInTheDocument();
+            }
+            expect(named.querySelector(".mx_EventTile_codeBlockLanguage")).toHaveTextContent("ts");
+            expect(unnamed.querySelector(".mx_EventTile_codeBlockLanguage")).toBeNull();
+        });
+
         // If pills were rendered within a Portal/same shadow DOM then it'd be easier to test
         it("pills get injected correctly into the DOM", () => {
             const ev = mkFormattedMessage("Hey User", 'Hey <a href="https://matrix.to/#/@user:server">Member</a>');

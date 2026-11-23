@@ -15,6 +15,7 @@ import { useSettingValue } from "../../../hooks/useSettings.ts";
 import { CopyTextButton } from "../elements/CopyableText.tsx";
 import AccessibleButton from "../elements/AccessibleButton.tsx";
 import { _t } from "../../../i18n";
+import { getCodeBlockLanguage } from "../../../telement/code-block/getCodeBlockLanguage.ts";
 
 const MAX_HIGHLIGHT_LENGTH = 4096;
 const MAX_LINES_BEFORE_COLLAPSE = 5;
@@ -46,6 +47,7 @@ const CodeBlock: React.FC<Props> = ({ preNode }) => {
     const [expanded, setExpanded] = useState(expandCodeByDefault);
 
     const text = textContent(preNode);
+    const language = getCodeBlockLanguage(preNode);
 
     let expandCollapseButton: JSX.Element | undefined;
     if (text.split("\n").length >= MAX_LINES_BEFORE_COLLAPSE) {
@@ -124,8 +126,17 @@ const CodeBlock: React.FC<Props> = ({ preNode }) => {
         content = <code>{content}</code>;
     }
 
+    // Telement: a header line names the language and holds the buttons, always shown, so that they never cover the
+    // code
     return (
         <div className="mx_EventTile_pre_container">
+            <div className="mx_EventTile_codeBlockHeader">
+                {language && <span className="mx_EventTile_codeBlockLanguage">{language}</span>}
+                {expandCollapseButton}
+                <CopyTextButton getTextToCopy={() => text} className="mx_EventTile_button mx_EventTile_copyButton">
+                    <CopyIcon />
+                </CopyTextButton>
+            </div>
             <pre
                 className={classNames({
                     mx_EventTile_collapsedCodeBlock: !expanded,
@@ -136,15 +147,6 @@ const CodeBlock: React.FC<Props> = ({ preNode }) => {
                     {content}
                 </div>
             </pre>
-            {expandCollapseButton}
-            <CopyTextButton
-                getTextToCopy={() => text}
-                className={classNames("mx_EventTile_button mx_EventTile_copyButton", {
-                    mx_EventTile_buttonBottom: !!expandCollapseButton,
-                })}
-            >
-                <CopyIcon />
-            </CopyTextButton>
         </div>
     );
 };

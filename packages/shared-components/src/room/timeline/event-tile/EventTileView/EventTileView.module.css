@@ -1838,8 +1838,13 @@
         }
 
         /* Secondary white on a translucent white fill drops under 3:1 in light themes, so what sits on one is white: a
-           code block's line numbers and a link preview's description */
-        > .slotBody :is(:global(.markdown-body) pre, :global(.mx_TextualBody_urlPreviews)) {
+           code block's language and line numbers and a link preview's description */
+        > .slotBody
+            :is(
+                :global(.markdown-body) pre,
+                :global(.mx_EventTile_codeBlockHeader),
+                :global(.mx_TextualBody_urlPreviews)
+            ) {
             --cpd-color-text-secondary: var(--tl-color-on-bubble-own);
             --cpd-color-icon-secondary: var(--tl-color-on-bubble-own);
         }

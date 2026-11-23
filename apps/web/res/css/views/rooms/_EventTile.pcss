@@ -329,40 +329,54 @@ $left-gutter: 64px;
     }
 
     .mx_EventTile_pre_container {
-        /* For correct positioning of _copyButton (See TextualBody) */
-        position: relative;
-
         /* Emoji are enlarged in prose, but a code block's line numbers are one fixed-height block
            per line and cannot follow a line that an enlarged emoji has made taller. */
         .mx_Emoji {
             font-size: inherit;
         }
 
-        &:focus-within,
-        &:hover {
-            .mx_EventTile_button {
-                visibility: visible;
-            }
-        }
-
         .mx_EventTile_collapsedCodeBlock {
             max-height: 30vh;
         }
 
-        /* The expand and copy buttons sit over the block's top end corner, so the code ends clear of them: the block
-           keeps their 28px and 8px more at its end, and a block that fits its longest line, as in a bubble, is that
-           much wider. Without the room they would cover the end of the first line when they show. */
-        > pre {
-            padding-inline-end: calc(var(--cpd-space-3x) - 1px + var(--cpd-space-7x) + var(--cpd-space-2x));
+        /* Telement: the block's fill and corners are the container's, so that its header line and its code share them.
+           A reply's quote shows only the code, in a fill of its own. */
+        &:not(:is(.mx_ReplyChain, .mx_ReplyPreview) *) {
+            background-color: var(--cpd-color-alpha-gray-300);
+            border-radius: var(--tl-radius-inline);
+
+            > pre {
+                background-color: transparent;
+                border-radius: 0;
+            }
+        }
+    }
+
+    /* Telement: a 28px line at the block's top, as in Telegram, names the code's language in 13px secondary text on the
+       code's 12px edge and holds the expand and copy buttons at its end, always shown, so that they never cover the
+       code. A line sets it apart from the code. It is the block's end that holds them, its left in right-to-left text,
+       where the code ends. */
+    .mx_EventTile_codeBlockHeader {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: var(--cpd-space-1x);
+        block-size: var(--cpd-space-7x);
+        padding-inline: var(--cpd-space-3x) var(--cpd-space-1x);
+        border-block-end: 1px solid var(--cpd-color-alpha-gray-400);
+        font: var(--cpd-font-body-sm-regular);
+        letter-spacing: var(--cpd-font-letter-spacing-body-sm);
+        /* A whole pixel line, so that the text sits as far from the line's top as from its bottom */
+        line-height: var(--cpd-space-5x);
+        color: var(--cpd-color-text-secondary);
+        user-select: none;
+
+        :is(.mx_ReplyChain, .mx_ReplyPreview) & {
+            display: none;
         }
 
-        /* Inserted adjacent to <pre> blocks, (See TextualBody), at the block's end, which is its left in right-to-left
-           text, where the code ends */
         .mx_EventTile_button {
-            position: absolute;
-            top: var(--cpd-space-2x);
-            inset-inline-end: var(--cpd-space-2x);
-            visibility: hidden;
+            flex-shrink: 0;
 
             /* The expand button is the copy button's size, a 20px icon in a 28px box, so their icons line up. */
             &.mx_AccessibleButton {
@@ -372,11 +386,6 @@ $left-gutter: 64px;
                 padding: var(--cpd-space-1x);
             }
 
-            /* Right below the expand button */
-            &.mx_EventTile_buttonBottom {
-                top: calc(var(--cpd-space-2x) + var(--cpd-space-7x));
-            }
-
             svg {
                 width: inherit;
                 height: inherit;
@@ -384,6 +393,16 @@ $left-gutter: 64px;
                 color: $message-action-bar-fg-color;
             }
         }
+    }
+
+    /* The language as the fence names it, drawn as typed, as code is */
+    .mx_EventTile_codeBlockLanguage {
+        min-inline-size: 0;
+        margin-inline-end: auto;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-feature-settings: var(--tl-font-feature-settings-identifier);
     }
 }
 

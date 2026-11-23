@@ -350,9 +350,9 @@ const REPLY = `
 /** A code block as CodeBlock renders it, with line numbers, syntax highlighting and its copy button. */
 const CODE = `
     <div class="mx_EventTile_pre_container">
+        <div class="mx_EventTile_codeBlockHeader"><span class="mx_EventTile_codeBlockLanguage">ts</span><div role="button" class="mx_AccessibleButton mx_EventTile_button mx_EventTile_copyButton">${icon(CopyIcon)}</div></div>
         <pre><span class="mx_EventTile_lineNumbers"><span>1</span></span><div style="display: contents"><code class="language-ts"><span class="hljs-keyword">const</span> accent = <span class="hljs-string">"#2481cc"</span>;
 </code></div></pre>
-        <div role="button" class="mx_AccessibleButton mx_EventTile_button mx_EventTile_copyButton">${icon(CopyIcon)}</div>
     </div>
 `;
 
@@ -669,25 +669,33 @@ describe("Your own bubbles", () => {
             expect(color(list.querySelector(".mx_Pill_UserIcon"))).toBe(theme.fill);
         });
 
-        it("draws code, its line numbers and its buttons in white on translucent white, syntax colors included", () => {
+        it("draws code, its line numbers, language and buttons in white on translucent white, syntax colors included", () => {
             const list = render(tile(formatted(`<p>Run <code>pnpm i18n</code>:</p>${CODE}`)));
             const inline = list.querySelector("p code")!;
+            const block = list.querySelector(".mx_EventTile_pre_container")!;
             const pre = list.querySelector("pre")!;
 
             for (const element of [inline, pre, ...pre.querySelectorAll("[class^='hljs-']")]) {
                 expect(color(element)).toBe(WHITE);
             }
-            for (const element of [inline, pre]) {
+            for (const element of [inline, block]) {
                 const [red, green, blue, alpha] = channels(fill(element));
                 expect([red, green, blue]).toEqual([255, 255, 255]);
                 expect(alpha).toBeGreaterThan(0);
                 expect(alpha).toBeLessThan(0.25);
             }
-            expect(contrast(composite(fill(pre), theme.fill), theme.fill)).toBeLessThan(1.25);
+            expect(contrast(composite(fill(block), theme.fill), theme.fill)).toBeLessThan(1.25);
             // The secondary white would be under 3:1 on the block's fill in light themes
             expect(color(list.querySelector(".mx_EventTile_lineNumbers"))).toBe(WHITE);
-            expect(contrast(WHITE, composite(fill(pre), theme.fill))).toBeGreaterThanOrEqual(3);
+            expect(color(list.querySelector(".mx_EventTile_codeBlockLanguage"))).toBe(WHITE);
+            expect(contrast(WHITE, composite(fill(block), theme.fill))).toBeGreaterThanOrEqual(3);
             expect(color(list.querySelector(".mx_EventTile_copyButton svg"))).toBe(WHITE);
+            // The header's line is a translucent white too
+            expect(
+                channels(
+                    getComputedStyle(list.querySelector(".mx_EventTile_codeBlockHeader")!).borderBottomColor,
+                ).slice(0, 3),
+            ).toEqual([255, 255, 255]);
         });
 
         it("draws a reply quote's line, sender and text in white, as Telegram does", () => {
