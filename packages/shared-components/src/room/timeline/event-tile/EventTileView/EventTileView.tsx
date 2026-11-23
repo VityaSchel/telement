@@ -33,6 +33,8 @@ export function EventTileView({
     onBlur,
     onClick,
     onContextMenu,
+    onMouseDown,
+    onDoubleClick,
     onPermalinkClick,
     onPermalinkContextMenu,
 }: Readonly<EventTileViewProps>): JSX.Element {
@@ -190,6 +192,8 @@ export function EventTileView({
             onBlur={onBlur}
             onClick={rootClickHandler}
             onContextMenu={rootContextMenuHandler}
+            onMouseDown={onMouseDown}
+            onDoubleClick={onDoubleClick}
         >
             {children}
         </Root>

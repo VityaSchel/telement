@@ -802,6 +802,33 @@ describe("EventTileView", () => {
         },
     );
 
+    it.each(["Room", "Thread"] as const)(
+        "hands presses and double clicks anywhere on a %s row to the application",
+        (shape) => {
+            const onMouseDown = vi.fn();
+            const onDoubleClick = vi.fn();
+            render(
+                <EventTileView
+                    {...createProps({
+                        root: { ...renderState, shape },
+                        onMouseDown,
+                        onDoubleClick,
+                        slots: createStylingContractSlots(),
+                    })}
+                />,
+                { presentation: { layout: "bubble" } },
+            );
+
+            for (const slotName of ["avatar", "body", "footer"]) {
+                fireEvent.mouseDown(screen.getByTestId(`styling-contract-${slotName}`), { detail: 2 });
+                fireEvent.doubleClick(screen.getByTestId(`styling-contract-${slotName}`));
+            }
+
+            expect(onMouseDown).toHaveBeenCalledTimes(3);
+            expect(onDoubleClick).toHaveBeenCalledTimes(3);
+        },
+    );
+
     it("opens the context menu from anywhere on a thread row", () => {
         const onContextMenu = vi.fn();
         render(

@@ -10,7 +10,7 @@ Please see LICENSE files in the repository root for full details.
 
 import React from "react";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { act, fireEvent, render, screen, waitFor } from "test-utils-rtl";
+import { act, fireEvent, render, screen, waitFor, within } from "test-utils-rtl";
 import userEvent from "@testing-library/user-event";
 import {
     EventStatus,
@@ -1039,6 +1039,61 @@ describe("EventTile", () => {
 
             expect(await screen.findByTestId("mx_MessageContextMenu")).toBeInTheDocument();
             expect(screen.queryByRole("menuitem", { name: "Copy image" })).toBeNull();
+        });
+    });
+
+    describe("double click", () => {
+        const isReply = (payload: unknown): boolean => (payload as { action?: string }).action === "reply_to_event";
+
+        it.each([TimelineRenderingType.Room, TimelineRenderingType.Thread])(
+            "starts a reply, as the message menu's Reply does, outside the text of a message in the %s timeline",
+            (renderingType) => {
+                const dispatch = vi.spyOn(dis, "dispatch").mockImplementation(() => {});
+                const { container } = getComponent({}, renderingType, { canSendMessages: true });
+
+                // The second press of the double click doesn't select a word
+                expect(fireEvent.mouseDown(getLine(container), { detail: 2 })).toBe(false);
+                fireEvent.doubleClick(getLine(container));
+
+                expect(dispatch).toHaveBeenCalledWith({
+                    action: "reply_to_event",
+                    event: mxEvent,
+                    context: renderingType,
+                });
+            },
+        );
+
+        it("leaves a double click on a control, such as the sender's avatar, to the control", () => {
+            const dispatch = vi.spyOn(dis, "dispatch").mockImplementation(() => {});
+            const { container } = getComponent({}, TimelineRenderingType.Room, { canSendMessages: true });
+            const avatar = within(getTile(container)).getAllByRole("button")[0];
+
+            expect(fireEvent.mouseDown(avatar, { detail: 2 })).toBe(true);
+            fireEvent.doubleClick(avatar);
+
+            expect(dispatch.mock.calls.filter(([payload]) => isReply(payload))).toEqual([]);
+        });
+
+        it.each<[string, () => ReturnType<typeof getComponent>]>([
+            ["in search results", () => getComponent({}, TimelineRenderingType.Search, { canSendMessages: true })],
+            ["in the files card", () => getComponent({}, TimelineRenderingType.File, { canSendMessages: true })],
+            ["where the user can't send messages", () => getComponent({}, TimelineRenderingType.Room)],
+            [
+                "on a message that failed to send",
+                () => {
+                    mxEvent.setStatus(EventStatus.NOT_SENT);
+                    return getComponent({}, TimelineRenderingType.Room, { canSendMessages: true });
+                },
+            ],
+        ])("doesn't reply %s", (_, renderTile) => {
+            const dispatch = vi.spyOn(dis, "dispatch").mockImplementation(() => {});
+            const { container } = renderTile();
+            const target = container.querySelector(".mx_EventTile_line") ?? getTile(container);
+
+            expect(fireEvent.mouseDown(target, { detail: 2 })).toBe(true);
+            fireEvent.doubleClick(target);
+
+            expect(dispatch.mock.calls.filter(([payload]) => isReply(payload))).toEqual([]);
         });
     });
 

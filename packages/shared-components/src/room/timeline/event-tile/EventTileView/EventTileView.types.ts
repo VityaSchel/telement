@@ -183,6 +183,10 @@ export interface EventTileViewHandlers {
     onClick?: React.MouseEventHandler<HTMLElement>;
     /** Event context menu. */
     onContextMenu?: React.MouseEventHandler<HTMLElement>;
+    /** Root mouse button press, which the application can use to keep a double click from selecting a word. */
+    onMouseDown?: React.MouseEventHandler<HTMLElement>;
+    /** Root double click. */
+    onDoubleClick?: React.MouseEventHandler<HTMLElement>;
     /** Permalink click. */
     onPermalinkClick?: React.MouseEventHandler<HTMLAnchorElement>;
     /** Permalink context menu. */

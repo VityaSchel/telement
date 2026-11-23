@@ -118,6 +118,8 @@ import { shouldHighlightEventTile } from "../../../viewmodels/room/timeline/even
 import { shouldHideEventTile } from "../../../viewmodels/room/timeline/event-tile/EventTileVisibilityState";
 import { UnreadNotificationBadgeViewModel } from "../../../viewmodels/room/notification-badge/UnreadNotificationBadgeViewModel";
 import { getMessageContextMenuTarget } from "../../../telement/message-context-menu/getMessageContextMenuTarget";
+import { canReplyOnDoubleClick } from "../../../telement/timeline/canReplyOnDoubleClick";
+import { isReplyDoubleClick } from "../../../telement/timeline/isReplyDoubleClick";
 import { ThreadListTileContextMenu } from "../../../telement/message-context-menu/ThreadListTileContextMenu";
 
 /** Relation lookup type retained for EventTile consumers. */
@@ -786,6 +788,33 @@ export class UnwrappedEventTile extends React.Component<EventTileProps, IState> 
         this.showContextMenu(ev);
     };
 
+    /** Telement: whether a double click on this message, outside its text and controls, starts a reply to it. */
+    private get repliesOnDoubleClick(): boolean {
+        return canReplyOnDoubleClick({
+            mxEvent: this.props.mxEvent,
+            timelineRenderingType: this.context.timelineRenderingType,
+            canSendMessages: this.context.canSendMessages,
+            isEditing: !!this.props.editState,
+        });
+    }
+
+    private readonly onMouseDown = (ev: React.MouseEvent): void => {
+        // The second press of a double click that will reply mustn't select the word nearest to the pointer
+        if (ev.detail === 2 && ev.button === 0 && this.repliesOnDoubleClick && isReplyDoubleClick(ev)) {
+            ev.preventDefault();
+        }
+    };
+
+    private readonly onDoubleClick = (ev: React.MouseEvent): void => {
+        if (ev.button !== 0 || !this.repliesOnDoubleClick || !isReplyDoubleClick(ev)) return;
+        // The message menu's Reply
+        dis.dispatch({
+            action: "reply_to_event",
+            event: this.props.mxEvent,
+            context: this.context.timelineRenderingType,
+        });
+    };
+
     private readonly onTimestampContextMenu = (ev: React.MouseEvent): void => {
         this.showContextMenu(ev, this.props.permalinkCreator?.forEvent(this.props.mxEvent.getId()!));
     };
@@ -1263,6 +1292,8 @@ export class UnwrappedEventTile extends React.Component<EventTileProps, IState> 
                 onBlur={this.onBlurWithin}
                 onClick={this.onPreviewTileClick}
                 onContextMenu={this.onContextMenu}
+                onMouseDown={this.onMouseDown}
+                onDoubleClick={this.onDoubleClick}
                 onPermalinkClick={this.onPermalinkClicked}
                 onPermalinkContextMenu={this.onTimestampContextMenu}
             />
