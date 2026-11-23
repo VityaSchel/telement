@@ -49,6 +49,7 @@ import {
 } from "../../../utils/pushRules/updatePushRuleActions";
 import { Caption } from "../typography/Caption";
 import { SettingsSubsection } from "./shared/SettingsSubsection";
+import { RoomNotificationExceptionsRow } from "../../../telement/settings/RoomNotificationExceptionsRow";
 import { doesRoomHaveUnreadMessages } from "../../../Unread";
 import SettingsFlag from "../elements/SettingsFlag";
 import { onSubmitPreventDefault } from "../../../utils/form.ts";
@@ -888,6 +889,8 @@ export default class Notifications extends React.PureComponent<EmptyObject, ISta
         return (
             <>
                 {this.renderTopSection()}
+                {/* Telement: the rooms with a notification level of their own, as Telegram's exceptions */}
+                {!this.isInhibited && <RoomNotificationExceptionsRow />}
                 {this.renderCategory(RuleClass.VectorGlobal)}
                 {this.renderCategory(RuleClass.VectorMentions)}
                 {this.renderCategory(RuleClass.VectorOther)}

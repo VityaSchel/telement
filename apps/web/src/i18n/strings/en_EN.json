@@ -3202,6 +3202,9 @@
             "result_position": "%(number)s of %(total)s",
             "show_results": "Show results"
         },
+        "settings": {
+            "notification_exceptions": "Rooms with their own setting"
+        },
         "space_home": {
             "empty_description": "Add an existing room or create a new one.",
             "empty_description_no_rights": "Rooms added to this space will appear here.",
