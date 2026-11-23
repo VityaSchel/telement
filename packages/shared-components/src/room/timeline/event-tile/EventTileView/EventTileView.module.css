@@ -35,7 +35,8 @@
     --event-tile-bubble-gutter: var(--cpd-space-3x);
     --event-tile-bubble-padding-block: var(--cpd-space-2x);
     --event-tile-bubble-padding-inline: var(--cpd-space-3x);
-    --event-tile-bubble-line-height: 1.125rem;
+    /* Telegram's 1.33 for 15px text, rather than upstream's 18px, which read dense next to code's 22px */
+    --event-tile-bubble-line-height: 1.25rem;
     --event-tile-bubble-line-max-width: 70%;
     --event-tile-bubble-line-margin-inline-start: -9px;
     --event-tile-bubble-line-margin-inline-end: -12px;

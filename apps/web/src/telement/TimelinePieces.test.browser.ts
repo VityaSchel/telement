@@ -246,7 +246,8 @@ describe("A poll in the bubble layout", () => {
 
         expect(box(".line").bottom - summary.bottom).toBe(8);
         expect(box(".slotTimestamp").bottom).toBe(summary.bottom);
-        expect(summary.height).toBe(18);
+        // One line of the bubble's text
+        expect(summary.height).toBe(20);
     });
 
     it.each([false, true])(

@@ -43,7 +43,7 @@
 .disambiguatedProfile[data-event-layout="bubble"] {
     width: fit-content;
     max-width: var(--event-tile-bubble-line-max-width, 70%);
-    line-height: var(--event-tile-bubble-line-height, 1.125rem);
+    line-height: var(--event-tile-bubble-line-height, 1.25rem);
     white-space: normal;
 
     .disambiguatedProfile_displayName {

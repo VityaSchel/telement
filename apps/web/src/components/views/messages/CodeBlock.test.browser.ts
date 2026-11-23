@@ -75,9 +75,10 @@ const CHIPS = formatted(
         "<code>git tag -s v1.12.33-telement.1</code> and <code>git log --oneline</code>.</p>",
 );
 
-/** The line heights formatted text inherits: from a bubble or an IRC line, and from a modern layout line. */
+/** The line heights formatted text inherits: from a bubble, an IRC line and a modern layout line. */
 const LAYOUT_LINE_HEIGHTS = [
-    ["a bubble or the IRC layout", "1.125rem"],
+    ["a bubble", "1.25rem"],
+    ["the IRC layout", "1.125rem"],
     ["the modern layout", "1.375rem"],
 ];
 
@@ -168,6 +169,17 @@ function textBoxes(element: Element): DOMRect[] {
 /** The box of the text of `element`'s first line. */
 function firstTextLine(element: Element): DOMRect {
     return textBoxes(element)[0];
+}
+
+/** The distinct tops of `element`'s lines of text, top to bottom. */
+function lineTops(element: Element): number[] {
+    return [...new Set(textBoxes(element).map((line) => Math.round(line.top)))].sort((a, b) => a - b);
+}
+
+/** How far apart consecutive lines of `element`'s text are. */
+function lineSpacings(element: Element): number[] {
+    const tops = lineTops(element);
+    return tops.slice(1).map((top, i) => top - tops[i]);
 }
 
 let stylesheet: HTMLStyleElement;
@@ -289,6 +301,26 @@ describe("Code in a message", () => {
                 expect(below.top - above.bottom).toBeGreaterThanOrEqual(2);
             }
         });
+    });
+
+    it("sets a bubble's text and its quotes 20px apart, Telegram's 1.33, and keeps its code 22px apart", () => {
+        const words = "The room list now shows two lines of preview and the badges under the time.";
+        render(
+            bubble(
+                formatted(
+                    `<p>${words}</p><blockquote><p>${words}</p></blockquote>` +
+                        codeBlock(["pnpm i18n", "pnpm lint:fmt:fix", "pnpm lint:types"]),
+                ),
+            ),
+        );
+        const [text, quote] = [...document.querySelectorAll(".markdown-body p")];
+
+        for (const element of [text, quote]) {
+            const spacings = lineSpacings(element);
+            expect(spacings.length).toBeGreaterThan(0);
+            for (const spacing of spacings) expect(spacing).toBe(20);
+        }
+        expect(lineSpacings(document.querySelector("pre code")!)).toEqual([22, 22]);
     });
 
     it("pads inline code at its sides only, as the font already leaves room above and below the text", () => {

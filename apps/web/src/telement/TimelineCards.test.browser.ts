@@ -433,7 +433,7 @@ describe("Timeline cards", () => {
     });
 
     it.each<[Layout, number]>([
-        ["bubble", 18],
+        ["bubble", 20],
         ["irc", 18],
         ["group", 22],
     ])("centers an event card's icon on its title's line in the %s layout", (layout, lineHeight) => {
