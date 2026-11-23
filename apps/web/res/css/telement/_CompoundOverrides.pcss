@@ -128,6 +128,13 @@ Please see LICENSE files in the repository root for full details.
     }
 }
 
+/* Destructive rows of Compound's lists outside menus, such as Leave room in the right panel, take the same red hover and
+   pressed fills, so they show the pointer as clearly as the gray rows around them. */
+:is([class^="_item_"], [class*=" _item_"])[data-kind="critical"] {
+    --cpd-color-bg-critical-subtle: var(--tl-color-bg-menu-critical-hovered);
+    --cpd-color-bg-critical-subtle-hovered: var(--tl-color-bg-menu-critical-pressed);
+}
+
 /*
  * What Compound's checkbox, radio and toggle draw on their accent fill (the check, the dot, the knob) is white in every
  * theme (telement/tokens.css), as in Telegram; Compound draws it in the page's color, near-black in dark themes.

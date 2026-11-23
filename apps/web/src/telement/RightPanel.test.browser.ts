@@ -226,9 +226,10 @@ async function keyboardFocusRing(row: HTMLElement): Promise<string> {
 }
 
 /** What hovering paints behind a row of each kind: rows that leave a room or ignore someone are red. */
+/** A row's hover fill: Compound's, or the menus' red for a destructive row (_CompoundOverrides.pcss). */
 const hoverColor = (kind: "primary" | "critical"): string =>
     tokenColor(
-        kind === "primary" ? "--cpd-color-bg-action-secondary-hovered" : "--cpd-color-bg-critical-subtle",
+        kind === "primary" ? "--cpd-color-bg-action-secondary-hovered" : "--tl-color-bg-menu-critical-hovered",
         document.body,
     );
 

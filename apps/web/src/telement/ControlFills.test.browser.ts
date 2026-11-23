@@ -9,8 +9,13 @@ import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
 import { cdp } from "vitest/browser";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { IconButton } from "@vector-im/compound-web";
-import { SettingsSolidIcon, ShareIcon, ThreadsSolidIcon } from "@vector-im/compound-design-tokens/assets/web/icons";
+import { IconButton, MenuItem } from "@vector-im/compound-web";
+import {
+    LeaveIcon,
+    SettingsSolidIcon,
+    ShareIcon,
+    ThreadsSolidIcon,
+} from "@vector-im/compound-design-tokens/assets/web/icons";
 import compoundBase from "@vector-im/compound-design-tokens/assets/web/css/cpd-common-base.css?raw";
 import compoundSemantic from "@vector-im/compound-design-tokens/assets/web/css/cpd-common-semantic.css?raw";
 import compoundLightTheme from "@vector-im/compound-design-tokens/assets/web/css/cpd-theme-light-base.css?raw";
@@ -93,6 +98,19 @@ function messageMenu(): string {
     `;
 }
 
+/** Leave room, as the room info lists it in the right panel: a destructive row of Compound's list, outside a menu. */
+function leaveRoomRow(): string {
+    return renderToStaticMarkup(
+        createElement(MenuItem, {
+            id: "leave",
+            kind: "critical",
+            label: "Leave room",
+            Icon: LeaveIcon,
+            onSelect: () => {},
+        }),
+    );
+}
+
 let stylesheet: HTMLStyleElement;
 
 describe("Hover and pressed fills", () => {
@@ -167,6 +185,24 @@ describe("Hover and pressed fills", () => {
             expect(pressed).toBeGreaterThanOrEqual(1.2);
             // A red, rather than the menu's gray or a maroon as dark as it
             expect(red - Math.max(green, blue)).toBeGreaterThan(theme === "cpd-theme-light" ? 10 : 15);
+        },
+    );
+
+    it.each(["cpd-theme-light", "cpd-theme-dark"])(
+        "fills a hovered destructive right panel row in the menus' red, deeper when pressed, in %s",
+        async (theme) => {
+            themed(theme, `<div class="mx_RightPanel">${leaveRoomRow()}</div>`);
+            const page = getComputedStyle(get("#page")).backgroundColor;
+
+            const hoveredColor = await hoveredFill(get("#leave"));
+            const pressedColor = await pressedFill(get("#leave"));
+            const [red, green, blue] = composite(hoveredColor, page);
+
+            expect(hoveredColor).toBe(color("--tl-color-bg-menu-critical-hovered"));
+            expect(pressedColor).toBe(color("--tl-color-bg-menu-critical-pressed"));
+            expect(contrastOver(hoveredColor, page)).toBeGreaterThanOrEqual(1.09);
+            expect(contrastOver(pressedColor, page)).toBeGreaterThan(contrastOver(hoveredColor, page));
+            expect(red - Math.max(green, blue)).toBeGreaterThan(10);
         },
     );
 
