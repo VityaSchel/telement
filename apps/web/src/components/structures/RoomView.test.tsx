@@ -339,6 +339,7 @@ describe("RoomView", () => {
         messagePanel: Record<string, unknown>;
         onAction(payload: ActionPayload): Promise<void>;
         onMessageListScroll(): void;
+        onRoomViewStoreUpdate(initial?: boolean): Promise<void>;
     }
     const internals = (instance: RoomView): RoomViewInternals => instance as unknown as RoomViewInternals;
 
@@ -412,10 +413,10 @@ describe("RoomView", () => {
                 scope: SearchScope.Room,
                 promise: new Promise<never>(() => {}),
             };
-            act(() => instance.setState({ search }));
+            act(() => instance.setState({ search, timelineRenderingType: TimelineRenderingType.Search }));
 
             await jump(instance, { event_id: "$result", highlighted: true });
-            act(() => instance.setState({ search: undefined }));
+            act(() => instance.setState({ search: undefined, timelineRenderingType: TimelineRenderingType.Room }));
             fireEvent.click(screen.getByRole("button", { name: "Back to where you were" }));
 
             expect(dispatched.at(-1)).toMatchObject({ event_id: "$reading", highlighted: true });
@@ -1249,6 +1250,104 @@ describe("RoomView", () => {
 
             await waitFor(() => {
                 expect(container.querySelector(".mx_RoomView_searchResultsPanel")).not.toBeInTheDocument();
+            });
+        });
+
+        describe("stepping through the results in the timeline (Telement)", () => {
+            afterEach(() => {
+                vi.mocked(defaultDispatcher.dispatch).mockRestore?.();
+                vi.mocked(stores.roomViewStore.getInitialEventId).mockRestore?.();
+            });
+
+            const searchResult = (eventId: string, ts: number): SearchResult =>
+                SearchResult.fromJson(
+                    {
+                        rank: 1,
+                        result: {
+                            content: { body: `pizza ${eventId}`, msgtype: "m.text" },
+                            type: "m.room.message",
+                            event_id: eventId,
+                            sender: cli.getSafeUserId(),
+                            origin_server_ts: ts,
+                            room_id: room.roomId,
+                        },
+                        context: { events_before: [], events_after: [], profile_info: {} },
+                    },
+                    (obj: Partial<IEvent>) => new MatrixEvent(obj),
+                );
+
+            /** A room view showing the list of a search's two results, newest first, and the jumps it dispatches. */
+            const searchRoom = async (): Promise<{ instance: RoomView; jumps: ViewRoomPayload[] }> => {
+                room.getMyMembership = vi.fn().mockReturnValue(KnownMembership.Join);
+                const ref = createRef<RoomView>();
+                await mountRoomView(ref);
+                await waitFor(() => expect(ref.current).toBeTruthy());
+                const results = {
+                    results: [searchResult("$newer", 2000), searchResult("$older", 1000)],
+                    highlights: [],
+                    count: 2,
+                };
+                act(() =>
+                    ref.current!.setState({
+                        timelineRenderingType: TimelineRenderingType.Search,
+                        search: {
+                            searchId: 1,
+                            roomId: room.roomId,
+                            term: "pizza",
+                            scope: SearchScope.Room,
+                            promise: Promise.resolve(results),
+                        },
+                    }),
+                );
+                await screen.findByRole("button", { name: "Older result" });
+
+                const jumps: ViewRoomPayload[] = [];
+                vi.spyOn(defaultDispatcher, "dispatch").mockImplementation((payload) => {
+                    if (payload.action === Action.ViewRoom) jumps.push(payload as ViewRoomPayload);
+                });
+                return { instance: ref.current!, jumps };
+            };
+
+            it("opens the newest result in the timeline under the search bar, then older ones", async () => {
+                const { instance, jumps } = await searchRoom();
+
+                await userEvent.click(screen.getByRole("button", { name: "Older result" }));
+
+                expect(jumps.at(-1)).toMatchObject({
+                    event_id: "$newer",
+                    highlighted: true,
+                    telement_jump_origin: "readingPosition",
+                });
+                expect(screen.getByText("1 of 2")).toBeInTheDocument();
+                expect(document.querySelector(".mx_RoomView_searchResultsPanel")).toBeNull();
+                expect(instance.state.timelineRenderingType).toBe(TimelineRenderingType.Room);
+
+                await userEvent.click(screen.getByRole("button", { name: "Older result" }));
+
+                // Jump to bottom returns to where the timeline was read before the search, not to each result
+                expect(jumps.at(-1)).toMatchObject({ event_id: "$older", telement_jump_origin: undefined });
+                expect(screen.getByText("2 of 2")).toBeInTheDocument();
+            });
+
+            it("shows the list again", async () => {
+                await searchRoom();
+                await userEvent.click(screen.getByRole("button", { name: "Older result" }));
+
+                await userEvent.click(screen.getByText("Show results"));
+
+                await waitFor(() => expect(document.querySelector(".mx_RoomView_searchResultsPanel")).toBeVisible());
+                expect(screen.queryByText("1 of 2")).toBeNull();
+            });
+
+            it("keeps the search bar for a result opened from the list, to step on from it", async () => {
+                const { instance } = await searchRoom();
+                vi.spyOn(stores.roomViewStore, "getInitialEventId").mockReturnValue("$older");
+
+                await act(() => internals(instance).onRoomViewStoreUpdate());
+
+                expect(instance.state.search?.hit).toBe(1);
+                expect(instance.state.timelineRenderingType).toBe(TimelineRenderingType.Room);
+                expect(screen.getByText("2 of 2")).toBeInTheDocument();
             });
         });
 

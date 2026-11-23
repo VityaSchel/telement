@@ -346,6 +346,27 @@ describe("MessagePanel", function () {
         expect(tiles.length).toEqual(10);
     });
 
+    it("marks the search's words in the highlighted event only, while the search bar steps through results", () => {
+        const found = [0, 1].map((i) =>
+            TestUtilsMatrix.mkMessage({
+                event: true,
+                room: "!room:id",
+                user: "@user:id",
+                msg: `Pizza tonight ${i}?`,
+                ts: Date.now() + i * 1000,
+            }),
+        );
+        const { container } = render(
+            getComponent({ events: found, highlightedEventId: found[1].getId(), highlightTerms: ["Pizza"] }),
+            clientAndSDKContextRenderOptions(client, sdkContext),
+        );
+
+        const marked = container.querySelectorAll(".mx_EventTile_searchHighlight");
+        expect(marked).toHaveLength(1);
+        expect(marked[0]).toHaveTextContent("Pizza");
+        expect(marked[0].closest("[data-event-id]")).toHaveAttribute("data-event-id", found[1].getId());
+    });
+
     it("should collapse adjacent member events", function () {
         const { container } = render(
             getComponent({ events: mkMelsEvents() }),

@@ -142,6 +142,9 @@ interface IProps {
     // Telement: ID of the message the composer's keys chose to reply to, which is marked like keyboard focus
     keyboardTargetEventId?: string;
 
+    // Telement: words to mark in the highlighted event, the search's while the search bar steps through its results
+    highlightTerms?: string[];
+
     // The room these events are all in together, if any.
     // (The notification panel won't have a room here, for example.)
     room?: Room;
@@ -835,6 +838,7 @@ export default class MessagePanel extends React.Component<IProps, IState> {
                 lastSuccessful={wrappedEvent.lastSuccessfulWeSent}
                 isSelectedEvent={highlight}
                 isKeyboardTarget={eventId === this.props.keyboardTargetEventId}
+                highlights={highlight ? this.props.highlightTerms : undefined}
                 getRelationsForEvent={this.props.getRelationsForEvent}
                 showReactions={this.props.showReactions}
                 layout={this.props.layout}

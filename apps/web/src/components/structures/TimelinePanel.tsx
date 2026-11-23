@@ -94,6 +94,9 @@ interface IProps {
     // Telement: ID of the message the composer's keys chose to reply to, which is marked like keyboard focus
     keyboardTargetEventId?: string;
 
+    // Telement: words to mark in the highlighted event, the search's while the search bar steps through its results
+    highlightTerms?: string[];
+
     // id of an event to jump to. If not given, will go to the end of the live timeline.
     eventId?: string;
 
@@ -1818,6 +1821,7 @@ class TimelinePanel extends React.Component<IProps, IState> {
                 events={events}
                 highlightedEventId={this.props.highlightedEventId}
                 keyboardTargetEventId={this.props.keyboardTargetEventId}
+                highlightTerms={this.props.highlightTerms}
                 readMarkerEventId={this.state.readMarkerEventId}
                 readMarkerVisible={this.state.readMarkerVisible}
                 canBackPaginate={this.state.canBackPaginate}

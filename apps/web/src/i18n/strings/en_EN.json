@@ -3193,6 +3193,12 @@
             "failed_unpin": "Failed to unpin room",
             "you": "You"
         },
+        "search": {
+            "newer_result": "Newer result",
+            "older_result": "Older result",
+            "result_position": "%(number)s of %(total)s",
+            "show_results": "Show results"
+        },
         "space_home": {
             "empty_description": "Add an existing room or create a new one.",
             "empty_description_no_rights": "Rooms added to this space will appear here.",

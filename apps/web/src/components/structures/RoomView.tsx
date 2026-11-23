@@ -113,7 +113,7 @@ import { LargeLoader } from "./LargeLoader";
 import { isVideoRoom } from "../../utils/video-rooms";
 import { SDKContext } from "../../contexts/SDKContext";
 import { RoomSearchView } from "./RoomSearchView";
-import eventSearch, { type SearchInfo, SearchScope } from "../../Searching";
+import eventSearch, { type SearchInfo, SearchScope, searchPagination } from "../../Searching";
 import { WidgetType } from "../../widgets/WidgetType";
 import WidgetUtils from "../../utils/WidgetUtils";
 import { shouldEncryptRoomWithSingle3rdPartyInvite } from "../../utils/room/shouldEncryptRoomWithSingle3rdPartyInvite";
@@ -138,6 +138,7 @@ import { TimelineFloatingDate } from "../../telement/room/TimelineFloatingDate";
 import { UnreadMentionsButton } from "../../telement/room/UnreadMentionsButton";
 import { TimelineReturns } from "../../telement/room/TimelineReturns";
 import { findReplyTarget, WALK_REPLY_TARGET, type WalkReplyTargetPayload } from "../../telement/room/replyWalk";
+import { searchHighlights, searchHitEvents, searchHitIndex, type SearchStep } from "../../telement/room/searchHits";
 
 const DEBUG = false;
 const PREVENT_MULTIPLE_JITSI_WITHIN = 30_000;
@@ -776,8 +777,14 @@ export class RoomView extends React.Component<IRoomProps, IRoomState> {
             this.state.initialEventId !== newState.initialEventId
         ) {
             newState.timelineRenderingType = TimelineRenderingType.Room;
-            this.state.search?.abortController?.abort();
-            newState.search = undefined;
+            // Telement: a result of this room's search opens under the search bar, which steps on from it
+            const hit = searchHitIndex(this.state.search, newState.initialEventId);
+            if (hit === undefined) {
+                this.state.search?.abortController?.abort();
+                newState.search = undefined;
+            } else {
+                newState.search = { ...this.state.search!, hit };
+            }
         }
 
         if (
@@ -1828,7 +1835,47 @@ export class RoomView extends React.Component<IRoomProps, IRoomState> {
                 count: searchResults?.count,
                 error: error ?? undefined,
                 inProgress,
+                results: searchResults ?? this.state.search?.results,
             },
+        });
+    };
+
+    // Telement: opens the result before or after the one the timeline shows, or the newest from the list, under the
+    // search bar, loading more results when stepping past the oldest loaded, as Telegram's in-chat search steps
+    private onStepSearchResult = async (step: SearchStep): Promise<void> => {
+        const search = this.state.search;
+        if (!search?.results || !this.context.client) return;
+        const index = search.hit === undefined ? 0 : search.hit + (step === "older" ? 1 : -1);
+        let results = search.results;
+        if (index >= searchHitEvents(results).length && results.next_batch) {
+            results = await searchPagination(this.context.client, results);
+            if (this.unmounted || this.state.search?.searchId !== search.searchId) return;
+        }
+        const event = searchHitEvents(results)[index];
+        if (!event) return;
+
+        this.setState({
+            timelineRenderingType: TimelineRenderingType.Room,
+            search: { ...this.state.search!, results, hit: index },
+        });
+        defaultDispatcher.dispatch<ViewRoomPayload>({
+            action: Action.ViewRoom,
+            room_id: this.getRoomId(),
+            event_id: event.getId(),
+            highlighted: true,
+            scroll_into_view: true,
+            // Jump to bottom returns to where the timeline was read before the search, not to each result
+            telement_jump_origin: search.hit === undefined ? "readingPosition" : undefined,
+        });
+    };
+
+    // Telement: shows the list of results again, drawn afresh from those loaded so far
+    private onShowSearchResults = (): void => {
+        const search = this.state.search;
+        if (!search?.results) return;
+        this.setState({
+            timelineRenderingType: TimelineRenderingType.Search,
+            search: { ...search, hit: undefined, searchId: Date.now(), promise: Promise.resolve(search.results) },
         });
     };
 
@@ -1986,10 +2033,12 @@ export class RoomView extends React.Component<IRoomProps, IRoomState> {
     };
 
     // Telement: remembers where a jump of this room's timeline came from, which jump to bottom returns to. Opening a
-    // search result jumps from where the timeline was read before the search.
+    // result from the search's list jumps from where the timeline was read before the search.
     private recordTimelineJump(payload: ViewRoomPayload): void {
         if (payload.room_id !== this.state.roomId || !payload.event_id) return;
-        const origin = payload.telement_jump_origin ?? (this.state.search ? "readingPosition" : undefined);
+        const origin =
+            payload.telement_jump_origin ??
+            (this.state.timelineRenderingType === TimelineRenderingType.Search ? "readingPosition" : undefined);
         if (origin) this.timelineReturns.recordJump(payload.event_id, origin, this.getReadingPosition);
     }
 
@@ -2451,13 +2500,15 @@ export class RoomView extends React.Component<IRoomProps, IRoomState> {
 
         let aux: JSX.Element | undefined;
         let previewBar;
-        if (this.state.timelineRenderingType === TimelineRenderingType.Search) {
+        if (this.state.timelineRenderingType === TimelineRenderingType.Search || this.state.search?.hit !== undefined) {
             if (!isRoomEncryptionLoading) {
                 aux = (
                     <RoomSearchAuxPanel
                         searchInfo={this.state.search}
                         onCancelClick={this.onCancelSearchClick}
                         onSearchScopeChange={this.onSearchScopeChange}
+                        onStepResult={this.onStepSearchResult}
+                        onShowResults={this.onShowSearchResults}
                         isRoomEncrypted={isRoomEncrypted}
                     />
                 );
@@ -2557,7 +2608,8 @@ export class RoomView extends React.Component<IRoomProps, IRoomState> {
         let searchResultsPanel;
         let hideMessagePanel = false;
 
-        if (this.state.search) {
+        // Telement: while a result shows in the timeline under the search bar, the list makes way for it
+        if (this.state.search && this.state.search.hit === undefined) {
             searchResultsPanel = (
                 <RoomSearchView
                     key={this.state.search.searchId}
@@ -2613,6 +2665,11 @@ export class RoomView extends React.Component<IRoomProps, IRoomState> {
                         manageReadMarkers={!this.state.isPeeking}
                         hidden={hideMessagePanel}
                         highlightedEventId={highlightedEventId}
+                        highlightTerms={
+                            this.state.search?.hit !== undefined
+                                ? searchHighlights(this.state.search.results, this.state.search.term)
+                                : undefined
+                        }
                         keyboardTargetEventId={
                             this.state.keyboardReplyEventId === this.state.replyToEvent?.getId()
                                 ? this.state.keyboardReplyEventId
@@ -2642,7 +2699,7 @@ export class RoomView extends React.Component<IRoomProps, IRoomState> {
 
         let jumpToBottom;
         // Do not show JumpToBottomButton if we have search results showing, it makes no sense
-        if (this.state.atEndOfLiveTimeline === false && !this.state.search) {
+        if (this.state.atEndOfLiveTimeline === false && (!this.state.search || this.state.search.hit !== undefined)) {
             jumpToBottom = (
                 <JumpToBottomButton
                     highlight={this.state.room.getUnreadNotificationCount(NotificationCountType.Highlight) > 0}

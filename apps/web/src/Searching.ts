@@ -742,4 +742,12 @@ export interface SearchInfo {
      * Describe the error if any occured.
      */
     error?: Error;
+    /**
+     * Telement: the results loaded so far, which the search bar steps through.
+     */
+    results?: ISearchResults;
+    /**
+     * Telement: which of the results, newest first, the timeline shows in place of the list, if it shows one.
+     */
+    hit?: number;
 }
