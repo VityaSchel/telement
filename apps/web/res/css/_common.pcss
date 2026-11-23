@@ -517,14 +517,21 @@ summary {
     width: calc(400px - 2 * var(--cpd-space-6x));
 }
 
-:is(.mx_ViewSource, .mx_PollHistoryDialog, .mx_MessageEditHistoryDialog).mx_Dialog_fixedWidth {
+/* Telement: lists, and also developer tools (a QuestionDialog by its class), a widget's own dialog and the screen
+   sharing picker, which hold neither a form nor a list but show as much as a list does */
+:is(
+    .mx_ViewSource,
+    .mx_PollHistoryDialog,
+    .mx_MessageEditHistoryDialog,
+    .mx_ModalWidgetDialog,
+    .mx_desktopCapturerSourcePicker
+).mx_Dialog_fixedWidth,
+.mx_DevtoolsDialog_wrapper .mx_Dialog_fixedWidth.mx_QuestionDialog {
     width: calc(640px - 2 * var(--cpd-space-6x));
 }
 
-/* Telement: the search dialog stays as it is, and developer tools (a QuestionDialog by its class), a widget's own
-   dialog and the screen sharing picker, which hold neither a form nor a list, keep upstream's width */
-:is(.mx_SpotlightDialog, .mx_ModalWidgetDialog, .mx_desktopCapturerSourcePicker).mx_Dialog_fixedWidth,
-.mx_DevtoolsDialog_wrapper .mx_Dialog_fixedWidth.mx_QuestionDialog {
+/* Telement: the search dialog stays as it is */
+.mx_SpotlightDialog.mx_Dialog_fixedWidth {
     width: 60vw;
     max-width: 704px;
 }

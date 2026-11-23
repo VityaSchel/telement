@@ -371,6 +371,27 @@ describe("Dialogs", () => {
             },
             { kind: "a message's source", className: "mx_ViewSource", wrapper: "", fixedWidth: true, width: 640 },
             {
+                kind: "developer tools",
+                className: "mx_QuestionDialog",
+                wrapper: "mx_DevtoolsDialog_wrapper",
+                fixedWidth: true,
+                width: 640,
+            },
+            {
+                kind: "a widget's own dialog",
+                className: "mx_ModalWidgetDialog",
+                wrapper: "",
+                fixedWidth: true,
+                width: 640,
+            },
+            {
+                kind: "the screen sharing picker",
+                className: "mx_desktopCapturerSourcePicker",
+                wrapper: "",
+                fixedWidth: true,
+                width: 640,
+            },
+            {
                 kind: "a message's edits",
                 className: "mx_MessageEditHistoryDialog",
                 wrapper: "",
@@ -404,14 +425,9 @@ describe("Dialogs", () => {
             expect(box("[data-testid=body]").width).toBe(480);
         });
 
-        it("keeps the search dialog and developer tools at upstream's width", () => {
+        it("keeps the search dialog at upstream's width", () => {
             renderDialog("mx_SpotlightDialog", "Search", "");
             expect(box(".mx_SpotlightDialog").width).toBe(704);
-            document.body.innerHTML = "";
-
-            renderDialog("mx_QuestionDialog", "Developer tools", "");
-            addWrapperClass("mx_DevtoolsDialog_wrapper");
-            expect(box("[data-testid=body]").width).toBe(752);
         });
     });
 
