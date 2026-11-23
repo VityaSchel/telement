@@ -1,0 +1,880 @@
+{
+    "auth|change_password_action": {
+        "upstream": "Change Password",
+        "telement": "Change password"
+    },
+    "auth|change_password_new_label": {
+        "upstream": "New Password",
+        "telement": "New password"
+    },
+    "auth|country_dropdown": {
+        "upstream": "Country Dropdown",
+        "telement": "Country dropdown"
+    },
+    "auth|register_action": {
+        "upstream": "Create Account",
+        "telement": "Create account"
+    },
+    "auth|registration_successful": {
+        "upstream": "Registration Successful",
+        "telement": "Registration successful"
+    },
+    "auth|server_picker_title_default": {
+        "upstream": "Server Options",
+        "telement": "Server options"
+    },
+    "auth|set_email|verification_pending_title": {
+        "upstream": "Verification Pending",
+        "telement": "Verification pending"
+    },
+    "auth|sign_in_or_register": {
+        "upstream": "Sign In or Create Account",
+        "telement": "Sign in or create account"
+    },
+    "auth|signing_in": {
+        "upstream": "Signing In…",
+        "telement": "Signing in…"
+    },
+    "auth|sso": {
+        "upstream": "Single Sign On",
+        "telement": "Single sign-on"
+    },
+    "auth|sso_complete_in_browser_dialog_title": {
+        "upstream": "Go to your browser to complete Sign In",
+        "telement": "Go to your browser to complete sign in"
+    },
+    "auth|uia|sso_body": {
+        "upstream": "Confirm adding this email address by using Single Sign On to prove your identity.",
+        "telement": "Confirm adding this email address by using single sign-on to prove your identity."
+    },
+    "auth|uia|sso_preauth_body": {
+        "upstream": "To continue, use Single Sign On to prove your identity.",
+        "telement": "To continue, use single sign-on to prove your identity."
+    },
+    "auth|uia|sso_title": {
+        "upstream": "Use Single Sign On to continue",
+        "telement": "Use single sign-on to continue"
+    },
+    "common|access_token": {
+        "upstream": "Access Token",
+        "telement": "Access token"
+    },
+    "common|all_chats": {
+        "upstream": "All Chats",
+        "telement": "All chats"
+    },
+    "common|qr_code": {
+        "upstream": "QR Code",
+        "telement": "QR code"
+    },
+    "common|secure_backup": {
+        "upstream": "Secure Backup",
+        "telement": "Secure backup"
+    },
+    "common|setup_secure_messages": {
+        "upstream": "Set up Secure Messages",
+        "telement": "Set up secure messages"
+    },
+    "common|unnamed_room": {
+        "upstream": "Unnamed Room",
+        "telement": "Unnamed room"
+    },
+    "common|unnamed_space": {
+        "upstream": "Unnamed Space",
+        "telement": "Unnamed space"
+    },
+    "composer|autocomplete|command_a11y": {
+        "upstream": "Command Autocomplete",
+        "telement": "Command autocomplete"
+    },
+    "composer|autocomplete|emoji_a11y": {
+        "upstream": "Emoji Autocomplete",
+        "telement": "Emoji autocomplete"
+    },
+    "composer|autocomplete|notification_a11y": {
+        "upstream": "Notification Autocomplete",
+        "telement": "Notification autocomplete"
+    },
+    "composer|autocomplete|notification_description": {
+        "upstream": "Room Notification",
+        "telement": "Room notification"
+    },
+    "composer|autocomplete|room_a11y": {
+        "upstream": "Room Autocomplete",
+        "telement": "Room autocomplete"
+    },
+    "composer|autocomplete|space_a11y": {
+        "upstream": "Space Autocomplete",
+        "telement": "Space autocomplete"
+    },
+    "composer|autocomplete|user_a11y": {
+        "upstream": "User Autocomplete",
+        "telement": "User autocomplete"
+    },
+    "composer|poll_button_no_perms_title": {
+        "upstream": "Permission Required",
+        "telement": "Permission required"
+    },
+    "composer|voice_message_button": {
+        "upstream": "Voice Message",
+        "telement": "Voice message"
+    },
+    "devtools|active_widgets": {
+        "upstream": "Active Widgets",
+        "telement": "Active widgets"
+    },
+    "devtools|client_versions": {
+        "upstream": "Client Versions",
+        "telement": "Client versions"
+    },
+    "devtools|crypto|key_storage": {
+        "upstream": "Key Storage",
+        "telement": "Key storage"
+    },
+    "devtools|developer_tools": {
+        "upstream": "Developer Tools",
+        "telement": "Developer tools"
+    },
+    "devtools|event_content": {
+        "upstream": "Event Content",
+        "telement": "Event content"
+    },
+    "devtools|event_type": {
+        "upstream": "Event Type",
+        "telement": "Event type"
+    },
+    "devtools|room_notifications_thread_id": {
+        "upstream": "Thread Id: ",
+        "telement": "Thread ID: "
+    },
+    "devtools|server_versions": {
+        "upstream": "Server Versions",
+        "telement": "Server versions"
+    },
+    "devtools|state_key": {
+        "upstream": "State Key",
+        "telement": "State key"
+    },
+    "devtools|sticky_duration": {
+        "upstream": "Sticky Duration (ms)",
+        "telement": "Sticky duration (ms)"
+    },
+    "devtools|sticky_key": {
+        "upstream": "Sticky Key",
+        "telement": "Sticky key"
+    },
+    "devtools|thread_root_id": {
+        "upstream": "Thread Root ID: %(threadRootId)s",
+        "telement": "Thread root ID: %(threadRootId)s"
+    },
+    "download_completed": {
+        "upstream": "Download Completed",
+        "telement": "Download completed"
+    },
+    "emoji|category_animals_nature": {
+        "upstream": "Animals & Nature",
+        "telement": "Animals & nature"
+    },
+    "emoji|category_food_drink": {
+        "upstream": "Food & Drink",
+        "telement": "Food & drink"
+    },
+    "emoji|category_frequently_used": {
+        "upstream": "Frequently Used",
+        "telement": "Frequently used"
+    },
+    "emoji|category_smileys_people": {
+        "upstream": "Smileys & People",
+        "telement": "Smileys & people"
+    },
+    "emoji|category_travel_places": {
+        "upstream": "Travel & Places",
+        "telement": "Travel & places"
+    },
+    "emoji|quick_reactions": {
+        "upstream": "Quick Reactions",
+        "telement": "Quick reactions"
+    },
+    "encryption|new_recovery_method_detected|description_1": {
+        "upstream": "A new Security Phrase and key for Secure Messages have been detected.",
+        "telement": "A new security phrase and key for secure messages have been detected."
+    },
+    "encryption|new_recovery_method_detected|title": {
+        "upstream": "New Recovery Method",
+        "telement": "New recovery method"
+    },
+    "encryption|recovery_method_removed|description_1": {
+        "upstream": "This device has detected that your Security Phrase and key for Secure Messages have been removed.",
+        "telement": "This device has detected that your security phrase and key for secure messages have been removed."
+    },
+    "encryption|recovery_method_removed|description_2": {
+        "upstream": "If you did this accidentally, you can setup Secure Messages on this device which will re-encrypt this device's message history with a new recovery method.",
+        "telement": "If you did this accidentally, you can setup secure messages on this device which will re-encrypt this device's message history with a new recovery method."
+    },
+    "encryption|recovery_method_removed|title": {
+        "upstream": "Recovery Method Removed",
+        "telement": "Recovery method removed"
+    },
+    "encryption|set_up_toast_title": {
+        "upstream": "Set up Secure Backup",
+        "telement": "Set up secure backup"
+    },
+    "encryption|verification|complete_action": {
+        "upstream": "Got It",
+        "telement": "Got it"
+    },
+    "encryption|verification|incoming_sas_dialog_title": {
+        "upstream": "Incoming Verification Request",
+        "telement": "Incoming verification request"
+    },
+    "encryption|verification|manual|no_userid": {
+        "upstream": "Unable to verify device - cannot find our User ID",
+        "telement": "Unable to verify device - cannot find our user ID"
+    },
+    "encryption|verification|request_toast_accept_user": {
+        "upstream": "Verify User",
+        "telement": "Verify user"
+    },
+    "encryption|verification|request_toast_start_verification": {
+        "upstream": "Start Verification",
+        "telement": "Start verification"
+    },
+    "encryption|verification|start_button": {
+        "upstream": "Start Verification",
+        "telement": "Start verification"
+    },
+    "encryption|verification|verification_dialog_title_user": {
+        "upstream": "Verification Request",
+        "telement": "Verification request"
+    },
+    "error|mau": {
+        "upstream": "This service has hit its Monthly Active User limit.",
+        "telement": "This service has hit its monthly active user limit."
+    },
+    "export_chat|cancelled": {
+        "upstream": "Export Cancelled",
+        "telement": "Export cancelled"
+    },
+    "export_chat|current_timeline": {
+        "upstream": "Current Timeline",
+        "telement": "Current timeline"
+    },
+    "export_chat|file_attached": {
+        "upstream": "File Attached",
+        "telement": "File attached"
+    },
+    "export_chat|html_title": {
+        "upstream": "Exported Data",
+        "telement": "Exported data"
+    },
+    "export_chat|include_attachments": {
+        "upstream": "Include Attachments",
+        "telement": "Include attachments"
+    },
+    "export_chat|size_limit": {
+        "upstream": "Size Limit",
+        "telement": "Size limit"
+    },
+    "export_chat|successful": {
+        "upstream": "Export Successful",
+        "telement": "Export successful"
+    },
+    "export_chat|text": {
+        "upstream": "Plain Text",
+        "telement": "Plain text"
+    },
+    "export_chat|title": {
+        "upstream": "Export Chat",
+        "telement": "Export chat"
+    },
+    "invite|recents_section": {
+        "upstream": "Recent Conversations",
+        "telement": "Recent conversations"
+    },
+    "invite|suggestions_section": {
+        "upstream": "Recently Direct Messaged",
+        "telement": "Recently direct messaged"
+    },
+    "invite|transfer_user_directory_tab": {
+        "upstream": "User Directory",
+        "telement": "User directory"
+    },
+    "keyboard|category_room_list": {
+        "upstream": "Room List",
+        "telement": "Room list"
+    },
+    "keyboard|composer_toggle_bold": {
+        "upstream": "Toggle Bold",
+        "telement": "Toggle bold"
+    },
+    "keyboard|composer_toggle_code_block": {
+        "upstream": "Toggle Code Block",
+        "telement": "Toggle code block"
+    },
+    "keyboard|composer_toggle_italics": {
+        "upstream": "Toggle Italics",
+        "telement": "Toggle italics"
+    },
+    "keyboard|composer_toggle_link": {
+        "upstream": "Toggle Link",
+        "telement": "Toggle link"
+    },
+    "keyboard|composer_toggle_quote": {
+        "upstream": "Toggle Quote",
+        "telement": "Toggle quote"
+    },
+    "keyboard|go_home_view": {
+        "upstream": "Go to Home View",
+        "telement": "Go to Home view"
+    },
+    "labs|group_voip": {
+        "upstream": "Voice & Video",
+        "telement": "Voice & video"
+    },
+    "labs|location_share_live": {
+        "upstream": "Live Location Sharing",
+        "telement": "Live location sharing"
+    },
+    "labs|notification_settings": {
+        "upstream": "New Notification Settings",
+        "telement": "New notification settings"
+    },
+    "labs|notification_settings_beta_title": {
+        "upstream": "Notification Settings",
+        "telement": "Notification settings"
+    },
+    "labs|url_preview_bundle": {
+        "upstream": "URL Preview Bundle (MSC4095)",
+        "telement": "URL preview bundle (MSC4095)"
+    },
+    "language_dropdown_label": {
+        "upstream": "Language Dropdown",
+        "telement": "Language dropdown"
+    },
+    "lightbox|rotate_left": {
+        "upstream": "Rotate Left",
+        "telement": "Rotate left"
+    },
+    "lightbox|rotate_right": {
+        "upstream": "Rotate Right",
+        "telement": "Rotate right"
+    },
+    "location_sharing|share_type_pin": {
+        "upstream": "Drop a Pin",
+        "telement": "Drop a pin"
+    },
+    "member_list|count": {
+        "upstream": {
+            "one": "%(count)s Member",
+            "other": "%(count)s Members"
+        },
+        "telement": {
+            "one": "%(count)s member",
+            "other": "%(count)s members"
+        }
+    },
+    "onboarding|create_room": {
+        "upstream": "Create a Group Chat",
+        "telement": "Create a group chat"
+    },
+    "onboarding|explore_rooms": {
+        "upstream": "Explore Public Rooms",
+        "telement": "Explore public rooms"
+    },
+    "onboarding|send_dm": {
+        "upstream": "Send a Direct Message",
+        "telement": "Send a direct message"
+    },
+    "poll|create_poll_action": {
+        "upstream": "Create Poll",
+        "telement": "Create poll"
+    },
+    "poll|end_title": {
+        "upstream": "End Poll",
+        "telement": "End poll"
+    },
+    "redact|confirm_button": {
+        "upstream": "Confirm Removal",
+        "telement": "Confirm removal"
+    },
+    "restore_key_backup_dialog|enter_key_description": {
+        "upstream": "Access your secure message history and set up secure messaging by entering your Recovery Key.",
+        "telement": "Access your secure message history and set up secure messaging by entering your recovery key."
+    },
+    "restore_key_backup_dialog|enter_key_title": {
+        "upstream": "Enter Recovery Key",
+        "telement": "Enter recovery key"
+    },
+    "restore_key_backup_dialog|enter_phrase_description": {
+        "upstream": "Access your secure message history and set up secure messaging by entering your Security Phrase.",
+        "telement": "Access your secure message history and set up secure messaging by entering your security phrase."
+    },
+    "restore_key_backup_dialog|enter_phrase_title": {
+        "upstream": "Enter Security Phrase",
+        "telement": "Enter security phrase"
+    },
+    "restore_key_backup_dialog|incorrect_security_phrase_dialog": {
+        "upstream": "Backup could not be decrypted with this Security Phrase: please verify that you entered the correct Security Phrase.",
+        "telement": "Backup could not be decrypted with this security phrase: please verify that you entered the correct security phrase."
+    },
+    "restore_key_backup_dialog|incorrect_security_phrase_title": {
+        "upstream": "Incorrect Security Phrase",
+        "telement": "Incorrect security phrase"
+    },
+    "restore_key_backup_dialog|key_forgotten_text": {
+        "upstream": "If you've forgotten your Recovery Key you can <button>set up new recovery options</button>",
+        "telement": "If you've forgotten your recovery key you can <button>set up new recovery options</button>"
+    },
+    "restore_key_backup_dialog|key_is_invalid": {
+        "upstream": "Not a valid Recovery Key",
+        "telement": "Not a valid recovery key"
+    },
+    "restore_key_backup_dialog|key_is_valid": {
+        "upstream": "This looks like a valid Recovery Key!",
+        "telement": "This looks like a valid recovery key!"
+    },
+    "restore_key_backup_dialog|phrase_forgotten_text": {
+        "upstream": "If you've forgotten your Security Phrase you can <button1>use your Recovery Key</button1> or <button2>set up new recovery options</button2>",
+        "telement": "If you've forgotten your security phrase you can <button1>use your recovery key</button1> or <button2>set up new recovery options</button2>"
+    },
+    "restore_key_backup_dialog|recovery_key_mismatch_description": {
+        "upstream": "Backup could not be decrypted with this Recovery Key: please verify that you entered the correct Recovery Key.",
+        "telement": "Backup could not be decrypted with this recovery key: please verify that you entered the correct recovery key."
+    },
+    "restore_key_backup_dialog|recovery_key_mismatch_title": {
+        "upstream": "Recovery Key mismatch",
+        "telement": "Recovery key mismatch"
+    },
+    "right_panel|pinned_messages|header": {
+        "upstream": {
+            "one": "1 Pinned message",
+            "other": "%(count)s Pinned messages",
+            "zero": "Pinned messages"
+        },
+        "telement": {
+            "one": "1 pinned message",
+            "other": "%(count)s pinned messages",
+            "zero": "Pinned messages"
+        }
+    },
+    "room_list|room_options": {
+        "upstream": "Room Options",
+        "telement": "Room options"
+    },
+    "room_list|room|more_options": {
+        "upstream": "More Options",
+        "telement": "More options"
+    },
+    "room_settings|advanced|upgrade_dialog_title": {
+        "upstream": "Upgrade Room Version",
+        "telement": "Upgrade room version"
+    },
+    "room_settings|general|aliases_section": {
+        "upstream": "Room Addresses",
+        "telement": "Room addresses"
+    },
+    "room_settings|general|leave_space": {
+        "upstream": "Leave Space",
+        "telement": "Leave space"
+    },
+    "room_settings|general|local_aliases_section": {
+        "upstream": "Local Addresses",
+        "telement": "Local addresses"
+    },
+    "room_settings|general|name_field_label": {
+        "upstream": "Room Name",
+        "telement": "Room name"
+    },
+    "room_settings|general|published_aliases_section": {
+        "upstream": "Published Addresses",
+        "telement": "Published addresses"
+    },
+    "room_settings|general|save": {
+        "upstream": "Save Changes",
+        "telement": "Save changes"
+    },
+    "room_settings|general|topic_field_label": {
+        "upstream": "Room Topic",
+        "telement": "Room topic"
+    },
+    "room_settings|permissions|muted_users_section": {
+        "upstream": "Muted Users",
+        "telement": "Muted users"
+    },
+    "room_settings|permissions|privileged_users_section": {
+        "upstream": "Privileged Users",
+        "telement": "Privileged users"
+    },
+    "room_settings|permissions|title": {
+        "upstream": "Roles & Permissions",
+        "telement": "Roles & permissions"
+    },
+    "room_settings|security|title": {
+        "upstream": "Security & Privacy",
+        "telement": "Security & privacy"
+    },
+    "room_settings|visibility|title": {
+        "upstream": "Security & Privacy",
+        "telement": "Security & privacy"
+    },
+    "room|join_button_account": {
+        "upstream": "Sign Up",
+        "telement": "Sign up"
+    },
+    "room|status_bar|monthly_user_limit_reached_title": {
+        "upstream": "Your message wasn't sent because this service has hit its Monthly Active User Limit.",
+        "telement": "Your message wasn't sent because this service has hit its monthly active user limit."
+    },
+    "settings|emoji_autocomplete": {
+        "upstream": "Enable Emoji suggestions while typing",
+        "telement": "Enable emoji suggestions while typing"
+    },
+    "settings|general|add_email_dialog_title": {
+        "upstream": "Add Email Address",
+        "telement": "Add email address"
+    },
+    "settings|general|add_msisdn_confirm_sso_button": {
+        "upstream": "Confirm adding this phone number by using Single Sign On to prove your identity.",
+        "telement": "Confirm adding this phone number by using single sign-on to prove your identity."
+    },
+    "settings|general|add_msisdn_dialog_title": {
+        "upstream": "Add Phone Number",
+        "telement": "Add phone number"
+    },
+    "settings|general|deactivate_confirm_body_sso": {
+        "upstream": "Confirm your account deactivation by using Single Sign On to prove your identity.",
+        "telement": "Confirm your account deactivation by using single sign-on to prove your identity."
+    },
+    "settings|general|deactivate_section": {
+        "upstream": "Deactivate Account",
+        "telement": "Deactivate account"
+    },
+    "settings|general|discovery_needs_terms": {
+        "upstream": "Agree to the identity server (%(serverName)s) Terms of Service to allow yourself to be discoverable by email address or phone number.",
+        "telement": "Agree to the identity server (%(serverName)s) terms of service to allow yourself to be discoverable by email address or phone number."
+    },
+    "settings|general|display_name": {
+        "upstream": "Display Name",
+        "telement": "Display name"
+    },
+    "settings|general|email_address_label": {
+        "upstream": "Email Address",
+        "telement": "Email address"
+    },
+    "settings|general|error_invalid_email": {
+        "upstream": "Invalid Email Address",
+        "telement": "Invalid email address"
+    },
+    "settings|general|msisdn_label": {
+        "upstream": "Phone Number",
+        "telement": "Phone number"
+    },
+    "settings|key_backup|setup_secure_backup|backup_setup_success_title": {
+        "upstream": "Secure Backup successful",
+        "telement": "Secure backup successful"
+    },
+    "settings|key_backup|setup_secure_backup|confirm_security_phrase": {
+        "upstream": "Confirm your Security Phrase",
+        "telement": "Confirm your security phrase"
+    },
+    "settings|key_backup|setup_secure_backup|enter_phrase_description": {
+        "upstream": "Enter a Security Phrase only you know, as it's used to safeguard your data. To be secure, you shouldn't re-use your account password.",
+        "telement": "Enter a security phrase only you know, as it's used to safeguard your data. To be secure, you shouldn't re-use your account password."
+    },
+    "settings|key_backup|setup_secure_backup|enter_phrase_title": {
+        "upstream": "Enter a Security Phrase",
+        "telement": "Enter a security phrase"
+    },
+    "settings|key_backup|setup_secure_backup|enter_phrase_to_confirm": {
+        "upstream": "Enter your Security Phrase a second time to confirm it.",
+        "telement": "Enter your security phrase a second time to confirm it."
+    },
+    "settings|key_backup|setup_secure_backup|generate_security_key_description": {
+        "upstream": "We'll generate a Recovery Key for you to store somewhere safe, like a password manager or a safe.",
+        "telement": "We'll generate a recovery key for you to store somewhere safe, like a password manager or a safe."
+    },
+    "settings|key_backup|setup_secure_backup|generate_security_key_title": {
+        "upstream": "Generate a Recovery Key",
+        "telement": "Generate a recovery key"
+    },
+    "settings|key_backup|setup_secure_backup|phrase_strong_enough": {
+        "upstream": "Great! This Security Phrase looks strong enough.",
+        "telement": "Great! This security phrase looks strong enough."
+    },
+    "settings|key_backup|setup_secure_backup|security_key_safety_reminder": {
+        "upstream": "Store your Recovery Key somewhere safe, like a password manager or a safe, as it's used to safeguard your encrypted data.",
+        "telement": "Store your recovery key somewhere safe, like a password manager or a safe, as it's used to safeguard your encrypted data."
+    },
+    "settings|key_backup|setup_secure_backup|settings_reminder": {
+        "upstream": "You can also set up Secure Backup & manage your keys in Settings.",
+        "telement": "You can also set up secure backup & manage your keys in Settings."
+    },
+    "settings|key_backup|setup_secure_backup|title_confirm_phrase": {
+        "upstream": "Confirm Security Phrase",
+        "telement": "Confirm security phrase"
+    },
+    "settings|key_backup|setup_secure_backup|title_save_key": {
+        "upstream": "Save your Recovery Key",
+        "telement": "Save your recovery key"
+    },
+    "settings|key_backup|setup_secure_backup|title_set_phrase": {
+        "upstream": "Set a Security Phrase",
+        "telement": "Set a security phrase"
+    },
+    "settings|key_backup|setup_secure_backup|use_phrase_only_you_know": {
+        "upstream": "Use a secret phrase only you know, and optionally save a Recovery Key to use for backup.",
+        "telement": "Use a secret phrase only you know, and optionally save a recovery key to use for backup."
+    },
+    "settings|labs_mjolnir|dialog_title": {
+        "upstream": "<strong>Settings:</strong> Ignored Users",
+        "telement": "<strong>Settings:</strong> Ignored users"
+    },
+    "settings|notifications|default_setting_section": {
+        "upstream": "I want to be notified for (Default Setting)",
+        "telement": "I want to be notified for (default setting)"
+    },
+    "settings|notifications|error_title": {
+        "upstream": "Unable to enable Notifications",
+        "telement": "Unable to enable notifications"
+    },
+    "settings|notifications|labs_notice_prompt": {
+        "upstream": "<strong>Update:</strong>We’ve simplified Notifications Settings to make options easier to find. Some custom settings you’ve chosen in the past are not shown here, but they’re still active. If you proceed, some of your settings may change. <a>Learn more</a>",
+        "telement": "<strong>Update:</strong>We’ve simplified Notifications settings to make options easier to find. Some custom settings you’ve chosen in the past are not shown here, but they’re still active. If you proceed, some of your settings may change. <a>Learn more</a>"
+    },
+    "settings|notifications|mentions_keywords": {
+        "upstream": "Mentions and Keywords",
+        "telement": "Mentions and keywords"
+    },
+    "settings|notifications|mentions_keywords_only": {
+        "upstream": "Mentions and Keywords only",
+        "telement": "Mentions and keywords only"
+    },
+    "settings|notifications|people_mentions_keywords": {
+        "upstream": "People, Mentions and Keywords",
+        "telement": "People, mentions and keywords"
+    },
+    "settings|notifications|quick_actions_section": {
+        "upstream": "Quick Actions",
+        "telement": "Quick actions"
+    },
+    "settings|notifications|voip": {
+        "upstream": "Audio and Video calls",
+        "telement": "Audio and video calls"
+    },
+    "settings|preferences|rm_lifetime": {
+        "upstream": "Read Marker lifetime (ms)",
+        "telement": "Read marker lifetime (ms)"
+    },
+    "settings|preferences|rm_lifetime_offscreen": {
+        "upstream": "Read Marker off-screen lifetime (ms)",
+        "telement": "Read marker off-screen lifetime (ms)"
+    },
+    "settings|replace_plain_emoji": {
+        "upstream": "Automatically replace plain text Emoji",
+        "telement": "Automatically replace plain text emoji"
+    },
+    "settings|security|dialog_title": {
+        "upstream": "<strong>Settings:</strong> Security & Privacy",
+        "telement": "<strong>Settings:</strong> Security & privacy"
+    },
+    "settings|security|e2ee_default_disabled_warning": {
+        "upstream": "Your account provider has disabled end-to-end encryption by default in private rooms & Direct Messages.",
+        "telement": "Your account provider has disabled end-to-end encryption by default in private rooms & direct messages."
+    },
+    "settings|sessions|confirm_sign_out_sso": {
+        "upstream": {
+            "one": "Confirm removing this device by using Single Sign On to prove your identity.",
+            "other": "Confirm removing these devices by using Single Sign On to prove your identity."
+        },
+        "telement": {
+            "one": "Confirm removing this device by using single sign-on to prove your identity.",
+            "other": "Confirm removing these devices by using single sign-on to prove your identity."
+        }
+    },
+    "settings|voip|allow_p2p": {
+        "upstream": "Allow Peer-to-Peer for 1:1 calls",
+        "telement": "Allow peer-to-peer for 1:1 calls"
+    },
+    "settings|voip|audio_input_empty": {
+        "upstream": "No Microphones detected",
+        "telement": "No microphones detected"
+    },
+    "settings|voip|audio_output": {
+        "upstream": "Audio Output",
+        "telement": "Audio output"
+    },
+    "settings|voip|audio_output_empty": {
+        "upstream": "No Audio Outputs detected",
+        "telement": "No audio outputs detected"
+    },
+    "settings|voip|dialog_title": {
+        "upstream": "<strong>Settings:</strong> Voice & Video",
+        "telement": "<strong>Settings:</strong> Voice & video"
+    },
+    "settings|voip|title": {
+        "upstream": "Voice & Video",
+        "telement": "Voice & video"
+    },
+    "settings|voip|video_input_empty": {
+        "upstream": "No Webcams detected",
+        "telement": "No webcams detected"
+    },
+    "setting|help_about|dialog_title": {
+        "upstream": "<strong>Settings:</strong> Help & About",
+        "telement": "<strong>Settings:</strong> Help & about"
+    },
+    "setting|help_about|title": {
+        "upstream": "Help & About",
+        "telement": "Help & about"
+    },
+    "share|title_link": {
+        "upstream": "Share Link",
+        "telement": "Share link"
+    },
+    "share|title_message": {
+        "upstream": "Share Room Message",
+        "telement": "Share room message"
+    },
+    "share|title_room": {
+        "upstream": "Share Room",
+        "telement": "Share room"
+    },
+    "share|title_user": {
+        "upstream": "Share User",
+        "telement": "Share user"
+    },
+    "slash_command|devtools": {
+        "upstream": "Opens the Developer Tools dialog",
+        "telement": "Opens the developer tools dialog"
+    },
+    "slash_command|help_dialog_title": {
+        "upstream": "Command Help",
+        "telement": "Command help"
+    },
+    "slash_command|unknown_command": {
+        "upstream": "Unknown Command",
+        "telement": "Unknown command"
+    },
+    "space|add_existing_room_space|dm_heading": {
+        "upstream": "Direct Messages",
+        "telement": "Direct messages"
+    },
+    "spotlight_dialog|count_of_members": {
+        "upstream": {
+            "one": "%(count)s Member",
+            "other": "%(count)s Members"
+        },
+        "telement": {
+            "one": "%(count)s member",
+            "other": "%(count)s members"
+        }
+    },
+    "spotlight_dialog|search_dialog": {
+        "upstream": "Search Dialog",
+        "telement": "Search dialog"
+    },
+    "status|set_status|choose_emoji": {
+        "upstream": "Choose Emoji",
+        "telement": "Choose emoji"
+    },
+    "status|set_status|focus_time": {
+        "upstream": "Focus Time",
+        "telement": "Focus time"
+    },
+    "terms|tac_title": {
+        "upstream": "Terms and Conditions",
+        "telement": "Terms and conditions"
+    },
+    "terms|tos": {
+        "upstream": "Terms of Service",
+        "telement": "Terms of service"
+    },
+    "update_room_access_modal|revert_access_description": {
+        "upstream": "(This can be reverted to the previous value in the Room Settings: <b>Security & Privacy</b> / <b>Access</b>)",
+        "telement": "(This can be reverted to the previous value in the Room settings: <b>Security & privacy</b> / <b>Access</b>)"
+    },
+    "update|release_notes_toast_title": {
+        "upstream": "What's New",
+        "telement": "What's new"
+    },
+    "upload_failed_title": {
+        "upstream": "Upload Failed",
+        "telement": "Upload failed"
+    },
+    "upload_file|cancel_all_button": {
+        "upstream": "Cancel All",
+        "telement": "Cancel all"
+    },
+    "upload_file|error_title": {
+        "upstream": "Upload Error",
+        "telement": "Upload error"
+    },
+    "user_info|admin_tools_section": {
+        "upstream": "Admin Tools",
+        "telement": "Admin tools"
+    },
+    "user_info|verify_button": {
+        "upstream": "Verify User",
+        "telement": "Verify user"
+    },
+    "user_menu|open_security": {
+        "upstream": "Security & Privacy",
+        "telement": "Security & privacy"
+    },
+    "voip|answered_elsewhere": {
+        "upstream": "Answered Elsewhere",
+        "telement": "Answered elsewhere"
+    },
+    "voip|call_failed": {
+        "upstream": "Call Failed",
+        "telement": "Call failed"
+    },
+    "voip|default_device": {
+        "upstream": "Default Device",
+        "telement": "Default device"
+    },
+    "voip|jitsi_call": {
+        "upstream": "Jitsi Conference",
+        "telement": "Jitsi conference"
+    },
+    "voip|legacy_call": {
+        "upstream": "Legacy Call",
+        "telement": "Legacy call"
+    },
+    "voip|no_permission_conference": {
+        "upstream": "Permission Required",
+        "telement": "Permission required"
+    },
+    "voip|too_many_calls": {
+        "upstream": "Too Many Calls",
+        "telement": "Too many calls"
+    },
+    "voip|transfer_failed": {
+        "upstream": "Transfer Failed",
+        "telement": "Transfer failed"
+    },
+    "voip|user_busy": {
+        "upstream": "User Busy",
+        "telement": "User busy"
+    },
+    "widget|capabilities_dialog|decline_all_permission": {
+        "upstream": "Decline All",
+        "telement": "Decline all"
+    },
+    "widget|error_loading": {
+        "upstream": "Error loading Widget",
+        "telement": "Error loading widget"
+    },
+    "widget|modal_title_default": {
+        "upstream": "Modal Widget",
+        "telement": "Modal widget"
+    },
+    "widget|no_name": {
+        "upstream": "Unknown App",
+        "telement": "Unknown app"
+    },
+    "zxcvbn|warnings|pwned": {
+        "upstream": "Your password was exposed by a data breach on the Internet.",
+        "telement": "Your password was exposed by a data breach on the internet."
+    }
+}

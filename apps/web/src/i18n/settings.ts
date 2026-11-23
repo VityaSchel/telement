@@ -14,7 +14,7 @@ import { SettingLevel } from "../settings/SettingLevel";
 import { getLanguageRetry } from "./languages";
 import { getLanguageFromBrowser } from "./browser";
 import { registerCustomTranslations } from "./custom";
-import { registerSentenceCaseOverrides } from "../telement/i18n/sentenceCase";
+import { registerEnglishOverrides } from "../telement/i18n/englishOverrides";
 
 export function getUserLanguage(): string {
     const language = SettingsStore.getValue("language", null, /*excludeDefault:*/ true);
@@ -54,6 +54,6 @@ export async function setLanguage(...preferredLangs: string[]): Promise<void> {
         registerTranslations("en", fallbackLanguageData);
     }
 
-    registerSentenceCaseOverrides();
+    registerEnglishOverrides();
     await registerCustomTranslations();
 }

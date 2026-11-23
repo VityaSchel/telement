@@ -9,7 +9,7 @@ Please see LICENSE files in the repository root for full details.
 
 import { afterEach, describe, expect, it } from "vitest";
 import fetchMock from "@fetch-mock/vitest";
-import { get, merge } from "lodash";
+import { get, isEqual, merge } from "lodash";
 import { KEY_SEPARATOR, setMissingEntryGenerator } from "@element-hq/web-shared-components";
 import { type Translation } from "matrix-web-i18n";
 
@@ -22,7 +22,7 @@ import SdkConfig from "../../SdkConfig";
 import { _t } from "../../languageHandler";
 import { setLanguage } from "../../i18n/settings";
 import { setupTranslationOverridesForTests } from "../../i18n/__mocks__";
-import { SENTENCE_CASE_OVERRIDES } from "./sentenceCase";
+import { ENGLISH_OVERRIDES, type EnglishOverride } from "./englishOverrides";
 
 const upstreamEnglish = merge({}, webStrings, sharedComponentsStrings);
 
@@ -30,85 +30,105 @@ function forms(translation: Translation): Record<string, string> {
     return typeof translation === "string" ? { "": translation } : (translation as Record<string, string>);
 }
 
-/** The %(name)s placeholders and the <tag> markup of a text, sorted. */
-function substitutions(text: string): string[] {
-    return [...text.matchAll(/%\([^)]+\)s|<[^>]+>/g)].map(([match]) => match).sort();
+/** The %(name)s placeholders and the <tag> markup of every form of a text. */
+function substitutions(translation: Translation): Set<string> {
+    const texts = Object.values(forms(translation));
+    return new Set(texts.flatMap((text) => [...text.matchAll(/%\([^)]+\)s|<[^>]+>/g)].map(([match]) => match)));
 }
 
-/** The words of a text, ignoring letter case and whether words are joined by a space or a hyphen. */
-function wording(text: string): string {
-    return text.toLowerCase().replace(/[\s-]+/g, " ");
-}
-
-function findProblems(key: string, override: Translation): string[] {
+function findProblems(key: string, { upstream: recorded, telement }: EnglishOverride): string[] {
     if (key.startsWith("telement|")) return [`${key}: is Telement's own key, change its text in en_EN.json instead`];
 
     const upstream: Translation | undefined = get(upstreamEnglish, key.split(KEY_SEPARATOR));
     if (upstream === undefined) return [`${key}: no longer in upstream's en_EN.json`];
+    if (!isEqual(upstream, recorded)) {
+        return [
+            `${key}: upstream's English changed from ${JSON.stringify(recorded)} to ${JSON.stringify(upstream)}; ` +
+                `check the override against it, then record the new text as "upstream"`,
+        ];
+    }
 
     const upstreamForms = forms(upstream);
-    const overrideForms = forms(override);
+    const overrideForms = forms(telement);
     if (Object.keys(upstreamForms).sort().join() !== Object.keys(overrideForms).sort().join()) {
         return [`${key}: has plural forms ${JSON.stringify(Object.keys(upstreamForms))} upstream`];
     }
 
     const problems: string[] = [];
+    // The code passes only upstream's placeholders and tags; the override may leave some out but add none
+    const upstreamSubstitutions = substitutions(upstream);
+    const added = [...substitutions(telement)].filter((substitution) => !upstreamSubstitutions.has(substitution));
+    if (added.length > 0) {
+        problems.push(`${key}: uses ${added.join(", ")}, which upstream's ${JSON.stringify(upstream)} doesn't have`);
+    }
     for (const [form, text] of Object.entries(overrideForms)) {
-        const upstreamText = upstreamForms[form];
-        if (substitutions(text).join() !== substitutions(upstreamText).join()) {
-            problems.push(`${key}: placeholders or tags differ from upstream's "${upstreamText}"`);
-        } else if (wording(text) !== wording(upstreamText)) {
-            problems.push(`${key}: changes more than letter case of upstream's "${upstreamText}"`);
-        } else if (/^\p{Lu}/u.test(upstreamText) && !/^\p{Lu}/u.test(text)) {
+        if (/^\p{Lu}/u.test(upstreamForms[form]) && !/^\p{Lu}/u.test(text)) {
             problems.push(`${key}: starts "${text}" with a lower case letter`);
         }
     }
-    if (JSON.stringify(upstreamForms) === JSON.stringify(overrideForms)) {
+    if (isEqual(upstream, telement)) {
         problems.push(`${key}: upstream already says ${JSON.stringify(upstream)}, remove the override`);
     }
     return problems;
 }
 
-describe("SENTENCE_CASE_OVERRIDES", () => {
+describe("ENGLISH_OVERRIDES", () => {
     // An upstream merge that renames, rewords or removes a string makes its override stale
-    it("only changes the letter case of strings upstream still has", () => {
-        const problems = Object.entries(SENTENCE_CASE_OVERRIDES).flatMap(([key, text]) => findProblems(key, text));
+    it("only overrides strings upstream still writes as they were when the override was written", () => {
+        const problems = Object.entries(ENGLISH_OVERRIDES).flatMap(([key, override]) => findProblems(key, override));
         expect(problems).toEqual([]);
     });
 
     it("explains what is wrong with an override", () => {
-        expect(findProblems("room_settings|security|title", "Security & privacy")).toEqual([]);
-        expect(findProblems("room_settings|security|gone", "Gone")).toEqual([
+        const security = "room_settings|security|title";
+        expect(findProblems(security, { upstream: "Security & Privacy", telement: "Security & privacy" })).toEqual([]);
+        expect(findProblems(security, { upstream: "Security & Privacy", telement: "Privacy and security" })).toEqual(
+            [],
+        );
+        expect(findProblems("room_settings|security|gone", { upstream: "Gone", telement: "Gone" })).toEqual([
             "room_settings|security|gone: no longer in upstream's en_EN.json",
         ]);
-        expect(findProblems("room_settings|security|title", "Privacy & security")).toEqual([
-            `room_settings|security|title: changes more than letter case of upstream's "Security & Privacy"`,
+        expect(findProblems(security, { upstream: "Security", telement: "Security" })).toEqual([
+            `room_settings|security|title: upstream's English changed from "Security" to "Security & Privacy"; ` +
+                `check the override against it, then record the new text as "upstream"`,
         ]);
-        expect(findProblems("room_settings|security|title", "security & privacy")).toEqual([
+        expect(findProblems(security, { upstream: "Security & Privacy", telement: "security & privacy" })).toEqual([
             `room_settings|security|title: starts "security & privacy" with a lower case letter`,
         ]);
-        expect(findProblems("member_list|count", { one: "%(n)s member", other: "%(count)s members" })).toEqual([
-            `member_list|count: placeholders or tags differ from upstream's "%(count)s Member"`,
+
+        const count = "member_list|count";
+        const countUpstream = { one: "%(count)s Member", other: "%(count)s Members" };
+        expect(
+            findProblems(count, { upstream: countUpstream, telement: { one: "1 member", other: "%(count)s" } }),
+        ).toEqual([]);
+        expect(
+            findProblems(count, {
+                upstream: countUpstream,
+                telement: { one: "%(n)s member", other: "<b>%(count)s</b>" },
+            }),
+        ).toEqual([
+            `member_list|count: uses %(n)s, <b>, </b>, which upstream's ` +
+                `{"one":"%(count)s Member","other":"%(count)s Members"} doesn't have`,
         ]);
-        expect(findProblems("member_list|count", "%(count)s members")).toEqual([
+        expect(findProblems(count, { upstream: countUpstream, telement: "%(count)s members" })).toEqual([
             `member_list|count: has plural forms ["one","other"] upstream`,
         ]);
-        expect(findProblems("common|rooms", "Rooms")).toEqual([
+        expect(findProblems("common|rooms", { upstream: "Rooms", telement: "Rooms" })).toEqual([
             `common|rooms: upstream already says "Rooms", remove the override`,
         ]);
-        expect(findProblems("telement|room_list|you", "you")).toEqual([
+        expect(findProblems("telement|room_list|you", { upstream: "You", telement: "you" })).toEqual([
             "telement|room_list|you: is Telement's own key, change its text in en_EN.json instead",
         ]);
     });
 });
 
-describe("registerSentenceCaseOverrides", () => {
+describe("registerEnglishOverrides", () => {
     afterEach(async () => {
         SdkConfig.reset();
         await setLanguage("en");
     });
 
-    it("shows the sentence case text in English", async () => {
+    it("shows Telement's text in English", async () => {
         await setLanguage("en");
         expect(_t("room_settings|security|title")).toBe("Security & privacy");
         expect(_t("settings|voip|title")).toBe("Voice & video");
@@ -137,7 +157,7 @@ describe("registerSentenceCaseOverrides", () => {
         expect(_t("member_list|count", { count: 2 })).toBe("2 Mitglieder");
     });
 
-    it("shows the sentence case text where a language falls back to English", async () => {
+    it("shows Telement's text where a language falls back to English", async () => {
         // The test setup shows a missing string as part of its key, which would stop the fallback to English
         setMissingEntryGenerator((key) => `missing translation: ${key}`);
         try {
@@ -148,7 +168,7 @@ describe("registerSentenceCaseOverrides", () => {
         }
     });
 
-    it("keeps the sentence case text after switching to another language and back", async () => {
+    it("keeps Telement's text after switching to another language and back", async () => {
         await setLanguage("de");
         await setLanguage("en");
         expect(_t("room_settings|security|title")).toBe("Security & privacy");
