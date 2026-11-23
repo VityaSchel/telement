@@ -185,6 +185,17 @@ describe("<AccountUserSettingsTab />", () => {
 
             expect(screen.getByText("Deactivate Account", { selector: "h2" }).parentElement!).toMatchSnapshot();
         });
+        it("should label the section once, with no Account management label under its heading", () => {
+            vi.spyOn(SettingsStore, "getValue").mockImplementation(
+                (settingName) => settingName === UIFeature.Deactivate,
+            );
+            render(getComponent());
+
+            expect(screen.getByRole("group", { name: "Deactivate Account" })).toContainElement(
+                screen.getByRole("button", { name: "Deactivate Account" }),
+            );
+            expect(screen.queryByText("Account management")).not.toBeInTheDocument();
+        });
         it("should display the deactivate account dialog when clicked", async () => {
             vi.spyOn(SettingsStore, "getValue").mockImplementation(
                 (settingName) => settingName === UIFeature.Deactivate,

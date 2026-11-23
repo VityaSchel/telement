@@ -73,8 +73,8 @@ interface ManagementSectionProps {
 const ManagementSection: React.FC<ManagementSectionProps> = ({ onDeactivateClicked }) => {
     return (
         <SettingsSection heading={_t("settings|general|deactivate_section")}>
+            {/* Telement: no "Account management" label under "Deactivate account", one label per group */}
             <SettingsSubsection
-                heading={_t("settings|general|account_management_section")}
                 data-testid="account-management-section"
                 description={_t("settings|general|deactivate_warning")}
             >

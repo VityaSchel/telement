@@ -22,6 +22,18 @@ Please see LICENSE files in the repository root for full details.
         @mixin settingsGroupLabel;
     }
 
+    /* Telement: one label per group, as in Telegram. When the section's first group has a label of its own (a
+       subsection's heading or a fieldset's legend, a form around it included), the section's heading isn't drawn, so
+       that two labels don't stack; it still names the section, a group labelled by it (SettingsSection) */
+    &:has(> .mx_SettingsSection_subSections > :first-child > .mx_SettingsSubsectionHeading),
+    &:has(> .mx_SettingsSection_subSections > form:first-child > :first-child > .mx_SettingsSubsectionHeading),
+    &:has(> .mx_SettingsSection_subSections > .mx_SettingsFieldset:first-child),
+    &:has(> .mx_SettingsSection_subSections > form:first-child > .mx_SettingsFieldset:first-child) {
+        > :is(h1, h2, h3, h4, h5, h6) {
+            display: none;
+        }
+    }
+
     &.mx_SettingsSection_newUi {
         display: flex;
         flex-direction: column;

@@ -108,10 +108,13 @@ exports[`<SecurityUserSettingsTab /> > renders security section 1`] = `
         </div>
       </form>
       <div
+        aria-labelledby="react-use-id-2"
         class="mx_SettingsSection"
+        role="group"
       >
         <h2
           class="mx_Heading_h3"
+          id="react-use-id-2"
         >
           Encryption
         </h2>
@@ -175,10 +178,13 @@ exports[`<SecurityUserSettingsTab /> > renders security section 1`] = `
         </div>
       </div>
       <div
+        aria-labelledby="react-use-id-3"
         class="mx_SettingsSection"
+        role="group"
       >
         <h2
           class="mx_Heading_h3"
+          id="react-use-id-3"
         >
           Privacy
         </h2>
@@ -220,7 +226,7 @@ exports[`<SecurityUserSettingsTab /> > renders security section 1`] = `
                     >
                       <label
                         class="_label"
-                        for="radix-react-use-id-2"
+                        for="radix-react-use-id-4"
                       >
                         Enter a new identity server
                       </label>
@@ -229,7 +235,7 @@ exports[`<SecurityUserSettingsTab /> > renders security section 1`] = `
                       >
                         <input
                           class="_control"
-                          id="radix-react-use-id-2"
+                          id="radix-react-use-id-4"
                           name="input"
                           placeholder=""
                           title=""
@@ -307,10 +313,13 @@ exports[`<SecurityUserSettingsTab /> > renders security section 1`] = `
         </div>
       </div>
       <div
+        aria-labelledby="react-use-id-5"
         class="mx_SettingsSection"
+        role="group"
       >
         <h2
           class="mx_Heading_h3"
+          id="react-use-id-5"
         >
           Advanced
         </h2>

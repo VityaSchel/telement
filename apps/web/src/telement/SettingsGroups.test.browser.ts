@@ -338,19 +338,74 @@ describe.each(THEMES.map(([theme]) => theme))("Settings groups in %s", (theme) =
         expect(box("#time-label").top - box("#keyboard-help").bottom).toBe(24);
     });
 
-    it("draws a section's heading as a label too, at any heading level, 8px over its first subsection's label", () => {
+    it("draws a section's heading as a label too, at any heading level, 8px over a first group without a label", () => {
         const container = renderTab(
             theme,
-            section("privacy", "Privacy", subsection("find", "How to find you", "<div>Identity server</div>")),
+            section(
+                "deactivate",
+                "Deactivate account",
+                `<div class="mx_SettingsSubsection">
+                    <div class="mx_SettingsSubsection_content" id="deactivate-card"><div>Deactivate account</div></div>
+                </div>`,
+            ),
         );
-        const style = getComputedStyle(get("#privacy-label"));
+        const style = getComputedStyle(get("#deactivate-label"));
 
         expect([style.fontSize, style.fontWeight, style.color]).toEqual([
             "13px",
             "400",
             tokenColor("--cpd-color-text-secondary", container),
         ]);
-        expect(box("#find-label").top - box("#privacy-label").bottom).toBe(8);
+        expect(box("#deactivate-card").top - box("#deactivate-label").bottom).toBe(8);
+    });
+
+    describe("one label per group", () => {
+        it.each([
+            ["a subsection's heading", subsection("emails", "Email addresses", "<div>Email address</div>")],
+            [
+                "a subsection's heading in a form",
+                `<form>${subsection("emails", "Email addresses", "<div>Email address</div>")}</form>`,
+            ],
+            [
+                "a fieldset's legend",
+                `<fieldset class="mx_SettingsFieldset">
+                    <legend class="mx_SettingsFieldset_legend" id="emails-label">Email addresses</legend>
+                    <div class="mx_SettingsFieldset_content" id="emails-card"><div>Email address</div></div>
+                </fieldset>`,
+            ],
+            [
+                "a fieldset's legend in a form",
+                `<form><fieldset class="mx_SettingsFieldset">
+                    <legend class="mx_SettingsFieldset_legend" id="emails-label">Email addresses</legend>
+                    <div class="mx_SettingsFieldset_content" id="emails-card"><div>Email address</div></div>
+                </fieldset></form>`,
+            ],
+        ])("draws no section heading over a first group labelled by %s, which stands alone", (_name, group) => {
+            renderTab(
+                theme,
+                section("personal", "Personal info", group + subsection("phones", "Phone numbers", "<div>+1</div>")),
+            );
+            const pane = get(".mx_TabbedView_tabPanel").getBoundingClientRect();
+
+            expect(getComputedStyle(get("#personal-label")).display).toBe("none");
+            expect(box("#emails-label").top - pane.top).toBe(16);
+            expect(getComputedStyle(get("#phones-label")).display).not.toBe("none");
+        });
+
+        it("keeps a section's heading over a first group that has no label, such as a toggle above subsections", () => {
+            renderTab(
+                theme,
+                section(
+                    "legacy",
+                    "Legacy calls",
+                    `<div id="lone">Enable legacy voice/video calls</div>` +
+                        subsection("voice", "Voice settings", "<div>Automatically adjust the microphone volume</div>"),
+                ),
+            );
+
+            expect(getComputedStyle(get("#legacy-label")).display).not.toBe("none");
+            expect(box("#lone").top - box("#legacy-label").bottom).toBe(8);
+        });
     });
 
     it("writes a subsection without content of its own, such as the FAQ, on its card in the size of other cards' text", () => {

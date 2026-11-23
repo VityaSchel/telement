@@ -7,7 +7,7 @@ Please see LICENSE files in the repository root for full details.
 */
 
 import classnames from "classnames";
-import React, { type ComponentProps, createContext, type HTMLAttributes, useContext } from "react";
+import React, { type ComponentProps, createContext, type HTMLAttributes, useContext, useId } from "react";
 
 import Heading from "../../typography/Heading";
 import { SettingsHeader } from "../SettingsHeader";
@@ -33,15 +33,21 @@ function SectionHeading({
     heading,
     legacy,
     level,
+    id,
 }: {
     heading: string | React.ReactNode | undefined;
     legacy: boolean;
     level: HeadingLevel;
+    id: string;
 }): React.ReactNode | undefined {
     switch (typeof heading) {
         case "string":
             return legacy ? (
-                <Heading as={`h${level}`} size={(level + 1).toString() as ComponentProps<typeof Heading>["size"]}>
+                <Heading
+                    as={`h${level}`}
+                    size={(level + 1).toString() as ComponentProps<typeof Heading>["size"]}
+                    id={id}
+                >
                     {heading}
                 </Heading>
             ) : (
@@ -80,15 +86,22 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
     ...rest
 }) => {
     const level = useContext(HeadingLevelContext);
+    const headingId = useId();
+    // Telement: a legacy section isn't drawn with its heading when its first group has a label of its own
+    // (_SettingsSection.pcss), so that each group has one label, as in Telegram. The heading still names the section,
+    // which is a group labelled by it
+    const labelledGroup = legacy && typeof heading === "string";
 
     return (
         <div
+            role={labelledGroup ? "group" : undefined}
+            aria-labelledby={labelledGroup ? headingId : undefined}
             {...rest}
             className={classnames("mx_SettingsSection", className, {
                 mx_SettingsSection_newUi: !legacy,
             })}
         >
-            {heading && <SectionHeading heading={heading} legacy={legacy} level={level} />}
+            {heading && <SectionHeading heading={heading} legacy={legacy} level={level} id={headingId} />}
             <HeadingLevelContext.Provider value={heading ? ((level + 1) as HeadingLevel) : level}>
                 <div className={legacy ? "mx_SettingsSection_subSections" : "mx_SettingsSection_content"}>
                     {children}

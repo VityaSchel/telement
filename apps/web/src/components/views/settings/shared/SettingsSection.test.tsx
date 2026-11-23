@@ -29,6 +29,31 @@ describe("<SettingsSection />", () => {
         expect(help).toHaveTextContent("Lets you view your chat history.");
     });
 
+    it("makes a legacy section a group named by its heading, which names it even where it isn't drawn", () => {
+        render(
+            <SettingsSection heading="Personal info">
+                <div>Email addresses</div>
+            </SettingsSection>,
+        );
+
+        expect(screen.getByRole("group", { name: "Personal info" })).toHaveClass("mx_SettingsSection");
+    });
+
+    it("makes no group of a section without a heading, or of a new-style section that is one card", () => {
+        render(
+            <>
+                <SettingsSection>
+                    <div>Profile</div>
+                </SettingsSection>
+                <SettingsSection legacy={false} heading="Key storage">
+                    <div>Allow key storage</div>
+                </SettingsSection>
+            </>,
+        );
+
+        expect(screen.queryByRole("group")).toBeNull();
+    });
+
     it("keeps a legacy section's children in its subsections, its subheading under them", () => {
         const { container } = render(
             <SettingsSection heading="Privacy" subHeading="How others can find you.">

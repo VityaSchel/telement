@@ -2,10 +2,13 @@
 
 exports[`<LabsUserSettingsTab /> > renders settings marked as beta as beta cards 1`] = `
 <div
+  aria-labelledby="react-use-id-1"
   class="mx_SettingsSection"
+  role="group"
 >
   <h2
     class="mx_Heading_h3"
+    id="react-use-id-1"
   >
     Upcoming features
   </h2>
