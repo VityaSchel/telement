@@ -33,7 +33,6 @@ import compoundStyles from "@vector-im/compound-web/dist/style.css?raw";
 import telementTokens from "../../../../packages/shared-components/src/telement/tokens.css?raw";
 import commonStyles from "../../res/css/_common.pcss?raw";
 import fontSizes from "../../res/css/_font-sizes.pcss?raw";
-import filterTabGroupStyles from "../../res/css/components/views/elements/_FilterTabGroup.pcss?raw";
 import tabbedViewStyles from "../../res/css/structures/_TabbedView.pcss?raw";
 import settingsSubsectionStyles from "../../res/css/components/views/settings/shared/_SettingsSubsection.pcss?raw";
 import settingsSubsectionHeadingStyles from "../../res/css/components/views/settings/shared/_SettingsSubsectionHeading.pcss?raw";
@@ -49,8 +48,6 @@ import settingsDropdownStyles from "../../res/css/views/elements/_SettingsDropdo
 import settingsFlagStyles from "../../res/css/views/elements/_SettingsFlag.pcss?raw";
 import styledRadioButtonStyles from "../../res/css/views/elements/_StyledRadioButton.pcss?raw";
 import tagComposerStyles from "../../res/css/views/elements/_TagComposer.pcss?raw";
-import pollHistoryStyles from "../../res/css/views/polls/pollHistory/_PollHistory.pcss?raw";
-import pollHistoryListStyles from "../../res/css/views/polls/pollHistory/_PollHistoryList.pcss?raw";
 import fontScalingPanelStyles from "../../res/css/views/settings/_FontScalingPanel.pcss?raw";
 import imageSizePanelStyles from "../../res/css/views/settings/_ImageSizePanel.pcss?raw";
 import joinRuleSettingsStyles from "../../res/css/views/settings/_JoinRuleSettings.pcss?raw";
@@ -82,7 +79,6 @@ import { loadInter } from "../test/telement/fonts";
 /** In the order _components.pcss imports them, after _common.pcss, as in the app's bundle. */
 const APP_STYLES = [
     commonStyles,
-    filterTabGroupStyles,
     tabbedViewStyles,
     settingsSubsectionStyles,
     settingsSubsectionHeadingStyles,
@@ -98,8 +94,6 @@ const APP_STYLES = [
     settingsFlagStyles,
     styledRadioButtonStyles,
     tagComposerStyles,
-    pollHistoryStyles,
-    pollHistoryListStyles,
     fontScalingPanelStyles,
     imageSizePanelStyles,
     joinRuleSettingsStyles,
@@ -1214,88 +1208,5 @@ describe.each(THEMES.map(([theme]) => theme))("Settings groups in %s", (theme) =
         expect(start("home")).toBe(contentBox("#spaces-card").left);
         expect(start("all") - start("home")).toBe(24);
         expect(start("orphans")).toBe(start("home"));
-    });
-
-    describe("the Polls tab", () => {
-        /** The room settings' Polls tab, as PollHistoryTab, PollHistory and PollHistoryList render it. */
-        const pollsTab = (list: string, heading = "Polls"): string => `
-            <div class="mx_SettingsTab">
-                <div class="mx_PollHistory_content">
-                    <h2 class="mx_Heading_h2 mx_PollHistory_header" id="heading">${heading}</h2>
-                    <div class="mx_PollHistoryList">
-                        <fieldset class="mx_FilterTabGroup" id="filter">
-                            <label id="active">
-                                <input type="radio" name="PollHistory_filter" value="ACTIVE" checked /><span>Active polls</span>
-                            </label>
-                            <label id="past">
-                                <input type="radio" name="PollHistory_filter" value="ENDED" /><span>Past polls</span>
-                            </label>
-                        </fieldset>
-                        ${list}
-                    </div>
-                </div>
-            </div>
-        `;
-        const noPolls = `<span class="mx_PollHistoryList_noResults" id="list">There are no active polls in this room</span>`;
-
-        it("leaves the tab's name to the title, keeping the way back from a poll", () => {
-            renderPanel(theme, pollsTab(noPolls));
-            expect(getComputedStyle(get("#heading")).display).toBe("none");
-
-            renderPanel(
-                theme,
-                pollsTab(noPolls, `<div class="mx_AccessibleButton mx_PollDetailHeader">Active polls</div>`),
-            );
-            expect(getComputedStyle(get("#heading")).display).not.toBe("none");
-        });
-
-        it("draws the filter as the room list's 28px chips 8px apart, the selected one filled, from the card's edge", () => {
-            const container = renderPanel(theme, pollsTab(noPolls));
-            const active = getComputedStyle(get("#active span"));
-            const past = getComputedStyle(get("#past span"));
-
-            expect(box("#active").height).toBe(28);
-            expect(box("#past").height).toBe(28);
-            expect(box("#active span").height).toBe(28);
-            expect(box("#active").top - box(".mx_TabbedView_tabPanel").top).toBe(16);
-            expect(box("#past").left - box("#active").right).toBe(8);
-            expect(box("#active").left).toBe(box("#list").left);
-            expect(active.borderTopLeftRadius).toBe(past.borderTopLeftRadius);
-            expect(parseFloat(past.borderTopLeftRadius)).toBeGreaterThanOrEqual(14);
-            expect([past.fontSize, past.fontWeight, active.fontWeight]).toEqual(["13px", "500", "500"]);
-            expect(past.borderTopColor).toBe(tokenColor("--cpd-color-border-interactive-secondary", container));
-            expect(past.backgroundColor).toBe("rgba(0, 0, 0, 0)");
-            expect(past.color).toBe(tokenColor("--cpd-color-text-primary", container));
-            expect(active.backgroundColor).toBe(tokenColor("--cpd-color-bg-action-primary-rest", container));
-            expect(active.color).toBe(tokenColor("--cpd-color-text-on-solid-primary", container));
-            expect(active.boxShadow).toBe("none");
-        });
-
-        it("puts the empty state on a card 8px under the filter, filling the pane down to the tab's edge", () => {
-            const container = renderPanel(theme, pollsTab(noPolls));
-            const scroller = get(".mx_TabbedView_tabPanelContent");
-
-            expectCard("#list", container);
-            expect(box("#list").top - box("#filter").bottom).toBe(8);
-            expect(box(".mx_SettingsTab").bottom - box("#list").bottom).toBe(24);
-            expect(scroller.scrollHeight).toBe(scroller.clientHeight);
-        });
-
-        it("scrolls a long list on its card rather than the pane", () => {
-            const container = renderPanel(
-                theme,
-                pollsTab(
-                    `<ol class="mx_PollHistoryList_list mx_PollHistoryList_list_ACTIVE" id="list">
-                        ${'<li style="height: 40px">Which accent for your own bubbles?</li>'.repeat(30)}
-                    </ol>`,
-                ),
-            );
-            const scroller = get(".mx_TabbedView_tabPanelContent");
-
-            expectCard("#list", container);
-            expect(box(".mx_SettingsTab").bottom - box("#list").bottom).toBe(24);
-            expect(scroller.scrollHeight).toBe(scroller.clientHeight);
-            expect(get("#list").scrollHeight).toBeGreaterThan(get("#list").clientHeight);
-        });
     });
 });

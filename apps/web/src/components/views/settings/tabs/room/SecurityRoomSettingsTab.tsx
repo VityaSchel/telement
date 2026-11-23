@@ -42,6 +42,7 @@ import SdkConfig from "../../../../../SdkConfig";
 import { shouldForceDisableEncryption } from "../../../../../utils/crypto/shouldForceDisableEncryption";
 import { Caption } from "../../../typography/Caption";
 import { MEGOLM_ENCRYPTION_ALGORITHM } from "../../../../../utils/crypto";
+import AliasSettings from "../../../room_settings/AliasSettings";
 
 interface IProps {
     room: Room;
@@ -536,6 +537,9 @@ export default class SecurityRoomSettingsTab extends React.Component<IProps, ISt
 
         const historySection = this.renderHistory();
 
+        const canSetCanonicalAlias = room.currentState.mayClientSendStateEvent("m.room.canonical_alias", client);
+        const canonicalAliasEvent = room.currentState.getStateEvents("m.room.canonical_alias", "") ?? undefined;
+
         return (
             <SettingsTab>
                 <Form.Root
@@ -580,9 +584,20 @@ export default class SecurityRoomSettingsTab extends React.Component<IProps, ISt
                             )}
                         </SettingsFieldset>
                         {this.renderJoinRule()}
-                        {historySection}
                     </SettingsSection>
                 </Form.Root>
+                {/* Telement: the room's addresses, moved here from General, follow who can join, so that making a room
+                    public is on one tab: the join rule, the address it needs and its place in the directory. They are
+                    outside the form above as they have forms of their own */}
+                <SettingsSection heading={_t("room_settings|general|aliases_section")}>
+                    <AliasSettings
+                        roomId={room.roomId}
+                        canSetCanonicalAlias={canSetCanonicalAlias}
+                        canSetAliases={true}
+                        canonicalAliasEvent={canonicalAliasEvent}
+                    />
+                </SettingsSection>
+                <SettingsSection>{historySection}</SettingsSection>
             </SettingsTab>
         );
     }

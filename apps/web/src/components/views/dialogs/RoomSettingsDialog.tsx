@@ -14,7 +14,6 @@ import {
     AdminIcon,
     GroupIcon,
     LockIcon,
-    PollsIcon,
     SettingsIcon,
     VoiceCallIcon,
     NotificationsIcon,
@@ -39,7 +38,6 @@ import { Action } from "../../../dispatcher/actions";
 import { VoipRoomSettingsTab } from "../settings/tabs/room/VoipRoomSettingsTab";
 import { type ActionPayload } from "../../../dispatcher/payloads";
 import { type NonEmptyArray } from "../../../@types/common";
-import { PollHistoryTab } from "../settings/tabs/room/PollHistoryTab";
 import ErrorBoundary from "../elements/ErrorBoundary";
 import { PeopleRoomSettingsTab } from "../settings/tabs/room/PeopleRoomSettingsTab";
 import { SDKContext } from "../../../contexts/SDKContext";
@@ -129,48 +127,15 @@ class RoomSettingsDialog extends React.Component<IProps, IState> {
     private getTabs(): NonEmptyArray<Tab<RoomSettingsTab>> {
         const tabs: Tab<RoomSettingsTab>[] = [];
 
+        // Telement: the settings a member changes for themselves first, then the room's setup, where making a room
+        // public is one tab (Security & privacy, with the addresses). Polls aren't settings: room info › Polls opens
+        // their history
         tabs.push(
             new Tab(
                 RoomSettingsTab.General,
                 _td("common|general"),
                 <SettingsIcon />,
                 <GeneralRoomSettingsTab room={this.state.room} />,
-            ),
-        );
-        if (SettingsStore.getValue("feature_ask_to_join") && this.state.room.getJoinRule() === "knock") {
-            tabs.push(
-                new Tab(
-                    RoomSettingsTab.People,
-                    _td("common|people"),
-                    <GroupIcon />,
-                    <PeopleRoomSettingsTab room={this.state.room} />,
-                ),
-            );
-        }
-        if (!SdkConfig.get("element_call").disable) {
-            tabs.push(
-                new Tab(
-                    RoomSettingsTab.Voip,
-                    _td("settings|voip|title"),
-                    <VoiceCallIcon />,
-                    <VoipRoomSettingsTab room={this.state.room} />,
-                ),
-            );
-        }
-        tabs.push(
-            new Tab(
-                RoomSettingsTab.Security,
-                _td("room_settings|security|title"),
-                <LockIcon />,
-                <SecurityRoomSettingsTab room={this.state.room} closeSettingsFn={() => this.props.onFinished(true)} />,
-            ),
-        );
-        tabs.push(
-            new Tab(
-                RoomSettingsTab.Roles,
-                _td("room_settings|permissions|title"),
-                <AdminIcon />,
-                <RolesRoomSettingsTab room={this.state.room} />,
             ),
         );
         tabs.push(
@@ -184,6 +149,42 @@ class RoomSettingsDialog extends React.Component<IProps, IState> {
                 />,
             ),
         );
+        tabs.push(
+            new Tab(
+                RoomSettingsTab.Security,
+                _td("room_settings|security|title"),
+                <LockIcon />,
+                <SecurityRoomSettingsTab room={this.state.room} closeSettingsFn={() => this.props.onFinished(true)} />,
+            ),
+        );
+        if (SettingsStore.getValue("feature_ask_to_join") && this.state.room.getJoinRule() === "knock") {
+            tabs.push(
+                new Tab(
+                    RoomSettingsTab.People,
+                    _td("common|people"),
+                    <GroupIcon />,
+                    <PeopleRoomSettingsTab room={this.state.room} />,
+                ),
+            );
+        }
+        tabs.push(
+            new Tab(
+                RoomSettingsTab.Roles,
+                _td("room_settings|permissions|title"),
+                <AdminIcon />,
+                <RolesRoomSettingsTab room={this.state.room} />,
+            ),
+        );
+        if (!SdkConfig.get("element_call").disable) {
+            tabs.push(
+                new Tab(
+                    RoomSettingsTab.Voip,
+                    _td("settings|voip|title"),
+                    <VoiceCallIcon />,
+                    <VoipRoomSettingsTab room={this.state.room} />,
+                ),
+            );
+        }
 
         if (SettingsStore.getValue("feature_bridge_state")) {
             tabs.push(
@@ -195,15 +196,6 @@ class RoomSettingsDialog extends React.Component<IProps, IState> {
                 ),
             );
         }
-
-        tabs.push(
-            new Tab(
-                RoomSettingsTab.PollHistory,
-                _td("right_panel|polls_button"),
-                <PollsIcon />,
-                <PollHistoryTab room={this.state.room} onFinished={() => this.props.onFinished(true)} />,
-            ),
-        );
 
         if (SettingsStore.getValue(UIFeature.AdvancedSettings)) {
             tabs.push(

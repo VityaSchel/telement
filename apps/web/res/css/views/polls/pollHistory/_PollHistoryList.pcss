@@ -63,26 +63,3 @@ Please see LICENSE files in the repository root for full details.
 .mx_PollHistoryList_loadMorePolls {
     width: max-content;
 }
-
-/* Telement: in the room settings' Polls tab the polls, or the line saying there are none, are on a settings card
-   (_common.pcss) 8px under the filter, as a card is under its label, and the card fills the pane */
-.mx_SettingsTab {
-    .mx_PollHistoryList_list,
-    .mx_PollHistoryList_noResults,
-    .mx_PollHistoryList_loading.mx_PollHistoryList_noResultsYet {
-        @mixin settingsGroupCard;
-        flex: 1 1 0;
-        min-height: 0;
-        margin: var(--cpd-space-2x) 0 0;
-    }
-
-    .mx_PollHistoryList_noResults {
-        height: auto;
-    }
-
-    .mx_PollHistoryList_loading.mx_PollHistoryList_noResultsYet {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-}

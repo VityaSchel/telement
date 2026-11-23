@@ -14,11 +14,9 @@ import RoomProfileSettings from "../../../room_settings/RoomProfileSettings";
 import AccessibleButton, { type ButtonEvent } from "../../../elements/AccessibleButton";
 import dis from "../../../../../dispatcher/dispatcher";
 import MatrixClientContext from "../../../../../contexts/MatrixClientContext";
-import AliasSettings from "../../../room_settings/AliasSettings";
 import { SettingsSubsection } from "../../shared/SettingsSubsection";
 import SettingsTab from "../SettingsTab";
 import { SettingsSection } from "../../shared/SettingsSection";
-import { MediaPreviewAccountSettings } from "../user/MediaPreviewAccountSettings";
 
 interface IProps {
     room: Room;
@@ -48,12 +46,7 @@ export default class GeneralRoomSettingsTab extends React.Component<IProps, ISta
     };
 
     public render(): React.ReactNode {
-        const client = this.context;
         const room = this.props.room;
-
-        const canSetAliases = true; // Previously, we arbitrarily only allowed admins to do this
-        const canSetCanonical = room.currentState.mayClientSendStateEvent("m.room.canonical_alias", client);
-        const canonicalAliasEv = room.currentState.getStateEvents("m.room.canonical_alias", "") ?? undefined;
 
         let leaveSection;
         if (room.getMyMembership() === KnownMembership.Join) {
@@ -68,30 +61,13 @@ export default class GeneralRoomSettingsTab extends React.Component<IProps, ISta
 
         return (
             <SettingsTab data-testid="General">
+                {/* Telement: the room's profile and leaving it. The addresses are on the Security & privacy tab and this
+                    room's media on its Notifications tab, with the other personal settings */}
                 <SettingsSection>
                     <RoomProfileSettings roomId={room.roomId} />
                 </SettingsSection>
 
-                <SettingsSection heading={_t("room_settings|general|aliases_section")}>
-                    <AliasSettings
-                        roomId={room.roomId}
-                        canSetCanonicalAlias={canSetCanonical}
-                        canSetAliases={canSetAliases}
-                        canonicalAliasEvent={canonicalAliasEv}
-                    />
-                </SettingsSection>
-
-                <SettingsSection heading={_t("room_settings|general|other_section")}>
-                    {/* Telement: the choices are a group of their own, labelled above their card */}
-                    <SettingsSubsection
-                        heading={_t("settings|media_preview|media_preview_label")}
-                        description={_t("settings|media_preview|media_preview_description")}
-                        legacy={false}
-                    >
-                        <MediaPreviewAccountSettings roomId={room.roomId} />
-                    </SettingsSubsection>
-                    {leaveSection}
-                </SettingsSection>
+                {leaveSection && <SettingsSection>{leaveSection}</SettingsSection>}
             </SettingsTab>
         );
     }

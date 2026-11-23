@@ -84,4 +84,14 @@ describe("NotificationSettingsTab", () => {
         expect(container.querySelector(".mx_SettingsSubsection")).toHaveClass("mx_NotificationSettingsTab_sounds");
         expect(screen.getByRole("button", { name: "Browse…" })).toHaveClass("mx_AccessibleButton_kind_primary_outline");
     });
+
+    it("ends with this room's choice of media to show, moved here from General with the other personal settings", () => {
+        const { container } = renderTab();
+        const groups = container.querySelectorAll(".mx_SettingsSection_subSections > *");
+        const media = groups[groups.length - 1];
+
+        expect(media).toHaveTextContent("Show media in timeline");
+        expect(within(media as HTMLElement).getByRole("radiogroup", { name: "Show media in timeline" })).toBeVisible();
+        expect(within(media as HTMLElement).getByRole("radio", { name: "Always hide" })).toBeInTheDocument();
+    });
 });

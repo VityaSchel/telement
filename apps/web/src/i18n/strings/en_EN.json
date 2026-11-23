@@ -2116,7 +2116,6 @@
             "new_alias_placeholder": "New published address (e.g. #alias:server)",
             "no_aliases_room": "This room has no local addresses",
             "no_aliases_space": "This space has no local addresses",
-            "other_section": "Other",
             "publish_toggle": "Publish this room to the public in %(domain)s's room directory?",
             "publish_warn_invite_only": "You cannot publish a room that is invite-only.",
             "publish_warn_no_canonical_permission": "You must have permission to set the main address to publish this room.",

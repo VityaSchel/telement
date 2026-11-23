@@ -28,7 +28,7 @@ test.describe("Room Directory", () => {
             });
 
             await app.viewRoomByName("Gaming");
-            await app.settings.openRoomSettings();
+            await app.settings.openRoomSettings("Security & privacy");
 
             // First add a local address `gaming`
             const localAddresses = page.locator(".mx_SettingsFieldset", { hasText: "Local addresses" });

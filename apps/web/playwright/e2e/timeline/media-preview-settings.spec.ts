@@ -120,7 +120,7 @@ test.describe("Media preview settings", () => {
         await app.viewRoomById(room.roomId);
         await page.getByRole("button", { name: "Accept" }).click();
 
-        const roomSettings = await app.settings.openRoomSettings("General");
+        const roomSettings = await app.settings.openRoomSettings("Notifications");
         await roomSettings.getByLabel("Show media in timeline").getByRole("radio", { name: "Always hide" }).click();
         await app.closeDialog();
 
@@ -134,7 +134,7 @@ test.describe("Media preview settings", () => {
         await app.viewRoomById(room.roomId);
         await page.getByRole("button", { name: "Accept" }).click();
 
-        const roomSettings = await app.settings.openRoomSettings("General");
+        const roomSettings = await app.settings.openRoomSettings("Notifications");
         await roomSettings.getByLabel("Show media in timeline").getByRole("radio", { name: "Always show" }).click();
         await app.closeDialog();
 

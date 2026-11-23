@@ -10,7 +10,7 @@ Please see LICENSE files in the repository root for full details.
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import React from "react";
-import { fireEvent, render, screen, waitFor } from "test-utils-rtl";
+import { fireEvent, render, screen, waitFor, within } from "test-utils-rtl";
 import {
     EventTimeline,
     EventType,
@@ -100,8 +100,17 @@ describe("<RoomSettingsDialog />", () => {
         expect(title.querySelector(".mx_RoomSettingsDialog_title_strong")).toHaveTextContent(`${room.name}:`);
         expect(screen.getByRole("dialog")).toHaveAccessibleName(`${room.name}: General`);
 
-        fireEvent.click(screen.getByText("Polls"));
-        expect(title).toHaveTextContent(`${room.name}: Polls`);
+        fireEvent.click(screen.getByRole("tab", { name: "Notifications" }));
+        expect(title).toHaveTextContent(`${room.name}: Notifications`);
+    });
+
+    it("keeps the room's profile on General, its addresses and media now being on Security & privacy and Notifications", () => {
+        getComponent();
+        const general = screen.getByTestId("General");
+
+        expect(within(general).getByRole("textbox", { name: "Room Name" })).toBeInTheDocument();
+        expect(within(general).queryByText("Published Addresses")).not.toBeInTheDocument();
+        expect(within(general).queryByRole("radiogroup", { name: "Show media in timeline" })).not.toBeInTheDocument();
     });
 
     it.each(["General", "Notifications"])("doesn't repeat the %s tab's name as a heading in its content", (tabName) => {
@@ -113,6 +122,28 @@ describe("<RoomSettingsDialog />", () => {
     });
 
     describe("Settings tabs", () => {
+        it("puts a member's own settings first, then the room's setup, with no Polls tab", () => {
+            vi.spyOn(SettingsStore, "getValue").mockImplementation(
+                (settingName) =>
+                    settingName === UIFeature.AdvancedSettings ||
+                    settingName === "feature_bridge_state" ||
+                    settingName === "feature_ask_to_join",
+            );
+            vi.spyOn(room, "getJoinRule").mockReturnValue(JoinRule.Knock);
+            const { container } = getComponent();
+
+            expect([...container.querySelectorAll(".mx_TabbedView_tabLabel")].map((tab) => tab.textContent)).toEqual([
+                "General",
+                "Notifications",
+                "Security & Privacy",
+                "People",
+                "Roles & Permissions",
+                "Voice & Video",
+                "Bridges",
+                "Advanced",
+            ]);
+        });
+
         it("renders default tabs correctly", () => {
             const { container } = getComponent();
             expect(container.querySelectorAll(".mx_TabbedView_tabLabel")).toMatchSnapshot();
@@ -181,24 +212,6 @@ describe("<RoomSettingsDialog />", () => {
             );
             getComponent();
             expect(screen.getByTestId("settings-tab-ROOM_ADVANCED_TAB")).toBeInTheDocument();
-        });
-    });
-
-    describe("poll history", () => {
-        beforeEach(() => {
-            mockClient.getOrCreateFilter.mockResolvedValue("filterId");
-        });
-        it("renders poll history tab", () => {
-            getComponent();
-            expect(screen.getByTestId("settings-tab-ROOM_POLL_HISTORY_TAB")).toBeInTheDocument();
-        });
-
-        it("displays poll history when tab clicked", () => {
-            const { container } = getComponent();
-
-            fireEvent.click(screen.getByText("Polls"));
-
-            expect(container.querySelector(".mx_SettingsTab")).toMatchSnapshot();
         });
     });
 });

@@ -26,6 +26,7 @@ import SettingsTab from "../SettingsTab";
 import { SettingsSection } from "../../shared/SettingsSection";
 import { SettingsSubsection } from "../../shared/SettingsSubsection";
 import { SDKContextClass } from "../../../../../contexts/SDKContextClass.ts";
+import { MediaPreviewAccountSettings } from "../user/MediaPreviewAccountSettings";
 
 interface IProps {
     roomId: string;
@@ -300,6 +301,15 @@ export default class NotificationsSettingsTab extends React.Component<IProps, IS
                             </AccessibleButton>
                             <br />
                         </div>
+                    </SettingsSubsection>
+                    {/* Telement: the media this room shows, moved here from General, so that this room's personal
+                        settings are on one tab. The choices are a group of their own, labelled above their card */}
+                    <SettingsSubsection
+                        heading={_t("settings|media_preview|media_preview_label")}
+                        description={_t("settings|media_preview|media_preview_description")}
+                        legacy={false}
+                    >
+                        <MediaPreviewAccountSettings roomId={this.props.roomId} />
                     </SettingsSubsection>
                 </SettingsSection>
             </SettingsTab>

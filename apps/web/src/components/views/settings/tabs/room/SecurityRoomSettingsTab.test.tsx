@@ -12,7 +12,15 @@ import React from "react";
 import { vi, describe, it, expect, beforeEach } from "vitest";
 import { fireEvent, render, screen, waitFor, within } from "test-utils-rtl";
 import { clearAllModals, flushPromises, stubClient } from "test-utils";
-import { EventType, GuestAccess, HistoryVisibility, JoinRule, MatrixEvent, Room } from "matrix-js-sdk/src/matrix";
+import {
+    EventType,
+    GuestAccess,
+    HistoryVisibility,
+    JoinRule,
+    MatrixEvent,
+    Room,
+    Visibility,
+} from "matrix-js-sdk/src/matrix";
 import { logger } from "matrix-js-sdk/src/logger";
 import { type RoomPowerLevelsEventContent } from "matrix-js-sdk/src/types";
 
@@ -80,6 +88,8 @@ describe("<SecurityRoomSettingsTab />", () => {
         client.sendStateEvent.mockReset().mockResolvedValue({ event_id: "test" });
         vi.spyOn(client.getCrypto()!, "isEncryptionEnabledInRoom").mockResolvedValue(false);
         client.getClientWellKnown.mockReturnValue(undefined);
+        // The room's addresses are on this tab, with their directory setting
+        client.getRoomDirectoryVisibility.mockResolvedValue({ visibility: Visibility.Private });
         vi.spyOn(SettingsStore, "getValue").mockRestore();
 
         await clearAllModals();
@@ -650,6 +660,20 @@ describe("<SecurityRoomSettingsTab />", () => {
             await renderPublicRoom();
 
             expect(screen.queryByText(warning)).not.toBeInTheDocument();
+        });
+
+        it("offers the room's addresses right after who can join, before who can read the history", async () => {
+            client.getLocalAliases.mockResolvedValue({ aliases: [] });
+
+            await renderPublicRoom();
+            const legends = [...document.querySelectorAll("legend")].map((legend) => legend.textContent);
+
+            expect(screen.getByRole("group", { name: "Room Addresses" })).toContainElement(
+                screen.getByTestId("published-address-fieldset"),
+            );
+            expect(legends.indexOf("Published Addresses")).toBe(legends.indexOf("Access") + 1);
+            expect(legends.indexOf("Local Addresses")).toBe(legends.indexOf("Published Addresses") + 1);
+            expect(legends.indexOf("Who can read history?")).toBe(legends.indexOf("Local Addresses") + 1);
         });
     });
 });

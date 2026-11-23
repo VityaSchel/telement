@@ -17,5 +17,4 @@ export const enum RoomSettingsTab {
     Notifications = "ROOM_NOTIFICATIONS_TAB",
     Bridges = "ROOM_BRIDGES_TAB",
     Advanced = "ROOM_ADVANCED_TAB",
-    PollHistory = "ROOM_POLL_HISTORY_TAB",
 }

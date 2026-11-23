@@ -34,11 +34,11 @@ NodeList [
     </span>
   </li>,
   <li
-    aria-controls="mx_tabpanel_ROOM_VOIP_TAB"
-    aria-labelledby="mx_tabpanel_ROOM_VOIP_TAB_label"
+    aria-controls="mx_tabpanel_ROOM_NOTIFICATIONS_TAB"
+    aria-labelledby="mx_tabpanel_ROOM_NOTIFICATIONS_TAB_label"
     aria-selected="false"
     class="mx_AccessibleButton mx_TabbedView_tabLabel"
-    data-testid="settings-tab-ROOM_VOIP_TAB"
+    data-testid="settings-tab-ROOM_NOTIFICATIONS_TAB"
     role="tab"
     tabindex="-1"
   >
@@ -50,16 +50,14 @@ NodeList [
       xmlns="http://www.w3.org/2000/svg"
     >
       <path
-        clip-rule="evenodd"
-        d="M8.929 15.1a13.6 13.6 0 0 0 4.654 3.066q2.62 1.036 5.492.923h.008l.003-.004.003-.002-.034-3.124-3.52-.483-1.791 1.792-.645-.322a13.5 13.5 0 0 1-3.496-2.52 13.4 13.4 0 0 1-2.52-3.496l-.322-.645 1.792-1.791-.483-3.52-3.123-.033-.003.002-.003.004v.002a13.65 13.65 0 0 0 .932 5.492A13.4 13.4 0 0 0 8.93 15.1m3.92 4.926a15.6 15.6 0 0 1-5.334-3.511 15.4 15.4 0 0 1-3.505-5.346 15.6 15.6 0 0 1-1.069-6.274 1.93 1.93 0 0 1 .589-1.366c.366-.366.84-.589 1.386-.589h.01l3.163.035a1.96 1.96 0 0 1 1.958 1.694v.005l.487 3.545v.003c.043.297.025.605-.076.907a2 2 0 0 1-.485.773l-.762.762a11.3 11.3 0 0 0 1.806 2.348 11.4 11.4 0 0 0 2.348 1.806l.762-.762a2 2 0 0 1 .774-.485c.302-.1.61-.118.907-.076l3.553.487a1.96 1.96 0 0 1 1.694 1.958l.034 3.174c0 .546-.223 1.02-.588 1.386-.36.36-.827.582-1.363.588a15.3 15.3 0 0 1-6.29-1.062"
-        fill-rule="evenodd"
+        d="M12 3c7 0 7 7 7 7v6l1.293 1.293c.63.63.184 1.707-.707 1.707H4.414c-.89 0-1.337-1.077-.707-1.707L5 16v-6s0-7 7-7m5 7.01v-.022l-.009-.146a7 7 0 0 0-.073-.607 6.6 6.6 0 0 0-.582-1.84c-.319-.638-.766-1.215-1.398-1.637C14.318 5.344 13.4 5 12 5s-2.317.344-2.937.758c-.633.422-1.08.999-1.4 1.636a6.6 6.6 0 0 0-.58 1.841A7 7 0 0 0 7 9.988v6.84L6.828 17h10.344L17 16.828zM12 22a2 2 0 0 1-2-2h4a2 2 0 0 1-2 2"
       />
     </svg>
     <span
       class="mx_TabbedView_tabLabel_text"
-      id="mx_tabpanel_ROOM_VOIP_TAB_label"
+      id="mx_tabpanel_ROOM_NOTIFICATIONS_TAB_label"
     >
-      Voice & Video
+      Notifications
     </span>
   </li>,
   <li
@@ -119,11 +117,11 @@ NodeList [
     </span>
   </li>,
   <li
-    aria-controls="mx_tabpanel_ROOM_NOTIFICATIONS_TAB"
-    aria-labelledby="mx_tabpanel_ROOM_NOTIFICATIONS_TAB_label"
+    aria-controls="mx_tabpanel_ROOM_VOIP_TAB"
+    aria-labelledby="mx_tabpanel_ROOM_VOIP_TAB_label"
     aria-selected="false"
     class="mx_AccessibleButton mx_TabbedView_tabLabel"
-    data-testid="settings-tab-ROOM_NOTIFICATIONS_TAB"
+    data-testid="settings-tab-ROOM_VOIP_TAB"
     role="tab"
     tabindex="-1"
   >
@@ -135,118 +133,17 @@ NodeList [
       xmlns="http://www.w3.org/2000/svg"
     >
       <path
-        d="M12 3c7 0 7 7 7 7v6l1.293 1.293c.63.63.184 1.707-.707 1.707H4.414c-.89 0-1.337-1.077-.707-1.707L5 16v-6s0-7 7-7m5 7.01v-.022l-.009-.146a7 7 0 0 0-.073-.607 6.6 6.6 0 0 0-.582-1.84c-.319-.638-.766-1.215-1.398-1.637C14.318 5.344 13.4 5 12 5s-2.317.344-2.937.758c-.633.422-1.08.999-1.4 1.636a6.6 6.6 0 0 0-.58 1.841A7 7 0 0 0 7 9.988v6.84L6.828 17h10.344L17 16.828zM12 22a2 2 0 0 1-2-2h4a2 2 0 0 1-2 2"
+        clip-rule="evenodd"
+        d="M8.929 15.1a13.6 13.6 0 0 0 4.654 3.066q2.62 1.036 5.492.923h.008l.003-.004.003-.002-.034-3.124-3.52-.483-1.791 1.792-.645-.322a13.5 13.5 0 0 1-3.496-2.52 13.4 13.4 0 0 1-2.52-3.496l-.322-.645 1.792-1.791-.483-3.52-3.123-.033-.003.002-.003.004v.002a13.65 13.65 0 0 0 .932 5.492A13.4 13.4 0 0 0 8.93 15.1m3.92 4.926a15.6 15.6 0 0 1-5.334-3.511 15.4 15.4 0 0 1-3.505-5.346 15.6 15.6 0 0 1-1.069-6.274 1.93 1.93 0 0 1 .589-1.366c.366-.366.84-.589 1.386-.589h.01l3.163.035a1.96 1.96 0 0 1 1.958 1.694v.005l.487 3.545v.003c.043.297.025.605-.076.907a2 2 0 0 1-.485.773l-.762.762a11.3 11.3 0 0 0 1.806 2.348 11.4 11.4 0 0 0 2.348 1.806l.762-.762a2 2 0 0 1 .774-.485c.302-.1.61-.118.907-.076l3.553.487a1.96 1.96 0 0 1 1.694 1.958l.034 3.174c0 .546-.223 1.02-.588 1.386-.36.36-.827.582-1.363.588a15.3 15.3 0 0 1-6.29-1.062"
+        fill-rule="evenodd"
       />
     </svg>
     <span
       class="mx_TabbedView_tabLabel_text"
-      id="mx_tabpanel_ROOM_NOTIFICATIONS_TAB_label"
+      id="mx_tabpanel_ROOM_VOIP_TAB_label"
     >
-      Notifications
-    </span>
-  </li>,
-  <li
-    aria-controls="mx_tabpanel_ROOM_POLL_HISTORY_TAB"
-    aria-labelledby="mx_tabpanel_ROOM_POLL_HISTORY_TAB_label"
-    aria-selected="false"
-    class="mx_AccessibleButton mx_TabbedView_tabLabel"
-    data-testid="settings-tab-ROOM_POLL_HISTORY_TAB"
-    role="tab"
-    tabindex="-1"
-  >
-    <svg
-      fill="currentColor"
-      height="1em"
-      viewBox="0 0 24 24"
-      width="1em"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <path
-        d="M16 10q.424 0 .712-.287A.97.97 0 0 0 17 9a.97.97 0 0 0-.288-.713A.97.97 0 0 0 16 8h-3a.97.97 0 0 0-.713.287A.97.97 0 0 0 12 9q0 .424.287.713.288.287.713.287zm0 6q.424 0 .712-.287A.97.97 0 0 0 17 15a.97.97 0 0 0-.288-.713A.97.97 0 0 0 16 14h-3a.97.97 0 0 0-.713.287A.97.97 0 0 0 12 15q0 .424.287.713.288.287.713.287zm-7-5q.825 0 1.412-.588Q11 9.826 11 9t-.588-1.412A1.93 1.93 0 0 0 9 7q-.825 0-1.412.588A1.93 1.93 0 0 0 7 9q0 .825.588 1.412Q8.175 11 9 11m0 6q.825 0 1.412-.587Q11 15.825 11 15t-.588-1.412A1.93 1.93 0 0 0 9 13q-.825 0-1.412.588A1.93 1.93 0 0 0 7 15q0 .824.588 1.413Q8.175 17 9 17m-4 4q-.824 0-1.412-.587A1.93 1.93 0 0 1 3 19V5q0-.824.587-1.412A1.93 1.93 0 0 1 5 3h14q.824 0 1.413.587Q21 4.176 21 5v14q0 .824-.587 1.413A1.93 1.93 0 0 1 19 21zm0-2h14V5H5z"
-      />
-    </svg>
-    <span
-      class="mx_TabbedView_tabLabel_text"
-      id="mx_tabpanel_ROOM_POLL_HISTORY_TAB_label"
-    >
-      Polls
+      Voice & Video
     </span>
   </li>,
 ]
-`;
-
-exports[`<RoomSettingsDialog /> > poll history > displays poll history when tab clicked 1`] = `
-<div
-  class="mx_SettingsTab"
->
-  <div
-    class="mx_PollHistory_content"
-  >
-    <h2
-      class="mx_Heading_h2 mx_PollHistory_header"
-    >
-      Polls
-    </h2>
-    <div
-      class="mx_PollHistoryList"
-    >
-      <fieldset
-        class="mx_FilterTabGroup"
-      >
-        <label
-          data-testid="filter-tab-PollHistory_filter-ACTIVE"
-        >
-          <input
-            checked=""
-            name="PollHistory_filter"
-            type="radio"
-            value="ACTIVE"
-          />
-          <span>
-            Active polls
-          </span>
-        </label>
-        <label
-          data-testid="filter-tab-PollHistory_filter-ENDED"
-        >
-          <input
-            name="PollHistory_filter"
-            type="radio"
-            value="ENDED"
-          />
-          <span>
-            Past polls
-          </span>
-        </label>
-      </fieldset>
-      <div
-        class="mx_PollHistoryList_loading mx_PollHistoryList_noResultsYet"
-      >
-        <span
-          class="mx_InlineSpinner"
-        >
-          <svg
-            aria-label="Loading…"
-            class="_icon"
-            data-testid="spinner"
-            fill="currentColor"
-            height="1em"
-            role="progressbar"
-            style="width: 16px; height: 16px;"
-            viewBox="0 0 24 24"
-            width="1em"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              clip-rule="evenodd"
-              d="M12 4.031a8 8 0 1 0 8 8 1 1 0 0 1 2 0c0 5.523-4.477 10-10 10s-10-4.477-10-10 4.477-10 10-10a1 1 0 1 1 0 2"
-              fill-rule="evenodd"
-            />
-          </svg>
-        </span>
-        Loading polls
-      </div>
-    </div>
-  </div>
-</div>
 `;

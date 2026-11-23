@@ -23,10 +23,22 @@ test.describe("General room settings tab", () => {
     test("should be rendered properly", { tag: "@screenshot" }, async ({ page, app, axe }) => {
         const settings = await app.settings.openRoomSettings("General");
 
-        // Assert that "Show less" details element is rendered
-        await expect(settings.getByText("Show less")).toBeVisible();
+        // The room's profile and Leave room: the addresses are on the Security & privacy tab
+        await expect(settings.getByRole("textbox", { name: /room name/i })).toBeVisible();
+        await expect(settings.getByRole("button", { name: /leave room/i })).toBeVisible();
+        await expect(settings.getByText(/published addresses/i)).not.toBeVisible();
 
         await expect(settings).toMatchScreenshot("General-room-settings-tab-should-be-rendered-properly-1.png");
+
+        axe.disableRules("color-contrast"); // XXX: We have some known contrast issues here
+        await expect(axe).toHaveNoViolations();
+    });
+
+    test("shows and hides the local addresses on the Security & privacy tab", async ({ app }) => {
+        const settings = await app.settings.openRoomSettings("Security & privacy");
+
+        // Assert that "Show less" details element is rendered
+        await expect(settings.getByText("Show less")).toBeVisible();
 
         // Click the "Show less" details element
         await settings.getByText("Show less").click();
@@ -34,13 +46,10 @@ test.describe("General room settings tab", () => {
         // Assert that "Show more" details element is rendered instead of "Show more"
         await expect(settings.getByText("Show less")).not.toBeVisible();
         await expect(settings.getByText("Show more")).toBeVisible();
-
-        axe.disableRules("color-contrast"); // XXX: We have some known contrast issues here
-        await expect(axe).toHaveNoViolations();
     });
 
     test("long address should not cause dialog to overflow", { tag: "@no-webkit" }, async ({ page, app, user }) => {
-        const settings = await app.settings.openRoomSettings("General");
+        const settings = await app.settings.openRoomSettings("Security & privacy");
         // 1. Set the room-address to be a really long string
         const longString = "abcasdhjasjhdaj1jh1asdhasjdhajsdhjavhjksd".repeat(4);
         await settings.locator("#roomAliases input[label='Room address']").fill(longString);

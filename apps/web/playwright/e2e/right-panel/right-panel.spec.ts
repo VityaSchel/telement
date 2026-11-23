@@ -50,7 +50,7 @@ test.describe("RightPanel", () => {
                 await app.client.createRoom({ name: ROOM_NAME_LONG });
                 await viewRoomSummaryByName(page, app, ROOM_NAME_LONG);
 
-                await app.settings.openRoomSettings();
+                await app.settings.openRoomSettings("Security & privacy");
 
                 // Set a local room address
                 const localAddresses = page.locator(".mx_SettingsFieldset", { hasText: "Local addresses" });

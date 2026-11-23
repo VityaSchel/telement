@@ -12,29 +12,10 @@ Please see LICENSE files in the repository root for full details.
 
     display: flex;
     flex-direction: column;
-
-    /* Telement: in the room settings' Polls tab the list fills the pane down to the tab's bottom edge, where 600px ran
-       past it and made an empty tab scroll */
-    .mx_SettingsTab & {
-        height: auto;
-        flex: 1;
-        min-height: 0;
-    }
-}
-
-/* Telement: the Polls tab is as tall as the pane, so that its list can fill it */
-.mx_SettingsTab:has(> .mx_PollHistory_content) {
-    height: 100%;
 }
 
 .mx_PollHistory_header.mx_Heading_h2 {
     margin-bottom: var(--cpd-space-4x);
-
-    /* Telement: in the room settings' Polls tab the dialog's title already names the tab, as on the other room tabs, so
-       the list has no heading of its own. The way back from a poll stays */
-    .mx_SettingsTab &:not(:has(.mx_PollDetailHeader)) {
-        display: none;
-    }
 }
 
 /* Telement: in the poll history dialog the dialog's title heads the list, which starts 16px under it as any dialog's
