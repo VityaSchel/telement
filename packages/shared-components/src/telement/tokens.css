@@ -457,6 +457,27 @@ Please see LICENSE files in the repository root for full details.
 }
 
 /*
+ * Secondary text on a settings row's pressed fill, which the row keeps while its menu is open, at 4.5:1: a step deeper
+ * in light themes, as on the band of a message being acted on, and two in dark ones, whose dialogs are raised a gray
+ * step and their pressed fill with them.
+ */
+:root,
+[class*="cpd-theme-"] {
+    --tl-color-text-secondary-on-pressed: var(--cpd-color-gray-1000);
+}
+
+.cpd-theme-dark.cpd-theme-dark,
+.cpd-theme-dark-hc.cpd-theme-dark-hc {
+    --tl-color-text-secondary-on-pressed: var(--cpd-color-gray-1100);
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --tl-color-text-secondary-on-pressed: var(--cpd-color-gray-1100);
+    }
+}
+
+/*
  * Switches are drawn as Telegram's (_CompoundOverrides.pcss, _ToggleSwitch.pcss): when off, the track is filled with
  * the separator gray of the surface the switch is on rather than outlined, and the knob is white with a soft shadow, as
  * when on. That gray is under 3:1 against the page, as in Telegram, so high contrast themes fill the track with

@@ -132,6 +132,8 @@ Please see LICENSE files in the repository root for full details.
     &:active,
     &[data-state="open"] {
         background-color: var(--settings-row-pressed, var(--cpd-color-bg-action-secondary-pressed));
+
+        --cpd-color-text-secondary: var(--tl-color-text-secondary-on-pressed);
     }
 
     &:disabled {

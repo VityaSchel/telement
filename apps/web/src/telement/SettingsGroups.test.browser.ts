@@ -28,7 +28,9 @@ import compoundDarkSemantic from "@vector-im/compound-design-tokens/assets/web/c
 import compoundDarkHcTheme from "@vector-im/compound-design-tokens/assets/web/css/cpd-theme-dark-hc-base.css?raw";
 import compoundDarkHcSemantic from "@vector-im/compound-design-tokens/assets/web/css/cpd-theme-dark-hc-semantic.css?raw";
 import compoundStyles from "@vector-im/compound-web/dist/style.css?raw";
-// The package doesn't export its token stylesheet on its own
+// The package doesn't export its stylesheets on their own
+// eslint-disable-next-line no-restricted-imports
+import settingsRowStyles from "../../../../packages/shared-components/src/telement/settings/SettingsRow.module.css?raw";
 // eslint-disable-next-line no-restricted-imports
 import telementTokens from "../../../../packages/shared-components/src/telement/tokens.css?raw";
 import commonStyles from "../../res/css/_common.pcss?raw";
@@ -73,7 +75,7 @@ import darkTheme from "../../res/themes/dark/css/_dark.pcss?raw";
 import imageSizeNormal from "../../res/img/element-icons/settings/img-size-normal.svg?raw";
 import imageSizeLarge from "../../res/img/element-icons/settings/img-size-large.svg?raw";
 import { cornerRadii, toBrowserCss } from "../test/telement/browserCss";
-import { tokenColor } from "../test/telement/computedStyle";
+import { composite, contrastOver, mouseButton, tokenColor } from "../test/telement/computedStyle";
 import { loadInter } from "../test/telement/fonts";
 
 /** In the order _components.pcss imports them, after _common.pcss, as in the app's bundle. */
@@ -126,6 +128,11 @@ const THEMES: [string, string[]][] = [
 const isDark = (theme: string): boolean => theme.startsWith("cpd-theme-dark");
 const isHighContrast = (theme: string): boolean => theme.endsWith("-hc");
 
+/** A CSS module's stylesheet with its local class names prefixed by the module's name, as the library build does. */
+function moduleCss(source: string, name: string): string {
+    return source.replace(/\.(-?[_a-zA-Z][\w-]*)/g, `.${name}_$1`);
+}
+
 let stylesheet: HTMLStyleElement;
 let removeInter: () => void;
 
@@ -145,7 +152,7 @@ beforeAll(async () => {
             ${compoundLightHcTheme} ${compoundLightHcSemantic} ${compoundDarkHcTheme} ${compoundDarkHcSemantic}
         }
         @layer compound-web { ${compoundStyles} }
-        @layer shared-components { ${telementTokens} }
+        @layer shared-components { ${telementTokens} ${moduleCss(settingsRowStyles, "SettingsRow")} }
         @layer app-web {
             body { margin: 0; }
             ${themed}
@@ -705,6 +712,62 @@ describe.each(THEMES.map(([theme]) => theme))("Settings groups in %s", (theme) =
                 expect(box(content).top - box(card).top).toBe(4);
                 expect(box(card).bottom - box(content).bottom).toBe(4);
             }
+        });
+    });
+
+    describe("value rows", () => {
+        /** A person's row (ValueRowView): the name over the Matrix ID, and the role at the end. */
+        function renderRow(attributes = ""): HTMLElement {
+            renderTab(
+                theme,
+                section(
+                    "roles",
+                    "",
+                    subsection(
+                        "users",
+                        "Privileged users",
+                        `<button class="SettingsRow_row SettingsRow_twoLine SettingsRow_interactive" type="button"
+                            data-settings-row="" id="person" ${attributes}>
+                            <span class="SettingsRow_text">
+                                <span class="SettingsRow_label">Alice</span>
+                                <span class="SettingsRow_description" id="user-id">@alice:example.org</span>
+                            </span>
+                            <span class="SettingsRow_end"><span class="SettingsRow_value" id="role">Admin</span></span>
+                        </button>`,
+                    ),
+                ),
+            );
+            return get("#person");
+        }
+
+        /** The lowest contrast of the row's secondary text, the value and the Matrix ID, on its fill over the card. */
+        function textContrast(fill: string): number {
+            const [red, green, blue] = composite(fill, getComputedStyle(get("#users-card")).backgroundColor);
+            const ground = `rgb(${red}, ${green}, ${blue})`;
+            return Math.min(
+                ...["#role", "#user-id"].map((id) => contrastOver(getComputedStyle(get(id)).color, ground)),
+            );
+        }
+
+        it("keeps the secondary text at 4.5:1 while the row's menu is open", () => {
+            const person = renderRow('data-state="open"');
+            const fill = getComputedStyle(person).backgroundColor;
+
+            expect(fill).toBe(tokenColor("--cpd-color-bg-action-secondary-pressed", person));
+            expect(textContrast(fill)).toBeGreaterThanOrEqual(4.5);
+        });
+
+        it("keeps the secondary text at 4.5:1 while the row is pressed", async () => {
+            const person = renderRow();
+            await mouseButton("mousePressed", person);
+            const pressed = person.matches(":active");
+            const fill = getComputedStyle(person).backgroundColor;
+            const contrast = textContrast(fill);
+            await mouseButton("mouseReleased", person);
+
+            expect(pressed).toBe(true);
+            expect(fill).toBe(tokenColor("--cpd-color-bg-action-secondary-pressed", person));
+            expect(contrast).toBeGreaterThanOrEqual(4.5);
         });
     });
 

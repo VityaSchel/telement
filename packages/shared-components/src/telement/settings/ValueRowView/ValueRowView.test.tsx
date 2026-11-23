@@ -216,6 +216,17 @@ describe("ValueRowView", () => {
         );
     });
 
+    it("darkens the value and the second line on the pressed fill, while the menu is open", async () => {
+        render(<Person />);
+        const row = screen.getByRole("button");
+        const texts = [screen.getByText("Moderator"), screen.getByText("@bot_0002:localhost")];
+        const colors = (): string[] => texts.map((text) => getComputedStyle(text).color);
+
+        expect(new Set(colors())).toEqual(new Set([tokenColor("--cpd-color-text-secondary")]));
+        await userEvent.click(row);
+        expect(new Set(colors())).toEqual(new Set([tokenColor("--tl-color-text-secondary-on-pressed")]));
+    });
+
     it("draws a person as a 52px two-line row, the 36px avatar on the content edge 8px from its top and bottom", () => {
         render(<Person />);
         const row = screen.getByRole("button").getBoundingClientRect();

@@ -138,8 +138,6 @@ export const ManyOptions: Story = {
                     { id: "aria-hidden-focus", enabled: false },
                     // The arrow keys scroll the list from the pill, which keeps the focus
                     { id: "scrollable-region-focusable", enabled: false },
-                    // The value's secondary text on the pressed fill the row has while its menu is open
-                    { id: "color-contrast", enabled: false },
                 ],
             },
         },
