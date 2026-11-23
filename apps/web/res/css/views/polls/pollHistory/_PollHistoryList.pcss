@@ -23,7 +23,8 @@ Please see LICENSE files in the repository root for full details.
     display: grid;
     gap: var(--cpd-space-5x);
     padding-right: var(--cpd-space-16x);
-    margin: var(--cpd-space-8x) 0;
+    /* Telement: 20px under the filter's chips, as the room list's rows are under its own */
+    margin: var(--cpd-space-5x) 0 var(--cpd-space-8x);
 
     &.mx_PollHistoryList_list_ENDED {
         gap: var(--cpd-space-8x);

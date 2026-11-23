@@ -6,41 +6,80 @@ SPDX-License-Identifier: AGPL-3.0-only OR GPL-3.0-only OR LicenseRef-Element-Com
 Please see LICENSE files in the repository root for full details.
 */
 
+/* Telement: drawn as the room list's filters (RoomListPrimaryFilters, Compound's ChatFilter) rather than as underlined
+   labels: 28px outlined chips 8px apart, the selected one filled, their capitals in the middle of the chip. The radio
+   itself has no size, so its focus ring is drawn around the chip */
 .mx_FilterTabGroup {
     /* Reset the browser default <fieldset> styling */
-    display: inline-block;
     margin-inline: unset;
     padding-block: unset;
     padding-inline: unset;
     min-inline-size: unset;
     border: none;
 
-    color: $primary-content;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--cpd-space-2x);
+
+    /* A flex row, so that the radio doesn't put a line of its own above the chip */
     label {
-        margin-right: var(--cpd-space-3x);
+        display: flex;
         cursor: pointer;
+
         span {
-            display: inline-block;
-            line-height: $font-24px;
+            display: block;
+            box-sizing: border-box;
+            block-size: var(--cpd-space-7x);
+            padding: calc((var(--cpd-space-7x) - 2 * var(--cpd-border-width-1) - 1cap) / 2) var(--cpd-space-2x) 0;
+            border: var(--cpd-border-width-1) solid var(--cpd-color-border-interactive-secondary);
+            border-radius: var(--tl-radius-control);
+            font: var(--cpd-font-body-sm-medium);
+            line-height: 1cap;
+            text-box: trim-both cap alphabetic;
+            color: var(--cpd-color-text-primary);
+        }
+
+        @media (hover) {
+            &:hover span {
+                border-color: var(--cpd-color-border-interactive-primary);
+                background-color: var(--cpd-color-bg-subtle-primary);
+            }
+        }
+
+        &:active span {
+            background-color: var(--tl-color-bg-subtle-pressed);
         }
     }
+
     input[type="radio"] {
         appearance: none;
         margin: 0;
         padding: 0;
 
-        &:focus,
-        &:hover {
-            & + span {
-                color: $secondary-content;
+        &:focus-visible + span {
+            outline: var(--cpd-border-width-2) solid var(--cpd-color-border-focused);
+            outline-offset: var(--cpd-border-width-1);
+        }
+    }
+
+    /* The selected chip takes the primary button's fills, hovered and pressed too */
+    label:has(> input:checked) {
+        span {
+            border-color: var(--cpd-color-bg-action-primary-rest);
+            background-color: var(--cpd-color-bg-action-primary-rest);
+            color: var(--cpd-color-text-on-solid-primary);
+        }
+
+        @media (hover) {
+            &:hover span {
+                border-color: var(--cpd-color-bg-action-primary-hovered);
+                background-color: var(--cpd-color-bg-action-primary-hovered);
             }
         }
 
-        &:checked + span {
-            color: $accent;
-            font-weight: var(--cpd-font-weight-semibold);
-            /* underline */
-            box-shadow: 0 1.5px 0 0 currentColor;
+        &:active span {
+            border-color: var(--cpd-color-bg-action-primary-pressed);
+            background-color: var(--cpd-color-bg-action-primary-pressed);
         }
     }
 }

@@ -23,6 +23,7 @@ import fontSizes from "../../res/css/_font-sizes.pcss?raw";
 import lightTheme from "../../res/themes/light/css/_light.pcss?raw";
 import pollListItemStyles from "../../res/css/components/views/dialogs/polls/_PollListItem.pcss?raw";
 import pollListItemEndedStyles from "../../res/css/components/views/dialogs/polls/_PollListItemEnded.pcss?raw";
+import filterTabGroupStyles from "../../res/css/components/views/elements/_FilterTabGroup.pcss?raw";
 import successDialogStyles from "../../res/css/compound/_SuccessDialog.pcss?raw";
 import spacePillButtonStyles from "../../res/css/structures/_SpacePillButton.pcss?raw";
 import tabbedViewStyles from "../../res/css/structures/_TabbedView.pcss?raw";
@@ -60,6 +61,7 @@ import copyableTextStyles from "../../res/css/views/elements/_CopyableText.pcss?
 import fieldStyles from "../../res/css/views/elements/_Field.pcss?raw";
 import roomAliasFieldStyles from "../../res/css/views/elements/_RoomAliasField.pcss?raw";
 import pollHistoryStyles from "../../res/css/views/polls/pollHistory/_PollHistory.pcss?raw";
+import pollHistoryListStyles from "../../res/css/views/polls/pollHistory/_PollHistoryList.pcss?raw";
 import linkModalStyles from "../../res/css/views/rooms/wysiwyg_composer/components/_LinkModal.pcss?raw";
 import roomProfileSettingsStyles from "../../res/css/views/settings/_RoomProfileSettings.pcss?raw";
 import settingsSectionStyles from "../../res/css/views/settings/tabs/_SettingsSection.pcss?raw";
@@ -76,6 +78,7 @@ const APP_STYLES = [
     commonStyles,
     pollListItemStyles,
     pollListItemEndedStyles,
+    filterTabGroupStyles,
     successDialogStyles,
     spacePillButtonStyles,
     tabbedViewStyles,
@@ -113,6 +116,7 @@ const APP_STYLES = [
     fieldStyles,
     roomAliasFieldStyles,
     pollHistoryStyles,
+    pollHistoryListStyles,
     linkModalStyles,
     roomProfileSettingsStyles,
     settingsSectionStyles,
@@ -252,8 +256,11 @@ describe("Dialogs", () => {
         stylesheet.textContent = `
             @layer compound-tokens, compound-web, shared-components, app-web;
             @layer compound-tokens { ${compoundBase} ${compoundSemantic} ${compoundLightTheme} ${compoundLightSemantic} }
-            /* Compound's form (Root), a column of its fields 20px apart */
-            @layer compound-web { .${COMPOUND_FORM} { display: flex; flex-direction: column; gap: var(--cpd-space-5x); } }
+            /* Compound's pill radius and its form (Root), a column of its fields 20px apart */
+            @layer compound-web {
+                :root { --cpd-radius-pill-effect: 9999px; }
+                .${COMPOUND_FORM} { display: flex; flex-direction: column; gap: var(--cpd-space-5x); }
+            }
             @layer shared-components { ${telementTokens} ${dialogFooterStyles} }
             @layer app-web {
                 body { margin: 0; }
@@ -1241,7 +1248,15 @@ describe("Dialogs", () => {
                 "Polls",
                 `<div class="mx_PollHistory_content">
                     <div class="mx_PollHistoryList" data-testid="list">
-                        <ol class="mx_PollHistoryList_list">
+                        <fieldset class="mx_FilterTabGroup" data-testid="filter">
+                            <label data-testid="active">
+                                <input type="radio" name="PollHistory_filter" value="ACTIVE" checked /><span>Active polls</span>
+                            </label>
+                            <label data-testid="past">
+                                <input type="radio" name="PollHistory_filter" value="ENDED" /><span>Past polls</span>
+                            </label>
+                        </fieldset>
+                        <ol class="mx_PollHistoryList_list" data-testid="polls">
                             <li class="mx_PollListItem">
                                 <div class="mx_PollListItem_content">
                                     <span>11/20/26</span>
@@ -1260,6 +1275,53 @@ describe("Dialogs", () => {
 
             expect(box("[data-testid=body]").width).toBe(640);
             expect(box("[data-testid=list]").top - box(".mx_Dialog_title").bottom).toBe(16);
+        });
+
+        it("filters with the room list's 28px chips 8px apart, the selected one filled, 20px above the polls", () => {
+            renderPolls();
+            const [active, past] = ["active", "past"].map((id) => getComputedStyle(get(`[data-testid=${id}] span`)));
+
+            for (const chip of ["active", "past"]) {
+                expect(box(`[data-testid=${chip}]`).height).toBe(28);
+                expect(box(`[data-testid=${chip}] span`).height).toBe(28);
+            }
+            expect(box("[data-testid=active]").left - box("[data-testid=body]").left).toBe(24);
+            expect(box("[data-testid=past]").left - box("[data-testid=active]").right).toBe(8);
+            expect(box("[data-testid=polls]").top - box("[data-testid=filter]").bottom).toBe(20);
+            expect(active.borderTopLeftRadius).toBe(past.borderTopLeftRadius);
+            expect(parseFloat(past.borderTopLeftRadius)).toBeGreaterThanOrEqual(14);
+            expect([past.fontSize, past.fontWeight, active.fontWeight]).toEqual(["13px", "500", "500"]);
+            expect(past.borderTopColor).toBe(colorOf("--cpd-color-border-interactive-secondary"));
+            expect(past.backgroundColor).toBe("rgba(0, 0, 0, 0)");
+            expect(past.color).toBe(colorOf("--cpd-color-text-primary"));
+            expect(active.backgroundColor).toBe(colorOf("--cpd-color-bg-action-primary-rest"));
+            expect(active.color).toBe(colorOf("--cpd-color-text-on-solid-primary"));
+            expect(active.boxShadow).toBe("none");
+        });
+
+        it("deepens a filter chip while it is pointed at, the selected one too", async () => {
+            renderPolls();
+
+            await userEvent.hover(get("[data-testid=past]"));
+            expect(getComputedStyle(get("[data-testid=past] span")).backgroundColor).toBe(
+                colorOf("--cpd-color-bg-subtle-primary"),
+            );
+
+            await userEvent.hover(get("[data-testid=active]"));
+            expect(getComputedStyle(get("[data-testid=active] span")).backgroundColor).toBe(
+                colorOf("--cpd-color-bg-action-primary-hovered"),
+            );
+        });
+
+        it("rings the chip whose filter has the keyboard focus", async () => {
+            renderPolls();
+
+            get("[data-testid=active] input").focus();
+            await userEvent.keyboard("{ArrowRight}");
+            const past = getComputedStyle(get("[data-testid=past] span"));
+
+            expect(get("[data-testid=past] input").matches(":focus-visible")).toBe(true);
+            expect([past.outlineStyle, past.outlineWidth, past.outlineOffset]).toEqual(["solid", "2px", "1px"]);
         });
 
         it("marks each poll with a 16px icon in the secondary icon color", () => {
