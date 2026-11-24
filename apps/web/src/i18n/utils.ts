@@ -17,16 +17,19 @@ type Language = {
     labelInTargetLanguage: string; // translated
 };
 
-export async function getAllLanguagesWithLabels(): Promise<Language[]> {
+/** A language with its name in the user's language and in its own. */
+export function getLanguageWithLabels(langKey: string): Language {
     const languageNames = new Intl.DisplayNames([getLocale()], { type: "language", style: "short" });
+    return {
+        value: langKey,
+        label: languageNames.of(langKey)!,
+        labelInTargetLanguage: new Intl.DisplayNames([langKey], { type: "language", style: "short" }).of(langKey)!,
+    };
+}
+
+export async function getAllLanguagesWithLabels(): Promise<Language[]> {
     const languages = await getAllLanguagesFromJson();
-    return languages.map<Language>((langKey) => {
-        return {
-            value: langKey,
-            label: languageNames.of(langKey)!,
-            labelInTargetLanguage: new Intl.DisplayNames([langKey], { type: "language", style: "short" }).of(langKey)!,
-        };
-    });
+    return languages.map(getLanguageWithLabels);
 }
 
 /**

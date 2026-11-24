@@ -7,7 +7,7 @@ SPDX-License-Identifier: AGPL-3.0-only OR GPL-3.0-only OR LicenseRef-Element-Com
 Please see LICENSE files in the repository root for full details.
 */
 
-import React, { type ChangeEvent, type JSX, useCallback, useEffect, useState } from "react";
+import React, { type ChangeEvent, type JSX, useCallback, useEffect, useRef, useState } from "react";
 import { SettingsToggleInput } from "@vector-im/compound-web";
 import { type EmptyObject } from "matrix-js-sdk/src/matrix";
 
@@ -25,13 +25,14 @@ import SdkConfig from "../../../../../SdkConfig";
 import { SettingsSubsection } from "../../shared/SettingsSubsection";
 import SettingsTab from "../SettingsTab";
 import { SettingsSection } from "../../shared/SettingsSection";
-import { getAllLanguagesWithLabels } from "../../../../../i18n/utils";
+import { getAllLanguagesWithLabels, getLanguageWithLabels } from "../../../../../i18n/utils";
 import PlatformPeg from "../../../../../PlatformPeg";
 import { IS_MAC } from "../../../../../Keyboard";
 import SpellCheckSettings from "../../SpellCheckSettings";
 import * as TimezoneHandler from "../../../../../TimezoneHandler";
 import { type BooleanSettingKey, type SettingKey } from "../../../../../settings/Settings.tsx";
 import SettingsDropdown from "../../../elements/SettingsDropdown.tsx";
+import { useLocalStorageState } from "../../../../../hooks/useLocalStorageState";
 import { SettingsValueRow } from "../../../../../telement/settings/SettingsValueRow";
 
 interface IState {
@@ -45,7 +46,8 @@ type Languages = Awaited<ReturnType<typeof getAllLanguagesWithLabels>>;
 
 const LanguageSection: React.FC = () => {
     const [language, setLanguage] = useState(getCurrentLanguage());
-    const [languages, setLanguages] = useState<Languages | null>(null);
+    // Telement: until the list is loaded, the current language alone, so that the row shows it from the start
+    const [languages, setLanguages] = useState<Languages>(() => [getLanguageWithLabels(language)]);
 
     useEffect(() => {
         let cancelled = false;
@@ -80,42 +82,65 @@ const LanguageSection: React.FC = () => {
     return (
         <SettingsValueRow
             label={_t("settings|general|application_language")}
-            options={(languages ?? []).map((lang) => ({
+            options={languages.map((lang) => ({
                 key: lang.value,
                 label: lang.labelInTargetLanguage,
                 searchTerms: [lang.label],
             }))}
             selectedKey={language}
-            disabled={languages === null}
             onSelect={onLanguageChange}
         />
     );
 };
 
+/** What the desktop app says of its spell checker. */
+interface SpellCheckState {
+    enabled: boolean;
+    languages?: string[];
+}
+
+/** On, as the desktop app has it until it is turned off (apps/desktop/src/store.ts). */
+const DEFAULT_SPELL_CHECK: SpellCheckState = { enabled: true };
+
 const SpellCheckSection: React.FC = () => {
-    const [spellCheckEnabled, setSpellCheckEnabled] = useState<boolean | undefined>();
-    const [spellCheckLanguages, setSpellCheckLanguages] = useState<string[] | undefined>();
+    // Telement: what the desktop app last said, so that the toggle and the languages are shown as they are from the
+    // start, rather than off and without languages until it has answered
+    const [spellCheck, setSpellCheck] = useLocalStorageState("spell_check", DEFAULT_SPELL_CHECK);
+    const changed = useRef(false);
 
     useEffect(() => {
+        const plaf = PlatformPeg.get();
+        if (!plaf?.supportsSpellCheckSettings()) return;
+
         (async () => {
-            const plaf = PlatformPeg.get();
-            const [enabled, langs] = await Promise.all([plaf?.getSpellCheckEnabled(), plaf?.getSpellCheckLanguages()]);
-
-            setSpellCheckEnabled(enabled);
-            setSpellCheckLanguages(langs || undefined);
+            const [enabled, languages] = await Promise.all([
+                plaf.getSpellCheckEnabled(),
+                plaf.getSpellCheckLanguages(),
+            ]);
+            // An answer from before the user changed something here
+            if (changed.current) return;
+            setSpellCheck({ enabled, languages: languages || undefined });
         })();
-    }, []);
+    }, [setSpellCheck]);
 
-    const onSpellCheckEnabledChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
-        const enabled = e.target.checked;
-        setSpellCheckEnabled(enabled);
-        PlatformPeg.get()?.setSpellCheckEnabled(enabled);
-    }, []);
+    const onSpellCheckEnabledChange = useCallback(
+        (e: ChangeEvent<HTMLInputElement>) => {
+            const enabled = e.target.checked;
+            changed.current = true;
+            setSpellCheck({ ...spellCheck, enabled });
+            PlatformPeg.get()?.setSpellCheckEnabled(enabled);
+        },
+        [spellCheck, setSpellCheck],
+    );
 
-    const onSpellCheckLanguagesChange = useCallback((languages: string[]): void => {
-        setSpellCheckLanguages(languages);
-        PlatformPeg.get()?.setSpellCheckLanguages(languages);
-    }, []);
+    const onSpellCheckLanguagesChange = useCallback(
+        (languages: string[]): void => {
+            changed.current = true;
+            setSpellCheck({ ...spellCheck, languages });
+            PlatformPeg.get()?.setSpellCheckLanguages(languages);
+        },
+        [spellCheck, setSpellCheck],
+    );
 
     if (!PlatformPeg.get()?.supportsSpellCheckSettings()) return null;
 
@@ -125,10 +150,10 @@ const SpellCheckSection: React.FC = () => {
                 name="allow_spellcheck"
                 label={_t("settings|general|allow_spellcheck")}
                 onChange={onSpellCheckEnabledChange}
-                checked={Boolean(spellCheckEnabled)}
+                checked={spellCheck.enabled}
             />
-            {spellCheckEnabled && spellCheckLanguages !== undefined && !IS_MAC && (
-                <SpellCheckSettings languages={spellCheckLanguages} onLanguagesChange={onSpellCheckLanguagesChange} />
+            {spellCheck.enabled && spellCheck.languages !== undefined && !IS_MAC && (
+                <SpellCheckSettings languages={spellCheck.languages} onLanguagesChange={onSpellCheckLanguagesChange} />
             )}
         </>
     );

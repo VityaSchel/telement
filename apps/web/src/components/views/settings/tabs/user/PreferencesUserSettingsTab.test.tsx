@@ -10,8 +10,9 @@ Please see LICENSE files in the repository root for full details.
 
 import React from "react";
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import { render, type RenderResult, screen, waitFor, within } from "test-utils-rtl";
+import { act, render, type RenderResult, screen, waitFor, within } from "test-utils-rtl";
 import {
+    flushPromises,
     getMockClientWithEventEmitter,
     mockClientMethodsServer,
     mockClientMethodsUser,
@@ -69,8 +70,9 @@ describe("PreferencesUserSettingsTab", () => {
             codes.map((value) => ({ value, label: name(value, "en"), labelInTargetLanguage: name(value, value) })),
         );
         renderTab();
-        const languageRow = await screen.findByRole("button", { name: /^Application language/ });
-        await waitFor(() => expect(languageRow).toHaveTextContent("Application languageEnglish"));
+        await act(flushPromises);
+        const languageRow = screen.getByRole("button", { name: /^Application language/ });
+        expect(languageRow).toHaveTextContent("Application languageEnglish");
         await userEvent.click(languageRow);
         const search = screen.getByRole("textbox", { name: "Search" });
 
@@ -132,6 +134,79 @@ describe("PreferencesUserSettingsTab", () => {
         expect(screen.queryByRole("switch", { name: "Allow spell check" })).not.toBeInTheDocument();
     });
 
+    describe("the spell check toggle", () => {
+        const toggle = (): HTMLElement => screen.getByRole("switch", { name: "Allow spell check" });
+
+        beforeEach(() => {
+            localStorage.clear();
+            PlatformPeg.get()!.supportsSpellCheckSettings = vi.fn().mockReturnValue(true);
+            PlatformPeg.get()!.getSpellCheckLanguages = vi.fn().mockResolvedValue(null);
+        });
+
+        it("is on from the first render, as the desktop app has it until it is turned off", async () => {
+            PlatformPeg.get()!.getSpellCheckEnabled = vi.fn().mockResolvedValue(true);
+            renderTab();
+            expect(toggle()).toBeChecked();
+
+            await act(flushPromises);
+            expect(toggle()).toBeChecked();
+        });
+
+        it("is what the desktop app last said from the first render, then what it says", async () => {
+            PlatformPeg.get()!.getSpellCheckEnabled = vi.fn().mockResolvedValue(false);
+            const { unmount } = renderTab();
+            await act(flushPromises);
+            expect(toggle()).not.toBeChecked();
+            unmount();
+
+            let answer!: (enabled: boolean) => void;
+            PlatformPeg.get()!.getSpellCheckEnabled = vi.fn(
+                () => new Promise<boolean>((resolve) => (answer = resolve)),
+            );
+            renderTab();
+            expect(toggle()).not.toBeChecked();
+
+            await act(async () => {
+                answer(true);
+                await flushPromises();
+            });
+            expect(toggle()).toBeChecked();
+        });
+
+        it("stays as the user set it when the desktop app's answer comes after", async () => {
+            let answer!: (enabled: boolean) => void;
+            PlatformPeg.get()!.getSpellCheckEnabled = vi.fn(
+                () => new Promise<boolean>((resolve) => (answer = resolve)),
+            );
+            PlatformPeg.get()!.setSpellCheckEnabled = vi.fn();
+            renderTab();
+            await userEvent.click(toggle());
+            expect(toggle()).not.toBeChecked();
+
+            await act(async () => {
+                answer(true);
+                await flushPromises();
+            });
+            expect(toggle()).not.toBeChecked();
+        });
+
+        it("doesn't ask a platform without one", () => {
+            PlatformPeg.get()!.supportsSpellCheckSettings = vi.fn().mockReturnValue(false);
+            PlatformPeg.get()!.getSpellCheckEnabled = vi.fn().mockResolvedValue(true);
+            renderTab();
+
+            expect(PlatformPeg.get()!.getSpellCheckEnabled).not.toHaveBeenCalled();
+        });
+    });
+
+    it("should show the language from the first render, before the list of languages is loaded", () => {
+        vi.mocked(getAllLanguagesWithLabels).mockReturnValueOnce(new Promise(() => {}));
+        renderTab();
+
+        const row = screen.getByRole("button", { name: /^Application language/ });
+        expect(row).toHaveTextContent("Application languageEnglish");
+    });
+
     it("should enable spell check", async () => {
         const spellCheckEnableFn = vi.fn();
         PlatformPeg.get()!.supportsSpellCheckSettings = vi.fn().mockReturnValue(true);
@@ -141,6 +216,7 @@ describe("PreferencesUserSettingsTab", () => {
         renderTab();
         const toggle = await screen.findByRole("switch", { name: "Allow spell check" });
         expect(toggle).not.toBeDisabled();
+        await waitFor(() => expect(toggle).not.toBeChecked());
 
         await userEvent.click(toggle);
 

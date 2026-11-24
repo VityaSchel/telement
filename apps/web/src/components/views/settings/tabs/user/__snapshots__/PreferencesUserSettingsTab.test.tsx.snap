@@ -33,10 +33,14 @@ exports[`PreferencesUserSettingsTab > should render 1`] = `
               <div
                 class="mx_SettingsSubsection_content"
               >
-                <div
-                  aria-disabled="true"
-                  class="_row"
+                <button
+                  aria-expanded="false"
+                  aria-haspopup="menu"
+                  class="_row _interactive"
                   data-settings-row=""
+                  data-state="closed"
+                  id="radix-react-use-id-1"
+                  type="button"
                 >
                   <span
                     class="_text"
@@ -52,9 +56,24 @@ exports[`PreferencesUserSettingsTab > should render 1`] = `
                   >
                     <span
                       class="_value"
-                    />
+                    >
+                      English
+                    </span>
+                    <svg
+                      aria-hidden="true"
+                      class="_chevron"
+                      fill="currentColor"
+                      height="1em"
+                      viewBox="0 0 24 24"
+                      width="1em"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M12 14.95q-.2 0-.375-.062a.9.9 0 0 1-.325-.213l-4.6-4.6a.95.95 0 0 1-.275-.7q0-.425.275-.7a.95.95 0 0 1 .7-.275q.425 0 .7.275l3.9 3.9 3.9-3.9a.95.95 0 0 1 .7-.275q.425 0 .7.275a.95.95 0 0 1 .275.7.95.95 0 0 1-.275.7l-4.6 4.6q-.15.15-.325.212a1.1 1.1 0 0 1-.375.063"
+                      />
+                    </svg>
                   </span>
-                </div>
+                </button>
               </div>
               <div
                 class="mx_SettingsSubsection_description"
@@ -195,7 +214,7 @@ exports[`PreferencesUserSettingsTab > should render 1`] = `
                   class="_row _interactive"
                   data-settings-row=""
                   data-state="closed"
-                  id="radix-react-use-id-1"
+                  id="radix-react-use-id-2"
                   type="button"
                 >
                   <span
@@ -348,7 +367,7 @@ exports[`PreferencesUserSettingsTab > should render 1`] = `
                     </label>
                     <span
                       class="_message _help-message"
-                      id="radix-react-use-id-2"
+                      id="radix-react-use-id-3"
                     >
                       <span>
                         Start messages with 

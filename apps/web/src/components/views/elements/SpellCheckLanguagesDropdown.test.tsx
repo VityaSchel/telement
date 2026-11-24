@@ -10,7 +10,9 @@ Please see LICENSE files in the repository root for full details.
 
 import { describe, it, expect, vi } from "vitest";
 import React from "react";
-import { render, screen, waitForElementToBeRemoved } from "test-utils-rtl";
+import { act, render, screen } from "test-utils-rtl";
+import { flushPromises } from "test-utils";
+import userEvent from "@testing-library/user-event";
 
 import SpellCheckLanguagesDropdown from "./SpellCheckLanguagesDropdown";
 import PlatformPeg from "../../../PlatformPeg";
@@ -30,7 +32,28 @@ describe("<SpellCheckLanguagesDropdown />", () => {
                 onOptionChange={vi.fn()}
             />,
         );
-        await waitForElementToBeRemoved(() => screen.queryAllByLabelText("Loading…"));
+        await act(flushPromises);
         expect(asFragment()).toMatchSnapshot();
+    });
+
+    it("is there from the first render, with English until the platform has listed its languages", async () => {
+        const languages = Promise.withResolvers<string[]>();
+        PlatformPeg.set({
+            getAvailableSpellCheckLanguages: () => languages.promise,
+            supportsSetting: vi.fn(),
+            overrideBrowserShortcuts: () => false,
+        } as any);
+        render(<SpellCheckLanguagesDropdown className="" value="" onOptionChange={vi.fn()} />);
+
+        expect(screen.queryByLabelText("Loading…")).toBeNull();
+        const dropdown = screen.getByRole("button");
+        await userEvent.click(dropdown);
+        expect(screen.getAllByRole("option").map((option) => option.textContent)).toEqual(["English"]);
+
+        await act(async () => {
+            languages.resolve(["en", "de"]);
+            await flushPromises();
+        });
+        expect(screen.getAllByRole("option").map((option) => option.textContent)).toEqual(["German", "English"]);
     });
 });

@@ -12,7 +12,6 @@ import Dropdown from "../../views/elements/Dropdown";
 import PlatformPeg from "../../../PlatformPeg";
 import { _t } from "../../../languageHandler";
 import { getUserLanguage } from "../../../i18n/settings";
-import Spinner from "./Spinner";
 import { type NonEmptyArray } from "../../../@types/common";
 
 type Languages = {
@@ -33,7 +32,7 @@ interface SpellCheckLanguagesDropdownIProps {
 
 interface SpellCheckLanguagesDropdownIState {
     searchQuery: string;
-    languages?: Languages;
+    languages: Languages;
 }
 
 export default class SpellCheckLanguagesDropdown extends React.Component<
@@ -46,6 +45,14 @@ export default class SpellCheckLanguagesDropdown extends React.Component<
 
         this.state = {
             searchQuery: "",
+            // Telement: English alone until the platform has listed its languages, so that the dropdown is there from the
+            // start rather than a spinner of another height
+            languages: [
+                {
+                    value: "en",
+                    label: new Intl.DisplayNames([getUserLanguage()], { type: "language", style: "short" }).of("en")!,
+                },
+            ],
         };
     }
 
@@ -69,16 +76,8 @@ export default class SpellCheckLanguagesDropdown extends React.Component<
                     });
                     this.setState({ languages: langs });
                 })
-                .catch((e) => {
-                    this.setState({
-                        languages: [
-                            {
-                                value: "en",
-                                label: languageNames.of("en")!,
-                            },
-                        ],
-                    });
-                });
+                // English alone, then
+                .catch(() => {});
         }
     }
 
@@ -87,10 +86,6 @@ export default class SpellCheckLanguagesDropdown extends React.Component<
     };
 
     public render(): React.ReactNode {
-        if (!this.state.languages) {
-            return <Spinner />;
-        }
-
         let displayedLanguages: Languages;
         if (this.state.searchQuery) {
             displayedLanguages = this.state.languages.filter((lang) => {
