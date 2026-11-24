@@ -188,7 +188,7 @@ describe("Settings dialogs", () => {
             });
         });
 
-        it("fills the setting it opened with the row hover fill, to 4px from its card, without flashing under reduced motion", () => {
+        it("fills the setting it opened with the accent's tint, to 4px from its card, without flashing under reduced motion", () => {
             document.body.innerHTML = `
                 <div class="mx_SettingsSearch_found" id="found"
                     style="--mx-settings-found-start: 12px; --mx-settings-found-end: 12px; --mx-settings-found-block: 10px">
@@ -197,7 +197,7 @@ describe("Settings dialogs", () => {
             `;
             const fill = getComputedStyle(document.querySelector("#found")!, "::before");
 
-            expect(fill.backgroundColor).toBe(tokenColor("--cpd-color-bg-action-secondary-hovered", document.body));
+            expect(fill.backgroundColor).toBe(tokenColor("--tl-accent-500", document.body));
             expect([fill.left, fill.right, fill.top, fill.bottom]).toEqual(["-12px", "-12px", "-10px", "-10px"]);
             expect(fill.borderTopLeftRadius).toBe("8px");
             expect(fill.zIndex).toBe("-1");

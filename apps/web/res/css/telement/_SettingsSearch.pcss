@@ -6,13 +6,20 @@ Please see LICENSE files in the repository root for full details.
 */
 
 /*
- * A setting search opened (revealSetting.ts): its row flashes the row hover fill for two seconds, reaching 4px from its
- * card's sides and at least a row tall, rounded like a row. Under the row's content, over its card. With reduced
- * motion the fill shows for the two seconds without flashing.
+ * A setting search opened (revealSetting.ts): its row flashes a tint of the accent for two seconds, as the message a
+ * jump lands on does, reaching 4px from its card's sides and at least a row tall, rounded like a row. Under the row's
+ * content, over its card. The gray hover fill wouldn't do: in light themes it is the color of the pane around the cards,
+ * so a group's card would vanish rather than flash. The tint is 1.4:1 or more against the cards and 1.25:1 or more
+ * against the pane in every theme; text on it is a step or two deeper, so that it stays 4.5:1. With reduced motion the
+ * fill shows for the two seconds without flashing.
  */
 .mx_SettingsSearch_found {
     position: relative;
     isolation: isolate;
+
+    --cpd-color-text-secondary: var(--tl-color-text-secondary-on-pressed);
+    --cpd-color-text-action-accent: var(--cpd-color-text-badge-accent);
+    --cpd-color-text-critical-primary: var(--cpd-color-red-1100);
 
     &::before {
         content: "";
@@ -22,7 +29,7 @@ Please see LICENSE files in the repository root for full details.
         inset-inline-end: calc(-1 * var(--mx-settings-found-end, 0px));
         z-index: -1;
         border-radius: var(--tl-radius-row);
-        background-color: var(--cpd-color-bg-action-secondary-hovered);
+        background-color: var(--tl-accent-500);
         pointer-events: none;
         animation: mx_SettingsSearch_flash 2s ease-out forwards;
     }
@@ -31,8 +38,10 @@ Please see LICENSE files in the repository root for full details.
 /* A group found by its label alone fills its card */
 :is(
         .mx_SettingsSubsection_content,
+        .mx_SettingsSubsection_description,
         .mx_SettingsFieldset_content,
-        .mx_SettingsSection_content
+        .mx_SettingsSection_content,
+        .mx_SettingsSection_subSections
     ).mx_SettingsSearch_found::before {
     border-radius: inherit;
 }

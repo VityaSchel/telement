@@ -65,6 +65,40 @@ describe("findSetting", () => {
         expect(findSetting(panel(), "Displaying time")?.id).toBe("time-card");
     });
 
+    it("finds a group without content, such as the FAQ, as its description's card", () => {
+        document.body.innerHTML = `
+            <div id="panel">
+                <div class="mx_SettingsSubsection">
+                    <div class="mx_SettingsSubsectionHeading"><h3>FAQ</h3></div>
+                    <div class="mx_SettingsSubsection_description" id="faq-card"><div>For help, see here.</div></div>
+                </div>
+            </div>
+        `;
+
+        expect(findSetting(document.getElementById("panel")!, "FAQ")?.id).toBe("faq-card");
+    });
+
+    it("finds a section that holds groups as the first one's card, as it has no card of its own", () => {
+        document.body.innerHTML = `
+            <div id="panel">
+                <div class="mx_SettingsSection">
+                    <h2>Moderation</h2>
+                    <div class="mx_SettingsSection_subSections">
+                        <div class="mx_SettingsSubsection">
+                            <div class="mx_SettingsSubsection_content" id="moderation-card">
+                                <fieldset class="mx_SettingsFieldset">
+                                    <div class="mx_SettingsFieldset_content">Invites</div>
+                                </fieldset>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        expect(findSetting(document.getElementById("panel")!, "Moderation")?.id).toBe("moderation-card");
+    });
+
     it("finds nothing for a label the tab doesn't show", () => {
         expect(findSetting(panel(), "Composer", "Wallpaper")).toBeUndefined();
         expect(findSetting(panel(), "Wallpapers")).toBeUndefined();

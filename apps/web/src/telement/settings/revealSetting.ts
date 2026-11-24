@@ -54,6 +54,17 @@ function isCard(element: Element): boolean {
     return element.matches(CARD) || (element.tagName === "FORM" && !!element.parentElement?.matches(CARD));
 }
 
+/** Whether a section's content holds groups with cards of their own, and so is drawn without one (_SettingsSection.pcss). */
+function holdsGroups(element: Element): boolean {
+    return element.matches(".mx_SettingsSection_subSections") && !!element.querySelector(`${GROUP}, .mx_BetaCard`);
+}
+
+/** The card of a group, its first one. A group without content, such as the FAQ, has its description on the card. */
+function cardOf(group: Element): HTMLElement | undefined {
+    const cards = [...group.querySelectorAll<HTMLElement>(`${CARD}, .mx_SettingsSubsection_description`)];
+    return cards.find((card) => !holdsGroups(card));
+}
+
 /** The row of a card that holds `element`: a settings row, or what the card lists as one of its items. */
 function rowOf(element: HTMLElement, scope: Element): HTMLElement {
     const settingsRow = element.closest<HTMLElement>("[data-settings-row]");
@@ -69,14 +80,14 @@ export function findSetting(panel: Element, group?: string, label?: string): HTM
     const heading = group ? findByText(panel, group) : undefined;
     const scope = heading?.closest(GROUP) ?? panel;
 
-    if (!label) return scope === panel ? undefined : (scope.querySelector<HTMLElement>(CARD) ?? undefined);
+    if (!label) return scope === panel ? undefined : cardOf(scope);
 
     const text = findByText(scope, label) ?? (scope === panel ? undefined : findByText(panel, label));
     return text ? rowOf(text, scope.contains(text) ? scope : panel) : undefined;
 }
 
 /**
- * Fills the row with the row hover fill for {@link FOUND_DURATION_MS}, flashing it unless the user prefers reduced
+ * Fills the row with a tint of the accent for {@link FOUND_DURATION_MS}, flashing it unless the user prefers reduced
  * motion. The fill reaches 4px from the card's sides, as a settings row's hover fill does, and is at least a row tall.
  */
 function flash(row: HTMLElement): void {
