@@ -304,19 +304,12 @@ exports[`<PinnedMessagesCard /> > should show two pinned messages 1`] = `
           </div>
         </div>
       </div>
-      <div
+      <button
         class="mx_PinnedMessagesCard_unpin"
+        type="button"
       >
-        <button
-          class="_button"
-          data-kind="tertiary"
-          data-size="lg"
-          role="button"
-          tabindex="0"
-        >
-          Unpin all messages
-        </button>
-      </div>
+        Unpin all messages
+      </button>
     </div>
   </div>
 </DocumentFragment>

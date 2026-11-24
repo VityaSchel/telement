@@ -7,7 +7,11 @@ Please see LICENSE files in the repository root for full details.
 */
 
 .mx_PinnedMessagesCard {
-    --unpin-height: 76px;
+    /* Telement: as tall as the composer beside it at its smallest, one line of text (--MessageComposer-oneLineHeight in
+       _MessageComposer.pcss) under a 1px line */
+    --unpin-height: calc(var(--cpd-border-width-1) + 2 * var(--cpd-space-4x) + $font-18px);
+
+    position: relative;
 
     .mx_PinnedMessagesCard_wrapper {
         display: flex;
@@ -29,21 +33,37 @@ Please see LICENSE files in the repository root for full details.
         height: calc(100% - var(--unpin-height) - calc(var(--cpd-space-4x) * 2));
     }
 
+    /* Telement: a row docked at the bottom of the card, which is all button, with the composer's line above it and the
+       composer's inset. Its label is in the accent, as Telegram's bar to unpin all messages is. */
     .mx_PinnedMessagesCard_unpin {
-        /* Make it float at the bottom of the unpin panel */
         position: absolute;
-        bottom: 0;
+        inset-block-end: 0;
+        inset-inline-start: 0;
+        box-sizing: border-box;
         width: 100%;
         height: var(--unpin-height);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        box-shadow: 0 4px 24px 0 rgb(27, 29, 34, 0.1);
-        background: var(--cpd-color-bg-canvas-default);
+        padding: 0 var(--cpd-space-2x);
+        border: none;
+        border-block-start: var(--cpd-border-width-1) solid var(--cpd-color-bg-subtle-primary);
+        background: none;
+        color: var(--cpd-color-text-action-accent);
+        font: var(--cpd-font-body-md-semibold);
+        letter-spacing: var(--cpd-font-letter-spacing-body-md);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
 
-        /* Telement: a standalone text button is accent text, as Telegram's bar to unpin all messages is */
-        [data-kind="tertiary"]:not([aria-disabled="true"]) {
-            color: var(--cpd-color-text-action-accent);
+        &:hover {
+            background: var(--cpd-color-bg-action-secondary-hovered);
+        }
+
+        &:active {
+            background: var(--cpd-color-bg-action-secondary-pressed);
+        }
+
+        &:focus-visible {
+            outline: var(--cpd-border-width-2) solid var(--cpd-color-border-focused);
+            outline-offset: calc(-1 * var(--cpd-border-width-2));
         }
     }
 

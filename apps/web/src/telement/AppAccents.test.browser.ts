@@ -511,9 +511,7 @@ describe.each(THEMES.map(([theme]) => theme))("Telement's accents in %s", (theme
                     </div>
                 </div>
                 <div class="mx_PinnedMessagesCard">
-                    <div class="mx_PinnedMessagesCard_unpin">
-                        ${markup(h(Button, { kind: "tertiary", disabled }, "Unpin all messages"))}
-                    </div>
+                    <button type="button" class="mx_PinnedMessagesCard_unpin">Unpin all messages</button>
                 </div>
                 <div class="raised">
                     <details class="mx_CreateRoomDialog_details">
@@ -545,7 +543,6 @@ describe.each(THEMES.map(([theme]) => theme))("Telement's accents in %s", (theme
             const disabled = tokenColor("--cpd-color-text-disabled", container);
 
             expect(getComputedStyle(textButton("Verify User")).color).toBe(disabled);
-            expect(getComputedStyle(textButton("Unpin all messages")).color).toBe(disabled);
         });
     });
 

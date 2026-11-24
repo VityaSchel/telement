@@ -8,7 +8,7 @@ Please see LICENSE files in the repository root for full details.
 
 import React, { useCallback, useEffect, type JSX, useContext } from "react";
 import { type Room, type MatrixEvent } from "matrix-js-sdk/src/matrix";
-import { Button, Separator } from "@vector-im/compound-web";
+import { Separator } from "@vector-im/compound-web";
 import classNames from "classnames";
 import PinIcon from "@vector-im/compound-design-tokens/assets/web/icons/pin";
 
@@ -159,11 +159,10 @@ function PinnedMessages({ events, room, permalinkCreator }: PinnedMessagesProps)
                 ))}
             </div>
             {canUnpin && (
-                <div className="mx_PinnedMessagesCard_unpin">
-                    <Button kind="tertiary" onClick={onUnpinAll}>
-                        {_t("right_panel|pinned_messages|unpin_all|button")}
-                    </Button>
-                </div>
+                // Telement: the whole row docked at the card's bottom is the button
+                <button type="button" className="mx_PinnedMessagesCard_unpin" onClick={onUnpinAll}>
+                    {_t("right_panel|pinned_messages|unpin_all|button")}
+                </button>
             )}
         </>
     );
