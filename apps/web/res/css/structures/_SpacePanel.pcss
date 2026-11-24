@@ -114,7 +114,7 @@ Please see LICENSE files in the repository root for full details.
     }
 
     .mx_SpaceItem:not(.hasSubSpaces) > .mx_SpaceButton {
-        margin-left: var(--gutterSize);
+        margin-inline-start: var(--gutterSize);
         min-width: 40px;
     }
 
@@ -371,6 +371,9 @@ Please see LICENSE files in the repository root for full details.
            room for that space's focus ring and for the ring of its counter, which hangs 2px over its button */
         margin-block-start: calc(-1 * var(--cpd-space-1x));
         padding: var(--cpd-space-1x) 0 16px 0;
+        /* A space scrolled into view, as by the focus, stops clear of the fades below, and the first one with that room
+           above it */
+        scroll-padding-block: var(--cpd-space-4x);
         scrollbar-gutter: stable;
 
         &.mx_IndicatorScrollbar_topOverflow {

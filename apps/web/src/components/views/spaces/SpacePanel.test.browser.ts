@@ -667,7 +667,8 @@ function renderList(
         badgeType = "badge_2char",
         expanded = false,
         dir = "ltr",
-    }: { selected?: string; badgeType?: BadgeType; expanded?: boolean; dir?: string } = {},
+        height = 400,
+    }: { selected?: string; badgeType?: BadgeType; expanded?: boolean; dir?: string; height?: number } = {},
 ): void {
     const { badgeClass, count } = BADGES[badgeType];
     const space = (label: string): string => `
@@ -691,7 +692,7 @@ function renderList(
     document.body.className = theme;
     document.body.innerHTML = `
         <div class="${theme}" dir="${dir}">
-            <nav class="mx_SpacePanel ${expanded ? "" : "collapsed"}" style="height: 400px; ${expanded ? "width: 240px" : ""}">
+            <nav class="mx_SpacePanel ${expanded ? "" : "collapsed"}" style="height: ${height}px; ${expanded ? "width: 240px" : ""}">
                 <div data-user-menu style="height: 36px; margin-block: 12px 16px"></div>
                 <ul class="mx_AutoHideScrollbar mx_SpaceTreeLevel" role="tree">${space("Home")}${space("Studio")}</ul>
             </nav>
@@ -753,6 +754,14 @@ describe("SpacePanel list", () => {
         return document.querySelector(".mx_SpaceTreeLevel")!.getBoundingClientRect();
     }
 
+    /** The points of the badges' rings that something hides or cuts off. */
+    function hiddenRings(): [number, number][] {
+        return ["Home", "Studio"].flatMap((label) => {
+            const badge = button(`${label} unread`);
+            return ringPoints(badge).filter(([x, y]) => document.elementFromPoint(x, y) !== badge);
+        });
+    }
+
     describe.each(ALL_THEMES.map(([theme]) => theme))("in %s", (theme) => {
         it.each(
             ["Home", "Studio"].flatMap((selected) =>
@@ -763,12 +772,36 @@ describe("SpacePanel list", () => {
         )("shows the whole ring of every $badgeType badge with $selected selected (expanded: $expanded)", (options) => {
             renderList(theme, options);
 
-            for (const label of ["Home", "Studio"]) {
-                const badge = button(`${label} unread`);
-                const hidden = ringPoints(badge).filter(([x, y]) => document.elementFromPoint(x, y) !== badge);
-                expect(hidden).toEqual([]);
-            }
+            expect(hiddenRings()).toEqual([]);
         });
+
+        it("shows the whole ring of every badge in right-to-left layouts too", () => {
+            renderList(theme, { dir: "rtl" });
+
+            expect(hiddenRings()).toEqual([]);
+        });
+
+        it("shows the whole ring of the first space's badge after the focus scrolled back to it", () => {
+            // As tall as a space and a half below the user menu
+            renderList(theme, { height: 144 });
+            const scroller = document.querySelector(".mx_SpaceTreeLevel")!;
+            scroller.scrollTop = scroller.scrollHeight;
+            expect(scroller.scrollTop).toBeGreaterThan(4);
+
+            button("Home").focus();
+
+            // At the top, where IndicatorScrollbar fades nothing out
+            expect(scroller.scrollTop).toBe(0);
+            const badge = button("Home unread");
+            expect(ringPoints(badge).filter(([x, y]) => document.elementFromPoint(x, y) !== badge)).toEqual([]);
+        });
+    });
+
+    it("scrolls a space clear of the fades at the list's top and bottom", () => {
+        renderList("cpd-theme-light", { height: 144 });
+
+        button("Studio").focus();
+        expect(list().bottom - button("Studio").getBoundingClientRect().bottom).toBe(16);
     });
 
     it.each(["ltr", "rtl"])("starts the scroll area above the first space's badge and its ring in %s", (dir) => {
