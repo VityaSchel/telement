@@ -165,6 +165,20 @@
 }
 
 /*
+ * Pressed and while its menu is open, the "…" button is tinted with the accent and its dots take the accent, as the
+ * header's buttons mark their open menus. The menu opens as the mouse button goes down, and from then on the pointer no
+ * longer hovers the button it presses. The row's class outranks Compound's pressed gray where its stylesheet comes later,
+ * as in unit tests.
+ */
+.roomListItem:not(.selected) .hoverMenu button:is(:active, [data-state="open"]) {
+    background-color: var(--cpd-color-bg-badge-accent);
+
+    svg {
+        fill: var(--cpd-color-icon-accent-primary);
+    }
+}
+
+/*
  * The two reserved preview lines. The decorations float at the end of both lines, centered on the second, so both lines
  * make room for them, as in Telegram for macOS, which narrows the whole preview by a badge's width plus 5px: a badge
  * taller than the line would touch the first line's text otherwise. Without decorations the lines take the whole
@@ -333,9 +347,13 @@
         background-color: currentColor;
     }
 
-    /* Compound's hover color for the "…" button would hide its white dots */
+    /* Compound's grays for the "…" button would hide its white dots, so it is filled with translucent white */
     .hoverMenu button:hover {
-        background-color: color-mix(in srgb, var(--tl-color-on-selection) 20%, transparent);
+        background-color: var(--tl-color-bg-on-selection-hovered);
+    }
+
+    .hoverMenu button:is(:active, [data-state="open"]) {
+        background-color: var(--tl-color-bg-on-selection-pressed);
     }
 }
 

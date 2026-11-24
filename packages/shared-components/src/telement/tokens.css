@@ -192,6 +192,10 @@ Please see LICENSE files in the repository root for full details.
     --tl-color-bg-selection-hovered: var(--tl-accent-1000);
     --tl-color-bg-selection-pressed: var(--tl-accent-1100);
     --tl-color-on-selection: #ffffff;
+
+    /* A button on it, hovered, and pressed or with its menu open: white icons stay 3:1 or more on both in every theme */
+    --tl-color-bg-on-selection-hovered: rgb(255 255 255 / 16%);
+    --tl-color-bg-on-selection-pressed: rgb(255 255 255 / 24%);
 }
 
 /*

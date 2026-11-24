@@ -74,21 +74,21 @@ function part(row: HTMLElement, className: string): HTMLElement {
     return row.querySelector<HTMLElement>(`.${className}`)!;
 }
 
-/** The color a token resolves to. */
-function colorOf(token: string): string {
+/** The color a token resolves to in `scope`, such as a theme's container. */
+function colorOf(token: string, scope: Element = document.body): string {
     const probe = document.createElement("div");
     probe.style.color = `var(${token})`;
-    document.body.append(probe);
+    scope.append(probe);
     const color = getComputedStyle(probe).color;
     probe.remove();
     return color;
 }
 
 /**
- * The background of `element` while the left mouse button is held on `target`. Through CDP, because userEvent can only
- * click, which releases the button before the test can look at it. The test runs in an iframe of the page CDP drives.
+ * What `read` returns while the left mouse button is held on `target`. Through CDP, because userEvent can only click,
+ * which releases the button before the test can look at it. The test runs in an iframe of the page CDP drives.
  */
-async function pressedFill(target: HTMLElement, element: HTMLElement): Promise<string> {
+async function whilePressed<T>(target: HTMLElement, read: () => T): Promise<T> {
     const frame = window.frameElement!.getBoundingClientRect();
     const scale = frame.width / document.documentElement.clientWidth;
     const box = target.getBoundingClientRect();
@@ -98,10 +98,32 @@ async function pressedFill(target: HTMLElement, element: HTMLElement): Promise<s
     await cdp().send("Input.dispatchMouseEvent", { type: "mousePressed", x, y, button: "left", clickCount: 1 });
     try {
         expect(target.matches(":active")).toBe(true);
-        return getComputedStyle(element).backgroundColor;
+        return read();
     } finally {
         await cdp().send("Input.dispatchMouseEvent", { type: "mouseReleased", x, y, button: "left", clickCount: 1 });
     }
+}
+
+/** The background of `element` while the left mouse button is held on `target`. */
+async function pressedFill(target: HTMLElement, element: HTMLElement): Promise<string> {
+    return whilePressed(target, () => getComputedStyle(element).backgroundColor);
+}
+
+/** WCAG's contrast ratio between the opaque `color` and `fill`, which may be translucent, drawn over `under`. */
+function contrastOn(color: string, fill: string, under: string): number {
+    const channels = (value: string): number[] => value.match(/[\d.]+/g)!.map(Number);
+    const [red, green, blue, alpha = 1] = channels(fill);
+    const below = channels(under);
+    const background = [red, green, blue].map((channel, i) => channel * alpha + below[i] * (1 - alpha));
+    const luminance = (rgb: number[]): number => {
+        const [r, g, b] = rgb.map((channel) => {
+            const value = channel / 255;
+            return value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4;
+        });
+        return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    };
+    const [lighter, darker] = [luminance(channels(color)), luminance(background)].sort((a, b) => b - a);
+    return (lighter + 0.05) / (darker + 0.05);
 }
 
 /** The vertical center of the n-th line (from 0) of an element whose lines are `lineHeight` tall. */
@@ -533,6 +555,97 @@ describe("Room list item layout", () => {
             colorOf("--cpd-color-bg-action-tertiary-hovered"),
         );
     });
+
+    describe.each(["cpd-theme-light", "cpd-theme-dark", "cpd-theme-light-hc", "cpd-theme-dark-hc"])(
+        "the more options button in %s",
+        (theme) => {
+            interface Button {
+                button: HTMLElement;
+                /** Its fill, its dots' color and the plate's under them. */
+                look: () => { fill: string; dots: string; plate: string };
+                token: (name: string) => string;
+                counter: HTMLElement;
+            }
+
+            /** The button of a row in the theme, which the pointer is on. */
+            async function renderButton(isSelected: boolean): Promise<Button> {
+                const row = renderRow({ isSelected, notification: unread });
+                const list = row.closest('[role="listbox"]')!;
+                list.classList.add(theme);
+                await userEvent.hover(row);
+                const button = screen.getByRole("button", { name: "More Options" });
+                return {
+                    button,
+                    look: () => ({
+                        fill: getComputedStyle(button).backgroundColor,
+                        dots: getComputedStyle(button.querySelector("svg")!).fill,
+                        plate: getComputedStyle(part(row, styles.container)).backgroundColor,
+                    }),
+                    token: (name) => colorOf(name, list),
+                    counter: screen.getByText("3"),
+                };
+            }
+
+            // Radix opens the menu as the button goes down, and the pointer no longer hovers the button from then on
+            async function open({ button }: Button): Promise<void> {
+                await userEvent.click(button);
+                expect(button).toHaveAttribute("data-state", "open");
+                expect(button.matches(":hover")).toBe(false);
+            }
+
+            afterEach(async () => {
+                await userEvent.keyboard("{Escape}");
+            });
+
+            it("is translucent white on the selected plate, deeper pressed and while its menu is open", async () => {
+                const row = await renderButton(true);
+                const [hovered, pressed, onSelection] = [
+                    row.token("--tl-color-bg-on-selection-hovered"),
+                    row.token("--tl-color-bg-on-selection-pressed"),
+                    row.token("--tl-color-on-selection"),
+                ];
+                const plate = row.token("--tl-color-bg-selection-hovered");
+                expect([hovered, pressed]).toEqual(["rgba(255, 255, 255, 0.16)", "rgba(255, 255, 255, 0.24)"]);
+
+                await userEvent.hover(row.button);
+                expect(row.look()).toEqual({ fill: hovered, dots: onSelection, plate });
+                expect(await whilePressed(row.button, row.look)).toEqual({ fill: pressed, dots: onSelection, plate });
+                await userEvent.keyboard("{Escape}");
+                await open(row);
+                expect(row.look()).toEqual({ fill: pressed, dots: onSelection, plate });
+
+                // The white dots on it, and the counter, which keeps its inverted colors
+                for (const fill of [hovered, pressed]) {
+                    expect(contrastOn(onSelection, fill, plate)).toBeGreaterThanOrEqual(3);
+                }
+                expect(getComputedStyle(row.counter).backgroundColor).toBe(onSelection);
+                expect(getComputedStyle(row.counter).color).toBe(plate);
+            });
+
+            it("takes the accent's tint and color on other plates, pressed and while its menu is open", async () => {
+                const row = await renderButton(false);
+                const [tint, accent] = [
+                    row.token("--cpd-color-bg-badge-accent"),
+                    row.token("--cpd-color-icon-accent-primary"),
+                ];
+                const plate = row.token("--cpd-color-bg-action-tertiary-hovered");
+
+                await userEvent.hover(row.button);
+                expect(row.look()).toEqual({
+                    fill: row.token("--cpd-color-bg-subtle-primary"),
+                    dots: row.token("--cpd-color-icon-primary"),
+                    plate,
+                });
+                expect(await whilePressed(row.button, row.look)).toEqual({ fill: tint, dots: accent, plate });
+                await userEvent.keyboard("{Escape}");
+                await open(row);
+                expect(row.look()).toEqual({ fill: tint, dots: accent, plate });
+
+                expect(contrastOn(accent, tint, tint)).toBeGreaterThanOrEqual(3);
+                expect(getComputedStyle(row.counter).backgroundColor).toBe(row.token("--cpd-color-bg-accent-rest"));
+            });
+        },
+    );
 
     it("selects in Telegram's muted night blue with white text in the dark theme", () => {
         const row = renderRow({ isSelected: true, notification: unread });
