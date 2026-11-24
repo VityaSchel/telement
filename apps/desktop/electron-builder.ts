@@ -162,7 +162,7 @@ const config: Omit<Writable<Configuration>, "electronFuses"> & {
             "libatspi2.0-0",
             "libuuid1",
             "libsecret-1-0",
-            "libasound2",
+            "libasound2t64 | libasound2",
             "libgbm1",
         ],
         recommends: ["element-io-archive-keyring"],
