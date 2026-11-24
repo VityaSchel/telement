@@ -73,6 +73,7 @@ describe("ActionRowView", () => {
             "15px",
             "400",
         ]);
+        expect(getComputedStyle(screen.getByText("Leave room")).fontWeight).toBe("600");
         expect([style.backgroundColor, style.borderTopStyle, style.borderTopLeftRadius]).toEqual([
             "rgba(0, 0, 0, 0)",
             "none",
@@ -95,6 +96,7 @@ describe("ActionRowView", () => {
         const row = screen.getByRole("button", { name: "Mark all as read" });
 
         expect(getComputedStyle(row).color).toBe(tokenColor("--cpd-color-text-action-accent"));
+        expect(getComputedStyle(screen.getByText("Mark all as read")).fontWeight).toBe("600");
         await pointer.hover(row);
         expect(getComputedStyle(row).backgroundColor).toBe(
             tokenColor("--cpd-color-bg-action-secondary-hovered", "backgroundColor"),
@@ -120,6 +122,7 @@ describe("ActionRowView", () => {
         const status = screen.getByText("No update available.");
 
         expect(getComputedStyle(status).color).toBe(tokenColor("--cpd-color-text-secondary"));
+        expect(getComputedStyle(status).fontWeight).toBe("400");
         expect(card(row).right - status.getBoundingClientRect().right).toBe(16);
     });
 
@@ -140,6 +143,7 @@ describe("ActionRowView", () => {
         const count = screen.getByText("3");
 
         expect(getComputedStyle(row).color).toBe(tokenColor("--cpd-color-text-primary"));
+        expect(getComputedStyle(screen.getByText("Rooms with their own setting")).fontWeight).toBe("400");
         expect(card(row).right - glyph.right).toBeCloseTo(16, 0);
         expect(row.querySelector("svg")!.getBoundingClientRect().left - count.getBoundingClientRect().right).toBe(4);
     });

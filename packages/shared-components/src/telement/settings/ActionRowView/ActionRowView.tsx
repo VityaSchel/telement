@@ -69,7 +69,7 @@ export function ActionRowView({
         >
             {Icon && <Icon className={styles.icon} aria-hidden />}
             <span className={rowStyles.text}>
-                <span className={rowStyles.label}>{children}</span>
+                <span className={classNames(rowStyles.label, styles.label)}>{children}</span>
             </span>
             {(value !== undefined || navigation) && (
                 <span className={rowStyles.end}>

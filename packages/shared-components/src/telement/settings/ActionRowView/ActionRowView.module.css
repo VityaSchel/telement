@@ -16,6 +16,12 @@ Please see LICENSE files in the repository root for full details.
     --settings-row-color: var(--cpd-color-text-critical-primary);
 }
 
+/* Semibold like the app's other text buttons, so that an action doesn't read as a line of colored text. A row that opens
+   a list keeps the regular weight of the card's other labels, and the status at a row's end its own */
+:is(.accent, .critical) .label {
+    font-weight: var(--cpd-font-weight-semibold);
+}
+
 .icon {
     flex: none;
     inline-size: var(--cpd-space-5x);
