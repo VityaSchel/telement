@@ -319,12 +319,20 @@ export default class MessagePanel extends React.Component<IProps, IState> {
         this.resizeObserver.disconnect();
     }
 
-    public componentDidUpdate(prevProps: IProps, prevState: IState): void {
+    /**
+     * Telement: whether the read marker's line is drawn, as it isn't after the last message, however visible the marker.
+     */
+    public getSnapshotBeforeUpdate(): boolean {
+        return !!this.readMarkerNode?.childElementCount;
+    }
+
+    public componentDidUpdate(prevProps: IProps, prevState: IState, wasReadMarkerLineDrawn: boolean): void {
         if (prevProps.layout !== this.props.layout) {
             this.calculateRoomMembersCount();
         }
 
         if (
+            wasReadMarkerLineDrawn &&
             prevProps.readMarkerVisible &&
             prevProps.readMarkerEventId &&
             this.props.readMarkerEventId !== prevProps.readMarkerEventId

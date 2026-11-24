@@ -594,6 +594,31 @@ describe("MessagePanel", function () {
         expect(isReadMarkerVisible(rm)).toBeFalsy();
     });
 
+    it("leaves no ghost of a read-marker whose line was not drawn, as after the last message", function () {
+        const { container, rerender } = render(
+            getComponent({
+                events: events.slice(0, 5),
+                readMarkerEventId: events[4].getId(),
+                readMarkerVisible: true,
+            }),
+            clientAndSDKContextRenderOptions(client, sdkContext),
+        );
+        const [rm] = container.getElementsByClassName("mx_MessagePanel_myReadMarker");
+        expect(isReadMarkerVisible(rm)).toBeFalsy();
+
+        rerender(
+            getComponent({
+                events: events.slice(0, 6),
+                readMarkerEventId: events[5].getId(),
+                readMarkerVisible: false,
+            }),
+        );
+
+        const readMarkers = container.getElementsByClassName("mx_MessagePanel_myReadMarker");
+        expect(readMarkers).toHaveLength(1);
+        expect(isReadMarkerVisible(readMarkers[0])).toBeFalsy();
+    });
+
     it("shows a ghost read-marker when the read-marker moves", function () {
         // fake the clock so that we can test the velocity animation.
         vi.useFakeTimers();
