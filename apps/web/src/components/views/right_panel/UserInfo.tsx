@@ -170,12 +170,11 @@ interface IProps {
     user: Member;
     room?: Room;
     phase: RightPanelPhases.MemberInfo | RightPanelPhases.EncryptionPanel;
-    onClose(this: void): void;
     verificationRequest?: VerificationRequest;
     verificationRequestPromise?: Promise<VerificationRequest>;
 }
 
-const UserInfo: React.FC<IProps> = ({ user, room, onClose, phase = RightPanelPhases.MemberInfo, ...props }) => {
+const UserInfo: React.FC<IProps> = ({ user, room, phase = RightPanelPhases.MemberInfo, ...props }) => {
     const sdkContext = useContext(SDKContext);
 
     // fetch latest room member if we have a room, so we don't show historical information, falling back to user
@@ -208,14 +207,6 @@ const UserInfo: React.FC<IProps> = ({ user, room, onClose, phase = RightPanelPha
             break;
     }
 
-    let closeLabel: string | undefined;
-    if (phase === RightPanelPhases.EncryptionPanel) {
-        const verificationRequest = (props as React.ComponentProps<typeof EncryptionPanel>).verificationRequest;
-        if (verificationRequest && verificationRequest.pending) {
-            closeLabel = _t("action|cancel");
-        }
-    }
-
     const header = (
         <UserInfoHeaderView
             hideVerificationSection={phase === RightPanelPhases.EncryptionPanel}
@@ -226,7 +217,7 @@ const UserInfo: React.FC<IProps> = ({ user, room, onClose, phase = RightPanelPha
     );
 
     return (
-        <BaseCard className={classes.join(" ")} header={_t("common|profile")} onClose={onClose} closeLabel={closeLabel}>
+        <BaseCard className={classes.join(" ")} header={_t("common|profile")}>
             {header}
             {content}
         </BaseCard>

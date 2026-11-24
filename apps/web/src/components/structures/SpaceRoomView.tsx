@@ -75,6 +75,7 @@ import SpacePillButton from "./SpacePillButton.tsx";
 import { useRoomName } from "../../hooks/useRoomName.ts";
 import MultiInviter from "../../utils/MultiInviter.ts";
 import { SDKContext } from "../../contexts/SDKContext.ts";
+import { PEOPLE_PANE, RIGHT_PANEL_ID } from "../../telement/right-panel/panes";
 
 interface IProps {
     space: Room;
@@ -214,12 +215,11 @@ const SpaceLanding: React.FC<{ space: Room }> = ({ space }) => {
     const userId = sdkContext.client!.getSafeUserId();
     const name = useRoomName(space);
 
-    const storeIsShowingSpaceMembers = useCallback(
-        () =>
-            sdkContext.rightPanelStore.isOpenForRoom(space.roomId) &&
-            sdkContext.rightPanelStore.currentCardForRoom(space.roomId)?.phase === RightPanelPhases.MemberList,
-        [space.roomId, sdkContext.rightPanelStore],
-    );
+    // Telement: the members' pane, its pages (a member's profile) included
+    const storeIsShowingSpaceMembers = useCallback(() => {
+        const phase = sdkContext.rightPanelStore.currentCardForRoom(space.roomId)?.phase;
+        return sdkContext.rightPanelStore.isOpenForRoom(space.roomId) && !!phase && PEOPLE_PANE.includes(phase);
+    }, [space.roomId, sdkContext.rightPanelStore]);
     const isShowingMembers = useEventEmitterState(sdkContext.rightPanelStore, UPDATE_EVENT, storeIsShowingSpaceMembers);
 
     let inviteButton;
@@ -263,7 +263,7 @@ const SpaceLanding: React.FC<{ space: Room }> = ({ space }) => {
     }
 
     const onMembersClick = (): void => {
-        sdkContext.rightPanelStore.setCard({ phase: RightPanelPhases.MemberList });
+        sdkContext.rightPanelStore.showOrHidePhase(RightPanelPhases.MemberList);
     };
 
     return (
@@ -281,7 +281,9 @@ const SpaceLanding: React.FC<{ space: Room }> = ({ space }) => {
                         room={space}
                         onlyKnownUsers={false}
                         numShown={7}
-                        onClick={isShowingMembers ? undefined : onMembersClick}
+                        onClick={onMembersClick}
+                        aria-expanded={isShowingMembers}
+                        aria-controls={RIGHT_PANEL_ID}
                     />
                     {inviteButton}
                     {settingsButton}

@@ -29,7 +29,6 @@ import {
     PinIcon,
     ShareIcon,
     UserAddIcon,
-    UserProfileIcon,
 } from "@vector-im/compound-design-tokens/assets/web/icons";
 import compoundBase from "@vector-im/compound-design-tokens/assets/web/css/cpd-common-base.css?raw";
 import compoundSemantic from "@vector-im/compound-design-tokens/assets/web/css/cpd-common-semantic.css?raw";
@@ -115,7 +114,7 @@ function renderRoomSummaryCard(dir = "ltr"): HTMLElement {
                 ${html(createElement(ToggleMenuItem, { Icon: PinIcon, label: "Pin to top", checked: false, onSelect: () => {} }))}
                 ${menuItem("Invite", UserAddIcon)}
                 ${html(createElement(Separator))}
-                ${menuItem("People", UserProfileIcon)}
+                ${menuItem("Files", FilesIcon)}
                 <div class="mx_RoomSummaryCard_bottomOptions">${menuItem("Leave room", LeaveIcon, { kind: "critical" })}</div>
             </div>
         </div>

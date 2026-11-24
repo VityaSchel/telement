@@ -38,7 +38,6 @@ import { EventPresentationContextProvider } from "../../utils/EventPresentationC
 
 interface IProps {
     roomId: string;
-    onClose: () => void;
 }
 
 interface IState {
@@ -232,7 +231,6 @@ class FilePanel extends React.Component<IProps, IState> {
             return (
                 <BaseCard
                     className="mx_FilePanel mx_RoomView_messageListWrapper"
-                    onClose={this.props.onClose}
                     header={_t("right_panel|files_button")}
                 >
                     <div className="mx_RoomView_empty">
@@ -254,7 +252,6 @@ class FilePanel extends React.Component<IProps, IState> {
             return (
                 <BaseCard
                     className="mx_FilePanel mx_RoomView_messageListWrapper"
-                    onClose={this.props.onClose}
                     header={_t("right_panel|files_button")}
                 >
                     <div className="mx_RoomView_empty">{_t("file_panel|peek_note")}</div>
@@ -283,7 +280,6 @@ class FilePanel extends React.Component<IProps, IState> {
                 >
                     <BaseCard
                         className="mx_FilePanel"
-                        onClose={this.props.onClose}
                         withoutScrollContainer
                         ref={this.card}
                         header={_t("right_panel|files_button")}
@@ -307,11 +303,7 @@ class FilePanel extends React.Component<IProps, IState> {
         } else {
             return (
                 <ScopedRoomContextProvider {...this.context} timelineRenderingType={TimelineRenderingType.File}>
-                    <BaseCard
-                        className="mx_FilePanel"
-                        onClose={this.props.onClose}
-                        header={_t("right_panel|files_button")}
-                    >
+                    <BaseCard className="mx_FilePanel" header={_t("right_panel|files_button")}>
                         <Spinner />
                     </BaseCard>
                 </ScopedRoomContextProvider>

@@ -164,6 +164,22 @@ describe("PdfViewerView", () => {
         expect(onPageInputCancel).toHaveBeenCalledOnce();
     });
 
+    it("takes the Escape that cancels the edit, which would close the right panel", async () => {
+        const user = userEvent.setup();
+        const onKeyDown = vi.fn();
+        document.body.addEventListener("keydown", onKeyDown);
+        renderView({ status: "ready", pageCount: 42 });
+
+        await user.click(screen.getByRole("textbox", { name: "Page number" }));
+        await user.keyboard("{Escape}");
+        expect(onKeyDown).not.toHaveBeenCalled();
+
+        // With the focus out of the field it is the panel's
+        await user.keyboard("{Escape}");
+        expect(onKeyDown).toHaveBeenCalledOnce();
+        document.body.removeEventListener("keydown", onKeyDown);
+    });
+
     it("hides the zoom buttons until pages are available", () => {
         renderView({ status: "loading", pageCount: 0 });
 

@@ -85,10 +85,13 @@ export interface RoomSummaryCardState {
      */
     pinCount: number;
     /**
+     * Telement: whether the card lists the room's people, as the room header does but in a DM
+     */
+    showPeople: boolean;
+    /**
      * Callbacks to all the actions button in the right panel
      */
     onRoomMembersClick: () => void;
-    onRoomThreadsClick: () => void;
     onRoomFilesClick: () => void;
     onRoomExtensionsClick: () => void;
     onRoomPinsClick: () => void;
@@ -149,10 +152,6 @@ export function useRoomSummaryCardViewModel(room: Room, permalinkCreator: RoomPe
 
     const onRoomMembersClick = (): void => {
         RightPanelStore.instance.pushCard({ phase: RightPanelPhases.MemberList }, true);
-    };
-
-    const onRoomThreadsClick = (): void => {
-        RightPanelStore.instance.pushCard({ phase: RightPanelPhases.ThreadPanel }, true);
     };
 
     const onRoomFilesClick = (): void => {
@@ -230,8 +229,8 @@ export function useRoomSummaryCardViewModel(room: Room, permalinkCreator: RoomPe
         isFavorite,
         canInviteToState,
         pinCount,
+        showPeople: !!dmMember,
         onRoomMembersClick,
-        onRoomThreadsClick,
         onRoomFilesClick,
         onRoomExtensionsClick,
         onRoomPinsClick,

@@ -90,9 +90,7 @@ test.describe("Lazy Loading", () => {
     }
 
     async function openMemberlist(app: ElementAppPage): Promise<void> {
-        await app.toggleRoomInfoPanel();
-        const { page } = app;
-        await page.locator(".mx_RightPanel").getByRole("menuitem", { name: "People" }).click();
+        await app.openMemberlistPanel();
     }
 
     function getMemberInMemberlist(page: Page, name: string): Locator {

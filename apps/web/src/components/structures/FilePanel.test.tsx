@@ -44,7 +44,7 @@ describe("FilePanel", () => {
         vi.mocked(cli.getRoom).mockReturnValue(room);
 
         const { asFragment } = render(
-            <FilePanel roomId={room.roomId} onClose={vi.fn()} />,
+            <FilePanel roomId={room.roomId} />,
             clientAndSDKContextRenderOptions(cli, SDKContextClass.instance),
         );
         await waitFor(() => {
@@ -77,10 +77,7 @@ describe("FilePanel", () => {
         pending.setStatus(EventStatus.SENDING);
         room.addPendingEvent(pending, "txn-text");
 
-        render(
-            <FilePanel roomId={room.roomId} onClose={vi.fn()} />,
-            clientAndSDKContextRenderOptions(cli, SDKContextClass.instance),
-        );
+        render(<FilePanel roomId={room.roomId} />, clientAndSDKContextRenderOptions(cli, SDKContextClass.instance));
         await screen.findByText("No files in this room");
 
         expect(screen.queryByText("a message being sent")).not.toBeInTheDocument();
@@ -101,7 +98,6 @@ describe("FilePanel", () => {
             render(
                 <FilePanel
                     roomId={room.roomId}
-                    onClose={vi.fn()}
                     ref={(ref) => {
                         filePanel = ref;
                     }}

@@ -129,7 +129,6 @@ describe("ThreadPanel", () => {
                 >
                     <ThreadPanel
                         roomId={ROOM_ID}
-                        onClose={vi.fn()}
                         resizeNotifier={new ResizeNotifier()}
                         permalinkCreator={new RoomPermalinkCreator(room)}
                     />

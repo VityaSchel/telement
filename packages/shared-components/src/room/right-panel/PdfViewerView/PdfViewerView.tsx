@@ -98,6 +98,9 @@ export function PdfViewerView({
                             onKeyDown={(event) => {
                                 if (event.key !== "Escape") return;
 
+                                // Telement: Escape closes the right panel, once the edit is over
+                                event.preventDefault();
+                                event.stopPropagation();
                                 onPageInputCancel();
                                 // Blur ends the edit the same way clicking away does.
                                 event.currentTarget.blur();

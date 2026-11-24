@@ -40,13 +40,9 @@ interface PinnedMessagesCardProps {
      * Permalink of the room.
      */
     permalinkCreator: RoomPermalinkCreator;
-    /**
-     * Callback for when the card is closed.
-     */
-    onClose(this: void): void;
 }
 
-export function PinnedMessagesCard({ room, onClose, permalinkCreator }: PinnedMessagesCardProps): JSX.Element {
+export function PinnedMessagesCard({ room, permalinkCreator }: PinnedMessagesCardProps): JSX.Element {
     const cli = useMatrixClientContext();
     const roomContext = useContext(RoomContext);
     const pinnedEventIds = usePinnedEvents(room);
@@ -86,7 +82,6 @@ export function PinnedMessagesCard({ room, onClose, permalinkCreator }: PinnedMe
         <BaseCard
             header={_t("right_panel|pinned_messages|header", { count: pinnedEventIds.length })}
             className="mx_PinnedMessagesCard"
-            onClose={onClose}
         >
             <ScopedRoomContextProvider {...roomContext} timelineRenderingType={TimelineRenderingType.Pinned}>
                 {content}

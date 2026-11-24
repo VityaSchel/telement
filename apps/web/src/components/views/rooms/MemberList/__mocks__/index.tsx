@@ -129,7 +129,7 @@ export async function renderMemberList(
     const root = render(
         <MatrixClientContext.Provider value={client}>
             <SDKContext.Provider value={context}>
-                <MemberListView roomId={memberListRoom.roomId} onClose={() => {}} />
+                <MemberListView roomId={memberListRoom.roomId} />
             </SDKContext.Provider>
         </MatrixClientContext.Provider>,
         {

@@ -1575,6 +1575,31 @@ describe("RoomView", () => {
         });
     });
 
+    describe("Escape while the right panel is open (Telement)", () => {
+        const pressEscape = async (state: Partial<RoomView["state"]>): Promise<{ handled: boolean }> => {
+            room.getMyMembership = vi.fn().mockReturnValue(KnownMembership.Join);
+            const instance = await getRoomViewInstance();
+            act(() => instance.setState({ showRightPanel: true, atEndOfLiveTimeline: true, ...state } as any));
+            // Not handled, it goes on to the panel, which closes
+            return { handled: !fireEvent.keyDown(document.querySelector(".mx_RoomView")!, { key: "Escape" }) };
+        };
+
+        it("is left to the panel once the timeline has nothing to dismiss", async () => {
+            await expect(pressEscape({})).resolves.toEqual({ handled: false });
+        });
+
+        it.each<[string, Partial<RoomView["state"]>]>([
+            ["is scrolled up", { atEndOfLiveTimeline: false }],
+            ["highlights a message", { isInitialEventHighlighted: true }],
+        ])("is the timeline's while it %s", async (_, state) => {
+            await expect(pressEscape(state)).resolves.toEqual({ handled: true });
+        });
+
+        it("is the timeline's while the panel is closed", async () => {
+            await expect(pressEscape({ showRightPanel: false })).resolves.toEqual({ handled: true });
+        });
+    });
+
     // Regression test for https://github.com/element-hq/element-web/issues/29072
     it("does not force a reload on sync unless the client is coming back online", async () => {
         cli.isInitialSyncComplete.mockReturnValue(false);

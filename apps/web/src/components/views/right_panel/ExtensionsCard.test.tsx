@@ -46,7 +46,7 @@ describe("<ExtensionsCard />", () => {
     it("should render empty state", () => {
         vi.mocked(useWidgets).mockReturnValue([]);
         const { asFragment } = render(
-            <ExtensionsCard room={room} onClose={vi.fn()} />,
+            <ExtensionsCard room={room} />,
             clientAndSDKContextRenderOptions(client, sdkContext),
         );
         expect(screen.getByText("Boost productivity with more tools, widgets and bots")).toBeInTheDocument();
@@ -76,7 +76,7 @@ describe("<ExtensionsCard />", () => {
         ] satisfies IApp[]);
 
         const { asFragment } = render(
-            <ExtensionsCard room={room} onClose={vi.fn()} />,
+            <ExtensionsCard room={room} />,
             clientAndSDKContextRenderOptions(client, sdkContext),
         );
         expect(screen.getByText("Custom Widget")).toBeInTheDocument();
@@ -99,7 +99,7 @@ describe("<ExtensionsCard />", () => {
         ] satisfies IApp[]);
 
         const { container } = render(
-            <ExtensionsCard room={room} onClose={vi.fn()} />,
+            <ExtensionsCard room={room} />,
             clientAndSDKContextRenderOptions(client, sdkContext),
         );
         await userEvent.click(container.querySelector(".mx_ExtensionsCard_app_options")!);
@@ -120,7 +120,7 @@ describe("<ExtensionsCard />", () => {
             },
         ] satisfies IApp[]);
 
-        render(<ExtensionsCard room={room} onClose={vi.fn()} />, clientAndSDKContextRenderOptions(client, sdkContext));
+        render(<ExtensionsCard room={room} />, clientAndSDKContextRenderOptions(client, sdkContext));
         expect(screen.getByText("Set layout for everyone")).toBeInTheDocument();
     });
 
@@ -138,7 +138,7 @@ describe("<ExtensionsCard />", () => {
             },
         ] satisfies IApp[]);
 
-        render(<ExtensionsCard room={room} onClose={vi.fn()} />, clientAndSDKContextRenderOptions(client, sdkContext));
+        render(<ExtensionsCard room={room} />, clientAndSDKContextRenderOptions(client, sdkContext));
         expect(screen.getByText("Custom Widget").closest(".mx_ExtensionsCard_Button_pinned")).toBeInTheDocument();
     });
 
@@ -157,14 +157,14 @@ describe("<ExtensionsCard />", () => {
             },
         ] satisfies IApp[]);
 
-        render(<ExtensionsCard room={room} onClose={vi.fn()} />, clientAndSDKContextRenderOptions(client, sdkContext));
+        render(<ExtensionsCard room={room} />, clientAndSDKContextRenderOptions(client, sdkContext));
         expect(screen.getByLabelText("You can only pin up to 3 widgets")).toBeInTheDocument();
     });
 
     it("should should open integration manager on click", async () => {
         vi.spyOn(IntegrationManagers.sharedInstance(), "hasManager").mockReturnValue(false);
         const spy = vi.spyOn(IntegrationManagers.sharedInstance(), "openNoManagerDialog");
-        render(<ExtensionsCard room={room} onClose={vi.fn()} />, clientAndSDKContextRenderOptions(client, sdkContext));
+        render(<ExtensionsCard room={room} />, clientAndSDKContextRenderOptions(client, sdkContext));
         await userEvent.click(screen.getByText("Add extensions"));
         expect(spy).toHaveBeenCalled();
     });
@@ -192,7 +192,7 @@ describe("<ExtensionsCard />", () => {
         ] satisfies IApp[]);
 
         vi.spyOn(sdkContext.widgetLayoutStore, "copyLayoutToRoom");
-        render(<ExtensionsCard room={room} onClose={vi.fn()} />, clientAndSDKContextRenderOptions(client, sdkContext));
+        render(<ExtensionsCard room={room} />, clientAndSDKContextRenderOptions(client, sdkContext));
         await userEvent.click(screen.getByText("Set layout for everyone"));
         expect(sdkContext.widgetLayoutStore.copyLayoutToRoom).toHaveBeenCalledWith(room);
     });

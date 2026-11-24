@@ -224,7 +224,6 @@ test.describe("Cryptography", function () {
             await verify(app, bob);
 
             // Assert that verified icon is rendered
-            await page.getByTestId("base-card-back-button").click();
             await page.getByLabel("Room info").nth(1).click();
             await expect(page.locator('.mx_RoomSummaryCard_badges [data-kind="green"]')).toContainText("Encrypted");
 

@@ -10,8 +10,10 @@ Please see LICENSE files in the repository root for full details.
 
 import { vi, describe, it, expect, beforeEach, afterEach, type MockedObject } from "vitest";
 import React from "react";
-import { render, screen, waitFor } from "test-utils-rtl";
-import { EventType, MatrixEvent, type MatrixClient, MsgType } from "matrix-js-sdk/src/matrix";
+import { act, render, screen, waitFor } from "test-utils-rtl";
+import userEvent from "@testing-library/user-event";
+import { EventType, MatrixEvent, type MatrixClient, MsgType, RoomMember } from "matrix-js-sdk/src/matrix";
+import { type VerificationRequest } from "matrix-js-sdk/src/crypto-api";
 import { stubClient, wrapInMatrixClientContext, mkRoom, wrapInSdkContext, TestSDKContext } from "test-utils";
 
 import _RightPanel from "./RightPanel";
@@ -27,6 +29,11 @@ import RightPanelStore from "../../stores/right-panel/RightPanelStore";
 import { UPDATE_EVENT } from "../../stores/AsyncStore";
 import { WidgetLayoutStore } from "../../stores/widgets/WidgetLayoutStore";
 import { RoomPermalinkCreator } from "../../utils/permalinks/Permalinks";
+import Modal from "../../Modal";
+import QuestionDialog from "../views/dialogs/QuestionDialog";
+
+// A profile asks the server for much, which these tests are not about
+vi.mock("../views/right_panel/UserInfo", () => ({ default: () => <button>Profile</button> }));
 
 const RightPanelBase = wrapInMatrixClientContext(_RightPanel);
 
@@ -240,5 +247,168 @@ describe("RightPanel", () => {
 
         // As above: the header proves the card picked up this event.
         await waitFor(() => expect(screen.getByRole("heading", { name: "README.md" })).toBeInTheDocument());
+    });
+
+    describe("panes (Telement)", () => {
+        const ROOM_ID = "r1";
+        let outside: HTMLButtonElement;
+
+        /** The panel as the room view shows it, beside the room header's button of the open pane and a composer. */
+        const renderPanel = async (): Promise<void> => {
+            const room = mkRoom(cli, ROOM_ID);
+            cli.getRoom.mockImplementation((roomId) => (roomId === ROOM_ID ? room : null));
+            await spinUpStores();
+            RightPanelStore.instance.setCard({ phase: RightPanelPhases.RoomSummary }, true, ROOM_ID);
+
+            render(
+                <>
+                    <button aria-label="Info" aria-controls="mx_RightPanel" aria-expanded="true" />
+                    <button aria-label="Outside" />
+                    <RightPanel
+                        room={room}
+                        resizeNotifier={resizeNotifier}
+                        permalinkCreator={new RoomPermalinkCreator(room, room.roomId)}
+                    />
+                </>,
+            );
+            const rpsUpdated = waitForRpsUpdate();
+            dis.dispatch({ action: Action.ViewRoom, room_id: ROOM_ID });
+            await rpsUpdated;
+            outside = screen.getByRole("button", { name: "Outside" });
+        };
+
+        const row = (name: string): HTMLElement => screen.getByRole("menuitem", { name });
+        const isOpen = (): boolean => RightPanelStore.instance.isOpenForRoom(ROOM_ID);
+
+        it("have no back or close button", async () => {
+            await renderPanel();
+            await userEvent.click(row("Extensions"));
+
+            expect(screen.getByRole("heading", { name: "Extensions" })).toBeInTheDocument();
+            expect(screen.queryByRole("button", { name: "Close" })).not.toBeInTheDocument();
+            expect(screen.queryByRole("button", { name: "Room info" })).not.toBeInTheDocument();
+        });
+
+        it("move the focus, which went with the row that opened it, to a page's title", async () => {
+            await renderPanel();
+            act(() => row("Extensions").focus());
+            await userEvent.keyboard("{Enter}");
+
+            const title = screen.getByRole("heading", { name: "Extensions" });
+            expect(title).toHaveFocus();
+            // Not a Tab stop
+            expect(title).toHaveAttribute("tabindex", "-1");
+        });
+
+        it("leave the focus alone while it is elsewhere", async () => {
+            await renderPanel();
+            act(() => outside.focus());
+            act(() => RightPanelStore.instance.pushCard({ phase: RightPanelPhases.Extensions }, true, ROOM_ID));
+
+            expect(screen.getByRole("heading", { name: "Extensions" })).toBeInTheDocument();
+            expect(outside).toHaveFocus();
+        });
+
+        it("close on Escape inside them, rather than go back, and give the focus back to their button", async () => {
+            await renderPanel();
+            await userEvent.click(row("Extensions"));
+            await userEvent.keyboard("{Escape}");
+
+            expect(isOpen()).toBe(false);
+            expect(RightPanelStore.instance.currentCardForRoom(ROOM_ID).phase).toBe(RightPanelPhases.Extensions);
+            expect(screen.getByRole("button", { name: "Info" })).toHaveFocus();
+        });
+
+        it("keep Escape inside them from what holds them", async () => {
+            await renderPanel();
+            const onKeyDown = vi.fn();
+            document.body.addEventListener("keydown", onKeyDown);
+            act(() => row("Extensions").focus());
+            await userEvent.keyboard("{Escape}");
+            document.body.removeEventListener("keydown", onKeyDown);
+
+            expect(onKeyDown).not.toHaveBeenCalled();
+        });
+
+        it("close on Escape elsewhere that nothing there took", async () => {
+            await renderPanel();
+            act(() => outside.focus());
+            await userEvent.keyboard("{Escape}");
+
+            expect(isOpen()).toBe(false);
+            expect(outside).toHaveFocus();
+        });
+
+        it.each([
+            ["something else took", (ev: KeyboardEvent) => ev.preventDefault()],
+            ["didn't get past something else", (ev: KeyboardEvent) => ev.stopPropagation()],
+        ])("stay open on Escape that %s", async (_, take) => {
+            await renderPanel();
+            outside.addEventListener("keydown", take);
+            act(() => outside.focus());
+            await userEvent.keyboard("{Escape}");
+
+            expect(isOpen()).toBe(true);
+        });
+
+        it("stay open on Escape with a modifier, and on Escape in a dialog", async () => {
+            await renderPanel();
+            act(() => outside.focus());
+            await userEvent.keyboard("{Shift>}{Escape}{/Shift}");
+            expect(isOpen()).toBe(true);
+
+            Modal.createDialog(QuestionDialog, { title: "Sure?" });
+            act(() => outside.focus());
+            await userEvent.keyboard("{Escape}");
+            expect(isOpen()).toBe(true);
+            await act(async () => Modal.closeCurrentModal());
+        });
+
+        it("cancel a verification on Escape inside it, and leave it alone on Escape elsewhere", async () => {
+            await renderPanel();
+            const verificationRequest = { pending: true, cancel: vi.fn() } as unknown as VerificationRequest;
+            act(() =>
+                RightPanelStore.instance.setCards(
+                    [
+                        {
+                            phase: RightPanelPhases.EncryptionPanel,
+                            state: { member: new RoomMember(ROOM_ID, "@bob:example.org"), verificationRequest },
+                        },
+                    ],
+                    true,
+                    ROOM_ID,
+                ),
+            );
+            act(() => outside.focus());
+            await userEvent.keyboard("{Escape}");
+            expect(verificationRequest.cancel).not.toHaveBeenCalled();
+
+            act(() => screen.getByRole("button", { name: "Profile" }).focus());
+            await userEvent.keyboard("{Escape}");
+            expect(verificationRequest.cancel).toHaveBeenCalledTimes(1);
+            expect(isOpen()).toBe(true);
+        });
+
+        it("close a user's page, which has no room, by going home", async () => {
+            // The room left for the page, which the clean-up above waits to leave
+            mkRoom(cli, ROOM_ID);
+            await spinUpStores();
+            const rpsUpdated = waitForRpsUpdate();
+            dis.dispatch({ action: Action.ViewRoom, room_id: ROOM_ID });
+            await rpsUpdated;
+
+            const dispatch = vi.spyOn(dis, "dispatch").mockImplementation(() => {});
+            const member = new RoomMember("", "@bob:example.org");
+            render(
+                <RightPanel
+                    overwriteCard={{ phase: RightPanelPhases.MemberInfo, state: { member } }}
+                    resizeNotifier={resizeNotifier}
+                />,
+            );
+            await userEvent.keyboard("{Escape}");
+
+            expect(dispatch).toHaveBeenCalledWith({ action: Action.ViewHomePage });
+            dispatch.mockRestore();
+        });
     });
 });

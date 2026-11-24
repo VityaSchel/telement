@@ -17,7 +17,6 @@ import LeaveIcon from "@vector-im/compound-design-tokens/assets/web/icons/leave"
 import FilesIcon from "@vector-im/compound-design-tokens/assets/web/icons/files";
 import ExtensionsIcon from "@vector-im/compound-design-tokens/assets/web/icons/extensions";
 import UserProfileIcon from "@vector-im/compound-design-tokens/assets/web/icons/user-profile";
-import ThreadsIcon from "@vector-im/compound-design-tokens/assets/web/icons/threads";
 import PollsIcon from "@vector-im/compound-design-tokens/assets/web/icons/polls";
 import PinIcon from "@vector-im/compound-design-tokens/assets/web/icons/pin";
 import LockIcon from "@vector-im/compound-design-tokens/assets/web/icons/lock-solid";
@@ -204,10 +203,17 @@ const RoomSummaryCardView: React.FC<IProps> = ({ room, permalinkCreator }) => {
                     onSelect={vm.onInviteToRoomClick}
                 />
 
-                <Separator />
+                {(vm.showPeople || !vm.isVideoRoom) && <Separator />}
 
-                <RovingMenuItem Icon={UserProfileIcon} label={_t("common|people")} onSelect={vm.onRoomMembersClick} />
-                <RovingMenuItem Icon={ThreadsIcon} label={_t("common|threads")} onSelect={vm.onRoomThreadsClick} />
+                {/* Telement: the people and the threads are panes of their own, opened from the room header, whose people
+                    button is missing only in a DM */}
+                {vm.showPeople && (
+                    <RovingMenuItem
+                        Icon={UserProfileIcon}
+                        label={_t("common|people")}
+                        onSelect={vm.onRoomMembersClick}
+                    />
+                )}
                 {!vm.isVideoRoom && (
                     <>
                         <RovingMenuItem

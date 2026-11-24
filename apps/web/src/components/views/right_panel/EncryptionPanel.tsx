@@ -6,7 +6,7 @@ SPDX-License-Identifier: AGPL-3.0-only OR GPL-3.0-only OR LicenseRef-Element-Com
 Please see LICENSE files in the repository root for full details.
 */
 
-import React, { useCallback, useContext, useEffect, useRef, useState } from "react";
+import React, { type JSX, useCallback, useContext, useEffect, useRef, useState } from "react";
 import { VerificationPhase, type VerificationRequest, VerificationRequestEvent } from "matrix-js-sdk/src/crypto-api";
 import { type RoomMember, type User } from "matrix-js-sdk/src/matrix";
 import { logger } from "matrix-js-sdk/src/logger";
@@ -14,6 +14,7 @@ import { logger } from "matrix-js-sdk/src/logger";
 // eslint-disable-next-line no-restricted-imports
 import ErrorSolidIcon from "@vector-im/compound-design-tokens/icons/error-solid.svg";
 
+import AccessibleButton from "../elements/AccessibleButton";
 import EncryptionInfo from "./EncryptionInfo";
 import VerificationPanel from "./VerificationPanel";
 import { ensureDMExists } from "../../../createRoom";
@@ -144,9 +145,10 @@ const EncryptionPanel: React.FC<IProps> = (props: IProps) => {
             (phase === VerificationPhase.Requested || phase === VerificationPhase.Unsent || phase === undefined));
     const isSelfVerification = request ? request.isSelfVerification : member.userId === sdkContext.client?.getUserId();
 
+    let content: JSX.Element;
     if (!request || requested) {
         const initiatedByMe = (!request && isRequesting) || (!!request && request.initiatedByMe);
-        return (
+        content = (
             <EncryptionInfo
                 isRoomEncrypted={isRoomEncrypted}
                 onStartVerification={onStartVerification}
@@ -158,7 +160,7 @@ const EncryptionPanel: React.FC<IProps> = (props: IProps) => {
             />
         );
     } else {
-        return (
+        content = (
             <VerificationPanel
                 isRoomEncrypted={isRoomEncrypted}
                 layout={layout}
@@ -170,6 +172,23 @@ const EncryptionPanel: React.FC<IProps> = (props: IProps) => {
             />
         );
     }
+
+    // Telement: the right panel's panes have no close button, with which a verification was canceled there
+    if (layout === "dialog" || !request?.pending) return content;
+    return (
+        <>
+            {content}
+            <div className="mx_UserInfo_container">
+                <AccessibleButton
+                    kind="secondary"
+                    className="mx_UserInfo_wideButton"
+                    onClick={() => void request.cancel()}
+                >
+                    {_t("action|cancel")}
+                </AccessibleButton>
+            </div>
+        </>
+    );
 };
 
 export default EncryptionPanel;

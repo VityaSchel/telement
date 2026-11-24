@@ -65,10 +65,8 @@ const RoomInfoLine: FC<IProps> = ({ room }) => {
         );
     } else if (memberCount && summary !== undefined) {
         // summary is not still loading
-        const viewMembers = (): void =>
-            sdkContext.rightPanelStore.setCard({
-                phase: RightPanelPhases.MemberList,
-            });
+        // Telement: the member list has no close button, so the link that opens it closes it too
+        const viewMembers = (): void => sdkContext.rightPanelStore.showOrHidePhase(RightPanelPhases.MemberList);
 
         members = (
             <AccessibleButton kind="link" className="mx_RoomInfoLine_members" onClick={viewMembers}>

@@ -350,6 +350,33 @@ export class ElementAppPage {
     }
 
     /**
+     * Opens the member list: with its button in the room header, or from room info in a DM, whose header has none.
+     * @returns locator to the memberlist panel
+     */
+    public async openMemberlistPanel(): Promise<Locator> {
+        const facePile = this.page.locator(".mx_RoomHeader .mx_FacePile");
+        if (await facePile.isVisible()) return this.toggleMemberlistPanel();
+
+        const roomInfo = await this.openRoomInfoPanel();
+        await roomInfo.getByRole("menuitem", { name: "People" }).click();
+        const memberlist = this.page.locator(".mx_MemberListView");
+        await memberlist.waitFor();
+        return memberlist;
+    }
+
+    /**
+     * Closes the right panel with the room header's button of the open pane, which goes back to the pane first from one
+     * of its pages. Escape would mark the room as read, when the focus is in the timeline.
+     */
+    public async closeRightPanel(): Promise<void> {
+        const rightPanel = this.page.getByTestId("right-panel");
+        const paneButton = this.page.locator('.mx_RoomHeader [aria-controls="mx_RightPanel"][aria-expanded="true"]');
+        await paneButton.click();
+        if (await rightPanel.isVisible()) await paneButton.click();
+        await expect(rightPanel).not.toBeVisible();
+    }
+
+    /**
      * Opens the room's search bar
      * @returns locator to its search field
      */

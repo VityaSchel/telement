@@ -22,7 +22,6 @@ import { _t } from "../../../../languageHandler";
 
 interface IProps {
     roomId: string;
-    onClose: () => void;
 }
 
 /**
@@ -102,7 +101,6 @@ const MemberListView: React.FC<IProps> = (props: IProps) => {
             ariaLabelledBy="memberlist-panel-tab"
             role="tabpanel"
             header={_t("common|people")}
-            onClose={props.onClose}
         >
             <Flex align="stretch" direction="column" className="mx_MemberListView_container">
                 <Form.Root onSubmit={(e) => e.preventDefault()}>

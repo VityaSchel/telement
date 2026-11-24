@@ -63,7 +63,6 @@ describe("ThreadView", () => {
                 >
                     <ThreadView
                         room={room}
-                        onClose={vi.fn()}
                         mxEvent={event}
                         initialEvent={initialEvent}
                         resizeNotifier={new ResizeNotifier()}

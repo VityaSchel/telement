@@ -523,8 +523,8 @@ export const verify = async (app: ElementAppPage, bob: Bot) => {
     const page = app.page;
     const bobsVerificationRequestPromise = waitForVerificationRequest(bob);
 
-    const roomInfo = await app.toggleRoomInfoPanel();
-    await page.locator(".mx_RightPanel").getByRole("menuitem", { name: "People" }).click();
+    await app.openMemberlistPanel();
+    const roomInfo = page.getByTestId("right-panel");
     await roomInfo.getByText("Bob").click();
     await roomInfo.getByRole("button", { name: "Verify" }).click();
     await roomInfo.getByRole("button", { name: "Start verification" }).click();
@@ -552,13 +552,9 @@ export const verifyApp = async (
     bobDisplayName: string,
     bobElementApp: ElementAppPage,
 ) => {
-    // Alice opens room info and starts verification.
+    // Alice opens the member list and starts verification.
     const aliceRoomInfo = aliceElementApp.page.locator(".mx_RightPanel");
-    if (await aliceRoomInfo.isHidden()) {
-        await aliceElementApp.toggleRoomInfoPanel();
-    }
-
-    await aliceElementApp.page.locator(".mx_RightPanel").getByRole("menuitem", { name: "People" }).click();
+    await aliceElementApp.openMemberlistPanel();
     await aliceRoomInfo.getByText("Bob").click();
     await aliceRoomInfo.getByRole("button", { name: "Verify" }).click();
     await aliceRoomInfo.getByRole("button", { name: "Start verification" }).click();

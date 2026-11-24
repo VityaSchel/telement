@@ -43,7 +43,6 @@ describe("<RoomSummaryCard />", () => {
     const getComponent = (props = {}) => {
         const defaultProps = {
             room,
-            onClose: vi.fn(),
             permalinkCreator: new RoomPermalinkCreator(room),
         };
 
@@ -71,8 +70,8 @@ describe("<RoomSummaryCard />", () => {
         isFavorite: false,
         canInviteToState: true,
         pinCount: 0,
+        showPeople: false,
         onRoomMembersClick: vi.fn(),
-        onRoomThreadsClick: vi.fn(),
         onRoomFilesClick: vi.fn(),
         onRoomExtensionsClick: vi.fn(),
         onRoomPinsClick: vi.fn(),
@@ -137,11 +136,12 @@ describe("<RoomSummaryCard />", () => {
         expect(container).toMatchSnapshot();
     });
 
-    it("is titled Room info, without a search field", () => {
+    it("is titled Room info, without a search field or a close button", () => {
         getComponent();
 
         expect(screen.getByRole("heading", { name: "Room info" })).toBeInTheDocument();
         expect(screen.queryByRole("searchbox")).not.toBeInTheDocument();
+        expect(screen.queryByRole("button", { name: "Close" })).not.toBeInTheDocument();
     });
 
     describe("keyboard", () => {
@@ -152,15 +152,15 @@ describe("<RoomSummaryCard />", () => {
         it("makes the items one Tab stop, which the up and down arrows, Home and End move through, as a menu's", async () => {
             const user = userEvent.setup();
             getComponent();
-            const [pin, invite, people] = items();
+            const [pin, invite, pinnedMessages] = items();
 
             expect(items().filter((item) => item.tabIndex === 0)).toEqual([pin]);
             pin.focus();
             await user.keyboard("{ArrowDown}");
             expect(invite).toHaveFocus();
             await user.keyboard("{ArrowDown}");
-            expect(people).toHaveFocus();
-            expect(items().filter((item) => item.tabIndex === 0)).toEqual([people]);
+            expect(pinnedMessages).toHaveFocus();
+            expect(items().filter((item) => item.tabIndex === 0)).toEqual([pinnedMessages]);
             await user.keyboard("{End}");
             expect(items().at(-1)).toHaveFocus();
             await user.keyboard("{Home}");
@@ -173,12 +173,12 @@ describe("<RoomSummaryCard />", () => {
             vi.mocked(useRoomSummaryCardViewModel).mockReturnValue({ ...vmDefaultValues, canInviteToState: false });
             const user = userEvent.setup();
             getComponent();
-            const [pin, invite, people] = items();
+            const [pin, invite, pinnedMessages] = items();
 
             expect(invite.tabIndex).toBe(-1);
             pin.focus();
             await user.keyboard("{ArrowDown}");
-            expect(people).toHaveFocus();
+            expect(pinnedMessages).toHaveFocus();
         });
 
         it("keeps Pin to top a toggle that reads whether the room is pinned", () => {
@@ -240,7 +240,8 @@ describe("<RoomSummaryCard />", () => {
         expect(vmDefaultValues.onRoomSettingsClick).toHaveBeenCalled();
     });
 
-    it("opens room member list on button click", () => {
+    it("opens room member list on button click, where it lists the people", () => {
+        vi.mocked(useRoomSummaryCardViewModel).mockReturnValue({ ...vmDefaultValues, showPeople: true });
         const { getByText } = getComponent();
 
         fireEvent.click(getByText("People"));
@@ -248,12 +249,11 @@ describe("<RoomSummaryCard />", () => {
         expect(vmDefaultValues.onRoomMembersClick).toHaveBeenCalled();
     });
 
-    it("opens room threads list on button click", () => {
-        const { getByText } = getComponent();
+    it("leaves the people and the threads to their own buttons in the room header", () => {
+        getComponent();
 
-        fireEvent.click(getByText("Threads"));
-
-        expect(vmDefaultValues.onRoomThreadsClick).toHaveBeenCalled();
+        expect(screen.queryByRole("menuitem", { name: "People" })).not.toBeInTheDocument();
+        expect(screen.queryByRole("menuitem", { name: "Threads" })).not.toBeInTheDocument();
     });
 
     it("opens room pinned messages on button click", () => {

@@ -244,10 +244,12 @@ test.describe("Threads", () => {
         await expect(locator.getByText("BotBob")).toBeAttached();
         await expect(locator.getByText(MessageLong)).toBeAttached();
 
-        // User closes right panel after clicking back to thread list
-        locator = page.locator(".mx_ThreadPanel");
-        await locator.getByRole("button", { name: "Threads" }).click();
-        await locator.getByRole("button", { name: "Close" }).click();
+        // User closes right panel after going back to thread list, both with the room header's button
+        locator = page.locator(".mx_RoomHeader").getByRole("button", { name: "Threads" });
+        await locator.click();
+        await expect(page.locator("#thread-panel")).toBeVisible();
+        await locator.click();
+        await expect(page.locator(".mx_RightPanel")).not.toBeVisible();
 
         // Bot responds to thread
         await bot.sendMessage(roomId, "How are things?", threadId);
@@ -494,7 +496,7 @@ test.describe("Threads", () => {
         await textbox.press("Enter");
         await expect(locator.locator(".mx_EventTile").last().getByText("Hello Mr. User")).toBeVisible();
         // Close thread
-        await locator.getByTestId("base-card-close-button").click();
+        await app.closeRightPanel();
 
         // Open existing thread
         locator = page
@@ -547,7 +549,7 @@ test.describe("Threads", () => {
             await textbox.press("Enter");
             await expect(threadPanel.locator(".mx_EventTile").last().getByText(threadMessage)).toBeVisible();
             // Close thread
-            await threadPanel.getByTestId("base-card-close-button").click();
+            await app.closeRightPanel();
         };
 
         await sendMessage("Hello Mr. Bot");
@@ -609,7 +611,7 @@ test.describe("Threads", () => {
         await threadTextbox.fill("Hello Mr. User in a thread");
         await threadTextbox.press("Enter");
         await expect(threadPanel.locator(".mx_EventTile").last().getByText("Hello Mr. User in a thread")).toBeVisible();
-        await threadPanel.getByTestId("base-card-close-button").click();
+        await app.closeRightPanel();
 
         await page.locator(".mx_RoomHeader").getByRole("button", { name: "Threads" }).click();
         const threadPanelHeader = page.locator(".mx_ThreadPanelHeader");

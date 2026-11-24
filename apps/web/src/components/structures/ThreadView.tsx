@@ -52,7 +52,6 @@ import { EventPresentationContextProvider } from "../../utils/EventPresentationC
 
 interface IProps {
     room: Room;
-    onClose: () => void;
     resizeNotifier: ResizeNotifier;
     mxEvent: MatrixEvent;
     permalinkCreator?: RoomPermalinkCreator;
@@ -420,7 +419,6 @@ export default class ThreadView extends React.Component<IProps, IState> {
                         className={classNames("mx_ThreadView mx_ThreadPanel", {
                             mx_ThreadView_narrow: this.state.narrow,
                         })}
-                        onClose={this.props.onClose}
                         withoutScrollContainer={true}
                         header={this.renderThreadViewHeader()}
                         ref={this.card}

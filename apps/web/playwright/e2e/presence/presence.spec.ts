@@ -51,8 +51,7 @@ test.describe("Presence tests", () => {
             );
             await app.client.createRoom({}); // trigger sync
 
-            await app.toggleRoomInfoPanel();
-            await page.locator(".mx_RightPanel").getByText("People").click();
+            await app.openMemberlistPanel();
             await expect(page.locator(".mx_EntityTile_unreachable")).toContainText("Bob");
             await expect(page.locator(".mx_EntityTile_unreachable")).toContainText("User's server unreachable");
         });

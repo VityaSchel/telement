@@ -35,7 +35,6 @@ import { SDKContext } from "../../../contexts/SDKContext.ts";
 
 interface Props {
     room: Room;
-    onClose(this: void): void;
 }
 
 interface IAppRowProps {
@@ -140,9 +139,8 @@ const AppRow: React.FC<IAppRowProps> = ({ app, room }) => {
 /**
  * A right panel card displaying a list of widgets in the room and allowing the user to manage them.
  * @param room the room to manage widgets for
- * @param onClose callback when the card is closed
  */
-const ExtensionsCard: React.FC<Props> = ({ room, onClose }) => {
+const ExtensionsCard: React.FC<Props> = ({ room }) => {
     const sdkContext = useContext(SDKContext);
     const apps = useWidgets(room);
     // Filter out virtual widgets
@@ -190,7 +188,7 @@ const ExtensionsCard: React.FC<Props> = ({ room, onClose }) => {
     }
 
     return (
-        <BaseCard header={_t("right_panel|extensions_button")} className="mx_ExtensionsCard" onClose={onClose}>
+        <BaseCard header={_t("right_panel|extensions_button")} className="mx_ExtensionsCard">
             {shouldShowComponent(UIComponent.AddIntegrations) && (
                 <Button size="md" onClick={onManageIntegrations} kind="secondary" Icon={PlusIcon}>
                     {_t("right_panel|add_integrations")}

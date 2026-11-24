@@ -59,10 +59,9 @@ import { SDKContext } from "../../../../contexts/SDKContext";
 import { SDKContextClass } from "../../../../contexts/SDKContextClass.ts";
 
 vi.mock("../../../../utils/ShieldUtils");
+const rightPanel = vi.hoisted(() => ({ currentPhase: "foo", isOpen: false }));
 vi.mock("../../../../hooks/right-panel/useCurrentPhase", () => ({
-    useCurrentPhase: () => {
-        return { currentPhase: "foo", isOpen: false };
-    },
+    useCurrentPhase: () => ({ ...rightPanel }),
 }));
 vi.mock("../../../../Modal");
 
@@ -129,6 +128,7 @@ describe("RoomHeader", () => {
     });
 
     afterEach(() => {
+        Object.assign(rightPanel, { currentPhase: "foo", isOpen: false });
         vi.resetAllMocks();
         SettingsStore.reset();
     });
@@ -225,6 +225,43 @@ describe("RoomHeader", () => {
 
         await user.click(getByLabelText(document.body, "Notifications"));
         expect(setCardSpy).toHaveBeenCalledWith({ phase: RightPanelPhases.NotificationPanel });
+    });
+
+    describe("the right panel's panes", () => {
+        /** The names of the header's buttons whose pane is open. */
+        const openPanes = (): (string | null)[] =>
+            screen
+                .getAllByRole("button", { expanded: true })
+                .filter((button) => button.getAttribute("aria-controls") === "mx_RightPanel")
+                .map((button) => button.getAttribute("aria-label"));
+
+        it.each([
+            [RightPanelPhases.RoomSummary, "Room info"],
+            [RightPanelPhases.FilePanel, "Room info"],
+            [RightPanelPhases.PinnedMessages, "Room info"],
+            [RightPanelPhases.Extensions, "Room info"],
+            [RightPanelPhases.Widget, "Room info"],
+            [RightPanelPhases.DocumentViewer, "Room info"],
+            [RightPanelPhases.ThreadPanel, "Threads"],
+            [RightPanelPhases.ThreadView, "Threads"],
+            [RightPanelPhases.MemberList, "0 members"],
+            [RightPanelPhases.MemberInfo, "0 members"],
+            [RightPanelPhases.ThreePidMemberInfo, "0 members"],
+            [RightPanelPhases.EncryptionPanel, "0 members"],
+        ])("marks only its own pane's button open on the %s page", (currentPhase, name) => {
+            Object.assign(rightPanel, { currentPhase, isOpen: true });
+            const { container } = render(<RoomHeader room={room} />, getWrapper());
+
+            expect(openPanes()).toEqual([name]);
+            expect(container.querySelectorAll(".mx_RoomHeader_toggled, .mx_FacePile_toggled")).toHaveLength(1);
+        });
+
+        it("marks no button open while the panel is closed", () => {
+            Object.assign(rightPanel, { currentPhase: RightPanelPhases.RoomSummary, isOpen: false });
+            render(<RoomHeader room={room} />, getWrapper());
+
+            expect(screen.queryAllByRole("button", { expanded: true })).toEqual([]);
+        });
     });
 
     describe("message search", () => {
@@ -980,6 +1017,20 @@ describe("RoomHeader", () => {
             const { asFragment } = render(<RoomHeader room={room} />, getWrapper());
 
             expect(asFragment()).toMatchSnapshot();
+        });
+
+        it.each([
+            RightPanelPhases.RoomSummary,
+            RightPanelPhases.FilePanel,
+            RightPanelPhases.MemberList,
+            RightPanelPhases.MemberInfo,
+        ])("marks the room info button open on the %s page, as DMs have no people button", (currentPhase) => {
+            Object.assign(rightPanel, { currentPhase, isOpen: true });
+            render(<RoomHeader room={room} />, getWrapper());
+
+            expect(
+                screen.getAllByRole("button", { expanded: true }).map((button) => button.getAttribute("aria-label")),
+            ).toEqual(["Room info"]);
         });
 
         it("updates the icon when the encryption status changes", async () => {

@@ -87,11 +87,7 @@ describe("<PinnedMessagesCard />", () => {
 
     async function renderMessagePinList(room: Room): Promise<RenderResult> {
         const renderResult = render(
-            <PinnedMessagesCard
-                room={room}
-                onClose={vi.fn()}
-                permalinkCreator={new RoomPermalinkCreator(room, room.roomId)}
-            />,
+            <PinnedMessagesCard room={room} permalinkCreator={new RoomPermalinkCreator(room, room.roomId)} />,
             clientAndSDKContextRenderOptions(cli, SDKContextClass.instance),
         );
         // Wait a tick for state updates
@@ -170,11 +166,7 @@ describe("<PinnedMessagesCard />", () => {
     it("should show spinner whilst loading", async () => {
         const room = mkRoom([], [pin1]);
         render(
-            <PinnedMessagesCard
-                room={room}
-                onClose={vi.fn()}
-                permalinkCreator={new RoomPermalinkCreator(room, room.roomId)}
-            />,
+            <PinnedMessagesCard room={room} permalinkCreator={new RoomPermalinkCreator(room, room.roomId)} />,
             clientAndSDKContextRenderOptions(cli, SDKContextClass.instance),
         );
 
@@ -322,11 +314,7 @@ describe("<PinnedMessagesCard />", () => {
             ).mockReturnValue(false);
 
             const { asFragment } = render(
-                <PinnedMessagesCard
-                    room={room}
-                    onClose={vi.fn()}
-                    permalinkCreator={new RoomPermalinkCreator(room, room.roomId)}
-                />,
+                <PinnedMessagesCard room={room} permalinkCreator={new RoomPermalinkCreator(room, room.roomId)} />,
                 clientAndSDKContextRenderOptions(cli, SDKContextClass.instance),
             );
 

@@ -208,6 +208,30 @@ describe("RightPanelStore", () => {
         });
     });
 
+    describe("showOrHidePhase", () => {
+        it.each([
+            [RightPanelPhases.RoomSummary, RightPanelPhases.FilePanel],
+            [RightPanelPhases.RoomSummary, RightPanelPhases.Extensions],
+            [RightPanelPhases.ThreadPanel, RightPanelPhases.RoomSummary],
+            [RightPanelPhases.MemberList, RightPanelPhases.PinnedMessages],
+        ])("goes to the %s pane from %s, then closes it", async (pane, page) => {
+            await viewRoom("!1:example.org");
+            store.setCard({ phase: RightPanelPhases.RoomSummary }, true, "!1:example.org");
+            store.pushCard({ phase: page }, true, "!1:example.org");
+
+            store.showOrHidePhase(pane);
+            expect(store.currentCard.phase).toEqual(pane);
+            expect(store.isOpen).toBe(true);
+
+            store.showOrHidePhase(pane);
+            expect(store.isOpen).toBe(false);
+
+            store.showOrHidePhase(pane);
+            expect(store.currentCard.phase).toEqual(pane);
+            expect(store.isOpen).toBe(true);
+        });
+    });
+
     describe("setCards", () => {
         it("overwrites history", async () => {
             await viewRoom("!1:example.org");

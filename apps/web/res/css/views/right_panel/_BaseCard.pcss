@@ -33,10 +33,6 @@ Please see LICENSE files in the repository root for full details.
         flex-shrink: 0;
         border-block-end: var(--cpd-border-width-1) solid $separator;
 
-        .mx_BaseCard_header_spacer {
-            flex: 1;
-        }
-
         /* BaseCard sizes its icon buttons with --BaseCard_header-button-size, and Compound would draw their icons 3/4
            of that: 24px icons, as in the room header. Compound puts its class first; Headers.test.browser.ts fails
            when an upgrade renames it. */

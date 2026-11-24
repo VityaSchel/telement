@@ -13,15 +13,15 @@ import { useToggled } from "./useToggled";
 
 type Props = {
     Icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
-    phase: RightPanelPhases;
+    phases: readonly RightPanelPhases[];
 };
 
 /**
  * Use this component for room header icons that toggle different right panel phases.
- * Will add a class to the icon when the specified phase is on.
+ * Will add a class to the icon when one of the specified phases is on.
  */
-export function ToggleableIcon({ Icon, phase }: Props): React.ReactElement {
-    const toggled = useToggled(phase);
+export function ToggleableIcon({ Icon, phases }: Props): React.ReactElement {
+    const toggled = useToggled(...phases);
     const highlightClass = classNames({
         mx_RoomHeader_toggled: toggled,
     });

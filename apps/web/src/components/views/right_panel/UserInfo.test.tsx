@@ -143,6 +143,7 @@ describe("<UserInfo />", () => {
         pending = true;
         phase: Phase = Phase.Ready;
         cancellationCode: string | null = null;
+        cancel = vi.fn();
 
         constructor(opts: Partial<VerificationRequest>) {
             super();
@@ -160,7 +161,6 @@ describe("<UserInfo />", () => {
         user: defaultUser,
         // idk what is wrong with this type
         phase: RightPanelPhases.MemberInfo as RightPanelPhases.MemberInfo,
-        onClose: vi.fn(),
     };
 
     const renderComponent = (props = {}) => {
@@ -177,14 +177,6 @@ describe("<UserInfo />", () => {
     afterEach(async () => {
         await clearAllModals();
         vi.clearAllMocks();
-    });
-
-    it("closes on close button click", async () => {
-        renderComponent();
-
-        await userEvent.click(screen.getByTestId("base-card-close-button"));
-
-        expect(defaultProps.onClose).toHaveBeenCalled();
     });
 
     describe("without a room", () => {
@@ -275,10 +267,19 @@ describe("<UserInfo />", () => {
             expect(spy).not.toHaveBeenCalled();
         });
 
-        it("renders close button correctly when encryption panel with a pending verification request", async () => {
+        it("cancels a pending verification with a button, as the panel has no close button", async () => {
             renderComponent({ phase: RightPanelPhases.EncryptionPanel, verificationRequest });
-            screen.getByTestId("base-card-close-button").focus();
-            expect(screen.getByText("Cancel")).toBeInTheDocument();
+
+            await userEvent.click(screen.getByRole("button", { name: "Cancel" }));
+
+            expect(verificationRequest.cancel).toHaveBeenCalled();
+        });
+
+        it("has nothing to cancel once the verification is done", () => {
+            verificationRequest.pending = false;
+            renderComponent({ phase: RightPanelPhases.EncryptionPanel, verificationRequest });
+
+            expect(screen.queryByRole("button", { name: "Cancel" })).not.toBeInTheDocument();
         });
     });
 

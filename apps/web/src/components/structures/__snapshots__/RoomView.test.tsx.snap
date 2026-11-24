@@ -1281,6 +1281,8 @@ exports[`RoomView > should hide the composer when hideComposer=true 1`] = `
             </div>
           </button>
           <button
+            aria-controls="mx_RightPanel"
+            aria-expanded="false"
             aria-label="Threads"
             aria-labelledby="react-use-id-4"
             class="_icon-button"
@@ -1311,6 +1313,8 @@ exports[`RoomView > should hide the composer when hideComposer=true 1`] = `
             </div>
           </button>
           <button
+            aria-controls="mx_RightPanel"
+            aria-expanded="false"
             aria-label="Room info"
             aria-labelledby="react-use-id-5"
             class="_icon-button"
@@ -1346,6 +1350,8 @@ exports[`RoomView > should hide the composer when hideComposer=true 1`] = `
             class="_typography _font-body-sm-medium"
           >
             <div
+              aria-controls="mx_RightPanel"
+              aria-expanded="false"
               aria-label="0 members"
               aria-labelledby="react-use-id-6"
               class="mx_AccessibleButton mx_FacePile"
@@ -1890,6 +1896,8 @@ exports[`RoomView > should hide the pinned message banner when hidePinnedMessage
             </div>
           </button>
           <button
+            aria-controls="mx_RightPanel"
+            aria-expanded="false"
             aria-label="Threads"
             aria-labelledby="react-use-id-4"
             class="_icon-button"
@@ -1920,6 +1928,8 @@ exports[`RoomView > should hide the pinned message banner when hidePinnedMessage
             </div>
           </button>
           <button
+            aria-controls="mx_RightPanel"
+            aria-expanded="false"
             aria-label="Room info"
             aria-labelledby="react-use-id-5"
             class="_icon-button"
@@ -1955,6 +1965,8 @@ exports[`RoomView > should hide the pinned message banner when hidePinnedMessage
             class="_typography _font-body-sm-medium"
           >
             <div
+              aria-controls="mx_RightPanel"
+              aria-expanded="false"
               aria-label="0 members"
               aria-labelledby="react-use-id-6"
               class="mx_AccessibleButton mx_FacePile"
@@ -2419,6 +2431,8 @@ exports[`RoomView > should hide the right panel when hideRightPanel=true 1`] = `
             </div>
           </button>
           <button
+            aria-controls="mx_RightPanel"
+            aria-expanded="false"
             aria-label="Threads"
             aria-labelledby="react-use-id-4"
             class="_icon-button"
@@ -2449,6 +2463,8 @@ exports[`RoomView > should hide the right panel when hideRightPanel=true 1`] = `
             </div>
           </button>
           <button
+            aria-controls="mx_RightPanel"
+            aria-expanded="false"
             aria-label="Room info"
             aria-labelledby="react-use-id-5"
             class="_icon-button"
@@ -2484,6 +2500,8 @@ exports[`RoomView > should hide the right panel when hideRightPanel=true 1`] = `
             class="_typography _font-body-sm-medium"
           >
             <div
+              aria-controls="mx_RightPanel"
+              aria-expanded="true"
               aria-label="0 members"
               aria-labelledby="react-use-id-6"
               class="mx_AccessibleButton mx_FacePile mx_FacePile_toggled"
@@ -2948,6 +2966,8 @@ exports[`RoomView > should not display the timeline when the room encryption is 
             </div>
           </button>
           <button
+            aria-controls="mx_RightPanel"
+            aria-expanded="false"
             aria-label="Threads"
             aria-labelledby="react-use-id-4"
             class="_icon-button"
@@ -2978,6 +2998,8 @@ exports[`RoomView > should not display the timeline when the room encryption is 
             </div>
           </button>
           <button
+            aria-controls="mx_RightPanel"
+            aria-expanded="false"
             aria-label="Room info"
             aria-labelledby="react-use-id-5"
             class="_icon-button"
@@ -3013,6 +3035,8 @@ exports[`RoomView > should not display the timeline when the room encryption is 
             class="_typography _font-body-sm-medium"
           >
             <div
+              aria-controls="mx_RightPanel"
+              aria-expanded="false"
               aria-label="0 members"
               aria-labelledby="react-use-id-6"
               class="mx_AccessibleButton mx_FacePile"
@@ -3235,6 +3259,8 @@ exports[`RoomView > should not display the timeline when the room encryption is 
             </div>
           </button>
           <button
+            aria-controls="mx_RightPanel"
+            aria-expanded="false"
             aria-label="Threads"
             aria-labelledby="react-use-id-6"
             class="_icon-button"
@@ -3265,6 +3291,8 @@ exports[`RoomView > should not display the timeline when the room encryption is 
             </div>
           </button>
           <button
+            aria-controls="mx_RightPanel"
+            aria-expanded="false"
             aria-label="Room info"
             aria-labelledby="react-use-id-7"
             class="_icon-button"
@@ -3300,6 +3328,8 @@ exports[`RoomView > should not display the timeline when the room encryption is 
             class="_typography _font-body-sm-medium"
           >
             <div
+              aria-controls="mx_RightPanel"
+              aria-expanded="false"
               aria-label="0 members"
               aria-labelledby="react-use-id-8"
               class="mx_AccessibleButton mx_FacePile"
@@ -3714,6 +3744,8 @@ exports[`RoomView > video rooms > should render joined video room view 1`] = `
             </div>
           </button>
           <button
+            aria-controls="mx_RightPanel"
+            aria-expanded="true"
             aria-label="Chat"
             aria-labelledby="react-use-id-1"
             class="_icon-button"
@@ -3767,6 +3799,8 @@ exports[`RoomView > video rooms > should render joined video room view 1`] = `
             </div>
           </button>
           <button
+            aria-controls="mx_RightPanel"
+            aria-expanded="false"
             aria-label="Threads"
             aria-labelledby="react-use-id-3"
             class="_icon-button"
@@ -3797,6 +3831,8 @@ exports[`RoomView > video rooms > should render joined video room view 1`] = `
             </div>
           </button>
           <button
+            aria-controls="mx_RightPanel"
+            aria-expanded="false"
             aria-label="Room info"
             aria-labelledby="react-use-id-4"
             class="_icon-button"
@@ -3832,6 +3868,8 @@ exports[`RoomView > video rooms > should render joined video room view 1`] = `
             class="_typography _font-body-sm-medium"
           >
             <div
+              aria-controls="mx_RightPanel"
+              aria-expanded="false"
               aria-label="0 members"
               aria-labelledby="react-use-id-5"
               class="mx_AccessibleButton mx_FacePile"

@@ -38,7 +38,6 @@ const noop = (): void => {};
 
 interface IProps {
     roomId: string;
-    onClose: () => void;
     resizeNotifier: ResizeNotifier;
     permalinkCreator: RoomPermalinkCreator;
 }
@@ -163,12 +162,11 @@ export const ThreadPanelHeader: React.FC<{
     );
 };
 
-const ThreadPanel: React.FC<IProps> = ({ roomId, onClose, permalinkCreator }) => {
+const ThreadPanel: React.FC<IProps> = ({ roomId, permalinkCreator }) => {
     const mxClient = useContext(MatrixClientContext);
     const roomContext = useContext(RoomContext);
     const timelinePanel = useRef<TimelinePanel | null>(null);
     const card = useRef<HTMLDivElement | null>(null);
-    const closeButonRef = useRef<HTMLButtonElement | null>(null);
 
     const [filterOption, setFilterOption] = useState<ThreadFilterType>(ThreadFilterType.All);
     const [room, setRoom] = useState<Room | null>(null);
@@ -208,10 +206,8 @@ const ThreadPanel: React.FC<IProps> = ({ roomId, onClose, permalinkCreator }) =>
                 className="mx_ThreadPanel"
                 ariaLabelledBy="thread-panel-tab"
                 role="tabpanel"
-                onClose={onClose}
                 withoutScrollContainer={true}
                 ref={card}
-                closeButtonRef={closeButonRef}
             >
                 {hasThreads && <ThreadPanelHeader filterOption={filterOption} setFilterOption={setFilterOption} />}
                 <Measured sensor={card} onMeasurement={setNarrow} />

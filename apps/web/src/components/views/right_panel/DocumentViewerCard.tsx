@@ -17,7 +17,6 @@ import { _t } from "../../../languageHandler";
 
 interface Props {
     mxEvent: MatrixEvent;
-    onClose: () => void;
 }
 
 /**
@@ -26,16 +25,16 @@ interface Props {
  * The card owns the media handle rather than the viewer, so that re-rendering the panel — which
  * happens on every resize — does not hand the viewer a new `blob` identity and make it reload the file.
  */
-export function DocumentViewerCard({ mxEvent, onClose }: Props): JSX.Element {
+export function DocumentViewerCard({ mxEvent }: Props): JSX.Element {
     const viewer = documentViewerForEvent(mxEvent);
     const media = useMemo(() => documentMediaForEvent(mxEvent), [mxEvent]);
 
     // The store only opens the card for an event a viewer can handle, but the event can stop being
     // one while the card is open, e.g. when the attachment is redacted. Show the error rather than an
-    // empty panel, so the card can still be closed.
+    // empty panel.
     if (!viewer || !media) {
         return (
-            <BaseCard onClose={onClose} header={_t("document_viewer|title")} withoutScrollContainer>
+            <BaseCard header={_t("document_viewer|title")} withoutScrollContainer>
                 <DocumentViewerView status="error" />
             </BaseCard>
         );
@@ -45,7 +44,7 @@ export function DocumentViewerCard({ mxEvent, onClose }: Props): JSX.Element {
 
     return (
         // Name the card after the file being read; BaseCard ellipsizes a title too long to fit.
-        <BaseCard onClose={onClose} header={media.name ?? _t("document_viewer|title")} withoutScrollContainer>
+        <BaseCard header={media.name ?? _t("document_viewer|title")} withoutScrollContainer>
             <ErrorBoundary>
                 <Suspense fallback={<Spinner />}>
                     <Viewer media={media} />

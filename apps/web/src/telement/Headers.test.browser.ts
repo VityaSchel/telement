@@ -14,7 +14,6 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { Avatar, AvatarStack, IconButton, Text } from "@vector-im/compound-web";
 import {
     ChevronDownIcon,
-    ChevronLeftIcon,
     CloseIcon,
     DownloadIcon,
     ExpandIcon,
@@ -121,19 +120,11 @@ function roomHeader(facePile: boolean): ReactNode {
     );
 }
 
-/** BaseCard's header: back, the title and close, as BaseCard sizes and fills its icon buttons. */
+/** BaseCard's header: the title, with what the card puts at its end. */
 function cardHeader(
     title: ReactNode = h("p", { className: "mx_BaseCard_header_title_heading" }, "Threads"),
 ): ReactNode {
-    const headerButton = (label: string, icon: ReactNode): ReactNode =>
-        h(IconButton, { "aria-label": label, "kind": "secondary", "size": "var(--BaseCard_header-button-size)" }, icon);
-    return h(
-        "div",
-        { className: "mx_BaseCard_header" },
-        headerButton("Back", h(ChevronLeftIcon)),
-        h("div", { className: "mx_BaseCard_header_title" }, title),
-        headerButton("Close", h(CloseIcon)),
-    );
+    return h("div", { className: "mx_BaseCard_header" }, h("div", { className: "mx_BaseCard_header_title" }, title));
 }
 
 /** ThreadView's and WidgetCard's title: the heading and the options button with its overflow icon. */
@@ -309,17 +300,13 @@ describe("Telement's headers", () => {
     });
 
     describe("right panel card header", () => {
-        it("draws back and close as 36px buttons around 24px icons, 12px from the panel's edges", () => {
-            render(rightPanel(h("div", { className: "mx_BaseCard" }, cardHeader())));
+        it("is as tall as the room header, its title 12px from the start and its options button 12px from the end", () => {
+            render(rightPanel(h("div", { className: "mx_BaseCard" }, cardHeader(optionsTitle()))));
 
             const header = box(".mx_BaseCard_header");
             expect(header.height).toBe(64);
-            for (const label of ["Back", "Close"]) {
-                expect(iconGeometry(button(label))).toEqual([36, 36, 24, 24, 6, 6]);
-                expect(button(label).getBoundingClientRect().top - header.top).toBe(13.5);
-            }
-            expect(button("Back").getBoundingClientRect().left - header.left).toBe(12);
-            expect(header.right - button("Close").getBoundingClientRect().right).toBe(12);
+            expect(box(".mx_BaseCard_header_title_heading").left - header.left).toBe(12);
+            expect(header.right - button("Thread options").getBoundingClientRect().right).toBe(12);
         });
 
         it("sizes the thread and widget options button like the other header buttons", () => {
@@ -352,25 +339,19 @@ describe("Telement's headers", () => {
         });
 
         it.each(["cpd-theme-light", "cpd-theme-dark"])(
-            "fills back, the thread's options and close alike before they are hovered (%s)",
+            "fills the thread's options button before it is hovered (%s)",
             async (theme) => {
                 render(rightPanel(h("div", { className: "mx_BaseCard" }, cardHeader(optionsTitle()))), theme);
                 const panel = document.querySelector("aside")!;
                 const [filled, hovered] = ["--cpd-color-bg-subtle-secondary", "--cpd-color-bg-subtle-primary"].map(
                     (token) => tokenColor(token, panel),
                 );
-                const buttons = ["Back", "Thread options", "Close"].map(button);
+                const options = button("Thread options");
 
                 expect(filled).not.toBe("rgba(0, 0, 0, 0)");
-                expect(buttons.map((element) => getComputedStyle(element).backgroundColor)).toEqual([
-                    filled,
-                    filled,
-                    filled,
-                ]);
-                for (const element of buttons) {
-                    await userEvent.hover(element);
-                    expect(getComputedStyle(element).backgroundColor).toBe(hovered);
-                }
+                expect(getComputedStyle(options).backgroundColor).toBe(filled);
+                await userEvent.hover(options);
+                expect(getComputedStyle(options).backgroundColor).toBe(hovered);
             },
         );
 
@@ -403,7 +384,7 @@ describe("Telement's headers", () => {
             expect(getComputedStyle(options).backgroundColor).toBe(
                 tokenColor("--cpd-color-bg-subtle-primary", options),
             );
-            expect(box(".mx_BaseCard_header").right - options.getBoundingClientRect().right).toBe(12 + 36 + 12);
+            expect(box(".mx_BaseCard_header").right - options.getBoundingClientRect().right).toBe(12);
         });
 
         it("gives the options button its hover disc whatever it holds", async () => {
@@ -436,17 +417,17 @@ describe("Telement's headers", () => {
                     "div",
                     { style: { display: "flex" } },
                     h("div", { style: { width: "600px" } }, roomHeader(false)),
-                    rightPanel(h("div", { className: "mx_BaseCard" }, cardHeader())),
+                    rightPanel(h("div", { className: "mx_BaseCard" }, cardHeader(optionsTitle()))),
                 ),
             );
 
             const roomHeaderBox = box(".mx_RoomHeader");
             const cardHeaderBox = box(".mx_BaseCard_header");
             const last = button("Threads").getBoundingClientRect();
-            const close = button("Close").getBoundingClientRect();
+            const options = button("Thread options").getBoundingClientRect();
             expect([cardHeaderBox.top, cardHeaderBox.height]).toEqual([roomHeaderBox.top, roomHeaderBox.height]);
-            expect(cardHeaderBox.right - close.right).toBe(roomHeaderBox.right - last.right);
-            expect([close.top, close.height]).toEqual([last.top, last.height]);
+            expect(cardHeaderBox.right - options.right).toBe(roomHeaderBox.right - last.right);
+            expect([options.top, options.height]).toEqual([last.top, last.height]);
         });
     });
 
@@ -481,14 +462,13 @@ describe("Telement's headers", () => {
             );
         }
 
-        it("puts mark all as read where the card header puts back: a 36px button 12px from the start, its icon 24px", () => {
+        it("puts mark all as read at its start: a 36px button 12px from the edge, its icon 24px", () => {
             render(threadPanelHeader());
 
             const header = box(".mx_ThreadPanelHeader");
             const markRead = button("Mark all as read").getBoundingClientRect();
             expect(iconGeometry(button("Mark all as read"))).toEqual([36, 36, 24, 24, 6, 6]);
             expect([markRead.left - header.left, markRead.top - header.top]).toEqual([12, 13.5]);
-            expect(markRead.left).toBe(button("Back").getBoundingClientRect().left);
         });
 
         it.each(["cpd-theme-light", "cpd-theme-dark"])(

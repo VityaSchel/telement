@@ -1165,12 +1165,14 @@ export class RoomView extends React.Component<IRoomProps, IRoomState> {
         const action = getKeyBindingsManager().getRoomAction(ev);
         switch (action) {
             case KeyBindingAction.DismissReadMarker:
-                // Telement: Escape closes the search bar first
+                // Telement: Escape closes the search bar first, and leaves an open right panel to close (RightPanel) once
+                // it has nothing left to dismiss in the timeline
                 if (this.isSearchOpen) {
                     void this.leaveSearch();
                     handled = true;
                     break;
                 }
+                if (this.state.showRightPanel && !this.props.hideRightPanel && !this.hasTimelineToDismiss) break;
                 this.timelineReturns.clear();
                 void this.messagePanel?.forgetReadMarker();
                 this.jumpToLiveTimeline();
@@ -1198,6 +1200,20 @@ export class RoomView extends React.Component<IRoomProps, IRoomState> {
             ev.preventDefault();
         }
     };
+
+    // Telement: whether the timeline has something for Escape to dismiss: unread messages, a message it shows highlighted,
+    // places to jump back to or being scrolled up
+    private get hasTimelineToDismiss(): boolean {
+        const readMarkerPosition = this.messagePanel?.getReadMarkerPosition();
+        return (
+            this.state.atEndOfLiveTimeline === false ||
+            !!this.state.isInitialEventHighlighted ||
+            this.timelineReturns.canReturn ||
+            // In view, or above it
+            readMarkerPosition === 0 ||
+            readMarkerPosition === -1
+        );
+    }
 
     private onCallState = (roomId: string | null): void => {
         // don't filter out payloads for room IDs other than props.room because

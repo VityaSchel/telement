@@ -410,8 +410,7 @@ class Helpers {
      * Close the threads panel.
      */
     async closeThreadsPanel() {
-        await this.page.locator(".mx_RightPanel").getByTestId("base-card-close-button").click();
-        await expect(this.page.locator(".mx_RightPanel")).not.toBeVisible();
+        await this.app.closeRightPanel();
     }
 
     /**
@@ -533,28 +532,19 @@ class Helpers {
     }
 
     /**
-     * Click the "Threads" or "Back" button if needed to get to the threads list.
+     * Click the "Threads" button if needed to get to the threads list.
      */
     async openThreadList() {
         // If we've just entered the room, the threads panel takes a while to decide
         // whether it's open or not - wait here to give it a chance to settle.
         await this.page.waitForTimeout(200);
 
-        const threadPanel = this.page.locator(".mx_ThreadPanel");
-        const isThreadPanelOpen = (await threadPanel.count()) !== 0;
-        if (!isThreadPanelOpen) {
+        // The threads button opens the list, also from a thread
+        const threadList = this.page.locator("#thread-panel");
+        if ((await threadList.count()) === 0) {
             await this.page.locator(".mx_RoomHeader").getByLabel("Threads").click();
         }
-        await expect(threadPanel).toBeVisible();
-        await threadPanel.evaluate(($panel) => {
-            const $button = $panel.querySelector<HTMLElement>('[data-testid="base-card-back-button"]');
-            const title = $panel.querySelector<HTMLElement>(".mx_BaseCard_header_title")?.textContent;
-            // If the Threads back button is present then click it - the
-            // threads button can open either threads list or thread panel
-            if ($button && title !== "Threads") {
-                $button.click();
-            }
-        });
+        await expect(threadList).toBeVisible();
     }
 
     async findRoomById(roomId: string): Promise<JSHandle<Room>> {

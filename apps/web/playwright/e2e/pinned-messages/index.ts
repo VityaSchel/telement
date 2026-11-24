@@ -218,7 +218,7 @@ export class Helpers {
      * Go back from the pinned messages list
      */
     async backPinnedMessagesList() {
-        await this.page.locator("#mx_RightPanel").getByTestId("base-card-back-button").click();
+        await this.openRoomInfo();
     }
 
     /**

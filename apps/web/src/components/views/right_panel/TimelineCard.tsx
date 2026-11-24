@@ -43,7 +43,6 @@ import { EventPresentationContextProvider } from "../../../utils/EventPresentati
 
 interface IProps {
     room: Room;
-    onClose: () => void;
     resizeNotifier: ResizeNotifier;
     permalinkCreator: RoomPermalinkCreator;
     classNames?: string;
@@ -209,7 +208,6 @@ export default class TimelineCard extends React.Component<IProps, IState> {
             >
                 <BaseCard
                     className={this.props.classNames}
-                    onClose={this.props.onClose}
                     withoutScrollContainer={true}
                     header={_t("right_panel|video_room_chat|title")}
                     ref={this.card}

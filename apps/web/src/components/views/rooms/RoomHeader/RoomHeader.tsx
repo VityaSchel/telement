@@ -51,12 +51,21 @@ import defaultDispatcher from "../../../../dispatcher/dispatcher.ts";
 import { RoomSettingsTab } from "../../dialogs/RoomSettingsDialog-tab";
 import { useScopedRoomContext } from "../../../../contexts/ScopedRoomContext.tsx";
 import { ToggleableIcon } from "./toggle/ToggleableIcon.tsx";
+import { useToggled } from "./toggle/useToggled.ts";
 import { CurrentRightPanelPhaseContextProvider } from "../../../../contexts/CurrentRightPanelPhaseContext.tsx";
 import { LocalRoom } from "../../../../models/LocalRoom.ts";
 import { useIsEncrypted } from "../../../../hooks/useIsEncrypted.ts";
 import { useUserStatus } from "../../../../hooks/useUserStatus.ts";
 import { SDKContext } from "../../../../contexts/SDKContext.ts";
 import { RoomEncryptionStatusIcon } from "../../../../telement/room/RoomEncryptionStatusIcon";
+import {
+    DM_INFO_PANE,
+    NOTIFICATIONS_PANE,
+    PEOPLE_PANE,
+    RIGHT_PANEL_ID,
+    ROOM_INFO_PANE,
+    THREADS_PANE,
+} from "../../../../telement/right-panel/panes";
 
 function RoomHeaderButtons({
     room,
@@ -90,6 +99,14 @@ function RoomHeaderButtons({
     const isDirectMessage = !!dmMember;
 
     const notificationsEnabled = useFeatureEnabled("feature_notifications");
+
+    // Telement: each pane of the right panel is opened and closed by its own button, which is marked open on all of the
+    // pane's pages and goes back to the pane from them
+    const roomInfoPane = isDirectMessage ? DM_INFO_PANE : ROOM_INFO_PANE;
+    const isRoomInfoOpen = useToggled(...roomInfoPane);
+    const isThreadsOpen = useToggled(...THREADS_PANE);
+    const isPeopleOpen = useToggled(...PEOPLE_PANE);
+    const isNotificationsOpen = useToggled(...NOTIFICATIONS_PANE);
 
     const videoClick = useCallback(
         (ev: React.MouseEvent) => videoCallClick(ev, callOptions[0]),
@@ -322,8 +339,10 @@ function RoomHeaderButtons({
                         sdkContext.rightPanelStore.showOrHidePhase(RightPanelPhases.ThreadPanel);
                     }}
                     aria-label={_t("common|threads")}
+                    aria-expanded={isThreadsOpen}
+                    aria-controls={RIGHT_PANEL_ID}
                 >
-                    <ToggleableIcon Icon={ThreadsIcon} phase={RightPanelPhases.ThreadPanel} />
+                    <ToggleableIcon Icon={ThreadsIcon} phases={THREADS_PANE} />
                 </IconButton>
             </Tooltip>
             {notificationsEnabled && (
@@ -335,8 +354,10 @@ function RoomHeaderButtons({
                             sdkContext.rightPanelStore.showOrHidePhase(RightPanelPhases.NotificationPanel);
                         }}
                         aria-label={_t("notifications|enable_prompt_toast_title")}
+                        aria-expanded={isNotificationsOpen}
+                        aria-controls={RIGHT_PANEL_ID}
                     >
-                        <ToggleableIcon Icon={NotificationsIcon} phase={RightPanelPhases.NotificationPanel} />
+                        <ToggleableIcon Icon={NotificationsIcon} phases={NOTIFICATIONS_PANE} />
                     </IconButton>
                 </Tooltip>
             )}
@@ -348,8 +369,10 @@ function RoomHeaderButtons({
                         sdkContext.rightPanelStore.showOrHidePhase(RightPanelPhases.RoomSummary);
                     }}
                     aria-label={_t("right_panel|room_summary_card|title")}
+                    aria-expanded={isRoomInfoOpen}
+                    aria-controls={RIGHT_PANEL_ID}
                 >
-                    <ToggleableIcon Icon={RoomInfoIcon} phase={RightPanelPhases.RoomSummary} />
+                    <ToggleableIcon Icon={RoomInfoIcon} phases={roomInfoPane} />
                 </IconButton>
             </Tooltip>
 
@@ -367,6 +390,8 @@ function RoomHeaderButtons({
                             e.stopPropagation();
                         }}
                         aria-label={_t("common|n_members", { count: memberCount })}
+                        aria-expanded={isPeopleOpen}
+                        aria-controls={RIGHT_PANEL_ID}
                     >
                         {formatCount(memberCount)}
                     </FacePile>

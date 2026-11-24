@@ -22,10 +22,6 @@ import EmptyState from "../views/right_panel/EmptyState";
 import { ScopedRoomContextProvider } from "../../contexts/ScopedRoomContext.tsx";
 import { EventPresentationContextProvider } from "../../utils/EventPresentationContextProvider";
 
-interface IProps {
-    onClose(): void;
-}
-
 interface IState {
     narrow: boolean;
 }
@@ -33,13 +29,13 @@ interface IState {
 /*
  * Component which shows the global notification list using a TimelinePanel
  */
-export default class NotificationPanel extends React.PureComponent<IProps, IState> {
+export default class NotificationPanel extends React.PureComponent<object, IState> {
     public static contextType = RoomContext;
     declare public context: React.ContextType<typeof RoomContext>;
 
     private card = React.createRef<HTMLDivElement>();
 
-    public constructor(props: IProps) {
+    public constructor(props: object) {
         super(props);
 
         this.state = {
@@ -94,7 +90,6 @@ export default class NotificationPanel extends React.PureComponent<IProps, IStat
                      * Will be done once all the panels are using a similar layout
                      */
                     className="mx_ThreadPanel"
-                    onClose={this.props.onClose}
                     withoutScrollContainer={true}
                 >
                     <Measured sensor={this.card} onMeasurement={this.onMeasurement} />

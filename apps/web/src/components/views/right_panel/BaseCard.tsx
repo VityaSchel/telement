@@ -6,106 +6,46 @@ SPDX-License-Identifier: AGPL-3.0-only OR GPL-3.0-only OR LicenseRef-Element-Com
 Please see LICENSE files in the repository root for full details.
 */
 
-import React, { type ReactNode, type KeyboardEvent, type Ref, type MouseEvent, useMemo, useContext } from "react";
+import React, { type ReactNode, type KeyboardEvent, type Ref, useMemo } from "react";
 import classNames from "classnames";
-import { IconButton, Text } from "@vector-im/compound-web";
-import CloseIcon from "@vector-im/compound-design-tokens/assets/web/icons/close";
-import ChevronLeftIcon from "@vector-im/compound-design-tokens/assets/web/icons/chevron-left";
+import { Text } from "@vector-im/compound-web";
 import { AutoHideScrollbar } from "@element-hq/web-shared-components";
 
-import { _t } from "../../../languageHandler";
-import { backLabelForPhase } from "../../../stores/right-panel/RightPanelStorePhases";
 import { CardContext } from "./context";
-import { SDKContext } from "../../../contexts/SDKContext.ts";
 
 interface IProps {
+    /**
+     * The card's title, or what its header holds. Telement's cards have no back or close button: the right panel's panes
+     * are opened and closed by their buttons in the room header, and closed by Escape.
+     */
     header?: ReactNode | null;
-    hideHeaderButtons?: boolean;
     footer?: ReactNode;
     className?: string;
     id?: string;
     role?: "tabpanel";
     ariaLabelledBy?: string;
     withoutScrollContainer?: boolean;
-    closeLabel?: string;
-    onClose?(this: void, ev: MouseEvent<HTMLButtonElement>): void;
-    onBack?(this: void, ev: MouseEvent<HTMLButtonElement>): void;
     onKeyDown?(this: void, ev: KeyboardEvent): void;
     ref?: Ref<HTMLDivElement>;
-    // Ref for the 'close' button the card
-    closeButtonRef?: Ref<HTMLButtonElement>;
     children: ReactNode;
 }
 
 const BaseCard: React.FC<IProps> = ({
-    closeLabel,
-    onClose,
-    onBack,
     className,
     id,
     ariaLabelledBy,
     role,
-    hideHeaderButtons,
     header,
     footer,
     withoutScrollContainer,
     children,
     onKeyDown,
-    closeButtonRef,
     ref,
 }: IProps) => {
-    const sdkContext = useContext(SDKContext);
-
-    let backButton;
-    const cardHistory = sdkContext.rightPanelStore.roomPhaseHistory;
-    if (cardHistory.length > 1 && !hideHeaderButtons) {
-        const prevCard = cardHistory[cardHistory.length - 2];
-        const onBackClick = (ev: MouseEvent<HTMLButtonElement>): void => {
-            onBack?.(ev);
-            sdkContext.rightPanelStore.popCard();
-        };
-        const label = backLabelForPhase(prevCard.phase) ?? _t("action|back");
-        backButton = (
-            <IconButton
-                size="var(--BaseCard_header-button-size)"
-                data-testid="base-card-back-button"
-                onClick={onBackClick}
-                tooltip={label}
-                kind="secondary"
-            >
-                <ChevronLeftIcon />
-            </IconButton>
-        );
-    }
-
-    let closeButton;
-    if (!hideHeaderButtons) {
-        // eslint-disable-next-line no-inner-declarations
-        function closeRightPanel(ev: MouseEvent<HTMLButtonElement>): void {
-            ev.preventDefault();
-            ev.stopPropagation();
-            sdkContext.rightPanelStore.popCard();
-        }
-
-        closeButton = (
-            <IconButton
-                size="var(--BaseCard_header-button-size)"
-                data-testid="base-card-close-button"
-                onClick={onClose ?? closeRightPanel}
-                ref={closeButtonRef}
-                tooltip={closeLabel ?? _t("action|close")}
-                kind="secondary"
-            >
-                <CloseIcon />
-            </IconButton>
-        );
-    }
-
     if (!withoutScrollContainer) {
         children = <AutoHideScrollbar className="mx_AutoHideScrollbar">{children}</AutoHideScrollbar>;
     }
 
-    const shouldRenderHeader = header || !hideHeaderButtons;
     const context = useMemo(() => ({ isCard: true }), []);
 
     return (
@@ -118,9 +58,8 @@ const BaseCard: React.FC<IProps> = ({
                 ref={ref}
                 onKeyDown={onKeyDown}
             >
-                {shouldRenderHeader && (
+                {header && (
                     <div className="mx_BaseCard_header">
-                        {backButton}
                         {typeof header === "string" ? (
                             <div className="mx_BaseCard_header_title">
                                 <Text
@@ -134,9 +73,8 @@ const BaseCard: React.FC<IProps> = ({
                                 </Text>
                             </div>
                         ) : (
-                            (header ?? <div className="mx_BaseCard_header_spacer" />)
+                            header
                         )}
-                        {closeButton}
                     </div>
                 )}
                 {children}

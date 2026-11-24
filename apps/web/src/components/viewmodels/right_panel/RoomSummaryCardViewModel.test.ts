@@ -8,7 +8,7 @@
 // @vitest-environment happy-dom
 
 import { describe, it, expect, vi, beforeEach, afterEach, type Mock } from "vitest";
-import { type MatrixClient, type Room } from "matrix-js-sdk/src/matrix";
+import { type MatrixClient, type Room, RoomMember } from "matrix-js-sdk/src/matrix";
 import { act, renderHook, waitFor } from "test-utils-rtl";
 import { mkStubRoom, stubClient, withClientContextRenderOptions } from "test-utils";
 
@@ -25,6 +25,7 @@ import { ReportRoomDialog } from "../../views/dialogs/ReportRoomDialog";
 import { inviteToRoom } from "../../../utils/room/inviteToRoom";
 import DMRoomMap from "../../../utils/DMRoomMap";
 import * as hooks from "../../../hooks/useAccountData";
+import * as WithPresenceIndicator from "../../views/avatars/WithPresenceIndicator";
 import * as getTagsForRoomUtils from "../../../utils/room/getTagsForRoom";
 
 vi.mock("../../../utils/room/inviteToRoom", () => ({
@@ -94,14 +95,6 @@ describe("useRoomSummaryCardViewModel", () => {
             action: "leave_room",
             room_id: room.roomId,
         });
-    });
-
-    it("should handle room threads click", () => {
-        const spy = vi.spyOn(RightPanelStore.instance, "pushCard");
-        const { result } = render();
-
-        result.current.onRoomThreadsClick();
-        expect(spy).toHaveBeenCalledWith({ phase: RightPanelPhases.ThreadPanel }, true);
     });
 
     it("should handle room files click", () => {
@@ -240,6 +233,24 @@ describe("useRoomSummaryCardViewModel", () => {
             await waitFor(() => {
                 expect(result.current.isDirectMessage).toBe(false);
             });
+        });
+    });
+
+    describe("people", () => {
+        it("are left to the room header, which has a button for them", () => {
+            vi.spyOn(WithPresenceIndicator, "useDmMember").mockReturnValue(null);
+            const { result } = render();
+
+            expect(result.current.showPeople).toBe(false);
+        });
+
+        it("are listed in a DM, where the room header has no button for them", () => {
+            vi.spyOn(WithPresenceIndicator, "useDmMember").mockReturnValue(
+                new RoomMember(room.roomId, "@bob:example.org"),
+            );
+            const { result } = render();
+
+            expect(result.current.showPeople).toBe(true);
         });
     });
 });

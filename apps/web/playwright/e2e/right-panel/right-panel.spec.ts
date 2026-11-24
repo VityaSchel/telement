@@ -120,25 +120,45 @@ test.describe("RightPanel", () => {
             await expect(page.locator(".mx_FilePanel")).toBeVisible();
             await expect(page.locator(".mx_EmptyState")).toBeVisible();
 
-            await page.getByTestId("base-card-back-button").click();
+            await page.getByLabel("Room info").nth(1).click();
             await checkRoomSummaryCard(page, ROOM_NAME);
         });
 
         test("should handle viewing room member", async ({ page, app }) => {
             await viewRoomSummaryByName(page, app, ROOM_NAME);
+            const peopleButton = page.locator(".mx_RoomHeader .mx_FacePile");
+            const roomInfoButton = page.getByLabel("Room info").nth(1);
 
-            await page.locator(".mx_RightPanel").getByRole("menuitem", { name: "People" }).click();
-            await expect(page.locator(".mx_MemberListView")).toBeVisible();
+            await app.openMemberlistPanel();
+            await expect(peopleButton).toHaveAttribute("aria-expanded", "true");
+            await expect(roomInfoButton).toHaveAttribute("aria-expanded", "false");
 
             await getMemberTileByName(page, NAME).click();
             await expect(page.locator(".mx_UserInfo")).toBeVisible();
             await expect(page.locator(".mx_UserInfo_profile").getByText(NAME)).toBeVisible();
+            await expect(peopleButton).toHaveAttribute("aria-expanded", "true");
 
-            await page.getByTestId("base-card-back-button").click();
+            await peopleButton.click();
             await expect(page.locator(".mx_MemberListView")).toBeVisible();
 
-            await page.getByLabel("Room info").nth(1).click();
+            await roomInfoButton.click();
             await checkRoomSummaryCard(page, ROOM_NAME);
+            await expect(peopleButton).toHaveAttribute("aria-expanded", "false");
+            await expect(roomInfoButton).toHaveAttribute("aria-expanded", "true");
+
+            await roomInfoButton.click();
+            await expect(page.locator(".mx_RightPanel")).not.toBeVisible();
+        });
+
+        test("should close on Escape, also from a page of room info", async ({ page, app }) => {
+            await viewRoomSummaryByName(page, app, ROOM_NAME);
+
+            await page.getByRole("menuitem", { name: "Extensions" }).press("Enter");
+            await expect(page.getByRole("heading", { name: "Extensions" })).toBeFocused();
+
+            await page.keyboard.press("Escape");
+            await expect(page.locator(".mx_RightPanel")).not.toBeVisible();
+            await expect(page.getByLabel("Room info").nth(1)).toBeFocused();
         });
 
         test(
@@ -151,9 +171,7 @@ test.describe("RightPanel", () => {
                 await bobLongName.joinRoom(testRoomId);
 
                 await viewRoomSummaryByName(page, app, ROOM_NAME);
-
-                await page.locator(".mx_RightPanel").getByRole("menuitem", { name: "People" }).click();
-                await expect(page.locator(".mx_MemberListView")).toBeVisible();
+                await app.openMemberlistPanel();
 
                 await getMemberTileByName(page, LONG_NAME).click();
                 await expect(page.locator(".mx_UserInfo")).toBeVisible();
@@ -219,7 +237,7 @@ test.describe("RightPanel", () => {
             await expect(page.locator(".mx_UserInfo")).toBeVisible();
             await expect(page.locator(".mx_UserInfo_profile").getByText(NAME)).toBeVisible();
 
-            await page.getByTestId("base-card-back-button").click();
+            await page.locator(".mx_SpaceRoomView_landing .mx_FacePile").click();
             await expect(page.locator(".mx_MemberListView")).toBeVisible();
         });
     });

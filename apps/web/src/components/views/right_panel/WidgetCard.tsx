@@ -22,10 +22,9 @@ import { SDKContext } from "../../../contexts/SDKContext.ts";
 interface IProps {
     room: Room;
     widgetId: string;
-    onClose(this: void): void;
 }
 
-const WidgetCard: React.FC<IProps> = ({ room, widgetId, onClose }) => {
+const WidgetCard: React.FC<IProps> = ({ room, widgetId }) => {
     const sdkContext = useContext(SDKContext);
 
     const apps = useWidgets(room);
@@ -73,7 +72,7 @@ const WidgetCard: React.FC<IProps> = ({ room, widgetId, onClose }) => {
     );
 
     return (
-        <BaseCard header={header} className="mx_WidgetCard" onClose={onClose} withoutScrollContainer>
+        <BaseCard header={header} className="mx_WidgetCard" withoutScrollContainer>
             <AppTile
                 app={app}
                 fullWidth

@@ -8,9 +8,8 @@ Please see LICENSE in the repository root for full details.
 // @vitest-environment happy-dom
 
 import React from "react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import { render, screen } from "test-utils-rtl";
-import userEvent from "@testing-library/user-event";
 import { EventType, type MatrixClient, MatrixEvent, MsgType, Room } from "matrix-js-sdk/src/matrix";
 
 import { DocumentViewerCard } from "./DocumentViewerCard";
@@ -42,32 +41,21 @@ describe("DocumentViewerCard", () => {
     });
 
     it("names the card after the file and mounts its viewer", async () => {
-        render(
-            <DocumentViewerCard mxEvent={mkFileEvent()} onClose={vi.fn()} />,
-            clientAndSDKContextRenderOptions(client, sdkContext),
-        );
+        render(<DocumentViewerCard mxEvent={mkFileEvent()} />, clientAndSDKContextRenderOptions(client, sdkContext));
 
         expect(screen.getByRole("heading", { name: "README.md" })).toBeInTheDocument();
         // The viewer is code split, so it shows up once its chunk has loaded.
         expect(await screen.findByRole("status")).toHaveTextContent("Loading document");
     });
 
-    it("shows an error that can be closed when the attachment can no longer be opened", async () => {
-        const user = userEvent.setup();
-        const onClose = vi.fn();
+    it("shows an error when the attachment can no longer be opened", () => {
         const mxEvent = mkFileEvent();
         // A redaction while the card is open leaves an event no viewer handles.
         mxEvent.makeRedacted(mxEvent, new Room(mxEvent.getRoomId()!, client, client.getSafeUserId()));
 
-        render(
-            <DocumentViewerCard mxEvent={mxEvent} onClose={onClose} />,
-            clientAndSDKContextRenderOptions(client, sdkContext),
-        );
+        render(<DocumentViewerCard mxEvent={mxEvent} />, clientAndSDKContextRenderOptions(client, sdkContext));
 
         expect(screen.getByRole("heading", { name: "Document" })).toBeInTheDocument();
         expect(screen.getByRole("alert")).toHaveTextContent("Unable to load this file.");
-
-        await user.click(screen.getByRole("button", { name: "Close" }));
-        expect(onClose).toHaveBeenCalledOnce();
     });
 });

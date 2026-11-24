@@ -15,7 +15,7 @@ import { OverflowHorizontalIcon } from "@vector-im/compound-design-tokens/assets
 import MemberAvatar from "../avatars/MemberAvatar";
 import AccessibleButton, { type ButtonEvent } from "./AccessibleButton";
 import { useToggled } from "../rooms/RoomHeader/toggle/useToggled";
-import { RightPanelPhases } from "../../../stores/right-panel/RightPanelStorePhases";
+import { PEOPLE_PANE } from "../../../telement/right-panel/panes";
 
 interface IProps extends Omit<HTMLAttributes<HTMLDivElement>, "onChange"> {
     members: RoomMember[];
@@ -62,12 +62,7 @@ const FacePile: FC<IProps> = ({
     );
 
     // Telement: a member's profile and their verification open from the member list, so the list stays marked open
-    const toggled = useToggled(
-        RightPanelPhases.MemberList,
-        RightPanelPhases.MemberInfo,
-        RightPanelPhases.ThreePidMemberInfo,
-        RightPanelPhases.EncryptionPanel,
-    );
+    const toggled = useToggled(...PEOPLE_PANE);
     const classes = classNames({
         mx_FacePile: true,
         mx_FacePile_toggled: toggled,

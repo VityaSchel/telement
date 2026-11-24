@@ -7,8 +7,9 @@ SPDX-License-Identifier: AGPL-3.0-only OR GPL-3.0-only OR LicenseRef-Element-Com
 Please see LICENSE files in the repository root for full details.
 */
 
-import React from "react";
+import React, { createRef } from "react";
 import { type Room, type RoomState, RoomStateEvent, RoomMember, type MatrixEvent } from "matrix-js-sdk/src/matrix";
+import { type VerificationRequest } from "matrix-js-sdk/src/crypto-api";
 import { throttle } from "lodash";
 
 import dis from "../../dispatcher/dispatcher";
@@ -32,6 +33,9 @@ import { type IRightPanelCard, type IRightPanelCardState } from "../../stores/ri
 import { Action } from "../../dispatcher/actions";
 import { DocumentViewerCard } from "../views/right_panel/DocumentViewerCard";
 import { type XOR } from "../../@types/common";
+import { Key } from "../../Keyboard";
+import Modal from "../../Modal";
+import { RIGHT_PANEL_ID } from "../../telement/right-panel/panes";
 import ExtensionsCard from "../views/right_panel/ExtensionsCard";
 import MemberListView from "../views/rooms/MemberList/MemberListView";
 
@@ -57,9 +61,21 @@ interface IState {
     cardState?: IRightPanelCardState;
 }
 
+/** Whether a key press is Escape that nothing has taken, such as a menu, or an input method to drop its composition. */
+const isEscape = (ev: KeyboardEvent): boolean =>
+    ev.key === Key.ESCAPE &&
+    !ev.defaultPrevented &&
+    !ev.isComposing &&
+    !ev.shiftKey &&
+    !ev.ctrlKey &&
+    !ev.altKey &&
+    !ev.metaKey;
+
 export default class RightPanel extends React.Component<Props, IState> {
     public static contextType = MatrixClientContext;
     declare public context: React.ContextType<typeof MatrixClientContext>;
+
+    private readonly panel = createRef<HTMLElement>();
 
     public constructor(props: Props) {
         super(props);
@@ -78,11 +94,29 @@ export default class RightPanel extends React.Component<Props, IState> {
     public componentDidMount(): void {
         this.context.on(RoomStateEvent.Members, this.onRoomStateMember);
         RightPanelStore.instance.on(UPDATE_EVENT, this.onRightPanelStoreUpdate);
+        document.addEventListener("keydown", this.onDocumentKeyDown);
+    }
+
+    /** Whether the focus is on the pane that the update is about to replace, and so about to go with it. */
+    public getSnapshotBeforeUpdate(): boolean {
+        return !!this.panel.current?.contains(document.activeElement);
+    }
+
+    public componentDidUpdate(_prevProps: Props, _prevState: IState, hadFocus: boolean): void {
+        // The row or message that opened this page went with the pane that held it. The focus goes on to the page's
+        // title, as it does to that of a new page, unless the page took it, as a thread's composer does.
+        if (hadFocus && (!document.activeElement || document.activeElement === document.body)) {
+            const title = this.panel.current?.querySelector<HTMLElement>(".mx_BaseCard_header_title_heading");
+            if (!title) return;
+            title.tabIndex = -1;
+            title.focus({ preventScroll: true });
+        }
     }
 
     public componentWillUnmount(): void {
         this.context?.removeListener(RoomStateEvent.Members, this.onRoomStateMember);
         RightPanelStore.instance.off(UPDATE_EVENT, this.onRightPanelStoreUpdate);
+        document.removeEventListener("keydown", this.onDocumentKeyDown);
         this.delayedUpdate.cancel();
     }
 
@@ -119,27 +153,51 @@ export default class RightPanel extends React.Component<Props, IState> {
         this.setState({ ...(RightPanel.getDerivedStateFromProps(this.props) as IState) });
     };
 
-    private onClose = (): void => {
-        // XXX: There are three different ways of 'closing' this panel depending on what state
-        // things are in... this knows far more than it should do about the state of the rest
-        // of the app and is generally a bit silly.
+    /** The verification the encryption panel shows, while it isn't done yet. */
+    private get pendingVerification(): VerificationRequest | undefined {
+        const request = this.state.cardState?.verificationRequest;
+        return this.state.phase === RightPanelPhases.EncryptionPanel && request?.pending ? request : undefined;
+    }
+
+    /**
+     * Closes the panel. Telement's panes have no close button: their button in the room header or Escape closes them.
+     */
+    private close(): void {
         if (this.props.overwriteCard?.state?.member) {
             // If we have a user prop then we're displaying a user from the 'user' page type
-            // in LoggedInView, so need to change the page type to close the panel (we switch
-            // to the home page which is not obviously the correct thing to do, but I'm not sure
-            // anything else is - we could hide the close button altogether?)
+            // in LoggedInView, so need to change the page type to close the panel
             dis.dispatch({
                 action: Action.ViewHomePage,
             });
-        } else if (
-            this.state.phase === RightPanelPhases.EncryptionPanel &&
-            this.state.cardState?.verificationRequest?.pending
-        ) {
-            // When the user clicks close on the encryption panel cancel the pending request first if any
-            void this.state.cardState.verificationRequest.cancel();
         } else {
-            RightPanelStore.instance.togglePanel(this.props.room?.roomId ?? null);
+            RightPanelStore.instance.hide(this.props.room?.roomId ?? null);
         }
+    }
+
+    /** Escape inside the panel closes it, before the room around it takes the key to mark its messages as read. */
+    private onKeyDown = (ev: React.KeyboardEvent): void => {
+        if (!isEscape(ev.nativeEvent)) return;
+        ev.preventDefault();
+        ev.stopPropagation();
+
+        if (this.pendingVerification) {
+            // Not closed yet: the panel says that the verification was canceled
+            void this.pendingVerification.cancel();
+            return;
+        }
+        // The focus would go with the panel: it goes back to the button in the room header that opens the pane
+        const opener = document.querySelector<HTMLElement>(`[aria-controls="${RIGHT_PANEL_ID}"][aria-expanded="true"]`);
+        this.close();
+        opener?.focus();
+    };
+
+    /**
+     * Escape anywhere else closes the panel too, once nothing there took the key: a menu, the composer, the timeline. It
+     * doesn't cancel a verification, which may not be what the key is pressed for there.
+     */
+    private onDocumentKeyDown = (ev: KeyboardEvent): void => {
+        if (!isEscape(ev) || Modal.hasDialogs() || this.pendingVerification) return;
+        this.close();
     };
 
     public render(): React.ReactNode {
@@ -150,7 +208,7 @@ export default class RightPanel extends React.Component<Props, IState> {
         switch (phase) {
             case RightPanelPhases.MemberList:
                 if (!!roomId) {
-                    card = <MemberListView roomId={roomId} onClose={this.onClose} />;
+                    card = <MemberListView roomId={roomId} />;
                 }
                 break;
 
@@ -163,7 +221,6 @@ export default class RightPanel extends React.Component<Props, IState> {
                             user={cardState.member}
                             room={this.context.getRoom(roomMember?.roomId) ?? this.props.room}
                             key={roomId ?? cardState.member.userId}
-                            onClose={this.onClose}
                             phase={phase}
                             verificationRequest={cardState.verificationRequest}
                             verificationRequestPromise={cardState.verificationRequestPromise}
@@ -174,25 +231,17 @@ export default class RightPanel extends React.Component<Props, IState> {
             }
             case RightPanelPhases.ThreePidMemberInfo:
                 if (!!cardState?.memberInfoEvent) {
-                    card = (
-                        <ThirdPartyMemberInfo event={cardState.memberInfoEvent} key={roomId} onClose={this.onClose} />
-                    );
+                    card = <ThirdPartyMemberInfo event={cardState.memberInfoEvent} key={roomId} />;
                 }
                 break;
 
             case RightPanelPhases.NotificationPanel:
-                card = <NotificationPanel onClose={this.onClose} />;
+                card = <NotificationPanel />;
                 break;
 
             case RightPanelPhases.PinnedMessages:
                 if (!!this.props.room) {
-                    card = (
-                        <PinnedMessagesCard
-                            room={this.props.room}
-                            onClose={this.onClose}
-                            permalinkCreator={this.props.permalinkCreator}
-                        />
-                    );
+                    card = <PinnedMessagesCard room={this.props.room} permalinkCreator={this.props.permalinkCreator} />;
                 }
                 break;
             case RightPanelPhases.Timeline:
@@ -203,7 +252,6 @@ export default class RightPanel extends React.Component<Props, IState> {
                             room={this.props.room}
                             timelineSet={this.props.room.getUnfilteredTimelineSet()}
                             resizeNotifier={this.props.resizeNotifier}
-                            onClose={this.onClose}
                             permalinkCreator={this.props.permalinkCreator}
                         />
                     );
@@ -211,7 +259,7 @@ export default class RightPanel extends React.Component<Props, IState> {
                 break;
             case RightPanelPhases.FilePanel:
                 if (!!roomId) {
-                    card = <FilePanel roomId={roomId} onClose={this.onClose} />;
+                    card = <FilePanel roomId={roomId} />;
                 }
                 break;
 
@@ -221,7 +269,6 @@ export default class RightPanel extends React.Component<Props, IState> {
                         <ThreadView
                             room={this.props.room}
                             resizeNotifier={this.props.resizeNotifier}
-                            onClose={this.onClose}
                             mxEvent={cardState.threadHeadEvent}
                             initialEvent={cardState.initialEvent}
                             isInitialEventHighlighted={cardState.isInitialEventHighlighted}
@@ -238,7 +285,6 @@ export default class RightPanel extends React.Component<Props, IState> {
                         <ThreadPanel
                             roomId={this.props.room.roomId}
                             resizeNotifier={this.props.resizeNotifier}
-                            onClose={this.onClose}
                             permalinkCreator={this.props.permalinkCreator}
                         />
                     );
@@ -259,25 +305,31 @@ export default class RightPanel extends React.Component<Props, IState> {
 
             case RightPanelPhases.Extensions:
                 if (!!this.props.room) {
-                    card = <ExtensionsCard room={this.props.room} onClose={this.onClose} />;
+                    card = <ExtensionsCard room={this.props.room} />;
                 }
                 break;
 
             case RightPanelPhases.Widget:
                 if (!!this.props.room && !!cardState?.widgetId) {
-                    card = <WidgetCard room={this.props.room} widgetId={cardState.widgetId} onClose={this.onClose} />;
+                    card = <WidgetCard room={this.props.room} widgetId={cardState.widgetId} />;
                 }
                 break;
 
             case RightPanelPhases.DocumentViewer:
                 if (!!cardState?.documentViewerEvent) {
-                    card = <DocumentViewerCard mxEvent={cardState.documentViewerEvent} onClose={this.onClose} />;
+                    card = <DocumentViewerCard mxEvent={cardState.documentViewerEvent} />;
                 }
                 break;
         }
 
         return (
-            <aside className="mx_RightPanel" id="mx_RightPanel" data-testid="right-panel">
+            <aside
+                className="mx_RightPanel"
+                id={RIGHT_PANEL_ID}
+                data-testid="right-panel"
+                ref={this.panel}
+                onKeyDown={this.onKeyDown}
+            >
                 {card}
             </aside>
         );

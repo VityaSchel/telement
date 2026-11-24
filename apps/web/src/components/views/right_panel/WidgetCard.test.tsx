@@ -51,10 +51,7 @@ describe("<WidgetCard />", () => {
     });
 
     it("shows the options button with the overflow icon the other card headers' options buttons have", () => {
-        render(
-            <WidgetCard room={room} widgetId="etherpad" onClose={vi.fn()} />,
-            clientAndSDKContextRenderOptions(client, sdkContext),
-        );
+        render(<WidgetCard room={room} widgetId="etherpad" />, clientAndSDKContextRenderOptions(client, sdkContext));
 
         const options = screen.getByRole("button", { name: "Options" });
         expect(options).toHaveClass("mx_BaseCard_header_title_button--option");
