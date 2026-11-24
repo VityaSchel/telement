@@ -54,18 +54,14 @@ test.describe("Account user settings tab", () => {
         // Check email addresses area
         const emailAddresses = uut.getByTestId("mx_AccountEmailAddresses");
         await emailAddresses.scrollIntoViewIfNeeded();
-        // Assert that an input area for a new email address is rendered
-        await expect(emailAddresses.getByRole("textbox", { name: "Email address" })).toBeVisible();
-        // Assert the add button is visible
-        await expect(emailAddresses.getByRole("button", { name: "Add" })).toBeVisible();
+        // Assert that the row that opens the form for a new email address is visible
+        await expect(emailAddresses.getByRole("button", { name: "Add email address" })).toBeVisible();
 
         // Check phone numbers area
         const phoneNumbers = uut.getByTestId("mx_AccountPhoneNumbers");
         await phoneNumbers.scrollIntoViewIfNeeded();
-        // Assert that an input area for a new phone number is rendered
-        await expect(phoneNumbers.getByRole("textbox", { name: "Phone number" })).toBeVisible();
-        // Assert that the add button is rendered
-        await expect(phoneNumbers.getByRole("button", { name: "Add" })).toBeVisible();
+        // Assert that the row that opens the form for a new phone number is visible
+        await expect(phoneNumbers.getByRole("button", { name: "Add phone number" })).toBeVisible();
 
         // Assert the account deactivation button is displayed
         const accountManagementSection = uut.getByTestId("account-management-section");
@@ -150,7 +146,8 @@ test.describe("Account user settings tab", () => {
         // Check phone numbers area
         const accountPhoneNumbers = uut.getByTestId("mx_AccountPhoneNumbers");
         await accountPhoneNumbers.scrollIntoViewIfNeeded();
-        // Assert that an input area for a new phone number is rendered
+        // Open the form for a new phone number
+        await accountPhoneNumbers.getByRole("button", { name: "Add phone number" }).click();
         await expect(accountPhoneNumbers.getByRole("textbox", { name: "Phone number" })).toBeVisible();
 
         // Check a new phone number dropdown menu
@@ -171,7 +168,7 @@ test.describe("Account user settings tab", () => {
         // Assert that the default value is rendered again
         await expect(dropdown.getByText(/\+1/)).toBeVisible();
 
-        await expect(accountPhoneNumbers.getByRole("button", { name: "Add" })).toBeVisible();
+        await expect(accountPhoneNumbers.getByRole("button", { name: "Add", exact: true })).toBeVisible();
     });
 
     test("should support changing a display name", async ({ uut, page, app, user }) => {
@@ -225,8 +222,9 @@ test.describe("Account user settings tab", () => {
         );
 
         const phoneSection = page.getByTestId("mx_AccountPhoneNumbers");
+        await phoneSection.getByRole("button", { name: "Add phone number" }).click();
         await phoneSection.getByRole("textbox", { name: "Phone number" }).fill("07700900000");
-        await phoneSection.getByRole("button", { name: "Add" }).click();
+        await phoneSection.getByRole("button", { name: "Add", exact: true }).click();
 
         await phoneSection
             .getByRole("textbox", { name: "Verification code" })

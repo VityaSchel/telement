@@ -348,6 +348,7 @@ describe("<AccountUserSettingsTab />", () => {
             const section = screen.getByTestId("mx_AccountEmailAddresses");
 
             // just check the fields are enabled
+            fireEvent.click(within(section).getByRole("button", { name: "Add Email Address" }));
             expect(within(section).getByLabelText("Email Address")).not.toBeDisabled();
             expect(within(section).getByText("Add")).not.toHaveAttribute("aria-disabled");
         });
@@ -362,7 +363,7 @@ describe("<AccountUserSettingsTab />", () => {
             fireEvent.click(within(section).getByText("Remove"));
 
             // confirm removal
-            expect(screen.getByText("Remove 123456789?")).toBeInTheDocument();
+            expect(screen.getByText("Remove +123456789?")).toBeInTheDocument();
             fireEvent.click(within(section).getByText("Remove"));
 
             expect(mockClient.deleteThreePid).toHaveBeenCalledWith(ThreepidMedium.Phone, "123456789");
@@ -376,6 +377,7 @@ describe("<AccountUserSettingsTab />", () => {
             const section = screen.getByTestId("mx_AccountPhoneNumbers");
 
             // just check the fields are enabled
+            fireEvent.click(within(section).getByRole("button", { name: "Add Phone Number" }));
             expect(within(section).getByLabelText("Phone Number")).not.toBeDisabled();
         });
 
@@ -391,6 +393,7 @@ describe("<AccountUserSettingsTab />", () => {
             const section = screen.getByTestId("mx_AccountEmailAddresses");
 
             // just check the fields are enabled
+            fireEvent.click(within(section).getByRole("button", { name: "Add Email Address" }));
             expect(within(section).getByLabelText("Email Address")).not.toBeDisabled();
             expect(within(section).getByText("Add")).not.toHaveAttribute("aria-disabled");
         });
@@ -411,7 +414,7 @@ describe("<AccountUserSettingsTab />", () => {
 
                 const section = screen.getByTestId("mx_AccountEmailAddresses");
 
-                expect(within(section).getByText("Remove")).toHaveAttribute("aria-disabled");
+                expect(within(section).getByText("Remove")).toBeDisabled();
             });
 
             it("should not allow adding a new email addresses", async () => {
@@ -421,9 +424,8 @@ describe("<AccountUserSettingsTab />", () => {
 
                 const section = screen.getByTestId("mx_AccountEmailAddresses");
 
-                // fields are not enabled
-                expect(within(section).getByLabelText("Email Address")).toBeDisabled();
-                expect(within(section).getByText("Add")).toHaveAttribute("aria-disabled");
+                // the form can't be opened
+                expect(within(section).getByRole("button", { name: "Add Email Address" })).toBeDisabled();
             });
 
             it("should not allow removing phone numbers", async () => {
@@ -433,7 +435,7 @@ describe("<AccountUserSettingsTab />", () => {
 
                 const section = screen.getByTestId("mx_AccountPhoneNumbers");
 
-                expect(within(section).getByText("Remove")).toHaveAttribute("aria-disabled");
+                expect(within(section).getByText("Remove")).toBeDisabled();
             });
 
             it("should not allow adding a new phone number", async () => {
@@ -443,7 +445,7 @@ describe("<AccountUserSettingsTab />", () => {
 
                 const section = screen.getByTestId("mx_AccountPhoneNumbers");
 
-                expect(within(section).getByLabelText("Phone Number")).toBeDisabled();
+                expect(within(section).getByRole("button", { name: "Add Phone Number" })).toBeDisabled();
             });
         });
     });

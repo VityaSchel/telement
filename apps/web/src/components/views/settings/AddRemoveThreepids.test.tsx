@@ -70,8 +70,62 @@ describe("AddRemoveThreepids", () => {
             />,
         );
 
-        await expect(screen.findByText("Email Address")).resolves.toBeVisible();
+        // Only the row that opens the form
+        expect(screen.getAllByRole("button")).toEqual([screen.getByRole("button", { name: "Add Email Address" })]);
+        expect(screen.queryByRole("textbox")).toBeNull();
         expect(container).toMatchSnapshot();
+    });
+
+    it("should open the form from its row, with the focus in its field, and give the focus back to the row", async () => {
+        render(
+            <AddRemoveThreepids
+                mode="hs"
+                medium={ThreepidMedium.Email}
+                threepids={[EMAIL1]}
+                isLoading={false}
+                onChange={() => {}}
+            />,
+        );
+
+        await userEvent.click(screen.getByRole("button", { name: "Add Email Address" }));
+        const input = screen.getByRole("textbox", { name: "Email Address" });
+        expect(input).toHaveFocus();
+        expect(screen.queryByRole("button", { name: "Add Email Address" })).toBeNull();
+
+        await userEvent.type(input, "bob@nowhere.dummy");
+        await userEvent.click(screen.getByRole("button", { name: "Cancel" }));
+        expect(screen.queryByRole("textbox")).toBeNull();
+        expect(screen.getByRole("button", { name: "Add Email Address" })).toHaveFocus();
+
+        // Opened again, it is empty
+        await userEvent.click(screen.getByRole("button", { name: "Add Email Address" }));
+        expect(screen.getByRole("textbox", { name: "Email Address" })).toHaveValue("");
+    });
+
+    it("should leave an address that wasn't verified", async () => {
+        vi.mocked(client.requestAdd3pidEmailToken).mockResolvedValue({ sid: "1" });
+        render(
+            <AddRemoveThreepids
+                mode="hs"
+                medium={ThreepidMedium.Email}
+                threepids={[]}
+                isLoading={false}
+                onChange={() => {}}
+            />,
+            { wrapper: clientProviderWrapper },
+        );
+
+        await userEvent.click(screen.getByRole("button", { name: "Add Email Address" }));
+        await userEvent.type(screen.getByRole("textbox", { name: "Email Address" }), EMAIL1.address);
+        await userEvent.click(screen.getByRole("button", { name: "Add" }));
+
+        // The address to verify, in a row like the others', over its state
+        expect(screen.getByText(EMAIL1.address).nextElementSibling).toHaveTextContent("Unverified");
+        await userEvent.click(screen.getByRole("button", { name: "Cancel" }));
+
+        expect(screen.queryByText(EMAIL1.address)).toBeNull();
+        expect(client.addThreePidOnly).not.toHaveBeenCalled();
+        expect(screen.getByRole("button", { name: "Add Email Address" })).toBeInTheDocument();
     });
 
     it("should add an email address", async () => {
@@ -91,6 +145,7 @@ describe("AddRemoveThreepids", () => {
             },
         );
 
+        await userEvent.click(screen.getByRole("button", { name: "Add Email Address" }));
         const input = await screen.findByRole("textbox", { name: "Email Address" });
         await userEvent.type(input, EMAIL1.address);
         const addButton = screen.getByRole("button", { name: "Add" });
@@ -130,6 +185,7 @@ describe("AddRemoveThreepids", () => {
             },
         );
 
+        await userEvent.click(screen.getByRole("button", { name: "Add Email Address" }));
         const input = await screen.findByRole("textbox", { name: "Email Address" });
         await userEvent.type(input, EMAIL1.address);
         const addButton = screen.getByRole("button", { name: "Add" });
@@ -174,6 +230,7 @@ describe("AddRemoveThreepids", () => {
             },
         );
 
+        await userEvent.click(screen.getByRole("button", { name: "Add Phone Number" }));
         const countryDropdown = await screen.findByRole("button", { name: /Country Dropdown/ });
         await userEvent.click(countryDropdown);
         const gbOption = screen.getByText("United Kingdom (+44)");
@@ -182,7 +239,7 @@ describe("AddRemoveThreepids", () => {
         const input = screen.getByRole("textbox", { name: "Phone Number" });
         await userEvent.type(input, PHONE1_LOCALNUM);
 
-        const addButton = screen.getByRole("button", { name: /Add/ });
+        const addButton = screen.getByRole("button", { name: "Add" });
         await userEvent.click(addButton);
 
         const continueButton = await screen.findByRole("button", { name: /Continue/ });
@@ -246,6 +303,41 @@ describe("AddRemoveThreepids", () => {
         expect(onChangeFn).toHaveBeenCalled();
     });
 
+    it("should say what is removed, put Cancel where Remove was, and the focus on it and back", async () => {
+        render(
+            <AddRemoveThreepids
+                mode="hs"
+                medium={ThreepidMedium.Email}
+                threepids={[EMAIL1]}
+                isLoading={false}
+                onChange={() => {}}
+            />,
+        );
+        const remove = screen.getByRole("button", { name: "Remove" });
+        expect(remove).toHaveAccessibleDescription(EMAIL1.address);
+
+        await userEvent.click(remove);
+        const cancel = screen.getByRole("button", { name: "Cancel" });
+        expect(cancel.matches(":last-child")).toBe(true);
+        expect(cancel).toHaveFocus();
+
+        await userEvent.click(cancel);
+        expect(screen.getByRole("button", { name: "Remove" })).toHaveFocus();
+    });
+
+    it("should list nothing to share when there is nothing", () => {
+        const { container } = render(
+            <AddRemoveThreepids
+                mode="is"
+                medium={ThreepidMedium.Email}
+                threepids={[]}
+                isLoading={false}
+                onChange={() => {}}
+            />,
+        );
+        expect(container).toBeEmptyDOMElement();
+    });
+
     it("should return to default view if adding is cancelled", async () => {
         const onChangeFn = vi.fn();
         render(
@@ -293,7 +385,7 @@ describe("AddRemoveThreepids", () => {
         const removeButton = await screen.findByRole("button", { name: /Remove/ });
         await userEvent.click(removeButton);
 
-        expect(screen.getByText(`Remove ${PHONE1.address}?`)).toBeVisible();
+        expect(screen.getByText(`Remove +${PHONE1.address}?`)).toBeVisible();
 
         const confirmRemoveButton = screen.getByRole("button", { name: /Remove/ });
         await userEvent.click(confirmRemoveButton);
@@ -372,7 +464,7 @@ describe("AddRemoveThreepids", () => {
             },
         );
 
-        await expect(screen.findByText(PHONE1.address)).resolves.toBeVisible();
+        await expect(screen.findByText(`+${PHONE1.address}`)).resolves.toBeVisible();
         const shareButton = screen.getByRole("button", { name: /Share/ });
         await userEvent.click(shareButton);
 
@@ -439,7 +531,7 @@ describe("AddRemoveThreepids", () => {
             },
         );
 
-        await expect(screen.findByText(PHONE1.address)).resolves.toBeVisible();
+        await expect(screen.findByText(`+${PHONE1.address}`)).resolves.toBeVisible();
         const revokeButton = screen.getByRole("button", { name: /Revoke/ });
         await userEvent.click(revokeButton);
 
@@ -465,6 +557,7 @@ describe("AddRemoveThreepids", () => {
             },
         );
 
+        await userEvent.click(screen.getByRole("button", { name: "Add Email Address" }));
         const input = screen.getByRole("textbox", { name: "Email Address" });
         await userEvent.type(input, EMAIL1.address);
         const addButton = screen.getByRole("button", { name: "Add" });
@@ -513,6 +606,7 @@ describe("AddRemoveThreepids", () => {
             },
         );
 
+        await userEvent.click(screen.getByRole("button", { name: "Add Phone Number" }));
         const countryDropdown = screen.getByRole("button", { name: /Country Dropdown/ });
         await userEvent.click(countryDropdown);
         const gbOption = screen.getByText("United Kingdom (+44)");
@@ -601,7 +695,7 @@ describe("AddRemoveThreepids", () => {
             />,
         );
 
-        await expect(screen.findByText(PHONE1.address)).resolves.toBeVisible();
+        await expect(screen.findByText(`+${PHONE1.address}`)).resolves.toBeVisible();
         expect(container).toMatchSnapshot();
     });
 });

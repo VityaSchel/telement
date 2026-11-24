@@ -13,29 +13,61 @@ Please see LICENSE files in the repository root for full details.
  * tab sensibly and before I can refactor these components.
  */
 
-.mx_AddRemoveThreepids_existing {
+/* Telement: the addresses and what adds one are a list of settings rows, one after another (ValueRowList), with no gaps
+   nor lines between them, the forms between rows 16px apart from what is around them */
+.mx_AddRemoveThreepids_row {
     display: flex;
     align-items: center;
+    gap: var(--cpd-space-3x);
+    box-sizing: border-box;
+    /* 44px, and 52px with a second line, as the settings' other rows (SettingsRow.module.css) */
+    min-block-size: calc(var(--tl-control-size) + var(--cpd-space-2x));
+    padding-block: var(--cpd-space-1x);
 }
 
-.mx_AddRemoveThreepids_existing_address,
-.mx_AddRemoveThreepids_existing_promptText {
-    flex: 1;
-    margin-right: 10px;
-}
-
-.mx_AddRemoveThreepids_existing_button {
-    margin-left: 5px;
-}
-
-.mx_EmailAddressesPhoneNumbers_verify {
+.mx_AddRemoveThreepids_row_text {
     display: flex;
-}
-
-.mx_EmailAddressesPhoneNumbers_existing_button {
-    justify-content: right;
-}
-
-.mx_EmailAddressesPhoneNumbers_verify_instructions {
     flex: 1;
+    flex-direction: column;
+    min-inline-size: 0;
+    overflow-wrap: anywhere;
+}
+
+.mx_AddRemoveThreepids_row:has(.mx_AddRemoveThreepids_row_description) {
+    min-block-size: calc(var(--tl-control-size) + 2 * var(--cpd-space-2x));
+}
+
+.mx_AddRemoveThreepids_row_description {
+    font: var(--cpd-font-body-sm-regular);
+    letter-spacing: var(--cpd-font-letter-spacing-body-sm);
+    color: var(--cpd-color-text-secondary);
+}
+
+.mx_AddRemoveThreepids_row_actions {
+    flex: none;
+    flex-wrap: nowrap;
+}
+
+.mx_AddRemoveThreepids .mx_AddRemoveThreepids_code,
+.mx_AddRemoveThreepids .mx_AddRemoveThreepids_add {
+    display: flex;
+    flex-direction: column;
+    gap: var(--cpd-space-4x);
+    /* A list of rows is 4px from its card's top and bottom, where a field is 16px and other content 12px from it. A
+       field's floated label keeps clear of the row over it. */
+    margin-block: var(--cpd-space-3x) calc(var(--cpd-space-3x) - var(--tl-inset-menu));
+
+    .mx_Field {
+        flex: none;
+    }
+}
+
+/* Text under the row it is about, as far from the row's own text as a settings card's help is from it */
+.mx_AddRemoveThreepids .mx_AddRemoveThreepids_row + .mx_AddRemoveThreepids_add:not(:has(> .mx_Field:first-child)) {
+    margin-block-start: var(--cpd-space-1x);
+}
+
+.mx_AddRemoveThreepids_buttons {
+    display: flex;
+    gap: var(--cpd-space-2x);
 }

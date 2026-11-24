@@ -6,7 +6,7 @@ SPDX-License-Identifier: AGPL-3.0-only OR GPL-3.0-only OR LicenseRef-Element-Com
 Please see LICENSE files in the repository root for full details.
 */
 
-import React, { useCallback, useRef, useState } from "react";
+import React, { type ReactNode, useCallback, useId, useRef, useState } from "react";
 import { logger } from "matrix-js-sdk/src/logger";
 import {
     type IRequestMsisdnTokenResponse,
@@ -15,6 +15,8 @@ import {
     ThreepidMedium,
 } from "matrix-js-sdk/src/matrix";
 import { emailLooksValid } from "@element-hq/element-web-shared-utils";
+import { ActionRowView, DialogFooterButton, DialogFooterView, ValueRowList } from "@element-hq/web-shared-components";
+import PlusIcon from "@vector-im/compound-design-tokens/assets/web/icons/plus";
 
 import AddThreepid, { type Binding, type ThirdPartyIdentifier } from "../../../AddThreepid";
 import { _t, UserFriendlyError } from "../../../languageHandler";
@@ -30,6 +32,35 @@ import InlineSpinner from "../elements/InlineSpinner";
 // Whether we're adding 3pids to the user's account on the homeserver or sharing them on an identity server
 type TheepidControlMode = "hs" | "is";
 
+/** An email address, or a phone number in the international format, which the homeserver keeps without its plus. */
+function formatThreepid({ medium, address }: Pick<ThirdPartyIdentifier, "medium" | "address">): string {
+    return medium === ThreepidMedium.Phone && !address.startsWith("+") ? `+${address}` : address;
+}
+
+interface ThreepidRowProps {
+    /** The address or number, or what is asked about it. */
+    children: ReactNode;
+    textId?: string;
+    /** What state it is in, in secondary text under it. */
+    description?: ReactNode;
+    /** The row's text buttons. */
+    actions?: ReactNode;
+}
+
+/**
+ * Telement: an address as a settings row, as Telegram lists a phone number: the address at the start, over its state, and
+ * text buttons for what can be done with it at the end, their labels on the card's edge.
+ */
+const ThreepidRow: React.FC<ThreepidRowProps> = ({ children, textId, description, actions }) => (
+    <div className="mx_AddRemoveThreepids_row">
+        <div className="mx_AddRemoveThreepids_row_text">
+            <span id={textId}>{children}</span>
+            {description && <span className="mx_AddRemoveThreepids_row_description">{description}</span>}
+        </div>
+        {actions && <DialogFooterView className="mx_AddRemoveThreepids_row_actions">{actions}</DialogFooterView>}
+    </div>
+);
+
 interface ExistingThreepidProps {
     mode: TheepidControlMode;
     threepid: ThirdPartyIdentifier;
@@ -39,6 +70,9 @@ interface ExistingThreepidProps {
 
 const ExistingThreepid: React.FC<ExistingThreepidProps> = ({ mode, threepid, onChange, disabled }) => {
     const [isConfirming, setIsConfirming] = useState(false);
+    // Whether the row was asking to confirm, so that Remove takes the focus back from Cancel
+    const [wasConfirming, setWasConfirming] = useState(false);
+    const textId = useId();
     const client = useMatrixClientContext();
     const bindTask = useRef<AddThreepid>(undefined);
 
@@ -58,6 +92,7 @@ const ExistingThreepid: React.FC<ExistingThreepidProps> = ({ mode, threepid, onC
         e.preventDefault();
 
         setIsConfirming(false);
+        setWasConfirming(true);
     }, []);
 
     const onConfirmRemoveClick = useCallback(
@@ -200,56 +235,56 @@ const ExistingThreepid: React.FC<ExistingThreepidProps> = ({ mode, threepid, onC
         setVerificationCode(e.target.value);
     }, []);
 
+    const address = formatThreepid(threepid);
+
     if (isConfirming) {
         return (
-            <div className="mx_AddRemoveThreepids_existing">
-                <span className="mx_AddRemoveThreepids_existing_promptText">
-                    {threepid.medium === ThreepidMedium.Email
-                        ? _t("settings|general|remove_email_prompt", { email: threepid.address })
-                        : _t("settings|general|remove_msisdn_prompt", { phone: threepid.address })}
-                </span>
-                <AccessibleButton
-                    onClick={onConfirmRemoveClick}
-                    kind="danger_sm"
-                    className="mx_AddRemoveThreepids_existing_button"
-                >
-                    {_t("action|remove")}
-                </AccessibleButton>
-                <AccessibleButton
-                    onClick={onCancelClick}
-                    kind="link_sm"
-                    className="mx_AddRemoveThreepids_existing_button"
-                >
-                    {_t("action|cancel")}
-                </AccessibleButton>
-            </div>
+            // Cancel is where Remove was, so that clicking twice doesn't remove the address
+            <ThreepidRow
+                actions={
+                    <>
+                        <DialogFooterButton destructive onClick={onConfirmRemoveClick}>
+                            {_t("action|remove")}
+                        </DialogFooterButton>
+                        <DialogFooterButton autoFocus onClick={onCancelClick}>
+                            {_t("action|cancel")}
+                        </DialogFooterButton>
+                    </>
+                }
+            >
+                {threepid.medium === ThreepidMedium.Email
+                    ? _t("settings|general|remove_email_prompt", { email: address })
+                    : _t("settings|general|remove_msisdn_prompt", { phone: address })}
+            </ThreepidRow>
         );
     }
 
     if (isVerifyingBind) {
         if (threepid.medium === ThreepidMedium.Email) {
             return (
-                <div className="mx_EmailAddressesPhoneNumbers_verify">
-                    <span className="mx_EmailAddressesPhoneNumbers_verify_instructions">
-                        {_t("settings|general|discovery_email_verification_instructions")}
-                    </span>
-                    <AccessibleButton
-                        className="mx_EmailAddressesPhoneNumbers_existing_button"
-                        kind="primary_sm"
-                        onClick={onContinueClick}
-                        disabled={continueDisabled}
-                    >
-                        {_t("action|complete")}
-                    </AccessibleButton>
-                </div>
+                <ThreepidRow
+                    description={_t("settings|general|discovery_email_verification_instructions")}
+                    actions={
+                        <DialogFooterButton onClick={onContinueClick} disabled={continueDisabled}>
+                            {_t("action|complete")}
+                        </DialogFooterButton>
+                    }
+                >
+                    {address}
+                </ThreepidRow>
             );
         } else {
             return (
-                <div className="mx_EmailAddressesPhoneNumbers_verify">
-                    <span className="mx_EmailAddressesPhoneNumbers_verify_instructions">
-                        {_t("settings|general|msisdn_verification_instructions")}
-                    </span>
-                    <form onSubmit={onContinueClick} autoComplete="off" noValidate={true}>
+                <>
+                    <ThreepidRow description={_t("settings|general|msisdn_verification_instructions")}>
+                        {address}
+                    </ThreepidRow>
+                    <form
+                        className="mx_AddRemoveThreepids_code"
+                        onSubmit={onContinueClick}
+                        autoComplete="off"
+                        noValidate={true}
+                    >
                         <Field
                             type="text"
                             label={_t("settings|general|msisdn_verification_field_label")}
@@ -259,22 +294,28 @@ const ExistingThreepid: React.FC<ExistingThreepidProps> = ({ mode, threepid, onC
                             onChange={onVerificationCodeChange}
                         />
                     </form>
-                </div>
+                </>
             );
         }
     }
 
     return (
-        <div className="mx_AddRemoveThreepids_existing">
-            <span className="mx_AddRemoveThreepids_existing_address">{threepid.address}</span>
-            <AccessibleButton
-                onClick={mode === "hs" ? onRemoveClick : threepid.bound ? onRevokeClick : onShareClick}
-                kind={mode === "hs" || threepid.bound ? "danger_sm" : "primary_sm"}
-                disabled={disabled}
-            >
-                {mode === "hs" ? _t("action|remove") : threepid.bound ? _t("action|revoke") : _t("action|share")}
-            </AccessibleButton>
-        </div>
+        <ThreepidRow
+            textId={textId}
+            actions={
+                <DialogFooterButton
+                    onClick={mode === "hs" ? onRemoveClick : threepid.bound ? onRevokeClick : onShareClick}
+                    destructive={mode === "hs" || threepid.bound}
+                    disabled={disabled}
+                    autoFocus={wasConfirming}
+                    aria-describedby={textId}
+                >
+                    {mode === "hs" ? _t("action|remove") : threepid.bound ? _t("action|revoke") : _t("action|share")}
+                </DialogFooterButton>
+            }
+        >
+            {address}
+        </ThreepidRow>
     );
 };
 
@@ -293,6 +334,9 @@ const AddThreepidSection: React.FC<{ medium: "email" | "msisdn"; disabled?: bool
     const [newThreepidInput, setNewThreepidInput] = useState("");
     const [phoneCountryInput, setPhoneCountryInput] = useState("");
     const [verificationCodeInput, setVerificationCodeInput] = useState("");
+    // Telement: the form opens from a row, which takes the focus back when the form is cancelled
+    const [isOpen, setIsOpen] = useState(false);
+    const [wasCancelled, setWasCancelled] = useState(false);
     const [isVerifying, setIsVerifying] = useState(false);
     const [continueDisabled, setContinueDisabled] = useState(false);
     const [sentToMsisdn, setSentToMsisdn] = useState("");
@@ -320,8 +364,11 @@ const AddThreepidSection: React.FC<{ medium: "email" | "msisdn"; disabled?: bool
                 .then(([finished]) => {
                     if (finished) {
                         addTask.current = undefined;
+                        setIsOpen(false);
+                        setWasCancelled(false);
                         setIsVerifying(false);
                         setNewThreepidInput("");
+                        setVerificationCodeInput("");
                         onChange();
                     }
                     setContinueDisabled(false);
@@ -360,6 +407,23 @@ const AddThreepidSection: React.FC<{ medium: "email" | "msisdn"; disabled?: bool
         },
         [onChange, medium, verificationCodeInput],
     );
+
+    const onOpenClick = useCallback(() => {
+        setIsOpen(true);
+    }, []);
+
+    const onCancelClick = useCallback((e: ButtonEvent) => {
+        e.stopPropagation();
+        e.preventDefault();
+
+        addTask.current = undefined;
+        setIsOpen(false);
+        setWasCancelled(true);
+        setIsVerifying(false);
+        setContinueDisabled(false);
+        setNewThreepidInput("");
+        setVerificationCodeInput("");
+    }, []);
 
     const onNewThreepidInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
         setNewThreepidInput(e.target.value);
@@ -415,23 +479,42 @@ const AddThreepidSection: React.FC<{ medium: "email" | "msisdn"; disabled?: bool
         setVerificationCodeInput(e.target.value);
     }, []);
 
+    const cancelButton = (
+        <AccessibleButton onClick={onCancelClick} kind="primary_outline">
+            {_t("action|cancel")}
+        </AccessibleButton>
+    );
+
     if (isVerifying && medium === "email") {
         return (
-            <div>
-                <div>{_t("settings|general|add_email_instructions")}</div>
-                <AccessibleButton onClick={onContinueClick} kind="primary" disabled={continueDisabled}>
-                    {_t("action|continue")}
-                </AccessibleButton>
-            </div>
+            <>
+                <ThreepidRow description={_t("common|unverified")}>{newThreepidInput}</ThreepidRow>
+                <div className="mx_AddRemoveThreepids_add">
+                    <div>{_t("settings|general|add_email_instructions")}</div>
+                    <div className="mx_AddRemoveThreepids_buttons">
+                        {cancelButton}
+                        <AccessibleButton onClick={onContinueClick} kind="primary" disabled={continueDisabled}>
+                            {_t("action|continue")}
+                        </AccessibleButton>
+                    </div>
+                </div>
+            </>
         );
     } else if (isVerifying) {
         return (
-            <div>
-                <div>
-                    {_t("settings|general|add_msisdn_instructions", { msisdn: sentToMsisdn })}
-                    <br />
-                </div>
-                <form onSubmit={onContinueClick} autoComplete="off" noValidate={true}>
+            <>
+                <ThreepidRow description={_t("common|unverified")}>
+                    {sentToMsisdn
+                        ? formatThreepid({ medium: ThreepidMedium.Phone, address: sentToMsisdn })
+                        : newThreepidInput}
+                </ThreepidRow>
+                <form
+                    className="mx_AddRemoveThreepids_add"
+                    onSubmit={onContinueClick}
+                    autoComplete="off"
+                    noValidate={true}
+                >
+                    <div>{_t("settings|general|add_msisdn_instructions", { msisdn: sentToMsisdn })}</div>
                     <Field
                         type="text"
                         label={_t("settings|general|msisdn_verification_field_label")}
@@ -440,15 +523,28 @@ const AddThreepidSection: React.FC<{ medium: "email" | "msisdn"; disabled?: bool
                         value={verificationCodeInput}
                         onChange={onVerificationCodeInputChange}
                     />
-                    <AccessibleButton
-                        onClick={onContinueClick}
-                        kind="primary"
-                        disabled={disabled || continueDisabled || verificationCodeInput.length === 0}
-                    >
-                        {_t("action|continue")}
-                    </AccessibleButton>
+                    <div className="mx_AddRemoveThreepids_buttons">
+                        {cancelButton}
+                        <AccessibleButton
+                            onClick={onContinueClick}
+                            kind="primary"
+                            disabled={disabled || continueDisabled || verificationCodeInput.length === 0}
+                        >
+                            {_t("action|continue")}
+                        </AccessibleButton>
+                    </div>
                 </form>
-            </div>
+            </>
+        );
+    }
+
+    if (!isOpen) {
+        return (
+            <ActionRowView Icon={PlusIcon} onClick={onOpenClick} disabled={disabled} autoFocus={wasCancelled}>
+                {medium === "email"
+                    ? _t("settings|general|add_email_dialog_title")
+                    : _t("settings|general|add_msisdn_dialog_title")}
+            </ActionRowView>
         );
     }
 
@@ -465,7 +561,7 @@ const AddThreepidSection: React.FC<{ medium: "email" | "msisdn"; disabled?: bool
         ) : undefined;
 
     return (
-        <form onSubmit={onAddClick} autoComplete="off" noValidate={true}>
+        <form className="mx_AddRemoveThreepids_add" onSubmit={onAddClick} autoComplete="off" noValidate={true}>
             <Field
                 type="text"
                 label={
@@ -474,14 +570,18 @@ const AddThreepidSection: React.FC<{ medium: "email" | "msisdn"; disabled?: bool
                         : _t("settings|general|msisdn_label")
                 }
                 autoComplete={medium === "email" ? "email" : "tel-national"}
+                autoFocus={true}
                 disabled={disabled || isVerifying}
                 value={newThreepidInput}
                 onChange={onNewThreepidInputChange}
                 prefixComponent={phoneCountry}
             />
-            <AccessibleButton onClick={onAddClick} kind="primary" disabled={disabled}>
-                {_t("action|add")}
-            </AccessibleButton>
+            <div className="mx_AddRemoveThreepids_buttons">
+                {cancelButton}
+                <AccessibleButton onClick={onAddClick} kind="primary" disabled={disabled}>
+                    {_t("action|add")}
+                </AccessibleButton>
+            </div>
         </form>
     );
 };
@@ -517,10 +617,12 @@ export const AddRemoveThreepids: React.FC<AddRemoveThreepidsProps> = ({
         return <ExistingThreepid mode={mode} threepid={e} onChange={onChange} key={e.address} disabled={disabled} />;
     });
 
+    if (mode === "is" && threepids.length === 0) return null;
+
     return (
-        <>
+        <ValueRowList className="mx_AddRemoveThreepids">
             {existingEmailElements}
             {mode === "hs" && <AddThreepidSection medium={medium} disabled={disabled} onChange={onChange} />}
-        </>
+        </ValueRowList>
     );
 };

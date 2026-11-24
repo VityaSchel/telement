@@ -33,6 +33,8 @@ import compoundDarkHcSemantic from "@vector-im/compound-design-tokens/assets/web
 import compoundStyles from "@vector-im/compound-web/dist/style.css?raw";
 // The package doesn't export its stylesheets on their own
 // eslint-disable-next-line no-restricted-imports
+import dialogFooterStyles from "../../../../packages/shared-components/src/telement/core/DialogFooterView/DialogFooterView.module.css?raw";
+// eslint-disable-next-line no-restricted-imports
 import settingsRowStyles from "../../../../packages/shared-components/src/telement/settings/SettingsRow.module.css?raw";
 // eslint-disable-next-line no-restricted-imports
 import telementTokens from "../../../../packages/shared-components/src/telement/tokens.css?raw";
@@ -42,6 +44,7 @@ import tabbedViewStyles from "../../res/css/structures/_TabbedView.pcss?raw";
 import settingsSubsectionStyles from "../../res/css/components/views/settings/shared/_SettingsSubsection.pcss?raw";
 import settingsSubsectionHeadingStyles from "../../res/css/components/views/settings/shared/_SettingsSubsectionHeading.pcss?raw";
 import loginWithQrStyles from "../../res/css/views/auth/_LoginWithQR.pcss?raw";
+import addRemoveThreepidsStyles from "../../res/css/components/views/settings/_AddRemoveThreepids.pcss?raw";
 import betaCardStyles from "../../res/css/views/beta/_BetaCard.pcss?raw";
 import roomSettingsDialogStyles from "../../res/css/views/dialogs/_RoomSettingsDialog.pcss?raw";
 import settingsDialogStyles from "../../res/css/views/dialogs/_SettingsDialog.pcss?raw";
@@ -86,6 +89,7 @@ import { loadInter } from "../test/telement/fonts";
 /** In the order _components.pcss imports them, after _common.pcss, as in the app's bundle. */
 const APP_STYLES = [
     commonStyles,
+    addRemoveThreepidsStyles,
     tabbedViewStyles,
     settingsSubsectionStyles,
     settingsSubsectionHeadingStyles,
@@ -159,7 +163,10 @@ beforeAll(async () => {
             ${compoundLightHcTheme} ${compoundLightHcSemantic} ${compoundDarkHcTheme} ${compoundDarkHcSemantic}
         }
         @layer compound-web { ${compoundStyles} }
-        @layer shared-components { ${telementTokens} ${moduleCss(settingsRowStyles, "SettingsRow")} }
+        @layer shared-components {
+            ${telementTokens} ${moduleCss(settingsRowStyles, "SettingsRow")}
+            ${moduleCss(dialogFooterStyles, "DialogFooterView")}
+        }
         @layer app-web {
             body { margin: 0; }
             ${themed}
@@ -1205,6 +1212,129 @@ describe.each(THEMES.map(([theme]) => theme))("Settings groups in %s", (theme) =
         expect(card.bottom - rows[2].bottom).toBe(12);
         expect(rows[1].top - rows[0].bottom).toBe(12);
         expect(rows[2].top - rows[1].bottom).toBe(12);
+    });
+
+    describe("email addresses and phone numbers", () => {
+        /** An address's row, as AddRemoveThreepids renders it, with its buttons' labels. */
+        const address = (id: string, text: string, actions: string[], description = ""): string => `
+            <div class="mx_AddRemoveThreepids_row" id="${id}">
+                <div class="mx_AddRemoveThreepids_row_text">
+                    <span id="${id}-text">${text}</span>
+                    ${description && `<span class="mx_AddRemoveThreepids_row_description" id="${id}-state">${description}</span>`}
+                </div>
+                <div class="DialogFooterView_footer mx_AddRemoveThreepids_row_actions">
+                    ${actions
+                        .map(
+                            (label) =>
+                                `<button class="DialogFooterView_button DialogFooterView_destructive" id="${id}-${label}">${label}</button>`,
+                        )
+                        .join("")}
+                </div>
+            </div>
+        `;
+        const addRow = `
+            <button class="SettingsRow_row SettingsRow_interactive" data-settings-row="" id="add">
+                <span class="SettingsRow_text"><span class="SettingsRow_label">Add email address</span></span>
+            </button>
+        `;
+        const buttons = `
+            <div class="mx_AddRemoveThreepids_buttons" id="buttons">
+                <div class="mx_AccessibleButton mx_AccessibleButton_hasKind mx_AccessibleButton_kind_primary_outline">Cancel</div>
+                <div class="mx_AccessibleButton mx_AccessibleButton_hasKind mx_AccessibleButton_kind_primary">Add</div>
+            </div>
+        `;
+        const form = `
+            <form class="mx_AddRemoveThreepids_add" id="form">
+                <div class="mx_Field" id="field"><input id="email" placeholder="Email address"><label>Email address</label></div>
+                ${buttons}
+            </form>
+        `;
+        /** The group's card around what its list (ValueRowList) holds. */
+        function renderList(rows: string): DOMRect {
+            renderTab(
+                theme,
+                section(
+                    "personal",
+                    "",
+                    `<div class="mx_SettingsSubsection">
+                        <div class="mx_SettingsSubsection_content mx_SettingsSubsection_contentStretch" id="card">
+                            <div class="SettingsRow_list mx_AddRemoveThreepids" data-settings-row="" id="list">${rows}</div>
+                        </div>
+                    </div>`,
+                ),
+            );
+            return box("#card");
+        }
+
+        it("are 44px rows one after another, the address and what can be done with it on the card's edges", () => {
+            const card = renderList(
+                address("first", "alice@example.org", ["Remove"]) +
+                    address("second", "+447700900000", ["Remove"]) +
+                    addRow,
+            );
+
+            expect([box("#first").height, box("#second").height, box("#add").height]).toEqual([44, 44, 44]);
+            expect(box("#first").top - card.top).toBe(4);
+            expect(box("#second").top).toBe(box("#first").bottom);
+            expect(box("#add").top).toBe(box("#second").bottom);
+            expect(card.bottom - box("#add").bottom).toBe(4);
+            expect(textBox("#first-text").left - card.left).toBe(16);
+            expect(textBox("#add .SettingsRow_label").left - card.left).toBe(16);
+            expect(card.right - textBox("#first-Remove").right).toBeCloseTo(16, 0);
+            // The button is the 36px text button of the dialogs' footers, in the menus' red
+            expect(box("#first-Remove").height).toBe(36);
+            expect(card.right - box("#first-Remove").right).toBe(4);
+            const style = getComputedStyle(get("#first-Remove"));
+            expect(style.color).toBe(tokenColor("--cpd-color-text-critical-primary", get("#card")));
+            expect(style.backgroundColor).toBe("rgba(0, 0, 0, 0)");
+            // Centered on its row
+            expect((box("#first-Remove").top + box("#first-Remove").bottom) / 2).toBe(box("#first").top + 22);
+        });
+
+        it("keep their height while asking to confirm, so that nothing moves", () => {
+            renderList(address("first", "Remove alice@example.org?", ["Remove", "Cancel"]) + addRow);
+
+            expect(box("#first").height).toBe(44);
+            expect(box("#first-Cancel").left - box("#first-Remove").right).toBe(8);
+        });
+
+        it("break a long address rather than running under its button", () => {
+            renderList(address("first", `${"alice".repeat(40)}@example.org`, ["Remove"]));
+
+            expect(box("#first-text").right).toBeLessThanOrEqual(box("#first-Remove").left);
+            expect(box("#first").height).toBeGreaterThan(44);
+        });
+
+        it("show the one to verify as a 52px row, its state in 13px secondary text under it", () => {
+            renderList(address("first", "bob@example.org", [], "Unverified"));
+            const style = getComputedStyle(get("#first-state"));
+
+            expect(box("#first").height).toBe(52);
+            expect([style.fontSize, style.color]).toEqual([
+                "13px",
+                tokenColor("--cpd-color-text-secondary", get("#card")),
+            ]);
+            expect(box("#first-state").top).toBe(box("#first-text").bottom);
+        });
+
+        it("put the form that adds one 16px under the card's top, and its buttons 12px over its bottom, 8px apart", () => {
+            const card = renderList(form);
+            const [cancel, add] = [...get("#buttons").children].map((button) => button.getBoundingClientRect());
+
+            expect(box("#field").top - card.top).toBe(16);
+            expect([box("#field").left - card.left, card.right - box("#field").right]).toEqual([16, 16]);
+            expect(box("#field").height).toBe(36);
+            expect(box("#buttons").top - box("#field").bottom).toBe(16);
+            expect(card.bottom - box("#buttons").bottom).toBe(12);
+            expect(add.left - cancel.right).toBe(8);
+            expect([cancel.height, add.height]).toEqual([36, 36]);
+        });
+
+        it("put it 12px under the last address", () => {
+            renderList(address("first", "alice@example.org", ["Remove"]) + form);
+
+            expect(box("#field").top - box("#first").bottom).toBe(12);
+        });
     });
 
     describe("the Appearance tab", () => {
