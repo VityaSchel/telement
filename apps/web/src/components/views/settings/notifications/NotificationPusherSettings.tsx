@@ -21,6 +21,7 @@ import AccessibleButton from "../../elements/AccessibleButton";
 import LabelledCheckbox from "../../elements/LabelledCheckbox";
 import { SettingsIndent } from "../shared/SettingsIndent";
 import { SettingsSubsection, SettingsSubsectionText } from "../shared/SettingsSubsection";
+import { NotificationTargets } from "../../../../telement/settings/NotificationTargets";
 
 function generalTabButton(content: string): JSX.Element {
     return (
@@ -111,13 +112,7 @@ export function NotificationPusherSettings(): JSX.Element {
             </SettingsSubsection>
             {notificationTargets.length > 0 && (
                 <SettingsSubsection heading={_t("settings|notifications|push_targets")} legacy={false}>
-                    <ul>
-                        {pushers
-                            .filter((it) => it.kind !== "email")
-                            .map((pusher) => (
-                                <li key={pusher.pushkey}>{pusher.device_display_name || pusher.app_display_name}</li>
-                            ))}
-                    </ul>
+                    <NotificationTargets pushers={notificationTargets} />
                 </SettingsSubsection>
             )}
         </>

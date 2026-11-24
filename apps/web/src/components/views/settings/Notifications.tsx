@@ -49,6 +49,7 @@ import {
 } from "../../../utils/pushRules/updatePushRuleActions";
 import { Caption } from "../typography/Caption";
 import { SettingsSubsection } from "./shared/SettingsSubsection";
+import { NotificationTargets } from "../../../telement/settings/NotificationTargets";
 import { RoomNotificationExceptionsRow } from "../../../telement/settings/RoomNotificationExceptionsRow";
 import { doesRoomHaveUnreadMessages } from "../../../Unread";
 import SettingsFlag from "../elements/SettingsFlag";
@@ -838,22 +839,13 @@ export default class Notifications extends React.PureComponent<EmptyObject, ISta
     private renderTargets(): ReactNode {
         if (this.isInhibited) return null; // no targets if there's no notifications
 
-        const rows = this.state.pushers?.map((p) => (
-            <tr key={p.kind + p.pushkey}>
-                <td>{p.app_display_name}</td>
-                <td>{p.device_display_name}</td>
-            </tr>
-        ));
+        if (!this.state.pushers?.length) return null; // no targets to show
 
-        if (!rows?.length) return null; // no targets to show
-
+        // Telement: rows on a card like the tab's other groups, rather than a table
         return (
-            <div className="mx_UserNotifSettings_floatingSection">
-                <div>{_t("settings|notifications|push_targets")}</div>
-                <table>
-                    <tbody>{rows}</tbody>
-                </table>
-            </div>
+            <SettingsSubsection heading={_t("settings|notifications|push_targets")}>
+                <NotificationTargets pushers={this.state.pushers} />
+            </SettingsSubsection>
         );
     }
 

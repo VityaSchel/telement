@@ -2348,9 +2348,35 @@ exports[`<Notifications /> > matches the snapshot 1`] = `
           <div
             class="mx_SettingsSubsection_content mx_SettingsSubsection_content_newUi"
           >
-            <ul>
+            <ul
+              class="mx_NotificationTargets"
+              data-settings-row=""
+            >
               <li>
-                My EyeFon
+                <div
+                  aria-disabled="true"
+                  class="_row"
+                  data-settings-row=""
+                >
+                  <span
+                    class="_text"
+                  >
+                    <span
+                      class="_label"
+                    >
+                      My EyeFon
+                    </span>
+                  </span>
+                  <span
+                    class="_end"
+                  >
+                    <span
+                      class="_value"
+                    >
+                      Element
+                    </span>
+                  </span>
+                </div>
               </li>
             </ul>
           </div>

@@ -38,12 +38,13 @@ import settingsSectionStyles from "../../res/css/views/settings/tabs/_SettingsSe
 import settingsTabStyles from "../../res/css/views/settings/tabs/_SettingsTab.pcss?raw";
 import headingStyles from "../../res/css/views/typography/_Heading.pcss?raw";
 import compoundOverrides from "../../res/css/telement/_CompoundOverrides.pcss?raw";
+import notificationTargetsStyles from "../../res/css/telement/_NotificationTargets.pcss?raw";
 import settingsSearchStyles from "../../res/css/telement/_SettingsSearch.pcss?raw";
 import lightTheme from "../../res/themes/light/css/_light.pcss?raw";
 import lightHcTheme from "../../res/themes/light-high-contrast/css/_light-high-contrast.pcss?raw";
 import darkTheme from "../../res/themes/dark/css/_dark.pcss?raw";
 import { cornerRadii, toBrowserCss } from "../test/telement/browserCss";
-import { composite, contrastOver, sendCdp } from "../test/telement/computedStyle";
+import { composite, contrastOver, sendCdp, tokenColor } from "../test/telement/computedStyle";
 import { loadInter } from "../test/telement/fonts";
 import { FOUND_CLASS, revealSetting } from "./settings/revealSetting";
 
@@ -59,6 +60,7 @@ const APP_STYLES = [
     settingsTabStyles,
     headingStyles,
     compoundOverrides,
+    notificationTargetsStyles,
     settingsSearchStyles,
 ];
 
@@ -151,6 +153,13 @@ function get(selector: string): HTMLElement {
 
 function box(selector: string): DOMRect {
     return get(selector).getBoundingClientRect();
+}
+
+/** Where the text of an element is drawn. */
+function textBox(element: Element): DOMRect {
+    const range = document.createRange();
+    range.selectNodeContents(element);
+    return range.getBoundingClientRect();
 }
 
 /** A SettingsSubsection as it renders inside a section, with the heading its group is labelled by. */
@@ -321,6 +330,57 @@ describe.each(THEMES.map(([theme]) => theme))("Settings rows in %s", (theme) => 
                 expect(opacityAt(1700)).toBeLessThan(1);
                 expect(opacityAt(2000)).toBe(0);
             });
+        });
+    });
+
+    describe("notification targets", () => {
+        /** A target as NotificationTargets renders it: a value row without a menu. */
+        const target = (device: string, app: string): string => `
+            <li>
+                <div class="SettingsRow_row" data-settings-row="" aria-disabled="true">
+                    <span class="SettingsRow_text"><span class="SettingsRow_label">${device}</span></span>
+                    <span class="SettingsRow_end"><span class="SettingsRow_value">${app}</span></span>
+                </div>
+            </li>
+        `;
+
+        it("are 44px rows one after another on a card labelled like the others, the app at the end in secondary text", () => {
+            renderTab(
+                theme,
+                section(
+                    "",
+                    subsection(
+                        "Notification targets",
+                        `<ul class="mx_NotificationTargets" data-settings-row="">
+                            ${target("Pixel 8", "Element X")}
+                            ${target("alice@example.org", "Email Notifications, sent by a homeserver with a very long name indeed")}
+                        </ul>`,
+                    ),
+                ),
+            );
+            const card = box("[data-card]");
+            const rows = [...document.querySelectorAll<HTMLElement>(".SettingsRow_row")].map((element) =>
+                element.getBoundingClientRect(),
+            );
+
+            expect(card.top - box(".mx_SettingsSubsectionHeading").bottom).toBe(8);
+            expect(rows.map(({ height }) => height)).toEqual([44, 44]);
+            // 4px from the card's top and bottom, as the rows' fill is from its sides, and touching each other
+            expect([rows[0].top - card.top, rows[1].top - rows[0].bottom, card.bottom - rows[1].bottom]).toEqual([
+                4, 0, 4,
+            ]);
+            expect([rows[0].left - card.left, card.right - rows[0].right]).toEqual([4, 4]);
+            expect(getComputedStyle(get("li")).listStyleType).toBe("none");
+
+            const device = get(".SettingsRow_label");
+            const app = get(".SettingsRow_value");
+            expect(textBox(device).left - card.left).toBe(16);
+            expect(card.right - textBox(app).right).toBeCloseTo(16, 0);
+            expect([getComputedStyle(device).fontSize, getComputedStyle(app).fontSize]).toEqual(["15px", "15px"]);
+            expect(getComputedStyle(app).color).toBe(tokenColor("--cpd-color-text-secondary", get("[data-card]")));
+            // A long name stays on its line, within half the row
+            const long = document.querySelectorAll<HTMLElement>(".SettingsRow_value")[1];
+            expect(long.scrollWidth).toBeGreaterThan(long.clientWidth);
         });
     });
 });

@@ -1233,6 +1233,37 @@ describe("<Notifications />", () => {
         });
     });
 
+    describe("notification targets", () => {
+        const phone = { app_id: "im.app", pushkey: "1", kind: "http", app_display_name: "Element X" };
+
+        it("lists where notifications are sent as rows of a group's card: the device, and its app at the end", async () => {
+            mockClient.getPushers.mockResolvedValue({
+                pushers: [
+                    { ...phone, device_display_name: "Pixel 8" },
+                    { ...phone, pushkey: "2", device_display_name: "" },
+                ] as IPusher[],
+            });
+            await getComponentAndWait();
+
+            const group = screen.getByText("Notification targets").closest<HTMLElement>(".mx_SettingsSubsection")!;
+            const list = within(group).getByRole("list");
+            // Rows of a settings card (ValueRowView), which puts them 4px from its edges
+            expect(list).toHaveAttribute("data-settings-row");
+            expect(list.parentElement).toHaveClass("mx_SettingsSubsection_content");
+            const rows = within(list).getAllByRole("listitem");
+            expect(rows.map((row) => row.textContent)).toEqual(["Pixel 8Element X", "Element X"]);
+            for (const row of rows) expect(row.firstElementChild).toHaveAttribute("data-settings-row");
+            expect(within(list).queryByRole("button")).toBeNull();
+        });
+
+        it("has no group without any", async () => {
+            mockClient.getPushers.mockResolvedValue({ pushers: [] });
+            await getComponentAndWait();
+
+            expect(screen.queryByText("Notification targets")).toBeNull();
+        });
+    });
+
     describe("clear all notifications", () => {
         it("clears all notifications", async () => {
             const room = new Room("room123", mockClient, "@alice:example.org");
