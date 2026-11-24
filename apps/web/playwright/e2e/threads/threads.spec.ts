@@ -598,7 +598,7 @@ test.describe("Threads", () => {
         const pinnedMessageBanner = page.getByTestId("pinned-message-banner");
         await expect(pinnedMessageBanner).toBeVisible();
 
-        // Reply in a thread, so the Threads panel header (Mark all as read + Show filter) is shown
+        // Reply in a thread, so the Threads panel header (the filters + Mark all as read) is shown
         const messageTile = roomViewBody
             .locator(".mx_EventTile[data-scroll-tokens]")
             .filter({ hasText: "Hello Mr. Bot" });

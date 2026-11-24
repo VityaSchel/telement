@@ -297,6 +297,21 @@ describe("ThreadsActivityCentre", () => {
         expect(tacRows.length).toEqual(1);
     });
 
+    it("should switch its tabs with the arrow keys, as the menu keeps Tab from reaching them", async () => {
+        cli.getVisibleRooms = vi.fn().mockReturnValue([roomWithNotif, roomWithOtherThread]);
+        renderTAC();
+        await userEvent.click(getTACButton());
+        const selected = (): string | null => screen.getByRole("tab", { selected: true }).textContent;
+
+        expect(selected()).toBe("My threads");
+        await userEvent.keyboard("{ArrowRight}");
+        expect(selected()).toBe("Other threads");
+        await userEvent.keyboard("{ArrowLeft}");
+        expect(selected()).toBe("My threads");
+        // The menu stays open
+        expect(screen.getByRole("menu")).toBeInTheDocument();
+    });
+
     it("should not show participated threads in Other threads tab", async () => {
         cli.getVisibleRooms = vi.fn().mockReturnValue([roomWithNotif, roomWithOtherThread]);
         renderTAC();

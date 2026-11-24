@@ -29,6 +29,7 @@ import { MessagePreviewStore } from "../../../../stores/message-preview/MessageP
 import { getSenderName } from "../../../../stores/message-preview/previews/utils";
 import { getKeyBindingsManager } from "../../../../KeyBindingsManager";
 import { KeyBindingAction } from "../../../../accessibility/KeyboardShortcuts";
+import { Key } from "../../../../Keyboard";
 
 interface ThreadsActivityCentreProps {
     /**
@@ -90,6 +91,13 @@ export function ThreadsActivityCentre({ displayButtonLabel }: ThreadsActivityCen
                 // Block spotlight opening
                 if (action === KeyBindingAction.FilterRooms) {
                     evt.stopPropagation();
+                }
+
+                // Telement: the menu keeps Tab from reaching its tabs, so the arrow keys switch them, as they do other tabs
+                if (evt.key === Key.ARROW_LEFT || evt.key === Key.ARROW_RIGHT) {
+                    evt.preventDefault();
+                    evt.stopPropagation();
+                    setView(view === "my_threads" ? "other_threads" : "my_threads");
                 }
             }}
         >
@@ -255,8 +263,8 @@ function ThreadsActivityCentreThreadRow({ threadData, onClick }: ThreadsActivity
                 onClick();
 
                 // Open the specific thread in that room's right panel. Set a two-card
-                // stack (thread list beneath the thread view) so the thread view gets a
-                // working back button, mirroring the canonical Action.ShowThread path.
+                // stack (thread list beneath the thread view), mirroring the canonical
+                // Action.ShowThread path.
                 if (thread.rootEvent) {
                     RightPanelStore.instance.setCards(
                         [

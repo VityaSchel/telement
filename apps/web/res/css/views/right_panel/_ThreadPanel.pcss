@@ -10,54 +10,14 @@ Please see LICENSE files in the repository root for full details.
     height: 100px;
     overflow: visible;
 
+    /* The card's second header (_BaseCard.pcss): the filter at its start, the button at its end */
     .mx_ThreadPanelHeader {
-        height: 64px;
-        display: flex;
-        box-sizing: border-box;
-        /* The card header's inset (_BaseCard.pcss) */
-        padding: 0 var(--cpd-space-3x);
-        align-items: center;
-        border-bottom: 1px solid var(--cpd-color-gray-400);
-
-        .mx_AccessibleButton {
-            font-size: 12px;
-            color: $secondary-content;
-        }
+        justify-content: space-between;
 
         /* As big as the card header's buttons, with their 24px icon. Compound puts its class first;
            Headers.test.browser.ts fails when an upgrade renames it. */
         [class^="_icon-button_"] {
             padding: calc((var(--BaseCard_header-button-size) - var(--cpd-space-6x)) / 2);
-        }
-
-        .mx_ThreadPanel_vertical_separator {
-            height: 28px;
-            margin-left: var(--cpd-space-3x);
-            margin-right: var(--cpd-space-2x);
-            border-left: 1px solid var(--cpd-color-gray-400);
-        }
-
-        /* A 36px pill like the button before it, with the chevron as far from its end as from its top and bottom. The
-           label's line is as tall as the pill, which centers the label to the half pixel. */
-        .mx_ThreadPanel_dropdown {
-            display: flex;
-            align-items: center;
-            font: var(--cpd-font-body-sm-regular);
-            padding-inline: var(--cpd-space-3x) var(--cpd-space-2x);
-            border-radius: var(--tl-radius-control);
-            line-height: var(--tl-control-size);
-            user-select: none;
-
-            &:hover,
-            &[aria-expanded="true"] {
-                background: $quinary-content;
-            }
-
-            svg {
-                margin-inline-start: 2px;
-                height: 20px;
-                width: 20px;
-            }
         }
     }
 
@@ -174,54 +134,6 @@ Please see LICENSE files in the repository root for full details.
 
         .mx_AccessibleButton_kind_link_inline {
             color: $secondary-content;
-        }
-    }
-}
-
-.mx_ContextualMenu_wrapper {
-    /* The shared menu rows (TELEMENT.md, "Radius and spacing"): content 16px from the menu's edge, Compound's radio
-       10px before the label, and the description in smaller secondary text under it */
-    .mx_ThreadPanel_Header_FilterOptionItem {
-        display: grid;
-        grid-template-columns: auto 1fr;
-        column-gap: var(--tl-menu-icon-gap);
-        align-items: center;
-        padding: var(--cpd-space-1x) var(--cpd-space-3x);
-        border-radius: var(--tl-radius-row);
-
-        /* Highlighted as in the other menus, also when focused with the keyboard */
-        &:hover,
-        &:focus-visible {
-            background-color: var(--cpd-color-bg-action-secondary-hovered);
-        }
-
-        &:active {
-            background-color: var(--cpd-color-bg-action-secondary-pressed);
-        }
-
-        /* Inside the highlight, so that the ring keeps clear of the menu's border, as far as the highlight does */
-        &:focus-visible {
-            outline: var(--cpd-border-width-2) solid var(--cpd-color-border-focused);
-            outline-offset: calc(-1 * var(--cpd-border-width-2));
-        }
-
-        /* Centered on the label's line */
-        .mx_ThreadPanel_Header_FilterOptionItem_selection {
-            grid-row: 1 / span 2;
-            align-self: start;
-            margin-block-start: calc((1lh - 20px) / 2);
-            pointer-events: none;
-        }
-
-        > span {
-            grid-column: 2;
-        }
-
-        /* Puts the row on the 4px grid: 4 + 22.5 + 2 + 19.5 + 4 = 52 */
-        > span:last-child {
-            margin-block-start: 2px;
-            font: var(--cpd-font-body-sm-regular);
-            color: var(--cpd-color-text-secondary);
         }
     }
 }

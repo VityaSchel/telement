@@ -131,21 +131,3 @@ Please see LICENSE files in the repository root for full details.
         }
     }
 }
-
-.mx_ContextualMenu_wrapper.mx_BaseCard_header_title {
-    .mx_ContextualMenu {
-        position: initial;
-        font: var(--cpd-font-body-md-regular);
-        color: var(--cpd-color-text-primary);
-        /* The item highlights are inset 4px inside the border, as in the other menus (_IconizedContextMenu.pcss) */
-        padding: calc(var(--tl-inset-menu) - var(--cpd-border-width-1));
-
-        border: var(--cpd-border-width-1) solid var(--cpd-color-border-interactive-secondary);
-        box-shadow: var(--tl-shadow-floating);
-    }
-
-    /* Like Telement's other menus, it doesn't point at its button */
-    .mx_ContextualMenu_chevron_top {
-        display: none;
-    }
-}

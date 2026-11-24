@@ -29,6 +29,8 @@ import fontSizes from "../../res/css/_font-sizes.pcss?raw";
 import autoHideScrollbarStyles from "../../res/css/structures/_AutoHideScrollbar.pcss?raw";
 import roomViewStyles from "../../res/css/structures/_RoomView.pcss?raw";
 import baseCardStyles from "../../res/css/views/right_panel/_BaseCard.pcss?raw";
+import commonStyles from "../../res/css/_common.pcss?raw";
+import filterTabGroupStyles from "../../res/css/components/views/elements/_FilterTabGroup.pcss?raw";
 import threadsActivityCentreStyles from "../../res/css/structures/_ThreadsActivityCentre.pcss?raw";
 import threadPanelStyles from "../../res/css/views/right_panel/_ThreadPanel.pcss?raw";
 import decoratedRoomAvatarStyles from "../../res/css/views/avatars/_DecoratedRoomAvatar.pcss?raw";
@@ -114,8 +116,16 @@ async function renderActivityCentre(rooms: string[]): Promise<HTMLElement> {
                                 "role": "tablist",
                                 "aria-label": "Threads",
                             },
-                            createElement(NavItem, { active: true, onClick: () => {} }, "My threads"),
-                            createElement(NavItem, { onClick: () => {} }, "Other threads"),
+                            createElement(
+                                NavItem,
+                                { "active": true, "aria-controls": "panel", "onClick": () => {} },
+                                "My threads",
+                            ),
+                            createElement(
+                                NavItem,
+                                { "active": false, "aria-controls": "panel", "onClick": () => {} },
+                                "Other threads",
+                            ),
                         ),
                         createElement(
                             "div",
@@ -206,7 +216,8 @@ describe("Thread menus", () => {
                 ${toBrowserCss(roomViewStyles, lightTheme, fontSizes)}
                 ${toBrowserCss(baseCardStyles, lightTheme, fontSizes)}
                 ${toBrowserCss(decoratedRoomAvatarStyles, lightTheme, fontSizes)}
-                ${toBrowserCss(threadsActivityCentreStyles, lightTheme, fontSizes)}
+                ${toBrowserCss(filterTabGroupStyles, commonStyles, lightTheme)}
+                ${toBrowserCss(threadsActivityCentreStyles, commonStyles, lightTheme, fontSizes)}
                 ${toBrowserCss(threadPanelStyles, lightTheme, fontSizes)}
             }
         `;
@@ -229,7 +240,7 @@ describe("Thread menus", () => {
         it("insets its rows 4px from the menu's edges, with the avatar 12px inside on the tabs' 16px edge", async () => {
             const menu = await renderActivityCentre(["Design", "Engineering"]);
             const edge = menu.getBoundingClientRect();
-            const firstTab = menu.querySelector(".mx_ThreadsActivityCentre_tabs li")!.getBoundingClientRect();
+            const firstTab = menu.querySelector('[role="tab"]')!.getBoundingClientRect();
 
             expect(firstTab.left - edge.left).toBe(16);
             for (const row of threadRows(menu)) {
@@ -244,6 +255,49 @@ describe("Thread menus", () => {
                 ]);
                 expect(avatar.left).toBe(firstTab.left);
             }
+        });
+
+        it("draws its tabs as the app's filter chips: 28px, 8px apart, 16px inside the menu, the selected one filled", async () => {
+            const menu = await renderActivityCentre(["Design"]);
+            const edge = menu.getBoundingClientRect();
+            const [mine, other] = [...menu.querySelectorAll<HTMLElement>('[role="tab"]')];
+            const [mineBox, otherBox] = [mine, other].map((tab) => tab.getBoundingClientRect());
+            // FilterTabGroup, as the threads card and the Polls dialog filter with it
+            const group = document.createElement("fieldset");
+            group.className = "mx_FilterTabGroup";
+            group.innerHTML = `
+                <label><input type="radio" name="chips" checked /><span>My threads</span></label>
+                <label><input type="radio" name="chips" /><span>Other threads</span></label>
+            `;
+            document.body.append(group);
+            const chips = [...group.querySelectorAll("span")];
+            const look = (element: Element): string[] => {
+                const { blockSize, font, color, backgroundColor, borderTopColor, borderTopLeftRadius, paddingInline } =
+                    settledStyle(element as HTMLElement);
+                return [blockSize, font, color, backgroundColor, borderTopColor, borderTopLeftRadius, paddingInline];
+            };
+
+            expect([mineBox.height, otherBox.height]).toEqual([28, 28]);
+            expect([mineBox.left - edge.left, mineBox.top - edge.top]).toEqual([16, 16]);
+            expect(otherBox.left - mineBox.right).toBe(8);
+            expect(look(mine)).toEqual(look(chips[0]));
+            expect(look(other)).toEqual(look(chips[1]));
+            expect(mineBox.width).toBeCloseTo(chips[0].getBoundingClientRect().width, 0);
+            expect(settledStyle(mine).backgroundColor).not.toBe(settledStyle(other).backgroundColor);
+            // Neither the bar's line nor the selected tab's underline
+            expect(getComputedStyle(menu.querySelector(".mx_ThreadsActivityCentre_tabs")!).borderBottomWidth).toBe(
+                "0px",
+            );
+            for (const tab of menu.querySelectorAll(".mx_ThreadsActivityCentre_tabs li")) {
+                expect(getComputedStyle(tab, "::before").content).toBe("none");
+            }
+        });
+
+        it("starts its rows 12px under the tabs", async () => {
+            const menu = await renderActivityCentre(["Design"]);
+            const tab = menu.querySelector('[role="tab"]')!.getBoundingClientRect();
+
+            expect(threadRows(menu)[0].getBoundingClientRect().top - tab.bottom).toBe(12);
         });
 
         it("keeps the last row 4px from the menu's bottom edge when scrolled to the end", async () => {
@@ -348,47 +402,5 @@ describe("Thread menus", () => {
 
         expect(getComputedStyle(list).paddingInlineStart).toBe("8px");
         expect(list.getBoundingClientRect().width - scroller.clientWidth).toBe(6);
-    });
-
-    describe("thread list filter", () => {
-        function renderFilterMenu(): HTMLElement[] {
-            document.body.innerHTML = `
-                <div class="mx_ContextualMenu_wrapper">
-                    <div class="mx_ContextualMenu" role="menu">
-                        <div class="mx_AccessibleButton mx_ThreadPanel_Header_FilterOptionItem" role="menuitemradio"
-                            aria-checked="true" tabindex="0">
-                            <svg width="16" height="16"></svg><span>All threads</span><span>Shows all threads</span>
-                        </div>
-                        <div class="mx_AccessibleButton mx_ThreadPanel_Header_FilterOptionItem" role="menuitemradio"
-                            aria-checked="false" tabindex="-1">
-                            <span>My threads</span><span>Shows threads you've participated in</span>
-                        </div>
-                    </div>
-                </div>
-            `;
-            return [...document.querySelectorAll<HTMLElement>(".mx_ThreadPanel_Header_FilterOptionItem")];
-        }
-
-        it("highlights the hovered option as the other menus do", async () => {
-            const [, mine] = renderFilterMenu();
-
-            await userEvent.hover(mine);
-
-            expect(settledStyle(mine).backgroundColor).toBe(
-                tokenColor("--cpd-color-bg-action-secondary-hovered", document.body),
-            );
-        });
-
-        it("highlights the option focused with the keyboard as on hover", async () => {
-            const [all] = renderFilterMenu();
-
-            await userEvent.keyboard("{Shift}");
-            all.focus();
-
-            expect(all.matches(":focus-visible")).toBe(true);
-            expect(settledStyle(all).backgroundColor).toBe(
-                tokenColor("--cpd-color-bg-action-secondary-hovered", document.body),
-            );
-        });
     });
 });

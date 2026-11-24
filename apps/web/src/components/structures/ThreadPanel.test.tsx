@@ -41,43 +41,37 @@ import { SDKContextClass } from "../../contexts/SDKContextClass.ts";
 
 describe("ThreadPanel", () => {
     describe("Header", () => {
-        it("expect that All filter for ThreadPanelHeader properly renders Show: All threads", () => {
-            const { asFragment } = render(
-                <ThreadPanelHeader filterOption={ThreadFilterType.All} setFilterOption={() => undefined} />,
-            );
-            expect(asFragment()).toMatchSnapshot();
+        it.each([
+            [ThreadFilterType.All, "All threads"],
+            [ThreadFilterType.My, "My threads"],
+        ])("shows the filters as chips, with the %s threads chosen", (filterOption, label) => {
+            render(<ThreadPanelHeader filterOption={filterOption} setFilterOption={() => undefined} />);
+
+            expect(screen.getAllByRole("radio").map((radio) => radio.closest("label")?.textContent)).toEqual([
+                "All threads",
+                "My threads",
+            ]);
+            expect(screen.getByRole("radio", { checked: true })).toBe(screen.getByRole("radio", { name: label }));
+            expect(screen.getByRole("group", { name: "Threads" })).toHaveClass("mx_FilterTabGroup");
         });
 
-        it("expect that My filter for ThreadPanelHeader properly renders Show: My threads", () => {
-            const { asFragment } = render(
-                <ThreadPanelHeader filterOption={ThreadFilterType.My} setFilterOption={() => undefined} />,
-            );
-            expect(asFragment()).toMatchSnapshot();
-        });
-
-        it("expect that ThreadPanelHeader properly opens a context menu when clicked on the button", () => {
+        it("is the card's second header, as the people's is, with Mark all as read at its end", () => {
             const { container } = render(
                 <ThreadPanelHeader filterOption={ThreadFilterType.All} setFilterOption={() => undefined} />,
             );
-            const found = container.querySelector(".mx_ThreadPanel_dropdown");
-            expect(found).toBeTruthy();
-            expect(screen.queryByRole("menu")).toBeFalsy();
-            fireEvent.click(found!);
-            expect(screen.queryByRole("menu")).toBeTruthy();
+
+            expect(container.firstElementChild).toHaveClass("mx_BaseCard_controls");
+            expect(container.firstElementChild!.lastElementChild).toBe(
+                screen.getByRole("button", { name: "Mark all as read" }),
+            );
         });
 
-        it("expect that ThreadPanelHeader has the correct option selected in the context menu", () => {
-            const { container } = render(
-                <ThreadPanelHeader filterOption={ThreadFilterType.All} setFilterOption={() => undefined} />,
-            );
-            fireEvent.click(container.querySelector(".mx_ThreadPanel_dropdown")!);
-            const found = screen.queryAllByRole("menuitemradio");
-            expect(found).toHaveLength(2);
-            const foundButton = screen.queryByRole("menuitemradio", { checked: true });
-            expect(foundButton?.textContent).toEqual(
-                `${_t("threads|all_threads")}${_t("threads|all_threads_description")}`,
-            );
-            expect(foundButton).toMatchSnapshot();
+        it("chooses a filter", () => {
+            const setFilterOption = vi.fn();
+            render(<ThreadPanelHeader filterOption={ThreadFilterType.All} setFilterOption={setFilterOption} />);
+            fireEvent.click(screen.getByRole("radio", { name: "My threads" }));
+
+            expect(setFilterOption).toHaveBeenCalledWith(ThreadFilterType.My);
         });
 
         it("sends an unthreaded read receipt when the Mark All Threads Read button is clicked", async () => {
@@ -157,21 +151,12 @@ describe("ThreadPanel", () => {
             vi.spyOn(room, "createThreadsTimelineSets").mockReturnValue(Promise.resolve([allThreads!, myThreads!]));
         });
 
-        function toggleThreadFilter(container: HTMLElement, newFilter: ThreadFilterType) {
-            fireEvent.click(container.querySelector(".mx_ThreadPanel_dropdown")!);
-            const found = screen.queryAllByRole("menuitemradio");
-            expect(found).toHaveLength(2);
-
-            const allThreadsContent = `${_t("threads|all_threads")}${_t("threads|all_threads_description")}`;
-            const myThreadsContent = `${_t("threads|my_threads")}${_t("threads|my_threads_description")}`;
-
-            const allThreadsOption = found.find((it) => it.textContent === allThreadsContent);
-            const myThreadsOption = found.find((it) => it.textContent === myThreadsContent);
-            expect(allThreadsOption).toBeTruthy();
-            expect(myThreadsOption).toBeTruthy();
-
-            const toSelect = newFilter === ThreadFilterType.My ? myThreadsOption : allThreadsOption;
-            fireEvent.click(toSelect!);
+        function toggleThreadFilter(newFilter: ThreadFilterType) {
+            fireEvent.click(
+                screen.getByRole("radio", {
+                    name: newFilter === ThreadFilterType.My ? _t("threads|my_threads") : _t("threads|all_threads"),
+                }),
+            );
         }
 
         type EventData = { sender: string | null; content: string | null };
@@ -241,8 +226,8 @@ describe("ThreadPanel", () => {
                 expect(events[1]).toEqual(toEventData(mixedThread.rootEvent));
                 expect(events[2]).toEqual(toEventData(ownThread.rootEvent));
             });
-            await waitFor(() => expect(renderResult.container.querySelector(".mx_ThreadPanel_dropdown")).toBeTruthy());
-            toggleThreadFilter(renderResult.container, ThreadFilterType.My);
+            expect(await screen.findByRole("radio", { name: "All threads" })).toBeInTheDocument();
+            toggleThreadFilter(ThreadFilterType.My);
             await waitFor(() => expect(renderResult.container.querySelector(".mx_AutoHideScrollbar")).toBeFalsy());
             await waitFor(() => {
                 const events = findEvents(renderResult.container);
@@ -250,7 +235,7 @@ describe("ThreadPanel", () => {
                 expect(events[0]).toEqual(toEventData(mixedThread.rootEvent));
                 expect(events[1]).toEqual(toEventData(ownThread.rootEvent));
             });
-            toggleThreadFilter(renderResult.container, ThreadFilterType.All);
+            toggleThreadFilter(ThreadFilterType.All);
             await waitFor(() => expect(renderResult.container.querySelector(".mx_AutoHideScrollbar")).toBeFalsy());
             await waitFor(() => {
                 const events = findEvents(renderResult.container);
@@ -287,14 +272,14 @@ describe("ThreadPanel", () => {
                 expect(events).toHaveLength(1);
                 expect(events[0]).toEqual(toEventData(otherThread.rootEvent));
             });
-            await waitFor(() => expect(renderResult.container.querySelector(".mx_ThreadPanel_dropdown")).toBeTruthy());
-            toggleThreadFilter(renderResult.container, ThreadFilterType.My);
+            expect(await screen.findByRole("radio", { name: "All threads" })).toBeInTheDocument();
+            toggleThreadFilter(ThreadFilterType.My);
             await waitFor(() => expect(renderResult.container.querySelector(".mx_AutoHideScrollbar")).toBeFalsy());
             await waitFor(() => {
                 const events = findEvents(renderResult.container);
                 expect(events).toHaveLength(0);
             });
-            toggleThreadFilter(renderResult.container, ThreadFilterType.All);
+            toggleThreadFilter(ThreadFilterType.All);
             await waitFor(() => expect(renderResult.container.querySelector(".mx_AutoHideScrollbar")).toBeFalsy());
             await waitFor(() => {
                 const events = findEvents(renderResult.container);

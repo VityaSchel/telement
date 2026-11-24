@@ -8,33 +8,25 @@ Please see LICENSE files in the repository root for full details.
 
 import React, { useContext, useEffect, useRef, useState } from "react";
 import { type EventTimelineSet, type Room, Thread } from "matrix-js-sdk/src/matrix";
-import { IconButton, RadioInput, Tooltip } from "@vector-im/compound-web";
+import { IconButton, Tooltip } from "@vector-im/compound-web";
 import { logger } from "matrix-js-sdk/src/logger";
-import {
-    ThreadsIcon,
-    ChevronDownIcon,
-    MarkThreadsAsReadIcon,
-} from "@vector-im/compound-design-tokens/assets/web/icons";
+import { ThreadsIcon, MarkThreadsAsReadIcon } from "@vector-im/compound-design-tokens/assets/web/icons";
 
 import BaseCard from "../views/right_panel/BaseCard";
 import type ResizeNotifier from "../../utils/ResizeNotifier";
 import MatrixClientContext, { useMatrixClientContext } from "../../contexts/MatrixClientContext";
 import { _t } from "../../languageHandler";
-import { ContextMenuButton } from "../../accessibility/context_menu/ContextMenuButton";
-import ContextMenu, { ChevronFace, MenuItemRadio, useContextMenu } from "./ContextMenu";
 import RoomContext, { TimelineRenderingType } from "../../contexts/RoomContext";
 import TimelinePanel from "./TimelinePanel";
 import { Layout } from "../../settings/enums/Layout";
 import { type RoomPermalinkCreator } from "../../utils/permalinks/Permalinks";
+import { FilterTabGroup } from "../views/elements/FilterTabGroup";
 import Measured from "../views/elements/Measured";
-import { type ButtonEvent } from "../views/elements/AccessibleButton";
 import Spinner from "../views/elements/Spinner";
 import { clearRoomNotification } from "../../utils/notifications";
 import EmptyState from "../views/right_panel/EmptyState";
 import { ScopedRoomContextProvider, useScopedRoomContext } from "../../contexts/ScopedRoomContext.tsx";
 import { EventPresentationContextProvider } from "../../utils/EventPresentationContextProvider";
-
-const noop = (): void => {};
 
 interface IProps {
     roomId: string;
@@ -43,37 +35,9 @@ interface IProps {
 }
 
 export enum ThreadFilterType {
-    My,
-    All,
+    My = "my",
+    All = "all",
 }
-
-type ThreadPanelHeaderOption = {
-    label: string;
-    description: string;
-    key: ThreadFilterType;
-};
-
-export const ThreadPanelHeaderFilterOptionItem: React.FC<
-    ThreadPanelHeaderOption & {
-        onClick: () => void;
-        isSelected: boolean;
-    }
-> = ({ label, description, onClick, isSelected }) => {
-    return (
-        <MenuItemRadio active={isSelected} className="mx_ThreadPanel_Header_FilterOptionItem" onClick={onClick}>
-            {/* Telement: Compound's radio marks the chosen filter, as in Telement's other menus */}
-            <RadioInput
-                className="mx_ThreadPanel_Header_FilterOptionItem_selection"
-                aria-hidden={true}
-                tabIndex={-1}
-                checked={isSelected}
-                onChange={noop}
-            />
-            <span>{label}</span>
-            <span>{description}</span>
-        </MenuItemRadio>
-    );
-};
 
 export const ThreadPanelHeader: React.FC<{
     filterOption: ThreadFilterType;
@@ -81,44 +45,6 @@ export const ThreadPanelHeader: React.FC<{
 }> = ({ filterOption, setFilterOption }) => {
     const mxClient = useMatrixClientContext();
     const roomContext = useScopedRoomContext("room");
-    const [menuDisplayed, button, openMenu, closeMenu] = useContextMenu();
-    const options: readonly ThreadPanelHeaderOption[] = [
-        {
-            label: _t("threads|all_threads"),
-            description: _t("threads|all_threads_description"),
-            key: ThreadFilterType.All,
-        },
-        {
-            label: _t("threads|my_threads"),
-            description: _t("threads|my_threads_description"),
-            key: ThreadFilterType.My,
-        },
-    ];
-
-    const value = options.find((option) => option.key === filterOption);
-    const contextMenuOptions = options.map((opt) => (
-        <ThreadPanelHeaderFilterOptionItem
-            key={opt.key}
-            label={opt.label}
-            description={opt.description}
-            onClick={() => {
-                setFilterOption(opt.key);
-                closeMenu();
-            }}
-            isSelected={opt === value}
-        />
-    ));
-    const contextMenu = menuDisplayed ? (
-        <ContextMenu
-            top={108}
-            right={33}
-            onFinished={closeMenu}
-            chevronFace={ChevronFace.Top}
-            wrapperClassName="mx_BaseCard_header_title"
-        >
-            {contextMenuOptions}
-        </ContextMenu>
-    ) : null;
 
     const onMarkAllThreadsReadClick = React.useCallback(
         (e: React.MouseEvent) => {
@@ -139,25 +65,23 @@ export const ThreadPanelHeader: React.FC<{
     );
 
     return (
-        <div className="mx_ThreadPanelHeader">
+        <div className="mx_BaseCard_controls mx_ThreadPanelHeader">
+            {/* Telement: the two filters are the app's 28px chips rather than a menu of two items */}
+            <FilterTabGroup<ThreadFilterType>
+                name="ThreadPanel_filter"
+                aria-label={_t("common|threads")}
+                value={filterOption}
+                onFilterChange={setFilterOption}
+                tabs={[
+                    { id: ThreadFilterType.All, label: _t("threads|all_threads") },
+                    { id: ThreadFilterType.My, label: _t("threads|my_threads") },
+                ]}
+            />
             <Tooltip label={_t("threads|mark_all_read")}>
                 <IconButton onClick={onMarkAllThreadsReadClick} size="var(--BaseCard_header-button-size)">
                     <MarkThreadsAsReadIcon />
                 </IconButton>
             </Tooltip>
-            <div className="mx_ThreadPanel_vertical_separator" />
-            <ContextMenuButton
-                className="mx_ThreadPanel_dropdown"
-                ref={button}
-                isExpanded={menuDisplayed}
-                onClick={(ev: ButtonEvent) => {
-                    openMenu();
-                }}
-            >
-                {`${_t("threads|show_thread_filter")} ${value?.label}`}
-                <ChevronDownIcon />
-            </ContextMenuButton>
-            {contextMenu}
         </div>
     );
 };

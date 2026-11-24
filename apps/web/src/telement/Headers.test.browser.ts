@@ -11,9 +11,8 @@ import { createElement, type ReactNode } from "react";
 import { flushSync } from "react-dom";
 import { createRoot, type Root } from "react-dom/client";
 import { renderToStaticMarkup } from "react-dom/server";
-import { Avatar, AvatarStack, IconButton, Text } from "@vector-im/compound-web";
+import { Avatar, AvatarStack, Button, IconButton, Text } from "@vector-im/compound-web";
 import {
-    ChevronDownIcon,
     CloseIcon,
     DownloadIcon,
     ExpandIcon,
@@ -22,6 +21,7 @@ import {
     PinSolidIcon,
     PopOutIcon,
     ThreadsIcon,
+    UserAddIcon,
     VideoCallIcon,
     VoiceCallIcon,
     ZoomInIcon,
@@ -37,7 +37,10 @@ import compoundStyles from "@vector-im/compound-web/dist/style.css?raw";
 // The package doesn't export its token stylesheet on its own
 // eslint-disable-next-line no-restricted-imports
 import telementTokens from "../../../../packages/shared-components/src/telement/tokens.css?raw";
+import commonStyles from "../../res/css/_common.pcss?raw";
 import fontSizes from "../../res/css/_font-sizes.pcss?raw";
+import filterTabGroupStyles from "../../res/css/components/views/elements/_FilterTabGroup.pcss?raw";
+import memberListHeaderViewStyles from "../../res/css/views/rooms/_MemberListHeaderView.pcss?raw";
 import roomHeaderStyles from "../../res/css/views/rooms/_RoomHeader.pcss?raw";
 import baseCardStyles from "../../res/css/views/right_panel/_BaseCard.pcss?raw";
 import threadPanelStyles from "../../res/css/views/right_panel/_ThreadPanel.pcss?raw";
@@ -202,6 +205,8 @@ describe("Telement's headers", () => {
                 ${toBrowserCss(roomHeaderStyles, lightTheme)}
                 ${toBrowserCss(baseCardStyles, lightTheme)}
                 ${toBrowserCss(threadPanelStyles, lightTheme)}
+                ${toBrowserCss(filterTabGroupStyles, commonStyles, lightTheme)}
+                ${toBrowserCss(memberListHeaderViewStyles, lightTheme)}
                 ${toBrowserCss(imageViewStyles, fontSizes, lightTheme)}
                 ${toBrowserCss(legacyCallHeaderStyles, lightTheme)}
             }
@@ -431,93 +436,146 @@ describe("Telement's headers", () => {
         });
     });
 
-    describe("thread panel header", () => {
-        function threadPanelHeader(): ReactNode {
-            return rightPanel(
+    describe("card's second header", () => {
+        /** ThreadPanelHeader: the filter's chips and Mark all as read. */
+        const threadsControls = (...filters: string[]): ReactNode =>
+            h(
+                "div",
+                { className: "mx_BaseCard_controls mx_ThreadPanelHeader" },
                 h(
-                    "div",
-                    { className: "mx_BaseCard mx_ThreadPanel" },
-                    cardHeader(),
-                    h(
-                        "div",
-                        { className: "mx_ThreadPanelHeader" },
+                    "fieldset",
+                    { className: "mx_FilterTabGroup" },
+                    filters.map((filter, i) =>
                         h(
-                            IconButton,
-                            { "aria-label": "Mark all as read", "size": "var(--BaseCard_header-button-size)" },
-                            h(MarkThreadsAsReadIcon),
-                        ),
-                        h("div", { className: "mx_ThreadPanel_vertical_separator" }),
-                        h(
-                            "div",
-                            {
-                                "className": "mx_AccessibleButton mx_ThreadPanel_dropdown",
-                                "role": "button",
-                                "aria-label": "Show",
-                            },
-                            "Show: All threads",
-                            h(ChevronDownIcon),
+                            "label",
+                            { "key": filter, "aria-label": filter },
+                            h("input", { type: "radio", name: "filter", defaultChecked: i === 0 }),
+                            h("span", null, filter),
                         ),
                     ),
                 ),
+                h(
+                    IconButton,
+                    { "aria-label": "Mark all as read", "size": "var(--BaseCard_header-button-size)" },
+                    h(MarkThreadsAsReadIcon),
+                ),
             );
-        }
 
-        it("puts mark all as read at its start: a 36px button 12px from the edge, its icon 24px", () => {
-            render(threadPanelHeader());
+        /** MemberListHeaderView: the search field, a 36px pill, and the invite button. */
+        const peopleControls = (): ReactNode =>
+            h(
+                "header",
+                { className: "mx_BaseCard_controls mx_MemberListHeaderView" },
+                h("div", {
+                    "className": "mx_MemberListHeaderView_search",
+                    "aria-label": "Search room members",
+                    "style": { height: "36px" },
+                }),
+                h(Button, {
+                    "kind": "primary",
+                    "size": "md",
+                    "iconOnly": true,
+                    "Icon": UserAddIcon,
+                    "aria-label": "Invite",
+                }),
+            );
 
-            const header = box(".mx_ThreadPanelHeader");
-            const markRead = button("Mark all as read").getBoundingClientRect();
-            expect(iconGeometry(button("Mark all as read"))).toEqual([36, 36, 24, 24, 6, 6]);
-            expect([markRead.left - header.left, markRead.top - header.top]).toEqual([12, 13.5]);
+        const card = (controls: ReactNode, dir = "ltr"): ReactNode =>
+            h(
+                "div",
+                { dir },
+                rightPanel(
+                    h(
+                        "div",
+                        { className: "mx_BaseCard mx_ThreadPanel" },
+                        cardHeader(),
+                        controls,
+                        h("div", null, "List"),
+                    ),
+                ),
+            );
+
+        it.each([
+            [
+                "threads",
+                (): ReactNode => threadsControls("All threads", "My threads"),
+                "All threads",
+                "Mark all as read",
+            ],
+            ["people", peopleControls, "Search room members", "Invite"],
+        ])(
+            "keeps the %s controls on one 64px line under the title, 12px from both edges",
+            (_, controls, first, last) => {
+                render(card(controls()));
+                const header = box(".mx_BaseCard_controls");
+                const [start, end] = [first, last].map((label) => button(label).getBoundingClientRect());
+                const middle = header.top + (header.height - 1) / 2;
+
+                expect(header.top).toBe(box(".mx_BaseCard_header").bottom);
+                expect(header.height).toBe(64);
+                expect([start.left - header.left, header.right - end.right]).toEqual([12, 12]);
+                expect(end.width).toBe(36);
+                for (const control of [start, end]) {
+                    expect(Math.abs(control.top + control.height / 2 - middle)).toBeLessThanOrEqual(0.5);
+                }
+                expect(end.left - start.right).toBeGreaterThanOrEqual(12);
+            },
+        );
+
+        it("draws the same full-width line under both cards' controls as under their titles", () => {
+            render(h("div", null, card(threadsControls("All threads", "My threads")), card(peopleControls())));
+            const borders = [...document.querySelectorAll(".mx_BaseCard_controls, .mx_BaseCard_header")].map(
+                (header) => {
+                    const { borderBottomWidth, borderBottomColor } = getComputedStyle(header);
+                    return [borderBottomWidth, borderBottomColor, header.getBoundingClientRect().width];
+                },
+            );
+
+            expect(borders).toHaveLength(4);
+            expect(new Set(borders.map(String)).size).toBe(1);
+            expect(borders[0][0]).toBe("1px");
+        });
+
+        it.each(["ltr", "rtl"])("filters the threads with the app's 28px chips 8px apart (%s)", (dir) => {
+            render(card(threadsControls("All threads", "My threads"), dir));
+            const header = box(".mx_BaseCard_controls");
+            const [all, mine, markRead] = ["All threads", "My threads", "Mark all as read"].map((label) =>
+                button(label).getBoundingClientRect(),
+            );
+            // How far `inner` is from where `outer` starts, in the layout's direction
+            const startOf = (inner: DOMRect, outer: DOMRect): number =>
+                dir === "rtl" ? outer.right - inner.right : inner.left - outer.left;
+
+            expect([all.height, mine.height]).toEqual([28, 28]);
+            expect(startOf(all, header)).toBe(12);
+            expect(startOf(mine, all)).toBe(all.width + 8);
+            expect(startOf(markRead, header)).toBe(header.width - 12 - markRead.width);
+        });
+
+        it("grows with chips that wrap, 8px from its edges, rather than letting them out of it", () => {
+            render(card(threadsControls("Alle Unterhaltungen im Raum", "Unterhaltungen mit mir")));
+            const header = box(".mx_BaseCard_controls");
+            const chips = box(".mx_FilterTabGroup");
+
+            expect(chips.height).toBe(28 + 8 + 28);
+            expect(chips.top - header.top).toBeGreaterThanOrEqual(8);
+            expect(header.bottom - 1 - chips.bottom).toBeGreaterThanOrEqual(8);
         });
 
         it.each(["cpd-theme-light", "cpd-theme-dark"])(
             "draws mark all as read in the color of the header's other icons, also on hover (%s)",
             async (theme) => {
-                render(threadPanelHeader(), theme);
+                render(card(threadsControls("All threads", "My threads")), theme);
                 const markRead = button("Mark all as read");
                 const fills = (): Set<string> =>
                     new Set([...markRead.querySelectorAll("path")].map((path) => getComputedStyle(path).fill));
 
+                expect(iconGeometry(markRead)).toEqual([36, 36, 24, 24, 6, 6]);
                 expect(fills()).toEqual(new Set([tokenColor("--cpd-color-icon-secondary", markRead)]));
                 await userEvent.hover(markRead);
                 expect(fills()).toEqual(new Set([tokenColor("--cpd-color-icon-primary", markRead)]));
             },
         );
-
-        it("makes the filter a 36px pill with the chevron 8px from its end, top and bottom", () => {
-            render(threadPanelHeader());
-
-            const dropdown = button("Show");
-            const outer = dropdown.getBoundingClientRect();
-            const chevron = dropdown.querySelector("svg")!.getBoundingClientRect();
-            const range = document.createRange();
-            range.selectNodeContents(dropdown.firstChild!);
-            const label = range.getBoundingClientRect();
-            expect(outer.height).toBe(36);
-            expect(parseFloat(getComputedStyle(dropdown).borderRadius)).toBeGreaterThanOrEqual(18);
-            expect([outer.right - chevron.right, chevron.top - outer.top, outer.bottom - chevron.bottom]).toEqual([
-                8, 8, 8,
-            ]);
-            expect(label.left - outer.left).toBe(12);
-            expect(label.top + label.height / 2).toBe(outer.top + outer.height / 2);
-        });
-
-        it("mirrors the filter in a right-to-left layout", () => {
-            render(h("div", { dir: "rtl" }, threadPanelHeader()));
-
-            const dropdown = button("Show");
-            const outer = dropdown.getBoundingClientRect();
-            const chevron = dropdown.querySelector("svg")!.getBoundingClientRect();
-            const range = document.createRange();
-            range.selectNodeContents(dropdown.firstChild!);
-            const label = range.getBoundingClientRect();
-            expect([chevron.left - outer.left, chevron.top - outer.top, outer.bottom - chevron.bottom]).toEqual([
-                8, 8, 8,
-            ]);
-            expect(outer.right - label.right).toBe(12);
-            expect(label.left - chevron.right).toBe(2);
-        });
     });
 
     describe("legacy call header", () => {

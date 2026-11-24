@@ -3249,7 +3249,6 @@
     },
     "threads": {
         "all_threads": "All threads",
-        "all_threads_description": "Shows all threads from current room",
         "count_of_reply": {
             "one": "%(count)s reply",
             "other": "%(count)s replies"
@@ -3257,9 +3256,7 @@
         "empty_title": "Threads help keep your conversations on-topic and easy to track.",
         "mark_all_read": "Mark all as read",
         "my_threads": "My threads",
-        "my_threads_description": "Shows all threads you've participated in",
-        "open_thread": "Open thread",
-        "show_thread_filter": "Show:"
+        "open_thread": "Open thread"
     },
     "threads_activity_centre": {
         "a11y": {

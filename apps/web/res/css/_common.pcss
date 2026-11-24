@@ -60,6 +60,21 @@ Please see LICENSE files in the repository root for full details.
     outline-offset: -2px;
 }
 
+/* A small switcher's chip, as the room list's filters are drawn (RoomListPrimaryFilters, Compound's ChatFilter): a 28px
+   outlined pill with its capitals in its middle */
+@define-mixin filterChip {
+    display: block;
+    box-sizing: border-box;
+    block-size: var(--cpd-space-7x);
+    padding: calc((var(--cpd-space-7x) - 2 * var(--cpd-border-width-1) - 1cap) / 2) var(--cpd-space-2x) 0;
+    border: var(--cpd-border-width-1) solid var(--cpd-color-border-interactive-secondary);
+    border-radius: var(--tl-radius-control);
+    font: var(--cpd-font-body-sm-medium);
+    line-height: 1cap;
+    text-box: trim-both cap alphabetic;
+    color: var(--cpd-color-text-primary);
+}
+
 /* Settings are grouped as in Telegram's settings: each group's rows sit on a 12px card on the tab's gray pane, under a
    13px secondary label and over 13px secondary help, both on the card's content edge, 16px in. The dialog title is the
    only large heading. A label or help inside a card, such as a fieldset's in a subsection's card, sits on that card's

@@ -117,10 +117,62 @@
         --cpd-menu-padding-block-end: 0;
     }
 
+    /* The app's filter chips (FilterTabGroup), 16px inside the menu as what its rows hold is, in place of Compound's
+       underlined tabs */
     .mx_ThreadsActivityCentre_tabs {
-        /* Override NavBar's default block margin to match the Figma design */
         margin: 0;
-        padding: var(--cpd-space-2x) var(--cpd-space-4x) 0;
+        padding: var(--cpd-space-4x) var(--cpd-space-4x) var(--cpd-space-2x);
+        border: none;
+
+        ul {
+            gap: var(--cpd-space-2x);
+        }
+
+        li {
+            padding: 0;
+
+            &::before {
+                content: none;
+            }
+        }
+
+        [role="tab"] {
+            @mixin filterChip;
+
+            &:focus-visible {
+                outline-offset: var(--cpd-border-width-1);
+            }
+
+            @media (hover) {
+                &:hover {
+                    border-color: var(--cpd-color-border-interactive-primary);
+                    background-color: var(--cpd-color-bg-subtle-primary);
+                }
+            }
+
+            &:active {
+                background-color: var(--tl-color-bg-subtle-pressed);
+            }
+
+            /* The selected chip takes the primary button's fills, hovered and pressed too */
+            &[aria-selected="true"] {
+                border-color: var(--cpd-color-bg-action-primary-rest);
+                background-color: var(--cpd-color-bg-action-primary-rest);
+                color: var(--cpd-color-text-on-solid-primary);
+
+                @media (hover) {
+                    &:hover {
+                        border-color: var(--cpd-color-bg-action-primary-hovered);
+                        background-color: var(--cpd-color-bg-action-primary-hovered);
+                    }
+                }
+
+                &:active {
+                    border-color: var(--cpd-color-bg-action-primary-pressed);
+                    background-color: var(--cpd-color-bg-action-primary-pressed);
+                }
+            }
+        }
     }
 
     .mx_ThreadsActivityCentre_rows {

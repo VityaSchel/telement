@@ -27,16 +27,7 @@ Please see LICENSE files in the repository root for full details.
         cursor: pointer;
 
         span {
-            display: block;
-            box-sizing: border-box;
-            block-size: var(--cpd-space-7x);
-            padding: calc((var(--cpd-space-7x) - 2 * var(--cpd-border-width-1) - 1cap) / 2) var(--cpd-space-2x) 0;
-            border: var(--cpd-border-width-1) solid var(--cpd-color-border-interactive-secondary);
-            border-radius: var(--tl-radius-control);
-            font: var(--cpd-font-body-sm-medium);
-            line-height: 1cap;
-            text-box: trim-both cap alphabetic;
-            color: var(--cpd-color-text-primary);
+            @mixin filterChip;
         }
 
         @media (hover) {
