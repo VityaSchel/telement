@@ -6,7 +6,7 @@ SPDX-License-Identifier: AGPL-3.0-only OR GPL-3.0-only OR LicenseRef-Element-Com
 Please see LICENSE files in the repository root for full details.
 */
 
-import React, { type JSX, type ReactNode, createRef, useCallback, useEffect, useState } from "react";
+import React, { type JSX, type ReactNode, createRef, useCallback, useEffect, useMemo, useState } from "react";
 import TakePhotoIcon from "@vector-im/compound-design-tokens/assets/web/icons/take-photo";
 import UploadIcon from "@vector-im/compound-design-tokens/assets/web/icons/share";
 import DeleteIcon from "@vector-im/compound-design-tokens/assets/web/icons/delete";
@@ -138,20 +138,25 @@ const AvatarSetting: React.FC<IProps> = ({
 
     // Real URL that we can supply to the img element, either a data URL or whatever mediaFromMxc gives
     // This represents whatever avatar the user has chosen at the time
-    const [avatarURL, setAvatarURL] = useState<string | undefined>(undefined);
+    // Telement: an mxc URL's is there from the first render, so that the photo doesn't follow the letter avatar
+    const [fileURL, setFileURL] = useState<string | undefined>(undefined);
     useEffect(() => {
-        if (avatar instanceof File) {
-            const reader = new FileReader();
-            reader.onload = () => {
-                setAvatarURL(reader.result as string);
-            };
-            reader.readAsDataURL(avatar);
-        } else if (avatar) {
-            setAvatarURL(mediaFromMxc(avatar).getSquareThumbnailHttp(96) ?? undefined);
-        } else {
-            setAvatarURL(undefined);
-        }
+        setFileURL(undefined);
+        if (!(avatar instanceof File)) return;
+
+        const reader = new FileReader();
+        reader.onload = () => {
+            setFileURL(reader.result as string);
+        };
+        reader.readAsDataURL(avatar);
+        return () => {
+            reader.onload = null;
+        };
     }, [avatar]);
+    const avatarURL = useMemo(() => {
+        if (avatar instanceof File) return fileURL;
+        return avatar ? (mediaFromMxc(avatar).getSquareThumbnailHttp(96) ?? undefined) : undefined;
+    }, [avatar, fileURL]);
 
     const onFileChanged = useCallback(
         (e: React.ChangeEvent<HTMLInputElement>) => {

@@ -6,7 +6,7 @@ SPDX-License-Identifier: AGPL-3.0-only OR GPL-3.0-only OR LicenseRef-Element-Com
 Please see LICENSE files in the repository root for full details.
 */
 
-import React, { type ChangeEvent, type ReactNode, useCallback, useEffect, useState } from "react";
+import React, { type ChangeEvent, type ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import { logger } from "matrix-js-sdk/src/logger";
 import { EditInPlace, Alert, ErrorMessage } from "@vector-im/compound-web";
 import PopOutIcon from "@vector-im/compound-design-tokens/assets/web/icons/pop-out";
@@ -33,6 +33,7 @@ import defaultDispatcher from "../../../dispatcher/dispatcher";
 import { SettingsSection } from "./shared/SettingsSection.tsx";
 import { SetStatusViewModel } from "../../../viewmodels/status/SetStatusViewModel.ts";
 import SettingsStore from "../../../settings/SettingsStore.ts";
+import { useOwnProfile } from "../../../telement/settings/useOwnProfile";
 
 const SpinnerToast: React.FC<{ children?: ReactNode }> = ({ children }) => (
     <>
@@ -118,8 +119,11 @@ const UserProfileSettings: React.FC<UserProfileSettingsProps> = ({
     canSetAvatar,
     startCustomStatus,
 }) => {
-    const [avatarURL, setAvatarURL] = useState(OwnProfileStore.instance.avatarMxc);
-    const [displayName, setDisplayName] = useState(OwnProfileStore.instance.displayName ?? "");
+    // Telement: the profile the app already has, from the start, then the latest. A name being edited stays as it is
+    const profile = useOwnProfile();
+    const [avatarURL, setAvatarURL] = useState(profile.avatarMxc);
+    const [displayName, setDisplayName] = useState(profile.displayName);
+    const shownProfileName = useRef(profile.displayName);
     const [avatarError, setAvatarError] = useState<boolean>(false);
     const [maxUploadSize, setMaxUploadSize] = useState<number | undefined>();
     const [displayNameError, setDisplayNameError] = useState<boolean>(false);
@@ -127,6 +131,14 @@ const UserProfileSettings: React.FC<UserProfileSettingsProps> = ({
     const toastRack = useToastContext();
 
     const client = useMatrixClientContext();
+
+    useEffect(() => setAvatarURL(profile.avatarMxc), [profile.avatarMxc]);
+
+    useEffect(() => {
+        const previousName = shownProfileName.current;
+        shownProfileName.current = profile.displayName;
+        setDisplayName((name) => (name === previousName ? profile.displayName : name));
+    }, [profile.displayName]);
 
     useEffect(() => {
         (async () => {
@@ -210,7 +222,7 @@ const UserProfileSettings: React.FC<UserProfileSettingsProps> = ({
             <div className="mx_UserProfileSettings">
                 <div className="mx_UserProfileSettings_profile">
                     <AvatarSetting
-                        avatar={avatarURL ?? undefined}
+                        avatar={avatarURL}
                         avatarAccessibleName={_t("common|user_avatar")}
                         onChange={onAvatarChange}
                         removeAvatar={avatarURL ? onAvatarRemove : undefined}

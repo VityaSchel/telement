@@ -6,7 +6,7 @@
  * Please see LICENSE files in the repository root for full details.
  */
 
-import React, { type JSX, useEffect, useState } from "react";
+import React, { type JSX } from "react";
 import { Field, HelpMessage, InlineField, Label, RadioControl, Root, ToggleControl } from "@vector-im/compound-web";
 
 import { SettingsSubsection } from "./shared/SettingsSubsection";
@@ -17,6 +17,7 @@ import { useSettingValue } from "../../../hooks/useSettings";
 import { Layout } from "../../../settings/enums/Layout";
 import EventTilePreview from "../elements/EventTilePreview";
 import { useMatrixClientContext } from "../../../contexts/MatrixClientContext";
+import { useOwnProfile } from "../../../telement/settings/useOwnProfile";
 
 /**
  * A section to switch between different message layouts.
@@ -71,7 +72,9 @@ interface LayoutRadioProps {
  */
 function LayoutRadio({ layout, label }: LayoutRadioProps): JSX.Element {
     const currentLayout = useSettingValue("layout");
-    const eventTileInfo = useEventTileInfo();
+    const userId = useMatrixClientContext().getSafeUserId();
+    // Telement: the profile the app already has, so that the previews show the user's name and photo from the start
+    const { displayName, avatarMxc } = useOwnProfile();
 
     return (
         <Field name="layout" className="mxLayoutSwitcher_LayoutSelector_LayoutRadio">
@@ -85,49 +88,13 @@ function LayoutRadio({ layout, label }: LayoutRadioProps): JSX.Element {
                     message={_t("common|preview_message")}
                     layout={layout}
                     className="mxLayoutSwitcher_LayoutSelector_LayoutRadio_EventTilePreview"
-                    {...eventTileInfo}
+                    userId={userId}
+                    displayName={displayName}
+                    avatarUrl={avatarMxc}
                 />
             </Label>
         </Field>
     );
-}
-
-type EventTileInfo = {
-    /**
-     * The ID of the user to display.
-     */
-    userId: string;
-    /**
-     * The display name of the user to display.
-     */
-    displayName?: string;
-    /**
-     * The avatar URL of the user to display.
-     */
-    avatarUrl?: string;
-};
-
-/**
- * Fetch the information to display in the event tile preview.
- */
-function useEventTileInfo(): EventTileInfo {
-    const matrixClient = useMatrixClientContext();
-    const userId = matrixClient.getSafeUserId();
-    const [eventTileInfo, setEventTileInfo] = useState<EventTileInfo>({ userId });
-
-    useEffect(() => {
-        const run = async (): Promise<void> => {
-            const profileInfo = await matrixClient.getProfileInfo(userId);
-            setEventTileInfo({
-                userId,
-                displayName: profileInfo.displayname,
-                avatarUrl: profileInfo.avatar_url,
-            });
-        };
-
-        void run();
-    }, [userId, matrixClient, setEventTileInfo]);
-    return eventTileInfo;
 }
 
 /**

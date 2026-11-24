@@ -48,6 +48,28 @@ describe("<AvatarSetting />", () => {
         expect(avatarButton).toBeInTheDocument();
     });
 
+    it("shows an mxc avatar from the first render, rather than after the letter avatar", () => {
+        const sources: (string | null | undefined)[] = [];
+        render(
+            <React.Profiler
+                id="avatar"
+                onRender={() =>
+                    sources.push(document.querySelector(".mx_AvatarSetting_avatar img")?.getAttribute("src"))
+                }
+            >
+                <AvatarSetting
+                    placeholderId="blee"
+                    placeholderName="boo"
+                    avatarAccessibleName="Avatar of Peter Fox"
+                    avatar="mxc://example.org/my-avatar"
+                />
+            </React.Profiler>,
+        );
+
+        expect(sources[0]).toMatch(/my-avatar/);
+        expect(new Set(sources).size).toBe(1);
+    });
+
     it("renders a file as the avatar when supplied", async () => {
         render(
             <AvatarSetting

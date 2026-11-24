@@ -9,7 +9,7 @@ Please see LICENSE files in the repository root for full details.
 // @vitest-environment happy-dom
 
 import { describe, it, expect, beforeEach, afterEach, vi, type MockedObject } from "vitest";
-import { fireEvent, render, screen, within } from "test-utils-rtl";
+import { act, fireEvent, render, screen, within } from "test-utils-rtl";
 import {
     getMockClientWithEventEmitter,
     mockClientMethodsServer,
@@ -30,6 +30,8 @@ import SettingsStore from "../../../../../settings/SettingsStore";
 import { UIFeature } from "../../../../../settings/UIFeature";
 import MatrixClientContext from "../../../../../contexts/MatrixClientContext";
 import Modal from "../../../../../Modal";
+import { OwnProfileStore } from "../../../../../stores/OwnProfileStore";
+import { UPDATE_EVENT } from "../../../../../stores/AsyncStore";
 
 let changePasswordOnError: (e: Error) => void;
 let changePasswordOnFinished: () => void;
@@ -114,6 +116,28 @@ describe("<AccountUserSettingsTab />", () => {
 
         const manageAccountLink = await screen.findByRole("button", { name: "Manage account" });
         expect(manageAccountLink.getAttribute("href")).toMatch(accountManagementLink);
+    });
+
+    it("opens with the profile the app already has, and shows the latest, though not over a name being edited", async () => {
+        const displayName = vi.spyOn(OwnProfileStore.instance, "displayName", "get").mockReturnValue("Alice");
+        vi.spyOn(OwnProfileStore.instance, "avatarMxc", "get").mockReturnValue("mxc://server.org/photo");
+        render(getComponent());
+        const field = screen.getByRole("textbox", { name: "Display Name" });
+
+        expect(field).toHaveValue("Alice");
+        expect(screen.getByRole("group", { name: "Profile picture" }).querySelector("img")).toHaveAttribute(
+            "src",
+            "mock-mxcUrlToHttp",
+        );
+
+        displayName.mockReturnValue("Alicia");
+        act(() => void OwnProfileStore.instance.emit(UPDATE_EVENT));
+        expect(field).toHaveValue("Alicia");
+
+        fireEvent.change(field, { target: { value: "Alice in Wonderland" } });
+        displayName.mockReturnValue("Ally");
+        act(() => void OwnProfileStore.instance.emit(UPDATE_EVENT));
+        expect(field).toHaveValue("Alice in Wonderland");
     });
 
     describe("before the capabilities are fetched again", () => {

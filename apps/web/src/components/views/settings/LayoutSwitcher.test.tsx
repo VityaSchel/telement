@@ -10,7 +10,7 @@
 
 import React from "react";
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { act, render, screen, waitFor } from "test-utils-rtl";
+import { act, render, type RenderResult, screen, waitFor } from "test-utils-rtl";
 import { stubClient } from "test-utils";
 
 import { LayoutSwitcher } from "./LayoutSwitcher";
@@ -18,38 +18,47 @@ import MatrixClientContext from "../../../contexts/MatrixClientContext";
 import SettingsStore from "../../../settings/SettingsStore";
 import { SettingLevel } from "../../../settings/SettingLevel";
 import { Layout } from "../../../settings/enums/Layout";
+import { OwnProfileStore } from "../../../stores/OwnProfileStore";
+import { UPDATE_EVENT } from "../../../stores/AsyncStore";
 
 describe("<LayoutSwitcher />", () => {
     const matrixClient = stubClient();
-    const profileInfo = {
-        displayname: "Alice",
-    };
+    const displayName = vi.spyOn(OwnProfileStore.instance, "displayName", "get");
 
-    async function renderLayoutSwitcher() {
-        const renderResult = render(
+    function renderLayoutSwitcher(): RenderResult {
+        return render(
             <MatrixClientContext.Provider value={matrixClient}>
                 <LayoutSwitcher />
             </MatrixClientContext.Provider>,
         );
-
-        // Wait for the profile info to be displayed in the event tile preview
-        // Also avoid act warning
-        await waitFor(() => expect(screen.getAllByText(profileInfo.displayname).length).toBe(3));
-        return renderResult;
     }
 
     beforeEach(async () => {
         await SettingsStore.setValue("layout", null, SettingLevel.DEVICE, Layout.Group);
-        vi.mocked(matrixClient).getProfileInfo.mockResolvedValue(profileInfo);
+        displayName.mockReturnValue("Alice");
     });
 
     it("should render", async () => {
-        const { asFragment } = await renderLayoutSwitcher();
+        const { asFragment } = renderLayoutSwitcher();
         expect(asFragment()).toMatchSnapshot();
     });
 
+    it("should show the previews from the first render, in the name the app already has, and then in the latest", () => {
+        renderLayoutSwitcher();
+
+        // At once, without a spinner or the Matrix ID, or asking the server
+        expect(screen.getAllByText("Alice")).toHaveLength(3);
+        expect(screen.queryByText(matrixClient.getSafeUserId())).toBeNull();
+        expect(screen.queryByLabelText("Loading…")).toBeNull();
+        expect(matrixClient.getProfileInfo).not.toHaveBeenCalled();
+
+        displayName.mockReturnValue("Alicia");
+        act(() => void OwnProfileStore.instance.emit(UPDATE_EVENT));
+        expect(screen.getAllByText("Alicia")).toHaveLength(3);
+    });
+
     it("should show each preview as a message on its own, the last of its run", async () => {
-        const { container } = await renderLayoutSwitcher();
+        const { container } = renderLayoutSwitcher();
         const previews = container.querySelectorAll('[data-testid="event-tile"]');
 
         expect(previews).toHaveLength(3);
@@ -60,19 +69,19 @@ describe("<LayoutSwitcher />", () => {
 
     describe("layout selection", () => {
         it("should stretch the layout cards across their group's card", async () => {
-            await renderLayoutSwitcher();
+            renderLayoutSwitcher();
             expect(screen.getByRole("radio", { name: "Modern" }).closest(".mx_SettingsSubsection_content")).toHaveClass(
                 "mx_SettingsSubsection_contentStretch",
             );
         });
 
         it("should display the modern layout", async () => {
-            await renderLayoutSwitcher();
+            renderLayoutSwitcher();
             expect(screen.getByRole("radio", { name: "Modern" })).toBeChecked();
         });
 
         it("should change the layout when selected", async () => {
-            await renderLayoutSwitcher();
+            renderLayoutSwitcher();
             act(() => screen.getByRole("radio", { name: "Message bubbles" }).click());
 
             expect(screen.getByRole("radio", { name: "Message bubbles" })).toBeChecked();
@@ -87,13 +96,13 @@ describe("<LayoutSwitcher />", () => {
 
         it("should be enabled", async () => {
             await SettingsStore.setValue("useCompactLayout", null, SettingLevel.DEVICE, true);
-            await renderLayoutSwitcher();
+            renderLayoutSwitcher();
 
             expect(screen.getByRole("switch", { name: "Show compact text and messages" })).toBeChecked();
         });
 
         it("should change the setting when toggled", async () => {
-            await renderLayoutSwitcher();
+            renderLayoutSwitcher();
             act(() => screen.getByRole("switch", { name: "Show compact text and messages" }).click());
 
             await waitFor(() => expect(SettingsStore.getValue("useCompactLayout")).toBe(true));
@@ -101,26 +110,26 @@ describe("<LayoutSwitcher />", () => {
 
         it("should be disabled when the modern layout is not enabled", async () => {
             await SettingsStore.setValue("layout", null, SettingLevel.DEVICE, Layout.Bubble);
-            await renderLayoutSwitcher();
+            renderLayoutSwitcher();
             expect(screen.getByRole("switch", { name: "Show compact text and messages" })).toBeDisabled();
         });
 
         it("should say why it is disabled only while it is", async () => {
             const hint = "Modern layout must be selected to use this feature.";
             await SettingsStore.setValue("layout", null, SettingLevel.DEVICE, Layout.Bubble);
-            const { unmount } = await renderLayoutSwitcher();
+            const { unmount } = renderLayoutSwitcher();
             expect(screen.getByText(hint)).toBeInTheDocument();
             unmount();
 
             await SettingsStore.setValue("layout", null, SettingLevel.DEVICE, Layout.Group);
-            await renderLayoutSwitcher();
+            renderLayoutSwitcher();
             expect(screen.getByRole("switch", { name: "Show compact text and messages" })).toBeEnabled();
             expect(screen.queryByText(hint)).toBeNull();
         });
 
         it("should keep layout previews at the default density", async () => {
             await SettingsStore.setValue("useCompactLayout", null, SettingLevel.DEVICE, true);
-            const { container } = await renderLayoutSwitcher();
+            const { container } = renderLayoutSwitcher();
 
             const groupPreviewSender = container.querySelector(
                 '[data-testid="event-tile-slot-sender"] [data-event-layout="group"]',
