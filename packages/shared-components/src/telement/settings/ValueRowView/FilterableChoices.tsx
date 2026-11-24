@@ -141,6 +141,8 @@ export function FilterableChoices({ choices, onClose }: Readonly<FilterableChoic
                     ref={inputRef}
                     value={query}
                     onChange={changeQuery}
+                    // The pill keeps the focus as long as the menu is open
+                    releaseFocus={() => inputRef.current?.focus()}
                     onKeyDown={onKeyDown}
                     aria-controls={listId}
                     aria-activedescendant={active && choiceId(active)}

@@ -42,12 +42,24 @@ interface IProps {
      * Ref to the search input, owned by the picker so it can inspect focus.
      */
     inputRef: React.RefObject<HTMLInputElement | null>;
+    /**
+     * Called to let go of the focus once the user has cleared the search with the pointer.
+     */
+    releaseFocus: () => void;
 }
 
 /**
  * The search field below the emoji picker's category bar, which scrolls away with the emoji.
  */
-export const Search: React.FC<IProps> = ({ query, onChange, onEnter, onKeyDown, inputRef, controlsId }) => {
+export const Search: React.FC<IProps> = ({
+    query,
+    onChange,
+    onEnter,
+    onKeyDown,
+    inputRef,
+    releaseFocus,
+    controlsId,
+}) => {
     const context = useContext(RovingTabIndexContext);
 
     const onInputKeyDown = useCallback(
@@ -68,6 +80,7 @@ export const Search: React.FC<IProps> = ({ query, onChange, onEnter, onKeyDown, 
             className={styles.search}
             value={query}
             onChange={onChange}
+            releaseFocus={releaseFocus}
             onKeyDown={onInputKeyDown}
             ref={inputRef}
             // Setting aria-activedescendant on the input allows screen readers to identify the active emoji.

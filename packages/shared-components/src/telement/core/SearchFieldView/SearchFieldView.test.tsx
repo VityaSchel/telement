@@ -154,7 +154,7 @@ describe("SearchFieldView", () => {
         expect(screen.getByRole("button", { name: "Clear search" })).toBeVisible();
     });
 
-    it("clears the text and keeps the focus in the input", async () => {
+    it("clears the text and lets go of the focus, so that the field rests again", async () => {
         const onChange = vi.fn();
         render(<ControlledField initialValue="cat" onChange={onChange} />);
         const input = screen.getByRole("textbox", { name: "Search" });
@@ -162,14 +162,75 @@ describe("SearchFieldView", () => {
         await userEvent.click(input);
         await userEvent.click(screen.getByRole("button", { name: "Clear search" }));
 
-        expect(onChange).toHaveBeenCalledWith("");
+        expect(onChange).toHaveBeenCalledExactlyOnceWith("");
         expect(input).toHaveValue("");
-        expect(input).toHaveFocus();
-        expect(screen.getByRole("button", { name: "Clear search" })).toBeVisible();
+        expect(document.body).toHaveFocus();
+        expect(screen.queryByRole("button", { name: "Clear search" })).toBeNull();
+        const { left, right } = getInsets(getField(), getDecoration(getField()));
+        expect(left).toBeCloseTo(right, 0);
     });
 
-    it("clears the text from the keyboard", async () => {
-        render(<ControlledField initialValue="cat" />);
+    it("searches for nothing when the empty field is cleared, and lets go of the focus", async () => {
+        const onChange = vi.fn();
+        render(<ControlledField onChange={onChange} />);
+
+        await userEvent.click(screen.getByRole("textbox", { name: "Search" }));
+        await userEvent.click(screen.getByRole("button", { name: "Clear search" }));
+
+        expect(onChange).not.toHaveBeenCalled();
+        expect(document.body).toHaveFocus();
+    });
+
+    it("gives the focus to what holds the field, as a click beside it does, without a ring", async () => {
+        const onKeyDown = vi.fn();
+        render(
+            <div role="dialog" aria-label="Settings" tabIndex={-1} onKeyDown={onKeyDown}>
+                <ControlledField initialValue="cat" />
+            </div>,
+        );
+        const dialog = screen.getByRole("dialog");
+
+        await userEvent.click(screen.getByRole("textbox", { name: "Search" }));
+        await userEvent.click(screen.getByRole("button", { name: "Clear search" }));
+
+        expect(dialog).toHaveFocus();
+        expect(dialog.matches(":focus-visible")).toBe(false);
+        // So it still hears Escape
+        await userEvent.keyboard("{Escape}");
+        expect(onKeyDown).toHaveBeenCalled();
+    });
+
+    it("leaves the focus alone when the field it clears doesn't have it", async () => {
+        render(
+            <>
+                <ControlledField initialValue="cat" />
+                <button type="button">Other</button>
+            </>,
+        );
+        const other = screen.getByRole("button", { name: "Other" });
+        other.focus();
+
+        await userEvent.click(screen.getByRole("button", { name: "Clear search" }));
+
+        expect(screen.getByRole("textbox", { name: "Search" })).toHaveValue("");
+        expect(other).toHaveFocus();
+    });
+
+    it("lets its user say where the focus goes instead", async () => {
+        const ref = React.createRef<HTMLInputElement>();
+        render(<ControlledField initialValue="cat" ref={ref} releaseFocus={() => ref.current?.focus()} />);
+        const input = screen.getByRole("textbox", { name: "Search" });
+
+        await userEvent.click(input);
+        await userEvent.click(screen.getByRole("button", { name: "Clear search" }));
+
+        expect(input).toHaveValue("");
+        expect(input).toHaveFocus();
+    });
+
+    it("clears the text from the keyboard, which keeps the focus in the input", async () => {
+        const onChange = vi.fn();
+        render(<ControlledField initialValue="cat" onChange={onChange} />);
         const input = screen.getByRole("textbox", { name: "Search" });
 
         await userEvent.click(input);
@@ -178,6 +239,11 @@ describe("SearchFieldView", () => {
         await userEvent.keyboard("[Enter]");
 
         expect(input).toHaveValue("");
+        expect(input).toHaveFocus();
+
+        await userEvent.tab();
+        await userEvent.keyboard("[Enter]");
+        expect(onChange).toHaveBeenCalledExactlyOnceWith("");
         expect(input).toHaveFocus();
     });
 

@@ -168,6 +168,23 @@ describe("SettingsSearchView", () => {
         expect(onKeyDown).toHaveBeenCalledTimes(1);
     });
 
+    it("empties the field and gives the focus to the settings from its clear button", async () => {
+        const vm = searchViewModel();
+        render(
+            <div role="dialog" aria-label="Settings" tabIndex={-1}>
+                <SettingsSearchView vm={vm} />
+            </div>,
+        );
+        await userEvent.click(screen.getByRole("combobox"));
+        expect(screen.getByRole("listbox")).toBeVisible();
+
+        await userEvent.click(screen.getByRole("button", { name: "Clear search" }));
+
+        expect(vm.setQuery).toHaveBeenCalledExactlyOnceWith("");
+        expect(screen.queryByRole("listbox")).toBeNull();
+        expect(screen.getByRole("dialog")).toHaveFocus();
+    });
+
     it("says when nothing matches", async () => {
         const field = renderSearch(searchViewModel({ results: [] }));
         await userEvent.click(field);
@@ -279,6 +296,18 @@ describe("SettingsSearchView", () => {
             expect(screen.queryByRole("combobox")).toBeNull();
             expect(button()).toHaveFocus();
             expect(onKeyDown).not.toHaveBeenCalledWith("Escape");
+        });
+
+        it("empties the field and becomes the button again from its clear button", async () => {
+            const vm = searchViewModel({ query: "font" });
+            render(compactSearch(vm));
+            await userEvent.click(button());
+
+            await userEvent.click(screen.getByRole("button", { name: "Clear search" }));
+
+            expect(vm.setQuery).toHaveBeenCalledExactlyOnceWith("");
+            expect(screen.queryByRole("combobox")).toBeNull();
+            expect(button()).toBeVisible();
         });
 
         it("opens the active result with Enter, and becomes the button again", async () => {

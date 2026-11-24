@@ -1003,7 +1003,7 @@ describe("EmojiPicker", function () {
             expect(screen.getByRole("tab", { name: "😀" })).toHaveFocus();
         });
 
-        it("clears the query with the clear button and keeps typing in the search field", async () => {
+        it("clears the query with the clear button and gives the focus back to the categories", async () => {
             const { input } = await renderAndWait();
             await userEvent.click(input);
 
@@ -1012,8 +1012,39 @@ describe("EmojiPicker", function () {
             await userEvent.click(screen.getByRole("button", { name: "Clear search" }));
 
             expect(input).toHaveValue("");
-            expect(input).toHaveFocus();
             await waitFor(() => expect(screen.queryByRole("gridcell", { name: "👋" })).toBeNull());
+            const category = screen.getByRole("tab", { selected: true });
+            expect(category).toHaveFocus();
+            expect(category.matches(":focus-visible")).toBe(false);
+            expect(screen.queryByRole("button", { name: "Clear search" })).toBeNull();
+
+            // Where typing still searches
+            await userEvent.keyboard("wa");
+            expect(input).toHaveFocus();
+            expect(input).toHaveValue("wa");
+        });
+
+        it("gives the focus to the first category again when its emoji didn't match the query", async () => {
+            const { input } = await renderAndWait(RECENT_EMOJIS);
+            await userEvent.click(input);
+            await userEvent.type(input, "flag");
+            await waitFor(() => expect(screen.getByRole("tab", { name: "Frequently Used" })).toBeDisabled());
+
+            await userEvent.click(screen.getByRole("button", { name: "Clear search" }));
+
+            expect(screen.getByRole("tab", { name: "Frequently Used" })).toHaveFocus();
+            await waitFor(() =>
+                expect(screen.getByRole("tab", { name: "Frequently Used" })).toHaveAttribute("aria-selected", "true"),
+            );
+        });
+
+        it("gives the focus back to the categories when the empty field is cleared", async () => {
+            const { input } = await renderAndWait();
+
+            await userEvent.click(input);
+            await userEvent.click(screen.getByRole("button", { name: "Clear search" }));
+
+            expect(screen.getByRole("tab", { selected: true })).toHaveFocus();
         });
 
         it("only lets the user select text in the search field", async () => {

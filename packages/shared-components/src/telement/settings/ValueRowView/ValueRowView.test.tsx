@@ -376,6 +376,17 @@ describe("ValueRowView", () => {
             expect(labels()).toEqual(["Deutsch"]);
         });
 
+        it("shows every option again when the pill is cleared, which keeps the focus", async () => {
+            await openMenu();
+            await pointer.fill(pill(), "german");
+
+            await pointer.click(screen.getByRole("button", { name: "Clear search" }));
+
+            expect(pill()).toHaveValue("");
+            expect(labels()).toHaveLength(LANGUAGES.length);
+            expect(pill()).toHaveFocus();
+        });
+
         it("says when no option matches, and Enter then chooses nothing", async () => {
             const vm = await openMenu();
 

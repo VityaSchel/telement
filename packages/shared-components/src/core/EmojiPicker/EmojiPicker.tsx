@@ -14,6 +14,7 @@ import React, {
     useCallback,
     useEffect,
     useId,
+    useLayoutEffect,
     useMemo,
     useRef,
     useState,
@@ -239,6 +240,7 @@ export function EmojiPicker({
     // its rows against this shared scroll parent.
     const [scrollElement, setScrollElement] = useState<HTMLDivElement | null>(null);
 
+    const pickerRef = useRef<HTMLElement>(null);
     const searchRef = useRef<HTMLInputElement>(null);
     const virtuosoRef = useRef<VirtuosoHandle>(null);
 
@@ -445,6 +447,23 @@ export function EmojiPicker({
         [scrollElement],
     );
 
+    // Cleared with the pointer, the search gives the focus back to the categories, which still hear the keys the picker
+    // acts on. The query's end enables the first one again, so that waits for it.
+    const leavingSearch = useRef(false);
+    const focusCategories = useCallback((): void => {
+        pickerRef.current
+            ?.querySelector<HTMLElement>("[data-category-tab]:enabled")
+            ?.focus({ preventScroll: true, focusVisible: false });
+    }, []);
+    const releaseSearchFocus = useCallback((): void => {
+        if (filter === "") focusCategories();
+        else leavingSearch.current = true;
+    }, [filter, focusCategories]);
+    useLayoutEffect(() => {
+        if (leavingSearch.current) focusCategories();
+        leavingSearch.current = false;
+    }, [filter, focusCategories]);
+
     const onEnterFilter = useCallback((): void => {
         // Only select emoji if highlight is shown
         if (!showHighlight) return;
@@ -528,6 +547,7 @@ export function EmojiPicker({
         >
             {({ onKeyDownHandler }) => (
                 <section
+                    ref={pickerRef}
                     className={styles.picker}
                     onKeyDown={onKeyDownHandler}
                     aria-label={_t("emoji_picker|emoji_picker")}
@@ -554,6 +574,7 @@ export function EmojiPicker({
                             onEnter={onEnterFilter}
                             onKeyDown={onKeyDownHandler}
                             inputRef={searchRef}
+                            releaseFocus={releaseSearchFocus}
                             controlsId={pickerBodyId}
                         />
                         <div id={pickerBodyId} className={styles.groups}>

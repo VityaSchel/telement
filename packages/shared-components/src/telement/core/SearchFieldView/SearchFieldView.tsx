@@ -9,6 +9,7 @@ import React, {
     type FocusEvent,
     type InputHTMLAttributes,
     type JSX,
+    type MouseEvent,
     type Ref,
     useImperativeHandle,
     useRef,
@@ -33,6 +34,11 @@ export interface SearchFieldViewProps extends Omit<
      */
     onChange: (value: string) => void;
     /**
+     * Lets go of the focus when the user clears the field with the pointer. By default it goes to what holds the field,
+     * as with a click beside it. A field that has to keep the focus, or to give it to something else, says so here.
+     */
+    releaseFocus?: () => void;
+    /**
      * Placeholder, also used as the input's accessible name. Defaults to "Search".
      */
     placeholder?: string;
@@ -47,8 +53,22 @@ export interface SearchFieldViewProps extends Omit<
 }
 
 /**
+ * Takes the focus out of `field` as a click beside it would: to what can take it around the field, such as the dialog
+ * it is in, which then still closes on Escape, or to nothing. No focus ring, as the pointer asked for it.
+ */
+function leaveField(field: HTMLElement): void {
+    const focused = document.activeElement;
+    if (!(focused instanceof HTMLElement) || !field.contains(focused)) return;
+    const holder = field.closest<HTMLElement>("[tabindex]");
+    if (holder) holder.focus({ preventScroll: true, focusVisible: false });
+    else focused.blur();
+}
+
+/**
  * Telegram's search field: a filled pill with the magnifier and placeholder in the middle. When the user focuses the
- * field or it holds text, they slide to the left edge and a round button to clear the text appears on the right.
+ * field or it holds text, they slide to the left edge and a round button to clear the text appears on the right. Clearing
+ * with the pointer also lets go of the focus, so that the field rests again; from the keyboard the focus returns to the
+ * input.
  *
  * @example
  * ```tsx
@@ -58,6 +78,7 @@ export interface SearchFieldViewProps extends Omit<
 export function SearchFieldView({
     value,
     onChange,
+    releaseFocus,
     placeholder,
     ref,
     className,
@@ -73,13 +94,19 @@ export function SearchFieldView({
         if (!event.currentTarget.contains(event.relatedTarget)) setEngaged(false);
     };
 
-    const onClear = (): void => {
-        onChange("");
-        inputRef.current?.focus();
+    const hasValue = value !== "";
+
+    const onClear = (event: MouseEvent<HTMLButtonElement>): void => {
+        // An empty field, whose button shows while it has the focus, has no search to change
+        if (hasValue) onChange("");
+
+        // A click without a pointer comes from the keyboard
+        if (event.detail === 0) inputRef.current?.focus();
+        else if (releaseFocus) releaseFocus();
+        else leaveField(event.currentTarget.parentElement!);
     };
 
     const label = placeholder ?? _t("action|search");
-    const hasValue = value !== "";
 
     return (
         <div
