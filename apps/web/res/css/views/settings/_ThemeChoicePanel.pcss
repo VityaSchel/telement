@@ -12,8 +12,11 @@ Please see LICENSE files in the repository root for full details.
     /* Override form default style */
     flex-direction: row !important;
     gap: var(--cpd-space-4x) !important;
+    /* Telement: a chip's focus ring is drawn on the card around it, in the card's focus color rather than its own theme's */
+    --choice-card-focus-color: var(--cpd-color-border-focused);
 
     .mx_ThemeChoicePanel_themeSelector {
+        @mixin choiceCard;
         /* Telement: Compound's outline gray, 3:1 or more against the card in every theme, as an unselected chip is
            drawn by its border alone when it shows the dialog's own theme */
         border: 1px solid var(--cpd-color-border-interactive-primary);
@@ -25,8 +28,20 @@ Please see LICENSE files in the repository root for full details.
         min-block-size: var(--cpd-space-11x);
         align-items: center;
         padding: 0 calc(var(--cpd-space-3x) - 1px);
-        gap: var(--cpd-space-2x);
         background-color: var(--cpd-color-bg-canvas-default);
+
+        /* The label covers the whole chip, so that a click anywhere on it chooses the theme, except for the radio, which
+           keeps its own */
+        .mx_ThemeChoicePanel_themeSelector_Label::after {
+            content: "";
+            position: absolute;
+            inset: -1px;
+            border-radius: var(--tl-radius-control);
+        }
+
+        input {
+            z-index: 1;
+        }
 
         /* Each chip resolves the accent in the theme it shows */
         &.mx_ThemeChoicePanel_themeSelector_enabled {

@@ -60,6 +60,43 @@ Please see LICENSE files in the repository root for full details.
     outline-offset: -2px;
 }
 
+/* Such a card is a button all over: it takes the rows' translucent hover and pressed fills over its own, and the keyboard
+   focus is ringed around it, 1px outside it as around other buttons, rather than around its radio alone. The card's own
+   outline is the selected choice's, so the ring is a pseudo-element's. */
+@define-mixin choiceCard {
+    position: relative;
+
+    &:has(input:focus-visible)::after {
+        content: "";
+        position: absolute;
+        inset: -1px;
+        border-radius: inherit;
+        outline: var(--cpd-border-width-2) solid var(--choice-card-focus-color, var(--cpd-color-border-focused));
+        outline-offset: 1px;
+        pointer-events: none;
+    }
+
+    input:focus-visible + * {
+        outline: none;
+    }
+
+    @media (hover) {
+        &:hover:not(:has(input:disabled)) {
+            background-image: linear-gradient(
+                var(--cpd-color-bg-action-secondary-hovered),
+                var(--cpd-color-bg-action-secondary-hovered)
+            );
+        }
+    }
+
+    &:active:not(:has(input:disabled)) {
+        background-image: linear-gradient(
+            var(--cpd-color-bg-action-secondary-pressed),
+            var(--cpd-color-bg-action-secondary-pressed)
+        );
+    }
+}
+
 /* A small switcher's chip, as the room list's filters are drawn (RoomListPrimaryFilters, Compound's ChatFilter): a 28px
    outlined pill with its capitals in its middle */
 @define-mixin filterChip {

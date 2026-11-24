@@ -17,6 +17,7 @@ import compoundLightSemantic from "@vector-im/compound-design-tokens/assets/web/
 import compoundDarkTheme from "@vector-im/compound-design-tokens/assets/web/css/cpd-theme-dark-base.css?raw";
 import compoundDarkSemantic from "@vector-im/compound-design-tokens/assets/web/css/cpd-theme-dark-semantic.css?raw";
 import compoundStyles from "@vector-im/compound-web/dist/style.css?raw";
+import commonStyles from "../../res/css/_common.pcss?raw";
 // The package doesn't export its token stylesheet on its own
 // eslint-disable-next-line no-restricted-imports
 import telementTokens from "../../../../packages/shared-components/src/telement/tokens.css?raw";
@@ -29,7 +30,7 @@ import settingsSearchStyles from "../../res/css/telement/_SettingsSearch.pcss?ra
 import lightTheme from "../../res/themes/light/css/_light.pcss?raw";
 import darkTheme from "../../res/themes/dark/css/_dark.pcss?raw";
 import { cornerRadii, toBrowserCss } from "../test/telement/browserCss";
-import { settledStyle, tokenColor } from "../test/telement/computedStyle";
+import { mouseButton, settledStyle, tokenColor } from "../test/telement/computedStyle";
 
 const TAB_NAMES = ["Account", "Sessions", "Appearance", "Notifications"];
 
@@ -84,14 +85,15 @@ describe("Settings dialogs", () => {
         stylesheet.textContent = `
             @layer compound-tokens, compound-web, app-web;
             @layer compound-tokens {
-                ${compoundBase} ${compoundSemantic} ${compoundLightTheme} ${compoundLightSemantic} ${telementTokens}
+                ${compoundBase} ${compoundSemantic} ${compoundLightTheme} ${compoundLightSemantic}
+                ${compoundDarkTheme} ${compoundDarkSemantic} ${telementTokens}
             }
             @layer compound-web { ${compoundStyles} }
             @layer app-web {
                 body { margin: 0; }
                 ${toBrowserCss(tabbedViewStyles, lightTheme, fontSizes)}
                 ${toBrowserCss(settingsDialogStyles, lightTheme, fontSizes)}
-                ${toBrowserCss(themeChoicePanelStyles, lightTheme, fontSizes)}
+                ${toBrowserCss(themeChoicePanelStyles, lightTheme, commonStyles, fontSizes)}
                 ${toBrowserCss(deviceSecurityCardStyles, lightTheme, fontSizes)}
                 ${toBrowserCss(settingsSearchStyles, lightTheme, fontSizes)}
             }
@@ -208,22 +210,36 @@ describe("Settings dialogs", () => {
     });
 
     describe("theme choices", () => {
-        it("are 44px pills, concentric with the radio 12px from their top, bottom and start", () => {
+        const CHOICES = [
+            { name: "Light", theme: "cpd-theme-light" },
+            { name: "Dark", theme: "cpd-theme-dark" },
+            { name: "High contrast", theme: "cpd-theme-light" },
+        ];
+
+        /** The theme choices on a settings card, as ThemeChoicePanel renders them, light chosen. */
+        function renderThemes(disabled = false): HTMLElement[] {
             document.body.innerHTML = renderToStaticMarkup(
                 createElement(
                     Root,
                     { className: "mx_ThemeChoicePanel_ThemeSelectors" },
-                    ["Light", "Dark", "High contrast"].map((name, index) =>
+                    CHOICES.map(({ name, theme }, index) =>
                         createElement(
                             InlineField,
                             {
                                 key: name,
                                 name: "themeSelector",
-                                className: `mx_ThemeChoicePanel_themeSelector ${index === 0 ? "mx_ThemeChoicePanel_themeSelector_enabled" : ""}`,
+                                className: `mx_ThemeChoicePanel_themeSelector ${theme} ${
+                                    disabled
+                                        ? "mx_ThemeChoicePanel_themeSelector_disabled"
+                                        : index === 0
+                                          ? "mx_ThemeChoicePanel_themeSelector_enabled"
+                                          : ""
+                                }`,
                                 control: createElement(RadioControl, {
                                     name: "themeSelector",
                                     value: name,
-                                    defaultChecked: index === 0,
+                                    defaultChecked: !disabled && index === 0,
+                                    disabled,
                                 }),
                             },
                             createElement(Label, { className: "mx_ThemeChoicePanel_themeSelector_Label" }, name),
@@ -231,23 +247,88 @@ describe("Settings dialogs", () => {
                     ),
                 ),
             );
+            return [...document.querySelectorAll<HTMLElement>(".mx_ThemeChoicePanel_themeSelector")];
+        }
 
-            const chips = [...document.querySelectorAll<HTMLElement>(".mx_ThemeChoicePanel_themeSelector")];
+        const radio = (chip: Element): HTMLInputElement => chip.querySelector("input")!;
+
+        it("are 44px pills, concentric with the radio 12px from their top, bottom and start, the label 12px after it", () => {
+            const chips = renderThemes();
             expect(chips).toHaveLength(3);
             for (const chip of chips) {
                 const rect = chip.getBoundingClientRect();
                 expect(rect.height).toBe(44);
                 // The radio's 10px radius and the 12px around it
                 expect(cornerRadii(chip)).toEqual({ x: 22, y: 22 });
-                const radio = chip.querySelector("input")!.getBoundingClientRect();
-                expect([radio.width, radio.height]).toEqual([20, 20]);
+                const radioBox = radio(chip).getBoundingClientRect();
+                expect([radioBox.width, radioBox.height]).toEqual([20, 20]);
                 // From the chip's outer edge, its 1px border included
-                expect([radio.left - rect.left, radio.top - rect.top, rect.bottom - radio.bottom]).toEqual([
+                expect([radioBox.left - rect.left, radioBox.top - rect.top, rect.bottom - radioBox.bottom]).toEqual([
                     12, 12, 12,
                 ]);
                 const body = chip.lastElementChild!.getBoundingClientRect();
+                expect(body.left - radioBox.right).toBe(12);
                 expect(rect.right - body.right).toBe(12);
             }
+        });
+
+        it.each([
+            ["at its start", () => ({ x: 4, y: 22 }), 1],
+            ["on its radio", () => ({ x: 22, y: 22 }), 1],
+            ["at its end", (width: number) => ({ x: width - 4, y: 22 }), 1],
+            ["at its top", (width: number) => ({ x: width / 2, y: 2 }), 2],
+            ["at its bottom", (width: number) => ({ x: width / 2, y: 42 }), 2],
+        ])("choose a theme by a click anywhere on its pill: %s", async (_, at, index) => {
+            const chip = renderThemes()[index];
+            await userEvent.click(chip, { position: at(chip.getBoundingClientRect().width), force: true });
+
+            expect(radio(chip).checked).toBe(true);
+        });
+
+        it("leave the space between and around the pills alone", async () => {
+            const [light, dark] = renderThemes();
+            const form = light.parentElement!;
+            const gap = dark.getBoundingClientRect().left - form.getBoundingClientRect().left - 8;
+            await userEvent.click(form, { position: { x: gap, y: 22 }, force: true });
+            // Outside the pill's round corner, though inside its box
+            await userEvent.click(dark, { position: { x: 1, y: 1 }, force: true });
+
+            expect(radio(light).checked).toBe(true);
+        });
+
+        it("take the rows' hover and pressed fills over their own, and none while they can't be chosen", async () => {
+            const [, dark] = renderThemes();
+            const fill = (token: string): string =>
+                `linear-gradient(${tokenColor(token, dark)}, ${tokenColor(token, dark)})`;
+            expect(getComputedStyle(dark).backgroundImage).toBe("none");
+
+            await userEvent.hover(dark);
+            expect(getComputedStyle(dark).backgroundImage).toBe(fill("--cpd-color-bg-action-secondary-hovered"));
+
+            await mouseButton("mousePressed", dark);
+            expect(getComputedStyle(dark).backgroundImage).toBe(fill("--cpd-color-bg-action-secondary-pressed"));
+            await mouseButton("mouseReleased", dark);
+
+            const [disabled] = renderThemes(true);
+            await userEvent.hover(disabled);
+            expect(getComputedStyle(disabled).backgroundImage).toBe("none");
+        });
+
+        it("ring the focused pill in the dialog's focus color, 1px outside it, rather than its radio", async () => {
+            const chips = renderThemes();
+            radio(chips[0]).focus();
+            await userEvent.keyboard("{ArrowRight}");
+            const ring = getComputedStyle(chips[1], "::after");
+
+            expect(radio(chips[1])).toBe(document.activeElement);
+            expect([ring.outlineStyle, ring.outlineWidth, ring.outlineOffset]).toEqual(["solid", "2px", "1px"]);
+            // The dark theme's pill is on the light dialog
+            expect(ring.outlineColor).toBe(tokenColor("--cpd-color-border-focused", document.documentElement));
+            expect(ring.outlineColor).not.toBe(tokenColor("--cpd-color-border-focused", chips[1]));
+            // Around the pill's border box, following its corners
+            expect([ring.top, ring.left, ring.borderTopLeftRadius]).toEqual(["-1px", "-1px", "9999px"]);
+            expect(getComputedStyle(radio(chips[1]).nextElementSibling!).outlineStyle).toBe("none");
+            expect(getComputedStyle(chips[0], "::after").content).toBe("none");
         });
 
         it("label their options in the size and weight of the panel's Match system theme switch", () => {
