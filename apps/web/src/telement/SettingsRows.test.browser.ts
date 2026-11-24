@@ -38,6 +38,7 @@ import settingsFieldsetStyles from "../../res/css/views/settings/_SettingsFields
 import settingsSectionStyles from "../../res/css/views/settings/tabs/_SettingsSection.pcss?raw";
 import settingsTabStyles from "../../res/css/views/settings/tabs/_SettingsTab.pcss?raw";
 import helpUserSettingsTabStyles from "../../res/css/views/settings/tabs/user/_HelpUserSettingsTab.pcss?raw";
+import voiceUserSettingsTabStyles from "../../res/css/views/settings/tabs/user/_VoiceUserSettingsTab.pcss?raw";
 import headingStyles from "../../res/css/views/typography/_Heading.pcss?raw";
 import compoundOverrides from "../../res/css/telement/_CompoundOverrides.pcss?raw";
 import notificationTargetsStyles from "../../res/css/telement/_NotificationTargets.pcss?raw";
@@ -63,6 +64,7 @@ const APP_STYLES = [
     settingsSectionStyles,
     settingsTabStyles,
     helpUserSettingsTabStyles,
+    voiceUserSettingsTabStyles,
     headingStyles,
     compoundOverrides,
     notificationTargetsStyles,
@@ -445,6 +447,82 @@ describe.each(THEMES.map(([theme]) => theme))("Settings rows in %s", (theme) => 
             expect(box("#token").height).toBeGreaterThan(72);
             expect(getComputedStyle(get("#value")).userSelect).not.toBe("none");
             expect(getComputedStyle(get("#warning strong")).userSelect).not.toBe("none");
+        });
+    });
+
+    describe("the Voice & video tab", () => {
+        /** A toggle alone, as a form holding the tab's groups renders it. */
+        const formToggle = (label: string, disabled = false): string =>
+            renderToStaticMarkup(
+                createElement(Form.Root, {}, createElement(SettingsToggleInput, { name: label, label, disabled })),
+            ).replace(/^<form[^>]*>|<\/form>$/g, "");
+        /** A device's row (ValueRowView): a button that opens the menu of devices, or without a menu a plain row. */
+        const device = (id: string, value: string, menu: boolean): string => {
+            const [tag, attributes] = menu ? ["button", 'type="button"'] : ["div", 'aria-disabled="true"'];
+            return `<${tag} class="SettingsRow_row ${menu ? "SettingsRow_interactive" : ""}" data-settings-row="" id="${id}" ${attributes}>
+                <span class="SettingsRow_text"><span class="SettingsRow_label">Device</span></span>
+                <span class="SettingsRow_end"><span class="SettingsRow_value">${value}</span></span>
+            </${tag}>`;
+        };
+        const dependent = (content: string): string =>
+            `<div class="mx_VoiceUserSettingsTab_dependentToggle">${content}</div>`;
+
+        function renderVoice(microphone: string): void {
+            renderTab(
+                theme,
+                `<form>
+                    ${section("Microphone", `${microphone}${formToggle("Noise suppression")}`, true)}
+                    ${section("Speaker", device("speaker", "No speakers detected", false), true)}
+                    ${section(
+                        "Calls",
+                        formToggle("Enable legacy voice/video calls") +
+                            dependent(formToggle("Allow peer-to-peer for 1:1 calls", true)) +
+                            dependent(""),
+                        true,
+                    )}
+                </form>`,
+            );
+        }
+
+        it("opens with a device's row as tall and in the same place as once the devices are known", () => {
+            const places = [
+                device("microphone", "", false),
+                device("microphone", "Default device", false),
+                device("microphone", "MacBook Pro Microphone (Built-in)", true),
+            ].map((microphone) => {
+                renderVoice(microphone);
+                const { top, left, width, height } = box("#microphone");
+                return [top, left, width, height, box("#speaker").top];
+            });
+
+            expect(places[0][3]).toBe(44);
+            expect(places[1]).toEqual(places[0]);
+            expect(places[2]).toEqual(places[0]);
+        });
+
+        it("draws each group as a card under its label, 24px apart, its device's row 4px from its top", () => {
+            renderVoice(device("microphone", "MacBook Pro Microphone (Built-in)", true));
+            const cards = [...document.querySelectorAll<HTMLElement>("[data-card]")];
+            const sections = [...document.querySelectorAll<HTMLElement>(".mx_SettingsSection")];
+
+            expect(cards.map((card) => cornerRadii(card).x)).toEqual([12, 12, 12]);
+            expect(box("#microphone").top - cards[0].getBoundingClientRect().top).toBe(4);
+            // A card with a device alone is its row and the 4px around it
+            expect(cards[1].getBoundingClientRect().height).toBe(52);
+            for (const [i, group] of sections.slice(1).entries()) {
+                expect(group.getBoundingClientRect().top - sections[i].getBoundingClientRect().bottom).toBe(24);
+            }
+        });
+
+        it("indents what legacy calls need 24px under their toggle, without room for what can't be set", () => {
+            renderVoice(device("microphone", "", false));
+            const card = [...document.querySelectorAll<HTMLElement>("[data-card]")].at(-1)!;
+            const [legacy, peerToPeer] = [...card.querySelectorAll("label")].map((label) => textBox(label));
+            const [needed, empty] = card.querySelectorAll<HTMLElement>(".mx_VoiceUserSettingsTab_dependentToggle");
+
+            expect(peerToPeer.left - legacy.left).toBe(24);
+            expect(empty.getClientRects()).toHaveLength(0);
+            expect(card.getBoundingClientRect().bottom - needed.getBoundingClientRect().bottom).toBe(12);
         });
     });
 });

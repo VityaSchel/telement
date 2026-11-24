@@ -23,6 +23,7 @@ import MatrixClientBackedController from "../../settings/controllers/MatrixClien
 import { UserTab } from "../../components/views/dialogs/UserTab";
 import PreferencesUserSettingsTab from "../../components/views/settings/tabs/user/PreferencesUserSettingsTab";
 import SidebarUserSettingsTab from "../../components/views/settings/tabs/user/SidebarUserSettingsTab";
+import VoiceUserSettingsTab from "../../components/views/settings/tabs/user/VoiceUserSettingsTab";
 import { SETTINGS_SEARCH_INDEX } from "./settingsSearchIndex";
 import { getSettingsSearchTargets } from "./settingsSearchTargets";
 import { findSetting } from "./revealSetting";
@@ -50,6 +51,7 @@ describe("SETTINGS_SEARCH_INDEX", () => {
         it.each([
             [UserTab.Preferences, PreferencesUserSettingsTab],
             [UserTab.Sidebar, SidebarUserSettingsTab],
+            [UserTab.Voice, VoiceUserSettingsTab],
         ])("finds each place on the %s tab", (tab, Tab: React.ComponentType) => {
             const { container } = render(<Tab />);
             const targets = getSettingsSearchTargets([{ id: tab, label: "common|preferences" }]).slice(1);

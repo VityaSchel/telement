@@ -1,0 +1,17 @@
+/*
+Copyright 2026 Viktor Shchelochkov
+
+SPDX-License-Identifier: AGPL-3.0-only OR GPL-3.0-only
+Please see LICENSE files in the repository root for full details.
+*/
+
+/* A toggle that only applies while legacy calls are on sits 24px in under their toggle, as in the Notifications and
+   Sidebar tabs */
+.mx_VoiceUserSettingsTab_dependentToggle {
+    margin-inline-start: var(--cpd-space-6x);
+}
+
+/* Without a gap of its own when the setting it holds can't be set here */
+.mx_VoiceUserSettingsTab_dependentToggle:empty {
+    display: none;
+}

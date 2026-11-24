@@ -453,7 +453,6 @@
         "integration_manager": "Integration manager",
         "joined": "Joined",
         "labs": "Labs",
-        "legacy_voice_and_video_settings": "Legacy calls",
         "legal": "Legal",
         "light": "Light",
         "loading": "Loading…",
@@ -2900,12 +2899,8 @@
             "request_permissions": "Request",
             "title": "Voice & Video",
             "video_input_empty": "No Webcams detected",
-            "video_section": "Video settings",
             "voice_agc": "Automatically adjust the microphone volume",
-            "voice_input_description": "The audio input configured here is used for voice messages and legacy calls.",
-            "voice_input_section": "Audio input",
-            "voice_processing": "Audio processing",
-            "voice_section": "Voice settings"
+            "voice_input_description": "The audio input configured here is used for voice messages and legacy calls."
         },
         "warn_quit": "Warn before quitting",
         "warning": "<w>WARNING:</w> <description/>"
@@ -3206,8 +3201,10 @@
             "show_results": "Show results"
         },
         "settings": {
+            "camera_description": "The camera chosen here is used for legacy calls.",
             "notification_exceptions": "Rooms with their own setting",
-            "notification_silent": "Silent"
+            "notification_silent": "Silent",
+            "speaker_description": "The speaker chosen here is used for legacy calls."
         },
         "space_home": {
             "empty_description": "Add an existing room or create a new one.",

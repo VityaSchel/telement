@@ -26,6 +26,8 @@ interface IProps {
     isExplicit?: boolean;
     hideIfCannotSet?: boolean;
     requires?: NullableBooleanSettingKey[];
+    /** Whether it can't be changed for a reason of the caller's, such as another setting that turns off what it is for. */
+    disabled?: boolean;
     onChange?(checked: boolean): void;
 }
 
@@ -113,9 +115,9 @@ export default class SettingsFlag extends React.Component<IProps, IState> {
     };
 
     public render(): React.ReactNode {
-        const disabled = !SettingsStore.canSetValue(this.props.name, this.props.roomId ?? null, this.props.level);
+        const cannotSet = !SettingsStore.canSetValue(this.props.name, this.props.roomId ?? null, this.props.level);
 
-        if (disabled && this.props.hideIfCannotSet) return null;
+        if (cannotSet && this.props.hideIfCannotSet) return null;
 
         const label = this.props.label ?? SettingsStore.getDisplayName(this.props.name, this.props.level);
         const description = SettingsStore.getDescription(this.props.name);
@@ -137,7 +139,7 @@ export default class SettingsFlag extends React.Component<IProps, IState> {
                 checked={this.state.value}
                 onChange={disabledMessage ? undefined : this.onChange}
                 name={this.props.name}
-                disabled={disabled}
+                disabled={cannotSet || this.props.disabled}
                 label={label ?? this.props.name}
                 helpMessage={helpMessage as string}
                 disabledMessage={disabledMessage}

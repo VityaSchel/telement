@@ -729,15 +729,23 @@
     },
     "settings|voip|audio_output": {
         "upstream": "Audio Output",
-        "telement": "Audio output"
+        "telement": "Speaker"
     },
     "settings|voip|audio_output_empty": {
         "upstream": "No Audio Outputs detected",
-        "telement": "No audio outputs detected"
+        "telement": "No speakers detected"
     },
     "settings|voip|dialog_title": {
         "upstream": "<strong>Settings:</strong> Voice & Video",
         "telement": "<strong>Settings:</strong> Voice & video"
+    },
+    "settings|voip|echo_cancellation_description": {
+        "upstream": "Removes echo from your microphone input during calls. This setting also applies to Element Call.",
+        "telement": "Removes the echo your microphone picks up during calls. This setting also applies to Element Call."
+    },
+    "settings|voip|noise_suppression_description": {
+        "upstream": "Reduces background noise in your microphone input during calls. This setting also applies to Element Call.",
+        "telement": "Reduces the background noise your microphone picks up during calls. This setting also applies to Element Call."
     },
     "settings|voip|title": {
         "upstream": "Voice & Video",
@@ -745,7 +753,11 @@
     },
     "settings|voip|video_input_empty": {
         "upstream": "No Webcams detected",
-        "telement": "No webcams detected"
+        "telement": "No cameras detected"
+    },
+    "settings|voip|voice_input_description": {
+        "upstream": "The audio input configured here is used for voice messages and legacy calls.",
+        "telement": "The microphone chosen here is used for voice messages and legacy calls."
     },
     "setting|help_about|dialog_title": {
         "upstream": "<strong>Settings:</strong> Help & About",

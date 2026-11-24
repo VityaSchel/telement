@@ -39,11 +39,6 @@ export default class MediaDeviceHandler extends EventEmitter {
         return MediaDeviceHandler.internalInstance;
     }
 
-    public static async hasAnyLabeledDevices(): Promise<boolean> {
-        const devices = await navigator.mediaDevices.enumerateDevices();
-        return devices.some((d) => Boolean(d.label));
-    }
-
     /**
      * Gets the available audio input/output and video input devices
      * from the browser: a thin wrapper around mediaDevices.enumerateDevices()

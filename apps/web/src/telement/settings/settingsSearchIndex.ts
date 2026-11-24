@@ -125,9 +125,15 @@ export const SETTINGS_SEARCH_INDEX: SettingsSearchEntry[] = [
     ...settings(UserTab.Preferences, "common|advanced", ["promptBeforeInviteUnknownUsers"]),
     { tab: UserTab.Preferences, group: "common|advanced", label: "settings|preferences|autocomplete_delay" },
 
-    { tab: UserTab.Voice, group: "settings|voip|voice_input_section", label: "common|microphone" },
-    { tab: UserTab.Voice, label: "settings|voip|audio_output" },
-    { tab: UserTab.Voice, label: "common|camera" },
+    { tab: UserTab.Voice, group: "common|microphone" },
+    { tab: UserTab.Voice, group: "common|microphone", label: "settings|voip|voice_agc" },
+    { tab: UserTab.Voice, group: "common|microphone", label: "settings|voip|noise_suppression" },
+    { tab: UserTab.Voice, group: "common|microphone", label: "settings|voip|echo_cancellation" },
+    { tab: UserTab.Voice, group: "settings|voip|audio_output" },
+    { tab: UserTab.Voice, group: "common|camera" },
+    ...settings(UserTab.Voice, "common|camera", ["VideoView.flipVideoHorizontally"]),
+    { tab: UserTab.Voice, group: "keyboard|category_calls" },
+    ...settings(UserTab.Voice, "keyboard|category_calls", ["enableLegacyCallsVoip", "webRtcAllowPeerToPeer"]),
 
     { tab: UserTab.Security, group: "common|presence" },
     ...settings(UserTab.Security, "common|presence", [
