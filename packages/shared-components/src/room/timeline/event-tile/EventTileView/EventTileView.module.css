@@ -499,16 +499,20 @@
 
         padding-top: 0;
 
+        /* Telement: the avatar's and the padlock's boxes are the text's first line, which they are centered on at every
+           font size */
         .slotAvatar,
         .slotPadlock {
-            line-height: 1;
+            display: flex;
+            align-items: center;
+            height: 1lh;
+            line-height: normal;
             margin-block: 3px 2px;
         }
 
         .slotAvatar {
             inset-block-start: auto;
             inset-inline-start: var(--event-tile-group-gutter);
-            height: 14px;
         }
 
         /* A clickable avatar is a <button>, which the app makes inherit this slot's line-height from a later layer
@@ -521,11 +525,18 @@
             padding-block: 3px 2px;
         }
 
-        /* The timestamp's box is the line's content box, and the time sits at its end, on the text's last line. */
+        /* The timestamp's box is the text's last line, which the time's digits are centered on at every font size,
+           trimmed to them, with padding in place of what was trimmed around them. The digits are drawn on whole pixels,
+           with half a pixel rounded down, so the padding lifts them by less than that. */
         .slotTimestamp {
-            inset-block: 3px 2px;
-            height: auto;
-            align-items: flex-end;
+            inset-block: auto 2px;
+            height: 1lh;
+            line-height: normal;
+        }
+
+        .line > .slotTimestamp > * {
+            padding-block: 0.25em calc(0.25em + 0.4px);
+            text-box: trim-both cap alphabetic;
         }
 
         .slotPadlock {
@@ -742,9 +753,9 @@
     .slotAvatar > *,
     .slotAvatar > * > * {
         font-size: 0.625rem;
-        /* Compound Avatar applies its own line-height to imageless fallbacks.
-           Keep the initial vertically centred in the IRC avatar slot. */
-        line-height: calc(var(--cpd-font-size-body-md) - 2px) !important;
+        /* Compound Avatar's own line-height (its size less 2px) centres the initial at every font size. A clickable
+           avatar is a <button>, which the app makes inherit the slot's line-height instead, from a later layer. */
+        line-height: calc(var(--cpd-avatar-size) - 2px) !important;
     }
 
     .slotPadlock,
@@ -2262,8 +2273,9 @@
 
     /* Informational bubble rows ("Alice joined the room") are metadata rows, not message bubbles. A row starts on the
        bubble column with its 14px avatar, centered on the text's first line, and its text ends with the time, 8px after
-       it on its last line, as a bubble's last line ends with its time. The row's line height is the text's, which the
-       avatar's and the time's boxes take too, so that both center on a line of the text. */
+       it on its last line, as a bubble's last line ends with its time. The avatar's and the line's line height is the
+       text's, whatever the row's is (the app sets another in an event summary), and the time's box takes it too, so that
+       both center on a line of the text. */
     &.stateInfo {
         --event-tile-body-padding: 0;
         --event-tile-info-margin-inline-start: calc(
@@ -2294,6 +2306,7 @@
             height: 1lh;
             margin-inline-end: var(--event-tile-bubble-gap);
             flex-shrink: 0;
+            line-height: normal;
         }
 
         .slotAvatar > *,
@@ -2314,7 +2327,7 @@
             margin: 0;
             padding: 0;
             background: transparent;
-            line-height: inherit;
+            line-height: normal;
         }
 
         /* Text in a block of its own (TextualEventView and most other bodies) flows inline, so that the time can follow
@@ -2333,6 +2346,14 @@
 
         .line > .slotTimestamp {
             margin-inline-start: var(--cpd-space-2x);
+        }
+
+        /* The digits are centered on the text at every font size: trimmed to them, the time has padding in place of
+           what was trimmed around them. They are drawn on whole pixels, with half a pixel rounded down, so the padding
+           lifts them by less than that. */
+        .line > .slotTimestamp > * {
+            padding-block: 0.25em calc(0.25em + 0.4px);
+            text-box: trim-both cap alphabetic;
         }
 
         .line > .slotPadlock {

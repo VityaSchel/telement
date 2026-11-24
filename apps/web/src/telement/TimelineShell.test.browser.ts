@@ -39,6 +39,8 @@ import decryptionFailureStyles from "../../../../packages/shared-components/src/
 // eslint-disable-next-line no-restricted-imports
 import textualEventViewStyles from "../../../../packages/shared-components/src/room/timeline/event-tile/EventTileView/TextualEventView/TextualEventView.module.css?raw";
 // eslint-disable-next-line no-restricted-imports
+import roomAvatarEventViewStyles from "../../../../packages/shared-components/src/room/timeline/event-tile/EventTileView/RoomAvatarEventView/RoomAvatarEventView.module.css?raw";
+// eslint-disable-next-line no-restricted-imports
 import disambiguatedProfileStyles from "../../../../packages/shared-components/src/room/timeline/event-tile/EventTileView/DisambiguatedProfile/DisambiguatedProfile.module.css?raw";
 // eslint-disable-next-line no-restricted-imports
 import eventTileBubbleStyles from "../../../../packages/shared-components/src/room/timeline/event-tile/EventTileView/EventTileBubble/EventTileBubble.module.css?raw";
@@ -69,6 +71,7 @@ import lightTheme from "../../res/themes/light/css/_light.pcss?raw";
 import { cornerRadii, toBrowserCss } from "../test/telement/browserCss";
 import { tokenColor } from "../test/telement/computedStyle";
 import { loadInter } from "../test/telement/fonts";
+import { paintedMiddles, resetPixelRatio, setPixelRatio } from "../test/telement/paintedPixels";
 
 /** A CSS module's stylesheet with its local class names prefixed by the module's name, as the library build does. */
 function moduleCss(source: string, name: string): string {
@@ -158,6 +161,14 @@ const checkMiddle = (tile: Element): number => middle(box(tile.querySelector(".s
 /** The text of an informational row ("Alice joined the room"), as TextualEventView renders it. */
 const event = (layout: Layout, body: string): string =>
     `<div class="mx_TextualEvent TextualEventView_textualEvent" data-event-layout="${layout}">${body}</div>`;
+
+/** The informational row of a changed room avatar, which ends in the new one, as RoomAvatarEventView renders it. */
+const avatarEvent = (layout: Layout): string =>
+    `<span class="RoomAvatarEventView_textualEvent" data-event-layout="${layout}">Alice changed the room avatar to <button type="button" class="RoomAvatarEventView_avatarButton">${avatar(14, "Office")}</button></span>`;
+
+/** Rows of an event summary that is expanded, or has too few events to summarize, which holds even a single one. */
+const summaryOf = (layout: Layout, rows: string): string =>
+    `<li class="mx_GenericEventListSummary" data-expanded="true" data-layout="${layout}"><ol class="mx_GenericEventListSummary_unstyledList">${rows}</ol></li>`;
 
 const PADLOCK = '<div class="mx_E2ePadlock" style="width: 14px; height: 14px"></div>';
 
@@ -400,6 +411,7 @@ describe("Timeline shell", () => {
                 ${moduleCss(textualBodyStyles, "TextualBody")}
                 ${moduleCss(decryptionFailureStyles, "DecryptionFailureBodyView")}
                 ${moduleCss(textualEventViewStyles, "TextualEventView")}
+                ${moduleCss(roomAvatarEventViewStyles, "RoomAvatarEventView")}
                 ${moduleCss(eventTileBubbleStyles, "EventTileBubble")}
                 ${moduleCss(readMarkerStyles, "ReadMarker")}
                 ${moduleCss(disambiguatedProfileStyles, "DisambiguatedProfile")}
@@ -1435,11 +1447,128 @@ describe("Timeline shell", () => {
     });
 
     describe("informational rows", () => {
+        afterEach(() => {
+            document.documentElement.style.fontSize = "";
+        });
+
+        const roomBody = (): HTMLElement => document.querySelector<HTMLElement>(".mx_RoomView_body")!;
+
+        /** Shows the rows as {@link render} does, in the room's timeline, where event summaries have styles of their own. */
+        function renderInTimeline(layout: Layout, ...items: string[]): void {
+            render(layout, ...items);
+            roomBody().classList.add("mx_RoomView_timeline");
+        }
+
         it.each(["bubble", "group", "irc"] as const)("center their time on their text in the %s layout", (layout) => {
             render(layout, row(layout, event(layout, "Alice joined the room"), { states: ["stateInfo"] }));
             const tile = document.querySelector(".root")!;
 
             expect(Math.abs(middle(timeOf(tile)) - middle(bodyText(tile)))).toBeLessThanOrEqual(0.5);
+        });
+
+        describe("on a 2x screen, with the app's font", () => {
+            beforeAll(() => setPixelRatio(2));
+
+            afterAll(() => resetPixelRatio());
+
+            /** The text of an informational row, its first character and its last one. */
+            function ends(tile: Element): [first: DOMRect, last: DOMRect] {
+                const body = tile.querySelector(".mx_TextualEvent, .RoomAvatarEventView_textualEvent")!;
+                const node = document.createTreeWalker(body, NodeFilter.SHOW_TEXT).nextNode() as Text;
+                const range = document.createRange();
+                return [0, node.data.trimEnd().length - 1].map((index) => {
+                    range.setStart(node, index);
+                    range.setEnd(node, index + 1);
+                    return range.getBoundingClientRect();
+                }) as [DOMRect, DOMRect];
+            }
+
+            const CASES: Array<{ name: string; layout: Layout; states: string[]; sizes: number[] }> = [
+                { name: "bubble", layout: "bubble", states: [], sizes: [14, 16, 17, 18, 20, 24] },
+                { name: "modern", layout: "group", states: [], sizes: [14, 16, 17, 18, 20, 24] },
+                { name: "compact modern", layout: "group", states: ["densityCompact"], sizes: [16, 20] },
+                { name: "IRC", layout: "irc", states: [], sizes: [16, 24] },
+            ];
+            const PLACES = [
+                { place: "on their own", wrap: (_layout: Layout, rows: string) => rows },
+                { place: "in an event summary", wrap: summaryOf },
+            ];
+
+            it.each(CASES.flatMap((layout) => PLACES.map((place) => ({ ...layout, ...place }))))(
+                "share one center line with their avatar and their time, in small and large fonts too, $place in the $name layout",
+                async ({ layout, states, sizes, wrap }) => {
+                    for (const size of sizes) {
+                        document.documentElement.style.fontSize = `${size}px`;
+                        renderInTimeline(
+                            layout,
+                            wrap(
+                                layout,
+                                [event(layout, "Alice joined the room"), event(layout, `Alice ${LONG_TEXT}`)]
+                                    .concat(avatarEvent(layout))
+                                    .map((body) => row(layout, body, { states: ["stateInfo", ...states] }))
+                                    .join(""),
+                            ),
+                        );
+                        if (states.length) roomBody().classList.add("mx_MatrixChat_useCompactLayout");
+                        roomBody().style.background = "#fff";
+
+                        const tiles = all(".root");
+                        // The capital each text starts with, and its time
+                        const painted = await paintedMiddles(tiles.flatMap((tile) => [ends(tile)[0], timeOf(tile)]));
+                        for (const [i, tile] of tiles.entries()) {
+                            const [capital, time] = painted.slice(2 * i, 2 * i + 2);
+                            const [first, last] = ends(tile);
+                            const lastLine = capital + last.top - first.top;
+
+                            expect(
+                                Math.abs(middle(box(tile.querySelector(".slotAvatar > *")!)) - capital),
+                                `avatar at ${size}px`,
+                            ).toBeLessThanOrEqual(0.5);
+                            expect(
+                                Math.abs(time - (layout === "irc" ? capital : lastLine)),
+                                `time at ${size}px`,
+                            ).toBeLessThanOrEqual(0.5);
+                        }
+                    }
+                },
+            );
+
+            it.each<Layout>(["bubble", "group", "irc"])(
+                "end a changed room avatar with the new one, centered on the text without making the line taller (%s)",
+                async (layout) => {
+                    render(
+                        layout,
+                        row(layout, event(layout, "Alice joined the room"), { states: ["stateInfo"] }),
+                        row(layout, avatarEvent(layout), { states: ["stateInfo"] }),
+                    );
+                    roomBody().style.background = "#fff";
+                    const [joined, changed] = all(".root");
+                    const inline = box(changed.querySelector(".RoomAvatarEventView_avatarButton > *")!);
+                    const [capital] = await paintedMiddles([ends(changed)[0]]);
+
+                    expect(Math.abs(middle(inline) - capital)).toBeLessThanOrEqual(0.5);
+                    expect(box(changed).height).toBe(box(joined).height);
+                },
+            );
+        });
+
+        it.each<Layout>(["bubble", "group", "irc"])(
+            "are as tall in an event summary as on their own in the %s layout",
+            (layout) => {
+                const info = row(layout, event(layout, "Alice joined the room"), { states: ["stateInfo"] });
+                renderInTimeline(layout, info, summaryOf(layout, info));
+                const [own, summarized] = all(".root").map((tile) => box(tile).height);
+
+                expect(summarized).toBe(own);
+            },
+        );
+
+        it.each([14, 16, 24])("center the initial in their avatar in the IRC layout at %ipx", (size) => {
+            document.documentElement.style.fontSize = `${size}px`;
+            render("irc", row("irc", event("irc", "Alice joined the room"), { states: ["stateInfo"] }));
+            const avatar = document.querySelector(".slotAvatar > *")!;
+
+            expect(Math.abs(middle(textBox(avatar)) - middle(box(avatar)))).toBeLessThanOrEqual(1);
         });
 
         it("keep their time on the last line of a text that wraps in the modern layout, as messages do", () => {

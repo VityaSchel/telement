@@ -35,7 +35,7 @@ export async function press(button: HTMLElement): Promise<CSSStyleDeclaration> {
  * Sends a command over the browser's CDP session. The session's `send` comes from the Playwright provider's types, which
  * only the browser tests' type check loads: in the app's own, they would change the types of the DOM.
  */
-function sendCdp(method: string, params: Record<string, unknown>): Promise<unknown> {
+export function sendCdp(method: string, params: Record<string, unknown>): Promise<unknown> {
     type Session = { send(method: string, params: Record<string, unknown>): Promise<unknown> };
     return (cdp() as unknown as Session).send(method, params);
 }

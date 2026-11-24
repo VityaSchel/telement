@@ -18,14 +18,24 @@
     line-height: 1.125rem;
 }
 
+/* Telement: a block in the modern layout, as other informational text is, so that it has their line height */
+.textualEvent[data-event-layout="group"] {
+    display: block;
+}
+
+/* Telement: a line of the text tall, with the avatar in its middle, so that the avatar is centered on the text and
+   doesn't make the line taller */
 .avatarButton {
-    display: inline;
-    position: relative;
-    top: 3px;
+    display: inline-flex;
+    align-items: center;
+    block-size: 1lh;
+    vertical-align: top;
     margin-inline-start: 0.25em;
     padding: 0;
     border: 0;
     background: none;
     color: inherit;
+    font: inherit;
+    line-height: inherit;
     cursor: pointer;
 }
