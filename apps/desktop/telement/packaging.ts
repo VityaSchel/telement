@@ -17,6 +17,7 @@ interface PackagingConfiguration {
 
 const COPYRIGHT_NOTE = "telement/release/COPYRIGHT";
 const LICENSE_TEXT = "LICENSE-AGPL-3.0";
+const THIRD_PARTY_LICENSES = "THIRD-PARTY-LICENSES";
 
 /** Changes upstream's electron-builder configuration where Telement's packages differ from Element's. */
 export function configureTelementPackaging(config: PackagingConfiguration): void {
@@ -30,6 +31,10 @@ export function configureTelementPackaging(config: PackagingConfiguration): void
         config.extraResources ?? [],
         { from: COPYRIGHT_NOTE, to: "COPYRIGHT" },
         { from: `../../${LICENSE_TEXT}`, to: LICENSE_TEXT },
+        // The license of diff-dom, in the web app, requires its own text and the GPL's. The former is a copy, because
+        // Linux packages are built in a container that has none of the web app's dependencies.
+        { from: "telement/release/LICENSE-LGPL-3.0", to: `${THIRD_PARTY_LICENSES}/LICENSE-LGPL-3.0` },
+        { from: "../../LICENSE-GPL-3.0", to: `${THIRD_PARTY_LICENSES}/LICENSE-GPL-3.0` },
     ].flat();
 
     // These are for the tar.gz. The deb packs the same directory, but installs a desktop file and an icon itself.

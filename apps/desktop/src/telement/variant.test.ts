@@ -159,6 +159,7 @@ describe("Telement desktop variant", () => {
             const { license } = JSON.parse(readText("package.json")) as { license: string };
             const licenseText = "LICENSE-AGPL-3.0";
             const copyrightNotice = readText("telement", "release", "COPYRIGHT");
+            const diffDomNotice = copyrightNotice.split("\n\n").find((text) => text.includes("diff-dom")) ?? "";
             const readme = readText("../../README.md");
 
             it("ships its text only, and the copyright notice, next to the app's own resources", () => {
@@ -195,9 +196,9 @@ describe("Telement desktop variant", () => {
             });
 
             it.each([
-                ["copyright notice", copyrightNotice],
+                ["copyright notice", copyrightNotice.replace(diffDomNotice, "")],
                 ["README", readme],
-            ])("is the only one the %s names, along with the file of its text", (_name, statement) => {
+            ])("is the only one the %s names for Telement, along with the file of its text", (_name, statement) => {
                 const licenseIds = statement.match(/\bA?GPL-[\d.]+(-only|-or-later)/g);
                 const licenseTexts = statement.match(/\bLICENSE-[\w.-]*\w/g);
 
@@ -205,6 +206,34 @@ describe("Telement desktop variant", () => {
                 expect(new Set(licenseTexts)).toEqual(new Set([licenseText]));
                 expect(statement).toContain("GNU Affero General Public License");
                 expect(statement).not.toContain("GNU General Public License");
+            });
+
+            // Required by section 4 of the LGPL, under which the web app bundles diff-dom
+            describe("of diff-dom, which the web app bundles", () => {
+                const diffDomDir = "../web/node_modules/diff-dom";
+                const diffDom = JSON.parse(readText(diffDomDir, "package.json")) as { license: string };
+                const ownText = "telement/release/LICENSE-LGPL-3.0";
+                const supplementedText = "../../LICENSE-GPL-3.0";
+
+                it("ships its text, and that of the GPL it supplements, apart from the text of Telement's license", () => {
+                    expect(packaging.extraResources).toEqual(
+                        expect.arrayContaining([
+                            { from: ownText, to: "THIRD-PARTY-LICENSES/LICENSE-LGPL-3.0" },
+                            { from: supplementedText, to: "THIRD-PARTY-LICENSES/LICENSE-GPL-3.0" },
+                        ]),
+                    );
+                    expect(readText(ownText)).toBe(readText(diffDomDir, "LICENSE.txt"));
+                    expect(readText(supplementedText)).toMatch(/^ +GNU GENERAL PUBLIC LICENSE\n +Version 3, /);
+                });
+
+                it("is named in the copyright notice, along with the files of the texts", () => {
+                    expect(diffDomNotice).toContain(`(${diffDom.license})`);
+                    expect(diffDomNotice.match(/\bLICENSE-L?GPL-[\w.-]*\w/g)).toEqual([
+                        path.basename(ownText),
+                        path.basename(supplementedText),
+                    ]);
+                    expect(diffDomNotice).toMatch(/\bTHIRD-PARTY-LICENSES\b/);
+                });
             });
         });
 
