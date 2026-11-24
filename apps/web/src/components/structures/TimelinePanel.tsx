@@ -57,6 +57,7 @@ import { type ViewRoomPayload } from "../../dispatcher/payloads/ViewRoomPayload"
 import { getKeyBindingsManager } from "../../KeyBindingsManager";
 import { KeyBindingAction } from "../../accessibility/KeyboardShortcuts";
 import { haveRendererForEvent } from "../../events/EventTileFactory";
+import { AppFocusTimer, isAppFocused } from "../../telement/timeline/AppFocusTimer";
 
 // These pagination sizes are higher than they may possibly need be
 // once https://github.com/matrix-org/matrix-spec-proposals/pull/3874 lands
@@ -243,6 +244,10 @@ class TimelinePanel extends React.Component<IProps, IState> {
     private unmounted = false;
     private readReceiptActivityTimer: Timer | null = null;
     private readMarkerActivityTimer: Timer | null = null;
+    // Telement: hides the read marker while the user only watches the app, without the input the timer above needs
+    private readMarkerFocusTimer: AppFocusTimer | null = null;
+    // Telement: the event the read marker was moved to while the user only watched the app
+    private watchedReadMarkerEventId: string | null = null;
 
     // A map of <callId, LegacyCallEventGrouper>
     private callEventGroupers = new Map<string, LegacyCallEventGrouper>();
@@ -308,6 +313,7 @@ class TimelinePanel extends React.Component<IProps, IState> {
         }
         if (this.props.manageReadMarkers && this.props.enableReadReceiptsAndMarkersOnActivity) {
             void this.updateReadMarkerOnUserActivity();
+            this.updateReadMarkerWhileAppFocused();
         }
         this.initTimeline(this.props);
     }
@@ -361,6 +367,7 @@ class TimelinePanel extends React.Component<IProps, IState> {
             this.readMarkerActivityTimer.abort();
             this.readMarkerActivityTimer = null;
         }
+        this.readMarkerFocusTimer?.stop();
         this.doManageReadMarkers.cancel();
         dis.unregister(this.dispatcherRef);
 
@@ -633,6 +640,7 @@ class TimelinePanel extends React.Component<IProps, IState> {
             const timeout = this.readMarkerTimeout(rmPosition);
             // NO-OP when timeout already has set to the given value
             this.readMarkerActivityTimer?.changeTimeout(timeout);
+            this.readMarkerFocusTimer?.changeDelay(timeout);
         },
         READ_MARKER_DEBOUNCE_MS,
         { leading: false, trailing: true },
@@ -721,12 +729,13 @@ class TimelinePanel extends React.Component<IProps, IState> {
                 // more than the timeout on userActiveRecently.
                 //
                 const myUserId = MatrixClientPeg.safeGet().credentials.userId;
-                if (ev.getSender() !== myUserId && !UserActivity.sharedInstance().userActiveRecently()) {
+                if (ev.getSender() !== myUserId && !this.isUserWatching()) {
                     updatedState.readMarkerVisible = true;
                 } else if (lastLiveEvent && this.getReadMarkerPosition() === 0) {
                     // we know we're stuckAtBottom, so we can advance the RM
                     // immediately, to save a later render cycle
 
+                    if (ev.getSender() !== myUserId) this.rememberWatchedReadMarker(lastLiveEvent);
                     void this.setReadMarker(lastLiveEvent.getId() ?? null, lastLiveEvent.getTs(), true);
                     updatedState.readMarkerVisible = false;
                     updatedState.readMarkerEventId = lastLiveEvent.getId();
@@ -907,6 +916,33 @@ class TimelinePanel extends React.Component<IProps, IState> {
         }
     }
 
+    /**
+     * Telement: whether the user sees the messages that arrive, either being active or only watching the app.
+     */
+    private isUserWatching(): boolean {
+        if (UserActivity.sharedInstance().userActiveRecently()) return true;
+        return !!this.props.enableReadReceiptsAndMarkersOnActivity && isAppFocused();
+    }
+
+    /**
+     * Telement: the read marker goes by itself while the app is focused, as it does while the user is active. Only
+     * the marker moves: what is sent to the server still waits for the user's activity.
+     */
+    private updateReadMarkerWhileAppFocused(): void {
+        const initialTimeout = this.readMarkerTimeout(this.getReadMarkerPosition());
+        this.readMarkerFocusTimer = new AppFocusTimer(initialTimeout, () => void this.updateReadMarker(false));
+        this.readMarkerFocusTimer.start();
+    }
+
+    /**
+     * Telement: called before the read marker moves to an event, to hold back its fully_read if the user isn't active.
+     */
+    private rememberWatchedReadMarker(event: MatrixEvent): void {
+        const eventId = event.getId()!;
+        if (eventId === this.state.readMarkerEventId) return;
+        if (!UserActivity.sharedInstance().userActiveRecently()) this.watchedReadMarkerEventId = eventId;
+    }
+
     private async updateReadReceiptOnUserActivity(): Promise<void> {
         this.readReceiptActivityTimer = new Timer(READ_RECEIPT_INTERVAL_MS);
         while (this.readReceiptActivityTimer) {
@@ -966,6 +1002,14 @@ class TimelinePanel extends React.Component<IProps, IState> {
             // The initial read marker is the one stored in the room account data.
             // It makes no sense to send a read marker for it,
             // because if it is in the room account data, a read marker must have been sent before.
+            return false;
+        }
+
+        if (
+            this.state.readMarkerEventId === this.watchedReadMarkerEventId &&
+            !UserActivity.sharedInstance().userActiveRecently()
+        ) {
+            // Telement: the marker moved while the user only watched the app, so it is sent once they are active.
             return false;
         }
 
@@ -1132,8 +1176,10 @@ class TimelinePanel extends React.Component<IProps, IState> {
      * Move the marker to the bottom of the screen.
      * If the read marker is on the screen, we can now assume we've caught up to the end
      * of the screen, so move the marker down to the bottom of the screen.
+     *
+     * @param sendReceipts - Telement: false to only move the marker, sending nothing to the server.
      */
-    public updateReadMarker = async (): Promise<void> => {
+    public updateReadMarker = async (sendReceipts = true): Promise<void> => {
         if (!this.props.manageReadMarkers) return;
         if (this.getReadMarkerPosition() === 1) {
             // the read marker is at an event below the viewport,
@@ -1151,6 +1197,7 @@ class TimelinePanel extends React.Component<IProps, IState> {
             return;
         }
         const lastDisplayedEvent = this.state.events[lastDisplayedIndex];
+        if (!sendReceipts) this.rememberWatchedReadMarker(lastDisplayedEvent);
         await this.setReadMarker(lastDisplayedEvent.getId()!, lastDisplayedEvent.getTs());
 
         // the read-marker should become invisible, so that if the user scrolls
@@ -1162,7 +1209,7 @@ class TimelinePanel extends React.Component<IProps, IState> {
         }
 
         // Send the updated read marker (along with read receipt) to the server
-        await this.sendReadReceipts();
+        if (sendReceipts) await this.sendReadReceipts();
     };
 
     // advance the read marker past any events we sent ourselves.
@@ -1455,6 +1502,9 @@ class TimelinePanel extends React.Component<IProps, IState> {
                             logger.warn("Error sending receipts on load", err);
                         });
                     }
+
+                    // Telement: a timeline too short to scroll would otherwise keep the timeout of a marker out of view
+                    if (this.props.manageReadMarkers) this.doManageReadMarkers();
                 },
             );
         };

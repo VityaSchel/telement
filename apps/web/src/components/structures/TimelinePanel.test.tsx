@@ -50,12 +50,15 @@ import TimelinePanel from "./TimelinePanel";
 import { MatrixClientPeg } from "../../MatrixClientPeg";
 import SettingsStore from "../../settings/SettingsStore";
 import ScrollPanel from "./ScrollPanel";
+import MessagePanel from "./MessagePanel";
+import UserActivity from "../../UserActivity";
 import defaultDispatcher from "../../dispatcher/dispatcher";
 import { Action } from "../../dispatcher/actions";
 import { SettingLevel } from "../../settings/SettingLevel";
 import MatrixClientBackedController from "../../settings/controllers/MatrixClientBackedController";
 import { SDKContextClass } from "../../contexts/SDKContextClass";
 import type Timer from "../../utils/Timer";
+import { AppFocusTimer } from "../../telement/timeline/AppFocusTimer";
 
 // ScrollPanel calls this, but jsdom doesn't mock it for us
 HTMLDivElement.prototype.scrollBy = () => {};
@@ -379,17 +382,27 @@ describe("TimelinePanel", () => {
             {
                 enabled: false,
                 testName: "should not set up activity timers when disabled",
-                checkCall: (readReceiptTimer: Timer | null, readMarkerTimer: Timer | null) => {
+                checkCall: (
+                    readReceiptTimer: Timer | null,
+                    readMarkerTimer: Timer | null,
+                    readMarkerFocusTimer: AppFocusTimer | null,
+                ) => {
                     expect(readReceiptTimer).toBeNull();
                     expect(readMarkerTimer).toBeNull();
+                    expect(readMarkerFocusTimer).toBeNull();
                 },
             },
             {
                 enabled: true,
                 testName: "should set up activity timers when enabled",
-                checkCall: (readReceiptTimer: Timer | null, readMarkerTimer: Timer | null) => {
+                checkCall: (
+                    readReceiptTimer: Timer | null,
+                    readMarkerTimer: Timer | null,
+                    readMarkerFocusTimer: AppFocusTimer | null,
+                ) => {
                     expect(readReceiptTimer).toBeTruthy();
                     expect(readMarkerTimer).toBeTruthy();
+                    expect(readMarkerFocusTimer).toBeTruthy();
                 },
             },
         ])("$testName", async ({ enabled, checkCall }) => {
@@ -419,8 +432,350 @@ describe("TimelinePanel", () => {
             const readReceiptTimer = timelinePanel!.readReceiptActivityTimer;
             // @ts-ignore - accessing private property for testing
             const readMarkerTimer = timelinePanel!.readMarkerActivityTimer;
+            // @ts-ignore - accessing private property for testing
+            const readMarkerFocusTimer = timelinePanel!.readMarkerFocusTimer;
 
-            checkCall(readReceiptTimer, readMarkerTimer);
+            checkCall(readReceiptTimer, readMarkerTimer, readMarkerFocusTimer);
+        });
+    });
+
+    describe("unread line", () => {
+        const roomId = "!room:example.com";
+        const otherUserId = "@u2:m.org";
+        const IN_VIEW_MS = 3000;
+        const OUT_OF_VIEW_MS = 30000;
+        // How long the position of the line is left to settle before it is looked at
+        const DEBOUNCE_MS = 100;
+        const RECEIPT_MS = 500;
+
+        let room: Room;
+        let timelineSet: EventTimelineSet;
+        let container: HTMLElement;
+        let markerPosition: number | null;
+        let isAtBottom: boolean;
+
+        const mkMessage = (eventId: string, sender = otherUserId, threadRootId?: string): MatrixEvent =>
+            new MatrixEvent({
+                event_id: eventId,
+                room_id: roomId,
+                sender,
+                origin_server_ts: Number(eventId.slice(2)),
+                type: EventType.RoomMessage,
+                content: {
+                    ...createMessageEventContent(`message ${eventId}`),
+                    ...(threadRootId && {
+                        "m.relates_to": { event_id: threadRootId, rel_type: RelationType.Thread },
+                    }),
+                },
+            });
+
+        const setFocused = (focused: boolean): void => {
+            vi.spyOn(document, "hasFocus").mockReturnValue(focused);
+            window.dispatchEvent(new Event(focused ? "focus" : "blur"));
+        };
+
+        const setVisible = (visible: boolean): void => {
+            vi.spyOn(document, "visibilityState", "get").mockReturnValue(visible ? "visible" : "hidden");
+            document.dispatchEvent(new Event("visibilitychange"));
+        };
+
+        const advance = (ms: number): Promise<void> =>
+            act(async () => {
+                await vi.advanceTimersByTimeAsync(ms);
+            });
+
+        const receive = async (...events: MatrixEvent[]): Promise<void> => {
+            act(() => events.forEach((event) => timelineSet.addLiveEvent(event, { addToState: true })));
+            await advance(0);
+        };
+
+        const setFullyRead = (eventId: string): void =>
+            room.addAccountData([new MatrixEvent({ type: EventType.FullyRead, content: { event_id: eventId } })]);
+
+        /** Opens a room where `ev1` is the last message read. */
+        const openRoom = async (
+            events: MatrixEvent[],
+            props: Partial<TimelinePanel["props"]> = {},
+            thread?: Thread,
+        ): Promise<void> => {
+            timelineSet = new EventTimelineSet(room, {}, client, thread);
+            timelineSet.on(RoomEvent.Timeline, (...args) => {
+                client.emit(RoomEvent.Timeline, ...args);
+            });
+            events.forEach((event) => timelineSet.addLiveEvent(event, { addToState: true }));
+            await openTimeline(props);
+        };
+
+        const openTimeline = async (props: Partial<TimelinePanel["props"]> = {}): Promise<void> => {
+            ({ container } = render(
+                <TimelinePanel
+                    timelineSet={timelineSet}
+                    manageReadMarkers={true}
+                    manageReadReceipts={true}
+                    {...props}
+                />,
+                clientAndSDKContextRenderOptions(client, sdkContext),
+            ));
+            await advance(DEBOUNCE_MS);
+            vi.mocked(client.sendReadReceipt).mockClear();
+            vi.mocked(client.setRoomReadMarkers).mockClear();
+        };
+
+        /** The messages that a line is drawn under, the one being faded out included. */
+        const messagesAboveLines = (): (string | null | undefined)[] =>
+            [...container.querySelectorAll(".mx_MessagePanel_myReadMarker")]
+                .filter((marker) => marker.querySelector("hr"))
+                .map((marker) => marker.previousElementSibling?.getAttribute("data-event-id"));
+
+        /** The message that the marker is under, whether its line is drawn or not. */
+        const messageAboveMarker = (): string | null | undefined =>
+            container
+                .querySelector(".mx_MessagePanel_myReadMarker[data-scroll-tokens]")
+                ?.previousElementSibling?.getAttribute("data-event-id");
+
+        /** Ends the transitions that fade out a line. */
+        const endFades = (): void =>
+            container.querySelectorAll(".mx_MessagePanel_myReadMarker:not([data-scroll-tokens]) hr").forEach((line) => {
+                act(() => {
+                    line.dispatchEvent(new Event("transitionend", { bubbles: true }));
+                });
+            });
+
+        const expectLineToGoAfter = async (ms: number): Promise<void> => {
+            await advance(ms - 1);
+            expect(messagesAboveLines()).toEqual(["ev1"]);
+            await advance(1);
+            endFades();
+            expect(messagesAboveLines()).toEqual([]);
+        };
+
+        beforeEach(() => {
+            vi.useFakeTimers();
+            window.mxUserActivity = new UserActivity(window, document);
+            room = new Room(roomId, client, userId, { pendingEventOrdering: PendingEventOrdering.Detached });
+            setFullyRead("ev1");
+            setFocused(true);
+            setVisible(true);
+            markerPosition = 0;
+            isAtBottom = true;
+            vi.spyOn(MessagePanel.prototype, "getReadMarkerPosition").mockImplementation(() => markerPosition);
+            vi.spyOn(MessagePanel.prototype, "getScrollState").mockImplementation(() => ({
+                stuckAtBottom: isAtBottom,
+            }));
+        });
+
+        afterEach(() => {
+            cleanup();
+            window.mxUserActivity.stop();
+            TimelinePanel.roomReadMarkerTsMap = {};
+            vi.useRealTimers();
+            vi.restoreAllMocks();
+        });
+
+        it("isn't drawn for a message that arrives at the bottom while the app is focused, whose marker moves", async () => {
+            await openRoom([mkMessage("ev1")]);
+            await receive(mkMessage("ev2"));
+
+            expect(messagesAboveLines()).toEqual([]);
+            expect(messageAboveMarker()).toBe("ev2");
+        });
+
+        it("is drawn for a message that arrives while the app is focused but hidden", async () => {
+            await openRoom([mkMessage("ev1")]);
+            setVisible(false);
+            await receive(mkMessage("ev2"));
+
+            expect(messagesAboveLines()).toEqual(["ev1"]);
+        });
+
+        it("stays while the app isn't focused, and goes on its own once it is", async () => {
+            await openRoom([mkMessage("ev1")]);
+            setFocused(false);
+            await receive(mkMessage("ev2"));
+            await advance(2 * OUT_OF_VIEW_MS);
+            expect(messagesAboveLines()).toEqual(["ev1"]);
+
+            setFocused(true);
+            await expectLineToGoAfter(IN_VIEW_MS);
+            expect(messageAboveMarker()).toBe("ev2");
+        });
+
+        it.each([
+            ["the app loses the focus", setFocused],
+            ["the app is hidden", setVisible],
+        ])("starts its time over when %s", async (_, setAttended) => {
+            await openRoom([mkMessage("ev1"), mkMessage("ev2")]);
+            setAttended(false);
+            setAttended(true);
+            await advance(IN_VIEW_MS - 1);
+            setAttended(false);
+            await advance(2 * OUT_OF_VIEW_MS);
+            expect(messagesAboveLines()).toEqual(["ev1"]);
+
+            setAttended(true);
+            await expectLineToGoAfter(IN_VIEW_MS);
+        });
+
+        it("is drawn above the first unread message of a room that is opened, and goes on its own", async () => {
+            await openRoom([mkMessage("ev1"), mkMessage("ev2"), mkMessage("ev3")]);
+
+            expect(messagesAboveLines()).toEqual(["ev1"]);
+            await expectLineToGoAfter(IN_VIEW_MS - DEBOUNCE_MS);
+            expect(messageAboveMarker()).toBe("ev3");
+        });
+
+        it("goes on its own after a longer time while it is above the messages in view", async () => {
+            markerPosition = -1;
+            await openRoom([mkMessage("ev1"), mkMessage("ev2")]);
+
+            await expectLineToGoAfter(OUT_OF_VIEW_MS - DEBOUNCE_MS);
+            expect(messageAboveMarker()).toBe("ev2");
+        });
+
+        it("marks where the unread messages start if they arrive while the timeline isn't at the bottom", async () => {
+            await openRoom([mkMessage("ev1"), mkMessage("ev2")]);
+            isAtBottom = false;
+            await receive(mkMessage("ev3"));
+
+            expect(messagesAboveLines()).toEqual(["ev1"]);
+            await expectLineToGoAfter(IN_VIEW_MS - DEBOUNCE_MS);
+        });
+
+        it("stays where it is while it is below the messages in view", async () => {
+            await openRoom([mkMessage("ev1"), mkMessage("ev2")]);
+            isAtBottom = false;
+            markerPosition = 1;
+            await advance(2 * OUT_OF_VIEW_MS);
+
+            expect(messageAboveMarker()).toBe("ev1");
+        });
+
+        it("doesn't come back with the next events until a message arrives while the app isn't focused", async () => {
+            await openRoom([mkMessage("ev1")]);
+            await receive(mkMessage("ev2"));
+            await act(async () => setFullyRead("ev1"));
+            await receive(mkMessage("ev3"), mkMessage("ev4", userId));
+            await receive(mkMessage("ev5"));
+            await advance(OUT_OF_VIEW_MS);
+            expect(messagesAboveLines()).toEqual([]);
+
+            setFocused(false);
+            await receive(mkMessage("ev6"));
+            expect(messagesAboveLines()).toEqual(["ev5"]);
+        });
+
+        describe("and what is sent to the server", () => {
+            const beActive = async (): Promise<void> => {
+                window.mxUserActivity.start();
+                document.dispatchEvent(new Event("keydown"));
+                await advance(RECEIPT_MS);
+            };
+
+            it("sends nothing for messages that the user only watches arriving", async () => {
+                await openRoom([mkMessage("ev1")]);
+                await receive(mkMessage("ev2"));
+                await advance(2 * OUT_OF_VIEW_MS);
+
+                expect(messageAboveMarker()).toBe("ev2");
+                expect(client.sendReadReceipt).not.toHaveBeenCalled();
+                expect(client.setRoomReadMarkers).not.toHaveBeenCalled();
+            });
+
+            it("sends nothing for a line that goes on its own", async () => {
+                setFocused(false);
+                await openRoom([mkMessage("ev1")]);
+                await receive(mkMessage("ev2"));
+                setFocused(true);
+                await advance(2 * OUT_OF_VIEW_MS);
+
+                expect(messageAboveMarker()).toBe("ev2");
+                expect(client.sendReadReceipt).not.toHaveBeenCalled();
+                expect(client.setRoomReadMarkers).not.toHaveBeenCalled();
+            });
+
+            it("sends the receipt and the fully_read of the watched message once the user is active", async () => {
+                await openRoom([mkMessage("ev1")]);
+                const watched = mkMessage("ev2");
+                await receive(watched);
+                await beActive();
+
+                expect(client.sendReadReceipt).toHaveBeenCalledWith(watched, ReceiptType.Read);
+                expect(client.setRoomReadMarkers).toHaveBeenCalledWith(roomId, "ev2");
+            });
+
+            it.each([
+                ["a message that arrived", true],
+                ["a line that went on its own", false],
+            ])("sends no fully_read when the timeline is loaded again after %s", async (_, focused) => {
+                await openRoom([mkMessage("ev1")]);
+                setFocused(focused);
+                await receive(mkMessage("ev2"));
+                setFocused(true);
+                await advance(IN_VIEW_MS);
+                act(() => {
+                    client.emit(RoomEvent.TimelineReset, room, timelineSet, true);
+                });
+                await advance(DEBOUNCE_MS);
+
+                expect(messageAboveMarker()).toBe("ev2");
+                expect(client.sendReadReceipt).toHaveBeenCalled();
+                expect(client.setRoomReadMarkers).not.toHaveBeenCalled();
+            });
+
+            it("isn't drawn when a room whose watched messages the user was active after is opened again", async () => {
+                vi.mocked(client.setRoomReadMarkers).mockImplementation(async (_roomId, eventId) => {
+                    setFullyRead(eventId);
+                    return {};
+                });
+                await openRoom([mkMessage("ev1")]);
+                await receive(mkMessage("ev2"));
+                await beActive();
+                cleanup();
+                await openTimeline();
+
+                expect(messageAboveMarker()).toBe("ev2");
+                expect(messagesAboveLines()).toEqual([]);
+            });
+        });
+
+        it("isn't drawn for a message that arrives in a focused app's thread, and nothing is sent for it", async () => {
+            vi.mocked(client.supportsThreads).mockReturnValue(true);
+            const threadRoot = mkMessage("ev0");
+            const thread = new Thread(threadRoot.getId()!, threadRoot, { client, room });
+            await openRoom([mkMessage("ev1", otherUserId, "ev0")], { hideThreadedMessages: false }, thread);
+            await receive(mkMessage("ev2", otherUserId, "ev0"));
+            await advance(2 * OUT_OF_VIEW_MS);
+
+            expect(messagesAboveLines()).toEqual([]);
+            expect(messageAboveMarker()).toBe("ev2");
+            expect(client.sendReadReceipt).not.toHaveBeenCalled();
+            expect(client.setRoomReadMarkers).not.toHaveBeenCalled();
+        });
+
+        it("follows the focus of the app no more than the user's activity where neither moves the marker", async () => {
+            await openRoom([mkMessage("ev1")], { enableReadReceiptsAndMarkersOnActivity: false });
+            await receive(mkMessage("ev2"));
+            await advance(2 * OUT_OF_VIEW_MS);
+
+            expect(messagesAboveLines()).toEqual(["ev1"]);
+        });
+
+        it("stops following the focus of the app when the timeline is closed", async () => {
+            const stopTimer = vi.spyOn(AppFocusTimer.prototype, "stop");
+            await openRoom([mkMessage("ev1")]);
+            expect(stopTimer).not.toHaveBeenCalled();
+
+            cleanup();
+            expect(stopTimer).toHaveBeenCalledTimes(1);
+        });
+
+        it("doesn't exist in a timeline that doesn't manage read markers", async () => {
+            await openRoom([mkMessage("ev1")], { manageReadMarkers: false });
+            await receive(mkMessage("ev2"));
+            await advance(2 * OUT_OF_VIEW_MS);
+
+            expect(container.querySelector(".mx_MessagePanel_myReadMarker")).toBeNull();
+            expect(client.setRoomReadMarkers).not.toHaveBeenCalled();
         });
     });
 
