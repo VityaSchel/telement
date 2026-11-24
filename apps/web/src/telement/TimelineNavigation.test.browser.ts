@@ -6,7 +6,7 @@ Please see LICENSE files in the repository root for full details.
 */
 
 import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
-import { userEvent } from "vitest/browser";
+import { cdp, userEvent } from "vitest/browser";
 import compoundBase from "@vector-im/compound-design-tokens/assets/web/css/cpd-common-base.css?raw";
 import compoundSemantic from "@vector-im/compound-design-tokens/assets/web/css/cpd-common-semantic.css?raw";
 import compoundLightTheme from "@vector-im/compound-design-tokens/assets/web/css/cpd-theme-light-base.css?raw";
@@ -466,6 +466,55 @@ describe("Timeline navigation", () => {
 
             expect(getComputedStyle(link).outlineStyle).toBe("solid");
             expect(getComputedStyle(link).outlineWidth).toBe("2px");
+        });
+
+        /** Gives a row the focus as closing its right-click menu with a key does: the keyboard's, on the row itself. */
+        async function focusRow(tile: HTMLElement): Promise<CSSStyleDeclaration> {
+            tile.tabIndex = -1;
+            await userEvent.keyboard("{Shift}");
+            tile.focus();
+            expect(tile.matches(":focus-visible")).toBe(true);
+            return getComputedStyle(tile);
+        }
+
+        it.each<[name: string, layout: Layout, html: string]>([
+            ["a message", "Bubble", row("Focused")],
+            ["your own message", "Bubble", row("Focused", { own: true })],
+            ["an informational row", "Bubble", infoRow("Alice joined the room")],
+            ["a message of a thread", "Bubble", row("Focused", { states: ["shapeThread"] })],
+            ["a search result", "Bubble", row("Focused", { states: ["shapeSearch"] })],
+            ["a message", "Group", row("Focused", { layout: "Group" })],
+            ["a message", "Irc", row("Focused", { layout: "Irc" })],
+        ])("marks %s that has the focus itself with the band alone, without a ring (%s)", async (_, layout, html) => {
+            const scope = render("cpd-theme-light", html);
+            const tile = scope.querySelector<HTMLElement>(".root")!;
+
+            expect((await focusRow(tile)).outlineStyle).toBe("none");
+            const band =
+                layout === "Bubble" ? bandOf(tile) : getComputedStyle(tile.querySelector(".line")!).backgroundColor;
+            expect(colorDistance(band, tokenColor("--tl-color-bg-message-selected", scope))).toBeLessThanOrEqual(1);
+        });
+
+        it.each([
+            ["being edited", "stateEditing"],
+            ["of a side panel's list", "shapeThreadsList"],
+        ])("keeps the ring on a focused message %s, which has no band", async (_, state) => {
+            const scope = render("cpd-theme-light", row("Focused", { states: [state] }));
+            const { outlineStyle, outlineWidth } = await focusRow(scope.querySelector<HTMLElement>(".root")!);
+
+            expect([outlineStyle, outlineWidth]).toEqual(["solid", "2px"]);
+        });
+
+        it("keeps the ring on a focused message in forced colors, which draw no band", async () => {
+            const scope = render("cpd-theme-light", row("Focused"));
+            await cdp().send("Emulation.setEmulatedMedia", { features: [{ name: "forced-colors", value: "active" }] });
+            try {
+                const { outlineStyle, outlineWidth } = await focusRow(scope.querySelector<HTMLElement>(".root")!);
+
+                expect([outlineStyle, outlineWidth]).toEqual(["solid", "2px"]);
+            } finally {
+                await cdp().send("Emulation.setEmulatedMedia", { features: [] });
+            }
         });
 
         it.each<Layout>(["Bubble", "Group"])(

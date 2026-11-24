@@ -2426,6 +2426,16 @@
 }
 
 /*
+ * The row itself, which a right-click focuses and its menu gives the focus back to, has no ring around it as well as
+ * the band. Forced colors draw no band, so they keep the ring.
+ */
+@media (forced-colors: none) {
+    .root:not(.stateEditing, .shapeCard, .shapeThreadsList, .shapeNotification, .shapeFile):focus-visible {
+        outline: none;
+    }
+}
+
+/*
  * Secondary text drawn on the selected band (an informational row, what a message without a bubble holds, and the group
  * and IRC layouts' lines) takes a deeper gray, which keeps it at 4.5:1. A jump's band fades, and the gray with it.
  */
