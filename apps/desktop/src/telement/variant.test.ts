@@ -5,6 +5,8 @@ SPDX-License-Identifier: AGPL-3.0-only OR GPL-3.0-only
 Please see LICENSE files in the repository root for full details.
 */
 
+import { type LinuxPackager } from "app-builder-lib";
+import { LinuxTargetHelper } from "app-builder-lib/out/targets/LinuxTargetHelper.js";
 import { beforeAll, describe, expect, it } from "vitest";
 import { execFileSync } from "node:child_process";
 import fs from "node:fs";
@@ -27,7 +29,10 @@ type Config = Record<string, unknown> & {
 
 /** The parts of the electron-builder configuration that the tests check. */
 interface PackagingConfig {
+    extraMetadata: { name: string; productName: string; description: string; desktopName: string };
     extraResources: { from?: string; to?: string; filter?: string[] }[];
+    protocols: { name: string; schemes: string[] };
+    linux: { executableName: string; extraFiles: { from: string; to: string }[] };
     deb: { depends: string[]; recommends: string[]; synopsis: string; fpm: string[] };
 }
 
@@ -56,6 +61,20 @@ function loadPackagingConfig(): PackagingConfig {
         encoding: "utf8",
     });
     return JSON.parse(output.slice(output.lastIndexOf("\n")));
+}
+
+/** Generates the desktop file the deb installs, as electron-builder does when building it. */
+function generateDebDesktopFile(packaging: PackagingConfig): Promise<string> {
+    const { extraMetadata, linux, deb } = packaging;
+    const packager = {
+        appInfo: { ...extraMetadata, sanitizedProductName: extraMetadata.productName },
+        config: packaging,
+        executableName: linux.executableName,
+        fileAssociations: [],
+        info: { metadata: extraMetadata },
+        platformSpecificBuildOptions: linux,
+    } as unknown as LinuxPackager;
+    return new LinuxTargetHelper(packager).computeDesktopEntry({ ...linux, ...deb });
 }
 
 function isSameHostOrSubdomain(host: string, candidate: string): boolean {
@@ -170,6 +189,42 @@ describe("Telement desktop variant", () => {
                 const { license } = JSON.parse(readText("package.json")) as { license: string };
                 expect(license).toBe("AGPL-3.0-only OR GPL-3.0-only");
                 expect(copyrightNotice).toContain(`SPDX-License-Identifier: ${license}\n`);
+            });
+        });
+
+        describe("tar.gz", () => {
+            const desktopFile = "share/applications/telement-desktop.desktop";
+            const icon = "share/icons/hicolor/512x512/apps/telement-desktop.png";
+
+            function readTarballFile(to: string): Buffer {
+                const { from } = packaging.linux.extraFiles.find((file) => file.to === to)!;
+                return fs.readFileSync(path.join(desktopDir, from));
+            }
+
+            it("holds a desktop file, an icon and how to install them", () => {
+                expect(packaging.linux.extraFiles.map(({ to }) => to)).toEqual(["install.txt", desktopFile, icon]);
+
+                const pngSize = readTarballFile(icon).subarray(16, 24);
+                expect([pngSize.readUInt32BE(0), pngSize.readUInt32BE(4)]).toEqual([512, 512]);
+
+                const instructions = readTarballFile("install.txt").toString();
+                expect(instructions).toContain(`~/.local/${desktopFile}\n`);
+                expect(instructions).toContain("update-desktop-database ~/.local/share/applications\n");
+            });
+
+            it("has the deb's desktop file, with the variant's URL scheme, apart from the executable's directory", async () => {
+                const content = readTarballFile(desktopFile).toString();
+                expect(content).toContain(`\nMimeType=x-scheme-handler/${build.protocols[0]};\n`);
+
+                const debDesktopFile = await generateDebDesktopFile(packaging);
+                expect(debDesktopFile).toContain("\nExec=/opt/Telement/telement-desktop %U\n");
+                expect(content).toBe(debDesktopFile.replace("/opt/Telement/", ""));
+            });
+
+            it("leaves the deb, which packs the same directory, without its files", () => {
+                const { fpm } = packaging.deb;
+                const excluded = fpm.filter((_, index) => fpm[index - 1] === "--exclude");
+                expect(excluded).toEqual(["opt/Telement/install.txt", "opt/Telement/share"]);
             });
         });
     });

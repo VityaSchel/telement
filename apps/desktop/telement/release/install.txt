@@ -1,0 +1,17 @@
+Telement runs from this directory without being installed: ./telement-desktop
+
+To list it in the applications menu and let it open dev.hloth.telement: links,
+which return to it from a login in the browser, run these two lines in this
+directory, and again after moving it:
+
+    mkdir -p ~/.local && cp -r share ~/.local/ && sed -i "s|^Exec=.*|Exec=\"$PWD/telement-desktop\" %U|" ~/.local/share/applications/telement-desktop.desktop
+    update-desktop-database ~/.local/share/applications
+
+If Telement exits saying that the SUID sandbox helper is not configured
+correctly, the kernel blocks unprivileged user namespaces, as on Ubuntu 24.04
+and later, and an archive can't make chrome-sandbox setuid root to do without
+them. Do one of these:
+
+  - Use the deb instead, which sets this up.
+  - Run: sudo chown root:root chrome-sandbox && sudo chmod 4755 chrome-sandbox
+  - Run ./telement-desktop --no-sandbox, which turns Chromium's sandbox off.

@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=Telement
+Exec=telement-desktop %U
+Terminal=false
+Type=Application
+Icon=telement-desktop
+StartupWMClass=telement-desktop
+Comment=Telement: a Telegram-style Matrix client based on Element
+MimeType=x-scheme-handler/dev.hloth.telement;
+Categories=Network;InstantMessaging;Chat;
