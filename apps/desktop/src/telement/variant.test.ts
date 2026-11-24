@@ -27,11 +27,16 @@ type Config = Record<string, unknown> & {
 
 /** The parts of the electron-builder configuration that the tests check. */
 interface PackagingConfig {
-    deb: { depends: string[]; recommends: string[]; synopsis: string };
+    extraResources: { from?: string; to?: string; filter?: string[] }[];
+    deb: { depends: string[]; recommends: string[]; synopsis: string; fpm: string[] };
+}
+
+function readText(...pathInDesktop: string[]): string {
+    return fs.readFileSync(path.join(desktopDir, ...pathInDesktop), "utf8");
 }
 
 function readJson<T>(fileName: string): T {
-    return JSON.parse(fs.readFileSync(path.join(variantDir, fileName), "utf8"));
+    return JSON.parse(readText("telement", "release", fileName));
 }
 
 /**
@@ -129,6 +134,43 @@ describe("Telement desktop variant", () => {
         it("has the variant's description as the deb's synopsis", () => {
             expect(packaging.deb.synopsis).toBe(build.description);
             expect(packaging.deb.synopsis).toMatch(/^.{1,79}$/);
+        });
+
+        describe("licenses", () => {
+            const copyrightNotice = readText("telement", "release", "COPYRIGHT");
+
+            it("ships the license texts and the copyright notice next to the app's own resources", () => {
+                expect(packaging.extraResources).toEqual(
+                    expect.arrayContaining([
+                        { filter: expect.arrayContaining(["webapp.asar"]) },
+                        { from: "telement/release/COPYRIGHT", to: "COPYRIGHT" },
+                        { from: "../../LICENSE-AGPL-3.0", to: "LICENSE-AGPL-3.0" },
+                        { from: "../../LICENSE-GPL-3.0", to: "LICENSE-GPL-3.0" },
+                    ]),
+                );
+                expect(readText("../../LICENSE-AGPL-3.0")).toContain("GNU AFFERO GENERAL PUBLIC LICENSE");
+                expect(readText("../../LICENSE-GPL-3.0")).toContain("GNU GENERAL PUBLIC LICENSE");
+            });
+
+            it("puts the copyright notice where Debian expects it, after fpm's options, which end at the first file", () => {
+                expect(packaging.deb.fpm.at(-1)).toBe(
+                    "telement/release/COPYRIGHT=/usr/share/doc/telement-desktop/copyright",
+                );
+            });
+
+            it("names in the copyright notice every copyright holder the README names", () => {
+                const copyrightLines = readText("../../README.md").match(/^Copyright .*$/gm);
+                expect(copyrightLines).not.toBeNull();
+                for (const line of copyrightLines!) {
+                    expect(copyrightNotice).toContain(`${line}\n`);
+                }
+            });
+
+            it("states the license in the package metadata as in the copyright notice", () => {
+                const { license } = JSON.parse(readText("package.json")) as { license: string };
+                expect(license).toBe("AGPL-3.0-only OR GPL-3.0-only");
+                expect(copyrightNotice).toContain(`SPDX-License-Identifier: ${license}\n`);
+            });
         });
     });
 });

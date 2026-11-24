@@ -14,7 +14,7 @@
         "type": "git",
         "url": "https://git.hloth.dev/hloth/telement"
     },
-    "license": "SEE LICENSE IN README.md",
+    "license": "AGPL-3.0-only OR GPL-3.0-only",
     "type": "module",
     "files": [],
     "engines": {
