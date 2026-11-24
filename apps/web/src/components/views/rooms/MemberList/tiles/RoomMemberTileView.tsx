@@ -16,7 +16,7 @@ import BaseAvatar from "../../../avatars/BaseAvatar";
 import { _t } from "../../../../../languageHandler";
 import { MemberTileView } from "./common/MemberTileView";
 import { InvitedIconView } from "./common/InvitedIconView";
-import { type MemberWithSeparator } from "../../../../viewmodels/memberlist/MemberListViewModel";
+import { type Member } from "../../../../viewmodels/memberlist/MemberListViewModel";
 import { DisambiguatedProfileViewModel } from "../../../../../viewmodels/room/timeline/event-tile/DisambiguatedProfileViewModel";
 import { useUserStatus } from "../../../../../hooks/useUserStatus";
 
@@ -24,14 +24,14 @@ interface IProps {
     /**
      * Needed for `onFocus`
      */
-    item: MemberWithSeparator;
+    item: Member;
     member: RoomMember;
     index: number;
     memberCount: number;
     showPresence?: boolean;
     focused?: boolean;
     tabIndex?: number;
-    onFocus: (item: MemberWithSeparator, e: React.FocusEvent) => void;
+    onFocus: (item: Member, e: React.FocusEvent) => void;
 }
 
 export function RoomMemberTileView(props: IProps): JSX.Element {
@@ -92,7 +92,7 @@ export function RoomMemberTileView(props: IProps): JSX.Element {
             iconJsx={iconJsx}
             focused={props.focused}
             tabIndex={props.tabIndex}
-            memberIndex={props.index - (member.isInvite ? 1 : 0)} // Adjust as invites are below the seperator
+            memberIndex={props.index}
             memberCount={props.memberCount}
         />
     );

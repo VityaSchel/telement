@@ -104,11 +104,21 @@ export type ScrollIntoViewOnChange<Item, Context> = NonNullable<
 
 export interface UseVirtualizedListResult<Item, Context> extends Omit<
     VirtuosoProps<Item, VirtualizedListContext<Context>>,
-    "data" | "itemContent" | "context" | "onKeyDown" | "onFocus" | "onBlur" | "rangeChanged" | "scrollerRef" | "ref"
+    | "data"
+    | "itemContent"
+    | "context"
+    | "onKeyDown"
+    | "onMouseDown"
+    | "onFocus"
+    | "onBlur"
+    | "rangeChanged"
+    | "scrollerRef"
+    | "ref"
 > {
     ref: React.RefCallback<VirtuosoHandle>;
     scrollerRef: (element: HTMLElement | Window | null) => void;
     onKeyDown: (e: React.KeyboardEvent<HTMLDivElement>) => void;
+    onMouseDown: (e: React.MouseEvent<HTMLDivElement>) => void;
     onFocus: (e: React.FocusEvent) => void;
     onBlur: (event: React.FocusEvent<HTMLDivElement>) => void;
     rangeChanged: (range: ListRange) => void;
@@ -142,6 +152,7 @@ export function useVirtualizedList<Item, Context>(
         getItemKey,
         context,
         onKeyDown,
+        onMouseDown,
         totalCount,
         rangeChanged,
         scrollerRef: externalScrollerRef,
@@ -280,6 +291,19 @@ export function useVirtualizedList<Item, Context>(
     );
 
     /**
+     * Telement: pressing the list's scrollbar, which browsers report as pressing the list itself, leaves the focus where
+     * it is. The focus went to the list otherwise, which scrolls to the item that is its Tab stop: once that had scrolled
+     * out of sight, usually as the first one, dragging the scrollbar threw the list back to it.
+     */
+    const mouseDownCallback = useCallback(
+        (e: React.MouseEvent<HTMLDivElement>): void => {
+            if (e.target === e.currentTarget) e.preventDefault();
+            onMouseDown?.(e);
+        },
+        [onMouseDown],
+    );
+
+    /**
      * Callback ref for the Virtuoso scroller element.
      * Stores the reference for use in focus management, and forwards it to an
      * optional external scrollerRef provided by the consumer (e.g. to observe
@@ -385,6 +409,7 @@ export function useVirtualizedList<Item, Context>(
         // or Shift+Tab from the item would stop on the list, which shows nothing, rather than leave it.
         tabIndex: isFocused ? -1 : 0,
         onKeyDown: keyDownCallback,
+        onMouseDown: mouseDownCallback,
         onFocus,
         onBlur,
         rangeChanged: handleRangeChanged,

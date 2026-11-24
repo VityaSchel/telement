@@ -19,7 +19,7 @@ import userEvent from "@testing-library/user-event";
 import { type RoomMember } from "../../../../../models/rooms/RoomMember";
 import {
     getPending3PidInvites,
-    type MemberWithSeparator,
+    type Member,
     sdkRoomMemberToRoomMember,
 } from "../../../../viewmodels/memberlist/MemberListViewModel";
 import { RoomMemberTileView } from "./RoomMemberTileView";
@@ -153,7 +153,7 @@ describe("MemberTileView", () => {
     });
 
     describe("ThreePidInviteTileView", () => {
-        const member = {} as MemberWithSeparator;
+        const member = {} as Member;
         let cli: MatrixClient;
         let room: Room;
         let threePidInvite: ThreePIDInvite;

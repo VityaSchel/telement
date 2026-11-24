@@ -9,11 +9,7 @@ import { Text } from "@vector-im/compound-web";
 import React, { type JSX, useCallback, useMemo } from "react";
 import { type VirtualizedListContext, FlatVirtualizedList } from "@element-hq/web-shared-components";
 
-import {
-    type MemberWithSeparator,
-    SEPARATOR,
-    useMemberListViewModel,
-} from "../../../viewmodels/memberlist/MemberListViewModel";
+import { type Member, SEPARATOR, useMemberListViewModel } from "../../../viewmodels/memberlist/MemberListViewModel";
 import { RoomMemberTileView } from "./tiles/RoomMemberTileView";
 import { ThreePidInviteTileView } from "./tiles/ThreePidInviteTileView";
 import { MemberListHeaderView } from "./MemberListHeaderView";
@@ -36,17 +32,22 @@ const MEMBER_LIST_ITEM_HEIGHT = 56;
  */
 const EXTENDED_VIEWPORT_HEIGHT = 15 * MEMBER_LIST_ITEM_HEIGHT;
 
+const isItemFocusable = (): boolean => true;
+
 const MemberListView: React.FC<IProps> = (props: IProps) => {
     const vm = useMemberListViewModel(props.roomId);
     const { isPresenceEnabled } = vm;
 
+    // Telement: every item is a tile of one height, which the list counts on (fixedItemHeight). The line that sets the
+    // people who are invited apart is drawn by the first of them: as an item of its own, shorter than a tile, it made the
+    // list's height, and so its scrollbar, jump whenever it scrolled into or out of what is drawn.
+    const separatorIndex = vm.members.indexOf(SEPARATOR);
+    const members = useMemo(() => vm.members.filter((item) => item !== SEPARATOR), [vm.members]);
     // While the list is filtered, those listed
-    const memberCount = useMemo(() => vm.members.filter((item) => item !== SEPARATOR).length, [vm.members]);
+    const memberCount = members.length;
 
-    const getItemKey = useCallback((item: MemberWithSeparator): string => {
-        if (item === SEPARATOR) {
-            return "separator";
-        } else if (item.member) {
+    const getItemKey = useCallback((item: Member): string => {
+        if (item.member) {
             return `member-${item.member.userId}`;
         } else {
             return `threePidInvite-${item.threePidInvite.event.getStateKey()}`;
@@ -56,48 +57,39 @@ const MemberListView: React.FC<IProps> = (props: IProps) => {
     const getItemComponent = useCallback(
         (
             index: number,
-            item: MemberWithSeparator,
+            item: Member,
             context: VirtualizedListContext<any>,
-            onFocus: (item: MemberWithSeparator, e: React.FocusEvent) => void,
+            onFocus: (item: Member, e: React.FocusEvent) => void,
         ): JSX.Element => {
             const itemKey = getItemKey(item);
             const isRovingItem = itemKey === context.tabIndexKey;
             const focused = isRovingItem && context.focused;
-            if (item === SEPARATOR) {
-                return <hr className="mx_MemberListView_separator" />;
-            } else if (item.member) {
-                return (
-                    <RoomMemberTileView
-                        item={item}
-                        member={item.member}
-                        showPresence={isPresenceEnabled}
-                        focused={focused}
-                        tabIndex={isRovingItem ? 0 : -1}
-                        index={index}
-                        memberCount={memberCount}
-                        onFocus={onFocus}
-                    />
-                );
-            } else {
-                return (
-                    <ThreePidInviteTileView
-                        item={item}
-                        threePidInvite={item.threePidInvite}
-                        focused={focused}
-                        tabIndex={isRovingItem ? 0 : -1}
-                        memberIndex={index - 1} // Adjust as invites are below the separator
-                        memberCount={memberCount}
-                        onFocus={onFocus}
-                    />
-                );
-            }
+            const tile = item.member ? (
+                <RoomMemberTileView
+                    item={item}
+                    member={item.member}
+                    showPresence={isPresenceEnabled}
+                    focused={focused}
+                    tabIndex={isRovingItem ? 0 : -1}
+                    index={index}
+                    memberCount={memberCount}
+                    onFocus={onFocus}
+                />
+            ) : (
+                <ThreePidInviteTileView
+                    item={item}
+                    threePidInvite={item.threePidInvite}
+                    focused={focused}
+                    tabIndex={isRovingItem ? 0 : -1}
+                    memberIndex={index}
+                    memberCount={memberCount}
+                    onFocus={onFocus}
+                />
+            );
+            return index === separatorIndex ? <div className="mx_MemberListView_separated">{tile}</div> : tile;
         },
-        [isPresenceEnabled, getItemKey, memberCount],
+        [isPresenceEnabled, getItemKey, memberCount, separatorIndex],
     );
-
-    const isItemFocusable = useCallback((item: MemberWithSeparator): boolean => {
-        return item !== SEPARATOR;
-    }, []);
 
     let list: JSX.Element;
     if (vm.isLoading) {
@@ -111,7 +103,7 @@ const MemberListView: React.FC<IProps> = (props: IProps) => {
     } else {
         list = (
             <FlatVirtualizedList
-                items={vm.members}
+                items={members}
                 getItemComponent={getItemComponent}
                 getItemKey={getItemKey}
                 isItemFocusable={isItemFocusable}

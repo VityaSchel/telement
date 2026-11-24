@@ -484,6 +484,17 @@ describe.each<ListTestVariant>([flatVariant])("$name", (variant) => {
             expect(container).toBeDefined();
         });
 
+        it("leaves the focus where it is when its scrollbar is pressed, which is reported as the list itself", () => {
+            const onMouseDown = vi.fn();
+            renderListWithHeight({ onMouseDown });
+            const container = screen.getByRole("grid");
+
+            // fireEvent returns whether the browser goes on to do what it does with a press, which is to focus the list
+            expect(fireEvent.mouseDown(container)).toBe(false);
+            expect(fireEvent.mouseDown(screen.getByTestId("row-0"))).toBe(true);
+            expect(onMouseDown).toHaveBeenCalledTimes(2);
+        });
+
         it("should not scroll to top when clicking an item after manual scroll", () => {
             // Create a larger list to enable meaningful scrolling
             const largerItems: TestItemWithSeparator[] = Array.from({ length: 50 }, (_, i) => ({

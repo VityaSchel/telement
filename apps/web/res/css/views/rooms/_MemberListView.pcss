@@ -11,10 +11,19 @@ Please see LICENSE files in the repository root for full details.
     flex-direction: column;
     min-height: 0;
 
-    .mx_MemberListView_separator {
-        margin: 0;
-        border: none;
-        border-top: 2px solid var(--cpd-color-bg-subtle-primary);
+    /* The line between the people in the room and those who are invited, over the edge of the first one's tile: the tiles
+       stay as tall as the list takes them to be */
+    .mx_MemberListView_separated {
+        position: relative;
+
+        &::before {
+            content: "";
+            position: absolute;
+            inset-inline: 0;
+            inset-block-start: calc(-1 * var(--cpd-border-width-1));
+            border-block-start: var(--cpd-border-width-2) solid var(--cpd-color-bg-subtle-primary);
+            pointer-events: none;
+        }
     }
 
     .mx_MemberListView_noMatches {

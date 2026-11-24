@@ -42,6 +42,7 @@ import roomSummaryCardStyles from "../../res/css/views/right_panel/_RoomSummaryC
 import userInfoStyles from "../../res/css/views/right_panel/_UserInfo.pcss?raw";
 import verificationPanelStyles from "../../res/css/views/right_panel/_VerificationPanel.pcss?raw";
 import accessibleButtonStyles from "../../res/css/views/elements/_AccessibleButton.pcss?raw";
+import memberListViewStyles from "../../res/css/views/rooms/_MemberListView.pcss?raw";
 import memberTileViewStyles from "../../res/css/views/rooms/_MemberTileView.pcss?raw";
 import pinnedEventTileStyles from "../../res/css/views/rooms/_PinnedEventTile.pcss?raw";
 import thirdPartyMemberInfoStyles from "../../res/css/views/rooms/_ThirdPartyMemberInfo.pcss?raw";
@@ -142,13 +143,14 @@ const memberTile = (name: string, tabIndex: number): string => `
     </div>
 `;
 
-/** MemberListView's list: two member tiles. */
+/** MemberListView's list: two members, then one who is invited, who draws the line before her. */
 function renderMemberList(dir = "ltr"): HTMLElement {
     document.body.innerHTML = `
         <div class="mx_BaseCard mx_MemberListView" dir="${dir}" style="width: ${CARD_WIDTH}px">
             <div role="listbox">
                 <div>${memberTile("Alice", 0)}</div>
                 <div>${memberTile("Bob", -1)}</div>
+                <div><div class="mx_MemberListView_separated">${memberTile("Carol", -1)}</div></div>
             </div>
         </div>
     `;
@@ -238,6 +240,7 @@ describe("Right panel", () => {
                     roomSummaryCardStyles,
                     userInfoStyles,
                     verificationPanelStyles,
+                    memberListViewStyles,
                     memberTileViewStyles,
                     pinnedEventTileStyles,
                     thirdPartyMemberInfoStyles,
@@ -370,6 +373,24 @@ describe("Right panel", () => {
     });
 
     describe("member list", () => {
+        it.each(["ltr", "rtl"])(
+            "draws the line before the people who are invited over the edge of the first one's tile, which stays 56px (%s)",
+            (dir) => {
+                const card = renderMemberList(dir);
+                const tiles = [...card.querySelectorAll(".mx_MemberTileView")].map((tile) =>
+                    tile.getBoundingClientRect(),
+                );
+                const separated = card.querySelector(".mx_MemberListView_separated")!;
+                const line = getComputedStyle(separated, "::before");
+
+                expect(tiles.map((tile) => tile.height)).toEqual([56, 56, 56]);
+                expect(separated.parentElement!.getBoundingClientRect().height).toBe(56);
+                expect([line.borderTopWidth, line.borderTopStyle]).toEqual(["2px", "solid"]);
+                expect(line.borderTopColor).toBe(tokenColor("--cpd-color-bg-subtle-primary", card));
+                expect([line.top, line.width]).toEqual(["-1px", `${CARD_WIDTH}px`]);
+            },
+        );
+
         it.each(["ltr", "rtl"])(
             "puts the avatar 12px from the tile's start, top and bottom and ends the tile's content on the content edge (%s)",
             (dir) => {

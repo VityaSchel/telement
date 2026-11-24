@@ -282,5 +282,26 @@ describe("MemberListView and MemberlistHeaderView", () => {
             // 6 joined + 2 3PID invites
             expect(tiles).toHaveLength(8);
         });
+
+        it("are set apart by a line that the first of them draws, so that every item is a tile", async () => {
+            const { root } = await renderMemberList(true, undefined, 2, [
+                mkThirdPartyInviteEvent("@alice:localhost", "user@example.com", "!room:localhost"),
+                mkThirdPartyInviteEvent("@alice:localhost", "other@example.com", "!room:localhost"),
+            ]);
+            const items = [...root.container.querySelectorAll("[data-item-index]")];
+
+            expect(items.map((item) => item.querySelectorAll(".mx_MemberTileView").length)).toEqual(
+                Array.from({ length: 8 }, () => 1),
+            );
+            expect(items.map((item) => !!item.querySelector(".mx_MemberListView_separated"))).toEqual([
+                ...Array.from({ length: 6 }, () => false),
+                true,
+                false,
+            ]);
+            const tiles = [...root.container.querySelectorAll(".mx_MemberTileView")];
+            expect(tiles.map((tile) => tile.getAttribute("aria-posinset"))).toEqual([..."12345678"]);
+            expect(tiles.every((tile) => tile.getAttribute("aria-setsize") === "8")).toBe(true);
+            expect(root.getByRole("heading", { name: "People (8)" })).toBeInTheDocument();
+        });
     });
 });

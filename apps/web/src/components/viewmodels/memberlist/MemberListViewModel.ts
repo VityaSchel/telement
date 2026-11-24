@@ -38,7 +38,7 @@ import { type XOR } from "../../../@types/common";
 import { useTypedEventEmitter } from "../../../hooks/useEventEmitter";
 import { useRoomMemberCount } from "../../../hooks/useRoomMembers";
 
-type Member = XOR<{ member: RoomMember }, { threePidInvite: ThreePIDInvite }>;
+export type Member = XOR<{ member: RoomMember }, { threePidInvite: ThreePIDInvite }>;
 
 export function getPending3PidInvites(room: Room, searchQuery?: string): Member[] {
     // include 3pid invites (m.room.third_party_invite) state events.
