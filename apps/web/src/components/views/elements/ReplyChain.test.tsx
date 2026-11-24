@@ -205,6 +205,33 @@ describe("ReplyChain", () => {
             expect(container.querySelector(".mx_ReplyChain_placeholder")).toBeNull();
         });
 
+        it("holds one Tab stop, the link to the quoted message", async () => {
+            const cli = stubClient();
+            const { room_id: roomId } = await cli.createRoom({});
+            vi.spyOn(cli.getRoom(roomId)!, "findEventById").mockReturnValue(mkQuoted(cli, roomId));
+            const parentEv = mkEvent({
+                event: true,
+                type: "m.room.message",
+                user: cli.getUserId()!,
+                room: roomId,
+                id: "$reply",
+                content: {
+                    "body": "Reply",
+                    "msgtype": "m.text",
+                    "m.relates_to": { "m.in_reply_to": { event_id: "$quoted" } },
+                },
+            });
+
+            render(
+                <ReplyChain parentEv={parentEv} setQuoteExpanded={vi.fn()} compactPreview={true} />,
+                withClientContextRenderOptions(cli),
+            );
+            const link = screen.getAllByRole("link").find((element) => element.textContent!.includes("Quoted"))!;
+
+            expect(link).toContainElement(screen.getByTestId("reply-tile-sender"));
+            expect(link.querySelector("[tabindex], [role='button']")).toBeNull();
+        });
+
         it("holds a fixed-height skeleton while the quoted message is fetched", async () => {
             const { cli, parentEv } = await setUp(null);
             // Never settles, so the chain stays in its loading state.

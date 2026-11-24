@@ -175,6 +175,7 @@ describe("DisambiguatedProfileView", () => {
         const profileContainer = getProfileContainer("Static User");
         expect(profileContainer).not.toHaveAttribute("role");
         expect(profileContainer).not.toHaveAttribute("tabIndex");
+        expect(getComputedStyle(profileContainer).cursor).toBe("default");
     });
 
     it("should display tooltip title when provided", () => {

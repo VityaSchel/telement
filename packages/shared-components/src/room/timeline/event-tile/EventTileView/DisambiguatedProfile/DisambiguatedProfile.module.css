@@ -13,7 +13,12 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    cursor: pointer;
+    cursor: default;
+
+    /* Telement: the hand only where the name does something when clicked */
+    &[role="button"] {
+        cursor: pointer;
+    }
 
     .disambiguatedProfile_displayName {
         font: var(--cpd-font-body-md-semibold);

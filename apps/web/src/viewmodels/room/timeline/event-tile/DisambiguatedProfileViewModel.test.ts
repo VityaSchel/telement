@@ -86,6 +86,12 @@ describe("DisambiguatedProfileViewModel", () => {
         expect(onClick).toHaveBeenCalledTimes(1);
     });
 
+    it("should have no onClick without a click handler, so that the view draws no button that does nothing", () => {
+        const vm = new DisambiguatedProfileViewModel({ member, fallbackName: "Fallback" });
+
+        expect(vm.onClick).toBeUndefined();
+    });
+
     it("should emit snapshot update when fallbackName changes", () => {
         const vm = new DisambiguatedProfileViewModel({
             member: null,

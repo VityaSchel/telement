@@ -36,8 +36,6 @@ exports[`ReplyChain > should call setQuoteExpanded if chain is longer than 2 lin
                 class="_senderProfile _disambiguatedProfile"
                 data-event-density="default"
                 data-event-layout="group"
-                role="button"
-                tabindex="0"
               >
                 <span
                   class="mx_Username_color2 _disambiguatedProfile_displayName mx_DisambiguatedProfile_displayName"

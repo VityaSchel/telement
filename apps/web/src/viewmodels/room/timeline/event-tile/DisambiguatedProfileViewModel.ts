@@ -11,7 +11,6 @@ import {
     type DisambiguatedProfileViewModel as DisambiguatedProfileViewModelInterface,
     type UserStatus,
 } from "@element-hq/web-shared-components";
-import { type MouseEvent } from "react";
 
 import { _t } from "../../../../languageHandler";
 import { getUserNameColorClass } from "../../../../utils/FormattingUtils";
@@ -125,8 +124,15 @@ export class DisambiguatedProfileViewModel
         };
     };
 
+    /**
+     * Telement: undefined without a click handler, as the view draws a profile with this action as a button, which
+     * would be a Tab stop that does nothing.
+     */
+    public readonly onClick?: DisambiguatedProfileViewActions["onClick"];
+
     public constructor(props: DisambiguatedProfileViewModelProps) {
         super(props, DisambiguatedProfileViewModel.computeSnapshot(props));
+        this.onClick = props.onClick;
         this.snapshot.merge({
             userStatus: props.userStatus,
         });
@@ -145,8 +151,4 @@ export class DisambiguatedProfileViewModel
             userStatus,
         });
     }
-
-    public onClick = (evt: MouseEvent<HTMLDivElement>): void => {
-        this.props.onClick?.(evt);
-    };
 }
