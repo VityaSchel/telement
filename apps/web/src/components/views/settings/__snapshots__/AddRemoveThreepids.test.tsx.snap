@@ -28,7 +28,7 @@ exports[`AddRemoveThreepids > should handle no email addresses 1`] = `
         class="_text"
       >
         <span
-          class="_label"
+          class="_label _label"
         >
           Add Email Address
         </span>
@@ -90,7 +90,7 @@ exports[`AddRemoveThreepids > should render email addresses 1`] = `
         class="_text"
       >
         <span
-          class="_label"
+          class="_label _label"
         >
           Add Email Address
         </span>
@@ -152,7 +152,7 @@ exports[`AddRemoveThreepids > should render phone numbers 1`] = `
         class="_text"
       >
         <span
-          class="_label"
+          class="_label _label"
         >
           Add Phone Number
         </span>

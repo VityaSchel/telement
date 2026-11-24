@@ -107,7 +107,7 @@ exports[`<SpaceSettingsVisibilityTab /> > for a public space > renders addresses
                     class="_text"
                   >
                     <span
-                      class="_label"
+                      class="_label _label"
                     >
                       Show advanced
                     </span>

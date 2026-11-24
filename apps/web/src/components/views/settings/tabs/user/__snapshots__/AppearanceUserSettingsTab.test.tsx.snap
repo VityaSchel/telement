@@ -697,7 +697,7 @@ exports[`AppearanceUserSettingsTab > should render 1`] = `
                   class="_text"
                 >
                   <span
-                    class="_label"
+                    class="_label _label"
                   >
                     Show advanced
                   </span>

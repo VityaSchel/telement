@@ -67,7 +67,7 @@ exports[`<AccountUserSettingsTab /> > 3pids > should display 3pid email addresse
           class="_text"
         >
           <span
-            class="_label"
+            class="_label _label"
           >
             Add Email Address
           </span>
@@ -145,7 +145,7 @@ exports[`<AccountUserSettingsTab /> > 3pids > should display 3pid email addresse
           class="_text"
         >
           <span
-            class="_label"
+            class="_label _label"
           >
             Add Phone Number
           </span>
@@ -173,7 +173,7 @@ exports[`<AccountUserSettingsTab /> > deactivate account > should render section
         class="_text"
       >
         <span
-          class="_label"
+          class="_label _label"
         >
           Deactivate Account
         </span>
