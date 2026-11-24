@@ -18,6 +18,8 @@ import {
 } from "electron-builder";
 import { LogMessageByKey } from "app-builder-lib/out/node-module-collector/moduleManager.js";
 
+import { configureTelementPackaging } from "./telement/packaging.js";
+
 /**
  * This script has different outputs depending on your os platform.
  *
@@ -284,6 +286,10 @@ if (os.platform() === "linux") {
     if (process.env.ED_DEBIAN_CHANGELOG) {
         config.deb.fpm.push(`--deb-changelog=${process.env.ED_DEBIAN_CHANGELOG}`);
     }
+}
+
+if (variant.name === "telement-desktop") {
+    configureTelementPackaging(config);
 }
 
 // Treat certain warnings as a fatal error

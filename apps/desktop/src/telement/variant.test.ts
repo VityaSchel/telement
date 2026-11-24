@@ -26,7 +26,7 @@ type Config = Record<string, unknown> & {
 
 /** The parts of the electron-builder configuration that the tests check. */
 interface PackagingConfig {
-    deb: { depends: string[] };
+    deb: { depends: string[]; recommends: string[] };
 }
 
 function readJson<T>(fileName: string): T {
@@ -118,6 +118,10 @@ describe("Telement desktop variant", () => {
         it("depends on ALSA's own library by its current name first", () => {
             expect(packaging.deb.depends).toContain("libasound2t64 | libasound2");
             expect(packaging.deb.depends).not.toContain("libasound2");
+        });
+
+        it("does not recommend the keyring of Element's apt repository", () => {
+            expect(packaging.deb.recommends).toEqual([]);
         });
     });
 });
