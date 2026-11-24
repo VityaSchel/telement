@@ -9,7 +9,8 @@ import { set } from "lodash";
 import { KEY_SEPARATOR, registerTranslations } from "@element-hq/web-shared-components";
 import { type Translation } from "matrix-web-i18n";
 
-import englishOverrides from "./englishOverrides.json";
+// Not named like this module, which webpack would then load in its place (webpackResolution.test.ts)
+import englishOverrides from "./overrides.en.json";
 
 /** Telement's English for one upstream translation key. */
 export interface EnglishOverride {
