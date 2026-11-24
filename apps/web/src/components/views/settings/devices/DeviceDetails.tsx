@@ -193,7 +193,8 @@ const DeviceDetails: React.FC<Props> = ({
                         data-testid="device-detail-sign-out-cta"
                     >
                         <span className="mx_DeviceDetails_signOutButtonContent">
-                            {_t("settings|sessions|sign_out")}
+                            {/* Telement: this device's button signs out of it, as its menu and the Account tab say */}
+                            {isCurrentDevice ? _t("action|sign_out") : _t("settings|sessions|sign_out")}
                             {isSigningOut && <Spinner size={16} />}
                         </span>
                     </AccessibleButton>

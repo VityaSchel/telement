@@ -183,6 +183,31 @@ describe("registerEnglishOverrides", () => {
         expect(_t("settings|preferences|publish_timezone")).toBe("Publish time zone on public profile");
     });
 
+    it("says Sign out for signing out of this device, in what asks about it too", async () => {
+        await setLanguage("en");
+        expect(_t("action|sign_out")).toBe("Sign out");
+        expect(_t("action|remove_this_device" as TranslationKey)).toBe("Sign out");
+
+        const asked: TranslationKey[] = [
+            "auth|logout_dialog|check_recovery_key_title",
+            "auth|logout_dialog|continue",
+            "auth|logout_dialog|description",
+            "auth|logout_dialog|setup_secure_backup_description",
+            "auth|logout_dialog|skip_key_backup",
+            "error|legacy_crypto_unsupported|actions" as TranslationKey,
+            "error|session_restore|clear_storage_button",
+            "error|session_restore|clear_storage_description",
+            "error|session_restore|description_3",
+            "error|storage_evicted_description_1",
+        ];
+        for (const key of asked) {
+            expect(_t(key)).toMatch(/sign(ing)? (you )?out/i);
+            expect(_t(key)).not.toMatch(/remov(e|ing) (this device|it)\b(?!')/i);
+        }
+        // Another device is still removed
+        expect(_t("settings|sessions|sign_out")).toBe("Remove this session");
+    });
+
     it("leaves the translations of other languages alone", async () => {
         await setLanguage("de");
         expect(_t("room_settings|security|title")).toBe(webStringsDe.room_settings.security.title);

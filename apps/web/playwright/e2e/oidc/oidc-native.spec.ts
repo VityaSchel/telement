@@ -75,8 +75,8 @@ test.describe("OIDC Native", { tag: ["@no-firefox", "@no-webkit"] }, () => {
         );
         const locator = await app.settings.openUserMenu();
         await locator.getByRole("menuitem", { name: "All settings", exact: true }).click();
-        await page.getByRole("button", { name: "Remove this device", exact: true }).click();
-        await page.getByRole("button", { name: "Remove this device anyway" }).click();
+        await page.getByRole("button", { name: "Sign out", exact: true }).click();
+        await page.getByRole("button", { name: "Sign out anyway" }).click();
         await revokeAccessTokenPromise;
         await revokeRefreshTokenPromise;
     });
@@ -122,8 +122,8 @@ test.describe("OIDC Native", { tag: ["@no-firefox", "@no-webkit"] }, () => {
         // Allow the outstanding requests queue to settle before logging out
         await page.waitForTimeout(2000);
         await page.getByRole("menu", { name: "User menu" }).getByRole("menuitem", { name: "All settings" }).click();
-        await page.getByRole("button", { name: "Remove this device" }).click();
-        await page.getByRole("button", { name: "Remove this device anyway" }).click();
+        await page.getByRole("button", { name: "Sign out" }).click();
+        await page.getByRole("button", { name: "Sign out anyway" }).click();
         await expect(page).toHaveURL(/\/#\/welcome$/);
 
         // Log in again
@@ -158,8 +158,8 @@ test.describe("OIDC Native", { tag: ["@no-firefox", "@no-webkit"] }, () => {
             await expect(page.getByText(userId, { exact: true })).toBeVisible();
             await page.waitForTimeout(2000);
             await page.getByRole("menu", { name: "User menu" }).getByRole("menuitem", { name: "All settings" }).click();
-            await page.getByRole("button", { name: "Remove this device" }).click();
-            await page.getByRole("button", { name: "Remove this device anyway" }).click();
+            await page.getByRole("button", { name: "Sign out" }).click();
+            await page.getByRole("button", { name: "Sign out anyway" }).click();
             await expect(page).toHaveURL(/\/#\/welcome$/);
 
             // Log in again
@@ -210,7 +210,7 @@ test.describe("OIDC Native", { tag: ["@no-firefox", "@no-webkit"] }, () => {
                     .getByRole("menu", { name: "User menu" })
                     .getByRole("menuitem", { name: "All settings" })
                     .click();
-                await page.getByRole("button", { name: "Remove this device" }).click();
+                await page.getByRole("button", { name: "Sign out" }).click();
                 // Since we have another device, it only shows a normal logout
                 // confirmation dialog, rather than prompting the user to set up
                 // recovery. Use the test ID to find this button to avoid

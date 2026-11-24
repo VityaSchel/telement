@@ -106,9 +106,9 @@ describe("ActionRowView", () => {
 
     it("puts a 20px icon on the content edge before the label", () => {
         render(<CriticalWithIcon />);
-        const row = screen.getByRole("button", { name: "Remove this device" });
+        const row = screen.getByRole("button", { name: "Sign out" });
         const icon = row.querySelector("svg")!.getBoundingClientRect();
-        const label = textBox(screen.getByText("Remove this device"));
+        const label = textBox(screen.getByText("Sign out"));
 
         expect([icon.width, icon.height]).toEqual([20, 20]);
         expect(icon.left - card(row).left).toBe(16);

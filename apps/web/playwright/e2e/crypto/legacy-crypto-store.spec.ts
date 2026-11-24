@@ -38,6 +38,6 @@ test.describe("legacy crypto store", function () {
         await expect(page.getByRole("heading", { name: "This device cannot be used" })).toBeVisible({
             timeout: 10000,
         });
-        await expect(page.getByRole("button", { name: "Remove this device" })).toBeVisible();
+        await expect(page.getByRole("button", { name: "Sign out" })).toBeVisible();
     });
 });

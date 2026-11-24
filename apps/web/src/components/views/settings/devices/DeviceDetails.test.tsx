@@ -70,6 +70,15 @@ describe("<DeviceDetails />", () => {
         expect(container).toMatchSnapshot();
     });
 
+    it("signs out of this device, and removes another one", () => {
+        const { getByTestId, rerender } = render(getComponent({ isCurrentDevice: true }));
+        // The text of upstream's action|sign_out, as the Account tab's row has it
+        expect(getByTestId("device-detail-sign-out-cta")).toHaveTextContent("Remove this device");
+
+        rerender(getComponent({ isCurrentDevice: false }));
+        expect(getByTestId("device-detail-sign-out-cta")).toHaveTextContent("Remove this session");
+    });
+
     it("links another session to its page on the account's server as a link that leaves the app", () => {
         const { getByTestId } = render(
             getComponent({ accountManagementEndpoint: "https://auth.example.org/account", isCurrentDevice: false }),

@@ -29,8 +29,8 @@ test.describe("logout with logout_redirect_url", () => {
         // give a change for the outstanding requests queue to settle before logging out
         await page.waitForTimeout(2000);
         await page.getByRole("menu", { name: "User menu" }).getByRole("menuitem", { name: "All settings" }).click();
-        await page.getByRole("button", { name: "Remove this device" }).click();
-        await page.getByRole("button", { name: "Remove this device anyway" }).click();
+        await page.getByRole("button", { name: "Sign out" }).click();
+        await page.getByRole("button", { name: "Sign out anyway" }).click();
 
         await expect(page).toHaveURL(/\/decoder-ring\/$/);
     });

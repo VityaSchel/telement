@@ -1,4 +1,12 @@
 {
+    "action|remove_this_device": {
+        "upstream": "Remove this device",
+        "telement": "Sign out"
+    },
+    "action|sign_out": {
+        "upstream": "Remove this device",
+        "telement": "Sign out"
+    },
     "action|start_chat": {
         "upstream": "Start chat",
         "telement": "New message"
@@ -14,6 +22,26 @@
     "auth|country_dropdown": {
         "upstream": "Country Dropdown",
         "telement": "Country dropdown"
+    },
+    "auth|logout_dialog|check_recovery_key_title": {
+        "upstream": "Make sure you have access to your recovery key before removing this device",
+        "telement": "Make sure you have access to your recovery key before signing out"
+    },
+    "auth|logout_dialog|continue": {
+        "upstream": "Continue to remove this device",
+        "telement": "Continue to sign out"
+    },
+    "auth|logout_dialog|description": {
+        "upstream": "Are you sure you want to remove this device?",
+        "telement": "Are you sure you want to sign out?"
+    },
+    "auth|logout_dialog|setup_secure_backup_description": {
+        "upstream": "This is your only device. If you remove it you'll need a recovery key in order to confirm your digital identity and restore your encrypted chats the next time you sign in.",
+        "telement": "This is your only device. If you sign out, you'll need a recovery key in order to confirm your digital identity and restore your encrypted chats the next time you sign in."
+    },
+    "auth|logout_dialog|skip_key_backup": {
+        "upstream": "Remove this device anyway",
+        "telement": "Sign out anyway"
     },
     "auth|register_action": {
         "upstream": "Create Account",
@@ -251,9 +279,29 @@
         "upstream": "Verification Request",
         "telement": "Verification request"
     },
+    "error|legacy_crypto_unsupported|actions": {
+        "upstream": "Please either downgrade to <b>%(version)s</b> first or remove this device.",
+        "telement": "Please either downgrade to <b>%(version)s</b> first or sign out."
+    },
     "error|mau": {
         "upstream": "This service has hit its Monthly Active User limit.",
         "telement": "This service has hit its monthly active user limit."
+    },
+    "error|session_restore|clear_storage_button": {
+        "upstream": "Remove this device",
+        "telement": "Sign out"
+    },
+    "error|session_restore|clear_storage_description": {
+        "upstream": "Remove this device together with its encryption keys?",
+        "telement": "Sign out and remove this device's encryption keys?"
+    },
+    "error|session_restore|description_3": {
+        "upstream": "Clearing your browser's storage may fix the problem, but will remove this device and cause any encrypted chat history to become unreadable.",
+        "telement": "Clearing your browser's storage may fix the problem, but will sign you out and cause any encrypted chat history to become unreadable."
+    },
+    "error|storage_evicted_description_1": {
+        "upstream": "Some of the data stored on this device is missing, so older messages may not open. Remove this device and sign in again — if you've set up recovery, your messages will come back.",
+        "telement": "Some of the data stored on this device is missing, so older messages may not open. Sign out and sign in again — if you've set up recovery, your messages will come back."
     },
     "export_chat|cancelled": {
         "upstream": "Export Cancelled",

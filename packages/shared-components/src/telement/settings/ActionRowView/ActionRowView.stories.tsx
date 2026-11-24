@@ -37,7 +37,7 @@ type Story = StoryObj<typeof meta>;
 export const Critical: Story = {};
 
 export const CriticalWithIcon: Story = {
-    args: { children: "Remove this device", Icon: SignOutIcon },
+    args: { children: "Sign out", Icon: SignOutIcon },
 };
 
 export const Accent: Story = {

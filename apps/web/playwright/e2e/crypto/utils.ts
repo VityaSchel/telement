@@ -256,16 +256,16 @@ export async function logOutOfElement(page: Page, discardKeys: boolean = false) 
     await page.getByRole("button", { name: "User menu" }).click();
 
     await page.getByRole("menu", { name: "User menu" }).getByRole("menuitem", { name: "All settings" }).click();
-    await page.getByRole("button", { name: "Remove this device" }).click();
+    await page.getByRole("button", { name: "Sign out" }).click();
     if (discardKeys) {
-        await page.getByRole("button", { name: "Remove this device anyway" }).click();
+        await page.getByRole("button", { name: "Sign out anyway" }).click();
     } else {
         // Plain confirmation if there is another verified device, recovery key reminder if this is the only one.
-        // Scope to the dialog by its heading: the settings dialog behind it has a "Remove this device" button too.
+        // Scope to the dialog by its heading: the settings dialog behind it has a "Sign out" button too.
         await page
             .getByRole("dialog")
-            .filter({ has: page.getByRole("heading", { name: /remov(e|ing) this device/ }) })
-            .getByRole("button", { name: /^(Remove this device|Continue to remove this device)$/ })
+            .filter({ has: page.getByRole("heading", { name: /sign(ing)? out/ }) })
+            .getByRole("button", { name: /^(Sign out|Continue to sign out)$/ })
             .click();
     }
 

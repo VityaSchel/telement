@@ -25,7 +25,7 @@ test.describe("Logout tests", () => {
         const locator = await app.settings.openUserMenu();
 
         await locator.getByRole("menuitem", { name: "All settings", exact: true }).click();
-        await page.getByRole("button", { name: "Remove this device", exact: true }).click();
+        await page.getByRole("button", { name: "Sign out", exact: true }).click();
 
         const currentDialogLocator = page.locator(".mx_Dialog");
 
@@ -44,13 +44,13 @@ test.describe("Logout tests", () => {
 
         const locator = await app.settings.openUserMenu();
         await locator.getByRole("menuitem", { name: "All settings", exact: true }).click();
-        await page.getByRole("button", { name: "Remove this device", exact: true }).click();
+        await page.getByRole("button", { name: "Sign out", exact: true }).click();
 
         const currentDialogLocator = page.locator(".mx_Dialog");
 
         await expect(
             currentDialogLocator.getByRole("heading", {
-                name: "Make sure you have access to your recovery key before removing this device",
+                name: "Make sure you have access to your recovery key before signing out",
             }),
         ).toBeVisible();
     });
@@ -62,7 +62,7 @@ test.describe("Logout tests", () => {
 
         const locator = await app.settings.openUserMenu();
         await locator.getByRole("menuitem", { name: "All settings", exact: true }).click();
-        await page.getByRole("button", { name: "Remove this device", exact: true }).click();
+        await page.getByRole("button", { name: "Sign out", exact: true }).click();
 
         const currentDialogLocator = page.locator(".mx_Dialog");
 
