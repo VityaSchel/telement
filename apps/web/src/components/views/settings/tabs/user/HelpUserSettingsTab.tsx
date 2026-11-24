@@ -9,7 +9,7 @@ Please see LICENSE files in the repository root for full details.
 import React, { type JSX, type ReactNode } from "react";
 import { logger } from "matrix-js-sdk/src/logger";
 import { type EmptyObject } from "matrix-js-sdk/src/matrix";
-import { ActionRowView } from "@element-hq/web-shared-components";
+import { ActionRowView, ValueRowList } from "@element-hq/web-shared-components";
 
 import { _t } from "../../../../../languageHandler";
 import SdkConfig from "../../../../../SdkConfig";
@@ -22,9 +22,13 @@ import { SettingsSubsection, SettingsSubsectionText } from "../../shared/Setting
 import ExternalLink from "../../../elements/ExternalLink";
 import MatrixClientContext from "../../../../../contexts/MatrixClientContext";
 
+/** The id of what the access token's row shows under it. */
+const ACCESS_TOKEN_ID = "mx_HelpUserSettingsTab_accessToken";
+
 interface IState {
     appVersion: string | null;
     canUpdate: boolean;
+    showAccessToken: boolean;
 }
 
 export default class HelpUserSettingsTab extends React.Component<EmptyObject, IState> {
@@ -37,6 +41,7 @@ export default class HelpUserSettingsTab extends React.Component<EmptyObject, IS
         this.state = {
             appVersion: null,
             canUpdate: false,
+            showAccessToken: false,
         };
     }
 
@@ -76,6 +81,10 @@ export default class HelpUserSettingsTab extends React.Component<EmptyObject, IS
         void this.context.store.deleteAllData().then(() => {
             PlatformPeg.get()?.reload();
         });
+    };
+
+    private toggleAccessToken = (): void => {
+        this.setState(({ showAccessToken }) => ({ showAccessToken: !showAccessToken }));
     };
 
     private renderLegal(): ReactNode {
@@ -286,21 +295,32 @@ export default class HelpUserSettingsTab extends React.Component<EmptyObject, IS
                                 )}
                             </SettingsSubsectionText>
                         )}
-                        <SettingsSubsectionText>
-                            <details>
-                                <summary className="mx_HelpUserSettingsTab_accessTokenDetails">
-                                    {_t("common|access_token")}
-                                </summary>
-                                <strong>{_t("setting|help_about|access_token_detail")}</strong>
-                                <CopyableText getTextToCopy={() => this.context.getAccessToken()}>
-                                    {this.context.getAccessToken()}
-                                </CopyableText>
-                            </details>
-                        </SettingsSubsectionText>
-                        {/* Telement: a red text row ending the card, as Telegram's Clear cache */}
-                        <ActionRowView kind="critical" onClick={this.onClearCacheAndReload}>
-                            {_t("setting|help_about|clear_cache_reload")}
-                        </ActionRowView>
+                        {/* Telement: rows ending the card, the access token's showing it under it, and a red text row, as
+                            Telegram's Clear cache */}
+                        <ValueRowList>
+                            <ActionRowView
+                                kind="default"
+                                navigation
+                                aria-expanded={this.state.showAccessToken}
+                                aria-controls={ACCESS_TOKEN_ID}
+                                onClick={this.toggleAccessToken}
+                            >
+                                {_t("common|access_token")}
+                            </ActionRowView>
+                            {this.state.showAccessToken && (
+                                <div className="mx_HelpUserSettingsTab_accessToken" id={ACCESS_TOKEN_ID}>
+                                    <SettingsSubsectionText>
+                                        <strong>{_t("setting|help_about|access_token_detail")}</strong>
+                                    </SettingsSubsectionText>
+                                    <CopyableText getTextToCopy={() => this.context.getAccessToken()}>
+                                        {this.context.getAccessToken()}
+                                    </CopyableText>
+                                </div>
+                            )}
+                            <ActionRowView kind="critical" onClick={this.onClearCacheAndReload}>
+                                {_t("setting|help_about|clear_cache_reload")}
+                            </ActionRowView>
+                        </ValueRowList>
                     </SettingsSubsection>
                 </SettingsSection>
             </SettingsTab>

@@ -585,26 +585,6 @@ describe.each(THEMES.map(([theme]) => theme))("Settings content in %s", (theme) 
             expect(underHeading("credits", "#bullet")).toBe(expected);
         });
 
-        it("keeps the access token's field 8px under the warning above it", () => {
-            render(
-                theme,
-                `<div class="mx_SettingsSubsection_content">
-                    <div class="mx_SettingsSubsection_text">
-                        <details open>
-                            <summary class="mx_HelpUserSettingsTab_accessTokenDetails" id="token-summary">Access token</summary>
-                            <strong>Do not share it with anyone.</strong>
-                            ${copyField("syt_token", "token")}
-                        </details>
-                    </div>
-                </div>`,
-            );
-            const summary = box("#token-summary");
-            const summaryGap = parseFloat(getComputedStyle(document.querySelector("#token-summary")!).marginBottom);
-            const warningLine = parseFloat(getComputedStyle(document.querySelector("#token-summary")!).lineHeight);
-
-            expect(box("#token").top - (summary.bottom + summaryGap + warningLine)).toBe(8);
-        });
-
         it("puts the Check for update row 16px under the versions, ending the card 4px over its edge, and indents the credits' bullets 20px", () => {
             renderHelp();
 
@@ -803,12 +783,12 @@ describe.each(THEMES.map(([theme]) => theme))("Settings content in %s", (theme) 
                 theme,
                 `<details><summary class="mx_AliasSettings_localAddresses" id="show-more">Show more</summary></details>
                 <div class="mx_SettingsSubsection_content">
-                    <details><summary class="mx_HelpUserSettingsTab_accessTokenDetails" id="token">Access token</summary></details>
+                    <details><summary id="advanced">Advanced</summary></details>
                 </div>`,
             );
             const accent = tokenColor("--cpd-color-text-action-accent", container);
 
-            for (const id of ["#show-more", "#token"]) {
+            for (const id of ["#show-more", "#advanced"]) {
                 const style = getComputedStyle(document.querySelector(id)!);
                 expect([style.color, style.fontWeight, style.textDecorationLine]).toEqual([accent, "600", "none"]);
                 expect(style.listStyleType).toBe("none");

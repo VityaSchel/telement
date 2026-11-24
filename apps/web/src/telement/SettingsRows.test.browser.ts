@@ -33,13 +33,16 @@ import tabbedViewStyles from "../../res/css/structures/_TabbedView.pcss?raw";
 import settingsSubsectionStyles from "../../res/css/components/views/settings/shared/_SettingsSubsection.pcss?raw";
 import settingsSubsectionHeadingStyles from "../../res/css/components/views/settings/shared/_SettingsSubsectionHeading.pcss?raw";
 import settingsDialogStyles from "../../res/css/views/dialogs/_SettingsDialog.pcss?raw";
+import copyableTextStyles from "../../res/css/views/elements/_CopyableText.pcss?raw";
 import settingsFieldsetStyles from "../../res/css/views/settings/_SettingsFieldset.pcss?raw";
 import settingsSectionStyles from "../../res/css/views/settings/tabs/_SettingsSection.pcss?raw";
 import settingsTabStyles from "../../res/css/views/settings/tabs/_SettingsTab.pcss?raw";
+import helpUserSettingsTabStyles from "../../res/css/views/settings/tabs/user/_HelpUserSettingsTab.pcss?raw";
 import headingStyles from "../../res/css/views/typography/_Heading.pcss?raw";
 import compoundOverrides from "../../res/css/telement/_CompoundOverrides.pcss?raw";
 import notificationTargetsStyles from "../../res/css/telement/_NotificationTargets.pcss?raw";
 import settingsSearchStyles from "../../res/css/telement/_SettingsSearch.pcss?raw";
+import userSelectStyles from "../../res/css/telement/_UserSelect.pcss?raw";
 import lightTheme from "../../res/themes/light/css/_light.pcss?raw";
 import lightHcTheme from "../../res/themes/light-high-contrast/css/_light-high-contrast.pcss?raw";
 import darkTheme from "../../res/themes/dark/css/_dark.pcss?raw";
@@ -55,13 +58,16 @@ const APP_STYLES = [
     settingsSubsectionStyles,
     settingsSubsectionHeadingStyles,
     settingsDialogStyles,
+    copyableTextStyles,
     settingsFieldsetStyles,
     settingsSectionStyles,
     settingsTabStyles,
+    helpUserSettingsTabStyles,
     headingStyles,
     compoundOverrides,
     notificationTargetsStyles,
     settingsSearchStyles,
+    userSelectStyles,
 ];
 
 /** Each theme's class with the theme stylesheets it is built from, in the order its entry point imports them. */
@@ -381,6 +387,64 @@ describe.each(THEMES.map(([theme]) => theme))("Settings rows in %s", (theme) => 
             // A long name stays on its line, within half the row
             const long = document.querySelectorAll<HTMLElement>(".SettingsRow_value")[1];
             expect(long.scrollWidth).toBeGreaterThan(long.clientWidth);
+        });
+    });
+
+    describe("the access token", () => {
+        /** The end of Help & about's Advanced card as HelpUserSettingsTab renders it, the token shown. */
+        function renderAdvanced(token: string): void {
+            renderTab(
+                theme,
+                section(
+                    "",
+                    subsection(
+                        "Advanced",
+                        `<div class="mx_SettingsSubsection_text" id="server">Account provider is https://example.org</div>
+                        <div class="SettingsRow_list" data-settings-row="" id="rows">
+                            ${row("Access token", "default")}
+                            <div class="mx_HelpUserSettingsTab_accessToken">
+                                <div class="mx_SettingsSubsection_text" id="warning">
+                                    <strong>Do not share it with anyone.</strong>
+                                </div>
+                                <span class="mx_CopyableText mx_CopyableText_border" id="token">
+                                    <span id="value">${token}</span>
+                                    <button class="mx_CopyableText_copyButton" style="width: 28px; height: 28px"></button>
+                                </span>
+                            </div>
+                            ${row("Clear cache and reload", "critical")}
+                        </div>`,
+                    ),
+                ),
+            );
+        }
+
+        it("sits under its row on the content edge, the warning over the token's field, and ends 12px over the next row", () => {
+            renderAdvanced("syt_token");
+            const card = box("[data-card]");
+            const [accessToken, clear] = [...document.querySelectorAll<HTMLElement>(".SettingsRow_row")];
+
+            expect(accessToken.getBoundingClientRect().height).toBe(44);
+            expect(accessToken.getBoundingClientRect().top - box("#server").bottom).toBe(16);
+            expect(box("#warning").top - accessToken.getBoundingClientRect().bottom).toBe(4);
+            expect(box("#token").top - box("#warning").bottom).toBe(8);
+            expect(clear.getBoundingClientRect().top - box("#token").bottom).toBe(12);
+            expect(card.bottom - clear.getBoundingClientRect().bottom).toBe(4);
+
+            // Labels, warning and field on the card's 16px edge, the field across the card
+            for (const label of [accessToken, clear]) {
+                expect(textBox(label.querySelector(".SettingsRow_label")!).left - card.left).toBe(16);
+            }
+            expect(textBox(get("#warning strong")).left - card.left).toBe(16);
+            expect([box("#token").left - card.left, card.right - box("#token").right]).toEqual([16, 16]);
+        });
+
+        it("wraps a long token within the card, its text selectable", () => {
+            renderAdvanced("mat_".padEnd(400, "x9"));
+
+            expect(get("#token").scrollWidth).toBeLessThanOrEqual(get("#token").clientWidth);
+            expect(box("#token").height).toBeGreaterThan(72);
+            expect(getComputedStyle(get("#value")).userSelect).not.toBe("none");
+            expect(getComputedStyle(get("#warning strong")).userSelect).not.toBe("none");
         });
     });
 });

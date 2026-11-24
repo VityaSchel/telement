@@ -55,3 +55,11 @@ export const Disabled: Story = {
 export const Navigation: Story = {
     args: { kind: "default", children: "Rooms with their own setting", value: "3", navigation: true },
 };
+
+export const Disclosure: Story = {
+    args: { "kind": "default", "children": "Access token", "navigation": true, "aria-expanded": false },
+};
+
+export const DisclosureExpanded: Story = {
+    args: { "kind": "default", "children": "Access token", "navigation": true, "aria-expanded": true },
+};

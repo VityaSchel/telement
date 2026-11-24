@@ -13,7 +13,9 @@ import React, {
     type SVGAttributes,
 } from "react";
 import classNames from "classnames";
+import ChevronDownIcon from "@vector-im/compound-design-tokens/assets/web/icons/chevron-down";
 import ChevronRightIcon from "@vector-im/compound-design-tokens/assets/web/icons/chevron-right";
+import ChevronUpIcon from "@vector-im/compound-design-tokens/assets/web/icons/chevron-up";
 
 import rowStyles from "../SettingsRow.module.css";
 import styles from "./ActionRowView.module.css";
@@ -32,20 +34,33 @@ export interface ActionRowViewProps extends Omit<ButtonHTMLAttributes<HTMLButton
     Icon?: ComponentType<SVGAttributes<SVGElement>>;
     /** What the row is at, at its end in secondary text, such as how many rooms a list holds or an update's status. */
     value?: ReactNode;
-    /** Ends the row with a chevron, for a row that opens a list of its own. */
+    /**
+     * Ends the row with a chevron, for a row that opens a list of its own. With `aria-expanded`, the row shows more
+     * under it instead: its chevron points down, and up while it shows.
+     */
     navigation?: boolean;
+}
+
+/** The chevron at the row's end. */
+function Chevron({ expanded }: { expanded: ActionRowViewProps["aria-expanded"] }): JSX.Element {
+    if (expanded === undefined) {
+        return <ChevronRightIcon className={classNames(rowStyles.chevron, rowStyles.chevronRight)} aria-hidden />;
+    }
+    const Icon = expanded === true || expanded === "true" ? ChevronUpIcon : ChevronDownIcon;
+    return <Icon className={rowStyles.chevron} aria-hidden />;
 }
 
 /**
  * A settings row that does something, as Telegram for macOS draws Log Out, Delete Account or Clear Cache: a 44px row
- * of text on the card's content edge rather than a button, red when it destroys something and in the accent
- * otherwise, with the row hover fill (the menus' red hover for a red row). A row in the text color with a value and a
- * chevron opens a list.
+ * of semibold text on the card's content edge rather than a button, red when it destroys something and in the accent
+ * otherwise, with the row hover fill (the menus' red hover for a red row). A row in the text color, regular, with a
+ * chevron opens a list or shows more under it.
  *
  * @example
  * ```tsx
  * <ActionRowView kind="critical" onClick={onLeave}>Leave room</ActionRowView>
  * <ActionRowView kind="default" value="3" navigation onClick={onOpen}>Rooms with their own setting</ActionRowView>
+ * <ActionRowView kind="default" navigation aria-expanded={open} onClick={onToggle}>Access token</ActionRowView>
  * ```
  */
 export function ActionRowView({
@@ -74,12 +89,7 @@ export function ActionRowView({
             {(value !== undefined || navigation) && (
                 <span className={rowStyles.end}>
                     {value !== undefined && <span className={rowStyles.value}>{value}</span>}
-                    {navigation && (
-                        <ChevronRightIcon
-                            className={classNames(rowStyles.chevron, rowStyles.chevronRight)}
-                            aria-hidden
-                        />
-                    )}
+                    {navigation && <Chevron expanded={props["aria-expanded"]} />}
                 </span>
             )}
         </button>

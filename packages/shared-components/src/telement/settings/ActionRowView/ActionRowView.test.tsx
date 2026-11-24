@@ -19,7 +19,8 @@ import "../../tokens.css";
 import * as stories from "./ActionRowView.stories";
 import { ActionRowView } from "./ActionRowView";
 
-const { Critical, CriticalWithIcon, Accent, AccentWithStatus, Disabled, Navigation } = composeStories(stories);
+const { Critical, CriticalWithIcon, Accent, AccentWithStatus, Disabled, Navigation, Disclosure, DisclosureExpanded } =
+    composeStories(stories);
 
 /** What a color token resolves to in the document. */
 function tokenColor(token: string, property: "color" | "backgroundColor" = "color"): string {
@@ -146,5 +147,37 @@ describe("ActionRowView", () => {
         expect(getComputedStyle(screen.getByText("Rooms with their own setting")).fontWeight).toBe("400");
         expect(card(row).right - glyph.right).toBeCloseTo(16, 0);
         expect(row.querySelector("svg")!.getBoundingClientRect().left - count.getBoundingClientRect().right).toBe(4);
+    });
+
+    it("draws a row that shows more under it with a chevron that points down, and up while it does, ending on the edge", () => {
+        /** Where the chevron's tip is in its box, measured from the top: below its middle when it points down. */
+        const tip = (row: HTMLElement): number => {
+            const icon = row.querySelector("svg")!;
+            const glyph = icon.querySelector("path")!;
+            const points = Array.from({ length: 100 }, (_, i) =>
+                glyph.getPointAtLength((glyph.getTotalLength() * i) / 100),
+            );
+            // The glyph's points nearest to its middle are the tip's
+            const middle = points.filter(({ x }) => Math.abs(x - 12) < 0.5).map(({ y }) => y);
+            return middle.reduce((sum, y) => sum + y, 0) / middle.length;
+        };
+
+        const { unmount } = render(<Disclosure />);
+        const collapsed = screen.getByRole("button", { name: "Access token", expanded: false });
+        expect(tip(collapsed)).toBeGreaterThan(12.5);
+        expect(card(collapsed).right - collapsed.querySelector("svg path")!.getBoundingClientRect().right).toBeCloseTo(
+            16,
+            0,
+        );
+        expect(getComputedStyle(collapsed).color).toBe(tokenColor("--cpd-color-text-primary"));
+        unmount();
+
+        render(<DisclosureExpanded />);
+        const expanded = screen.getByRole("button", { name: "Access token", expanded: true });
+        expect(tip(expanded)).toBeLessThan(11.5);
+        expect(card(expanded).right - expanded.querySelector("svg path")!.getBoundingClientRect().right).toBeCloseTo(
+            16,
+            0,
+        );
     });
 });
