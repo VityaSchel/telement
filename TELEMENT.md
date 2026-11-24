@@ -85,7 +85,12 @@ pnpm test:unit
     - `apps/web/src/i18n/strings/en_EN.json`: take upstream's version, then run `pnpm i18n`.
     - English overrides: run `pnpm vitest run apps/web/src/telement/i18n/englishOverrides.test.ts`; check each
       override whose upstream English changed and record the new text as its `upstream`, or drop it; add new
-      overrides to `apps/web/src/telement/i18n/englishOverrides.json` with their upstream text.
+      overrides to `apps/web/src/telement/i18n/overrides.en.json` with their upstream text.
+    - Third-party notices: after a bump of `matrix-sdk-crypto-wasm`, seshat or the rich text editor's wasm, the desktop
+      build fails until `apps/desktop/telement/notices/crates.ts` is run again with the command the failure prints; what
+      has no license text of its own goes into `overrides.ts` beside it.
+- Keep what the builds rely on: `allowImportingTsExtensions` in `apps/desktop/tsconfig.node.json` (the notices scripts),
+  and in `apps/web/webpack.config.ts` the `asciiCss` plugin and Terser's `ascii_only` (see [building](#building)).
 - Start the app and check the screens Telement changes.
 - Add a row to the [upstream merge log](#upstream-merge-log), noting conflicts and anything surprising.
 
@@ -108,6 +113,7 @@ git merge-tree --write-tree --name-only main upstream/develop
   as part of Element) and the package's open-source licences without Element's commercial option, which covers only
   agreements with Element. Upstream files almost all use
   `AGPL-3.0-only OR GPL-3.0-only OR LicenseRef-Element-Commercial`, so Telement files use `AGPL-3.0-only OR GPL-3.0-only`.
+  The app as a whole is AGPL-3.0-only (2026-11-24, see [What makes it Telement](#what-makes-it-telement)).
 
     ```
     /*
@@ -212,10 +218,12 @@ easier.
 6. **Strings.** Use `telement|…` translation keys so Telement's strings land in one block of `en_EN.json`. Run
    `pnpm i18n` in `apps/web` and `packages/shared-components` after removing code, so unused strings go too.
    Telement's English for upstream strings (sentence case, wording and punctuation) lives in
-   `apps/web/src/telement/i18n/englishOverrides.json`, never in `en_EN.json`, which every merge takes from upstream as
+   `apps/web/src/telement/i18n/overrides.en.json`, never in `en_EN.json`, which every merge takes from upstream as
    it is. The file is keyed by translation key, each entry recording the upstream English it was written against
    (`upstream`) and Telement's (`telement`), and `englishOverrides.ts` registers it over the English strings of
-   `apps/web` and `packages/shared-components` at startup and after every language change; other languages keep their
+   `apps/web` and `packages/shared-components` at startup and after every language change. The file must not be named
+   like the module (webpack resolves `.json` before `.ts`, which once hid the overrides from every build;
+   `webpackResolution.test.ts` guards it); other languages keep their
    translations, and a deployment's custom translations still win. `englishOverrides.test.ts` fails when upstream's
    English for a key changes, when an override adds placeholders or tags or changes plural forms, or when it names a
    string upstream has dropped or repeats upstream's text.
@@ -267,7 +275,10 @@ What Telement changes in Element's behavior, apart from the features described f
 - **Room menus:** hovering a room shows only the "…" button, in the time's place, and the badges stay; the bell button
   is gone. The notification options are a "Notifications" submenu in the "…" and right-click menus, which marks the
   room's setting with a trailing check, as the sort menu marks its option (2026-11-21). Room menus have the message
-  menu's size (16px icons, 15px text, 4px padding, 8px item highlights, 12px corners).
+  menu's size (16px icons, 15px text, 4px padding, 8px item highlights, 12px corners). On the selected plate the "…"
+  button is filled with translucent white, 16% hovered and 24% pressed or with its menu open
+  (`--tl-color-bg-on-selection-hovered`, `-pressed`); on other rows it keeps its gray hover and is filled with the
+  accent's tint pressed or open (`--cpd-color-bg-badge-accent`, 2026-11-24).
 - **Room list status, toasts and filters** (2026-11-23): while the client catches up after starting or reconnecting, a
   16px spinner and "Updating…" take the place of the room list's title, or "Waiting for network…" while sync fails,
   in 15px secondary text 8px after the spinner; the heading stays for screen readers and the status is announced.
@@ -286,7 +297,9 @@ What Telement changes in Element's behavior, apart from the features described f
   sticks. Pickers open with focus on the selected category, not on the search field. The room list search keeps Element's search dialog but looks like the field at rest
   (`SearchFieldButtonView`, which without a label is a 36px circle around the magnifier). Typing in a picker searches
   (2026-11-23): a character typed without Ctrl, Alt or Meta, or Backspace while there is a query, moves the focus to
-  the search field, which takes the key; Space is left to the focused tab or emoji.
+  the search field, which takes the key; Space is left to the focused tab or emoji. Clearing a field with the pointer
+  (2026-11-24) also lets go of the focus, to what a click beside the field would focus (in a picker the selected
+  category), and clearing an empty field starts no search; cleared with the keyboard, the field keeps the focus.
 - **Timestamps:** always shown; the "Always show message timestamps" setting is gone. Modern layout: at the right of
   the last line, in a reserved gutter. Bubbles: in the bottom-right corner, sharing the last line when it fits.
   Pictures, stickers and videos without a caption show the time as a dark pill over the media's bottom-right corner. The filename and size banner shown when hovering a picture is gone.
@@ -337,6 +350,10 @@ What Telement changes in Element's behavior, apart from the features described f
   a line that is there goes on its own in a focused window (3s at the bottom, the off-screen time above) without
   mouse or key input. Read receipts and fully_read still wait for input. A line that was never drawn no longer leaves a
   fading ghost.
+- **Presence** (2026-11-24): someone offline, or with unknown presence, has no dot and no notch anywhere, as in
+  Telegram (the room list, the header, the member list and the dialogs). Online, away and busy keep theirs. In the
+  search dialog, Forward, Add existing rooms and the threads list a public room's globe is in the accent, as in the
+  room list.
 - **Jumping back** (2026-11-23): after a jump from a reply's quote, a pin, "View in timeline" or a search result,
   jump to bottom says "Back to where you were" and first returns to the message the jump started from, flashing it;
   it keeps up to 10 such places, and reaching the bottom or pressing Escape clears them. The message a jump lands on
@@ -344,7 +361,29 @@ What Telement changes in Element's behavior, apart from the features described f
   message chosen with right-click keeps the band, the same accent tint, while its menu is open.
 - **Search in a room** (2026-11-23): the search bar steps through the room's results with Older and Newer buttons
   and "N of M"; the timeline shows each hit in place with the term highlighted, and "Show results" goes back to the
-  list.
+  list. Since 2026-11-24 the room header's Search messages button, between the call and threads buttons, opens and
+  closes the bar, with its field, over the timeline, in place of room info's search field. Escape and the bar's close
+  button (×, "Close search", after the step arrows; 2026-11-26) close it too; the field's own clear button only empties
+  it, and an emptied field shows the timeline again and keeps the bar.
+- **Side panes** (2026-11-24): the right panel shows one pane at a time, Room info, Threads or People, and the pane's
+  button in the room header opens and closes it. The button is in the accent and `aria-expanded` on all of its pane's
+  pages, and goes back from them to the pane (`telement/right-panel/panes.ts`): Files, Pinned messages, Extensions, a
+  widget and the document viewer are pages of Room info, a thread of Threads, and a profile and a verification of
+  People. In a DM, whose header has no people button, the people and profiles are pages of Room info. Notifications (a
+  lab) and a video room's Chat keep their own buttons. No pane has a back or a close button. Escape in a pane closes it
+  and gives the focus back to its button; elsewhere it closes the pane only once nothing else took the key (a menu, a
+  dialog, the composer, a timeline that has unread messages, is scrolled up or has a place to jump back to). When the
+  row that opened a page goes with the pane that held it, the focus goes to the page's title. A pending verification
+  has a Cancel button, and Escape in it cancels it too. Room info's search, Threads and (except in DMs) People rows are
+  gone, as the header's buttons open the same, and a space's face pile and "N members" open and close its people.
+  Space info, under Space home in both of a space's menus (in the space panel and in the room list header), opens the
+  space's own room info beside its home from any room (2026-11-26). For a space the pane is titled "Space info", and
+  so are the room header's buttons that open it in the space's timeline (developer mode).
+- **People** (2026-11-24): the pane is titled "People (N)", counting who joined or is invited, by email too, as it
+  changes, and its list has no group titles; its search and its Invite button are in a second header over the list,
+  which scrolls alone. Escape empties the search, then closes the pane. Pressing the list's scrollbar leaves the focus
+  where it is. Room info shows no encryption badge until RoomView knows it, rather than Not trusted or Not encrypted at
+  first, and keeps the badge's place.
 - **Cursors:** the arrow on every control (`apps/web/res/css/telement/_Cursor.pcss`); the hand only on links in
   message text and link preview headers; the I-beam over the whole text of a message; not-allowed on disabled
   controls. The left panel's separator shows its own resize cursor, and while it is dragged a window-wide layer keeps
@@ -364,21 +403,28 @@ What Telement changes in Element's behavior, apart from the features described f
   message skips polls, which have no inline editor. In the Forward dialog and the search dialog the pointer moves the
   selection the arrow keys move, so only one row is ever highlighted; the Forward dialog's paper plane shows on the
   selected row (2026-11-23). A dialog ignores a key that something inside it has already acted on (`defaultPrevented`),
-  so Escape in a menu closes the menu alone, with reduced motion too, where the menu fades out (2026-11-23).
+  so Escape in a menu closes the menu alone, with reduced motion too, where the menu fades out (2026-11-23). A name is
+  a button only where clicking it does something (2026-11-24): a reply quote is one Tab stop, the link that jumps to
+  its message, and the member list's names are none. A thread's message takes the focus from a right-click as the
+  room's do, so that closing its menu doesn't ring the whole room.
 - **Dialogs with tabs** (user, room and space settings) focus the selected tab when they open, so Escape works
   straight away. Before, focus could fall to the page when React replaced the first focused element. The room settings
   dialog is titled "<room name>: <tab>" like the user settings' "Settings: <tab>" (the room's name semibold, the tab's
   regular), and its tabs no longer open with a heading repeating the tab's name.
-- **Create a space** dims the app like a dialog, so it has a dialog's close button on its title's line.
+- **Create a space** is a popover beside its button (2026-11-24), which floats with a shadow as the other menus do: it
+  dims nothing, leaves the desktop app's title bar free and has no close button, as Escape or a click outside closes
+  either of its steps.
 - **Explore rooms:** a public room's result shows its address only when it has one, never the raw room ID.
-- **English text** is in sentence case: Telement overrides the English of 225 upstream strings (see
+- **English text** is in sentence case: Telement overrides the English of 248 upstream strings (see
   [Strings](#changing-upstream-code)), mostly titles and labels written in Title Case, for example "Security & privacy"
   and "Voice & video". Since 2026-11-23 the overrides also fix wording and punctuation: both leave dialogs ask "Leave
   <name>?", the search hint's quotes are curly, "typing…" has no space before its ellipsis, Upgrade room no longer asks
   for a bug report, the Report message dialog's Ignore user switch says what it does ("Hide all current and future
   messages from this user."), the "Set timezone" row is "Time zone", as the setting that publishes it spells it too, and
   starting a chat is "New message", as in Telegram (the menu item, the tooltip, the empty room list and the dialog's
-  title).
+  title). Since 2026-11-24 signing out of this device is "Sign out" in the settings, the menus and the dialogs that
+  said "Remove this device" (other devices keep "Remove this session"), and media devices are the microphone, the
+  speaker and the camera where upstream says input and output devices and webcam.
 - **Stickers:** the "Show stickers button" setting is gone; stickers are available whenever widgets are
   (`UIFeature.Widgets`).
 - **Defaults:** GIFs autoplay, and the message layout is bubbles.
@@ -392,11 +438,19 @@ What Telement changes in Element's behavior, apart from the features described f
   settings put the room's own settings first: General (profile, Leave room), Notifications (with this room's Show
   media), Security & privacy (access, room addresses, history), People (a lab), Roles & permissions, Voice & video,
   Bridges (a lab) and Advanced. The room Polls tab is gone, as room info's Polls opens the same history
-  (`PollHistoryDialog`). Space settings keep their tabs, and no tab id changed.
+  (`PollHistoryDialog`). Space settings keep their tabs, and no tab id changed. Since 2026-11-24 the columns of the
+  Notifications tab are Off, Silent and On, which makes a sound (upstream's On made none, and its Noisy did). Voice &
+  video is grouped by Microphone (the device, automatic volume, noise suppression, echo cancellation), Speaker (the
+  device), Camera (the device, mirroring) and Calls (legacy calls, with peer-to-peer and the fallback server indented
+  under it). Each device has its row from the start, as the list is kept from when the browser last gave it
+  (`telement/media/mediaDevices.ts`), and without legacy calls the speaker's and the camera's settings stay in place,
+  disabled, while the microphone's apply to voice messages.
 - **Settings search and exceptions** (2026-11-23): a search pill above the user settings tabs finds a setting by name
   and lists its results as a menu of "Tab › Group › Setting" rows, moved by the arrow keys and the pointer; choosing
-  one opens the tab scrolled to the setting, its row flashing the hover fill (held for 2s with reduced motion). The
-  settings are declared in `telement/settings/settingsSearchIndex.ts`. In windows up to 1024px wide, where the tabs are
+  one opens the tab scrolled to the setting, its row flashing a tint of the accent (held for 2s with reduced motion;
+  `--tl-accent-500`, with secondary, accent and red text deeper on it), as the gray hover fill is the pane's own color
+  in light themes (2026-11-24). The settings are declared in `telement/settings/settingsSearchIndex.ts`. In windows up
+  to 1024px wide, where the tabs are
   icons only, each with its name in a tooltip, the search is a 36px round filled button 16px above them ("Search
   settings"): it opens the same 220px pill and results on a floating surface over the tabs and the pane, so nothing
   moves, and Escape empties the pill, then turns it back into the button, as choosing a result or leaving it does. The
@@ -516,10 +570,17 @@ apps/desktop/telement/build.sh               # installers (dmg and zip on macOS)
 apps/desktop/telement/build.sh --reuse-web   # skip rebuilding apps/web/webapp
 ```
 
-The script builds the web app, copies it to `apps/desktop/webapp` with Telement's `config.json`, packs it into
-`webapp.asar`, and runs electron-builder with `VARIANT_PATH=telement/release/build.json`. Extra arguments go to
-electron-builder.
+The script builds the web app, copies it to `apps/desktop/webapp` with Telement's `config.json`, generates the
+third-party notices from it, packs it into `webapp.asar`, and runs electron-builder with
+`VARIANT_PATH=telement/release/build.json`. Extra arguments go to electron-builder.
 
+- **Third-party notices** (2026-11-24): `apps/desktop/telement/notices/generate.ts` writes
+  `telement/release/THIRD-PARTY-NOTICES.txt` (ignored by git) from what the web and desktop apps bundle, and ends the
+  build if something would ship without a license text. Packing stops without the file (`beforePack` in
+  `packaging.ts`), also in the Linux container, which takes the one generated on the host.
+- **ASCII** (2026-11-24): stylesheets and scripts are built in ASCII (the `asciiCss` PostCSS plugin and Terser's
+  `ascii_only`), so that they read the same in any encoding. Nothing states the encoding of a file inside the `.asar`,
+  and a zero-width space in the shared components' stylesheet showed as "â€‹" before a message's checks.
 - **Signing (macOS):** electron-builder signs with the first "Developer ID Application" identity in the keychain. Set
   `CSC_IDENTITY_AUTO_DISCOVERY=false` for an unsigned local build, or `CSC_NAME` to pick an identity.
 - **Notarization (macOS):** store the Apple credentials in the keychain once with
@@ -551,8 +612,20 @@ electron-builder.
 - `apps/desktop/package.json` sets the product name, so `pnpm start` in `apps/desktop` uses the Telement profile and
   never opens Element Desktop's data, and the publisher (`Viktor Shchelochkov <hi@hloth.dev>`), homepage and
   repository shown in installer metadata.
-- `apps/desktop/src/telement/variant.test.ts` checks the variant and config: no Element URL schemes or services, and
-  the OAuth rules below.
+- `apps/desktop/telement/packaging.ts`, called from `electron-builder.ts` for the `telement-desktop` variant, sets what
+  the variant JSON can't: the deb's recommendations (none), synopsis and copyright file, the license files in
+  `resources`, and what only the tar.gz holds (`install.txt` with a desktop file and icon, since the tarball has no
+  installer). The deb depends on `libasound2t64 | libasound2`: apt would otherwise take OSS's emulation on Ubuntu 24.04
+  and the app would not start.
+- Telement as a whole is licensed under AGPL-3.0-only (2026-11-24): many upstream files are "AGPL-3.0-only OR
+  LicenseRef-Element-Commercial", so the GPL-3.0 option of other files isn't available for the app. The packages ship
+  `LICENSE-AGPL-3.0`, `COPYRIGHT`, `THIRD-PARTY-NOTICES.txt` (about 750 KB: the npm packages, 522 Rust crates, under
+  Apache-2.0 where they offer it, the fonts, SQLCipher, OpenSSL and data) and `THIRD-PARTY-LICENSES` with the LGPL-3.0
+  and GPL-3.0 that diff-dom needs, which the credits in Help & about name (LGPL-3.0 section 4c).
+- `apps/desktop/src/telement/variant.test.ts` checks the variant, the config and the packaging: no Element URL schemes
+  or services, the OAuth rules below, the deb's dependencies, the license files and the tar.gz files. The upstream merge
+  must keep `electron-builder.ts`'s `libasound2` line and the call to `configureTelementPackaging`, and the desktop file
+  in `telement/release` must follow the one electron-builder makes for the deb.
 
 ### Keychain on macOS
 
@@ -607,8 +680,6 @@ icon and keeps its name by choice.
 
 ### Known gaps
 
-- The Linux package still recommends `element-io-archive-keyring`. apt skips it when Element's repository isn't
-  configured.
 - The `ELEMENT_PROFILE_DIR` environment variable is shared with Element Desktop: if it is set, both apps use the
   same profile directory.
 - Built and checked on 2026-11-17: the signed and notarized macOS arm64 app, and Linux x64 `deb` and `tar.gz`. Windows
@@ -668,7 +739,8 @@ Do not repeat:
   `chat-bg-br.png` in Telegram Web A ([Ajaxy/telegram-tt](https://github.com/Ajaxy/telegram-tt)) at commit
   `dc69997bd3` (2022-05-30). Telegram Web A replaced them on 2026-01-13 with `src/assets/pattern.svg`.
 - That repository is GPL-3.0 and names no separate licence for its assets, so Telement uses them under GPL-3.0.
-  GPL-3.0 section 13 allows combining them with Telement's AGPL-3.0 code; the image files themselves stay GPL-3.0.
+  GPL-3.0 section 13 allows combining them with Telement's AGPL-3.0 code; the image files themselves stay GPL-3.0. The
+  packages already ship LICENSE-GPL-3.0, in `THIRD-PARTY-LICENSES` (2026-11-24).
 - When adding them, give them their own directory with a notice file naming the source repository, commit, path and
   licence and pointing to [LICENSE-GPL-3.0](./LICENSE-GPL-3.0). List any changes made to the images (GPL-3.0 section
   5a). Prefer the current `pattern.svg`: the SVG is its own source form and can be recolored and scaled.
@@ -847,7 +919,9 @@ kinds, legacy dialog buttons) giving about 17 button specs in 8 visible families
   only has to read it too.
 - **Controls are 36px** (Compound md), so some computed radii (22, 26) are off the 4px grid. Two are smaller: room
   list filter chips are 28px with Compound's 8px inset, beside a 28px chevron, so four filters fit at the room list's
-  default width; reaction chips stay 24px, as in Telegram, with a 24px add-reaction button. Icon buttons in the room
+  default width, and so are the Polls dialog's filter, the Threads popup's tabs and the Threads pane's filter
+  (`filterChip` in `_common.pcss`, 2026-11-24); reaction chips stay 24px, as in Telegram, with a 24px add-reaction
+  button. Icon buttons in the room
   header, room list header, card headers and media viewers hold 24px icons (Compound's own 36px icon button would draw
   27px ones); legacy call buttons hold 20px icons. An icon that fills its whole box, unlike Compound's,
   gets a 20px box so it looks as big as its neighbors.
@@ -906,8 +980,8 @@ kinds, legacy dialog buttons) giving about 17 button specs in 8 visible families
   equal specificity wins in the app but loses there; give such a rule a more specific selector.
 - **Visible results**, by area:
     - **Menus and search dialog:** the shared menu geometry covers the message and room menus with their Notifications
-      submenu, the user menu, the thread filter, the legacy call menu, the Threads Activity Centre, the video viewer's
-      speed menu and Compound's menus (paperclip, sort, compose, space, room header, pinned message, avatar). The space
+      submenu, the user menu, the legacy call menu, the Threads Activity Centre, the video viewer's speed menu and
+      Compound's menus (paperclip, sort, compose, space, room header, pinned message, avatar). The space
       menu has no title row, as it opens from the space's name. The user menu's name, status and Matrix ID are 4px
       apart, 8px under the 64px avatar. With no threads, the Threads Activity Centre centers Compound's threads icon in
       a 56px tile, 16px above its caption, as the shared empty state's compact size draws it. The space menu's Add
@@ -917,7 +991,9 @@ kinds, legacy dialog buttons) giving about 17 button specs in 8 visible families
       in; its rows are 40px with the avatar 8px from every side. Explore rooms lists public rooms as 52px two-line rows:
       a 36px avatar 8px from the row's start, top and bottom, and the name over 13px details, centered on the row with
       its button. Its recently viewed tiles keep upstream's 58px width and are 67px tall, with the avatar centered 8px
-      from the top and the name 8px from the bottom. The keyboard hint is a pill of four 19px keys whose arrow icons sit
+      from the top and the name 8px from the bottom. The strip scrolls sideways with a trackpad or a mouse wheel,
+      without a scrollbar: it runs to the dialog's edges and starts and ends on the 16px edge (2026-11-24). The
+      keyboard hint is a pill of four 19px keys whose arrow icons sit
       2px inside them at every font size.
     - **Composer and editor:** the composer's text field sits 8px from its buttons. The rich-text field is a 36px pill
       that keeps 18px corners as it grows, with its buttons on its last line and the formatting bar starting at its
@@ -927,8 +1003,9 @@ kinds, legacy dialog buttons) giving about 17 button specs in 8 visible families
     - **Code:** blocks round to 4 in every layout, with their text and line numbers 12px inside the edge and the
       numbers 8px from the code, at the start side (on the right in right-to-left messages). Since 2026-11-23 a 28px
       header line at the block's top, as in Telegram, names the code's language in 13px secondary text on that edge
-      and holds the expand and copy buttons at its end, always shown, the copy icon 8px from the end (the left in
-      right-to-left blocks); a 1px line sets it apart from the code, and the fill and corners are the whole block's.
+      and holds the expand and copy buttons at its end, the copy icon 8px from the end (the left in right-to-left
+      blocks). Copy is always shown; expand (the same icon button, 2026-11-24) only when the collapsed height, 30% of
+      the window, hides lines; a 1px line sets it apart from the code, and the fill and corners are the whole block's.
       With the buttons out of its way, the code ends 12px from the block's end, and the side it is scrolled out of
       fades over 24px, mirrored in right-to-left blocks. A reply's quote shows the code alone, without the
       header or the fade. A numbered block in a bubble fits its longest
@@ -949,7 +1026,9 @@ kinds, legacy dialog buttons) giving about 17 button specs in 8 visible families
       band; selected and highlighted messages keep theirs. Since 2026-11-23 every layout has one selected band, a tint
       of the accent (`--tl-color-bg-message-selected`): for a message while its right-click menu is open, for the one a
       jump lands on as it fades back (see [behavior changes](#behavior-changes)) and, except in the side panels' lists,
-      for the one with keyboard focus or chosen to reply to with the composer's keys. It covers a mention's highlight,
+      for the one with keyboard focus or chosen to reply to with the composer's keys. The band alone marks a focused
+      message, without a ring around it, except in forced colors, while it is edited and in the side panels' lists
+      (2026-11-24). It covers a mention's highlight,
       secondary text drawn on it turns Compound's gray 1000, and your own bubble takes its muted blue highlighted fill
       when right-clicked or jumped to, but keeps its plain blue for the keyboard. A message being edited in the group
       and IRC layouts stays gray. Your own messages have no avatar. Your own bubbles are filled
@@ -972,9 +1051,11 @@ kinds, legacy dialog buttons) giving about 17 button specs in 8 visible families
       marker clears every avatar by at least 2px. In bubbles they start on the bubble column, the avatar on their first
       line, and their time follows the text 8px after it, at the end of the last line, in the bubble time style; a
       summary's Expand takes that place, 8px after its text in 13px accent semibold, and its Collapse starts the
-      expanded rows' column (2026-11-23). Times
-      of emotes center on their last line. Message search results start on the timeline's edges, without the browser's
-      list padding. Link preview titles are in the text's color (white in your own bubbles), underlined when hovered.
+      expanded rows' column (2026-11-23). Since 2026-11-24 the rows in a summary, which holds even a single join, are
+      20px too, and in every layout the avatar, the padlock and a picture in the text are centered on the text's line,
+      as the time is, trimmed to its digits (up to 1.5px off in the IRC layout at font sizes other than 16 and 24).
+      Times of emotes center on their last line. Message search results start on the timeline's edges, without the
+      browser's list padding. Link preview titles are in the text's color (white in your own bubbles), underlined when hovered.
       The typing notice is 13px secondary text, its 24px avatars ringed in the page's color.
     - **Cards and media:** a captioned picture or video is one bubble, the media across the top, clipped to the
       bubble's corners, with the caption below it; media under 160px wide is centered in a 160px bubble. Files, audio
@@ -1033,20 +1114,29 @@ kinds, legacy dialog buttons) giving about 17 button specs in 8 visible families
       the start, top and bottom. The document, PDF and
       Markdown viewers use the same 12px edge. Settings tabs are 36px pills with the 20px icon on the dialog title's
       edge (circles in a narrow dialog). Theme choices are 44px pills with the radio 12px from their top, bottom and
-      start, and the message layout cards have a 44px header with the radio 12px from the card's top and start; they
-      stretch across their card, and the image sizes are two equal columns 16px apart, each drawing scaled to its
-      column 12px above its radio (2026-11-23). Home page tiles are 12px cards, and space home tiles pad 16 (76px
+      start; a click anywhere on a pill chooses its theme, and the pill hovers, presses and is ringed as a whole, as
+      the layout and image size cards are (2026-11-24). Those cards have a 44px header with the radio 12px from their
+      top and start and its label 12px after it, and under a separator the layout's preview or the drawing, flush with
+      the card; layouts stretch across the settings card, image sizes are two equal columns 16px apart, and the boxes
+      of every group are 16px from the settings card's edges (2026-11-24). Previews pad 12px and are drawn in the
+      regular weight. Home page tiles are 12px cards, and space home tiles pad 16 (76px
       tall). Cards inside a settings card, such as a session's details, pad 12 × 16 like it and round to 4, its 12
       pushed inward by their 16px inset and kept at the floor (2026-11-20), and bordered boxes there (the session
       security box, the microphone alert, the versions box, the layout and image size choices) round to a row's 8
       (2026-11-23; the session security box was 4). Media in the Files card has no download button under it (the message
-      menu saves it), and the card's voice players span it. The line under the member count stops on the card's 12px
-      content edge, as room info's dividers do. Destructive rows (Leave room, Report, Ignore, the admin tools) hover and
-      press in the menus' red (2026-11-23).
+      menu saves it), and the card's voice players span it. The People pane's search and Invite button and the
+      Threads pane's filter are in a second header under the card's (`mx_BaseCard_controls`, 2026-11-24): 64px, inset
+      12px, over a line as wide as the card. In the people's list the line before those invited is drawn on the first
+      of their tiles, so that each tile is 56px and the list keeps its height as it scrolls. The Pinned card's Unpin all is a
+      row docked at its bottom, all of it the button, its accent label under the composer's 1px line: 51px in all, as
+      tall as the composer beside it with one line of text, inset 8px (2026-11-24). Destructive rows (Leave room,
+      Report, Ignore, the admin tools) hover and press in the menus' red (2026-11-23).
       In the space panel, Threads and Settings are 40px circles when collapsed and 40px rows when expanded, like the
       space buttons, and in light themes, where the panel is as white as the selected space's inverted badge, that
       badge is ringed in the plate's color. The space panel's counters stay 20px (24px with their 2px ring), with 11px
-      digits, at every font size, as its tiles don't grow (2026-11-23). The room intro's avatar upload badge is filled
+      digits, at every font size, as its tiles don't grow (2026-11-23); the list's scroll area starts 4px above the
+      first space, so that neither a badge's ring nor the focus ring is clipped, and what the focus scrolls to stops
+      16px from the list's ends (2026-11-24). The room intro's avatar upload badge is filled
       with the accent and holds a white camera, as the settings avatar's badge does. The widget picture-in-picture is
       25 around its 12px widget, with a 36px back button.
     - **Empty states** (2026-11-23): one shared view, `EmptyStateView` (shared-components `telement/core`), centered
@@ -1061,12 +1151,12 @@ kinds, legacy dialog buttons) giving about 17 button specs in 8 visible families
       there are none and keeps the server picker.
     - **Headers and viewers:** icon buttons in the room header, right panel card headers, the thread list and both
       media viewers are 36px circles around 24px icons; the legacy call header's hold 20px icons, as does the thread
-      list's mark-all-read button. Every right panel card header button (back, options, close) is filled at rest with
-      the fill of Compound's secondary icon buttons (`bg-subtle-secondary`), `bg-subtle-primary` when hovered or
-      pressed, and the card's title is 15px semibold in the primary text color, the room name's weight and color a
-      size smaller. The room header and card headers inset their content 12px, and the room's name runs up to the
-      header's 12px gap before its buttons. The face pile and the thread list's filter are 36px pills; the face pile
-      stays marked open while a member's profile or verification opened from the member list is shown. The image and
+      list's mark-all-read button. Every right panel card header button (the options of a thread and of a widget, since
+      2026-11-24 without back and close) is filled at rest with the fill of Compound's secondary icon buttons
+      (`bg-subtle-secondary`), `bg-subtle-primary` when hovered or pressed, and the card's title is 15px semibold in the
+      primary text color, the room name's weight and color a size smaller. The room header and card headers inset their content 12px, and the room's name runs up to the
+      header's 12px gap before its buttons. The face pile is a 36px pill, marked open on every page of the People
+      pane, as each pane's button is. The image and
       video viewers share a 68px top bar, filled, in the dark theme's colors, with the sender and the buttons 16px from
       the edges, and both show the sender as a semibold name over a
       gray date. The video viewer's speed menu is a 12px menu with 8px items inset 4px, and the PDF viewer's zoom
@@ -1144,9 +1234,10 @@ findings: https://claude.ai/artifact/BVZ6pyrzyasmRRAVMFxxB7.
   in the auth dialog's cross-signing step. In those two dialogs the card is the dialog's body, without a border, 16px
   under the auth dialog's title. Unpin all and Share (Copy link alone) end in it as well. Widths: 400
   confirmations, 480 forms, 640 lists, 980 tabbed settings. Image and video viewers, the search dialog, spinner, maps
-  and dial pad stay as they are. The Create a space panel, which dims the app, is laid out as a 480px dialog: its title
-  shares a line 16px from the top with the close button and, after the first step, the back button; the rest sits on the
-  24px edge, and its corners are 32 around its 8px cards. Since 2026-11-21:
+  and dial pad stay as they are. The Create a space popover is laid out as a 480px dialog without a close button: its
+  title is on a line 16px from the top, after the first step beside the back button; the rest sits on the 24px edge, and
+  its corners are 32 around its 8px cards. It opens beside the space panel, level with its button, and stays inside a
+  small window, where it scrolls (`usePlacementBesideSpacePanel`, 2026-11-24). Since 2026-11-21:
     - A fixed-width dialog nobody sized is a 480px form. Alerts and confirmations are 400 (error, question, text input,
       confirm user action, sign out and, since 2026-11-23, Unpin all), lists 640 (view source, poll history, edit
       history, add existing rooms, invite). Developer tools, a widget's own dialog and the screen sharing picker are 640
@@ -1155,8 +1246,9 @@ findings: https://claude.ai/artifact/BVZ6pyrzyasmRRAVMFxxB7.
       of a confirmation has the dialog footer, Cancel before the action at the bottom end, which is how Deactivate
       account's button moved to the footer's end. Disabled legacy dialog buttons use Compound's disabled look.
     - Dialog text is in the primary color and help and subtitles in the secondary one. Create poll and Leave space
-      follow the anatomy; Create a space and Add existing rooms title on the close button's line, 20px semibold, with
-      the space's avatar on the dialog's edge. The text input dialog's field is the shared 36px field, Create room's
+      follow the anatomy; Create a space titles on its back button's line and Add existing rooms on the close button's,
+      20px semibold, with the space's avatar on the dialog's edge. The text input dialog's field is the shared 36px
+      field, Create room's
       address spans the dialog, Add existing rooms lists in the Forward dialog's 52px rows, View source labels its
       event like a settings group with its copy button at the top, the Polls dialog is titled like every dialog with
       16px poll icons and filters with the room list's 28px chips, the polls 20px under them without a card
@@ -1197,7 +1289,17 @@ findings: https://claude.ai/artifact/BVZ6pyrzyasmRRAVMFxxB7.
       accent fill is under 3:1 on the cards, a checked radio is ringed in the accent's border color
       (`--tl-color-border-radio-checked`), poll options in bubbles included.
     - The Account tab opens with the profile text and controls of the client's cached capabilities, so nothing
-      changes or moves once the server answers.
+      changes or moves once the server answers. Since 2026-11-24 the email addresses, the phone numbers and the account
+      page are loaded as the client starts (`OwnAccount`), Appearance's previews and the Account tab show the name and
+      photo the client has (`useOwnProfile`), and Preferences shows the spell checker as the desktop app last had it
+      (local storage `mx_spell_check`) and the app's language from the first render.
+    - Since 2026-11-24 the account's, rooms' and spaces' profiles share one layout (`settingsProfile`): the photo at the
+      start, 16px from the card's edges, the fields 16px after it, wrapping under it where they would be narrower than
+      240px, and the username as the display name's second line, 13px secondary text with a copy button.
+    - Email addresses and phone numbers are 44px rows (2026-11-24), 52px with a second line such as one yet to be
+      verified, with Remove as red text at the end, which asks in the 400px confirmation dialog ("Remove <address>?", what removing
+      unlinks, Cancel and a red Remove; 2026-11-26). An accent row under them opens
+      the form that adds one, which was always there.
     - Since 2026-11-23 each group has one label: a section's heading is hidden when its first group has a label of
       its own, and names the group for assistive technologies instead; "Account management" over Deactivate account
       is gone. Show media in timeline is a group of its own, labelled above its card with its help under it, and the
@@ -1209,18 +1311,24 @@ findings: https://claude.ai/artifact/BVZ6pyrzyasmRRAVMFxxB7.
       row's end with a trailing check. The hover fill sits 4px inside the card's sides, rounded by 8; rows touch, and
       the card pads 4px where a row comes first or last. They serve Roles & permissions (22 rows; a custom level
       shows its number, and "Custom…" opens a 36px number field), the level for adding privileged users, the
-      language, the time zone, the font size, the microphone, the audio output and the camera, in place of dropdowns
-      with their labels above them. A menu of more than 20 options (the time zone's and the language's) starts with the
+      language, the time zone, the microphone, the speaker and the camera, in place of dropdowns with their labels above
+      them. The notification targets are such rows without a menu, the device with its app at the end (2026-11-24). A
+      menu of more than 20 options (the time zone's and the language's) starts with the
       36px search pill, 8px from its edges, over a list 8.5 rows tall that keeps its height and width while filtered
       and opens scrolled to the checked choice. Focus stays in the pill, the arrow keys and the pointer move one
       highlight, and Escape empties the pill, then closes the menu. On the pressed fill, which a row keeps while its
       menu is open, its secondary text is gray 1000, gray 1100 in dark themes (`--tl-color-text-secondary-on-pressed`);
       on the hover and keyboard focus fill the dark theme alone takes gray 1000
       (`--tl-color-text-secondary-on-hovered`). Both are 4.5:1 or more in every theme.
+    - The font size is a slider (2026-11-24, `SliderRowView`), as Telegram for macOS's Text Size: the label with the
+      size at the row's end, over a slider between a small and a large A with a step for each of the 19 sizes. Dragged,
+      it scales the preview alone, and the app takes the size it is let go at.
     - One-off and destructive buttons are text rows on the card's edge (2026-11-23, `ActionRowView`), as Telegram's
-      Log Out and Clear Cache: Leave room, Leave space, Deactivate account, Remove this device and Clear cache and
-      reload in red with the menus' red hover; Mark all as read, Check for update and Show advanced in the accent,
-      regular weight, with the gray hover. No filled red button stands alone in a card anymore.
+      Log Out and Clear Cache: Leave room, Leave space, Deactivate account, Sign out and Clear cache and reload in red
+      with the menus' red hover; Mark all as read, Check for update and Show advanced in the accent with the gray hover;
+      all semibold since 2026-11-24. A row that opens a list or shows more under it is regular, in the text color, with
+      a chevron, as Help & about's Access token is, which opens its warning and its copy field. No filled red button
+      stands alone in a card anymore.
     - Privileged and muted users are 52px person rows (2026-11-23): a 36px avatar on the content edge, the name over
       the Matrix ID in 13px secondary text, and the role as a value menu at the end, applied as soon as it is chosen,
       after the member info's warnings for demoting yourself or promoting someone to your own level.
@@ -1267,8 +1375,9 @@ findings: https://claude.ai/artifact/BVZ6pyrzyasmRRAVMFxxB7.
   browser's ring, so buttons, links, tabs and avatars without a ring of their own get it, and it sits in the lowest
   cascade layer, so a component that draws its own ring, an inset one or none keeps it. Upstream's transparent
   outlines "for enhanced visibility under contrast control" apply only in forced colors, where they are drawn, and
-  never to a focused element, as elsewhere they took the place of the ring. Rings follow the shape of what they ring:
-  the room's name in the header gets a row's ring inside the header. A focused panel separator is drawn in the focus
+  never to a focused element, as elsewhere they took the place of the ring. A focused message is marked by its band
+  instead (2026-11-24, see [radius and spacing](#radius-and-spacing)). Rings follow the shape of what they ring: the
+  room's name in the header gets a row's ring inside the header. A focused panel separator is drawn in the focus
   color, as its hover gray is under 3:1.
 - **The rest:** four shadows (floating, raised, edge, on media), Compound's tooltip only, two toasts on tokens,
   eleven avatar sizes (14, 16, 20, 24, 32, 36, 40, 48, 64, 80, 120), three durations (100ms, 200ms ease-out, 300ms).
@@ -1466,13 +1575,13 @@ Deferred work:
 | 2026-11-19 | Right panel card header buttons are filled circles at rest, no longer transparent until hovered; card titles are primary 15px semibold.         | [Radius and spacing](#radius-and-spacing)                                            |
 | 2026-11-19 | Member list without dividers; space menu without a title; room list menus open at their button's end; the filters chevron is outlined.          | [Radius and spacing](#radius-and-spacing)                                            |
 | 2026-11-19 | Inline links keep the sentence's weight and the underline; links leaving the app show the external icon; identifiers drop Inter's alternates.   | [Colors, type and components](#colors-type-and-components)                           |
-| 2026-11-19 | Your own bubbles: a white play button with a blue glyph and a white quote line; Explore rooms hides raw room IDs; Create a space is a dialog.   | [Radius and spacing](#radius-and-spacing)                                            |
+| 2026-11-19 | Your own bubbles: a white play button with a blue glyph and a white quote line; Explore rooms hides raw room IDs.                               | [Radius and spacing](#radius-and-spacing)                                            |
 | 2026-11-20 | Agents draft upstream issues and pull request texts, which the maintainer rewrites; accessibility-only fixes go up as their own pull requests.  | [Upstream pull requests](#upstream-pull-requests)                                    |
 | 2026-11-20 | Telement commits that carry an upstream fix name its pull request in a body line, `See https://github.com/element-hq/element-web/pull/N`.       | [Upstream pull requests](#upstream-pull-requests)                                    |
 | 2026-11-21 | Quick reactions sit 4px from every edge, the chevron in a 32px cell; large emoji are their message's whole box, 2px from their run.             | [Behavior changes](#behavior-changes)                                                |
 | 2026-11-21 | The text of controls can't be selected; message text, links and fields can.                                                                     | [Behavior changes](#behavior-changes)                                                |
 | 2026-11-21 | Tab follows what is drawn: room info and the room list filters are one stop each; Tab closes legacy menus and leaves an empty composer.         | [Behavior changes](#behavior-changes)                                                |
-| 2026-11-21 | Cards inside settings cards round to 4, the session security card included (was 12); beta cards pad 12 × 16; alerts are 400px wide.             | [Radius and spacing](#radius-and-spacing)                                            |
+| 2026-11-21 | Cards inside settings cards round to 4 (bordered boxes 8 since 2026-11-23); beta cards pad 12 × 16; alerts are 400px wide.                      | [Radius and spacing](#radius-and-spacing)                                            |
 | 2026-11-21 | Your own failed message keeps a red mark ringed in white; code ends 48px from its block's end, clear of its buttons.                            | [Radius and spacing](#radius-and-spacing)                                            |
 | 2026-11-21 | Dialogs default to 480px, confirmations 400, lists 640; developer tools, widget dialogs and the screen picker keep 752 until decided.           | [Colors, type and components](#colors-type-and-components)                           |
 | 2026-11-21 | Destructive confirmations act in red; password steps get the dialog footer; dialog text is primary, help and subtitles secondary.               | [Colors, type and components](#colors-type-and-components)                           |
@@ -1510,6 +1619,36 @@ Deferred work:
 | 2026-11-23 | Your own bubble keeps its plain blue under the keyboard's band; only a right-click or a jump gives it the muted highlighted blue.               | [Radius and spacing](#radius-and-spacing)                                            |
 | 2026-11-24 | A settings row's secondary text also darkens on its hover and keyboard focus fill in the dark theme, where it was 4.16:1.                       | [Colors, type and components](#colors-type-and-components)                           |
 | 2026-11-24 | A focused window draws no unread line for messages arriving at its bottom; a line there goes by itself, and receipts still wait for input.      | [Behavior changes](#behavior-changes)                                                |
+| 2026-11-24 | Space badges keep their whole ring: the list's scroll area starts 4px above the first space, and the focus scrolls to 16px from its ends.       | [Radius and spacing](#radius-and-spacing)                                            |
+| 2026-11-24 | A code block offers Expand only when its collapsed height (30% of the window) hides lines; Expand is the same icon button as Copy.              | [Radius and spacing](#radius-and-spacing)                                            |
+| 2026-11-24 | The overrides file is overrides.en.json, not englishOverrides.json, which webpack loaded in its place in every built app until now.             | [Changing upstream code](#changing-upstream-code)                                    |
+| 2026-11-24 | The release is AGPL-3.0-only: the GPL option of some files isn't available for the whole app.                                                   | [Desktop](#what-makes-it-telement)                                                   |
+| 2026-11-24 | Offline people show no dot or notch anywhere, as in Telegram; public rooms' globes in the dialogs are in the accent.                            | [Behavior changes](#behavior-changes)                                                |
+| 2026-11-24 | The right panel shows Room info, Threads or People, one at a time, opened and closed by its header button; no back or close buttons.            | [Behavior changes](#behavior-changes)                                                |
+| 2026-11-24 | A room's messages are searched from a header button, which opens the bar with its field over the timeline; room info has no search field.       | [Behavior changes](#behavior-changes)                                                |
+| 2026-11-24 | The people are counted in their pane's title; their search and Invite, and the Threads pane's filter, are in a second header.                   | [Radius and spacing](#radius-and-spacing)                                            |
+| 2026-11-24 | The Threads popup's tabs and the Threads pane's filter are the app's 28px filter chips.                                                         | [Radius and spacing](#radius-and-spacing)                                            |
+| 2026-11-24 | Create a space is a popover beside its button (a dialog since 2026-11-19): it dims nothing, and Escape or a click outside closes it.            | [Behavior changes](#behavior-changes)                                                |
+| 2026-11-24 | Signing out of this device is called Sign out; devices are called microphone, speaker and camera everywhere.                                    | [Behavior changes](#behavior-changes)                                                |
+| 2026-11-24 | Notification columns are Off, Silent and On (On has the sound); notification targets are settings rows.                                         | [Behavior changes](#behavior-changes)                                                |
+| 2026-11-24 | Voice & video is grouped by microphone, speaker, camera and calls, with each device's row there from the start.                                 | [Behavior changes](#behavior-changes)                                                |
+| 2026-11-24 | A setting found by search flashes a tint of the accent, as the gray hover fill is the color of the settings pane.                               | [Behavior changes](#behavior-changes)                                                |
+| 2026-11-24 | Account, room and space profiles: the photo at the start, the username as the display name's second line; addresses are 44px rows.              | [Colors, type and components](#colors-type-and-components)                           |
+| 2026-11-24 | The font size is a slider that applies the size it is let go at; until then only the preview scales.                                            | [Colors, type and components](#colors-type-and-components)                           |
+| 2026-11-24 | Theme pills, layout cards and image size cards are clickable all over, and the boxes of every group are 16px from their card's edges.           | [Radius and spacing](#radius-and-spacing)                                            |
+| 2026-11-24 | Action rows are semibold; Help & about's access token is a row that opens under it.                                                             | [Colors, type and components](#colors-type-and-components)                           |
+| 2026-11-24 | Settings show what the app already has from the first render: profile, addresses, devices, spell check and languages.                           | [Colors, type and components](#colors-type-and-components)                           |
+| 2026-11-24 | A focused message is marked by its band, without a ring; a reply quote's author and the member list's names are no Tab stops.                   | [Radius and spacing](#radius-and-spacing)                                            |
+| 2026-11-24 | Informational rows are centered on their text in every layout; Unpin all is a docked row as tall as the composer beside it.                     | [Radius and spacing](#radius-and-spacing)                                            |
+| 2026-11-24 | The room row's open "…" is translucent white on the selected plate; the search dialog's recently viewed rooms scroll sideways.                  | [Behavior changes](#behavior-changes)                                                |
+| 2026-11-24 | Clearing a search field with the pointer lets go of the focus; clearing an empty one starts no search.                                          | [Behavior changes](#behavior-changes)                                                |
+| 2026-11-24 | The notices of what the apps bundle are generated, and the build ends if any lacks a license text; packages ship them, LGPL-3.0 and GPL-3.0.    | [Desktop](#what-makes-it-telement)                                                   |
+| 2026-11-24 | Rust crates that offer Apache-2.0 among other licenses are used under it.                                                                       | [Desktop](#what-makes-it-telement)                                                   |
+| 2026-11-24 | Stylesheets and scripts are built in ASCII, which reads the same in any encoding.                                                               | [Building](#building)                                                                |
+| 2026-11-26 | The message search bar closes with an icon button (×, Close search) after the step arrows, a gap away from the field's own clear button.        | [Behavior changes](#behavior-changes)                                                |
+| 2026-11-26 | Space info, under Space home in the space's menu, opens the space's own room info (topic, settings, Report room) beside its home.               | [Behavior changes](#behavior-changes)                                                |
+| 2026-11-26 | Removing an email address or phone number asks in the 400px confirmation dialog, with what it unlinks, Cancel and a red Remove.                 | [Colors, type and components](#colors-type-and-components)                           |
+| 2026-11-26 | Space info is in the room list header's space menu too, under Space home; a space's info pane is titled "Space info".                           | [Behavior changes](#behavior-changes)                                                |
 
 ## Upstream merge log
 
