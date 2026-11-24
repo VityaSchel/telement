@@ -457,13 +457,19 @@ Please see LICENSE files in the repository root for full details.
 }
 
 /*
- * Secondary text on a settings row's pressed fill, which the row keeps while its menu is open, at 4.5:1: a step deeper
- * in light themes, as on the band of a message being acted on, and two in dark ones, whose dialogs are raised a gray
- * step and their pressed fill with them.
+ * Secondary text on a settings row's fills, at 4.5:1. On the hover fill, which the row also has while the keyboard is on
+ * it, only the dark theme's text is a step deeper, as its dialogs are raised a gray step and their fills with them. On
+ * the pressed fill, which the row keeps while its menu is open, it is a step deeper in light themes, as on the band of
+ * a message being acted on, and two in dark ones.
  */
 :root,
 [class*="cpd-theme-"] {
+    --tl-color-text-secondary-on-hovered: var(--cpd-color-gray-900);
     --tl-color-text-secondary-on-pressed: var(--cpd-color-gray-1000);
+}
+
+.cpd-theme-dark.cpd-theme-dark {
+    --tl-color-text-secondary-on-hovered: var(--cpd-color-gray-1000);
 }
 
 .cpd-theme-dark.cpd-theme-dark,
@@ -473,6 +479,7 @@ Please see LICENSE files in the repository root for full details.
 
 @media (prefers-color-scheme: dark) {
     :root {
+        --tl-color-text-secondary-on-hovered: var(--cpd-color-gray-1000);
         --tl-color-text-secondary-on-pressed: var(--cpd-color-gray-1100);
     }
 }

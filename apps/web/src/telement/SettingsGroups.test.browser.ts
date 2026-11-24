@@ -6,6 +6,7 @@ Please see LICENSE files in the repository root for full details.
 */
 
 import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
+import { userEvent } from "vitest/browser";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import {
@@ -75,7 +76,7 @@ import darkTheme from "../../res/themes/dark/css/_dark.pcss?raw";
 import imageSizeNormal from "../../res/img/element-icons/settings/img-size-normal.svg?raw";
 import imageSizeLarge from "../../res/img/element-icons/settings/img-size-large.svg?raw";
 import { cornerRadii, toBrowserCss } from "../test/telement/browserCss";
-import { composite, contrastOver, mouseButton, tokenColor } from "../test/telement/computedStyle";
+import { composite, contrastOver, hoveredFill, mouseButton, tokenColor } from "../test/telement/computedStyle";
 import { loadInter } from "../test/telement/fonts";
 
 /** In the order _components.pcss imports them, after _common.pcss, as in the app's bundle. */
@@ -749,6 +750,25 @@ describe.each(THEMES.map(([theme]) => theme))("Settings groups in %s", (theme) =
             );
         }
 
+        it("keeps the secondary text at 4.5:1 while the row is hovered", async () => {
+            const person = renderRow();
+            const fill = await hoveredFill(person);
+
+            expect(fill).toBe(tokenColor("--cpd-color-bg-action-secondary-hovered", person));
+            expect(textContrast(fill)).toBeGreaterThanOrEqual(4.5);
+        });
+
+        it("keeps the secondary text at 4.5:1 while the keyboard is on the row", async () => {
+            const person = renderRow();
+            await userEvent.unhover(person);
+            await userEvent.tab();
+            const fill = getComputedStyle(person).backgroundColor;
+
+            expect(person.matches(":focus-visible:not(:hover)")).toBe(true);
+            expect(fill).toBe(tokenColor("--cpd-color-bg-action-secondary-hovered", person));
+            expect(textContrast(fill)).toBeGreaterThanOrEqual(4.5);
+        });
+
         it("keeps the secondary text at 4.5:1 while the row's menu is open", () => {
             const person = renderRow('data-state="open"');
             const fill = getComputedStyle(person).backgroundColor;
@@ -768,6 +788,19 @@ describe.each(THEMES.map(([theme]) => theme))("Settings groups in %s", (theme) =
             expect(pressed).toBe(true);
             expect(fill).toBe(tokenColor("--cpd-color-bg-action-secondary-pressed", person));
             expect(contrast).toBeGreaterThanOrEqual(4.5);
+        });
+
+        it("keeps the secondary text's color on a disabled row, which has no fill, while the row is hovered", async () => {
+            const person = renderRow("disabled");
+            const fill = await hoveredFill(person);
+
+            expect(person.matches(":hover")).toBe(true);
+            expect(fill).toBe("rgba(0, 0, 0, 0)");
+            for (const id of ["#role", "#user-id"]) {
+                expect(getComputedStyle(get(id)).color).toBe(
+                    tokenColor("--cpd-color-text-secondary", get("#users-card")),
+                );
+            }
         });
     });
 

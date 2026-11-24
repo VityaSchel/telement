@@ -120,11 +120,15 @@ Please see LICENSE files in the repository root for full details.
         outline: var(--cpd-border-width-2) solid var(--cpd-color-border-focused);
         outline-offset: calc(-1 * var(--cpd-border-width-2));
         background-color: var(--settings-row-hovered, var(--cpd-color-bg-action-secondary-hovered));
+
+        --cpd-color-text-secondary: var(--tl-color-text-secondary-on-hovered);
     }
 
     @media (hover) {
         &:hover {
             background-color: var(--settings-row-hovered, var(--cpd-color-bg-action-secondary-hovered));
+
+            --cpd-color-text-secondary: var(--tl-color-text-secondary-on-hovered);
         }
     }
 
@@ -136,8 +140,11 @@ Please see LICENSE files in the repository root for full details.
         --cpd-color-text-secondary: var(--tl-color-text-secondary-on-pressed);
     }
 
+    /* Without a fill, its secondary text stays as it is */
     &:disabled {
         background-color: transparent;
         color: var(--cpd-color-text-disabled);
+
+        --cpd-color-text-secondary: inherit;
     }
 }
