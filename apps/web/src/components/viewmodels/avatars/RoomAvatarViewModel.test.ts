@@ -94,6 +94,19 @@ describe("RoomAvatarViewModel", () => {
         expect(vm.current.badgeDecoration).toBe(AvatarBadgeDecoration.LowPriority);
     });
 
+    it.each([
+        [PresenceIndicatorModule.Presence.Online, AvatarBadgeDecoration.Presence],
+        [PresenceIndicatorModule.Presence.Away, AvatarBadgeDecoration.Presence],
+        [PresenceIndicatorModule.Presence.Busy, AvatarBadgeDecoration.Presence],
+        [PresenceIndicatorModule.Presence.Offline, undefined],
+        [null, undefined],
+    ])("should decorate the avatar of someone with the presence %s with %s", (presence, badgeDecoration) => {
+        vi.spyOn(PresenceIndicatorModule, "usePresence").mockReturnValue(presence);
+
+        const { result: vm } = renderHook(() => useRoomAvatarViewModel(room));
+        expect(vm.current).toEqual({ badgeDecoration, presence });
+    });
+
     it("should recompute isPublic when room changed", async () => {
         const { result: vm, rerender } = renderHook((props) => useRoomAvatarViewModel(props), { initialProps: room });
         expect(vm.current.badgeDecoration).not.toBe(AvatarBadgeDecoration.PublicRoom);

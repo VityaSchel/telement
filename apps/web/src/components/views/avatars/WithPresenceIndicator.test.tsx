@@ -10,7 +10,15 @@ Please see LICENSE files in the repository root for full details.
 
 import { vi, describe, it, expect, beforeEach, afterEach } from "vitest";
 import { act, render, renderHook, waitFor } from "test-utils-rtl";
-import { type MatrixClient, PendingEventOrdering, Room, RoomMember, User, UserEvent } from "matrix-js-sdk/src/matrix";
+import {
+    type MatrixClient,
+    MatrixEvent,
+    PendingEventOrdering,
+    Room,
+    RoomMember,
+    User,
+    UserEvent,
+} from "matrix-js-sdk/src/matrix";
 import React from "react";
 import { getMockClientWithEventEmitter, stubClient } from "test-utils";
 
@@ -65,29 +73,47 @@ describe("WithPresenceIndicator", () => {
         expect(container.children[0].tagName).toBe("SPAN");
     });
 
-    it.each([
-        ["online", "Online"],
-        ["offline", "Offline"],
-        ["unavailable", "Away"],
-    ])("renders presence indicator with tooltip for DM rooms", async (presenceStr, renderedStr) => {
+    function makeDm(user: User): void {
         vi.mocked(isPresenceEnabled).mockReturnValue(true);
-        const DM_USER_ID = "@bob:foo.bar";
         const dmRoomMap = {
             getUserIdForRoomId: () => {
-                return DM_USER_ID;
+                return user.userId;
             },
         } as unknown as DMRoomMap;
         vi.spyOn(DMRoomMap, "shared").mockReturnValue(dmRoomMap);
         room.getMember = vi.fn((userId) => {
             const member = new RoomMember(room.roomId, userId);
-            member.user = new User(userId);
-            member.user.presence = presenceStr;
+            member.user = user;
             return member;
         });
+    }
+
+    it.each(["online", "unavailable"])("renders presence indicator with tooltip for DM rooms", async (presence) => {
+        const user = new User("@bob:foo.bar");
+        user.presence = presence;
+        makeDm(user);
 
         const { asFragment } = renderComponent();
 
         expect(asFragment()).toMatchSnapshot();
+    });
+
+    it("renders no presence indicator for someone offline, and the same child once they come online", () => {
+        const user = new User("@bob:foo.bar");
+        user.presence = "offline";
+        makeDm(user);
+
+        const { container } = renderComponent();
+        const child = container.querySelector("span");
+        expect(container.querySelector("svg")).toBeNull();
+        expect(container.querySelector("[tabindex]")).toBeNull();
+
+        act(() => {
+            user.presence = "online";
+            user.emit(UserEvent.Presence, new MatrixEvent(), user);
+        });
+        expect(container.querySelector("svg")).toHaveClass("mx_PresenceIconView_online");
+        expect(container.querySelector("span")).toBe(child);
     });
 });
 

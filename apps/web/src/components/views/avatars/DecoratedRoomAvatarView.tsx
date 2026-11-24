@@ -11,7 +11,6 @@ import PublicIcon from "@vector-im/compound-design-tokens/assets/web/icons/publi
 import VideoIcon from "@vector-im/compound-design-tokens/assets/web/icons/video-call-solid";
 import ArrowDownIcon from "@vector-im/compound-design-tokens/assets/web/icons/arrow-down";
 import OnlineOrUnavailableIcon from "@vector-im/compound-design-tokens/assets/web/icons/presence-solid-8x8";
-import OfflineIcon from "@vector-im/compound-design-tokens/assets/web/icons/presence-outline-8x8";
 import BusyIcon from "@vector-im/compound-design-tokens/assets/web/icons/presence-strikethrough-8x8";
 import classNames from "classnames";
 import { Tooltip } from "@vector-im/compound-web";
@@ -35,19 +34,20 @@ interface DecoratedRoomAvatarViewProps {
 export const DecoratedRoomAvatarView = memo(function DecoratedRoomAvatarView({
     room,
 }: DecoratedRoomAvatarViewProps): JSX.Element {
-    const vm = useRoomAvatarViewModel(room);
+    const { badgeDecoration, presence } = useRoomAvatarViewModel(room);
     // No decoration, we just show the avatar
-    if (!vm.badgeDecoration) return <RoomAvatar size="48px" room={room} />;
+    // Telement: someone offline is wrapped anyway, as their image would load anew if only coming online wrapped it
+    if (!badgeDecoration && !presence) return <RoomAvatar size="48px" room={room} />;
 
-    const icon = getAvatarDecoration(vm.badgeDecoration, vm.presence);
-    const label = getDecorationLabel(vm.badgeDecoration, vm.presence);
+    const icon = badgeDecoration && getAvatarDecoration(badgeDecoration, presence);
+    const label = badgeDecoration && getDecorationLabel(badgeDecoration, presence);
 
     // Presence indicator and video/public icons don't have the same size
     // We use different masks
-    const maskClass =
-        vm.badgeDecoration === AvatarBadgeDecoration.Presence
-            ? "mx_RoomAvatarView_RoomAvatar_presence"
-            : "mx_RoomAvatarView_RoomAvatar_icon";
+    const maskClass = {
+        mx_RoomAvatarView_RoomAvatar_presence: badgeDecoration === AvatarBadgeDecoration.Presence,
+        mx_RoomAvatarView_RoomAvatar_icon: badgeDecoration && badgeDecoration !== AvatarBadgeDecoration.Presence,
+    };
 
     return (
         <Flex className="mx_RoomAvatarView">
@@ -60,7 +60,7 @@ export const DecoratedRoomAvatarView = memo(function DecoratedRoomAvatarView({
 /**
  * Get the decoration for the avatar based on the presence.
  */
-function getPresenceDecoration(presence: Presence): JSX.Element {
+function getPresenceDecoration(presence: Presence): JSX.Element | undefined {
     switch (presence) {
         case Presence.Online:
             return (
@@ -79,16 +79,6 @@ function getPresenceDecoration(presence: Presence): JSX.Element {
                     height="8px"
                     className="mx_RoomAvatarView_PresenceDecoration"
                     color="var(--cpd-color-icon-quaternary)"
-                    aria-label={getPresenceLabel(presence)}
-                />
-            );
-        case Presence.Offline:
-            return (
-                <OfflineIcon
-                    width="8px"
-                    height="8px"
-                    className="mx_RoomAvatarView_PresenceDecoration"
-                    color="var(--cpd-color-icon-tertiary)"
                     aria-label={getPresenceLabel(presence)}
                 />
             );
@@ -162,14 +152,12 @@ function getDecorationLabel(decoration: AvatarBadgeDecoration, presence: Presenc
  * Get the label for the presence.
  * This is used for the tooltip and a11y label.
  */
-function getPresenceLabel(presence: Presence): string {
+function getPresenceLabel(presence: Presence): string | undefined {
     switch (presence) {
         case Presence.Online:
             return _t("presence|online");
         case Presence.Away:
             return _t("presence|away");
-        case Presence.Offline:
-            return _t("presence|offline");
         case Presence.Busy:
             return _t("presence|busy");
     }

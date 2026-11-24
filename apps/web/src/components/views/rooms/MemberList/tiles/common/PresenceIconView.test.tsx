@@ -22,10 +22,9 @@ describe("<PresenceIconView/>", () => {
         expect(container).toMatchSnapshot();
     });
 
-    it("renders correctly for presence=offline", () => {
-        const { container } = render(<AvatarPresenceIconView presenceState="offline" />);
-        expect(container.querySelector(".mx_PresenceIconView_offline")).toBeDefined();
-        expect(container).toMatchSnapshot();
+    it.each(["offline", "unknown"])("renders nothing for presence=%s", (presenceState) => {
+        const { container } = render(<AvatarPresenceIconView presenceState={presenceState} />);
+        expect(container).toBeEmptyDOMElement();
     });
 
     it("renders correctly for presence=unavailable/unreachable", () => {

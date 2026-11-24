@@ -220,66 +220,6 @@ exports[`<DecoratedRoomAvatarView /> > should render the busy presence 1`] = `
 </DocumentFragment>
 `;
 
-exports[`<DecoratedRoomAvatarView /> > should render the offline presence 1`] = `
-<DocumentFragment>
-  <div
-    class="_flex mx_RoomAvatarView"
-    style="--mx-flex-display: flex; --mx-flex-direction: row; --mx-flex-align: start; --mx-flex-justify: start; --mx-flex-gap: 0; --mx-flex-wrap: nowrap;"
-  >
-    <span
-      aria-label="Avatar"
-      class="_avatar mx_BaseAvatar mx_RoomAvatarView_RoomAvatar mx_RoomAvatarView_RoomAvatar_presence"
-      data-color="1"
-      data-testid="avatar-img"
-      data-type="round"
-      role="img"
-      style="--cpd-avatar-size: 48px;"
-    >
-      <img
-        alt=""
-        class="_image"
-        data-type="round"
-        height="48px"
-        loading="lazy"
-        referrerpolicy="no-referrer"
-        src="http://this.is.a.url/avatar.url/room.png"
-        width="48px"
-      />
-    </span>
-    <svg
-      aria-label="Offline"
-      aria-labelledby="react-use-id-1"
-      class="mx_RoomAvatarView_PresenceDecoration"
-      color="var(--cpd-color-icon-tertiary)"
-      fill="currentColor"
-      height="8px"
-      viewBox="0 0 8 8"
-      width="8px"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <g
-        clip-path="url(#cpd_PresenceOutline8X8Icon_a)"
-      >
-        <path
-          clip-rule="evenodd"
-          d="M4 6.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5M4 8a4 4 0 1 0 0-8 4 4 0 0 0 0 8"
-          fill-rule="evenodd"
-        />
-      </g>
-      <defs>
-        <clippath
-          id="cpd_PresenceOutline8X8Icon_a"
-        >
-          <path
-            d="M0 0h8v8H0z"
-          />
-        </clippath>
-      </defs>
-    </svg>
-  </div>
-</DocumentFragment>
-`;
-
 exports[`<DecoratedRoomAvatarView /> > should render the online presence 1`] = `
 <DocumentFragment>
   <div

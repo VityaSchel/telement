@@ -9,7 +9,7 @@ import { EventType, JoinRule, type MatrixEvent, type Room, RoomEvent } from "mat
 import { useEffect, useState } from "react";
 
 import { useTypedEventEmitter, useTypedEventEmitterState } from "../../../hooks/useEventEmitter";
-import { useDmMember, usePresence, type Presence } from "../../views/avatars/WithPresenceIndicator";
+import { useDmMember, usePresence, Presence } from "../../views/avatars/WithPresenceIndicator";
 import { DefaultTagID } from "../../../stores/room-list-v3/skip-list/tag";
 
 export enum AvatarBadgeDecoration {
@@ -50,7 +50,8 @@ export function useRoomAvatarViewModel(room: Room): RoomAvatarViewState {
         badgeDecoration = AvatarBadgeDecoration.VideoRoom;
     } else if (isPublic) {
         badgeDecoration = AvatarBadgeDecoration.PublicRoom;
-    } else if (presence) {
+    } else if (presence && presence !== Presence.Offline) {
+        // Telement: someone offline has no dot, as in Telegram
         badgeDecoration = AvatarBadgeDecoration.Presence;
     }
 

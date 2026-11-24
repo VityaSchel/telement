@@ -117,6 +117,29 @@ describe("MemberTileView", () => {
             expect(container4).toHaveTextContent("Invited");
         });
 
+        it.each<[RoomMember["presenceState"], string | null]>([
+            ["online", "mx_PresenceIconView_online"],
+            ["unavailable", "mx_PresenceIconView_unavailable"],
+            ["offline", null],
+            [undefined, null],
+        ])("should mark the avatar of someone with the presence %s with %s", (presenceState, icon) => {
+            member.presenceState = presenceState;
+            const { container } = render(
+                <RoomMemberTileView
+                    item={item}
+                    member={member}
+                    index={0}
+                    memberCount={1}
+                    showPresence={true}
+                    onFocus={vi.fn()}
+                />,
+            );
+
+            const presence = container.querySelector(".mx_MemberTileView_presence")!;
+            expect(presence.querySelector("svg")?.getAttribute("class") ?? null).toBe(icon);
+            expect(presence.childElementCount).toBe(icon ? 1 : 0);
+        });
+
         it("should call onFocus handler when focused", async () => {
             const user = userEvent.setup();
             const onFocus = vi.fn();

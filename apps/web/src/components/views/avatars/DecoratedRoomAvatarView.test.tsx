@@ -9,8 +9,9 @@
 
 import React from "react";
 import { vi, describe, it, expect, beforeEach } from "vitest";
-import { render, screen } from "test-utils-rtl";
+import { act, render, screen } from "test-utils-rtl";
 import { mkStubRoom, stubClient } from "test-utils";
+import { MatrixEvent, RoomMember, User, UserEvent } from "matrix-js-sdk/src/matrix";
 
 import { DecoratedRoomAvatarView } from "./DecoratedRoomAvatarView";
 import {
@@ -85,7 +86,6 @@ describe("<DecoratedRoomAvatarView />", () => {
 
     it.each([
         { presence: Presence.Online, label: "Online" },
-        { presence: Presence.Offline, label: "Offline" },
         { presence: Presence.Busy, label: "Busy" },
         { presence: Presence.Away, label: "Away" },
     ])("should render the $presence presence", ({ presence, label }) => {
@@ -98,5 +98,63 @@ describe("<DecoratedRoomAvatarView />", () => {
 
         expect(screen.getByLabelText(label)).toBeInTheDocument();
         expect(asFragment()).toMatchSnapshot();
+    });
+
+    describe("in a DM", () => {
+        const user = new User("@bob:foo.bar");
+        const member = new RoomMember(room.roomId, user.userId);
+        member.user = user;
+
+        beforeEach(async () => {
+            const { useRoomAvatarViewModel: actualViewModel } = await vi.importActual<
+                typeof import("../../viewmodels/avatars/RoomAvatarViewModel")
+            >("../../viewmodels/avatars/RoomAvatarViewModel");
+            vi.mocked(useRoomAvatarViewModel).mockImplementation(actualViewModel);
+
+            vi.spyOn(DMRoomMap.shared(), "getUserIdForRoomId").mockReturnValue(user.userId);
+            vi.spyOn(room, "getMember").mockReturnValue(member);
+            vi.spyOn(room, "getJoinedMembers").mockReturnValue([
+                new RoomMember(room.roomId, matrixClient.getSafeUserId()),
+                member,
+            ]);
+        });
+
+        function setPresence(presence: string): void {
+            user.presence = presence;
+            user.emit(UserEvent.Presence, new MatrixEvent(), user);
+        }
+
+        function decoration(container: HTMLElement): { dot: string | null | undefined; notch: boolean } {
+            return {
+                dot: container.querySelector("svg")?.getAttribute("aria-label"),
+                notch: container.querySelector(".mx_RoomAvatarView_RoomAvatar_presence") !== null,
+            };
+        }
+
+        it("should show someone offline without a dot, and without the notch for one", () => {
+            user.presence = "offline";
+            const { container } = render(<DecoratedRoomAvatarView room={room} />);
+
+            expect(decoration(container)).toEqual({ dot: undefined, notch: false });
+        });
+
+        it.each([
+            ["online", "Online"],
+            ["unavailable", "Away"],
+            ["busy", "Busy"],
+        ])("should change between offline and %s without loading the avatar's image anew", (presence, label) => {
+            user.presence = presence;
+            const { container } = render(<DecoratedRoomAvatarView room={room} />);
+            const image = container.querySelector("img");
+            expect(image).not.toBeNull();
+            expect(decoration(container)).toEqual({ dot: label, notch: true });
+
+            act(() => setPresence("offline"));
+            expect(decoration(container)).toEqual({ dot: undefined, notch: false });
+
+            act(() => setPresence(presence));
+            expect(decoration(container)).toEqual({ dot: label, notch: true });
+            expect(container.querySelector("img")).toBe(image);
+        });
     });
 });
