@@ -10,7 +10,7 @@ Please see LICENSE files in the repository root for full details.
 
 import React, { type ChangeEvent } from "react";
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { act, render, screen } from "test-utils-rtl";
+import { act, render, screen, within } from "test-utils-rtl";
 import { mkStubRoom, stubClient } from "test-utils";
 import { type MatrixClient, type UploadResponse } from "matrix-js-sdk/src/matrix";
 import userEvent from "@testing-library/user-event";
@@ -116,13 +116,17 @@ describe("ProfileSettings", () => {
         expect(screen.getByText("This is how you appear to others on the app.")).toHaveClass("mx_SettingsSection_help");
     });
 
-    it("floats the username's label on its copy field", () => {
+    it("puts the username and its copy button under the display name, named as the username", () => {
         renderProfileSettings(toastRack, client);
 
-        const label = screen.getByText("Username");
-        expect(label).toHaveClass("mx_CopyableText_label");
-        expect(label.parentElement).toHaveClass("mx_CopyableText_field");
-        expect(label.nextElementSibling).toHaveClass("mx_CopyableText_border");
+        const username = screen.getByRole("group", { name: "Username" });
+        expect(username).toHaveTextContent(client.getSafeUserId());
+        expect(within(username).getByRole("button", { name: "Copy" })).toBeInTheDocument();
+        // Text without a field's border, and no label drawn
+        expect(username).not.toHaveClass("mx_CopyableText_border");
+        expect(screen.queryByText("Username")).toBeNull();
+        expect(username.previousElementSibling).toBe(screen.getByText(/^Mocked EditInPlace/));
+        expect(username.closest(".mx_UserProfileSettings_profile_nameAndStatus")).not.toBeNull();
     });
 
     it("removes avatar", async () => {

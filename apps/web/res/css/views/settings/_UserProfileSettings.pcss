@@ -14,9 +14,7 @@ Please see LICENSE files in the repository root for full details.
     }
 
     .mx_UserProfileSettings_profile {
-        display: flex;
-        margin-top: var(--cpd-space-4x);
-        gap: 16px;
+        @mixin settingsProfile;
 
         .mx_UserProfileSettings_profile_displayName {
             flex-grow: 0;
@@ -24,25 +22,24 @@ Please see LICENSE files in the repository root for full details.
             gap: 0;
         }
         .mx_UserProfileSettings_profile_nameAndStatus {
-            width: 100%;
-            /* Override the default of min-width: auto to allow max-width: 100% to bound correctly */
-            min-width: 0;
-            gap: 16px;
+            gap: var(--cpd-space-4x);
         }
     }
 
-    .mx_UserProfileSettings_profile_controls {
-        flex-grow: 1;
-    }
+    /* Telement: the Matrix ID is the display name's second line, as Telegram puts a username under a name: 13px
+       secondary text 4px under the field, which starts on its edge, then its copy button. A long ID breaks rather than
+       running past the card. */
+    .mx_UserProfileSettings_username {
+        margin-block-start: calc(var(--cpd-space-1x) - var(--cpd-space-4x));
+        font: var(--cpd-font-body-sm-regular);
+        letter-spacing: var(--cpd-font-letter-spacing-body-sm);
+        color: var(--cpd-color-text-secondary);
+        overflow-wrap: anywhere;
 
-    /* Telement: a copy field with its label floated on the border (_CopyableText.pcss), 16px under the profile as
-       fields are under each other */
-    .mx_UserProfileSettings_profile_controls_userId {
-        width: 100%;
-        margin-top: var(--cpd-space-4x);
-        .mx_CopyableText {
-            width: 100%;
-            box-sizing: border-box;
+        /* Taller than the line, the button takes no height, so that what follows is as far from the text as fields
+           are from each other */
+        .mx_CopyableText_copyButton {
+            margin-block: calc(-1 * var(--cpd-space-7x) / 2);
         }
     }
 
@@ -54,17 +51,9 @@ Please see LICENSE files in the repository root for full details.
         margin-right: var(--cpd-space-2x);
     }
 
-    /* Telement: the red Remove this device row (ActionRowView) ends the card, 16px under what is above it as the
-       card's other rows are; its hover fill reaches 4px from the card's bottom edge, as at its sides */
+    /* Telement: the red Sign out row (ActionRowView) ends the card, 16px under what is above it as the card's other rows
+       are; its hover fill reaches 4px from the card's bottom edge, as at its sides */
     .mx_UserProfileSettings_signOut {
         margin-block: var(--cpd-space-4x) calc(var(--tl-inset-menu) - var(--cpd-space-3x));
-    }
-}
-
-@media (max-width: 768px) {
-    .mx_UserProfileSettings_profile {
-        flex-direction: column;
-        align-items: center;
-        gap: 30px;
     }
 }

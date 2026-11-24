@@ -232,6 +232,20 @@ export default class RoomProfileSettings extends React.Component<IProps, IState>
         return (
             <form onSubmit={this.saveProfile} autoComplete="off" noValidate={true} className="mx_RoomProfileSettings">
                 <div className="mx_RoomProfileSettings_profile">
+                    {/* Telement: the photo at the card's start, as in the Account tab */}
+                    <AvatarSetting
+                        avatar={
+                            this.state.avatarRemovalPending
+                                ? undefined
+                                : (this.state.avatarFile ?? this.state.originalAvatarUrl ?? undefined)
+                        }
+                        avatarAccessibleName={_t("room_settings|general|avatar_field_label")}
+                        disabled={!this.state.canSetAvatar}
+                        onChange={this.onAvatarChanged}
+                        removeAvatar={canRemove ? this.removeAvatar : undefined}
+                        placeholderId={idNameForRoom(MatrixClientPeg.safeGet().getRoom(this.props.roomId)!)}
+                        placeholderName={MatrixClientPeg.safeGet().getRoom(this.props.roomId)!.name}
+                    />
                     <div className="mx_RoomProfileSettings_profile_controls">
                         <Field
                             label={_t("room_settings|general|name_field_label")}
@@ -256,19 +270,6 @@ export default class RoomProfileSettings extends React.Component<IProps, IState>
                             element="textarea"
                         />
                     </div>
-                    <AvatarSetting
-                        avatar={
-                            this.state.avatarRemovalPending
-                                ? undefined
-                                : (this.state.avatarFile ?? this.state.originalAvatarUrl ?? undefined)
-                        }
-                        avatarAccessibleName={_t("room_settings|general|avatar_field_label")}
-                        disabled={!this.state.canSetAvatar}
-                        onChange={this.onAvatarChanged}
-                        removeAvatar={canRemove ? this.removeAvatar : undefined}
-                        placeholderId={idNameForRoom(MatrixClientPeg.safeGet().getRoom(this.props.roomId)!)}
-                        placeholderName={MatrixClientPeg.safeGet().getRoom(this.props.roomId)!.name}
-                    />
                 </div>
                 {profileSettingsButtons}
             </form>

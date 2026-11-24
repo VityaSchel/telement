@@ -101,5 +101,17 @@ describe("<SpaceSettingsDialog />", () => {
             );
             expect(screen.queryByRole("button", { name: "Upload avatar" })).toBeNull();
         });
+
+        it("shows the photo before the name and the description, as the room's profile does", () => {
+            renderDialog();
+            const avatar = screen.getByRole("group", { name: "Avatar" });
+
+            expect(avatar.matches(".mx_RoomProfileSettings_profile > :first-child")).toBe(true);
+            expect(
+                screen
+                    .getByRole("textbox", { name: "Name" })
+                    .closest(".mx_RoomProfileSettings_profile > .mx_RoomProfileSettings_profile_controls:last-child"),
+            ).not.toBeNull();
+        });
     });
 });

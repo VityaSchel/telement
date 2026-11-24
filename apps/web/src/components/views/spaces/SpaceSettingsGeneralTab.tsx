@@ -92,8 +92,8 @@ const SpaceSettingsGeneralTab: React.FC<IProps> = ({ matrixClient: cli, space })
         }
     };
 
-    // Laid out as the room's profile (RoomProfileSettings): the fields beside the avatar editor, whose letter avatar is
-    // square as the space bar draws spaces, and Cancel and Save disabled until something changes. The dialog's title
+    // Laid out as the room's profile (RoomProfileSettings): the avatar editor, whose letter avatar is square as the space
+    // bar draws spaces, before the fields, and Cancel and Save disabled until something changes. The dialog's title
     // names the tab, so the section has no heading of its own.
     return (
         <SettingsTab>
@@ -110,6 +110,16 @@ const SpaceSettingsGeneralTab: React.FC<IProps> = ({ matrixClient: cli, space })
                     {error && <div className="mx_SpaceRoomView_errorText">{error}</div>}
 
                     <div className="mx_RoomProfileSettings_profile">
+                        <AvatarSetting
+                            avatar={shownAvatar}
+                            avatarAccessibleName={_t("common|avatar")}
+                            disabled={busy || !canSetAvatar}
+                            onChange={setNewAvatar}
+                            removeAvatar={shownAvatar ? () => setNewAvatar(undefined) : undefined}
+                            placeholderId={space.roomId}
+                            placeholderName={space.name}
+                            type="square"
+                        />
                         <div className="mx_RoomProfileSettings_profile_controls">
                             <Field
                                 name="spaceName"
@@ -132,16 +142,6 @@ const SpaceSettingsGeneralTab: React.FC<IProps> = ({ matrixClient: cli, space })
                                 disabled={busy || !canSetTopic}
                             />
                         </div>
-                        <AvatarSetting
-                            avatar={shownAvatar}
-                            avatarAccessibleName={_t("common|avatar")}
-                            disabled={busy || !canSetAvatar}
-                            onChange={setNewAvatar}
-                            removeAvatar={shownAvatar ? () => setNewAvatar(undefined) : undefined}
-                            placeholderId={space.roomId}
-                            placeholderName={space.name}
-                            type="square"
-                        />
                     </div>
 
                     <div className="mx_RoomProfileSettings_buttons">

@@ -10,6 +10,7 @@ import { userEvent } from "vitest/browser";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import {
+    EditInPlace,
     Field,
     Form,
     InlineField,
@@ -51,6 +52,7 @@ import settingsDropdownStyles from "../../res/css/views/elements/_SettingsDropdo
 import settingsFlagStyles from "../../res/css/views/elements/_SettingsFlag.pcss?raw";
 import styledRadioButtonStyles from "../../res/css/views/elements/_StyledRadioButton.pcss?raw";
 import tagComposerStyles from "../../res/css/views/elements/_TagComposer.pcss?raw";
+import avatarSettingStyles from "../../res/css/views/settings/_AvatarSetting.pcss?raw";
 import fontScalingPanelStyles from "../../res/css/views/settings/_FontScalingPanel.pcss?raw";
 import imageSizePanelStyles from "../../res/css/views/settings/_ImageSizePanel.pcss?raw";
 import joinRuleSettingsStyles from "../../res/css/views/settings/_JoinRuleSettings.pcss?raw";
@@ -97,6 +99,7 @@ const APP_STYLES = [
     settingsFlagStyles,
     styledRadioButtonStyles,
     tagComposerStyles,
+    avatarSettingStyles,
     fontScalingPanelStyles,
     imageSizePanelStyles,
     joinRuleSettingsStyles,
@@ -599,24 +602,153 @@ describe.each(THEMES.map(([theme]) => theme))("Settings groups in %s", (theme) =
         }
     });
 
-    it("ends the account's profile card with the Remove this device row, 16px under the username and 4px over the card's edge", () => {
-        renderTab(
-            theme,
-            section(
-                "account",
-                "Profile",
-                `<div class="mx_UserProfileSettings">
-                    <div class="mx_UserProfileSettings_profile_controls_userId" id="username" style="height: 36px"></div>
-                    <button data-settings-row="" class="mx_UserProfileSettings_signOut" id="sign-out"
-                        style="display: block; box-sizing: border-box; height: 44px; width: calc(100% + 24px); margin-inline: -12px">
-                        Remove this device
-                    </button>
-                </div>`,
-            ),
+    describe("profiles", () => {
+        /** The avatar editor (AvatarSetting), as it renders with its file input after it. */
+        const avatar = `
+            <div class="mx_AvatarSetting_avatar" id="avatar" role="group"></div>
+            <input type="file" style="display: none">
+        `;
+        const displayName = renderToStaticMarkup(
+            createElement(EditInPlace, {
+                className: "mx_UserProfileSettings_profile_displayName",
+                label: "Display name",
+                saveButtonLabel: "Save",
+                cancelButtonLabel: "Cancel",
+                savingLabel: "Updating",
+                defaultValue: "Alice",
+                onSave: async () => {},
+            }),
+        );
+        const field = (id: string): string => `
+            <div class="mx_Field mx_RoomProfileSettings_profile_controls_${id}" id="${id}">
+                <input type="text" placeholder="${id}"><label>${id}</label>
+            </div>
+        `;
+
+        /** The account's profile, as UserProfileSettings lays it out in its section. */
+        const account = section(
+            "account",
+            "Profile",
+            `<div class="mx_UserProfileSettings">
+                <div class="mx_UserProfileSettings_profile" id="profile">
+                    ${avatar}
+                    <div class="mx_UserProfileSettings_profile_nameAndStatus" id="fields"
+                        style="display: flex; flex-direction: column">
+                        ${displayName}
+                        <span class="mx_CopyableText mx_UserProfileSettings_username" id="username" role="group">
+                            @alice:example.org
+                            <button class="mx_CopyableText_copyButton" id="copy"
+                                style="box-sizing: border-box; width: 28px; height: 28px; padding: 4px"></button>
+                        </span>
+                        <div id="status" style="height: 28px">What's your status?</div>
+                    </div>
+                </div>
+                <button data-settings-row="" class="mx_UserProfileSettings_signOut" id="sign-out"
+                    style="display: block; box-sizing: border-box; height: 44px; width: calc(100% + 24px); margin-inline: -12px">
+                    Sign out
+                </button>
+            </div>`,
+        );
+        /** A room's profile, as RoomProfileSettings lays it out, on its section's card. */
+        const roomForm = `
+            <form class="mx_RoomProfileSettings">
+                <div class="mx_RoomProfileSettings_profile" id="profile">
+                    ${avatar}
+                    <div class="mx_RoomProfileSettings_profile_controls" id="fields">${field("name")}${field("topic")}</div>
+                </div>
+                <div class="mx_RoomProfileSettings_buttons" id="buttons"><button style="height: 36px">Save</button></div>
+            </form>
+        `;
+        const room = section("room", "", roomForm);
+        /** A space's, whose form is a card of its own beside the Leave space card. */
+        const space = section("space", "", roomForm + subsection("leave", "", "<div>Leave space</div>"));
+
+        it.each([
+            ["the account's", account, "#account-content", "form"],
+            ["a room's", room, "#room-content", "#name"],
+            ["a space's", space, "#space-content > form", "#name"],
+        ])(
+            "lays out %s: the photo 16px from its card's start and top, the fields 16px after it",
+            (_, tab, card, first) => {
+                renderTab(theme, tab);
+                const cardBox = box(card);
+
+                expect([box("#avatar").width, box("#avatar").height]).toEqual([120, 120]);
+                expect([box("#avatar").left - cardBox.left, box("#avatar").top - cardBox.top]).toEqual([16, 16]);
+                // The first field, 36px tall, starts where the photo does and spans the rest of the card
+                const firstField = box(`#fields ${first === "form" ? "input" : first}`);
+                expect([firstField.left - box("#avatar").right, firstField.top - cardBox.top]).toEqual([16, 16]);
+                expect(firstField.height).toBe(36);
+                expect(cardBox.right - firstField.right).toBe(16);
+            },
         );
 
-        expect(box("#sign-out").top - box("#username").bottom).toBe(16);
-        expect(box("#account-content").bottom - box("#sign-out").bottom).toBe(4);
+        it("mirrors right to left", () => {
+            renderTab(theme, room, "rtl");
+            const cardBox = box("#room-content");
+
+            expect(cardBox.right - box("#avatar").right).toBe(16);
+            expect(box("#avatar").left - box("#name").right).toBe(16);
+        });
+
+        it.each([
+            ["the account's", account, "#account-content"],
+            ["a room's", room, "#room-content"],
+        ])("wraps %s fields under the photo in a narrow dialog", (_, tab, card) => {
+            renderTab(theme, tab);
+            get("#profile").style.width = "260px";
+
+            expect(box("#avatar").left - box(card).left).toBe(16);
+            expect(box("#fields").left).toBe(box("#avatar").left);
+            expect(box("#fields").top - box("#avatar").bottom).toBe(16);
+            expect(box("#fields").width).toBe(260);
+        });
+
+        it("writes the username under the display name, in 13px secondary text on the field's edge", () => {
+            const container = renderTab(theme, account);
+            const style = getComputedStyle(get("#username"));
+            const input = box("#fields input");
+
+            expect([style.fontSize, style.fontWeight, style.color]).toEqual([
+                "13px",
+                "400",
+                tokenColor("--cpd-color-text-secondary", container),
+            ]);
+            expect(style.borderStyle).toBe("none");
+            expect(box("#username").top - input.bottom).toBe(4);
+            expect(textBox("#username").left).toBe(input.left);
+            // The copy button is centered on the line and makes it no taller
+            const line = parseFloat(style.lineHeight);
+            expect(box("#username").height).toBeCloseTo(line, 1);
+            expect((box("#copy").top + box("#copy").bottom) / 2).toBeCloseTo(
+                (box("#username").top + box("#username").bottom) / 2,
+                1,
+            );
+            expect(box("#status").top - box("#username").bottom).toBe(16);
+        });
+
+        it("breaks a long username rather than running past the card", () => {
+            renderTab(theme, account.replace("@alice:example.org", `@${"alice".repeat(40)}:example.org`));
+
+            expect(box("#username").right).toBeLessThanOrEqual(box("#fields").right);
+            expect(box("#copy").right).toBeLessThanOrEqual(box("#fields").right);
+            expect(box("#username").height).toBeGreaterThan(30);
+        });
+
+        it("ends the account's card with the Sign out row, 16px under the photo and 4px over the card's edge", () => {
+            renderTab(theme, account);
+
+            expect(box("#sign-out").top - box("#avatar").bottom).toBe(16);
+            expect(box("#account-content").bottom - box("#sign-out").bottom).toBe(4);
+        });
+
+        it("keeps a room's fields 16px apart, and its buttons 16px under them", () => {
+            renderTab(theme, room);
+
+            expect(box("#topic").top - box("#name").bottom).toBe(16);
+            expect(box("#buttons").top - box("#profile").bottom).toBe(16);
+            expect(box("#room-content").bottom - box("#buttons").bottom).toBe(12);
+        });
     });
 
     it("draws the Labs tab's beta cards as settings cards on the pane, padded 12 × 16 like the others", () => {

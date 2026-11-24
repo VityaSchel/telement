@@ -6,7 +6,7 @@ SPDX-License-Identifier: AGPL-3.0-only OR GPL-3.0-only OR LicenseRef-Element-Com
 Please see LICENSE files in the repository root for full details.
 */
 
-import React, { type ChangeEvent, type ReactNode, useCallback, useEffect, useState, useId } from "react";
+import React, { type ChangeEvent, type ReactNode, useCallback, useEffect, useState } from "react";
 import { logger } from "matrix-js-sdk/src/logger";
 import { EditInPlace, Alert, ErrorMessage } from "@vector-im/compound-web";
 import PopOutIcon from "@vector-im/compound-design-tokens/assets/web/icons/pop-out";
@@ -41,23 +41,22 @@ const SpinnerToast: React.FC<{ children?: ReactNode }> = ({ children }) => (
     </>
 );
 
-interface UsernameBoxProps {
+interface UsernameProps {
     username: string;
 }
 
-const UsernameBox: React.FC<UsernameBoxProps> = ({ username }) => {
-    const labelId = useId();
-    return (
-        <div className="mx_UserProfileSettings_profile_controls_userId mx_CopyableText_field">
-            <div className="mx_CopyableText_label" id={labelId}>
-                {_t("settings|general|username")}
-            </div>
-            <CopyableText getTextToCopy={() => username} aria-labelledby={labelId}>
-                {username}
-            </CopyableText>
-        </div>
-    );
-};
+/** Telement: the Matrix ID as the display name's second line, with its copy button, rather than in a field of its own. */
+const Username: React.FC<UsernameProps> = ({ username }) => (
+    <CopyableText
+        className="mx_UserProfileSettings_username"
+        border={false}
+        getTextToCopy={() => username}
+        role="group"
+        aria-label={_t("settings|general|username")}
+    >
+        {username}
+    </CopyableText>
+);
 
 interface ManageAccountButtonProps {
     externalAccountManagementUrl: string;
@@ -238,6 +237,7 @@ const UserProfileSettings: React.FC<UserProfileSettingsProps> = ({
                                 <ErrorMessage>{_t("settings|general|display_name_error")}</ErrorMessage>
                             )}
                         </EditInPlace>
+                        <Username username={client.getSafeUserId()} />
                         {userStatusEnabled && <SetStatusView vm={setStatusVM} initialCustomMode={startCustomStatus} />}
                     </Flex>
                 </div>
@@ -248,7 +248,6 @@ const UserProfileSettings: React.FC<UserProfileSettingsProps> = ({
                             : _t("settings|general|avatar_upload_error_text", { size: formatBytes(maxUploadSize) })}
                     </Alert>
                 )}
-                <UsernameBox username={client.getSafeUserId()} />
                 {externalAccountManagementUrl && (
                     <Flex gap="var(--cpd-space-4x)" className="mx_UserProfileSettings_profile_buttons">
                         <ManageAccountButton externalAccountManagementUrl={externalAccountManagementUrl} />

@@ -131,6 +131,22 @@ Please see LICENSE files in the repository root for full details.
     padding: 0 var(--settings-group-inset, var(--cpd-space-4x));
 }
 
+/* The profile at the top of a settings card (the account's, a room's or a space's), as Telegram's edit pages lay it out:
+   the photo at the card's start and the fields beside it, 16px apart, both 16px under the card's edge, as far as the
+   photo is from its start. In a narrow dialog the fields wrap under the photo. */
+@define-mixin settingsProfile {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: var(--cpd-space-4x);
+    margin-block-start: calc(var(--cpd-space-4x) - var(--cpd-space-3x));
+
+    > :last-child {
+        flex: 1 1 240px;
+        min-inline-size: 0;
+    }
+}
+
 :root {
     --container-border-width: 8px;
     --container-gap-width: 8px; /* only even numbers should be used because otherwise we get 0.5px margin values. */

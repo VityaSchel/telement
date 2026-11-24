@@ -38,6 +38,24 @@ describe("RoomProfileSetting", () => {
         room = mkStubRoom(ROOM_ID, "Test room", client);
     });
 
+    it("shows the photo before the name and the topic", () => {
+        render(<RoomProfileSettings roomId={ROOM_ID} />);
+        const avatar = screen.getByRole("group", { name: "Room avatar" });
+
+        for (const field of ["Room Name", "Room Topic"]) {
+            expect(
+                avatar.compareDocumentPosition(screen.getByLabelText(field)) & Node.DOCUMENT_POSITION_FOLLOWING,
+            ).toBeTruthy();
+        }
+        // The profile's first and last children, which the settingsProfile mixin lays out
+        expect(avatar.matches(".mx_RoomProfileSettings_profile > :first-child")).toBe(true);
+        expect(
+            screen
+                .getByLabelText("Room Name")
+                .closest(".mx_RoomProfileSettings_profile > .mx_RoomProfileSettings_profile_controls:last-child"),
+        ).not.toBeNull();
+    });
+
     it("handles uploading a room avatar", async () => {
         const user = userEvent.setup();
         vi.mocked(client.uploadContent).mockResolvedValue({ content_uri: "mxc://matrix.org/1234" });

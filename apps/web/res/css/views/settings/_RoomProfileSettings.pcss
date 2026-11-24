@@ -9,16 +9,9 @@ Please see LICENSE files in the repository root for full details.
 /* Telement: on its section's card (_SettingsSection.pcss), with no line under it */
 .mx_RoomProfileSettings {
     .mx_RoomProfileSettings_profile {
-        display: flex;
+        @mixin settingsProfile;
 
         .mx_RoomProfileSettings_profile_controls {
-            flex-grow: 1;
-            margin-inline-end: 54px;
-
-            .mx_Field {
-                margin-top: var(--cpd-space-2x);
-            }
-
             .mx_RoomProfileSettings_profile_controls_topic {
                 /* 16px under the name, as fields are elsewhere (_Field.pcss), so the floated label keeps clear of it */
                 margin-top: var(--cpd-space-4x);
@@ -31,10 +24,6 @@ Please see LICENSE files in the repository root for full details.
                 &.mx_RoomProfileSettings_profile_controls_topic--room textarea {
                     min-height: 4em;
                 }
-            }
-
-            .mx_RoomProfileSettings_profile_controls_userId {
-                margin-inline-end: var(--cpd-space-5x);
             }
         }
     }
