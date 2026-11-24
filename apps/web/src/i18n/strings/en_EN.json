@@ -3144,6 +3144,9 @@
             "stickers": "Stickers"
         },
         "console_dev_note": "If you know what you're doing, Telement is open-source, be sure to check out its source code (https://git.hloth.dev/hloth/telement) and contribute!",
+        "credits": {
+            "diff_dom": "The <library>diff-dom</library> library is © <author>Johannes Wilm and other contributors</author> used under the terms of <terms>LGPL 3.0</terms>. Its license texts are in THIRD-PARTY-LICENSES, and those of other libraries, fonts and data in THIRD-PARTY-NOTICES.txt, in the app's resources folder."
+        },
         "error": {
             "invalid_json": "Your Telement configuration contains invalid JSON. Please correct the problem and reload the page.",
             "misconfigured": "Your Telement is misconfigured"

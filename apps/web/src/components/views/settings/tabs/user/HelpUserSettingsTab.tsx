@@ -186,6 +186,32 @@ export default class HelpUserSettingsTab extends React.Component<EmptyObject, IS
                                 },
                             )}
                         </li>
+                        {/* Telement: the notice that section 4c of the LGPL requires here */}
+                        <li>
+                            {_t(
+                                "telement|credits|diff_dom",
+                                {},
+                                {
+                                    library: (sub) => (
+                                        <ExternalLink href="https://github.com/fiduswriter/diffDOM">{sub}</ExternalLink>
+                                    ),
+                                    author: (sub) => (
+                                        <ExternalLink href="https://github.com/fiduswriter/diffDOM/graphs/contributors">
+                                            {sub}
+                                        </ExternalLink>
+                                    ),
+                                    terms: (sub) => (
+                                        <ExternalLink
+                                            href="https://www.gnu.org/licenses/lgpl-3.0.html"
+                                            rel="noreferrer noopener"
+                                            target="_blank"
+                                        >
+                                            {sub}
+                                        </ExternalLink>
+                                    ),
+                                },
+                            )}
+                        </li>
                     </ul>
                 </SettingsSubsectionText>
             </SettingsSubsection>
