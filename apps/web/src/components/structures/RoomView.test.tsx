@@ -1437,6 +1437,35 @@ describe("RoomView", () => {
             await expect(prom).resolves.toEqual(expect.objectContaining({ room_id: room2.roomId }));
         });
 
+        it.each(["", "  "])(
+            "should search for nothing and show the timeline again for the query '%s'",
+            async (query) => {
+                room.getMyMembership = vi.fn().mockReturnValue(KnownMembership.Join);
+                const roomViewRef = createRef<RoomView>();
+                await mountRoomView(roomViewRef);
+                await waitFor(() => expect(roomViewRef.current).toBeTruthy());
+                const search = vi.spyOn(cli, "search").mockResolvedValue({ search_categories: {} as any });
+                const onSearchChange = roomViewRef.current!["onSearchChange"];
+
+                act(() => {
+                    onSearchChange("pizza");
+                    onSearchChange.flush();
+                });
+                await waitFor(() => expect(search).toHaveBeenCalledTimes(1));
+                expect(roomViewRef.current!.state.search?.term).toBe("pizza");
+
+                act(() => {
+                    onSearchChange(query);
+                    onSearchChange.flush();
+                });
+                await flushPromises();
+
+                expect(search).toHaveBeenCalledTimes(1);
+                expect(roomViewRef.current!.state.search).toBeUndefined();
+                expect(roomViewRef.current!.state.timelineRenderingType).toBe(TimelineRenderingType.Room);
+            },
+        );
+
         it("should pre-fill search field on FocusMessageSearch dispatch", async () => {
             room.getMyMembership = vi.fn().mockReturnValue(KnownMembership.Join);
 

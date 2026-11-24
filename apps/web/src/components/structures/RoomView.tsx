@@ -2005,7 +2005,12 @@ export class RoomView extends React.Component<IRoomProps, IRoomState> {
     };
 
     private onSearchChange = debounce((term: string): void => {
-        this.onSearch(term);
+        // Telement: an emptied field searches for nothing, so the timeline comes back
+        if (term.trim() === "") {
+            this.setState({ timelineRenderingType: TimelineRenderingType.Room, search: undefined });
+        } else {
+            this.onSearch(term);
+        }
     }, 300);
 
     private onCancelSearchClick = (): Promise<void> => {
