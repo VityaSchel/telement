@@ -24,6 +24,10 @@ import compoundLightTheme from "@vector-im/compound-design-tokens/assets/web/css
 import compoundLightSemantic from "@vector-im/compound-design-tokens/assets/web/css/cpd-theme-light-semantic.css?raw";
 import compoundDarkTheme from "@vector-im/compound-design-tokens/assets/web/css/cpd-theme-dark-base.css?raw";
 import compoundDarkSemantic from "@vector-im/compound-design-tokens/assets/web/css/cpd-theme-dark-semantic.css?raw";
+import compoundLightHcTheme from "@vector-im/compound-design-tokens/assets/web/css/cpd-theme-light-hc-base.css?raw";
+import compoundLightHcSemantic from "@vector-im/compound-design-tokens/assets/web/css/cpd-theme-light-hc-semantic.css?raw";
+import compoundDarkHcTheme from "@vector-im/compound-design-tokens/assets/web/css/cpd-theme-dark-hc-base.css?raw";
+import compoundDarkHcSemantic from "@vector-im/compound-design-tokens/assets/web/css/cpd-theme-dark-hc-semantic.css?raw";
 import compoundStyles from "@vector-im/compound-web/dist/style.css?raw";
 import sharedComponentsStyles from "@element-hq/web-shared-components/dist/element-web-shared-components.css?raw";
 // The package doesn't export its token stylesheet on its own, and its build can be older than the badge's source
@@ -34,9 +38,12 @@ import notificationBadgeStyles from "../../../../../../packages/shared-component
 
 import lightTheme from "../../../../res/themes/light/css/_light.pcss?raw";
 import darkTheme from "../../../../res/themes/dark/css/_dark.pcss?raw";
+import lightHighContrastTheme from "../../../../res/themes/light-high-contrast/css/_light-high-contrast.pcss?raw";
+import autoHideScrollbarStyles from "../../../../res/css/structures/_AutoHideScrollbar.pcss?raw";
 import quickSettingsButtonStyles from "../../../../res/css/structures/_QuickSettingsButton.pcss?raw";
 import spacePanelStyles from "../../../../res/css/structures/_SpacePanel.pcss?raw";
 import threadsActivityCentreStyles from "../../../../res/css/structures/_ThreadsActivityCentre.pcss?raw";
+import focusRingStyles from "../../../../res/css/telement/FocusRing.pcss?raw";
 import { cornerRadii, toBrowserCss } from "../../../test/telement/browserCss";
 import { settledStyle, tokenColor } from "../../../test/telement/computedStyle";
 import { loadInter } from "../../../test/telement/fonts";
@@ -412,7 +419,7 @@ describe("SpacePanel badges and create button", () => {
                     expect(box.height).toBe(24);
                     expect([box.top, box.right, box.width]).toEqual([atDefault.top, atDefault.right, atDefault.width]);
                     expect(getComputedStyle(badge()).fontSize).toBe("11px");
-                    // Inside its ring, as the list's scroll area clips what is above the first space's button
+                    // Only its ring hangs over the button, into the room the list leaves above the first space
                     expect(box.top + 2).toBeCloseTo(spaceButton.top, 1);
                 }
             } finally {
@@ -631,5 +638,161 @@ describe("SpacePanel selection", () => {
                 expect(plateColor("Favourites")).toBe(tokenColor("--tl-color-bg-selection", container));
             },
         );
+    });
+});
+
+/** {@link THEMES} with the high contrast ones. */
+const ALL_THEMES: [string, string[]][] = [
+    ...THEMES,
+    ["cpd-theme-light-hc", [lightTheme, lightHighContrastTheme]],
+    ["cpd-theme-dark-hc", [lightTheme, darkTheme]],
+];
+
+const BADGES = {
+    dot: { badgeClass: "dot", count: "" },
+    badge_2char: { badgeClass: "badge2Char", count: "6" },
+    badge_3char: { badgeClass: "badge3Char", count: "128" },
+};
+
+type BadgeType = keyof typeof BADGES;
+
+/**
+ * The space panel with its list of spaces in IndicatorScrollbar's scroll area, 16px under the user menu, which a plain
+ * box stands in for. Home, which is first in the list, and Studio below it both have a badge.
+ */
+function renderList(
+    theme: string,
+    {
+        selected = "Home",
+        badgeType = "badge_2char",
+        expanded = false,
+        dir = "ltr",
+    }: { selected?: string; badgeType?: BadgeType; expanded?: boolean; dir?: string } = {},
+): void {
+    const { badgeClass, count } = BADGES[badgeType];
+    const space = (label: string): string => `
+        <li class="mx_SpaceItem ${expanded ? "" : "collapsed"}" role="treeitem" aria-selected="${label === selected}">
+            <div class="mx_AccessibleButton mx_SpaceButton ${label === selected ? "mx_SpaceButton_active" : ""}
+                ${expanded ? "" : "mx_SpaceButton_narrow"}" role="button" tabindex="0" aria-label="${label}">
+                <div class="mx_SpaceButton_selectionWrapper">
+                    <div class="mx_SpaceButton_avatarWrapper">
+                        <div class="mx_SpaceButton_avatarPlaceholder"><div class="mx_SpaceButton_icon"></div></div>
+                        <div class="mx_SpacePanel_badgeContainer">
+                            <button type="button" data-badge-type="${badgeType}" aria-label="${label} unread"
+                                class="mx_SpacePanel_notificationBadge notificationBadge visible notification ${badgeClass}"
+                            ><span class="count">${count}</span></button>
+                        </div>
+                    </div>
+                    ${expanded ? `<span class="mx_SpaceButton_name">${label}</span>` : ""}
+                </div>
+            </div>
+        </li>
+    `;
+    document.body.className = theme;
+    document.body.innerHTML = `
+        <div class="${theme}" dir="${dir}">
+            <nav class="mx_SpacePanel ${expanded ? "" : "collapsed"}" style="height: 400px; ${expanded ? "width: 240px" : ""}">
+                <div data-user-menu style="height: 36px; margin-block: 12px 16px"></div>
+                <ul class="mx_AutoHideScrollbar mx_SpaceTreeLevel" role="tree">${space("Home")}${space("Studio")}</ul>
+            </nav>
+        </div>
+    `;
+}
+
+/** Points in the middle of `badge`'s ring, all the way round it. */
+function ringPoints(badge: Element): [number, number][] {
+    const { left, right, top, height } = badge.getBoundingClientRect();
+    const outer = height / 2;
+    const radius = outer - parseFloat(getComputedStyle(badge).borderTopWidth) / 2;
+    const points: [number, number][] = [];
+    for (let angle = 0; angle < 360; angle += 15) {
+        const [cos, sin] = [Math.cos((angle * Math.PI) / 180), Math.sin((angle * Math.PI) / 180)];
+        const x = cos > 0 ? right - outer : left + outer;
+        points.push([x + radius * cos, top + outer + radius * sin]);
+    }
+    for (const x of [(left + right) / 2, left + outer, right - outer]) {
+        points.push([x, top + outer - radius], [x, top + outer + radius]);
+    }
+    return points;
+}
+
+describe("SpacePanel list", () => {
+    beforeAll(() => {
+        const themed = ALL_THEMES.map(
+            ([theme, sources]) => `.${theme} {
+                ${toBrowserCss(autoHideScrollbarStyles, ...sources)}
+                ${toBrowserCss(spacePanelStyles, ...sources)}
+            }`,
+        ).join("\n");
+        stylesheet = document.createElement("style");
+        stylesheet.textContent = `
+            @layer focus-ring, compound-tokens, compound-web, shared-components, app-web;
+            @layer focus-ring { ${focusRingStyles} }
+            @layer compound-tokens {
+                ${compoundTokens} ${compoundSemantic}
+                ${compoundLightTheme} ${compoundLightSemantic} ${compoundDarkTheme} ${compoundDarkSemantic}
+                ${compoundLightHcTheme} ${compoundLightHcSemantic} ${compoundDarkHcTheme} ${compoundDarkHcSemantic}
+            }
+            @layer compound-web { ${compoundStyles} }
+            @layer shared-components { ${telementTokens} ${notificationBadgeStyles} }
+            @layer app-web { ${themed} }
+        `;
+        document.head.append(stylesheet);
+    });
+
+    afterAll(() => {
+        stylesheet.remove();
+    });
+
+    afterEach(() => {
+        document.body.innerHTML = "";
+        document.body.className = "";
+    });
+
+    function list(): DOMRect {
+        return document.querySelector(".mx_SpaceTreeLevel")!.getBoundingClientRect();
+    }
+
+    describe.each(ALL_THEMES.map(([theme]) => theme))("in %s", (theme) => {
+        it.each(
+            ["Home", "Studio"].flatMap((selected) =>
+                (["badge_2char", "badge_3char", "dot"] as const).flatMap((badgeType) =>
+                    [false, true].map((expanded) => ({ selected, badgeType, expanded })),
+                ),
+            ),
+        )("shows the whole ring of every $badgeType badge with $selected selected (expanded: $expanded)", (options) => {
+            renderList(theme, options);
+
+            for (const label of ["Home", "Studio"]) {
+                const badge = button(`${label} unread`);
+                const hidden = ringPoints(badge).filter(([x, y]) => document.elementFromPoint(x, y) !== badge);
+                expect(hidden).toEqual([]);
+            }
+        });
+    });
+
+    it.each(["ltr", "rtl"])("starts the scroll area above the first space's badge and its ring in %s", (dir) => {
+        renderList("cpd-theme-light", { dir });
+
+        expect(button("Home unread").getBoundingClientRect().top).toBeGreaterThanOrEqual(list().top);
+    });
+
+    it("keeps the first space 16px under the user menu", () => {
+        renderList("cpd-theme-light");
+        const userMenu = document.querySelector("[data-user-menu]")!.getBoundingClientRect();
+
+        expect(button("Home").getBoundingClientRect().top - userMenu.bottom).toBe(16);
+    });
+
+    it("leaves room for the first space's focus ring too", async () => {
+        renderList("cpd-theme-light");
+        await userEvent.keyboard("{Shift}");
+        button("Home").focus();
+        const { outlineWidth, outlineOffset } = getComputedStyle(button("Home"));
+        const ringTop =
+            button("Home").getBoundingClientRect().top - parseFloat(outlineWidth) - parseFloat(outlineOffset);
+
+        expect([outlineWidth, outlineOffset]).toEqual(["2px", "1px"]);
+        expect(ringTop).toBeGreaterThanOrEqual(list().top);
     });
 });

@@ -335,8 +335,7 @@ Please see LICENSE files in the repository root for full details.
         /* The room list's counter at its default 20px size: with its 2px ring, centered 2px inside the avatar's top
            right corner, as Element's 16px badge was. The tiles stay 32px at every font size, so the counter keeps its
            20px size and 11px digits too, rather than growing with the font as the room list's does, and covers no
-           more than the tile's corner. Longer counts grow it to the left: on the first space its top already meets
-           the top of the list's scroll area, which clips what is above. */
+           more than the tile's corner. Longer counts grow it to the left. */
         [data-badge-type="badge_2char"],
         [data-badge-type="badge_3char"] {
             --notification-badge-size: 20px;
@@ -368,7 +367,10 @@ Please see LICENSE files in the repository root for full details.
     /* root space buttons are bigger and not indented */
     & > .mx_AutoHideScrollbar {
         flex: 1;
-        padding: 0 0 16px 0;
+        /* The scroll area clips what it holds, so it starts 4px above the first space, over the user menu's margin, with
+           room for that space's focus ring and for the ring of its counter, which hangs 2px over its button */
+        margin-block-start: calc(-1 * var(--cpd-space-1x));
+        padding: var(--cpd-space-1x) 0 16px 0;
         scrollbar-gutter: stable;
 
         &.mx_IndicatorScrollbar_topOverflow {
