@@ -9,8 +9,8 @@ Please see LICENSE files in the repository root for full details.
 // @vitest-environment happy-dom
 
 import { vi, describe, it, expect, beforeEach, afterEach, type MockedObject } from "vitest";
-import React from "react";
-import { render, cleanup } from "test-utils-rtl";
+import React, { type RefObject } from "react";
+import { act, cleanup, fireEvent, render } from "test-utils-rtl";
 import {
     HistoryVisibility,
     MatrixError,
@@ -32,9 +32,11 @@ import * as createRoomModule from "../../../createRoom";
 import SpaceCreateMenu, { createSpace } from "./SpaceCreateMenu";
 import { UIFeature } from "../../../settings/UIFeature";
 import SettingsStore from "../../../settings/SettingsStore";
+import UIStore, { UI_EVENTS } from "../../../stores/UIStore";
 
 describe("<SpaceCreateMenu />", () => {
     let client: MockedObject<MatrixClient>;
+    const anchor: RefObject<HTMLElement | null> = { current: null };
 
     beforeEach(() => {
         client = getMockClientWithEventEmitter({
@@ -54,30 +56,65 @@ describe("<SpaceCreateMenu />", () => {
     });
 
     it("should render", async () => {
-        const { asFragment } = render(<SpaceCreateMenu onFinished={vi.fn()} />, withClientContextRenderOptions(client));
+        const { asFragment } = render(
+            <SpaceCreateMenu anchor={anchor} onFinished={vi.fn()} />,
+            withClientContextRenderOptions(client),
+        );
         expect(asFragment()).toMatchSnapshot();
     });
 
-    it("closes from the close button on its title's line, as a dialog does, at either step", async () => {
+    it("closes on Escape or a click outside, as the other menus do, at either step", async () => {
         const onFinished = vi.fn();
-        const { getByRole, getByText } = render(
-            <SpaceCreateMenu onFinished={onFinished} />,
+        const { getByRole, getByText, queryByRole } = render(
+            <SpaceCreateMenu anchor={anchor} onFinished={onFinished} />,
             withClientContextRenderOptions(client),
         );
+        const background = document.querySelector(".mx_ContextualMenu_background")!;
+        expect(queryByRole("button", { name: "Close dialog" })).toBeNull();
 
-        await userEvent.click(getByRole("button", { name: "Close dialog" }));
+        fireEvent.keyDown(getByText("Public"), { key: "Escape" });
         expect(onFinished).toHaveBeenCalledTimes(1);
+        await userEvent.click(background);
+        expect(onFinished).toHaveBeenCalledTimes(2);
 
         await userEvent.click(getByText("Public"));
-        await userEvent.click(getByRole("button", { name: "Close dialog" }));
-        expect(onFinished).toHaveBeenCalledTimes(2);
+        fireEvent.keyDown(getByRole("textbox", { name: "Name" }), { key: "Escape" });
+        expect(onFinished).toHaveBeenCalledTimes(3);
+        await userEvent.click(background);
+        expect(onFinished).toHaveBeenCalledTimes(4);
+    });
+
+    it("opens beside the button of the space panel that opened it, and follows it as the window resizes", () => {
+        const panel = document.createElement("nav");
+        panel.className = "mx_SpacePanel";
+        const button = panel.appendChild(document.createElement("div"));
+        vi.spyOn(panel, "getBoundingClientRect").mockReturnValue({ top: 32, right: 68 } as DOMRect);
+        const buttonBox = vi.spyOn(button, "getBoundingClientRect").mockReturnValue({ top: 200 } as DOMRect);
+
+        render(<SpaceCreateMenu anchor={{ current: button }} onFinished={vi.fn()} />, {
+            ...withClientContextRenderOptions(client),
+        });
+        const { style } = document.querySelector<HTMLElement>(".mx_SpaceCreateMenu_wrapper")!;
+        const placement = (): string[] =>
+            ["--space-panel-end", "--space-panel-top", "--space-panel-button-top"].map((name) =>
+                style.getPropertyValue(name),
+            );
+        expect(placement()).toEqual(["68px", "32px", "200px"]);
+        // Its stylesheet places it by these, so that a taller step isn't placed by the height of the step before
+        expect([style.left, style.top, style.right, style.bottom]).toEqual(["", "", "", ""]);
+
+        buttonBox.mockReturnValue({ top: 120 } as DOMRect);
+        act(() => {
+            UIStore.instance.emit(UI_EVENTS.Resize, UI_EVENTS.Resize, []);
+        });
+        expect(placement()).toEqual(["68px", "32px", "120px"]);
     });
 
     it("should be able to create a public space", async () => {
         const onFinished = vi.fn();
         client.createRoom.mockResolvedValue({ room_id: "!room:id" });
         const { getByText, getByLabelText } = render(
-            <SpaceCreateMenu onFinished={onFinished} />,
+            <SpaceCreateMenu anchor={anchor} onFinished={onFinished} />,
             withClientContextRenderOptions(client),
         );
         await userEvent.click(getByText("Public"));
@@ -115,7 +152,7 @@ describe("<SpaceCreateMenu />", () => {
         const onFinished = vi.fn();
         client.createRoom.mockResolvedValue({ room_id: "!room:id" });
         const { getByText, getByLabelText } = render(
-            <SpaceCreateMenu onFinished={onFinished} />,
+            <SpaceCreateMenu anchor={anchor} onFinished={onFinished} />,
             withClientContextRenderOptions(client),
         );
         await userEvent.type(getByLabelText("Name"), "My Name");

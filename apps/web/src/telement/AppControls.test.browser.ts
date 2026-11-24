@@ -386,7 +386,8 @@ describe("App controls", () => {
             ],
             [
                 "space create menu",
-                `<div class="mx_SpaceCreateMenu_wrapper"><div class="mx_ContextualMenu" style="position: static">@</div></div>`,
+                `<div class="mx_SpaceCreateMenu_wrapper"><div class="mx_ContextualMenu" style="position: static">
+                    <div data-focus-lock-disabled="false">@</div></div></div>`,
             ],
             [
                 "room preview",

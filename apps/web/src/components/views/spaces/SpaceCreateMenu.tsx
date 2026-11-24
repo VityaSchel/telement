@@ -26,12 +26,7 @@ import {
     type ICreateRoomOpts,
 } from "matrix-js-sdk/src/matrix";
 import { logger } from "matrix-js-sdk/src/logger";
-import {
-    LockSolidIcon,
-    PublicIcon,
-    ChevronLeftIcon,
-    CloseIcon,
-} from "@vector-im/compound-design-tokens/assets/web/icons";
+import { LockSolidIcon, PublicIcon, ChevronLeftIcon } from "@vector-im/compound-design-tokens/assets/web/icons";
 
 import { _t } from "../../../languageHandler";
 import ContextMenu, { ChevronFace } from "../../structures/ContextMenu";
@@ -51,6 +46,7 @@ import { type OpenSpotlightPayload } from "../../../dispatcher/payloads/OpenSpot
 import { useSettingValue } from "../../../hooks/useSettings.ts";
 import { UIFeature } from "../../../settings/UIFeature.ts";
 import SpacePillButton from "../../structures/SpacePillButton.tsx";
+import { usePlacementBesideSpacePanel } from "../../../telement/spaces/usePlacementBesideSpacePanel";
 
 export const createSpace = async (
     client: MatrixClient,
@@ -201,8 +197,11 @@ export const SpaceCreateForm: React.FC<ISpaceCreateFormProps> = ({
 };
 
 const SpaceCreateMenu: React.FC<{
+    /** Telement: the button of the space panel that opened it, which it opens beside. */
+    anchor: RefObject<HTMLElement | null>;
     onFinished(this: void): void;
-}> = ({ onFinished }) => {
+}> = ({ anchor, onFinished }) => {
+    const placement = usePlacementBesideSpacePanel(anchor);
     const cli = useMatrixClientContext();
     const settingAllowPublicSpaces = useSettingValue(UIFeature.AllowCreatingPublicSpaces);
     const [visibility, setVisibility] = useState<Visibility | null>(
@@ -343,27 +342,16 @@ const SpaceCreateMenu: React.FC<{
     }
 
     return (
+        // Telement: a popover beside the button that opened it, placed by its stylesheet as its steps differ in height
         <ContextMenu
-            left={72}
-            top={62}
-            chevronOffset={0}
             chevronFace={ChevronFace.None}
             onFinished={onFinished}
             wrapperClassName="mx_SpaceCreateMenu_wrapper"
+            wrapperStyle={placement}
             managed={false}
             focusLock={true}
         >
             {body}
-            {/* Telement: it dims the app like a dialog, so it closes like one, from the button on its title's line */}
-            <AccessibleButton
-                onClick={onFinished}
-                className="mx_Dialog_cancelButton"
-                title={_t("action|close")}
-                aria-label={_t("dialog_close_label")}
-                placement="bottom"
-            >
-                <CloseIcon />
-            </AccessibleButton>
         </ContextMenu>
     );
 };

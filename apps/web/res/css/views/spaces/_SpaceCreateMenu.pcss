@@ -7,30 +7,51 @@ Please see LICENSE files in the repository root for full details.
 */
 
 .mx_SpaceCreateMenu_wrapper {
-    /* background blur everything except SpacePanel */
+    /* Telement: a popover that floats beside the + button like the other menus, so nothing is dimmed. What closes it on
+       a click outside starts under the macOS app's title bar, which still drags the window. */
     .mx_ContextualMenu_background {
-        background-color: $dialog-backdrop-color;
-        opacity: 0.6;
-        left: 68px;
+        top: var(--space-panel-top, 0px);
+        height: auto;
+        bottom: 0;
     }
 
     .mx_ContextualMenu {
-        /* Telement: laid out as a dialog is (_common.pcss): the title's line starts 16px from the top, level with the
-           close button, and everything else sits on a 24px edge, measured from the outside of the menu's 1px border.
-           Its corners follow the 8px cards 24px in. */
+        /* Telement: laid out as a dialog is (_common.pcss): the title's line starts 16px from the top and everything
+           else sits on a 24px edge, measured from the outside of the menu's 1px border. Its corners follow the 8px cards
+           24px in. */
         --dialog-close-button-size: calc(20px + 2 * var(--cpd-space-1x));
         --space-create-edge: calc(var(--cpd-space-6x) - var(--cpd-border-width-1));
         --space-create-top: calc(var(--cpd-space-4x) - var(--cpd-border-width-1));
+        /* Between it and the panel, and at least between it and the edges of the window */
+        --space-create-gap: var(--cpd-space-1x);
+        --space-create-margin: var(--cpd-space-2x);
+        --space-create-left: calc(var(--space-panel-end, 0px) + var(--space-create-gap));
 
-        padding: var(--space-create-top) var(--space-create-edge) var(--space-create-edge);
-        border-radius: calc(var(--tl-radius-row) + var(--cpd-space-6x));
-        width: 480px;
+        /* Level with the button that opened it, or up from there as far as it takes to fit in the window, whichever step
+           it shows. In a window too small for it, it scrolls. */
+        position: fixed;
+        left: var(--space-create-left);
+        top: var(--space-panel-button-top, 0px);
+        translate: 0 min(0px, calc(100vh - var(--space-create-margin) - var(--space-panel-button-top, 0px) - 100%));
+        width: min(480px, calc(100vw - var(--space-create-left) - var(--space-create-margin)));
+        max-height: calc(100vh - var(--space-panel-top, 0px) - 2 * var(--space-create-margin));
         box-sizing: border-box;
-        background-color: $background;
-        position: relative;
+        border-radius: calc(var(--tl-radius-row) + var(--cpd-space-6x));
+        /* Clips the scrolled content and its scrollbar to the corners */
+        display: flex;
+        overflow: hidden;
 
+        /* The focus lock around the step */
         > div {
-            /* The dialog's title: Compound's heading-sm on a line as tall as the close button, kept 8px clear of it */
+            flex: 1;
+            min-width: 0;
+            box-sizing: border-box;
+            overflow-y: auto;
+            padding: var(--space-create-top) var(--space-create-edge) var(--space-create-edge);
+            /* The back button scrolls with the title */
+            position: relative;
+
+            /* The dialog's title: Compound's heading-sm on a line as tall as the back button */
             > h2 {
                 font: var(--cpd-font-heading-sm-semibold);
                 letter-spacing: var(--cpd-font-letter-spacing-heading-sm);
@@ -39,9 +60,6 @@ Please see LICENSE files in the repository root for full details.
                     var(--cpd-font-line-height-tight) * var(--cpd-font-size-heading-sm)
                 );
                 margin: 0 0 var(--cpd-space-4x);
-                padding-inline-end: calc(
-                    var(--dialog-close-button-size) + var(--cpd-space-4x) + var(--cpd-space-2x) - var(--cpd-space-6x)
-                );
             }
 
             > p {
@@ -50,13 +68,13 @@ Please see LICENSE files in the repository root for full details.
             }
         }
 
-        /* Telement: the close button sits 16px from the top and the end, as in a dialog, the back button as far from
-           the start on the same line, and the title 8px after it */
-        .mx_Dialog_cancelButton {
-            top: var(--space-create-top);
-            right: var(--space-create-top);
+        /* Telement: as wide as the edges leave, rather than a fixed 432px */
+        .mx_SpacePillButton {
+            width: 100%;
         }
 
+        /* Telement: the back button sits 16px from the top and the start, as a dialog's close button does from the end,
+           on the title's line, and the title 8px after it */
         .mx_SpaceCreateMenu_back {
             @mixin customisedCancelButton;
             border-radius: var(--tl-radius-control);

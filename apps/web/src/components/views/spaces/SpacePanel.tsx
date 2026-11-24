@@ -224,7 +224,7 @@ const CreateSpaceButton: React.FC<Pick<IInnerSpacePanelProps, "isPanelCollapsed"
 
     let contextMenu: JSX.Element | undefined;
     if (menuDisplayed) {
-        contextMenu = <SpaceCreateMenu onFinished={closeMenu} />;
+        contextMenu = <SpaceCreateMenu anchor={handle} onFinished={closeMenu} />;
     }
 
     const onNewClick = menuDisplayed

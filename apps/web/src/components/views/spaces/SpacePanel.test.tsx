@@ -9,7 +9,7 @@ Please see LICENSE files in the repository root for full details.
 
 // @vitest-environment happy-dom
 
-import { vi, describe, it, expect, beforeAll, beforeEach, afterEach } from "vitest";
+import { vi, describe, it, expect, beforeAll, beforeEach, afterEach, onTestFinished } from "vitest";
 import React from "react";
 import { render, screen, fireEvent, act, cleanup, waitFor, within } from "test-utils-rtl";
 import { type MatrixClient, type Room } from "matrix-js-sdk/src/matrix";
@@ -183,6 +183,25 @@ describe("<SpacePanel />", () => {
             render(<SpacePanel />);
             fireEvent.click(screen.getByTestId("create-space-button"));
             expect(screen.getByTestId("create-space-button")).toBeVisible();
+        });
+
+        it("opens the menu beside the create space button", () => {
+            const boxes = vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockImplementation(function (
+                this: HTMLElement,
+            ) {
+                return {
+                    right: this.classList.contains("mx_SpacePanel") ? 68 : 54,
+                    top: this.dataset.testid === "create-space-button" ? 200 : 32,
+                } as DOMRect;
+            });
+            onTestFinished(() => boxes.mockRestore());
+            render(<SpacePanel />);
+            fireEvent.click(screen.getByTestId("create-space-button"));
+
+            const { style } = document.querySelector<HTMLElement>(".mx_SpaceCreateMenu_wrapper")!;
+            expect(style.getPropertyValue("--space-panel-end")).toBe("68px");
+            expect(style.getPropertyValue("--space-panel-top")).toBe("32px");
+            expect(style.getPropertyValue("--space-panel-button-top")).toBe("200px");
         });
     });
 

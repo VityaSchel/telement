@@ -87,6 +87,8 @@ export interface IProps extends MenuProps {
     // whether this context menu should be focus managed. If false it must handle itself
     "managed"?: boolean;
     "wrapperClassName"?: string;
+    // Telement: styles of the wrapper, such as custom properties its stylesheet places the menu with.
+    "wrapperStyle"?: CSSProperties;
     "menuClassName"?: string;
 
     // If true, this context menu will be mounted as a child to the parent container. Otherwise
@@ -276,6 +278,7 @@ export default class ContextMenu extends React.PureComponent<React.PropsWithChil
             focusLock,
             managed,
             wrapperClassName,
+            "wrapperStyle": propsWrapperStyle,
             "chevronFace": propsChevronFace,
             "chevronOffset": propsChevronOffset,
             mountAsChild,
@@ -439,7 +442,7 @@ export default class ContextMenu extends React.PureComponent<React.PropsWithChil
                 {({ onKeyDownHandler }) => (
                     <div
                         className={classNames("mx_ContextualMenu_wrapper", wrapperClassName)}
-                        style={{ ...position, ...wrapperStyle }}
+                        style={{ ...propsWrapperStyle, ...position, ...wrapperStyle }}
                         onClick={this.onClick}
                         onKeyDown={onKeyDownHandler}
                         onContextMenu={this.onContextMenuPreventBubbling}
