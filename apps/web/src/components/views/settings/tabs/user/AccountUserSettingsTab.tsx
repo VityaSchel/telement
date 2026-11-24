@@ -25,6 +25,7 @@ import { SettingsSection } from "../../shared/SettingsSection";
 import { SettingsSubsection } from "../../shared/SettingsSubsection";
 import { UserPersonalInfoSettings } from "../../UserPersonalInfoSettings";
 import { SDKContext } from "../../../../../contexts/SDKContext.ts";
+import { OwnAccount, useAccountManagementUrl } from "../../../../../telement/settings/OwnAccount";
 
 interface IProps {
     closeSettingsFn: () => void;
@@ -118,7 +119,9 @@ const AccountUserSettingsTab: React.FC<IProps> = ({ closeSettingsFn, startCustom
     const sdkContext = useContext(SDKContext);
     const cli = sdkContext.client!;
 
-    const [externalAccountManagementUrl, setExternalAccountManagementUrl] = React.useState<string | undefined>();
+    // Telement: the one the app already has, so that the tab opens with the Manage account button and without what the
+    // page it opens replaces
+    const externalAccountManagementUrl = useAccountManagementUrl(cli);
     // Telement: the client fetches the capabilities when it starts, so the tab opens with the profile's final text
     // and controls rather than switching from the read-only ones once they arrive
     const [{ canMake3pidChanges, canSetDisplayName, canSetAvatar, canChangePassword }, setAccountPermissions] =
@@ -127,10 +130,8 @@ const AccountUserSettingsTab: React.FC<IProps> = ({ closeSettingsFn, startCustom
     useEffect(() => {
         (async () => {
             setAccountPermissions(getAccountPermissions((await cli.getCapabilities()) ?? {}));
-
-            const authMetadata = await cli.getAuthMetadata().catch(() => {});
-            setExternalAccountManagementUrl(authMetadata?.account_management_uri);
         })();
+        void OwnAccount.of(cli).refreshAccountManagementUrl();
     }, [cli]);
 
     const onPasswordChangeError = useCallback((err: Error): void => {

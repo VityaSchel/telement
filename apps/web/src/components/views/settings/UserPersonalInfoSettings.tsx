@@ -6,7 +6,7 @@ SPDX-License-Identifier: AGPL-3.0-only OR GPL-3.0-only OR LicenseRef-Element-Com
 Please see LICENSE files in the repository root for full details.
 */
 
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { ThreepidMedium } from "matrix-js-sdk/src/matrix";
 import { Alert } from "@vector-im/compound-web";
 
@@ -14,11 +14,11 @@ import { _t } from "../../../languageHandler";
 import InlineSpinner from "../elements/InlineSpinner";
 import { SettingsSubsection } from "./shared/SettingsSubsection";
 import { useMatrixClientContext } from "../../../contexts/MatrixClientContext";
-import { type ThirdPartyIdentifier } from "../../../AddThreepid";
 import SettingsStore from "../../../settings/SettingsStore";
 import { UIFeature } from "../../../settings/UIFeature";
 import { AddRemoveThreepids } from "./AddRemoveThreepids";
 import { SettingsSection } from "./shared/SettingsSection.tsx";
+import { OwnAccount, useOwnThreepids } from "../../../telement/settings/OwnAccount";
 
 type LoadingState = "loading" | "loaded" | "error";
 
@@ -50,22 +50,10 @@ interface UserPersonalInfoSettingsProps {
  * Settings controls allowing the user to set personal information like email addresses.
  */
 export const UserPersonalInfoSettings: React.FC<UserPersonalInfoSettingsProps> = ({ canMake3pidChanges }) => {
-    const [emails, setEmails] = useState<ThirdPartyIdentifier[] | undefined>();
-    const [phoneNumbers, setPhoneNumbers] = useState<ThirdPartyIdentifier[] | undefined>();
-    const [loadingState, setLoadingState] = useState<"loading" | "loaded" | "error">("loading");
-
     const client = useMatrixClientContext();
-
-    const updateThreepids = useCallback(async () => {
-        try {
-            const threepids = await client.getThreePids();
-            setEmails(threepids.threepids.filter((a) => a.medium === ThreepidMedium.Email));
-            setPhoneNumbers(threepids.threepids.filter((a) => a.medium === ThreepidMedium.Phone));
-            setLoadingState("loaded");
-        } catch {
-            setLoadingState("error");
-        }
-    }, [client]);
+    // Telement: those the app already has, so that the groups show them from the start, then the latest
+    const { emails, phoneNumbers, state: loadingState } = useOwnThreepids(client);
+    const updateThreepids = OwnAccount.of(client).refreshThreepids;
 
     useEffect(() => {
         void updateThreepids();

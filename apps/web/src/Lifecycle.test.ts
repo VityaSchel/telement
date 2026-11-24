@@ -34,6 +34,8 @@ import { encryptPickleKey } from "./utils/tokens/pickling";
 import * as StorageManager from "./utils/StorageManager.ts";
 import type BasePlatform from "./BasePlatform.ts";
 import * as createMatrixClientModule from "./utils/createMatrixClient";
+import { OwnAccount } from "./telement/settings/OwnAccount";
+import SettingsStore from "./settings/SettingsStore";
 
 const { logout, restoreSessionFromStorage, setLoggedIn } = Lifecycle;
 
@@ -693,6 +695,25 @@ describe("Lifecycle", () => {
             await setLoggedIn(credentials);
 
             expect(MatrixClientPeg.start).toHaveBeenCalled();
+        });
+
+        it("should load what the Account tab shows of the account, so that it opens with it", async () => {
+            const load = vi.spyOn(OwnAccount.of(mockClient), "load").mockResolvedValue(undefined);
+            await setLoggedIn(credentials);
+
+            expect(load).toHaveBeenCalledTimes(1);
+        });
+
+        it("should leave that to the Account tab in low bandwidth mode", async () => {
+            const getValue = SettingsStore.getValue;
+            vi.spyOn(SettingsStore, "getValue").mockImplementation((name, ...args) =>
+                name === "lowBandwidth" ? true : getValue.call(SettingsStore, name, ...args),
+            );
+            const load = vi.spyOn(OwnAccount.of(mockClient), "load").mockResolvedValue(undefined);
+            await setLoggedIn(credentials);
+
+            expect(load).not.toHaveBeenCalled();
+            vi.mocked(SettingsStore.getValue).mockRestore();
         });
 
         it("should not let a logout which is still clearing storage wipe the new session", async () => {

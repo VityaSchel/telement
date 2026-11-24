@@ -30,6 +30,7 @@ import SettingsStore from "../../../../../settings/SettingsStore";
 import { UIFeature } from "../../../../../settings/UIFeature";
 import MatrixClientContext from "../../../../../contexts/MatrixClientContext";
 import Modal from "../../../../../Modal";
+import { OwnAccount } from "../../../../../telement/settings/OwnAccount";
 import { OwnProfileStore } from "../../../../../stores/OwnProfileStore";
 import { UPDATE_EVENT } from "../../../../../stores/AsyncStore";
 
@@ -116,6 +117,17 @@ describe("<AccountUserSettingsTab />", () => {
 
         const manageAccountLink = await screen.findByRole("button", { name: "Manage account" });
         expect(manageAccountLink.getAttribute("href")).toMatch(accountManagementLink);
+    });
+
+    it("opens with the account management link the app already has, and without what it replaces", async () => {
+        mockClient.getAuthMetadata.mockResolvedValue({ account_management_uri: "https://id.server.org/me" } as any);
+        await OwnAccount.of(mockClient).load();
+        mockClient.getAuthMetadata.mockReturnValue(new Promise(() => {}));
+
+        render(getComponent());
+
+        expect(screen.getByRole("button", { name: "Manage account" })).toBeInTheDocument();
+        expect(screen.queryByText("Deactivate Account")).not.toBeInTheDocument();
     });
 
     it("opens with the profile the app already has, and shows the latest, though not over a name being edited", async () => {
@@ -313,6 +325,43 @@ describe("<AccountUserSettingsTab />", () => {
                 within(screen.getByTestId("mx_AccountEmailAddresses")).getByLabelText("Loading…"),
             ).toBeInTheDocument();
             expect(within(screen.getByTestId("mx_AccountPhoneNumbers")).getByLabelText("Loading…")).toBeInTheDocument();
+        });
+
+        it("should open with those the app already has, and show the latest once it has them", async () => {
+            await OwnAccount.of(mockClient).load();
+            const latest = Promise.withResolvers<Awaited<ReturnType<MatrixClient["getThreePids"]>>>();
+            mockClient.getThreePids.mockReturnValue(latest.promise);
+            render(getComponent());
+
+            // Nothing of the first render waits for the server, so nothing moves when it answers
+            expect(screen.getByText("test@test.io")).toBeInTheDocument();
+            expect(screen.getByText("+123456789")).toBeInTheDocument();
+            expect(screen.queryByLabelText("Loading…")).not.toBeInTheDocument();
+
+            latest.resolve({
+                threepids: [{ medium: ThreepidMedium.Email, address: "new@test.io", validated_at: 1, added_at: 1 }],
+            });
+            expect(await screen.findByText("new@test.io")).toBeInTheDocument();
+            expect(screen.queryByText("test@test.io")).not.toBeInTheDocument();
+            expect(screen.queryByText("+123456789")).not.toBeInTheDocument();
+        });
+
+        it("should keep showing those the app already has when the latest can't be loaded", async () => {
+            await OwnAccount.of(mockClient).load();
+            mockClient.getThreePids.mockRejectedValue(new Error("offline"));
+            render(getComponent());
+            await flushPromises();
+
+            expect(screen.getByText("test@test.io")).toBeInTheDocument();
+            expect(screen.queryByText("Unable to load email addresses")).not.toBeInTheDocument();
+        });
+
+        it("should display an error when there are none to show and they can't be loaded", async () => {
+            mockClient.getThreePids.mockRejectedValue(new Error("offline"));
+            render(getComponent());
+
+            expect(await screen.findByText("Unable to load email addresses")).toBeInTheDocument();
+            expect(screen.getByText("Unable to load phone numbers")).toBeInTheDocument();
         });
 
         it("should display 3pid email addresses and phone numbers", async () => {

@@ -68,6 +68,7 @@ import { clearUploadedMediaCache } from "./utils/UploadedMediaCache";
 import { CallStatusListener } from "./CallStatusListener.ts";
 import { CallStore } from "./stores/CallStore.ts";
 import { ModuleApi } from "./modules/Api.ts";
+import { OwnAccount } from "./telement/settings/OwnAccount";
 
 const HOMESERVER_URL_KEY = "mx_hs_url";
 const ID_SERVER_URL_KEY = "mx_is_url";
@@ -1129,6 +1130,9 @@ async function startMatrixClient(
 
     // Now that we have a MatrixClientPeg, update the Jitsi info
     Jitsi.getInstance().start();
+
+    // Telement: what the Account tab of the settings shows, so that it opens with it
+    if (startSyncing && !SettingsStore.getValue("lowBandwidth")) void OwnAccount.of(client).load();
 
     // dispatch that we finished starting up to wire up any other bits
     // of the matrix client that cannot be set prior to starting up.
