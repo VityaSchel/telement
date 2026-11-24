@@ -814,6 +814,21 @@ describe("Spotlight Dialog", () => {
             expect(screen.getByRole("group", { name: "Recently viewed" })).toContainElement(tile(testDM));
             expect(tile(testRoom)).toBeNull();
         });
+
+        it("should scroll sideways with a mouse wheel, out of the Tab order", async () => {
+            vi.spyOn(BreadcrumbsStore.instance, "rooms", "get").mockReturnValue([testRoom, testDM]);
+            render(<SpotlightDialog onFinished={() => null} />);
+            vi.advanceTimersByTime(200);
+            await flushPromisesWithFakeTimers();
+            const strip = document.getElementById(
+                `mx_SpotlightDialog_button_recentlyViewed_${testDM.roomId}`,
+            )!.parentElement!;
+
+            // React's listeners for the wheel can't keep the dialog from scrolling, which this does
+            expect(fireEvent.wheel(strip, { deltaY: 100 })).toBe(false);
+            expect(strip.scrollLeft).toBe(100);
+            expect(strip.tabIndex).toBe(-1);
+        });
     });
 
     describe("keyboard prompt filter and query checks", () => {

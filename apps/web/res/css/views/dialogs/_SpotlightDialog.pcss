@@ -248,11 +248,22 @@ Please see LICENSE files in the repository root for full details.
         }
 
         .mx_SpotlightDialog_recentlyViewed {
+            /* Telement: scrolls sideways without a scrollbar, as Telegram's does, out to the dialog's edges, so that they
+               are what cuts a tile short. What the arrow keys scroll into view stops on the options' edge, where the
+               strip starts and ends. */
             > div {
                 display: flex;
                 white-space: nowrap;
-                overflow-x: hidden;
-                margin-right: 1px; /* occlude the 1px visible of the very next tile to prevent it looking broken */
+                overflow: auto hidden;
+                overscroll-behavior-x: contain;
+                scrollbar-width: none;
+                margin-inline: calc(-1 * var(--tl-inset-surface));
+                padding-inline: var(--tl-inset-surface);
+                scroll-padding-inline: var(--tl-inset-surface);
+
+                &::-webkit-scrollbar {
+                    display: none;
+                }
             }
 
             /* The avatar 8px from the tile's top, as in the other options, and the name 8px from its bottom */
@@ -273,7 +284,7 @@ Please see LICENSE files in the repository root for full details.
                 }
 
                 & + .mx_SpotlightDialog_option {
-                    margin-left: var(--cpd-space-4x);
+                    margin-inline-start: var(--cpd-space-4x);
                 }
             }
         }

@@ -25,6 +25,7 @@ import spotlightStyles from "../../../../../res/css/views/dialogs/_SpotlightDial
 import lightTheme from "../../../../../res/themes/light/css/_light.pcss?raw";
 import { cornerRadii, toBrowserCss } from "../../../../test/telement/browserCss";
 import { tokenColor } from "../../../../test/telement/computedStyle";
+import { scrollSidewaysOnWheel } from "../../../../telement/search-dialog/scrollSidewaysOnWheel";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import {
@@ -549,6 +550,116 @@ describe("SpotlightDialog styles", () => {
         expect(tiles[1].getBoundingClientRect().left - tiles[0].getBoundingClientRect().right).toBe(16);
         // The first tile's highlight is inset as the options' are
         expect(tiles[0].getBoundingClientRect().left - dialog.left).toBe(16);
+    });
+
+    describe("the strip of recently viewed rooms", () => {
+        const TILE =
+            `<div class="mx_AccessibleButton mx_SpotlightDialog_option" role="option" aria-selected="false" tabindex="-1">` +
+            `<div class="mx_DecoratedRoomAvatar">` +
+            `<span class="mx_BaseAvatar" style="display: block; width: 32px; height: 32px"></span></div>Room</div>`;
+
+        /** The strip as SpotlightDialog draws it, with more rooms than fit, in a dialog taller than its window. */
+        function renderStrip(dir = "ltr"): HTMLElement {
+            document.body.innerHTML = spotlightDialog(["↓", "↑"]);
+            document.body.dir = dir;
+            element("#mx_SpotlightDialog_content").innerHTML = `
+                <div class="mx_SpotlightDialog_section mx_SpotlightDialog_recentlyViewed" role="group">
+                    <h4>Recently viewed</h4>
+                    <div tabindex="-1">${TILE.repeat(20)}</div>
+                </div>
+                <div class="mx_SpotlightDialog_section" style="height: 1000px"></div>`;
+            return element(".mx_SpotlightDialog_recentlyViewed > div") as HTMLElement;
+        }
+
+        /** Scrolls with the pointer over `target`, as a trackpad and a mouse wheel do. */
+        async function scrollOver(target: Element, delta: { deltaX?: number; deltaY?: number }): Promise<void> {
+            const frame = window.frameElement!.getBoundingClientRect();
+            const scale = frame.width / document.documentElement.clientWidth;
+            const box = target.getBoundingClientRect();
+            await cdp().send("Input.dispatchMouseEvent", {
+                type: "mouseWheel",
+                x: frame.left + (box.left + box.width / 2) * scale,
+                y: frame.top + (box.top + box.height / 2) * scale,
+                deltaX: 0,
+                deltaY: 0,
+                ...delta,
+            });
+        }
+
+        const tiles = (strip: HTMLElement): DOMRect[] =>
+            [...strip.children].map((tile) => tile.getBoundingClientRect());
+
+        afterEach(() => {
+            document.body.removeAttribute("dir");
+        });
+
+        it.each([
+            ["ltr", 200],
+            ["rtl", -200],
+        ])("scrolls sideways with a trackpad (%s)", async (dir, deltaX) => {
+            const strip = renderStrip(dir);
+            expect(strip.scrollWidth).toBeGreaterThan(strip.clientWidth);
+
+            await scrollOver(strip, { deltaX });
+
+            await expect.poll(() => strip.scrollLeft).toBe(deltaX);
+        });
+
+        it("scrolls sideways with a mouse wheel, and lets the dialog scroll once it is at its end", async () => {
+            const strip = renderStrip();
+            const content = element("#mx_SpotlightDialog_content");
+            const stop = scrollSidewaysOnWheel(strip);
+
+            await scrollOver(strip, { deltaY: 100 });
+            await expect.poll(() => strip.scrollLeft).toBe(100);
+            expect(content.scrollTop).toBe(0);
+
+            strip.scrollLeft = strip.scrollWidth;
+            const end = strip.scrollLeft;
+            await scrollOver(strip, { deltaY: 100 });
+            await expect.poll(() => content.scrollTop).toBe(100);
+            expect(strip.scrollLeft).toBe(end);
+            stop?.();
+        });
+
+        it("draws no scrollbar and only scrolls sideways", () => {
+            const strip = renderStrip();
+
+            expect(getComputedStyle(strip).scrollbarWidth).toBe("none");
+            expect(strip.offsetHeight).toBe(strip.clientHeight);
+            expect(strip.scrollHeight).toBe(strip.clientHeight);
+            // Nor does the dialog around it scroll sideways
+            const content = element("#mx_SpotlightDialog_content");
+            expect(content.scrollWidth).toBe(content.clientWidth);
+        });
+
+        it.each(["ltr", "rtl"])("starts and ends on the options' edge, 16px from the dialog's (%s)", (dir) => {
+            const strip = renderStrip(dir);
+            const content = element("#mx_SpotlightDialog_content");
+            const left = content.getBoundingClientRect().left + content.clientLeft;
+            const right = left + content.clientWidth;
+            const box = strip.getBoundingClientRect();
+            const toStart = (tile: DOMRect): number => (dir === "ltr" ? tile.left - left : right - tile.right);
+            const toEnd = (tile: DOMRect): number => (dir === "ltr" ? right - tile.right : tile.left - left);
+
+            // The dialog's edges, not the options', are what cuts a tile short
+            expect([box.left, box.right]).toEqual([left, right]);
+            expect(toStart(tiles(strip)[0])).toBe(16);
+
+            strip.scrollLeft = (dir === "ltr" ? 1 : -1) * strip.scrollWidth;
+            expect(toEnd(tiles(strip).at(-1)!)).toBe(16);
+        });
+
+        it("scrolls the tile the arrow keys move to into view, up to the options' edge", () => {
+            const strip = renderStrip();
+            const { left, right } = strip.getBoundingClientRect();
+
+            strip.children[12].scrollIntoView({ block: "nearest" });
+            expect(right - tiles(strip)[12].right).toBe(16);
+
+            strip.children[3].scrollIntoView({ block: "nearest" });
+            expect(tiles(strip)[3].left - left).toBe(16);
+        });
     });
 
     it.each(["cpd-theme-light", "cpd-theme-dark"])(

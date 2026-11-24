@@ -96,6 +96,7 @@ import RoomAvatar from "../../avatars/RoomAvatar";
 import { useFeatureEnabled } from "../../../../hooks/useSettings";
 import { filterBoolean } from "../../../../utils/arrays";
 import { transformSearchTerm } from "../../../../utils/SearchInput";
+import { scrollSidewaysOnWheel } from "../../../../telement/search-dialog/scrollSidewaysOnWheel";
 import { Filter } from "./Filter";
 
 const MAX_RECENT_SEARCHES = 10;
@@ -1141,7 +1142,9 @@ const SpotlightDialog: React.FC<IProps> = ({ initialText = "", initialFilter = n
                         <h4 id="mx_SpotlightDialog_section_recentlyViewed">
                             {_t("spotlight_dialog|recently_viewed_section_title")}
                         </h4>
-                        <div>
+                        {/* Telement: a strip that scrolls sideways, with a mouse wheel too. It is no Tab stop, which
+                            browsers would make it as it scrolls: the arrow keys move through it. */}
+                        <div ref={scrollSidewaysOnWheel} tabIndex={-1}>
                             {recentlyViewedRooms.map((room) => (
                                 <TooltipOption
                                     id={`mx_SpotlightDialog_button_recentlyViewed_${room.roomId}`}
