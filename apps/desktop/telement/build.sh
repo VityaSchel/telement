@@ -27,6 +27,8 @@ cp -R "$web_dir/webapp/bundles/$bundle" "$desktop_dir/webapp/bundles/"
 cp "$desktop_dir/telement/release/config.json" "$desktop_dir/webapp/config.json"
 
 cd "$desktop_dir"
+# Ends the build if something would ship without its license notice
+node telement/notices/generate.ts
 pnpm run asar-webapp
 # Nx hashes only files git tracks, so it misses the ignored webapp.asar and would restore an older dist from its cache
 NX_SKIP_NX_CACHE=true VARIANT_PATH=telement/release/build.json pnpm run build "$@"

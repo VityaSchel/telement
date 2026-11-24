@@ -7,11 +7,13 @@ Please see LICENSE files in the repository root for full details.
 
 import { type LinuxPackager } from "app-builder-lib";
 import { LinuxTargetHelper } from "app-builder-lib/out/targets/LinuxTargetHelper.js";
-import { beforeAll, describe, expect, it } from "vitest";
+import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+
+import { configureTelementPackaging } from "../../telement/packaging.ts";
 
 const desktopDir = path.join(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 const variantDir = path.join(desktopDir, "telement", "release");
@@ -206,6 +208,55 @@ describe("Telement desktop variant", () => {
                 expect(new Set(licenseTexts)).toEqual(new Set([licenseText]));
                 expect(statement).toContain("GNU Affero General Public License");
                 expect(statement).not.toContain("GNU General Public License");
+            });
+
+            describe("notices of third parties", () => {
+                const notices = "THIRD-PARTY-NOTICES.txt";
+                const generatedNotices = `telement/release/${notices}`;
+
+                afterEach(() => {
+                    vi.restoreAllMocks();
+                });
+
+                it("are shipped next to the app's own resources", () => {
+                    expect(packaging.extraResources).toContainEqual({ from: generatedNotices, to: notices });
+                });
+
+                it("are named in the copyright notice", () => {
+                    expect(copyrightNotice).toContain(notices);
+                });
+
+                it("are generated for the web app that is packed, which this ends if it can't", () => {
+                    const commands = readText("telement", "build.sh").split("\n");
+                    const generation = commands.indexOf("node telement/notices/generate.ts");
+                    expect(commands).toContain("set -eu");
+                    expect(commands.findIndex((command) => command.includes("/webapp/config.json"))).toBeLessThan(
+                        generation,
+                    );
+                    expect(commands.indexOf("pnpm run asar-webapp")).toBe(generation + 1);
+                    // In the container that builds Linux packages, it's there as part of the repository's directory
+                    expect(readText("scripts", "in-docker.sh")).toContain(" -v ${PWD}/../../:/project ");
+                });
+
+                it("aren't kept in git, as they're generated", () => {
+                    const ignored = execFileSync("git", ["check-ignore", generatedNotices], { cwd: desktopDir });
+                    expect(ignored.toString().trim()).toBe(generatedNotices);
+                });
+
+                it.each([true, false])("are needed for packing: %s", async (areGenerated) => {
+                    const config = {
+                        extraMetadata: { name: "name", productName: "Name", description: "Description" },
+                        linux: {},
+                        deb: { fpm: [] },
+                    } as Parameters<typeof configureTelementPackaging>[0];
+                    configureTelementPackaging(config);
+                    const exists = vi.spyOn(fs, "existsSync").mockReturnValue(areGenerated);
+
+                    const pack = async (): Promise<void> => (config.beforePack as () => Promise<void>)();
+                    if (areGenerated) await expect(pack()).resolves.toBeUndefined();
+                    else await expect(pack()).rejects.toThrow("build.sh");
+                    expect(exists).toHaveBeenCalledWith(generatedNotices);
+                });
             });
 
             // Required by section 4 of the LGPL, under which the web app bundles diff-dom
