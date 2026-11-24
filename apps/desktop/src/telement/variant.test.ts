@@ -155,20 +155,23 @@ describe("Telement desktop variant", () => {
             expect(packaging.deb.synopsis).toMatch(/^.{1,79}$/);
         });
 
-        describe("licenses", () => {
+        describe("license", () => {
+            const { license } = JSON.parse(readText("package.json")) as { license: string };
+            const licenseText = "LICENSE-AGPL-3.0";
             const copyrightNotice = readText("telement", "release", "COPYRIGHT");
+            const readme = readText("../../README.md");
 
-            it("ships the license texts and the copyright notice next to the app's own resources", () => {
+            it("ships its text only, and the copyright notice, next to the app's own resources", () => {
                 expect(packaging.extraResources).toEqual(
                     expect.arrayContaining([
                         { filter: expect.arrayContaining(["webapp.asar"]) },
                         { from: "telement/release/COPYRIGHT", to: "COPYRIGHT" },
-                        { from: "../../LICENSE-AGPL-3.0", to: "LICENSE-AGPL-3.0" },
-                        { from: "../../LICENSE-GPL-3.0", to: "LICENSE-GPL-3.0" },
+                        { from: `../../${licenseText}`, to: licenseText },
                     ]),
                 );
-                expect(readText("../../LICENSE-AGPL-3.0")).toContain("GNU AFFERO GENERAL PUBLIC LICENSE");
-                expect(readText("../../LICENSE-GPL-3.0")).toContain("GNU GENERAL PUBLIC LICENSE");
+                const texts = packaging.extraResources.map(({ to }) => to).filter((to) => to?.startsWith("LICENSE"));
+                expect(texts).toEqual([licenseText]);
+                expect(readText(`../../${licenseText}`)).toContain("GNU AFFERO GENERAL PUBLIC LICENSE");
             });
 
             it("puts the copyright notice where Debian expects it, after fpm's options, which end at the first file", () => {
@@ -178,17 +181,30 @@ describe("Telement desktop variant", () => {
             });
 
             it("names in the copyright notice every copyright holder the README names", () => {
-                const copyrightLines = readText("../../README.md").match(/^Copyright .*$/gm);
+                const copyrightLines = readme.match(/^Copyright .*$/gm);
                 expect(copyrightLines).not.toBeNull();
                 for (const line of copyrightLines!) {
                     expect(copyrightNotice).toContain(`${line}\n`);
                 }
             });
 
-            it("states the license in the package metadata as in the copyright notice", () => {
-                const { license } = JSON.parse(readText("package.json")) as { license: string };
-                expect(license).toBe("AGPL-3.0-only OR GPL-3.0-only");
-                expect(copyrightNotice).toContain(`SPDX-License-Identifier: ${license}\n`);
+            it("is AGPL-3.0-only in the package metadata, and the same in the copyright notice", () => {
+                expect(license).toBe("AGPL-3.0-only");
+                const spdxLines = copyrightNotice.match(/^SPDX-License-Identifier: .*$/gm);
+                expect(spdxLines).toEqual([`SPDX-License-Identifier: ${license}`]);
+            });
+
+            it.each([
+                ["copyright notice", copyrightNotice],
+                ["README", readme],
+            ])("is the only one the %s names, along with the file of its text", (_name, statement) => {
+                const licenseIds = statement.match(/\bA?GPL-[\d.]+(-only|-or-later)/g);
+                const licenseTexts = statement.match(/\bLICENSE-[\w.-]*\w/g);
+
+                expect(new Set(licenseIds)).toEqual(new Set([license]));
+                expect(new Set(licenseTexts)).toEqual(new Set([licenseText]));
+                expect(statement).toContain("GNU Affero General Public License");
+                expect(statement).not.toContain("GNU General Public License");
             });
         });
 

@@ -16,7 +16,7 @@ interface PackagingConfiguration {
 }
 
 const COPYRIGHT_NOTE = "telement/release/COPYRIGHT";
-const LICENSE_TEXTS = ["LICENSE-AGPL-3.0", "LICENSE-GPL-3.0"];
+const LICENSE_TEXT = "LICENSE-AGPL-3.0";
 
 /** Changes upstream's electron-builder configuration where Telement's packages differ from Element's. */
 export function configureTelementPackaging(config: PackagingConfiguration): void {
@@ -29,7 +29,7 @@ export function configureTelementPackaging(config: PackagingConfiguration): void
     config.extraResources = [
         config.extraResources ?? [],
         { from: COPYRIGHT_NOTE, to: "COPYRIGHT" },
-        LICENSE_TEXTS.map((fileName) => ({ from: `../../${fileName}`, to: fileName })),
+        { from: `../../${LICENSE_TEXT}`, to: LICENSE_TEXT },
     ].flat();
 
     // These are for the tar.gz. The deb packs the same directory, but installs a desktop file and an icon itself.

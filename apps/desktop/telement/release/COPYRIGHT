@@ -10,12 +10,13 @@ Copyright (c) 2025-2026 Element Creations Ltd.
 Telement is a fork of Element Web (https://github.com/element-hq/element-web).
 The headers of its source files name further authors.
 
-Telement is licensed under the GNU Affero General Public License v3.0 or the
-GNU General Public License v3.0, at your choice: see LICENSE-AGPL-3.0 and
-LICENSE-GPL-3.0, which are next to this file or, with the Debian package, in
-/opt/Telement/resources. Each file's SPDX header states its exact license.
-Telement comes with no warranty; see the licenses for details.
+Telement as a whole is licensed under the GNU Affero General Public License
+v3.0 only (AGPL-3.0-only): see LICENSE-AGPL-3.0, which is next to this file or,
+with the Debian package, in /opt/Telement/resources. Each source file's SPDX
+header states its own license; some files, most of them from Element Web, also
+allow other licenses. Telement comes with no warranty; see the license for
+details.
 
-SPDX-License-Identifier: AGPL-3.0-only OR GPL-3.0-only
+SPDX-License-Identifier: AGPL-3.0-only
 
 Source code: https://git.hloth.dev/hloth/telement
