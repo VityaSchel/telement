@@ -331,6 +331,10 @@
         "upstream": "Go to Home View",
         "telement": "Go to Home view"
     },
+    "keyboard|toggle_webcam_mute": {
+        "upstream": "Toggle webcam on/off",
+        "telement": "Toggle camera on/off"
+    },
     "labs|group_voip": {
         "upstream": "Voice & Video",
         "telement": "Voice & video"
@@ -895,9 +899,29 @@
         "upstream": "Call Failed",
         "telement": "Call failed"
     },
+    "voip|call_failed_media": {
+        "upstream": "Call failed because webcam or microphone could not be accessed. Check that:",
+        "telement": "Call failed because camera or microphone could not be accessed. Check that:"
+    },
+    "voip|call_failed_media_applications": {
+        "upstream": "No other application is using the webcam",
+        "telement": "No other application is using the camera"
+    },
+    "voip|call_failed_media_connected": {
+        "upstream": "A microphone and webcam are plugged in and set up correctly",
+        "telement": "A microphone and camera are plugged in and set up correctly"
+    },
+    "voip|call_failed_media_permissions": {
+        "upstream": "Permission is granted to use the webcam",
+        "telement": "Permission is granted to use the camera"
+    },
     "voip|default_device": {
         "upstream": "Default Device",
         "telement": "Default device"
+    },
+    "voip|input_devices": {
+        "upstream": "Input devices",
+        "telement": "Microphones"
     },
     "voip|jitsi_call": {
         "upstream": "Jitsi Conference",
@@ -907,9 +931,17 @@
         "upstream": "Legacy Call",
         "telement": "Legacy call"
     },
+    "voip|no_media_perms_description": {
+        "upstream": "You may need to manually permit %(brand)s to access your microphone/webcam",
+        "telement": "You may need to manually permit %(brand)s to access your microphone/camera"
+    },
     "voip|no_permission_conference": {
         "upstream": "Permission Required",
         "telement": "Permission required"
+    },
+    "voip|output_devices": {
+        "upstream": "Output devices",
+        "telement": "Speakers"
     },
     "voip|too_many_calls": {
         "upstream": "Too Many Calls",
@@ -918,6 +950,10 @@
     "voip|transfer_failed": {
         "upstream": "Transfer Failed",
         "telement": "Transfer failed"
+    },
+    "voip|unable_to_access_media": {
+        "upstream": "Unable to access webcam / microphone",
+        "telement": "Unable to access camera / microphone"
     },
     "voip|user_busy": {
         "upstream": "User Busy",
