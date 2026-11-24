@@ -17,6 +17,7 @@ const variantDir = path.join(desktopDir, "telement", "release");
 interface Variant {
     appId: string;
     productName: string;
+    description: string;
     protocols: string[];
 }
 
@@ -26,7 +27,7 @@ type Config = Record<string, unknown> & {
 
 /** The parts of the electron-builder configuration that the tests check. */
 interface PackagingConfig {
-    deb: { depends: string[]; recommends: string[] };
+    deb: { depends: string[]; recommends: string[]; synopsis: string };
 }
 
 function readJson<T>(fileName: string): T {
@@ -122,6 +123,12 @@ describe("Telement desktop variant", () => {
 
         it("does not recommend the keyring of Element's apt repository", () => {
             expect(packaging.deb.recommends).toEqual([]);
+        });
+
+        // Package lists show only the synopsis. Debian's policy limits it to one line of under 80 characters.
+        it("has the variant's description as the deb's synopsis", () => {
+            expect(packaging.deb.synopsis).toBe(build.description);
+            expect(packaging.deb.synopsis).toMatch(/^.{1,79}$/);
         });
     });
 });

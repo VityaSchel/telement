@@ -7,11 +7,13 @@ Please see LICENSE files in the repository root for full details.
 
 /** The parts of electron-builder's configuration that Telement changes. */
 interface PackagingConfiguration {
-    deb: { recommends?: string[] };
+    extraMetadata: { description: string };
+    deb: { recommends?: string[]; synopsis?: string };
 }
 
 /** Changes upstream's electron-builder configuration where Telement's packages differ from Element's. */
 export function configureTelementPackaging(config: PackagingConfiguration): void {
     // Without a list, electron-builder recommends libappindicator3-1, which Electron no longer uses
     config.deb.recommends = [];
+    config.deb.synopsis = config.extraMetadata.description;
 }
