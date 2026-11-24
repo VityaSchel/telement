@@ -28,6 +28,7 @@ import postcssNested from "postcss-nested";
 
 import pkgJson from "./package.json" with { type: "json" };
 import { I18nWebpackPlugin } from "./I18nWebpackPlugin.ts";
+import { asciiCss } from "./src/telement/build/asciiCss.ts";
 
 // Environment variables
 // RIOT_OG_IMAGE_URL: specifies the URL to the image which should be used for the opengraph logo.
@@ -179,6 +180,8 @@ export default (env: string, argv: Record<string, any>): webpack.Configuration =
                               // https://github.com/terser/terser/issues/1677
                               "widgets/element-call/",
                           ],
+                          // Scripts read the same whatever encoding they are decoded in, as stylesheets do (asciiCss)
+                          terserOptions: { format: { ascii_only: true } },
                       }),
                       new CssMinimizerPlugin(),
                   ]
@@ -347,6 +350,7 @@ export default (env: string, argv: Record<string, any>): webpack.Configuration =
 
                                         postcssSimpleVars(),
                                         postcssHexrgba(),
+                                        asciiCss(),
 
                                         // It's important that this plugin is last otherwise we end
                                         // up with broken CSS.
@@ -384,6 +388,7 @@ export default (env: string, argv: Record<string, any>): webpack.Configuration =
                                         postcssSimpleVars(),
                                         postcssNested(),
                                         postcssHexrgba(),
+                                        asciiCss(),
 
                                         // It's important that this plugin is last otherwise we end
                                         // up with broken CSS.
