@@ -25,6 +25,7 @@ import {
     useRoomSummaryCardViewModel,
 } from "../../viewmodels/right_panel/RoomSummaryCardViewModel";
 import DMRoomMap from "../../../utils/DMRoomMap";
+import { E2EStatus } from "../../../utils/ShieldUtils";
 import { SDKContext } from "../../../contexts/SDKContext";
 import { SDKContextClass } from "../../../contexts/SDKContextClass";
 
@@ -254,6 +255,38 @@ describe("<RoomSummaryCard />", () => {
 
         expect(screen.queryByRole("menuitem", { name: "People" })).not.toBeInTheDocument();
         expect(screen.queryByRole("menuitem", { name: "Threads" })).not.toBeInTheDocument();
+    });
+
+    describe("encryption badge", () => {
+        const badgeOf = (label: string): HTMLElement => screen.getByText(label);
+
+        it.each<[string, Partial<RoomSummaryCardState>]>([
+            ["whether the room is encrypted", { isRoomEncrypted: null }],
+            ["whether its members are trusted", { isRoomEncrypted: true, e2eStatus: undefined }],
+        ])("keeps its place, unseen, until it is known %s", (_, state) => {
+            vi.mocked(useRoomSummaryCardViewModel).mockReturnValue({ ...vmDefaultValues, ...state });
+            getComponent();
+
+            // Hidden by its style (RightPanel.test.browser.ts)
+            expect(badgeOf("Encrypted")).toHaveClass("mx_RoomSummaryCard_badge_unknown");
+            expect(screen.queryByText("Not encrypted")).not.toBeInTheDocument();
+            expect(screen.queryByText("Not trusted")).not.toBeInTheDocument();
+        });
+
+        it.each<[string, Partial<RoomSummaryCardState>]>([
+            ["Encrypted", { isRoomEncrypted: true, e2eStatus: E2EStatus.Normal }],
+            ["Encrypted", { isRoomEncrypted: true, e2eStatus: E2EStatus.Verified }],
+            ["Not trusted", { isRoomEncrypted: true, e2eStatus: E2EStatus.Warning }],
+            ["Not encrypted", { isRoomEncrypted: false }],
+        ])("says %s alone once it is known", (label, state) => {
+            vi.mocked(useRoomSummaryCardViewModel).mockReturnValue({ ...vmDefaultValues, ...state });
+            getComponent();
+
+            expect(badgeOf(label)).not.toHaveClass("mx_RoomSummaryCard_badge_unknown");
+            for (const other of ["Encrypted", "Not trusted", "Not encrypted"].filter((other) => other !== label)) {
+                expect(screen.queryByText(other)).not.toBeInTheDocument();
+            }
+        });
     });
 
     it("opens room pinned messages on button click", () => {

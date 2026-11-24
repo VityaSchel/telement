@@ -8,9 +8,10 @@
 // @vitest-environment happy-dom
 
 import { describe, it, expect, vi, beforeEach, afterEach, type Mock } from "vitest";
+import { createElement, type PropsWithChildren } from "react";
 import { type MatrixClient, type Room, RoomMember } from "matrix-js-sdk/src/matrix";
 import { act, renderHook, waitFor } from "test-utils-rtl";
-import { mkStubRoom, stubClient, withClientContextRenderOptions } from "test-utils";
+import { getRoomContext, mkStubRoom, stubClient, withClientContextRenderOptions } from "test-utils";
 
 import { useRoomSummaryCardViewModel } from "./RoomSummaryCardViewModel";
 import defaultDispatcher from "../../../dispatcher/dispatcher";
@@ -26,6 +27,8 @@ import { inviteToRoom } from "../../../utils/room/inviteToRoom";
 import DMRoomMap from "../../../utils/DMRoomMap";
 import * as hooks from "../../../hooks/useAccountData";
 import * as WithPresenceIndicator from "../../views/avatars/WithPresenceIndicator";
+import MatrixClientContext from "../../../contexts/MatrixClientContext";
+import { ScopedRoomContextProvider } from "../../../contexts/ScopedRoomContext";
 import * as getTagsForRoomUtils from "../../../utils/room/getTagsForRoom";
 
 vi.mock("../../../utils/room/inviteToRoom", () => ({
@@ -64,7 +67,7 @@ describe("useRoomSummaryCardViewModel", () => {
         const { result } = render();
 
         expect(result.current.isDirectMessage).toBe(false);
-        expect(result.current.isRoomEncrypted).toBe(false);
+        expect(result.current.isRoomEncrypted).toBeNull();
         expect(result.current.isVideoRoom).toBe(false);
         expect(result.current.isFavorite).toBe(false);
         expect(result.current.pinCount).toBe(0);
@@ -251,6 +254,36 @@ describe("useRoomSummaryCardViewModel", () => {
             const { result } = render();
 
             expect(result.current.showPeople).toBe(true);
+        });
+    });
+
+    describe("encryption", () => {
+        const renderInRoomView = (isRoomEncrypted: boolean | null) =>
+            renderHook(() => useRoomSummaryCardViewModel(room, permalinkCreator), {
+                wrapper: ({ children }: PropsWithChildren) =>
+                    createElement(
+                        MatrixClientContext.Provider,
+                        { value: matrixClient },
+                        createElement(ScopedRoomContextProvider, {
+                            ...getRoomContext(room, { isRoomEncrypted }),
+                            children,
+                        }),
+                    ),
+            });
+
+        it("is unknown, rather than off, until it is known", async () => {
+            vi.spyOn(matrixClient.getCrypto()!, "isEncryptionEnabledInRoom").mockResolvedValue(true);
+            const { result } = render();
+
+            expect(result.current.isRoomEncrypted).toBeNull();
+            await waitFor(() => expect(result.current.isRoomEncrypted).toBe(true));
+        });
+
+        it.each([true, false])("is the room view's, which knew it was %s before it showed the card", (isEncrypted) => {
+            vi.spyOn(matrixClient.getCrypto()!, "isEncryptionEnabledInRoom").mockReturnValue(new Promise(() => {}));
+            const { result } = renderInRoomView(isEncrypted);
+
+            expect(result.current.isRoomEncrypted).toBe(isEncrypted);
         });
     });
 });

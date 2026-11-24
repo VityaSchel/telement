@@ -62,7 +62,7 @@ import SettingsStore from "../../settings/SettingsStore";
 import { Layout } from "../../settings/enums/Layout";
 import AccessibleButton from "../views/elements/AccessibleButton";
 import { TimelineRenderingType, MainSplitContentType } from "../../contexts/RoomContext";
-import { E2EStatus, shieldStatusForRoom } from "../../utils/ShieldUtils";
+import { type E2EStatus, shieldStatusForRoom } from "../../utils/ShieldUtils";
 import { Action } from "../../dispatcher/actions";
 import { type IMatrixClientCreds } from "../../utils/createMatrixClient";
 import { useMatrixClientContext } from "../../contexts/MatrixClientContext";
@@ -820,8 +820,8 @@ export class RoomView extends React.Component<IRoomProps, IRoomState> {
         const isRoomEncrypted = await this.getIsRoomEncrypted(newState.roomId);
         this.setState({
             isRoomEncrypted,
-            ...(isRoomEncrypted &&
-                newState.roomId && { e2eStatus: RoomView.e2eStatusCache.get(newState.roomId) ?? E2EStatus.Warning }),
+            // Telement: undefined until it is known, as a warning meanwhile turned into "Encrypted" in room info later
+            ...(isRoomEncrypted && newState.roomId && { e2eStatus: RoomView.e2eStatusCache.get(newState.roomId) }),
         });
     };
 

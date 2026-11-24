@@ -49,11 +49,11 @@ export interface RoomSummaryCardState {
      */
     userStatus: UserStatus | undefined;
     /**
-     * Whether the room is encrypted, used to display the correct badge and icon
+     * Whether the room is encrypted, used to display the correct badge and icon. Null until it is known.
      */
-    isRoomEncrypted: boolean;
+    isRoomEncrypted: boolean | null;
     /**
-     * The e2e status of the room, used to display the correct badge and icon
+     * The e2e status of the room, used to display the correct badge and icon. Undefined until it is known.
      */
     e2eStatus: E2EStatus | undefined;
     /**
@@ -129,9 +129,10 @@ const useIsDirectMessage = (room: Room): boolean => {
 export function useRoomSummaryCardViewModel(room: Room, permalinkCreator: RoomPermalinkCreator): RoomSummaryCardState {
     const cli = useMatrixClientContext();
 
-    const isRoomEncrypted = useIsEncrypted(cli, room) ?? false;
-    const roomContext = useScopedRoomContext("e2eStatus", "timelineRenderingType");
+    const roomContext = useScopedRoomContext("e2eStatus", "isRoomEncrypted");
     const e2eStatus = roomContext.e2eStatus;
+    // Telement: the room view knows before it shows the card, which would say that the room isn't encrypted until it does
+    const isRoomEncrypted = useIsEncrypted(cli, room) ?? roomContext.isRoomEncrypted ?? null;
     const isVideoRoom = calcIsVideoRoom(room);
 
     const { historyVisibility, roomJoinRule } = useRoomState(room, (state) => ({

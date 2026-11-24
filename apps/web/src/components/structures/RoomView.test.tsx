@@ -56,6 +56,7 @@ import { RoomView } from "./RoomView";
 import SettingsStore from "../../settings/SettingsStore";
 import { SettingLevel } from "../../settings/SettingLevel";
 import DMRoomMap from "../../utils/DMRoomMap";
+import { E2EStatus } from "../../utils/ShieldUtils";
 import { NotificationState, NotificationStateEvents } from "../../stores/notifications/NotificationState";
 import { RoomNotificationStateStore } from "../../stores/notifications/RoomNotificationStateStore";
 import { RightPanelPhases } from "../../stores/right-panel/RightPanelStorePhases";
@@ -771,6 +772,21 @@ describe("RoomView", () => {
         deferred.resolve(true);
         await waitFor(() => expect(container.querySelector(".mx_RoomView_messagePanel")).not.toBeNull());
         expect(asFragment()).toMatchSnapshot();
+    });
+
+    it("doesn't warn of the encryption of a room until its status is known (Telement)", async () => {
+        vi.spyOn(room, "getMyMembership").mockReturnValue(KnownMembership.Join);
+        vi.spyOn(cli, "getCrypto").mockReturnValue(crypto);
+        vi.spyOn(cli.getCrypto()!, "isEncryptionEnabledInRoom").mockResolvedValue(true);
+        const members = Promise.withResolvers<RoomMember[]>();
+        vi.spyOn(room, "getEncryptionTargetMembers").mockReturnValue(members.promise);
+
+        const instance = await getRoomViewInstance();
+        await waitFor(() => expect(instance.state.isRoomEncrypted).toBe(true));
+        expect(instance.state.e2eStatus).toBeUndefined();
+
+        members.resolve([]);
+        await waitFor(() => expect(instance.state.e2eStatus).toBe(E2EStatus.Verified));
     });
 
     it("updates live timeline when a timeline reset happens", async () => {

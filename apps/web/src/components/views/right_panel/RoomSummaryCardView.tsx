@@ -110,6 +110,7 @@ const RoomSummaryCardView: React.FC<IProps> = ({ room, permalinkCreator }) => {
     const vm = useRoomSummaryCardViewModel(room, permalinkCreator);
     // XXX: this name should be part of the view model
     const name = useRoomName(room);
+    const isEncryptionKnown = !!vm.isRoomEncrypted && vm.e2eStatus !== undefined;
 
     const roomInfo = (
         <header className="mx_RoomSummaryCard_container">
@@ -148,14 +149,19 @@ const RoomSummaryCardView: React.FC<IProps> = ({ room, permalinkCreator }) => {
                     </Badge>
                 )}
 
-                {vm.isRoomEncrypted && vm.e2eStatus !== E2EStatus.Warning && (
-                    <Badge kind="green">
+                {/* Telement: until it is known which of the three it is, the badge keeps its place, unseen, rather than
+                    showing one that then turns into another */}
+                {vm.isRoomEncrypted !== false && vm.e2eStatus !== E2EStatus.Warning && (
+                    <Badge
+                        kind="green"
+                        className={classNames({ mx_RoomSummaryCard_badge_unknown: !isEncryptionKnown })}
+                    >
                         <LockIcon width="1rem" height="1rem" />
                         {_t("common|encrypted")}
                     </Badge>
                 )}
 
-                {!vm.isRoomEncrypted && (
+                {vm.isRoomEncrypted === false && (
                     <Badge kind="blue">
                         <LockOffIcon width="1rem" height="1rem" color="var(--cpd-color-icon-info-primary)" />
                         {_t("common|unencrypted")}

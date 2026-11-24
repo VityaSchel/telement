@@ -9,7 +9,7 @@ import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
 import { userEvent } from "vitest/browser";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { Avatar, IconButton, Link, MenuItem, Separator, ToggleMenuItem } from "@vector-im/compound-web";
+import { Avatar, Badge, IconButton, Link, MenuItem, Separator, ToggleMenuItem } from "@vector-im/compound-web";
 import {
     ChatIcon,
     ChevronDownIcon,
@@ -295,6 +295,28 @@ describe("Right panel", () => {
 
             expect(style.color).toBe(tokenColor("--tl-accent-900", card));
             expect(style.textDecorationLine).toBe("none");
+        });
+
+        it("keeps the place of the encryption badge, unseen, until it is known, so that nothing moves once it is", () => {
+            const badges = (className?: string): string => `
+                <section class="mx_RoomSummaryCard_badges">
+                    ${html(createElement(Badge, { kind: "green", className }, "Encrypted"))}
+                    <span class="other">History</span>
+                </section>
+            `;
+            const measure = (): [string, number, number] => {
+                const badge = document.querySelector(".mx_RoomSummaryCard_badges > :first-child")!;
+                const other = document.querySelector(".other")!.getBoundingClientRect();
+                return [getComputedStyle(badge).visibility, other.left, other.top];
+            };
+
+            document.body.innerHTML = badges("mx_RoomSummaryCard_badge_unknown");
+            const [unknown, ...unknownPlace] = measure();
+            document.body.innerHTML = badges();
+            const [known, ...knownPlace] = measure();
+
+            expect([unknown, known]).toEqual(["hidden", "visible"]);
+            expect(unknownPlace).toEqual(knownPlace);
         });
 
         it("mirrors its rows and summary right to left", () => {
