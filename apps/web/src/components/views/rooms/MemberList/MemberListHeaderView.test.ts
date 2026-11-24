@@ -11,6 +11,7 @@ Please see LICENSE files in the repository root for full details.
 
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { act, fireEvent, screen, waitFor } from "test-utils-rtl";
+import userEvent from "@testing-library/user-event";
 import { RoomMember, User, RoomEvent, RoomStateEvent, type RoomState } from "matrix-js-sdk/src/matrix";
 import { KnownMembership } from "matrix-js-sdk/src/types";
 
@@ -50,8 +51,24 @@ describe("MemberListHeaderView", () => {
         rendered = await renderMemberList(true);
     });
 
-    it("Shows the correct member count", async () => {
-        expect(await screen.findByText("6 Members")).toBeVisible();
+    it("Shows the correct member count in the card's title, and nowhere else", async () => {
+        expect(await screen.findByRole("heading", { name: "People (6)" })).toBeVisible();
+        expect(screen.queryByText("6 Members")).not.toBeInTheDocument();
+    });
+
+    it("Updates the member count as people join and are invited", async () => {
+        const { memberListRoom } = rendered;
+        memberListRoom.currentState.getJoinedMemberCount = vi.fn().mockReturnValue(7);
+        memberListRoom.currentState.getInvitedMemberCount = vi.fn().mockReturnValue(1);
+        act(() => {
+            memberListRoom.emit(RoomEvent.Summary, {
+                "m.heroes": [],
+                "m.joined_member_count": 7,
+                "m.invited_member_count": 1,
+            });
+        });
+
+        expect(await screen.findByRole("heading", { name: "People (8)" })).toBeVisible();
     });
 
     it("Does not show search box when there's less than 20 members", async () => {
@@ -74,6 +91,60 @@ describe("MemberListHeaderView", () => {
         }
         await reRender();
         await waitFor(() => expect(screen.queryByPlaceholderText("Search room members")).toBeVisible());
+    });
+
+    describe("search field", () => {
+        const field = (): HTMLElement => screen.getByRole("searchbox", { name: "Search room members" });
+        const names = (): (string | null)[] =>
+            screen.queryAllByRole("option").map((option) => option.getAttribute("aria-label"));
+
+        beforeEach(async () => {
+            rendered.root.unmount();
+            // 21 people: 7 admins, 7 moderators and 7 others
+            rendered = await renderMemberList(true, undefined, 7);
+        });
+
+        it("lists those it finds, counted as the list's, while the title keeps counting everyone", async () => {
+            await userEvent.type(field(), "admin");
+
+            await waitFor(() => expect(names()).toHaveLength(7));
+            expect(screen.getAllByRole("option")[6]).toHaveAttribute("aria-posinset", "7");
+            expect(screen.getAllByRole("option")[6]).toHaveAttribute("aria-setsize", "7");
+            expect(screen.getByRole("heading", { name: "People (21)" })).toBeInTheDocument();
+        });
+
+        it("says when it finds no one", async () => {
+            await userEvent.type(field(), "nobody");
+
+            expect(await screen.findByRole("status")).toHaveTextContent("No matches");
+            expect(names()).toEqual([]);
+        });
+
+        it("empties on Escape, and leaves the key to the panel, which closes, once it is empty", async () => {
+            const onKeyDown = vi.fn();
+            document.body.addEventListener("keydown", onKeyDown);
+            await userEvent.type(field(), "admin");
+            await waitFor(() => expect(names()).toHaveLength(7));
+            onKeyDown.mockClear();
+
+            await userEvent.keyboard("{Escape}");
+            expect(field()).toHaveValue("");
+            expect(onKeyDown).not.toHaveBeenCalled();
+            await waitFor(() => expect(names()).toHaveLength(21));
+
+            await userEvent.keyboard("{Escape}");
+            expect(onKeyDown).toHaveBeenCalledTimes(1);
+            document.body.removeEventListener("keydown", onKeyDown);
+        });
+
+        it("is in the card's second header with the invite button, over the list that scrolls", () => {
+            const header = field().closest("header")!;
+
+            expect(header).toHaveClass("mx_BaseCard_controls");
+            expect(header).toContainElement(screen.getByRole("button", { name: "Invite" }));
+            expect(header.parentElement).toHaveClass("mx_BaseCard");
+            expect(header.nextElementSibling).toBe(screen.getByRole("listbox", { name: "Member list" }));
+        });
     });
 
     describe("Invite button functionality", () => {

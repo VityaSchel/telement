@@ -9,17 +9,7 @@ import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
 import { userEvent } from "vitest/browser";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import {
-    Avatar,
-    Button,
-    Form,
-    IconButton,
-    Link,
-    MenuItem,
-    Search,
-    Separator,
-    ToggleMenuItem,
-} from "@vector-im/compound-web";
+import { Avatar, IconButton, Link, MenuItem, Separator, ToggleMenuItem } from "@vector-im/compound-web";
 import {
     ChatIcon,
     ChevronDownIcon,
@@ -52,7 +42,6 @@ import roomSummaryCardStyles from "../../res/css/views/right_panel/_RoomSummaryC
 import userInfoStyles from "../../res/css/views/right_panel/_UserInfo.pcss?raw";
 import verificationPanelStyles from "../../res/css/views/right_panel/_VerificationPanel.pcss?raw";
 import accessibleButtonStyles from "../../res/css/views/elements/_AccessibleButton.pcss?raw";
-import memberListHeaderViewStyles from "../../res/css/views/rooms/_MemberListHeaderView.pcss?raw";
 import memberTileViewStyles from "../../res/css/views/rooms/_MemberTileView.pcss?raw";
 import pinnedEventTileStyles from "../../res/css/views/rooms/_PinnedEventTile.pcss?raw";
 import thirdPartyMemberInfoStyles from "../../res/css/views/rooms/_ThirdPartyMemberInfo.pcss?raw";
@@ -153,39 +142,14 @@ const memberTile = (name: string, tabIndex: number): string => `
     </div>
 `;
 
-/** MemberListView: MemberListHeaderView's search field, invite button and count, then two member tiles. */
+/** MemberListView's list: two member tiles. */
 function renderMemberList(dir = "ltr"): HTMLElement {
-    const search = html(
-        createElement(
-            Form.Root,
-            null,
-            createElement(Search, {
-                className: "mx_MemberListHeaderView_search mx_no_textinput",
-                name: "searchMembers",
-                placeholder: "Filter People…",
-                onChange: () => {},
-            }),
-        ),
-    ).replace(/^<form[^>]*>|<\/form>$/g, "");
-    const invite = html(
-        createElement(Button, {
-            "kind": "primary",
-            "size": "md",
-            "iconOnly": true,
-            "Icon": UserAddIcon,
-            "aria-label": "Invite",
-        }),
-    );
-    const header = flex(
-        "column",
-        "mx_MemberListHeaderView",
-        `${flex("row", "mx_MemberListHeaderView_container", search + invite, "var(--cpd-space-3x)")}
-        <div class="mx_MemberListHeaderView_label">4 Members</div>`,
-    );
     document.body.innerHTML = `
         <div class="mx_BaseCard mx_MemberListView" dir="${dir}" style="width: ${CARD_WIDTH}px">
-            <form>${header}</form>
-            <div role="listbox">${memberTile("Alice", 0)}${memberTile("Bob", -1)}</div>
+            <div role="listbox">
+                <div>${memberTile("Alice", 0)}</div>
+                <div>${memberTile("Bob", -1)}</div>
+            </div>
         </div>
     `;
     return document.querySelector(".mx_MemberListView")!;
@@ -274,7 +238,6 @@ describe("Right panel", () => {
                     roomSummaryCardStyles,
                     userInfoStyles,
                     verificationPanelStyles,
-                    memberListHeaderViewStyles,
                     memberTileViewStyles,
                     pinnedEventTileStyles,
                     thirdPartyMemberInfoStyles,
@@ -407,52 +370,6 @@ describe("Right panel", () => {
     });
 
     describe("member list", () => {
-        it("makes the search field the filled pill of every search, ringed in Compound's focus blue while focused", () => {
-            const card = renderMemberList();
-            const search = card.querySelector<HTMLElement>(".mx_MemberListHeaderView_search")!;
-            const fill = (): string => getComputedStyle(search).backgroundColor;
-            const probe = document.createElement("span");
-            probe.style.backgroundColor = "var(--cpd-color-bg-subtle-secondary)";
-            card.append(probe);
-            const subtle = getComputedStyle(probe).backgroundColor;
-            probe.remove();
-
-            expect(fill()).toBe(subtle);
-            expect(settledStyle(search).borderTopColor).toBe("rgba(0, 0, 0, 0)");
-            expect(search.getBoundingClientRect().height).toBe(36);
-            search.querySelector("input")!.focus();
-            expect(settledStyle(search).borderTopColor).toBe("rgba(0, 0, 0, 0)");
-            const focused = getComputedStyle(search);
-            expect(`${focused.outlineStyle} ${focused.outlineWidth} ${focused.outlineOffset}`).toBe("solid 2px -2px");
-            expect(getComputedStyle(search).outlineColor).toBe(tokenColor("--cpd-color-border-focused", card));
-        });
-
-        it.each(["ltr", "rtl"])(
-            "starts the search field and the member count and ends the invite button on the content edge (%s)",
-            (dir) => {
-                const card = renderMemberList(dir);
-
-                expect(insets(card.querySelector(".mx_MemberListHeaderView_search")!, card).start).toBe(CONTENT_EDGE);
-                expect(insets(card.querySelector(".mx_MemberListHeaderView_container > button")!, card).end).toBe(
-                    CONTENT_EDGE,
-                );
-                expect(insets(textOf(card.querySelector(".mx_MemberListHeaderView_label")!), card).start).toBe(
-                    CONTENT_EDGE,
-                );
-            },
-        );
-
-        it.each(["ltr", "rtl"])(
-            "stops the line under the member count on the content edge at both ends, as room info's dividers do (%s)",
-            (dir) => {
-                const card = renderMemberList(dir);
-                const header = card.querySelector(".mx_MemberListHeaderView")!;
-
-                expect(getComputedStyle(header).borderBottomWidth).toBe("1px");
-                expect(insets(header, card)).toEqual({ start: CONTENT_EDGE, end: CONTENT_EDGE });
-            },
-        );
-
         it.each(["ltr", "rtl"])(
             "puts the avatar 12px from the tile's start, top and bottom and ends the tile's content on the content edge (%s)",
             (dir) => {

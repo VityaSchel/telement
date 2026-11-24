@@ -74,7 +74,7 @@ test.describe("Memberlist", () => {
         const memberlist = await app.toggleMemberlistPanel();
 
         // Get the scrollable container
-        const memberListContainer = memberlist.locator(".mx_AutoHideScrollbar");
+        const memberListContainer = memberlist.getByRole("listbox", { name: "Member list" });
 
         // Scroll down to the bottom of the member list
         await app.scrollListToBottom(memberListContainer);

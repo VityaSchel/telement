@@ -96,7 +96,7 @@ describe("ENGLISH_OVERRIDES", () => {
             `room_settings|security|title: starts "security & privacy" with a lower case letter`,
         ]);
 
-        const count = "member_list|count";
+        const count = "spotlight_dialog|count_of_members";
         const countUpstream = { one: "%(count)s Member", other: "%(count)s Members" };
         expect(
             findProblems(count, { upstream: countUpstream, telement: { one: "1 member", other: "%(count)s" } }),
@@ -107,11 +107,11 @@ describe("ENGLISH_OVERRIDES", () => {
                 telement: { one: "%(n)s member", other: "<b>%(count)s</b>" },
             }),
         ).toEqual([
-            `member_list|count: uses %(n)s, <b>, </b>, which upstream's ` +
+            `spotlight_dialog|count_of_members: uses %(n)s, <b>, </b>, which upstream's ` +
                 `{"one":"%(count)s Member","other":"%(count)s Members"} doesn't have`,
         ]);
         expect(findProblems(count, { upstream: countUpstream, telement: "%(count)s members" })).toEqual([
-            `member_list|count: has plural forms ["one","other"] upstream`,
+            `spotlight_dialog|count_of_members: has plural forms ["one","other"] upstream`,
         ]);
         expect(findProblems("common|rooms", { upstream: "Rooms", telement: "Rooms" })).toEqual([
             `common|rooms: upstream already says "Rooms", remove the override`,
@@ -144,8 +144,8 @@ describe("registerEnglishOverrides", () => {
 
     it("keeps placeholders, plural forms and tags", async () => {
         await setLanguage("en");
-        expect(_t("member_list|count", { count: 1 })).toBe("1 member");
-        expect(_t("member_list|count", { count: 2 })).toBe("2 members");
+        expect(_t("spotlight_dialog|count_of_members", { count: 1 })).toBe("1 member");
+        expect(_t("spotlight_dialog|count_of_members", { count: 2 })).toBe("2 members");
         expect(_t("setting|help_about|dialog_title", {}, { strong: (sub) => `[${sub}]` })).toBe(
             "[Settings:] Help & about",
         );
@@ -186,7 +186,7 @@ describe("registerEnglishOverrides", () => {
     it("leaves the translations of other languages alone", async () => {
         await setLanguage("de");
         expect(_t("room_settings|security|title")).toBe(webStringsDe.room_settings.security.title);
-        expect(_t("member_list|count", { count: 2 })).toBe("2 Mitglieder");
+        expect(_t("spotlight_dialog|count_of_members", { count: 2 })).toBe("2 Mitglieder");
     });
 
     it("shows Telement's text where a language falls back to English", async () => {

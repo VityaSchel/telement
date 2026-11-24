@@ -1605,10 +1605,6 @@
         "open": "Open Markdown"
     },
     "member_list": {
-        "count": {
-            "one": "%(count)s Member",
-            "other": "%(count)s Members"
-        },
         "filter_placeholder": "Search room members",
         "invite_button_no_perms_tooltip": "You do not have permission to invite users",
         "invited_label": "Invited",
@@ -3175,6 +3171,7 @@
             "open_matrix_client_other_device": "Open your Matrix client on your other device"
         },
         "right_panel": {
+            "people_count": "People (%(total)s)",
             "pin_to_top": "Pin to top",
             "pinned_messages": {
                 "empty_description": "Right-click a message and choose “%(pinAction)s” to add it here."

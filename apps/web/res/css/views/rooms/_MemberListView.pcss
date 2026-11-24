@@ -11,13 +11,15 @@ Please see LICENSE files in the repository root for full details.
     flex-direction: column;
     min-height: 0;
 
-    .mx_MemberListView_container {
-        height: 100%;
-    }
-
     .mx_MemberListView_separator {
         margin: 0;
         border: none;
         border-top: 2px solid var(--cpd-color-bg-subtle-primary);
+    }
+
+    .mx_MemberListView_noMatches {
+        padding: var(--cpd-space-4x) var(--cpd-space-3x);
+        text-align: center;
+        color: var(--cpd-color-text-secondary);
     }
 }

@@ -379,16 +379,6 @@
         "upstream": "Drop a Pin",
         "telement": "Drop a pin"
     },
-    "member_list|count": {
-        "upstream": {
-            "one": "%(count)s Member",
-            "other": "%(count)s Members"
-        },
-        "telement": {
-            "one": "%(count)s member",
-            "other": "%(count)s members"
-        }
-    },
     "onboarding|create_room": {
         "upstream": "Create a Group Chat",
         "telement": "Create a group chat"

@@ -101,6 +101,10 @@ export type MemberWithSeparator = Member | typeof SEPARATOR;
 export interface MemberListViewState {
     members: MemberWithSeparator[];
     memberCount: number;
+    /**
+     * Telement: how many people the room has, joined and invited, whatever the list is filtered by.
+     */
+    peopleCount: number;
     search: (searchQuery: string) => void;
     isPresenceEnabled: boolean;
     shouldShowInvite: boolean;
@@ -132,6 +136,9 @@ export function useMemberListViewModel(roomId: string): MemberListViewState {
      */
     const [memberCount, setMemberCount] = useState(0);
 
+    const [threePidInviteCount, setThreePidInviteCount] = useState(() => getPending3PidInvites(room).length);
+    const peopleCount = memberCountWithout3Pid + threePidInviteCount;
+
     const loadMembers = useMemo(
         () =>
             throttle(
@@ -141,6 +148,7 @@ export function useMemberListViewModel(roomId: string): MemberListViewState {
                         searchQuery,
                     );
                     const threePidInvited = getPending3PidInvites(room, searchQuery);
+                    setThreePidInviteCount(searchQuery ? getPending3PidInvites(room).length : threePidInvited.length);
 
                     const newMemberMap = new Map<string, MemberWithSeparator>();
 
@@ -267,12 +275,14 @@ export function useMemberListViewModel(roomId: string): MemberListViewState {
     return {
         members: Array.from(memberMap.values()),
         memberCount,
+        peopleCount,
         search: loadMembers,
         shouldShowInvite,
         isPresenceEnabled,
         isLoading,
         onInviteButtonClick,
-        shouldShowSearch: totalMemberCount >= 20,
+        // Telement: known before the members are loaded, so that the header doesn't change once they are
+        shouldShowSearch: (isLoading ? peopleCount : totalMemberCount) >= 20,
         canInvite,
     };
 }

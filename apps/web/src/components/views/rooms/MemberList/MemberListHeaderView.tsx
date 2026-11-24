@@ -5,14 +5,15 @@ SPDX-License-Identifier: AGPL-3.0-only OR GPL-3.0-only OR LicenseRef-Element-Com
 Please see LICENSE files in the repository root for full details.
 */
 
-import { Search, Text, Button, Tooltip, InlineSpinner } from "@vector-im/compound-web";
-import React from "react";
+import { Button, Tooltip } from "@vector-im/compound-web";
+import React, { type KeyboardEvent, useState } from "react";
 import InviteIcon from "@vector-im/compound-design-tokens/assets/web/icons/user-add";
 import { UserAddIcon } from "@vector-im/compound-design-tokens/assets/web/icons";
-import { Flex } from "@element-hq/web-shared-components";
+import { SearchFieldView } from "@element-hq/web-shared-components";
 
 import { type MemberListViewState } from "../../../viewmodels/memberlist/MemberListViewModel";
 import { _t } from "../../../../languageHandler";
+import { Key } from "../../../../Keyboard";
 
 interface TooltipProps {
     canInvite: boolean;
@@ -76,61 +77,44 @@ const InviteButton: React.FC<Props> = ({ vm }) => {
 };
 
 /**
- * This should be:
- * A loading text with spinner while the memberlist loads.
- * Member count of the room when there's nothing in the search field.
- * Number of matching members during search or 'No result' if search found nothing.
+ * Telement: the card's controls, the search field and the invite button, in a second header that stays over the list as
+ * it scrolls. How many people there are is in the card's title.
  */
-function getHeaderLabelJSX(vm: MemberListViewState): React.ReactNode {
-    if (vm.isLoading) {
-        return (
-            <Flex align="center" gap="8px">
-                <InlineSpinner /> {_t("common|loading")}
-            </Flex>
-        );
-    }
-    if (vm.memberCount === 0) {
-        return _t("member_list|no_matches");
-    }
-    return _t("member_list|count", { count: vm.memberCount });
-}
+export const MemberListHeaderView: React.FC<Props> = ({ vm }: Props) => {
+    const [query, setQuery] = useState("");
 
-export const MemberListHeaderView: React.FC<Props> = (props: Props) => {
-    const vm = props.vm;
-
-    let contentJSX: React.ReactNode;
-
-    if (vm.shouldShowSearch) {
-        // When we need to show the search box
-        contentJSX = (
-            <Flex justify="center" gap="var(--cpd-space-3x)" className="mx_MemberListHeaderView_container">
-                <Search
-                    className="mx_MemberListHeaderView_search mx_no_textinput"
-                    name="searchMembers"
-                    placeholder={_t("member_list|filter_placeholder")}
-                    onChange={(e) => vm.search((e as React.ChangeEvent<HTMLInputElement>).target.value)}
-                />
-                <InviteButton vm={vm} />
-            </Flex>
-        );
-    } else if (!vm.shouldShowSearch && vm.shouldShowInvite) {
-        // When we don't need to show the search box but still need an invite button
-        contentJSX = (
-            <Flex direction="column" align="center" className="mx_MemberListHeaderView_container">
-                <InviteButton vm={vm} />
-            </Flex>
-        );
-    } else {
+    if (!vm.shouldShowSearch && !vm.shouldShowInvite) {
         // No search box and no invite icon, so nothing to render!
-        contentJSX = null;
+        return null;
     }
+
+    const search = (newQuery: string): void => {
+        setQuery(newQuery);
+        vm.search(newQuery);
+    };
+
+    // Escape empties the field first, and then closes the panel
+    const onKeyDown = (event: KeyboardEvent): void => {
+        if (event.key !== Key.ESCAPE || !query || event.nativeEvent.isComposing) return;
+        event.preventDefault();
+        event.stopPropagation();
+        search("");
+    };
 
     return (
-        <Flex className="mx_MemberListHeaderView" as="header" align="center" justify="space-between" direction="column">
-            {!vm.isLoading && contentJSX}
-            <Text as="div" size="sm" weight="semibold" className="mx_MemberListHeaderView_label">
-                {getHeaderLabelJSX(vm)}
-            </Text>
-        </Flex>
+        <header className="mx_BaseCard_controls mx_MemberListHeaderView">
+            {vm.shouldShowSearch && (
+                <SearchFieldView
+                    className="mx_MemberListHeaderView_search"
+                    name="searchMembers"
+                    role="searchbox"
+                    placeholder={_t("member_list|filter_placeholder")}
+                    value={query}
+                    onChange={search}
+                    onKeyDown={onKeyDown}
+                />
+            )}
+            <InviteButton vm={vm} />
+        </header>
     );
 };

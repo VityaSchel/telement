@@ -11,7 +11,7 @@ Please see LICENSE files in the repository root for full details.
 
 import { act } from "react";
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { waitFor, fireEvent } from "test-utils-rtl";
+import { waitFor } from "test-utils-rtl";
 import { filterConsole, mkThirdPartyInviteEvent } from "test-utils";
 import { type Room, type RoomMember, type RoomState, MatrixEvent, RoomStateEvent } from "matrix-js-sdk/src/matrix";
 
@@ -148,16 +148,6 @@ describe("MemberListView and MemberlistHeaderView", () => {
             await waitFor(() => {
                 expect(root.container.querySelector(".mx_PresenceIconView_unavailable")).not.toBeNull();
             });
-        });
-
-        it("should prevent default form submission", async () => {
-            const { root } = rendered;
-            const form = root.container.querySelector("form");
-            expect(form).not.toBeNull();
-            const submitEvent = new Event("submit", { bubbles: true, cancelable: true });
-            const preventDefaultSpy = vi.spyOn(submitEvent, "preventDefault");
-            fireEvent(form!, submitEvent);
-            expect(preventDefaultSpy).toHaveBeenCalled();
         });
 
         it("does not reload members after unmount", async () => {

@@ -5,32 +5,14 @@ SPDX-License-Identifier: AGPL-3.0-only OR GPL-3.0-only OR LicenseRef-Element-Com
 Please see LICENSE files in the repository root for full details.
 */
 
+/* The card's second header (_BaseCard.pcss). Without a search field the invite button spans it. */
 .mx_MemberListHeaderView {
-    /* On the card's content edge, the card header's 12px inset: the line under the count stops there, as room info's
-       and member info's dividers do */
-    margin-inline: var(--cpd-space-3x);
-    border-bottom: var(--cpd-border-width-1) solid var(--cpd-color-gray-400);
-
-    .mx_MemberListHeaderView_container {
-        margin-top: var(--cpd-space-6x);
-        align-self: stretch;
-    }
-
     .mx_MemberListHeaderView_inviteButton {
-        width: 100%;
-        max-width: 428px;
-    }
-
-    .mx_MemberListHeaderView_label {
-        padding: var(--cpd-space-6x) 0 var(--cpd-space-2x);
-        box-sizing: border-box;
-        width: 100%;
-        color: var(--cpd-color-text-secondary);
-        font: var(--cpd-font-body-sm-semibold);
+        flex: 1;
     }
 
     .mx_MemberListHeaderView_search {
-        width: 240px;
-        flex-grow: 1;
+        flex: 1;
+        min-width: 0;
     }
 }
