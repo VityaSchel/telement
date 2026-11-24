@@ -35,7 +35,6 @@ describe("useRoomSummaryCardViewModel", () => {
     let matrixClient: MatrixClient;
     let room: Room;
     let permalinkCreator: any;
-    const onSearchCancel = vi.fn();
 
     beforeEach(() => {
         matrixClient = stubClient();
@@ -55,7 +54,7 @@ describe("useRoomSummaryCardViewModel", () => {
 
     function render() {
         return renderHook(
-            () => useRoomSummaryCardViewModel(room, permalinkCreator, onSearchCancel),
+            () => useRoomSummaryCardViewModel(room, permalinkCreator),
             withClientContextRenderOptions(matrixClient),
         );
     }
@@ -68,7 +67,6 @@ describe("useRoomSummaryCardViewModel", () => {
         expect(result.current.isVideoRoom).toBe(false);
         expect(result.current.isFavorite).toBe(false);
         expect(result.current.pinCount).toBe(0);
-        expect(result.current.searchInputRef.current).toBe(null);
     });
 
     it("should handle room members click", () => {
@@ -242,30 +240,6 @@ describe("useRoomSummaryCardViewModel", () => {
             await waitFor(() => {
                 expect(result.current.isDirectMessage).toBe(false);
             });
-        });
-    });
-
-    describe("search input", () => {
-        it("should handle search input escape key", () => {
-            const directRoomsList = {};
-            vi.spyOn(hooks, "useAccountData").mockReturnValue(directRoomsList);
-            const { result } = render();
-            // Create a mock input element and set it as the current ref value
-            const mockInputElement = document.createElement("input");
-            mockInputElement.value = "some search text";
-
-            result.current.searchInputRef.current = mockInputElement;
-
-            const event = {
-                key: "Escape",
-                preventDefault: vi.fn(),
-                stopPropagation: vi.fn(),
-            };
-
-            result.current.onUpdateSearchInput(event as any);
-
-            expect(onSearchCancel).toHaveBeenCalled();
-            expect(mockInputElement?.value).toBe("");
         });
     });
 });

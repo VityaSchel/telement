@@ -28,6 +28,7 @@ import {
 } from "matrix-js-sdk/src/matrix";
 import { type CryptoApi, CryptoEvent, UserVerificationStatus } from "matrix-js-sdk/src/crypto-api";
 import { KnownMembership } from "matrix-js-sdk/src/types";
+import { sleep } from "matrix-js-sdk/src/utils";
 import { act, cleanup, fireEvent, render, type RenderResult, screen, waitFor, findByRole } from "test-utils-rtl";
 import userEvent from "@testing-library/user-event";
 import {
@@ -1463,6 +1464,8 @@ describe("RoomView", () => {
                 expect(search).toHaveBeenCalledTimes(1);
                 expect(roomViewRef.current!.state.search).toBeUndefined();
                 expect(roomViewRef.current!.state.timelineRenderingType).toBe(TimelineRenderingType.Room);
+                // Under the search bar, which stays open for another search
+                expect(screen.getByRole("searchbox", { name: "Search messages…" })).toBeInTheDocument();
             },
         );
 
@@ -1481,6 +1484,94 @@ describe("RoomView", () => {
             );
 
             await expect(findByPlaceholderText("Search messages…")).resolves.toHaveValue("search term");
+        });
+
+        describe("search bar (Telement)", () => {
+            const field = (): HTMLElement | null => screen.queryByRole("searchbox", { name: "Search messages…" });
+            const button = (): HTMLElement => screen.getByRole("button", { name: "Search messages" });
+
+            const mountJoinedRoom = (): Promise<RoomView> => {
+                room.getMyMembership = vi.fn().mockReturnValue(KnownMembership.Join);
+                return getRoomViewInstance();
+            };
+
+            it("opens over the timeline and closes with the room header's button", async () => {
+                await mountJoinedRoom();
+                expect(field()).not.toBeInTheDocument();
+                expect(button()).toHaveAttribute("aria-expanded", "false");
+
+                await userEvent.click(button());
+                expect(field()).toBeInTheDocument();
+                expect(button()).toHaveAttribute("aria-expanded", "true");
+                expect(document.querySelector(".mx_RoomView_searchResultsPanel")).toBeNull();
+                expect(document.querySelector(".mx_MessageComposer")).toBeInTheDocument();
+
+                await userEvent.click(button());
+                expect(field()).not.toBeInTheDocument();
+                expect(button()).toHaveAttribute("aria-expanded", "false");
+            });
+
+            it("opens on Ctrl+F, rather than room info", async () => {
+                const setCard = vi.spyOn(stores.rightPanelStore, "setCard");
+                await mountJoinedRoom();
+                act(() => defaultDispatcher.dispatch({ action: Action.FocusMessageSearch }, true));
+
+                expect(field()).toBeInTheDocument();
+                expect(setCard).not.toHaveBeenCalled();
+            });
+
+            it("doesn't open in a room that can't be read", async () => {
+                room.getMyMembership = vi.fn().mockReturnValue(KnownMembership.Leave);
+                const instance = await getRoomViewInstance();
+                act(() => defaultDispatcher.dispatch({ action: Action.FocusMessageSearch }, true));
+
+                expect(instance.state.searchOpen).toBeFalsy();
+            });
+
+            it("closes on Escape in its field, and searches for nothing typed just before", async () => {
+                const search = vi.spyOn(cli, "search").mockResolvedValue({ search_categories: {} as any });
+                await mountJoinedRoom();
+                await userEvent.click(button());
+                fireEvent.change(field()!, { target: { value: "pizza" } });
+                fireEvent.keyDown(field()!, { key: "Escape" });
+
+                await waitFor(() => expect(field()).not.toBeInTheDocument());
+                await sleep(400);
+                expect(search).not.toHaveBeenCalled();
+                expect(field()).not.toBeInTheDocument();
+            });
+
+            it("closes on Escape in the room, before the room marks its messages as read", async () => {
+                const instance = await mountJoinedRoom();
+                const jumpToLiveTimeline = vi.spyOn(instance as any, "jumpToLiveTimeline");
+                await userEvent.click(button());
+                fireEvent.keyDown(document.querySelector(".mx_RoomView")!, { key: "Escape" });
+
+                await waitFor(() => expect(field()).not.toBeInTheDocument());
+                expect(jumpToLiveTimeline).not.toHaveBeenCalled();
+            });
+
+            it("closes with the search when a result of another room is opened", async () => {
+                const instance = await mountJoinedRoom();
+                act(() =>
+                    instance.setState({
+                        searchOpen: true,
+                        timelineRenderingType: TimelineRenderingType.Search,
+                        search: { searchId: 1, term: "pizza", scope: SearchScope.All, promise: new Promise(() => {}) },
+                    }),
+                );
+                await act(async () => {
+                    defaultDispatcher.dispatch<ViewRoomPayload>({
+                        action: Action.ViewRoom,
+                        room_id: room.roomId,
+                        event_id: "$elsewhere",
+                    });
+                    await flushPromises();
+                });
+
+                expect(instance.state.search).toBeUndefined();
+                expect(field()).not.toBeInTheDocument();
+            });
         });
     });
 

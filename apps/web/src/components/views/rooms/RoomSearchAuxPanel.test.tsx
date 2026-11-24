@@ -9,18 +9,32 @@ Please see LICENSE files in the repository root for full details.
 // @vitest-environment happy-dom
 
 import React from "react";
-import { describe, it, expect, vi } from "vitest";
-import { render, screen } from "test-utils-rtl";
-
+import { beforeEach, describe, it, expect, vi } from "vitest";
+import { act, render, screen } from "test-utils-rtl";
+import userEvent from "@testing-library/user-event";
 import { type ISearchResults, MatrixEvent, type SearchResult } from "matrix-js-sdk/src/matrix";
 
 import RoomSearchAuxPanel from "./RoomSearchAuxPanel";
 import { type SearchInfo, SearchScope } from "../../../Searching";
+import defaultDispatcher from "../../../dispatcher/dispatcher";
+import { Action } from "../../../dispatcher/actions";
 
 describe("RoomSearchAuxPanel", () => {
+    const props = {
+        isRoomEncrypted: false,
+        onSearchChange: vi.fn(),
+        onSearchScopeChange: vi.fn(),
+        onCancelClick: vi.fn(),
+    };
+
+    beforeEach(() => {
+        vi.resetAllMocks();
+    });
+
     it("should render the count of results", () => {
         render(
             <RoomSearchAuxPanel
+                {...props}
                 searchInfo={{
                     searchId: 1234,
                     count: 5,
@@ -28,9 +42,6 @@ describe("RoomSearchAuxPanel", () => {
                     scope: SearchScope.Room,
                     promise: new Promise(() => {}),
                 }}
-                isRoomEncrypted={false}
-                onSearchScopeChange={vi.fn()}
-                onCancelClick={vi.fn()}
             />,
         );
 
@@ -40,61 +51,134 @@ describe("RoomSearchAuxPanel", () => {
     });
 
     it("should allow the user to toggle to all rooms search", async () => {
-        const onSearchScopeChange = vi.fn();
-
         render(
             <RoomSearchAuxPanel
-                isRoomEncrypted={false}
-                onSearchScopeChange={onSearchScopeChange}
-                onCancelClick={vi.fn()}
+                {...props}
+                searchInfo={{
+                    searchId: 1234,
+                    term: "abcd",
+                    scope: SearchScope.Room,
+                    promise: new Promise(() => {}),
+                }}
             />,
         );
 
         screen.getByText("Search all rooms").click();
-        expect(onSearchScopeChange).toHaveBeenCalledWith(SearchScope.All);
+        expect(props.onSearchScopeChange).toHaveBeenCalledWith(SearchScope.All);
     });
 
     it("should allow the user to toggle back to room-specific search", async () => {
-        const onSearchScopeChange = vi.fn();
-
         render(
             <RoomSearchAuxPanel
+                {...props}
                 searchInfo={{
                     searchId: 1234,
                     term: "abcd",
                     scope: SearchScope.All,
                     promise: new Promise(() => {}),
                 }}
-                isRoomEncrypted={false}
-                onSearchScopeChange={onSearchScopeChange}
-                onCancelClick={vi.fn()}
             />,
         );
 
         screen.getByText("Search this room").click();
-        expect(onSearchScopeChange).toHaveBeenCalledWith(SearchScope.Room);
+        expect(props.onSearchScopeChange).toHaveBeenCalledWith(SearchScope.Room);
     });
 
     it("should allow the user to cancel a search", async () => {
-        const onCancelClick = vi.fn();
-
-        render(
-            <RoomSearchAuxPanel isRoomEncrypted={false} onSearchScopeChange={vi.fn()} onCancelClick={onCancelClick} />,
-        );
+        render(<RoomSearchAuxPanel {...props} />);
 
         screen.getByRole("button", { name: "Cancel" }).click();
-        expect(onCancelClick).toHaveBeenCalled();
+        expect(props.onCancelClick).toHaveBeenCalled();
     });
 
-    it("shows the scope switch as a text button and closes with a plain 36px icon button, not a red one", () => {
-        render(<RoomSearchAuxPanel isRoomEncrypted={false} onSearchScopeChange={vi.fn()} onCancelClick={vi.fn()} />);
+    describe("search field (Telement)", () => {
+        const field = (): HTMLElement => screen.getByRole("searchbox", { name: "Search messages…" });
+        const searchFor = (term: string): SearchInfo => ({
+            searchId: 1,
+            term,
+            scope: SearchScope.Room,
+            promise: new Promise(() => {}),
+        });
+
+        it("takes the focus as the bar opens, which shows nothing else of a search until there is one", () => {
+            render(<RoomSearchAuxPanel {...props} />);
+
+            expect(field()).toHaveFocus();
+            expect(field()).toHaveValue("");
+            expect(screen.queryByText("Search all rooms")).not.toBeInTheDocument();
+            expect(screen.queryByText("results found", { exact: false })).not.toBeInTheDocument();
+        });
+
+        it("searches for what is typed", async () => {
+            render(<RoomSearchAuxPanel {...props} />);
+            await userEvent.type(field(), "pizza");
+
+            expect(field()).toHaveValue("pizza");
+            expect(props.onSearchChange).toHaveBeenLastCalledWith("pizza");
+        });
+
+        it("keeps what is typed while the search before it starts", async () => {
+            const { rerender } = render(<RoomSearchAuxPanel {...props} />);
+            await userEvent.type(field(), "pizza");
+            rerender(<RoomSearchAuxPanel {...props} searchInfo={searchFor("pizza")} />);
+            await userEvent.type(field(), "s");
+            rerender(<RoomSearchAuxPanel {...props} searchInfo={{ ...searchFor("pizza"), count: 3 }} />);
+
+            expect(field()).toHaveValue("pizzas");
+        });
+
+        it("shows a search started elsewhere", () => {
+            const { rerender } = render(<RoomSearchAuxPanel {...props} />);
+            rerender(<RoomSearchAuxPanel {...props} searchInfo={searchFor("lunch")} />);
+
+            expect(field()).toHaveValue("lunch");
+        });
+
+        it("empties with its clear button, the bar staying open", async () => {
+            render(<RoomSearchAuxPanel {...props} searchInfo={searchFor("lunch")} />);
+            await userEvent.click(screen.getByRole("button", { name: "Clear search" }));
+
+            expect(field()).toHaveValue("");
+            expect(props.onSearchChange).toHaveBeenLastCalledWith("");
+            expect(props.onCancelClick).not.toHaveBeenCalled();
+        });
+
+        it("takes the focus again, its text selected, when the search is asked for", () => {
+            render(<RoomSearchAuxPanel {...props} searchInfo={searchFor("lunch")} />);
+            const input = field() as HTMLInputElement;
+            act(() => input.blur());
+            act(() => defaultDispatcher.dispatch({ action: Action.FocusMessageSearch }, true));
+
+            expect(input).toHaveFocus();
+            expect([input.selectionStart, input.selectionEnd]).toEqual([0, 5]);
+        });
+
+        it("closes the bar on Escape, which goes no further", async () => {
+            const onKeyDown = vi.fn();
+            render(
+                <div onKeyDown={onKeyDown}>
+                    <RoomSearchAuxPanel {...props} searchInfo={searchFor("lunch")} />
+                </div>,
+            );
+            await userEvent.type(field(), "{Escape}");
+
+            expect(props.onCancelClick).toHaveBeenCalledTimes(1);
+            expect(onKeyDown).not.toHaveBeenCalled();
+        });
+    });
+
+    it("shows the scope switch and Cancel as text buttons, so that no cross beside the field reads as clearing it", () => {
+        render(
+            <RoomSearchAuxPanel
+                {...props}
+                searchInfo={{ searchId: 1, term: "abcd", scope: SearchScope.Room, promise: new Promise(() => {}) }}
+            />,
+        );
 
         expect(screen.getByText("Search all rooms")).toHaveClass("mx_RoomSearchAuxPanel_scopeButton");
         const cancel = screen.getByRole("button", { name: "Cancel" });
-        // Compound's destructive icon button would draw the cross in red, kept for actions that destroy something
-        expect(cancel.className).not.toMatch(/destructive/);
-        expect(cancel.style.getPropertyValue("--cpd-icon-button-size")).toBe("var(--tl-control-size)");
-        expect(cancel.style.padding).toBe("var(--cpd-space-1-5x)");
+        expect(cancel).toHaveTextContent("Cancel");
+        expect(cancel.querySelector("svg")).toBeNull();
     });
 
     describe("stepping through the results (Telement)", () => {
@@ -119,9 +203,7 @@ describe("RoomSearchAuxPanel", () => {
                         promise: new Promise(() => {}),
                         ...searchInfo,
                     }}
-                    isRoomEncrypted={false}
-                    onSearchScopeChange={vi.fn()}
-                    onCancelClick={vi.fn()}
+                    {...props}
                     onStepResult={onStepResult}
                     onShowResults={onShowResults}
                 />,

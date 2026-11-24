@@ -232,6 +232,8 @@ export interface IRoomState {
      * The state of an ongoing search if there is one.
      */
     search?: SearchInfo;
+    /** Telement: whether the search bar is open over the timeline, also while its field is empty. */
+    searchOpen?: boolean;
     callState?: CallState;
     canPeek: boolean;
     canSelfRedact: boolean;
@@ -787,6 +789,7 @@ export class RoomView extends React.Component<IRoomProps, IRoomState> {
             if (hit === undefined) {
                 this.state.search?.abortController?.abort();
                 newState.search = undefined;
+                newState.searchOpen = false;
             } else {
                 newState.search = { ...this.state.search!, hit };
             }
@@ -1162,6 +1165,12 @@ export class RoomView extends React.Component<IRoomProps, IRoomState> {
         const action = getKeyBindingsManager().getRoomAction(ev);
         switch (action) {
             case KeyBindingAction.DismissReadMarker:
+                // Telement: Escape closes the search bar first
+                if (this.isSearchOpen) {
+                    void this.leaveSearch();
+                    handled = true;
+                    break;
+                }
                 this.timelineReturns.clear();
                 void this.messagePanel?.forgetReadMarker();
                 this.jumpToLiveTimeline();
@@ -1245,7 +1254,7 @@ export class RoomView extends React.Component<IRoomProps, IRoomState> {
                     payload.event?.getRoomId() === this.state.roomId &&
                     payload.context === TimelineRenderingType.Search
                 ) {
-                    void this.onCancelSearchClick();
+                    void this.closeSearch();
                     // we don't need to re-dispatch as RoomViewStore knows to persist with context=Search also
                 }
                 break;
@@ -1296,6 +1305,7 @@ export class RoomView extends React.Component<IRoomProps, IRoomState> {
                         // events in the search result), we need to close that search, because RoomSearchView
                         // doesn't handle editing and won't render the composer.
                         search: undefined,
+                        searchOpen: false,
                     },
                     () => {
                         if (payload.event) {
@@ -1318,7 +1328,7 @@ export class RoomView extends React.Component<IRoomProps, IRoomState> {
                     composerInsertPayload.timelineRenderingType === TimelineRenderingType.Search
                 ) {
                     // we don't have the composer rendered in this state, so bring it back first
-                    await this.onCancelSearchClick();
+                    await this.closeSearch();
                     timelineRenderingType = TimelineRenderingType.Room;
                 }
 
@@ -1379,6 +1389,9 @@ export class RoomView extends React.Component<IRoomProps, IRoomState> {
             case Action.FocusMessageSearch:
                 if ((payload as FocusMessageSearchPayload).initialText) {
                     this.onSearch(payload.initialText);
+                } else if (this.state.room?.getMyMembership() === KnownMembership.Join || this.state.canPeek) {
+                    // Telement: the search bar, whose field takes the focus, rather than the field in room info
+                    this.setState({ searchOpen: true });
                 }
                 break;
         }
@@ -1816,6 +1829,7 @@ export class RoomView extends React.Component<IRoomProps, IRoomState> {
 
         this.setState({
             timelineRenderingType: TimelineRenderingType.Search,
+            searchOpen: true,
             search: {
                 // make sure that we don't end up showing results from
                 // an aborted search by keeping a unique id.
@@ -2024,6 +2038,29 @@ export class RoomView extends React.Component<IRoomProps, IRoomState> {
             );
         });
     };
+
+    // Telement: closes the search bar with the search. What was typed last would open it again.
+    private closeSearch = (): Promise<void> => {
+        this.onSearchChange.cancel();
+        this.setState({ searchOpen: false });
+        return this.onCancelSearchClick();
+    };
+
+    // Telement: closes the search bar, which held the focus, and goes back to writing
+    private leaveSearch = async (): Promise<void> => {
+        await this.closeSearch();
+        defaultDispatcher.fire(Action.FocusSendMessageComposer);
+    };
+
+    // Telement: the room header's search button, which opens and closes the search bar
+    private onToggleSearch = (): void => {
+        if (this.isSearchOpen) void this.closeSearch();
+        else this.setState({ searchOpen: true });
+    };
+
+    private get isSearchOpen(): boolean {
+        return !!this.state.searchOpen || !!this.state.search;
+    }
 
     // jump down to the bottom of this room, where new events are arriving
     private jumpToLiveTimeline = (): void => {
@@ -2510,12 +2547,17 @@ export class RoomView extends React.Component<IRoomProps, IRoomState> {
 
         let aux: JSX.Element | undefined;
         let previewBar;
-        if (this.state.timelineRenderingType === TimelineRenderingType.Search || this.state.search?.hit !== undefined) {
+        if (
+            this.state.timelineRenderingType === TimelineRenderingType.Search ||
+            this.state.search?.hit !== undefined ||
+            this.state.searchOpen
+        ) {
             if (!isRoomEncryptionLoading) {
                 aux = (
                     <RoomSearchAuxPanel
                         searchInfo={this.state.search}
-                        onCancelClick={this.onCancelSearchClick}
+                        onSearchChange={this.onSearchChange}
+                        onCancelClick={this.leaveSearch}
                         onSearchScopeChange={this.onSearchScopeChange}
                         onStepResult={this.onStepSearchResult}
                         onShowResults={this.onShowSearchResults}
@@ -2733,9 +2775,6 @@ export class RoomView extends React.Component<IRoomProps, IRoomState> {
                 room={this.state.room}
                 resizeNotifier={this.context.resizeNotifier}
                 permalinkCreator={this.permalinkCreator}
-                onSearchChange={this.onSearchChange}
-                onSearchCancel={this.onCancelSearchClick}
-                searchTerm={this.state.search?.term ?? ""}
             />
         ) : undefined;
 
@@ -2744,7 +2783,7 @@ export class RoomView extends React.Component<IRoomProps, IRoomState> {
         });
 
         let { mainSplitContentType } = this.state;
-        if (this.state.search) {
+        if (this.isSearchOpen) {
             // When in the middle of a search force the main split content type to timeline
             mainSplitContentType = MainSplitContentType.Timeline;
         }
@@ -2846,7 +2885,12 @@ export class RoomView extends React.Component<IRoomProps, IRoomState> {
                                 data-layout={this.state.layout}
                             >
                                 {!this.props.hideHeader && (
-                                    <RoomHeader room={this.state.room} extraButtons={<>{extraButtons}</>} />
+                                    <RoomHeader
+                                        room={this.state.room}
+                                        extraButtons={<>{extraButtons}</>}
+                                        isSearchOpen={this.isSearchOpen}
+                                        onSearchClick={this.onToggleSearch}
+                                    />
                                 )}
                                 {mainSplitBody}
                             </div>

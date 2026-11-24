@@ -7,13 +7,14 @@ SPDX-License-Identifier: AGPL-3.0-only OR GPL-3.0-only OR LicenseRef-Element-Com
 Please see LICENSE files in the repository root for full details.
 */
 
-import React, { type JSX, useCallback, useContext, useState } from "react";
+import React, { type ComponentProps, type JSX, useCallback, useContext, useState } from "react";
 import { Text, Button, IconButton, Menu, MenuItem, Tooltip } from "@vector-im/compound-web";
 import VideoCallIcon from "@vector-im/compound-design-tokens/assets/web/icons/video-call";
 import VoiceCallIcon from "@vector-im/compound-design-tokens/assets/web/icons/voice-call";
 import CloseCallIcon from "@vector-im/compound-design-tokens/assets/web/icons/close";
 import ThreadsIcon from "@vector-im/compound-design-tokens/assets/web/icons/threads";
 import RoomInfoIcon from "@vector-im/compound-design-tokens/assets/web/icons/info";
+import SearchIcon from "@vector-im/compound-design-tokens/assets/web/icons/search";
 import NotificationsIcon from "@vector-im/compound-design-tokens/assets/web/icons/notifications";
 import VerifiedIcon from "@vector-im/compound-design-tokens/assets/web/icons/verified";
 import ErrorIcon from "@vector-im/compound-design-tokens/assets/web/icons/error-solid";
@@ -57,7 +58,14 @@ import { useUserStatus } from "../../../../hooks/useUserStatus.ts";
 import { SDKContext } from "../../../../contexts/SDKContext.ts";
 import { RoomEncryptionStatusIcon } from "../../../../telement/room/RoomEncryptionStatusIcon";
 
-function RoomHeaderButtons({ room, extraButtons }: { room: Room; extraButtons?: JSX.Element }): JSX.Element {
+function RoomHeaderButtons({
+    room,
+    extraButtons,
+    isSearchOpen,
+    onSearchClick,
+}: Pick<ComponentProps<typeof RoomHeader>, "extraButtons" | "isSearchOpen" | "onSearchClick"> & {
+    room: Room;
+}): JSX.Element {
     const sdkContext = useContext(SDKContext);
     const members = useRoomMembers(room, 2500);
     const memberCount = useRoomMemberCount(room, { throttleWait: 2500, includeInvited: true });
@@ -296,6 +304,16 @@ function RoomHeaderButtons({ room, extraButtons }: { room: Room; extraButtons?: 
 
             {showChatButton && <VideoRoomChatButton room={room} />}
 
+            {onSearchClick && (
+                <IconButton
+                    tooltip={_t("telement|search|search_messages")}
+                    onClick={onSearchClick}
+                    aria-expanded={!!isSearchOpen}
+                >
+                    <SearchIcon className={isSearchOpen ? "mx_RoomHeader_toggled" : undefined} />
+                </IconButton>
+            )}
+
             <Tooltip label={_t("common|threads")}>
                 <IconButton
                     indicator={notificationLevelToIndicator(threadNotifications)}
@@ -397,11 +415,17 @@ export default function RoomHeader({
     room,
     extraButtons,
     oobData,
+    isSearchOpen,
+    onSearchClick,
 }: {
     room: Room | LocalRoom;
     // Extra buttons added by a new element web module API module
     extraButtons?: JSX.Element;
     oobData?: IOOBData;
+    /** Telement: whether the search bar is open over the room's timeline. */
+    isSearchOpen?: boolean;
+    /** Telement: opens and closes the search bar. Without it the header has no search button. */
+    onSearchClick?: () => void;
 }): JSX.Element {
     const sdkContext = useContext(SDKContext);
     const roomName = useRoomName(room);
@@ -507,7 +531,14 @@ export default function RoomHeader({
                     </Box>
                 </button>
                 {/* If the room is local-only then we don't want to show any additional buttons, as it won't work */}
-                {room instanceof LocalRoom === false && <RoomHeaderButtons room={room} extraButtons={extraButtons} />}
+                {room instanceof LocalRoom === false && (
+                    <RoomHeaderButtons
+                        room={room}
+                        extraButtons={extraButtons}
+                        isSearchOpen={isSearchOpen}
+                        onSearchClick={onSearchClick}
+                    />
+                )}
             </Flex>
             {askToJoinEnabled && <RoomKnocksBar room={room} />}
         </CurrentRightPanelPhaseContextProvider>

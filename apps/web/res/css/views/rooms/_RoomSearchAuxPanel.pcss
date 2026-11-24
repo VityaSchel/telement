@@ -6,74 +6,72 @@ SPDX-License-Identifier: AGPL-3.0-only OR GPL-3.0-only OR LicenseRef-Element-Com
 Please see LICENSE files in the repository root for full details.
 */
 
+/* Telement: the search bar the room header's search button opens over the timeline: the search field with the arrows that
+   step through the results and Cancel, and what the search found under them */
 .mx_RoomSearchAuxPanel {
-    /* use `min-height` rather than height, to allow room for the text to wrap if the window is narrow */
-    min-height: 84px;
-    display: flex;
-    align-items: center;
-    border-color: var(--cpd-color-bg-canvas-default);
-    border-style: solid;
-    border-width: 1px 0;
     padding: var(--cpd-space-3x);
     box-sizing: border-box;
-    gap: var(--cpd-space-2x);
+    border-block-end: var(--cpd-border-width-1) solid $separator;
 
-    .mx_RoomSearchAuxPanel_summary {
-        flex-grow: 1;
-        display: inherit; /* flex */
-        gap: var(--cpd-space-2x);
+    .mx_RoomSearchAuxPanel_bar,
+    .mx_RoomSearchAuxPanel_steps {
+        display: flex;
         align-items: center;
-        overflow: hidden;
-
-        > svg {
-            padding: var(--cpd-space-2x);
-            border-radius: var(--cpd-space-2x);
-            background-color: var(--cpd-color-bg-subtle-secondary);
-            color: var(--cpd-color-icon-secondary);
-            flex-shrink: 0;
-        }
-
-        .mx_RoomSearchAuxPanel_summary_text {
-            display: flex;
-            flex-direction: column;
-            font-size: $font-15px;
-            line-height: $font-22px;
-            overflow: hidden;
-
-            span {
-                overflow: hidden;
-                text-overflow: ellipsis;
-                white-space: nowrap;
-            }
-        }
-
-        .mx_SearchWarning {
-            display: contents;
-            font-size: $font-13px;
-            line-height: $font-20px;
-            color: var(--cpd-color-text-secondary);
-        }
+        gap: var(--cpd-space-3x);
     }
 
-    .mx_RoomSearchAuxPanel_buttons {
-        display: inherit; /* flex */
-        gap: var(--cpd-space-6x);
-        align-items: center;
+    .mx_RoomSearchAuxPanel_steps {
         flex-shrink: 0;
+    }
+
+    .mx_RoomSearchAuxPanel_field {
+        flex: 1;
+        min-width: 0;
+    }
+
+    /* The label ends on the bar's 12px edge, as its box is drawn only while it is hovered */
+    .mx_RoomSearchAuxPanel_cancel {
+        flex-shrink: 0;
+        padding-inline: var(--cpd-space-2x);
+        margin-inline: calc(-1 * var(--cpd-space-2x));
+        font: var(--cpd-font-body-md-regular);
+        color: var(--cpd-color-text-action-accent);
+    }
+
+    .mx_RoomSearchAuxPanel_details {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: var(--cpd-space-3x);
+        margin-block-start: var(--cpd-space-2x);
+        font: var(--cpd-font-body-sm-regular);
+        color: var(--cpd-color-text-secondary);
+    }
+
+    .mx_RoomSearchAuxPanel_summary_text {
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+        overflow-wrap: anywhere;
+    }
+
+    .mx_SearchWarning {
+        display: contents;
+        font: inherit;
+        color: inherit;
     }
 
     /* "Search all rooms" stands on its own, so it is a text button in the accent, without a link's underline */
     .mx_RoomSearchAuxPanel_scopeButton {
+        flex-shrink: 0;
+        /* Compound pads a link by 0.25rem for its pressed pill; this ends the text on the bar's edge, under Cancel */
+        margin-inline-end: -0.25rem;
+        font: inherit;
         color: var(--cpd-color-text-action-accent);
         text-decoration: none;
     }
 
-    /* Telement: the place of the result the timeline shows and the arrows that step through the results, spaced as the
-       bar's other buttons */
-    .mx_RoomSearchAuxPanel_steps {
-        display: contents;
-    }
-
+    /* Telement: the place of the result the timeline shows, before the arrows that step through the results */
     .mx_RoomSearchAuxPanel_position {
         font: var(--cpd-font-body-md-regular);
         font-variant-numeric: tabular-nums;

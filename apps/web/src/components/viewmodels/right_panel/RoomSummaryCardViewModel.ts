@@ -4,7 +4,7 @@ SPDX-License-Identifier: AGPL-3.0-only OR GPL-3.0-only
 Please see LICENSE files in the repository root for full details.
 */
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import {
     EventType,
     type HistoryVisibility,
@@ -22,9 +22,7 @@ import { type E2EStatus } from "../../../utils/ShieldUtils";
 import { isVideoRoom as calcIsVideoRoom } from "../../../utils/video-rooms";
 import { useRoomState } from "../../../hooks/useRoomState";
 import { useAccountData } from "../../../hooks/useAccountData";
-import { useDispatcher } from "../../../hooks/useDispatcher";
 import defaultDispatcher from "../../../dispatcher/dispatcher";
-import { Action } from "../../../dispatcher/actions";
 import { canInviteTo } from "../../../utils/room/canInviteTo";
 import { DefaultTagID } from "../../../stores/room-list-v3/skip-list/tag";
 import { useEventEmitterState } from "../../../hooks/useEventEmitter";
@@ -36,7 +34,6 @@ import ExportDialog from "../../views/dialogs/ExportDialog";
 import { ShareDialog } from "../../views/dialogs/ShareDialog";
 import { type RoomPermalinkCreator } from "../../../utils/permalinks/Permalinks";
 import { ReportRoomDialog } from "../../views/dialogs/ReportRoomDialog";
-import { Key } from "../../../Keyboard";
 import { usePinnedEvents } from "../../../hooks/usePinnedEvents";
 import { tagRoom } from "../../../utils/room/tagRoom";
 import { inviteToRoom } from "../../../utils/room/inviteToRoom";
@@ -87,11 +84,6 @@ export interface RoomSummaryCardState {
      * Getting the number of pinned messages in the room, next to the pin button
      */
     pinCount: number;
-    searchInputRef: React.RefObject<HTMLInputElement | null>;
-    /**
-     * The callback when new value is entered in the search input
-     */
-    onUpdateSearchInput: (e: React.KeyboardEvent<HTMLInputElement>) => void;
     /**
      * Callbacks to all the actions button in the right panel
      */
@@ -131,44 +123,7 @@ const useIsDirectMessage = (room: Room): boolean => {
     return isDirectMessage;
 };
 
-/**
- * Hook to handle the search input in the right panel
- * @param onSearchCancel - The callback when the search input is cancelled
- * @returns The search input ref and the callback when the search input is updated
- */
-const useSearchInput = (
-    onSearchCancel?: () => void,
-): {
-    searchInputRef: React.RefObject<HTMLInputElement | null>;
-    onUpdateSearchInput: (e: React.KeyboardEvent<HTMLInputElement>) => void;
-} => {
-    const searchInputRef = useRef<HTMLInputElement>(null);
-
-    const onUpdateSearchInput = (e: React.KeyboardEvent<HTMLInputElement>): void => {
-        if (searchInputRef.current && e.key === Key.ESCAPE) {
-            searchInputRef.current.value = "";
-            onSearchCancel?.();
-        }
-    };
-
-    // Focus the search field when the user clicks on the search button component
-    useDispatcher(defaultDispatcher, (payload) => {
-        if (payload.action === Action.FocusMessageSearch) {
-            searchInputRef.current?.focus();
-        }
-    });
-
-    return {
-        searchInputRef,
-        onUpdateSearchInput,
-    };
-};
-
-export function useRoomSummaryCardViewModel(
-    room: Room,
-    permalinkCreator: RoomPermalinkCreator,
-    onSearchCancel?: () => void,
-): RoomSummaryCardState {
+export function useRoomSummaryCardViewModel(room: Room, permalinkCreator: RoomPermalinkCreator): RoomSummaryCardState {
     const cli = useMatrixClientContext();
 
     const isRoomEncrypted = useIsEncrypted(cli, room) ?? false;
@@ -263,9 +218,6 @@ export function useRoomSummaryCardViewModel(
         inviteToRoom(room);
     };
 
-    // Room Search element ref
-    const { searchInputRef, onUpdateSearchInput } = useSearchInput(onSearchCancel);
-
     return {
         isDirectMessage,
         userStatus,
@@ -277,7 +229,6 @@ export function useRoomSummaryCardViewModel(
         alias,
         isFavorite,
         canInviteToState,
-        searchInputRef,
         pinCount,
         onRoomMembersClick,
         onRoomThreadsClick,
@@ -290,7 +241,6 @@ export function useRoomSummaryCardViewModel(
         onRoomExportClick,
         onRoomPollHistoryClick,
         onReportRoomClick,
-        onUpdateSearchInput,
         onFavoriteToggleClick,
         onInviteToRoomClick,
     };

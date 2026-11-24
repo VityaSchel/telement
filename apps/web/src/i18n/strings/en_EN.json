@@ -3202,6 +3202,7 @@
             "newer_result": "Newer result",
             "older_result": "Older result",
             "result_position": "%(number)s of %(total)s",
+            "search_messages": "Search messages",
             "show_results": "Show results"
         },
         "settings": {

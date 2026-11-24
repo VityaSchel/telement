@@ -71,8 +71,6 @@ describe("<RoomSummaryCard />", () => {
         isFavorite: false,
         canInviteToState: true,
         pinCount: 0,
-        searchInputRef: { current: null },
-        onUpdateSearchInput: vi.fn(),
         onRoomMembersClick: vi.fn(),
         onRoomThreadsClick: vi.fn(),
         onRoomFilesClick: vi.fn(),
@@ -139,67 +137,11 @@ describe("<RoomSummaryCard />", () => {
         expect(container).toMatchSnapshot();
     });
 
-    describe("search", () => {
-        it("has the search field", async () => {
-            const onSearchChange = vi.fn();
-            const { getByPlaceholderText } = getComponent({
-                onSearchChange,
-            });
-            expect(getByPlaceholderText("Search messages…")).toBeVisible();
-        });
+    it("is titled Room info, without a search field", () => {
+        getComponent();
 
-        it("should focus the search field if focusRoomSearch=true", () => {
-            const onSearchChange = vi.fn();
-            const { getByPlaceholderText } = getComponent({
-                onSearchChange,
-                focusRoomSearch: true,
-            });
-            expect(getByPlaceholderText("Search messages…")).toHaveFocus();
-        });
-
-        it("should cancel search on escape", () => {
-            const onSearchChange = vi.fn();
-            const onSearchCancel = vi.fn();
-
-            const { getByPlaceholderText } = getComponent({
-                onSearchChange,
-                onSearchCancel,
-                focusRoomSearch: true,
-            });
-            expect(getByPlaceholderText("Search messages…")).toHaveFocus();
-            fireEvent.keyDown(getByPlaceholderText("Search messages…"), { key: "Escape" });
-            expect(vmDefaultValues.onUpdateSearchInput).toHaveBeenCalled();
-        });
-
-        it("should update the search field value correctly", async () => {
-            const user = userEvent.setup();
-
-            const onSearchChange = vi.fn();
-            const { getByPlaceholderText } = getComponent({
-                onSearchChange,
-            });
-
-            const searchInput = getByPlaceholderText("Search messages…");
-            await user.type(searchInput, "test query");
-
-            expect(onSearchChange).toHaveBeenCalledWith("test query");
-            expect(searchInput).toHaveValue("test query");
-        });
-
-        it("is the search pill with its own clear button, not the browser's", async () => {
-            const user = userEvent.setup();
-            const onSearchChange = vi.fn();
-            const { getByRole } = getComponent({ onSearchChange });
-
-            const searchInput = getByRole("searchbox", { name: "Search messages…" });
-            expect(searchInput).not.toHaveAttribute("type", "search");
-            await user.type(searchInput, "lunch");
-            await user.click(getByRole("button", { name: "Clear search" }));
-
-            expect(searchInput).toHaveValue("");
-            expect(searchInput).toHaveFocus();
-            expect(onSearchChange).toHaveBeenLastCalledWith("");
-        });
+        expect(screen.getByRole("heading", { name: "Room info" })).toBeInTheDocument();
+        expect(screen.queryByRole("searchbox")).not.toBeInTheDocument();
     });
 
     describe("keyboard", () => {

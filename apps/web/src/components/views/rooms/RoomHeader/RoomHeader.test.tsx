@@ -14,6 +14,7 @@ import { vi, describe, it, expect, beforeEach, afterEach, type Mocked } from "vi
 import React, { type ComponentType } from "react";
 import VideoCallIcon from "@vector-im/compound-design-tokens/assets/web/icons/video-call";
 import VoiceCallIcon from "@vector-im/compound-design-tokens/assets/web/icons/voice-call";
+import SearchIcon from "@vector-im/compound-design-tokens/assets/web/icons/search";
 import ThreadsIcon from "@vector-im/compound-design-tokens/assets/web/icons/threads";
 import RoomInfoIcon from "@vector-im/compound-design-tokens/assets/web/icons/info";
 import { CallType, type MatrixCall } from "matrix-js-sdk/src/webrtc/call";
@@ -226,15 +227,41 @@ describe("RoomHeader", () => {
         expect(setCardSpy).toHaveBeenCalledWith({ phase: RightPanelPhases.NotificationPanel });
     });
 
+    describe("message search", () => {
+        it("is opened and closed by a button, marked open while the search bar is", async () => {
+            const onSearchClick = vi.fn();
+            const { rerender } = render(
+                <RoomHeader room={room} isSearchOpen={false} onSearchClick={onSearchClick} />,
+                getWrapper(),
+            );
+            const button = screen.getByRole("button", { name: "Search messages" });
+
+            expect(button).toHaveAttribute("aria-expanded", "false");
+            await userEvent.click(button);
+            expect(onSearchClick).toHaveBeenCalledTimes(1);
+
+            rerender(<RoomHeader room={room} isSearchOpen onSearchClick={onSearchClick} />);
+            expect(button).toHaveAttribute("aria-expanded", "true");
+            expect(button.querySelector("svg")).toHaveClass("mx_RoomHeader_toggled");
+        });
+
+        it("has no button where there is no search bar", () => {
+            render(<RoomHeader room={room} />, getWrapper());
+
+            expect(screen.queryByRole("button", { name: "Search messages" })).not.toBeInTheDocument();
+        });
+    });
+
     it.each<[string, ComponentType, number]>([
         ["Video call", VideoCallIcon, 0],
         ["Voice call", VoiceCallIcon, 0],
+        ["Search messages", SearchIcon, 0],
         ["Threads", ThreadsIcon, 0],
         // The first "Room info" button is the room's name
         ["Room info", RoomInfoIcon, 1],
     ])("draws the %s button with Compound's outline icon", (name, Icon, index) => {
         mockRoomMembers(room, 2);
-        render(<RoomHeader room={room} />, getWrapper());
+        render(<RoomHeader room={room} onSearchClick={() => {}} />, getWrapper());
         const drawn = screen.getAllByRole("button", { name })[index].querySelector("svg")!;
 
         const { container: outline } = render(<Icon />);

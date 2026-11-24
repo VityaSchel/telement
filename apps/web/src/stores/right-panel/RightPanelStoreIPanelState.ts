@@ -23,8 +23,6 @@ export interface IRightPanelCardState {
     initialEvent?: MatrixEvent;
     isInitialEventHighlighted?: boolean;
     initialEventScrollIntoView?: boolean;
-    // room summary
-    focusRoomSearch?: boolean;
     // document viewer: the m.file event whose attachment is being read
     documentViewerEvent?: MatrixEvent;
 }

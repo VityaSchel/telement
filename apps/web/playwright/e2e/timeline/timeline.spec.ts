@@ -732,10 +732,7 @@ test.describe("Timeline", () => {
                     await page.goto(`/#/room/${room.roomId}`);
                     await rejectToast(page, "Verify this device");
 
-                    await app.toggleRoomInfoPanel();
-
-                    await page.locator(".mx_RoomSummaryCard_search").getByRole("searchbox").fill("Message");
-                    await page.locator(".mx_RoomSummaryCard_search").getByRole("searchbox").press("Enter");
+                    await (await app.openMessageSearch()).fill("Message");
 
                     await expect(page.locator(".mx_RoomSearchAuxPanel")).toMatchScreenshot("search-aux-panel.png");
 
@@ -777,8 +774,7 @@ test.describe("Timeline", () => {
                 ).toHaveClass(/mx_TextualEvent/);
 
                 // Search the string to display both the message and TextualEvent on search results panel
-                await page.locator(".mx_RoomSummaryCard_search").getByRole("searchbox").fill(stringToSearch);
-                await page.locator(".mx_RoomSummaryCard_search").getByRole("searchbox").press("Enter");
+                await (await app.openMessageSearch()).fill(stringToSearch);
 
                 await expect(page.locator(".mx_RoomView_searchResultsPanel")).toMatchScreenshot(
                     "search-results-with-TextualEvent.png",

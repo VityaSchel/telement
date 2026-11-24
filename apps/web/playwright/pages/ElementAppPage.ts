@@ -350,6 +350,15 @@ export class ElementAppPage {
     }
 
     /**
+     * Opens the room's search bar
+     * @returns locator to its search field
+     */
+    public async openMessageSearch(): Promise<Locator> {
+        await this.page.locator(".mx_RoomHeader").getByRole("button", { name: "Search messages" }).click();
+        return this.page.getByRole("search").getByRole("searchbox");
+    }
+
+    /**
      * Opens/closes the memberlist panel
      * @returns locator to the memberlist panel
      */

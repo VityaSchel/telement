@@ -6,7 +6,7 @@ SPDX-License-Identifier: AGPL-3.0-only OR GPL-3.0-only OR LicenseRef-Element-Com
 Please see LICENSE files in the repository root for full details.
 */
 
-import React, { useEffect, useState, type JSX } from "react";
+import React, { type JSX } from "react";
 import classNames from "classnames";
 import { Separator, Text, Badge, Heading, IconButton, Link } from "@vector-im/compound-web";
 import UserAddIcon from "@vector-im/compound-design-tokens/assets/web/icons/user-add";
@@ -27,14 +27,7 @@ import ErrorIcon from "@vector-im/compound-design-tokens/assets/web/icons/error"
 import ErrorSolidIcon from "@vector-im/compound-design-tokens/assets/web/icons/error-solid";
 import ChevronDownIcon from "@vector-im/compound-design-tokens/assets/web/icons/chevron-down";
 import { JoinRule, type Room } from "matrix-js-sdk/src/matrix";
-import {
-    Box,
-    Flex,
-    HistoryVisibilityBadge,
-    LinkedText,
-    SearchFieldView,
-    StatusTextView,
-} from "@element-hq/web-shared-components";
+import { Box, Flex, HistoryVisibilityBadge, LinkedText, StatusTextView } from "@element-hq/web-shared-components";
 
 import BaseCard from "./BaseCard.tsx";
 import { _t } from "../../../languageHandler";
@@ -50,10 +43,6 @@ import { RovingMenuBar, RovingMenuItem, RovingToggleMenuItem } from "../../../te
 interface IProps {
     room: Room;
     permalinkCreator: RoomPermalinkCreator;
-    onSearchChange?: (term: string) => void;
-    onSearchCancel?: () => void;
-    focusRoomSearch?: boolean;
-    searchTerm?: string;
 }
 
 const RoomTopic: React.FC<Pick<IProps, "room">> = ({ room }): JSX.Element | null => {
@@ -118,24 +107,10 @@ const RoomTopic: React.FC<Pick<IProps, "room">> = ({ room }): JSX.Element | null
     );
 };
 
-const RoomSummaryCardView: React.FC<IProps> = ({
-    room,
-    permalinkCreator,
-    onSearchChange,
-    onSearchCancel,
-    focusRoomSearch,
-    searchTerm = "",
-}) => {
-    const vm = useRoomSummaryCardViewModel(room, permalinkCreator, onSearchCancel);
+const RoomSummaryCardView: React.FC<IProps> = ({ room, permalinkCreator }) => {
+    const vm = useRoomSummaryCardViewModel(room, permalinkCreator);
     // XXX: this name should be part of the view model
     const name = useRoomName(room);
-
-    // The search field is controlled and onSearchChange is debounced in RoomView,
-    // so we need to set the value of the input right away
-    const [searchValue, setSearchValue] = useState(searchTerm);
-    useEffect(() => {
-        setSearchValue(searchTerm);
-    }, [searchTerm]);
 
     const roomInfo = (
         <header className="mx_RoomSummaryCard_container">
@@ -202,32 +177,13 @@ const RoomSummaryCardView: React.FC<IProps> = ({
         </header>
     );
 
-    // Telement's search pill, with its own clear button where Compound's Search would show the browser's
-    const header = onSearchChange && (
-        <SearchFieldView
-            className="mx_RoomSummaryCard_search"
-            placeholder={_t("room|search|placeholder")}
-            name="room_message_search"
-            // A search field to assistive technology, as the browser's search input was
-            role="searchbox"
-            onChange={(value) => {
-                setSearchValue(value);
-                onSearchChange(value);
-            }}
-            value={searchValue}
-            ref={vm.searchInputRef}
-            autoFocus={focusRoomSearch}
-            onKeyDown={vm.onUpdateSearchInput}
-        />
-    );
-
     return (
         <BaseCard
             id="room-summary-panel"
             className="mx_RoomSummaryCard"
             ariaLabelledBy="room-summary-panel-tab"
             role="tabpanel"
-            header={header}
+            header={_t("right_panel|room_summary_card|title")}
         >
             {roomInfo}
 

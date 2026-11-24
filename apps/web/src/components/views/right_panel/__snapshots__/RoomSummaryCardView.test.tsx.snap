@@ -12,8 +12,16 @@ exports[`<RoomSummaryCard /> > has button to edit topic 1`] = `
       class="mx_BaseCard_header"
     >
       <div
-        class="mx_BaseCard_header_spacer"
-      />
+        class="mx_BaseCard_header_title"
+      >
+        <p
+          aria-level="1"
+          class="_typography _font-body-md-medium mx_BaseCard_header_title_heading"
+          role="heading"
+        >
+          Room info
+        </p>
+      </div>
       <button
         aria-labelledby="react-use-id-1"
         class="_icon-button"
@@ -766,8 +774,16 @@ exports[`<RoomSummaryCard /> > renders the room summary 1`] = `
       class="mx_BaseCard_header"
     >
       <div
-        class="mx_BaseCard_header_spacer"
-      />
+        class="mx_BaseCard_header_title"
+      >
+        <p
+          aria-level="1"
+          class="_typography _font-body-md-medium mx_BaseCard_header_title_heading"
+          role="heading"
+        >
+          Room info
+        </p>
+      </div>
       <button
         aria-labelledby="react-use-id-1"
         class="_icon-button"
@@ -1478,8 +1494,16 @@ exports[`<RoomSummaryCard /> > renders the room topic in the summary 1`] = `
       class="mx_BaseCard_header"
     >
       <div
-        class="mx_BaseCard_header_spacer"
-      />
+        class="mx_BaseCard_header_title"
+      >
+        <p
+          aria-level="1"
+          class="_typography _font-body-md-medium mx_BaseCard_header_title_heading"
+          role="heading"
+        >
+          Room info
+        </p>
+      </div>
       <button
         aria-labelledby="react-use-id-1"
         class="_icon-button"
