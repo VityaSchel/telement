@@ -62,7 +62,6 @@ enum Icon {
     Globe = "GLOBE",
     PresenceOnline = "ONLINE",
     PresenceAway = "AWAY",
-    PresenceOffline = "OFFLINE",
     PresenceBusy = "BUSY",
 }
 
@@ -74,8 +73,6 @@ function tooltipText(variant: Icon): string | undefined {
             return _t("presence|online");
         case Icon.PresenceAway:
             return _t("presence|away");
-        case Icon.PresenceOffline:
-            return _t("presence|offline");
         case Icon.PresenceBusy:
             return _t("presence|busy");
     }
@@ -149,13 +146,12 @@ export default class DecoratedRoomAvatar extends React.PureComponent<IProps, ISt
 
         let icon = Icon.None;
 
+        // Telement: someone offline has no dot, as in Telegram, and so no cutout for one
         const isOnline = this.dmUser.currentlyActive || this.dmUser.presence === "online";
         if (BUSY_PRESENCE_NAME.matches(this.dmUser.presence)) {
             icon = Icon.PresenceBusy;
         } else if (isOnline) {
             icon = Icon.PresenceOnline;
-        } else if (this.dmUser.presence === "offline") {
-            icon = Icon.PresenceOffline;
         } else if (this.dmUser.presence === "unavailable") {
             icon = Icon.PresenceAway;
         }

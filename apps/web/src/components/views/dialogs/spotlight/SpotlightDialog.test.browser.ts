@@ -20,9 +20,11 @@ import compoundStyles from "@vector-im/compound-web/dist/style.css?raw";
 import sharedComponentsStyles from "@element-hq/web-shared-components/dist/element-web-shared-components.css?raw";
 
 import fontSizes from "../../../../../res/css/_font-sizes.pcss?raw";
+import decoratedRoomAvatarStyles from "../../../../../res/css/views/avatars/_DecoratedRoomAvatar.pcss?raw";
 import spotlightStyles from "../../../../../res/css/views/dialogs/_SpotlightDialog.pcss?raw";
 import lightTheme from "../../../../../res/themes/light/css/_light.pcss?raw";
 import { cornerRadii, toBrowserCss } from "../../../../test/telement/browserCss";
+import { tokenColor } from "../../../../test/telement/computedStyle";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import {
@@ -30,6 +32,7 @@ import {
     ArrowLeftIcon,
     ArrowRightIcon,
     ArrowUpIcon,
+    PublicIcon,
 } from "@vector-im/compound-design-tokens/assets/web/icons";
 
 /** The icons SpotlightDialog draws in the scroll hint's keys. */
@@ -237,6 +240,7 @@ describe("SpotlightDialog styles", () => {
                 body { font: var(--cpd-font-body-md-regular); }
                 .mx_Dialog .mx_textinput { display: flex; align-items: center; }
                 .mx_Dialog .mx_textinput > input[type="text"] { border: none; flex: 1; }
+                ${toBrowserCss(decoratedRoomAvatarStyles, lightTheme)}
                 ${toBrowserCss(spotlightStyles, fontSizes, lightTheme)}
             }
         `;
@@ -546,6 +550,26 @@ describe("SpotlightDialog styles", () => {
         // The first tile's highlight is inset as the options' are
         expect(tiles[0].getBoundingClientRect().left - dialog.left).toBe(16);
     });
+
+    it.each(["cpd-theme-light", "cpd-theme-dark"])(
+        "marks public rooms with a globe in the accent the room list draws it in, selected or not (%s)",
+        (theme) => {
+            document.body.innerHTML = spotlightDialog(["↓", "↑"], ["Travel tips", "Public lounge"], theme);
+            // A room's avatar as DecoratedRoomAvatar draws it
+            for (const avatar of document.querySelectorAll(".mx_SpotlightDialog_option > .mx_BaseAvatar")) {
+                avatar.outerHTML = `<div class="mx_DecoratedRoomAvatar mx_DecoratedRoomAvatar_cutout">${avatar.outerHTML}
+                    <div class="mx_DecoratedRoomAvatar_icon mx_DecoratedRoomAvatar_icon_globe">
+                        ${renderToStaticMarkup(createElement(PublicIcon))}
+                    </div></div>`;
+            }
+            const dialog = element(".mx_Dialog");
+            const roomListColor = tokenColor("--cpd-color-icon-info-primary", dialog);
+            const globes = [...document.querySelectorAll(".mx_DecoratedRoomAvatar_icon_globe path")];
+
+            expect(roomListColor).toBe(tokenColor("--cpd-color-icon-accent-primary", dialog));
+            expect(globes.map((globe) => getComputedStyle(globe).color)).toEqual([roomListColor, roomListColor]);
+        },
+    );
 
     it("draws a public room as a 52px two-line row, its 36px avatar 8px from three sides and its button centered", () => {
         document.body.innerHTML = spotlightDialog(["↓", "↑"]);

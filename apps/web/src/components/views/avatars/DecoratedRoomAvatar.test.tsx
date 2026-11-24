@@ -9,8 +9,17 @@ Please see LICENSE files in the repository root for full details.
 // @vitest-environment happy-dom
 
 import { vi, describe, it, expect, beforeEach, afterEach } from "vitest";
-import { render, waitFor } from "test-utils-rtl";
-import { JoinRule, type MatrixClient, PendingEventOrdering, Room, RoomMember } from "matrix-js-sdk/src/matrix";
+import { act, render, waitFor } from "test-utils-rtl";
+import {
+    JoinRule,
+    type MatrixClient,
+    MatrixEvent,
+    PendingEventOrdering,
+    Room,
+    RoomMember,
+    User,
+    UserEvent,
+} from "matrix-js-sdk/src/matrix";
 import React from "react";
 import userEvent from "@testing-library/user-event";
 import { stubClient } from "test-utils";
@@ -98,5 +107,54 @@ describe("DecoratedRoomAvatar", () => {
         expect(tooltip).toHaveTextContent("Online");
 
         expect(asFragment()).toMatchSnapshot();
+    });
+
+    describe("presence in a DM room", () => {
+        const DM_USER_ID = "@bob:foo.bar";
+
+        let user: User;
+
+        beforeEach(() => {
+            user = new User(DM_USER_ID);
+            vi.mocked(mockClient.getUser).mockReturnValue(user);
+            vi.spyOn(DMRoomMap, "shared").mockReturnValue({
+                getUserIdForRoomId: () => DM_USER_ID,
+            } as unknown as DMRoomMap);
+        });
+
+        function setPresence(presence: string): void {
+            user.presence = presence;
+            user.emit(UserEvent.Presence, new MatrixEvent(), user);
+        }
+
+        function decoration(container: HTMLElement): { cutout: boolean; icon: string | undefined } {
+            return {
+                cutout: container.querySelector(".mx_DecoratedRoomAvatar_cutout") !== null,
+                icon: container.querySelector(".mx_DecoratedRoomAvatar_icon")?.className.split(" ").at(-1),
+            };
+        }
+
+        it("shows someone offline without a dot, and without the cutout for one", () => {
+            user.presence = "offline";
+            const { container } = renderComponent();
+
+            expect(decoration(container)).toEqual({ cutout: false, icon: undefined });
+        });
+
+        it.each([
+            ["online", "mx_DecoratedRoomAvatar_icon_online"],
+            ["unavailable", "mx_DecoratedRoomAvatar_icon_away"],
+            ["busy", "mx_DecoratedRoomAvatar_icon_busy"],
+        ])("cuts the avatar out only while there is a dot to show in it: %s", (presence, icon) => {
+            user.presence = presence;
+            const { container } = renderComponent();
+            expect(decoration(container)).toEqual({ cutout: true, icon });
+
+            act(() => setPresence("offline"));
+            expect(decoration(container)).toEqual({ cutout: false, icon: undefined });
+
+            act(() => setPresence(presence));
+            expect(decoration(container)).toEqual({ cutout: true, icon });
+        });
     });
 });

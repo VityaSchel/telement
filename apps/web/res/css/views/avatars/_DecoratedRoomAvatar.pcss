@@ -43,12 +43,8 @@ Please see LICENSE files in the repository root for full details.
         width: 120%;
         height: 120%;
         margin: -10%;
-        color: $secondary-content;
-    }
-
-    .mx_DecoratedRoomAvatar_icon_offline::before {
-        content: "";
-        background-color: $presence-offline;
+        /* Telement: the color the room list marks public rooms in (DecoratedRoomAvatarView) */
+        color: var(--cpd-color-icon-info-primary);
     }
 
     .mx_DecoratedRoomAvatar_icon_online::before {
