@@ -76,7 +76,7 @@ describe("The font size preview", () => {
                 ${eventTileViewStyles.replace(/:global\(([^)]*)\)/g, "$1")}
             }
             @layer app-web {
-                ${toBrowserCss(fontScalingPanelStyles, lightTheme)}
+                ${toBrowserCss(fontScalingPanelStyles, lightTheme, commonStyles)}
                 ${toBrowserCss(".raised { @mixin floatingSurface; }", commonStyles)}
             }
         `;
@@ -122,14 +122,15 @@ describe("The font size preview", () => {
         const tailEnd = bubble.getBoundingClientRect().right - parseFloat(getComputedStyle(bubble, "::after").right);
         const endInset = card.right - tailEnd;
 
-        expect(endInset).toBe(16);
+        // As in the layout cards' previews
+        expect(endInset).toBe(12);
         expect([
             bubble.getBoundingClientRect().top - card.top,
             card.bottom - bubble.getBoundingClientRect().bottom,
         ]).toEqual([endInset, endInset]);
     });
 
-    it("rounds the card by 8, as the layout cards and theme chips above it", () => {
+    it("rounds the card by 8, as the layout cards above it", () => {
         document.body.innerHTML = PREVIEW;
 
         expect(cornerRadii(document.querySelector(".mx_FontScalingPanel_preview")!)).toEqual({ x: 8, y: 8 });

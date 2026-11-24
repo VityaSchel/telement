@@ -9,7 +9,7 @@ import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
 import { userEvent } from "vitest/browser";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { Button, Field, InlineField, Label, RadioControl, Root } from "@vector-im/compound-web";
+import { Button, Field, InlineField, Label, RadioControl, RadioInput, Root } from "@vector-im/compound-web";
 import { ChevronDownIcon, TakePhotoIcon, TakePhotoSolidIcon } from "@vector-im/compound-design-tokens/assets/web/icons";
 import compoundBase from "@vector-im/compound-design-tokens/assets/web/css/cpd-common-base.css?raw";
 import compoundSemantic from "@vector-im/compound-design-tokens/assets/web/css/cpd-common-semantic.css?raw";
@@ -198,17 +198,29 @@ function layoutCards(): string {
 /** The image size options as ImageSizePanel renders them, with the drawings inline as SVGR inlines them. */
 function imageSizeCards(): string {
     const option = (name: string, drawing: string, checked: boolean): string => `
-        <label aria-label="${name}">
+        <label class="mx_ImageSizePanel_choice">
+            <span class="mx_ImageSizePanel_header">
+                ${renderToStaticMarkup(
+                    createElement(RadioInput, { name: "image_size", value: name, defaultChecked: checked }),
+                )}
+                ${name}
+            </span>
             ${drawing.replace("<svg ", '<svg class="mx_ImageSizePanel_size" ')}
-            <label class="mx_StyledRadioButton">
-                <input type="radio" name="image_size" value="${name}" ${checked ? "checked" : ""} />
-                <div><div></div></div>
-                <div class="mx_StyledRadioButton_content">${name}</div>
-            </label>
         </label>`;
-    return `<div class="mx_ImageSizePanel_radios">
+    return `<div class="mx_ImageSizePanel_choices">
         ${option("Default", imageSizeNormal, true)}${option("Large", imageSizeLarge, false)}
     </div>`;
+}
+
+/** Legacy radios (StyledRadioButton), the first one checked. */
+function legacyRadios(): string {
+    const option = (name: string, checked: boolean): string => `
+        <label class="mx_StyledRadioButton">
+            <input type="radio" name="legacy" value="${name}" ${checked ? "checked" : ""} />
+            <div><div></div></div>
+            <div class="mx_StyledRadioButton_content">${name}</div>
+        </label>`;
+    return option("Everyone", true) + option("Members", false);
 }
 
 /** The parts of a color in `rgb()`, `rgba()` or `color(srgb …)` form, its channels from 0 to 255. */
@@ -329,24 +341,22 @@ describe.each(THEMES.map(([theme]) => theme))("Telement's accents in %s", (theme
                 expect(contrast(getComputedStyle(bubbles).outlineColor, card)).toBeGreaterThanOrEqual(3);
             });
 
-            it("edge and ring the image size drawings 3:1 or more against the card", () => {
+            it("edge and ring the image size cards 3:1 or more against the card", () => {
                 const card = renderOnCard(imageSizeCards());
-                const [normal, large] = [...document.querySelectorAll<SVGElement>(".mx_ImageSizePanel_size")];
+                const [normal, large] = [...document.querySelectorAll<HTMLElement>(".mx_ImageSizePanel_choice")];
 
-                expect(contrast(getComputedStyle(large).outlineColor, card)).toBeGreaterThanOrEqual(3);
+                expect(contrast(getComputedStyle(large).borderTopColor, card)).toBeGreaterThanOrEqual(3);
                 expect(contrast(getComputedStyle(normal).outlineColor, card)).toBeGreaterThanOrEqual(3);
             });
 
             it("ring Compound's and the legacy radios 3:1 or more against the card, checked or not", () => {
-                const card = renderOnCard(layoutCards() + imageSizeCards());
+                const card = renderOnCard(layoutCards() + imageSizeCards() + legacyRadios());
                 const rings = [
-                    ...document.querySelectorAll(
-                        ".mxLayoutSwitcher_LayoutSelector_LayoutRadio input + [class^='_ui_']",
-                    ),
+                    ...document.querySelectorAll("input + [class^='_ui_']"),
                     ...document.querySelectorAll(".mx_StyledRadioButton input + div"),
                 ];
 
-                expect(rings).toHaveLength(4);
+                expect(rings).toHaveLength(6);
                 for (const ring of rings) {
                     expect(contrast(getComputedStyle(ring).borderTopColor, card)).toBeGreaterThanOrEqual(3);
                 }
@@ -364,17 +374,17 @@ describe.each(THEMES.map(([theme]) => theme))("Telement's accents in %s", (theme
             expect(getComputedStyle(bubbles).outlineStyle).toBe("none");
         });
 
-        it("ring the selected image size's drawing in the accent, the other drawing edged in Compound's outline gray", () => {
+        it("ring the selected image size in the accent, the other one edged in Compound's outline gray", () => {
             const container = render(theme, `<div class="raised">${imageSizeCards()}</div>`);
-            const [normal, large] = [...document.querySelectorAll<SVGElement>(".mx_ImageSizePanel_size")];
+            const [normal, large] = [...document.querySelectorAll<HTMLElement>(".mx_ImageSizePanel_choice")];
             const ring = getComputedStyle(normal);
             const edge = getComputedStyle(large);
 
             expect([ring.outlineStyle, ring.outlineWidth, ring.outlineOffset]).toEqual(["solid", "2px", "-2px"]);
             expect(ring.outlineColor).toBe(tokenColor("--cpd-color-border-accent-primary", container));
-            // Over the drawing's own 1px edge, along its 8px corners
-            expect([edge.outlineStyle, edge.outlineWidth, edge.outlineOffset]).toEqual(["solid", "1px", "-1px"]);
-            expect(edge.outlineColor).toBe(tokenColor("--cpd-color-border-interactive-primary", container));
+            // Over the card's own 1px edge, along its 8px corners
+            expect([edge.borderTopStyle, edge.borderTopWidth, edge.outlineStyle]).toEqual(["solid", "1px", "none"]);
+            expect(edge.borderTopColor).toBe(tokenColor("--cpd-color-border-interactive-primary", container));
             expect([ring.borderTopLeftRadius, edge.borderBottomRightRadius]).toEqual(["8px", "8px"]);
         });
     });

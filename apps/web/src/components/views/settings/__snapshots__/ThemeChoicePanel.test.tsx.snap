@@ -3,7 +3,7 @@
 exports[`<ThemeChoicePanel /> > custom theme > should display custom theme 1`] = `
 <DocumentFragment>
   <div
-    class="mx_SettingsSubsection mx_SettingsSubsection_newUi"
+    class="mx_SettingsSubsection"
     data-testid="themePanel"
   >
     <div
@@ -16,7 +16,7 @@ exports[`<ThemeChoicePanel /> > custom theme > should display custom theme 1`] =
       </h2>
     </div>
     <div
-      class="mx_SettingsSubsection_content mx_SettingsSubsection_content_newUi"
+      class="mx_SettingsSubsection_content"
     >
       <form
         class="_root"
@@ -200,7 +200,7 @@ exports[`<ThemeChoicePanel /> > custom theme > should display custom theme 1`] =
 exports[`<ThemeChoicePanel /> > custom theme > should render the custom theme section 1`] = `
 <DocumentFragment>
   <div
-    class="mx_SettingsSubsection mx_SettingsSubsection_newUi"
+    class="mx_SettingsSubsection"
     data-testid="themePanel"
   >
     <div
@@ -213,7 +213,7 @@ exports[`<ThemeChoicePanel /> > custom theme > should render the custom theme se
       </h2>
     </div>
     <div
-      class="mx_SettingsSubsection_content mx_SettingsSubsection_content_newUi"
+      class="mx_SettingsSubsection_content"
     >
       <form
         class="_root"
@@ -397,7 +397,7 @@ exports[`<ThemeChoicePanel /> > custom theme > should render the custom theme se
 exports[`<ThemeChoicePanel /> > renders the theme choice UI 1`] = `
 <DocumentFragment>
   <div
-    class="mx_SettingsSubsection mx_SettingsSubsection_newUi"
+    class="mx_SettingsSubsection"
     data-testid="themePanel"
   >
     <div
@@ -410,7 +410,7 @@ exports[`<ThemeChoicePanel /> > renders the theme choice UI 1`] = `
       </h2>
     </div>
     <div
-      class="mx_SettingsSubsection_content mx_SettingsSubsection_content_newUi"
+      class="mx_SettingsSubsection_content"
     >
       <form
         class="_root"

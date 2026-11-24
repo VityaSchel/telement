@@ -35,7 +35,7 @@ export function ThemeChoicePanel(): JSX.Element {
     const themeWatcher = useMemo(() => new ThemeWatcher(), []);
 
     return (
-        <SettingsSubsection heading={_t("common|theme")} legacy={false} data-testid="themePanel">
+        <SettingsSubsection heading={_t("common|theme")} data-testid="themePanel">
             {themeWatcher.isSystemThemeSupported() && (
                 <SystemTheme systemThemeActivated={themeState.systemThemeActivated} />
             )}

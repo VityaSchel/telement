@@ -168,6 +168,80 @@ Please see LICENSE files in the repository root for full details.
     padding: 0 var(--settings-group-inset, var(--cpd-space-4x));
 }
 
+/* A bordered box at a settings card's top or bottom, such as the choices of a theme or a message layout, sits 16px from the
+   card's edge there, as far as from its sides and as a field does, where a row of text has its 12px */
+@define-mixin settingsGroupBox {
+    &:first-child {
+        margin-block-start: calc(var(--cpd-space-4x) - var(--cpd-space-3x));
+    }
+
+    &:last-child {
+        margin-block-end: calc(var(--cpd-space-4x) - var(--cpd-space-3x));
+    }
+}
+
+/* A message shown in the settings, as the message layouts and the font size show one. It is drawn as in the timeline,
+   without what can be done with it, and its sides are on the edges of what it is in, in every layout. */
+@define-mixin settingsMessagePreview {
+    pointer-events: none;
+    /* Not in the weight of a label around it */
+    font: var(--cpd-font-body-md-regular);
+    letter-spacing: var(--cpd-font-letter-spacing-body-md);
+
+    .mx_EventTile {
+        margin: 0;
+
+        /* EventTileView applies the content gutter through this variable on the shell. Keep the preview's content width
+           consistent with the content rule below. */
+        --event-tile-content-inline-end: 0;
+
+        /* Hide the message options and message action bar in the preview */
+        .mx_ReadReceiptGroup,
+        .mx_MessageActionBar {
+            display: none;
+        }
+
+        .mx_EventTile_content {
+            margin-right: 0;
+            margin-inline-end: 0;
+        }
+
+        /* Its avatar is 8px inside the tile, 14px under its top */
+        &:has([data-event-layout="group"]) {
+            margin-block-start: calc(var(--cpd-space-3x) * -1);
+            margin-inline-start: calc(var(--cpd-space-2x) * -1);
+        }
+
+        /* No margin of its own, so that a bubble is as far from the top and the bottom as its tail is from the end. Your
+           own bubble sits at the end, as your messages do in the timeline, its tail on the edge. The timeline's column
+           for read receipts has no place here. The fallback, the tail's width, is for stylelint, which doesn't read the
+           tile's own variables. */
+        &:has([data-event-layout="bubble"]) {
+            flex-shrink: 1;
+
+            .mx_EventTile_line {
+                margin-inline-end: var(--event-tile-bubble-tail-width, var(--cpd-space-1-5x));
+            }
+        }
+
+        &:has([data-event-layout="irc"]) {
+            /* The tile's padding over its line, so that the line is as far from the top as from the bottom */
+            margin-block-start: calc(var(--cpd-space-1x) * -1);
+
+            /* The migrated tile keeps an empty timestamp slot for IRC alignment. The preview must hide that slot as the
+               legacy preview hid its timestamp element. */
+            .mx_MessageTimestamp,
+            [data-testid="event-tile-slot-timestamp"] {
+                display: none;
+            }
+        }
+
+        .mx_EventTile_line {
+            max-width: 100%;
+        }
+    }
+}
+
 /* The profile at the top of a settings card (the account's, a room's or a space's), as Telegram's edit pages lay it out:
    the photo at the card's start and the fields beside it, 16px apart, both 16px under the card's edge, as far as the
    photo is from its start. In a narrow dialog the fields wrap under the photo. */

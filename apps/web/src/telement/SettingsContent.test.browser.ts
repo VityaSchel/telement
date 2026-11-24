@@ -829,7 +829,7 @@ describe.each(THEMES.map(([theme]) => theme))("Settings content in %s", (theme) 
             const container = render(
                 theme,
                 `<div class="mx_DeviceSecurityCard" id="card"><div class="mx_DeviceSecurityCard_content">Unverified</div></div>
-            <div class="mx_ImageSizePanel_radios"><label><svg class="mx_ImageSizePanel_size" id="size"></svg></label></div>`,
+            <label class="mx_ImageSizePanel_choice"><svg class="mx_ImageSizePanel_size" id="size"></svg></label>`,
             );
             const separator = tokenColor("--cpd-color-separator-primary", container);
 

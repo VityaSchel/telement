@@ -16,7 +16,7 @@ exports[`AppearanceUserSettingsTab > should render 1`] = `
           class="mx_SettingsSection_subSections"
         >
           <div
-            class="mx_SettingsSubsection mx_SettingsSubsection_newUi"
+            class="mx_SettingsSubsection"
             data-testid="themePanel"
           >
             <div
@@ -29,7 +29,7 @@ exports[`AppearanceUserSettingsTab > should render 1`] = `
               </h2>
             </div>
             <div
-              class="mx_SettingsSubsection_content mx_SettingsSubsection_content_newUi"
+              class="mx_SettingsSubsection_content"
             >
               <form
                 class="_root mx_ThemeChoicePanel_ThemeSelectors"
@@ -140,7 +140,7 @@ exports[`AppearanceUserSettingsTab > should render 1`] = `
             </div>
           </div>
           <div
-            class="mx_SettingsSubsection mx_SettingsSubsection_newUi"
+            class="mx_SettingsSubsection"
             data-testid="layoutPanel"
           >
             <div
@@ -153,7 +153,7 @@ exports[`AppearanceUserSettingsTab > should render 1`] = `
               </h2>
             </div>
             <div
-              class="mx_SettingsSubsection_content mx_SettingsSubsection_contentStretch mx_SettingsSubsection_content_newUi"
+              class="mx_SettingsSubsection_content mx_SettingsSubsection_contentStretch"
             >
               <form
                 class="_root mx_LayoutSwitcher_LayoutSelector"
@@ -655,9 +655,30 @@ exports[`AppearanceUserSettingsTab > should render 1`] = `
               class="mx_SettingsSubsection_content mx_SettingsSubsection_contentStretch"
             >
               <div
-                class="mx_ImageSizePanel_radios"
+                class="mx_ImageSizePanel_choices"
               >
-                <label>
+                <label
+                  class="mx_ImageSizePanel_choice"
+                >
+                  <span
+                    class="mx_ImageSizePanel_header"
+                  >
+                    <div
+                      class="_container"
+                    >
+                      <input
+                        checked=""
+                        class="_input"
+                        name="image_size"
+                        type="radio"
+                        value="normal"
+                      />
+                      <div
+                        class="_ui"
+                      />
+                    </div>
+                    Default
+                  </span>
                   <svg
                     aria-hidden="true"
                     class="mx_ImageSizePanel_size"
@@ -695,14 +716,6 @@ exports[`AppearanceUserSettingsTab > should render 1`] = `
                         />
                       </mask>
                     </defs>
-                    <rect
-                      height="147"
-                      rx="7.5"
-                      stroke="currentColor"
-                      width="220"
-                      x="0.5"
-                      y="0.5"
-                    />
                     <rect
                       fill="currentColor"
                       height="10"
@@ -755,9 +768,10 @@ exports[`AppearanceUserSettingsTab > should render 1`] = `
                       d="M57 32.5C57 31.6716 57.6716 31 58.5 31H208.5C209.328 31 210 31.6716 210 32.5V54.5C210 55.3284 209.328 56 208.5 56H58.5C57.6716 56 57 55.3284 57 54.5V32.5Z"
                       fill="currentColor"
                     />
-                    <path
-                      d="M0 8C0 3.58173 3.58172 0 8 0H45C45.5523 0 46 0.447715 46 1V147C46 147.552 45.5523 148 45 148H8C3.58172 148 0 144.418 0 140V8Z"
+                    <rect
                       fill="currentColor"
+                      height="148"
+                      width="46"
                     />
                     <rect
                       fill="currentColor"
@@ -769,29 +783,28 @@ exports[`AppearanceUserSettingsTab > should render 1`] = `
                       y="82"
                     />
                   </svg>
-                  <label
-                    class="mx_StyledRadioButton mx_StyledRadioButton_enabled mx_StyledRadioButton_checked"
-                  >
-                    <input
-                      checked=""
-                      name="image_size"
-                      type="radio"
-                      value="normal"
-                    />
-                    <div>
-                      <div />
-                    </div>
-                    <div
-                      class="mx_StyledRadioButton_content"
-                    >
-                      Default
-                    </div>
-                    <div
-                      class="mx_StyledRadioButton_spacer"
-                    />
-                  </label>
                 </label>
-                <label>
+                <label
+                  class="mx_ImageSizePanel_choice"
+                >
+                  <span
+                    class="mx_ImageSizePanel_header"
+                  >
+                    <div
+                      class="_container"
+                    >
+                      <input
+                        class="_input"
+                        name="image_size"
+                        type="radio"
+                        value="large"
+                      />
+                      <div
+                        class="_ui"
+                      />
+                    </div>
+                    Large
+                  </span>
                   <svg
                     aria-hidden="true"
                     class="mx_ImageSizePanel_size"
@@ -830,14 +843,6 @@ exports[`AppearanceUserSettingsTab > should render 1`] = `
                       </mask>
                     </defs>
                     <rect
-                      height="147"
-                      rx="7.5"
-                      stroke="currentColor"
-                      width="220"
-                      x="0.5"
-                      y="0.5"
-                    />
-                    <rect
                       fill="currentColor"
                       height="10"
                       rx="1.5"
@@ -853,9 +858,10 @@ exports[`AppearanceUserSettingsTab > should render 1`] = `
                       x="70"
                       y="14"
                     />
-                    <path
-                      d="M0 8C0 3.58173 3.58172 0 8 0H45C45.5523 0 46 0.447715 46 1V147C46 147.552 45.5523 148 45 148H8C3.58172 148 0 144.418 0 140V8Z"
+                    <rect
                       fill="currentColor"
+                      height="148"
+                      width="46"
                     />
                     <rect
                       fill="currentColor"
@@ -867,26 +873,6 @@ exports[`AppearanceUserSettingsTab > should render 1`] = `
                       y="32"
                     />
                   </svg>
-                  <label
-                    class="mx_StyledRadioButton mx_StyledRadioButton_enabled"
-                  >
-                    <input
-                      name="image_size"
-                      type="radio"
-                      value="large"
-                    />
-                    <div>
-                      <div />
-                    </div>
-                    <div
-                      class="mx_StyledRadioButton_content"
-                    >
-                      Large
-                    </div>
-                    <div
-                      class="mx_StyledRadioButton_spacer"
-                    />
-                  </label>
                 </label>
               </div>
             </div>

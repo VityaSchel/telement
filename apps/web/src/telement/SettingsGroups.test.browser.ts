@@ -18,6 +18,7 @@ import {
     RadioControl,
     RadioInput,
     SettingsToggleInput,
+    ToggleControl,
 } from "@vector-im/compound-web";
 import compoundBase from "@vector-im/compound-design-tokens/assets/web/css/cpd-common-base.css?raw";
 import compoundSemantic from "@vector-im/compound-design-tokens/assets/web/css/cpd-common-semantic.css?raw";
@@ -63,6 +64,7 @@ import roomProfileSettingsStyles from "../../res/css/views/settings/_RoomProfile
 import setIntegrationManagerStyles from "../../res/css/views/settings/_SetIntegrationManager.pcss?raw";
 import settingsFieldsetStyles from "../../res/css/views/settings/_SettingsFieldset.pcss?raw";
 import settingsHeaderStyles from "../../res/css/views/settings/_SettingsHeader.pcss?raw";
+import themeChoicePanelStyles from "../../res/css/views/settings/_ThemeChoicePanel.pcss?raw";
 import userProfileSettingsStyles from "../../res/css/views/settings/_UserProfileSettings.pcss?raw";
 import settingsSectionStyles from "../../res/css/views/settings/tabs/_SettingsSection.pcss?raw";
 import settingsTabStyles from "../../res/css/views/settings/tabs/_SettingsTab.pcss?raw";
@@ -110,6 +112,7 @@ const APP_STYLES = [
     setIntegrationManagerStyles,
     settingsFieldsetStyles,
     settingsHeaderStyles,
+    themeChoicePanelStyles,
     userProfileSettingsStyles,
     settingsSectionStyles,
     settingsTabStyles,
@@ -1236,30 +1239,65 @@ describe.each(THEMES.map(([theme]) => theme))("Settings groups in %s", (theme) =
 
         /** The image sizes, as ImageSizePanel renders them, the drawings inline as SVGR inlines them. */
         const imageSize = (id: string, drawing: string, checked: boolean): string => `
-            <label id="${id}">
+            <label class="mx_ImageSizePanel_choice" id="${id}">
+                <span class="mx_ImageSizePanel_header" id="${id}-header">
+                    ${renderToStaticMarkup(
+                        createElement(RadioInput, { name: "image_size", value: id, defaultChecked: checked }),
+                    )}
+                    <span id="${id}-label">${id}</span>
+                </span>
                 ${drawing.replace("<svg ", `<svg class="mx_ImageSizePanel_size" id="${id}-drawing" `)}
-                <label class="mx_StyledRadioButton mx_StyledRadioButton_enabled" id="${id}-radio">
-                    <input type="radio" name="image_size" value="${id}" ${checked ? "checked" : ""} />
-                    <div><div></div></div>
-                    <div class="mx_StyledRadioButton_content">${id}</div>
-                    <div class="mx_StyledRadioButton_spacer"></div>
-                </label>
             </label>
         `;
+        const imageSizes = `
+            <div class="mx_ImageSizePanel_choices">
+                ${imageSize("default", imageSizeNormal, true)}${imageSize("large", imageSizeLarge, false)}
+            </div>
+        `;
+
+        /** The switch and the choices of the theme, as ThemeChoicePanel renders them. */
+        const systemTheme = renderToStaticMarkup(
+            createElement(
+                Form.Root,
+                { id: "system" },
+                createElement(
+                    InlineField,
+                    { name: "systemTheme", control: createElement(ToggleControl, { name: "systemTheme" }) },
+                    createElement(Label, {}, "Match system theme"),
+                ),
+            ),
+        );
+        const themes = renderToStaticMarkup(
+            createElement(
+                Form.Root,
+                { className: "mx_ThemeChoicePanel_ThemeSelectors", id: "themes" },
+                createElement(
+                    InlineField,
+                    {
+                        name: "themeSelector",
+                        className: "mx_ThemeChoicePanel_themeSelector",
+                        id: "theme",
+                        control: createElement(RadioControl, { name: "themeSelector", value: "light" }),
+                    },
+                    createElement(Label, { className: "mx_ThemeChoicePanel_themeSelector_Label" }, "Light"),
+                ),
+            ),
+        );
 
         /** A subsection whose content is stretched across its card, as `stretchContent` renders it. */
-        const stretched = (id: string, heading: string, content: string, newUi = false): string => `
-            <div class="mx_SettingsSubsection${newUi ? " mx_SettingsSubsection_newUi" : ""}" id="${id}">
+        const stretched = (id: string, heading: string, content: string): string => `
+            <div class="mx_SettingsSubsection" id="${id}">
                 <div class="mx_SettingsSubsectionHeading">
                     <h3 class="mx_Heading_h4 mx_SettingsSubsectionHeading_heading">${heading}</h3>
                 </div>
-                <div class="mx_SettingsSubsection_content mx_SettingsSubsection_contentStretch${newUi ? " mx_SettingsSubsection_content_newUi" : ""}"
-                    id="${id}-card">${content}</div>
+                <div class="mx_SettingsSubsection_content mx_SettingsSubsection_contentStretch" id="${id}-card">
+                    ${content}
+                </div>
             </div>
         `;
 
         it("stretches the layout cards across their group's card", () => {
-            renderTab(theme, section("appearance", "", stretched("layout", "Message layout", layouts, true)));
+            renderTab(theme, section("appearance", "", stretched("layout", "Message layout", layouts)));
             const edges = contentBox("#layout-card");
 
             for (const card of document.querySelectorAll(".mxLayoutSwitcher_LayoutSelector_LayoutRadio")) {
@@ -1268,22 +1306,96 @@ describe.each(THEMES.map(([theme]) => theme))("Settings groups in %s", (theme) =
             }
         });
 
-        it.each<"ltr" | "rtl">(["ltr", "rtl"])(
-            "lays the image sizes out as two equal columns 16px apart, each drawing as wide as its column and 12px over its radio (%s)",
-            (dir) => {
-                renderTab(
-                    theme,
-                    section(
-                        "appearance",
-                        "",
+        it("puts what is boxed 16px from its card's edges, top and bottom too, and rows of text 12px from them", () => {
+            const compact = `<form id="compact"><div style="height: 24px">Show compact text and messages</div></form>`;
+            renderTab(
+                theme,
+                section(
+                    "appearance",
+                    "",
+                    stretched("theme-group", "Theme", systemTheme + themes) +
+                        stretched("theme-alone", "Theme", themes.replaceAll('id="theme', 'id="alone')) +
+                        stretched("layout", "Message layout", layouts + compact) +
                         stretched(
-                            "size",
-                            "Image size in the timeline",
-                            `<div class="mx_ImageSizePanel_radios">${imageSize("default", imageSizeNormal, true)}${imageSize("large", imageSizeLarge, false)}</div>`,
-                        ),
-                    ),
-                    dir,
-                );
+                            "font",
+                            "",
+                            `<div data-settings-row="" id="slider" style="height: 64px"></div>
+                            <div class="mx_FontScalingPanel_preview" id="preview">Hey you.</div>`,
+                        ) +
+                        stretched("size", "Image size in the timeline", imageSizes),
+                ),
+            );
+            const insets = (card: string, first: string, last: string): number[] => {
+                const cardBox = box(card);
+                return [
+                    box(first).left - cardBox.left,
+                    box(first).top - cardBox.top,
+                    cardBox.bottom - box(last).bottom,
+                ];
+            };
+            const firstLayout = ".mxLayoutSwitcher_LayoutSelector_LayoutRadio";
+
+            expect(insets("#theme-group-card", "#system", "#theme")).toEqual([16, 12, 16]);
+            expect(insets("#theme-alone-card", "#alone", "#alone")).toEqual([16, 16, 16]);
+            expect(insets("#layout-card", firstLayout, "#compact")).toEqual([16, 16, 12]);
+            expect(insets("#font-card", "#slider", "#preview").slice(1)).toEqual([4, 16]);
+            expect(box("#preview").left - box("#font-card").left).toBe(16);
+            expect(insets("#size-card", "#default", "#default")).toEqual([16, 16, 16]);
+
+            // The cards are the groups' own, and what they hold is 16px apart in all of them
+            for (const card of ["#theme-group-card", "#layout-card", "#size-card"]) {
+                expect(cornerRadii(get(card))).toEqual({ x: 12, y: 12 });
+            }
+            expect(box("#theme").top - box("#system").bottom).toBe(16);
+            const layoutCards = [...document.querySelectorAll(firstLayout)].map((card) => card.getBoundingClientRect());
+            expect(layoutCards[1].top - layoutCards[0].bottom).toBe(16);
+            expect(box("#compact").top - layoutCards[2].bottom).toBe(16);
+            expect(box("#large").left - box("#default").right).toBe(16);
+            expect(box("#preview").top - box("#slider").bottom).toBe(16);
+        });
+
+        it("draws the layouts and the image sizes as the same cards: 1px outlines rounded by 8 under a 44px header", () => {
+            renderTab(
+                theme,
+                section(
+                    "appearance",
+                    "",
+                    stretched("layout", "Message layout", layouts) +
+                        stretched("size", "Image size in the timeline", imageSizes),
+                ),
+            );
+            const cards: [string, string, string][] = [
+                [
+                    ".mxLayoutSwitcher_LayoutSelector_LayoutRadio",
+                    ".mxLayoutSwitcher_LayoutSelector_LayoutRadio_inline > span",
+                    ".mxLayoutSwitcher_LayoutSelector_LayoutRadio_separator",
+                ],
+                ["#large", "#large-label", "#large-drawing"],
+            ];
+
+            for (const [card, label, below] of cards) {
+                const cardBox = box(card);
+                const radio = get(card).querySelector("input")!.getBoundingClientRect();
+                const style = getComputedStyle(get(card));
+
+                expect([style.borderTopStyle, style.borderTopWidth]).toEqual(["solid", "1px"]);
+                expect(style.borderTopColor).toBe(tokenColor("--cpd-color-border-interactive-primary", get(card)));
+                expect(cornerRadii(get(card))).toEqual({ x: 8, y: 8 });
+                expect([radio.left - cardBox.left, radio.top - cardBox.top]).toEqual([12, 12]);
+                expect([radio.width, radio.height]).toEqual([20, 20]);
+                expect(textBox(label).left - radio.right).toBe(12);
+                expect(getComputedStyle(get(label)).fontSize).toBe("15px");
+                expect(getComputedStyle(get(label)).fontWeight).toBe("500");
+                // The 1px separator ends the header
+                const header = below.endsWith("drawing") ? box(below).top : box(below).bottom;
+                expect(header - cardBox.top).toBe(44);
+            }
+        });
+
+        it.each<"ltr" | "rtl">(["ltr", "rtl"])(
+            "lays the image sizes out as two equal cards 16px apart, each drawing flush with its card's edges (%s)",
+            (dir) => {
+                renderTab(theme, section("appearance", "", stretched("size", "Image size", imageSizes)), dir);
                 const edges = contentBox("#size-card");
                 const [first, second] = dir === "ltr" ? ["#default", "#large"] : ["#large", "#default"];
 
@@ -1293,11 +1405,41 @@ describe.each(THEMES.map(([theme]) => theme))("Settings groups in %s", (theme) =
                 expect(box("#default").width).toBe(box("#large").width);
                 for (const id of ["#default", "#large"]) {
                     const drawing = box(`${id}-drawing`);
-                    expect([drawing.left, drawing.right]).toEqual([box(id).left, box(id).right]);
-                    // Scaled with its 221 × 148 drawing
+                    // Inside the 1px outline
+                    expect([drawing.left - box(id).left, box(id).right - drawing.right]).toEqual([1, 1]);
+                    expect(box(id).bottom - drawing.bottom).toBe(1);
+                    // Scaled with its 221 × 148 drawing, and following the card's end corners
                     expect(Math.abs(drawing.height - (drawing.width * 148) / 221)).toBeLessThanOrEqual(0.5);
-                    expect(box(`${id}-radio`).top - drawing.bottom).toBe(12);
+                    expect(getComputedStyle(get(`${id}-drawing`)).borderEndEndRadius).toBe("7px");
                 }
+            },
+        );
+
+        it.each([
+            ["layout", ".mxLayoutSwitcher_LayoutSelector_LayoutRadio", layouts],
+            ["image size", ".mx_ImageSizePanel_choice", imageSizes],
+        ])(
+            "makes a %s card a button all over: hover and pressed fills, and the focus ring around it",
+            async (_, card, group) => {
+                renderTab(theme, section("appearance", "", stretched("group", "Group", group)));
+                const [first, choice] = [...document.querySelectorAll<HTMLElement>(card)];
+                const fill = (token: string): string =>
+                    `linear-gradient(${tokenColor(token, choice)}, ${tokenColor(token, choice)})`;
+
+                await userEvent.hover(choice);
+                expect(getComputedStyle(choice).backgroundImage).toBe(fill("--cpd-color-bg-action-secondary-hovered"));
+                await mouseButton("mousePressed", choice);
+                expect(getComputedStyle(choice).backgroundImage).toBe(fill("--cpd-color-bg-action-secondary-pressed"));
+                await mouseButton("mouseReleased", choice);
+
+                first.querySelector("input")!.focus();
+                await userEvent.keyboard("{ArrowRight}");
+                const ring = getComputedStyle(choice, "::after");
+                expect(document.activeElement).toBe(choice.querySelector("input"));
+                expect([ring.outlineStyle, ring.outlineWidth, ring.outlineOffset]).toEqual(["solid", "2px", "1px"]);
+                expect(ring.outlineColor).toBe(tokenColor("--cpd-color-border-focused", choice));
+                expect(ring.borderTopLeftRadius).toBe("8px");
+                expect(getComputedStyle(choice.querySelector("input + *")!).outlineStyle).toBe("none");
             },
         );
     });

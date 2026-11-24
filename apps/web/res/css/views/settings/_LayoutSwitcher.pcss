@@ -8,6 +8,7 @@ Please see LICENSE files in the repository root for full details.
 */
 
 .mx_LayoutSwitcher_LayoutSelector {
+    @mixin settingsGroupBox;
     display: flex;
     flex-direction: column;
     /**
@@ -17,10 +18,11 @@ Please see LICENSE files in the repository root for full details.
     gap: var(--cpd-space-4x) !important;
 
     .mxLayoutSwitcher_LayoutSelector_LayoutRadio {
+        @mixin choiceCard;
         /* Telement: Compound's outline gray, as on the theme chips, 3:1 or more against the card in every theme, and
            the accent ring around the selected layout */
         border: 1px solid var(--cpd-color-border-interactive-primary);
-        border-radius: var(--cpd-space-2x);
+        border-radius: var(--tl-radius-row);
 
         &:has(input:checked) {
             @mixin selectedChoiceRing;
@@ -28,10 +30,8 @@ Please see LICENSE files in the repository root for full details.
 
         .mxLayoutSwitcher_LayoutSelector_LayoutRadio_inline {
             display: flex;
-            /*
-             * 10px
-             */
-            gap: calc(var(--cpd-space-2x) + var(--cpd-space-0-5x));
+            /* Telement: the label 12px after the radio, as on the theme chips and every other radio */
+            gap: var(--cpd-space-3x);
             align-items: center;
             /* Telement: a 44px header like the theme chips (_ThemeChoicePanel.pcss), its 1px separator included, with
                the radio 12px from the card's top and start, its 1px border included. The row is as tall as the radio,
@@ -40,70 +40,9 @@ Please see LICENSE files in the repository root for full details.
             block-size: 20px;
         }
 
-        /**
-         * Override the event tile style to make it fit in the selector
-         * Tweak also hover style and remove action bar
-         */
         .mxLayoutSwitcher_LayoutSelector_LayoutRadio_EventTilePreview {
+            @mixin settingsMessagePreview;
             margin: var(--cpd-space-3x);
-            pointer-events: none;
-
-            .mx_EventTile {
-                margin: 0;
-
-                /*
-                 * EventTileView applies the content gutter through this
-                 * variable on the shell. Keep the preview's content width
-                 * consistent with the legacy preview override below.
-                 */
-                --event-tile-content-inline-end: 0;
-
-                /**
-                 * Hide the message options and message action bar in the preview
-                 */
-                .mx_ReadReceiptGroup,
-                .mx_MessageActionBar {
-                    display: none;
-                }
-
-                .mx_EventTile_content {
-                    margin-right: 0;
-                    margin-inline-end: 0;
-                }
-
-                &:has([data-event-layout="group"]) {
-                    margin-top: calc(var(--cpd-space-3x) * -1);
-                }
-
-                &:has([data-event-layout="bubble"]) {
-                    /* Telement: no margin of its own, so that the preview's margin puts the bubble as far below the
-                       separator and above the card's bottom as its tail is from the card's end */
-                    flex-shrink: 1;
-
-                    /* Telement: your own bubble sits at the card's end, as your messages do in the timeline, with its
-                       tail ending at the card's inset. The timeline's column for read receipts has no place here. The
-                       fallback, the tail's width, is for stylelint, which doesn't read the tile's own variables. */
-                    .mx_EventTile_line {
-                        margin-inline-end: var(--event-tile-bubble-tail-width, var(--cpd-space-1-5x));
-                    }
-                }
-
-                &:has([data-event-layout="irc"]) {
-                    /*
-                     * The migrated tile keeps an empty timestamp slot for
-                     * IRC alignment. The preview must hide that slot as the
-                     * legacy preview hid its timestamp element.
-                     */
-                    .mx_MessageTimestamp,
-                    [data-testid="event-tile-slot-timestamp"] {
-                        display: none;
-                    }
-                }
-
-                .mx_EventTile_line {
-                    max-width: 100%;
-                }
-            }
         }
 
         .mxLayoutSwitcher_LayoutSelector_LayoutRadio_separator {

@@ -3,7 +3,7 @@
 exports[`<LayoutSwitcher /> > should render 1`] = `
 <DocumentFragment>
   <div
-    class="mx_SettingsSubsection mx_SettingsSubsection_newUi"
+    class="mx_SettingsSubsection"
     data-testid="layoutPanel"
   >
     <div
@@ -16,7 +16,7 @@ exports[`<LayoutSwitcher /> > should render 1`] = `
       </h2>
     </div>
     <div
-      class="mx_SettingsSubsection_content mx_SettingsSubsection_contentStretch mx_SettingsSubsection_content_newUi"
+      class="mx_SettingsSubsection_content mx_SettingsSubsection_contentStretch"
     >
       <form
         class="_root mx_LayoutSwitcher_LayoutSelector"

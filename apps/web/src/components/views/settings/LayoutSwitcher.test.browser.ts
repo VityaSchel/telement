@@ -21,6 +21,7 @@ import eventTileViewStyles from "../../../../../../packages/shared-components/sr
 // The package doesn't export its token stylesheet on its own
 // eslint-disable-next-line no-restricted-imports
 import telementTokens from "../../../../../../packages/shared-components/src/telement/tokens.css?raw";
+import commonStyles from "../../../../res/css/_common.pcss?raw";
 import layoutSwitcherStyles from "../../../../res/css/views/settings/_LayoutSwitcher.pcss?raw";
 import lightTheme from "../../../../res/themes/light/css/_light.pcss?raw";
 import { toBrowserCss } from "../../../test/telement/browserCss";
@@ -82,7 +83,7 @@ describe("The layout switcher's bubble preview", () => {
                 ${eventTileViewStyles.replace(/:global\(([^)]*)\)/g, "$1")}
             }
             @layer app-web {
-                ${toBrowserCss(layoutSwitcherStyles, lightTheme)}
+                ${toBrowserCss(layoutSwitcherStyles, lightTheme, commonStyles)}
             }
         `;
         document.head.append(stylesheet);
@@ -145,6 +146,31 @@ describe("The layout switcher's bubble preview", () => {
         expect([radio.width, radio.height]).toEqual([20, 20]);
         expect([radio.left - card.left, radio.top - card.top]).toEqual([12, 12]);
         expect(separator.top - radio.bottom).toBe(radio.top - card.top - 1);
+    });
+
+    it("writes the message in the weight of the timeline's, not of the label it is in", () => {
+        renderBubbleOption();
+        const label = getComputedStyle(document.querySelector("label")!);
+        const message = getComputedStyle(document.querySelector(".mx_EventTile_body")!);
+
+        expect(label.fontWeight).toBe("500");
+        expect([message.fontWeight, message.fontSize]).toEqual(["400", "15px"]);
+    });
+
+    it.each([
+        // The tile's avatar is 8px inside it, under 18px of padding
+        ["group", { marginInlineStart: "-8px", marginBlockStart: "-12px" }],
+        // The tile pads 4px over its line
+        ["irc", { marginInlineStart: "0px", marginBlockStart: "-4px" }],
+    ])("puts the %s layout's message on the preview's edges", (layout, margins) => {
+        renderBubbleOption();
+        document.querySelector(".mx_EventTile_content")!.setAttribute("data-event-layout", layout);
+        const { marginInlineStart, marginBlockStart, marginInlineEnd, marginBlockEnd } = getComputedStyle(
+            document.querySelector(".mx_EventTile")!,
+        );
+
+        expect({ marginInlineStart, marginBlockStart }).toEqual(margins);
+        expect([marginInlineEnd, marginBlockEnd]).toEqual(["0px", "0px"]);
     });
 
     it("puts your own bubble as far below the separator and above the card's bottom as its tail is from the card's end", () => {
