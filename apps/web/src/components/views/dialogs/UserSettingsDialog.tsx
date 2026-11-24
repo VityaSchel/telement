@@ -57,6 +57,7 @@ import { EncryptionUserSettingsTab, type State } from "../settings/tabs/user/Enc
 import { SettingsSearchViewModel } from "../../../viewmodels/telement/settings/SettingsSearchViewModel";
 import { getSettingsSearchTargets } from "../../../telement/settings/settingsSearchTargets";
 import { revealSetting } from "../../../telement/settings/revealSetting";
+import { refreshMediaDevices } from "../../../telement/media/mediaDevices";
 
 interface IProps {
     initialTabId?: UserTab;
@@ -235,6 +236,11 @@ export default function UserSettingsDialog(props: IProps): JSX.Element {
             }),
     );
     useEffect(() => () => stopRevealing.current?.(), []);
+
+    // Telement: lists the media devices ahead, so that the Voice & video tab opens with them
+    useEffect(() => {
+        if (voipEnabled) void refreshMediaDevices();
+    }, [voipEnabled]);
 
     const [activeToast, toastRack] = useActiveToast();
 

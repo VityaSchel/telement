@@ -177,6 +177,8 @@ export function useMockMediaDevices(): void {
     navigator["mediaDevices"] = {
         enumerateDevices: vi.fn().mockResolvedValue([]),
         getUserMedia: vi.fn(),
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
     };
 }
 

@@ -210,6 +210,16 @@ describe("<UserSettingsDialog />", () => {
         expect(getByTestId(`settings-tab-${UserTab.Voice}`)).toBeTruthy();
     });
 
+    it("lists the media devices as it opens, so that the voip tab opens with them, only when voip is enabled", () => {
+        useMockMediaDevices();
+        render(getComponent()).unmount();
+        expect(navigator.mediaDevices.enumerateDevices).not.toHaveBeenCalled();
+
+        mockSettingsStore.getValue.mockImplementation((settingName: any): any => settingName === UIFeature.Voip);
+        render(getComponent());
+        expect(navigator.mediaDevices.enumerateDevices).toHaveBeenCalledTimes(1);
+    });
+
     it("renders with session manager tab selected", () => {
         const { getByTestId } = render(getComponent({ initialTabId: UserTab.SessionManager }));
         expect(getByTestId(`settings-tab-${UserTab.SessionManager}`)).toBeTruthy();
