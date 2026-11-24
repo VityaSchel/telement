@@ -1923,7 +1923,7 @@
         }
 
         /* Secondary white on a translucent white fill drops under 3:1 in light themes, so what sits on one is white: a
-           code block's language and line numbers and a link preview's description */
+           code block's language, line numbers and buttons and a link preview's description */
         > .slotBody
             :is(
                 :global(.markdown-body) pre,
@@ -1945,12 +1945,11 @@
             --cpd-color-bg-canvas-default: var(--tl-color-bg-bubble-own-subtle-hovered);
         }
 
-        /* Formatted text's links, code, tables and rules have github-markdown-css's and highlight.js's colors, a code
-           block's buttons the dark theme's own gray and a quote's line the border color (secondary white here), from
-           the app's later cascade layer, which only important declarations in this layer override. Links are white and
-           underlined, as the accent they'd be elsewhere is the bubble's color; code is plain white, as syntax colors
-           don't read on blue. A quote's line is white, as the reply quote's is, while its text stays the secondary
-           white. */
+        /* Formatted text's links, code, tables and rules have github-markdown-css's and highlight.js's colors and a
+           quote's line the border color (secondary white here), from the app's later cascade layer, which only
+           important declarations in this layer override. Links are white and underlined, as the accent they'd be
+           elsewhere is the bubble's color; code is plain white, as syntax colors don't read on blue. A quote's line is
+           white, as the reply quote's is, while its text stays the secondary white. */
         > .slotBody :global(.markdown-body) {
             a[href]:not(:global(.mx_Pill)) {
                 text-decoration: underline !important;
@@ -1976,10 +1975,6 @@
 
             hr {
                 background-color: var(--tl-color-separator-bubble-own) !important;
-            }
-
-            :global(.mx_EventTile_button) svg {
-                color: var(--tl-color-on-bubble-own) !important;
             }
         }
 

@@ -5,7 +5,7 @@ SPDX-License-Identifier: AGPL-3.0-only OR GPL-3.0-only
 Please see LICENSE files in the repository root for full details.
 */
 
-import React, { type JSX } from "react";
+import React, { type JSX, useState } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { flushSync } from "react-dom";
 import { createRoot, type Root } from "react-dom/client";
@@ -14,10 +14,11 @@ import { getScrollEdges, type ScrollEdges, useScrollEdges } from "./useScrollEdg
 
 /** A 100px wide scroller of `contentWidth` content, which writes its edges into its data attributes. */
 function Scroller({ dir, contentWidth }: { dir: "ltr" | "rtl"; contentWidth: number }): JSX.Element {
-    const [ref, { hiddenAtStart, hiddenAtEnd }] = useScrollEdges<HTMLDivElement>();
+    const [scroller, setScroller] = useState<HTMLDivElement | null>(null);
+    const { hiddenAtStart, hiddenAtEnd } = useScrollEdges(scroller);
     return (
         <div
-            ref={ref}
+            ref={setScroller}
             dir={dir}
             data-start={hiddenAtStart}
             data-end={hiddenAtEnd}

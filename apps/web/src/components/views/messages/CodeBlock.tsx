@@ -9,17 +9,17 @@ import React, { type JSX, useState } from "react";
 import classNames from "classnames";
 import { type DOMNode, type Element as ParserElement, domToReact } from "html-react-parser";
 import { textContent, getInnerHTML } from "domutils";
+import { IconButton } from "@vector-im/compound-web";
 import { CollapseIcon, CopyIcon, ExpandIcon } from "@vector-im/compound-design-tokens/assets/web/icons";
 
 import { useSettingValue } from "../../../hooks/useSettings.ts";
 import { CopyTextButton } from "../elements/CopyableText.tsx";
-import AccessibleButton from "../elements/AccessibleButton.tsx";
 import { _t } from "../../../i18n";
 import { getCodeBlockLanguage } from "../../../telement/code-block/getCodeBlockLanguage.ts";
+import { useCollapsible } from "../../../telement/code-block/useCollapsible.ts";
 import { useScrollEdges } from "../../../telement/code-block/useScrollEdges.ts";
 
 const MAX_HIGHLIGHT_LENGTH = 4096;
-const MAX_LINES_BEFORE_COLLAPSE = 5;
 
 interface Props {
     preNode: ParserElement;
@@ -29,15 +29,17 @@ const ExpandCollapseButton: React.FC<{
     expanded: boolean;
     onClick(this: void): void;
 }> = ({ expanded, onClick }) => {
+    // Telement: the icon button CopyTextButton is, beside it, so that the two look the same in every state
     return (
-        <AccessibleButton
-            element="button"
-            title={expanded ? _t("action|collapse") : _t("action|expand")}
+        <IconButton
+            tooltip={expanded ? _t("action|collapse") : _t("action|expand")}
             onClick={onClick}
             className="mx_EventTile_button"
+            size="28px"
+            style={{ padding: "4px" }} // CopyTextButton's workaround for the padding of Compound's 28px button
         >
             {expanded ? <CollapseIcon /> : <ExpandIcon />}
-        </AccessibleButton>
+        </IconButton>
     );
 };
 
@@ -46,13 +48,15 @@ const CodeBlock: React.FC<Props> = ({ preNode }) => {
     const showCodeLineNumbers = useSettingValue("showCodeLineNumbers");
     const expandCodeByDefault = useSettingValue("expandCodeByDefault");
     const [expanded, setExpanded] = useState(expandCodeByDefault);
-    const [preRef, scrollEdges] = useScrollEdges<HTMLPreElement>();
+    const [pre, setPre] = useState<HTMLPreElement | null>(null);
+    const scrollEdges = useScrollEdges(pre);
+    const collapsible = useCollapsible(pre);
 
     const text = textContent(preNode);
     const language = getCodeBlockLanguage(preNode);
 
     let expandCollapseButton: JSX.Element | undefined;
-    if (text.split("\n").length >= MAX_LINES_BEFORE_COLLAPSE) {
+    if (collapsible) {
         expandCollapseButton = (
             <ExpandCollapseButton
                 expanded={expanded}
@@ -140,7 +144,7 @@ const CodeBlock: React.FC<Props> = ({ preNode }) => {
                 </CopyTextButton>
             </div>
             <pre
-                ref={preRef}
+                ref={setPre}
                 className={classNames({
                     mx_EventTile_collapsedCodeBlock: !expanded,
                     mx_EventTile_codeBlock_hiddenAtStart: scrollEdges.hiddenAtStart,

@@ -5,7 +5,7 @@ SPDX-License-Identifier: AGPL-3.0-only OR GPL-3.0-only
 Please see LICENSE files in the repository root for full details.
 */
 
-import { type RefCallback, useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 /** Which sides of a horizontally scrolling element have content scrolled out of view. */
 export interface ScrollEdges {
@@ -37,10 +37,9 @@ export function getScrollEdges(element: HTMLElement): ScrollEdges {
 /**
  * Follows which sides of a horizontally scrolling element hide content, as it scrolls, resizes or its content changes,
  * so that the side that has more to show can fade out.
- * @returns A ref for the element, and its edges.
+ * @param element - The element, or null before it is mounted.
  */
-export function useScrollEdges<T extends HTMLElement>(): [RefCallback<T>, ScrollEdges] {
-    const [element, setElement] = useState<T | null>(null);
+export function useScrollEdges(element: HTMLElement | null): ScrollEdges {
     const [edges, setEdges] = useState<ScrollEdges>(NONE);
 
     useEffect(() => {
@@ -71,6 +70,5 @@ export function useScrollEdges<T extends HTMLElement>(): [RefCallback<T>, Scroll
         };
     }, [element]);
 
-    const ref = useCallback((node: T | null) => setElement(node), []);
-    return [ref, edges];
+    return edges;
 }

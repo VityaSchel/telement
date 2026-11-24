@@ -403,21 +403,6 @@ $left-gutter: 64px;
 
         .mx_EventTile_button {
             flex-shrink: 0;
-
-            /* The expand button is the copy button's size, a 20px icon in a 28px box, so their icons line up. */
-            &.mx_AccessibleButton {
-                box-sizing: content-box;
-                width: var(--cpd-space-5x);
-                height: var(--cpd-space-5x);
-                padding: var(--cpd-space-1x);
-            }
-
-            svg {
-                width: inherit;
-                height: inherit;
-                display: block;
-                color: $message-action-bar-fg-color;
-            }
         }
     }
 

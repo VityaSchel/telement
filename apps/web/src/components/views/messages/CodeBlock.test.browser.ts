@@ -10,7 +10,7 @@ import { userEvent } from "vitest/browser";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { IconButton } from "@vector-im/compound-web";
-import { CopyIcon } from "@vector-im/compound-design-tokens/assets/web/icons";
+import { CopyIcon, ExpandIcon } from "@vector-im/compound-design-tokens/assets/web/icons";
 import compoundBase from "@vector-im/compound-design-tokens/assets/web/css/cpd-common-base.css?raw";
 import compoundSemantic from "@vector-im/compound-design-tokens/assets/web/css/cpd-common-semantic.css?raw";
 import compoundLightTheme from "@vector-im/compound-design-tokens/assets/web/css/cpd-theme-light-base.css?raw";
@@ -42,14 +42,18 @@ const CODE_LINES = ["pnpm i18n", "pnpm lint:fmt:fix"];
 /** The block as a whole, its header line and its code, which owns its fill and corners. */
 const BLOCK = ".mx_EventTile_pre_container";
 
-/** CopyTextButton: a Compound IconButton with the code block's button classes. */
-const COPY_BUTTON = renderToStaticMarkup(
-    createElement(
-        IconButton,
-        { className: "mx_EventTile_button mx_EventTile_copyButton", size: "28px", style: { padding: "4px" } },
-        createElement(CopyIcon),
-    ),
-);
+/** A button of the block's header line as CodeBlock and CopyTextButton render it, a Compound IconButton. */
+const headerButton = (label: string, className: string, icon: typeof CopyIcon): string =>
+    renderToStaticMarkup(
+        createElement(
+            IconButton,
+            { "aria-label": label, className, "size": "28px", "style": { padding: "4px" } },
+            createElement(icon),
+        ),
+    );
+
+const EXPAND_BUTTON = headerButton("Expand", "mx_EventTile_button", ExpandIcon);
+const COPY_BUTTON = headerButton("Copy", "mx_EventTile_button mx_EventTile_copyButton", CopyIcon);
 
 /**
  * The block CodeBlock renders in place of a message's `pre`: its header line, with the language the fence names and
@@ -59,7 +63,7 @@ function codeBlock(lines = CODE_LINES, language = "sh"): string {
     const numbers = lines.map((_, i) => `<span>${i + 1}</span>`).join("");
     return `
         <div class="mx_EventTile_pre_container">
-            <div class="mx_EventTile_codeBlockHeader">${language ? `<span class="mx_EventTile_codeBlockLanguage">${language}</span>` : ""}<button class="mx_AccessibleButton mx_EventTile_button" aria-label="Expand"><svg viewBox="0 0 24 24"><path d="M4 4h16v16H4z" /></svg></button>${COPY_BUTTON}</div>
+            <div class="mx_EventTile_codeBlockHeader">${language ? `<span class="mx_EventTile_codeBlockLanguage">${language}</span>` : ""}${EXPAND_BUTTON}${COPY_BUTTON}</div>
             <pre class="mx_EventTile_collapsedCodeBlock"><span class="mx_EventTile_lineNumbers" data-event-tile-line-numbers="true">${numbers}</span><div style="display: contents"><code class="language-${language}">${lines.join("\n")}
 </code></div></pre>
         </div>
@@ -412,6 +416,27 @@ describe("Code in a message", () => {
         for (const button of document.querySelectorAll(".mx_EventTile_button")) {
             expect(getComputedStyle(button).visibility).toBe("visible");
         }
+    });
+
+    it.each([
+        ["light", "cpd-theme-light"],
+        ["dark", "cpd-theme-dark"],
+    ])("draws the expand and copy icons in the same gray in the %s theme, darker on hover", async (_, theme) => {
+        render(MESSAGE, "", theme);
+        const header = document.querySelector(".mx_EventTile_codeBlockHeader")!;
+        const buttons = [...header.querySelectorAll<HTMLElement>(".mx_EventTile_button")];
+        const iconColors = (): string[] =>
+            buttons.map((button) => getComputedStyle(button.querySelector("svg path")!).color);
+
+        expect(buttons).toHaveLength(2);
+        const secondary = tokenColor("--cpd-color-icon-secondary", header);
+        expect(iconColors()).toEqual([secondary, secondary]);
+        const primary = tokenColor("--cpd-color-icon-primary", header);
+        for (const button of buttons) {
+            await userEvent.hover(button);
+            expect(iconColors()).toEqual(buttons.map((hovered) => (hovered === button ? primary : secondary)));
+        }
+        await userEvent.unhover(header);
     });
 
     it("names the fence's language at the start of the header line, in 13px secondary text on the code's 12px edge", () => {

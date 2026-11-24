@@ -16,6 +16,7 @@ import {
     DocumentIcon,
     DownloadIcon,
     ErrorSolidIcon,
+    ExpandIcon,
     ItalicIcon,
     LockSolidIcon,
     PinSolidIcon,
@@ -347,10 +348,16 @@ const REPLY = `
     </blockquote>
 `;
 
-/** A code block as CodeBlock renders it, with line numbers, syntax highlighting and its copy button. */
+/** A button of a code block's header line as CodeBlock and CopyTextButton render it, a Compound IconButton. */
+const codeBlockButton = (className: string, Icon: ComponentType<SVGProps<SVGSVGElement>>): string =>
+    renderToStaticMarkup(
+        createElement(IconButton, { className, size: "28px", style: { padding: "4px" } }, createElement(Icon)),
+    );
+
+/** A code block as CodeBlock renders it, with line numbers, syntax highlighting and its expand and copy buttons. */
 const CODE = `
     <div class="mx_EventTile_pre_container">
-        <div class="mx_EventTile_codeBlockHeader"><span class="mx_EventTile_codeBlockLanguage">ts</span><div role="button" class="mx_AccessibleButton mx_EventTile_button mx_EventTile_copyButton">${icon(CopyIcon)}</div></div>
+        <div class="mx_EventTile_codeBlockHeader"><span class="mx_EventTile_codeBlockLanguage">ts</span>${codeBlockButton("mx_EventTile_button", ExpandIcon)}${codeBlockButton("mx_EventTile_button mx_EventTile_copyButton", CopyIcon)}</div>
         <pre><span class="mx_EventTile_lineNumbers"><span>1</span></span><div style="display: contents"><code class="language-ts"><span class="hljs-keyword">const</span> accent = <span class="hljs-string">"#2481cc"</span>;
 </code></div></pre>
     </div>
@@ -689,7 +696,8 @@ describe("Your own bubbles", () => {
             expect(color(list.querySelector(".mx_EventTile_lineNumbers"))).toBe(WHITE);
             expect(color(list.querySelector(".mx_EventTile_codeBlockLanguage"))).toBe(WHITE);
             expect(contrast(WHITE, composite(fill(block), theme.fill))).toBeGreaterThanOrEqual(3);
-            expect(color(list.querySelector(".mx_EventTile_copyButton svg"))).toBe(WHITE);
+            const buttonIcons = [...list.querySelectorAll(".mx_EventTile_button svg path")];
+            expect(new Set(buttonIcons.map(color))).toEqual(new Set([WHITE]));
             // The header's line is a translucent white too
             expect(
                 channels(
