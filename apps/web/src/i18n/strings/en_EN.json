@@ -2640,7 +2640,6 @@
             "mentions_keywords": "Mentions and Keywords",
             "mentions_keywords_only": "Mentions and Keywords only",
             "messages_containing_keywords": "Messages containing keywords",
-            "noisy": "Noisy",
             "notices": "Messages sent by bots",
             "notify_at_room": "Notify when someone mentions using @room",
             "notify_keyword": "Notify when someone uses a keyword",
@@ -3206,7 +3205,8 @@
             "show_results": "Show results"
         },
         "settings": {
-            "notification_exceptions": "Rooms with their own setting"
+            "notification_exceptions": "Rooms with their own setting",
+            "notification_silent": "Silent"
         },
         "space_home": {
             "empty_description": "Add an existing room or create a new one.",

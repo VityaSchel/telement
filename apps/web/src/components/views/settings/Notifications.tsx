@@ -769,10 +769,11 @@ export default class Notifications extends React.PureComponent<EmptyObject, ISta
             );
         }
 
+        // Telement: what notifies with a sound is "On" and what notifies without one "Silent", rather than "Noisy" and "On"
         const VectorStateToLabel = {
-            [VectorState.On]: _t("common|on"),
+            [VectorState.On]: _t("telement|settings|notification_silent"),
             [VectorState.Off]: _t("common|off"),
-            [VectorState.Loud]: _t("settings|notifications|noisy"),
+            [VectorState.Loud]: _t("common|on"),
         };
 
         const makeRadio = (r: IVectorPushRule, s: VectorState): JSX.Element => (

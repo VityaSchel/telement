@@ -153,16 +153,16 @@ export function mentionNotificationSettingsTests(legacyRulesServed: boolean): vo
         }
         await expect(settings.getByText("Messages containing my display name")).toHaveCount(legacyRulesServed ? 1 : 0);
 
-        // Both rows default to 'Noisy'
-        await expect(userMentionRow.getByRole("radio", { name: "Noisy", exact: true })).toBeChecked();
-        await expect(roomMentionRow.getByRole("radio", { name: "Noisy", exact: true })).toBeChecked();
+        // Both rows default to 'On'
+        await expect(userMentionRow.getByRole("radio", { name: "On", exact: true })).toBeChecked();
+        await expect(roomMentionRow.getByRole("radio", { name: "On", exact: true })).toBeChecked();
 
-        // Turn user mentions off and @room mentions down to 'On'
+        // Turn user mentions off and @room mentions down to 'Silent'
         await radioLabel(userMentionRow, "Off").click();
         await expect(userMentionRow.getByRole("radio", { name: "Off", exact: true })).toBeChecked();
         await expect(userMentionRow.getByText(UPDATE_ERROR)).toHaveCount(0);
-        await radioLabel(roomMentionRow, "On").click();
-        await expect(roomMentionRow.getByRole("radio", { name: "On", exact: true })).toBeChecked();
+        await radioLabel(roomMentionRow, "Silent").click();
+        await expect(roomMentionRow.getByRole("radio", { name: "Silent", exact: true })).toBeChecked();
         await expect(roomMentionRow.getByText(UPDATE_ERROR)).toHaveCount(0);
 
         // The intentional rules were written, and the legacy rules only if the server serves them
@@ -189,8 +189,8 @@ export function mentionNotificationSettingsTests(legacyRulesServed: boolean): vo
 
         // Turn user mentions back on
         await app.settings.openUserSettings("Notifications");
-        await radioLabel(userMentionRow, "Noisy").click();
-        await expect(userMentionRow.getByRole("radio", { name: "Noisy", exact: true })).toBeChecked();
+        await radioLabel(userMentionRow, "On").click();
+        await expect(userMentionRow.getByRole("radio", { name: "On", exact: true })).toBeChecked();
         rules = await fetchRules();
         expect(rules.get(USER_MENTION_RULE)!.enabled).toBe(true);
         if (legacyRulesServed) {
@@ -251,7 +251,7 @@ export function mentionNotificationSettingsTransitionTests(): void {
 
         // The open tab still shows the legacy rows; the next change goes through one of them
         const legacyRoomRow = settings.getByTestId(`vector_mentions${LEGACY_ROOM_MENTION_RULE}`);
-        await radioLabel(legacyRoomRow, "On").click();
+        await radioLabel(legacyRoomRow, "Silent").click();
 
         // After the write the page re-reads the rules and switches to the intentional rows
         const userMentionRow = settings.getByTestId(`vector_mentions${USER_MENTION_RULE}`);
@@ -265,7 +265,7 @@ export function mentionNotificationSettingsTransitionTests(): void {
 
         // The preference set before the switch survives it, and the change made during it applied
         await expect(userMentionRow.getByRole("radio", { name: "Off", exact: true })).toBeChecked();
-        await expect(roomMentionRow.getByRole("radio", { name: "On", exact: true })).toBeChecked();
+        await expect(roomMentionRow.getByRole("radio", { name: "Silent", exact: true })).toBeChecked();
         rules = await fetchRules();
         expect(rules.get(USER_MENTION_RULE)!.enabled).toBe(false);
         expect(rules.get(ROOM_MENTION_RULE)!.actions).toEqual(["notify", { set_tweak: "highlight", value: false }]);

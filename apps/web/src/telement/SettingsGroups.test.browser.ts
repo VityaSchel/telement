@@ -1191,11 +1191,11 @@ describe.each(THEMES.map(([theme]) => theme))("Settings groups in %s", (theme) =
                         <div class="mx_SettingsSubsection_content mx_SettingsSubsection_contentStretch" id="mentions-card">
                             <div class="mx_UserNotifSettings_grid" id="grid">
                                 <span class="mx_UserNotifSettings_gridColumnLabel" id="off">Off</span>
+                                <span class="mx_UserNotifSettings_gridColumnLabel">Silent</span>
                                 <span class="mx_UserNotifSettings_gridColumnLabel">On</span>
-                                <span class="mx_UserNotifSettings_gridColumnLabel" id="noisy">Noisy</span>
                                 <fieldset class="mx_UserNotifSettings_gridRowContainer">
                                     <legend class="mx_UserNotifSettings_gridRowLabel" id="rule">Messages containing keywords</legend>
-                                    ${radio("off")}${radio("on")}${radio("noisy")}
+                                    ${radio("off")}${radio("silent")}${radio("on")}
                                 </fieldset>
                             </div>
                             <div class="mx_TagComposer" id="keywords">

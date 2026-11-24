@@ -568,6 +568,20 @@ describe("<Notifications />", () => {
             }
         });
 
+        it("names the columns Off, Silent and On, as each radio", async () => {
+            await getComponentAndWait();
+
+            for (const section of ["vector_global", "vector_mentions", "vector_other"]) {
+                const grid = screen.getByTestId(`notif-section-${section}`);
+                const columns = [...grid.querySelectorAll(".mx_UserNotifSettings_gridColumnLabel")];
+                expect(columns.map((column) => column.textContent)).toEqual(["Off", "Silent", "On"]);
+                for (const rule of grid.querySelectorAll("fieldset")) {
+                    const radios = within(rule).getAllByRole("radio");
+                    expect(radios.map((radio) => radio.getAttribute("aria-label"))).toEqual(["Off", "Silent", "On"]);
+                }
+            }
+        });
+
         it("renders radios correctly", async () => {
             await getComponentAndWait();
             const section = "vector_global";
@@ -577,10 +591,10 @@ describe("<Notifications />", () => {
             expect(globalSection.querySelectorAll("fieldset").length).toEqual(4);
             // oneToOneRule is set to 'on'
             const oneToOneRuleElement = screen.getByTestId(section + oneToOneRule.rule_id);
-            expect(oneToOneRuleElement.querySelector("[aria-label='On']")).toBeInTheDocument();
+            expect(oneToOneRuleElement.querySelector("[aria-label='Silent']")).toBeInTheDocument();
             // encryptedOneToOneRule is set to 'loud'
             const encryptedOneToOneElement = screen.getByTestId(section + encryptedOneToOneRule.rule_id);
-            expect(encryptedOneToOneElement.querySelector("[aria-label='Noisy']")).toBeInTheDocument();
+            expect(encryptedOneToOneElement.querySelector("[aria-label='On']")).toBeInTheDocument();
             // encryptedGroupRule is set to 'off'
             const encryptedGroupElement = screen.getByTestId(section + encryptedGroupRule.rule_id);
             expect(encryptedGroupElement.querySelector("[aria-label='Off']")).toBeInTheDocument();
@@ -634,7 +648,7 @@ describe("<Notifications />", () => {
             // error message attached to oneToOne rule
             const oneToOneRuleElement = screen.getByTestId(section + oneToOneRule.rule_id);
             // old value still shown as selected
-            expect(within(oneToOneRuleElement).getByLabelText("On")).toBeChecked();
+            expect(within(oneToOneRuleElement).getByLabelText("Silent")).toBeChecked();
             expect(
                 within(oneToOneRuleElement).getByText(
                     "An error occurred when updating your notification preferences. Please try to toggle your option again.",
@@ -847,7 +861,7 @@ describe("<Notifications />", () => {
                 const oneToOneRuleElement = screen.getByTestId(section + oneToOneRule.rule_id);
 
                 // loudest state of synced rules should be the toggle value
-                expect(oneToOneRuleElement.querySelector('input[aria-label="On"]')).toBeChecked();
+                expect(oneToOneRuleElement.querySelector('input[aria-label="Silent"]')).toBeChecked();
             });
 
             it("sets the UI toggle to the loudest synced rule value", async () => {
@@ -859,9 +873,9 @@ describe("<Notifications />", () => {
                 const oneToOneRuleElement = screen.getByTestId(section + oneToOneRule.rule_id);
 
                 // loudest state of synced rules should be the toggle value
-                expect(oneToOneRuleElement.querySelector('input[aria-label="Noisy"]')).toBeChecked();
+                expect(oneToOneRuleElement.querySelector('input[aria-label="On"]')).toBeChecked();
 
-                const onToggle = oneToOneRuleElement.querySelector('input[aria-label="On"]')!;
+                const onToggle = oneToOneRuleElement.querySelector('input[aria-label="Silent"]')!;
                 fireEvent.click(onToggle);
 
                 await flushPromises();
@@ -932,15 +946,15 @@ describe("<Notifications />", () => {
 
                 const userNameElement = screen.getByTestId(section + RuleId.ContainsUserName);
                 expect(within(userNameElement).getByText("@mentions and replies")).toBeInTheDocument();
-                expect(userNameElement.querySelector('input[aria-label="Noisy"]')).toBeChecked();
+                expect(userNameElement.querySelector('input[aria-label="On"]')).toBeChecked();
 
                 const roomNotifElement = screen.getByTestId(section + RuleId.AtRoomNotification);
                 expect(within(roomNotifElement).getByText("@room mentions")).toBeInTheDocument();
-                expect(roomNotifElement.querySelector('input[aria-label="Noisy"]')).toBeChecked();
+                expect(roomNotifElement.querySelector('input[aria-label="On"]')).toBeChecked();
 
                 const displayNameElement = screen.getByTestId(section + RuleId.ContainsDisplayName);
                 expect(within(displayNameElement).getByText("Messages containing my display name")).toBeInTheDocument();
-                expect(displayNameElement.querySelector('input[aria-label="Noisy"]')).toBeChecked();
+                expect(displayNameElement.querySelector('input[aria-label="On"]')).toBeChecked();
 
                 // the intentional rules are synced rules of the legacy rows, not rows of their own
                 expect(screen.queryByTestId(section + RuleId.IsUserMention)).not.toBeInTheDocument();
@@ -958,9 +972,9 @@ describe("<Notifications />", () => {
                 await getComponentAndWait();
 
                 const userNameElement = screen.getByTestId(section + RuleId.ContainsUserName);
-                expect(userNameElement.querySelector('input[aria-label="Noisy"]')).toBeChecked();
+                expect(userNameElement.querySelector('input[aria-label="On"]')).toBeChecked();
                 const roomNotifElement = screen.getByTestId(section + RuleId.AtRoomNotification);
-                expect(roomNotifElement.querySelector('input[aria-label="Noisy"]')).toBeChecked();
+                expect(roomNotifElement.querySelector('input[aria-label="On"]')).toBeChecked();
             });
 
             it("updates the intentional rules along with the legacy ones", async () => {
@@ -968,7 +982,7 @@ describe("<Notifications />", () => {
                 const userNameElement = screen.getByTestId(section + RuleId.ContainsUserName);
                 const roomNotifElement = screen.getByTestId(section + RuleId.AtRoomNotification);
 
-                fireEvent.click(userNameElement.querySelector('input[aria-label="On"]')!);
+                fireEvent.click(userNameElement.querySelector('input[aria-label="Silent"]')!);
                 await flushPromises();
                 fireEvent.click(roomNotifElement.querySelector('input[aria-label="Off"]')!);
                 await flushPromises();
@@ -1064,11 +1078,11 @@ describe("<Notifications />", () => {
 
                     const userMentionElement = screen.getByTestId(section + RuleId.IsUserMention);
                     expect(within(userMentionElement).getByText("@mentions and replies")).toBeInTheDocument();
-                    expect(userMentionElement.querySelector('input[aria-label="Noisy"]')).toBeChecked();
+                    expect(userMentionElement.querySelector('input[aria-label="On"]')).toBeChecked();
 
                     const roomMentionElement = screen.getByTestId(section + RuleId.IsRoomMention);
                     expect(within(roomMentionElement).getByText("@room mentions")).toBeInTheDocument();
-                    expect(roomMentionElement.querySelector('input[aria-label="Noisy"]')).toBeChecked();
+                    expect(roomMentionElement.querySelector('input[aria-label="On"]')).toBeChecked();
 
                     for (const ruleId of legacyMentionRuleIds) {
                         expect(screen.queryByTestId(section + ruleId)).not.toBeInTheDocument();
@@ -1081,7 +1095,7 @@ describe("<Notifications />", () => {
                     const userMentionElement = screen.getByTestId(section + RuleId.IsUserMention);
                     const roomMentionElement = screen.getByTestId(section + RuleId.IsRoomMention);
 
-                    fireEvent.click(userMentionElement.querySelector('input[aria-label="On"]')!);
+                    fireEvent.click(userMentionElement.querySelector('input[aria-label="Silent"]')!);
                     await flushPromises();
                     fireEvent.click(roomMentionElement.querySelector('input[aria-label="Off"]')!);
                     await flushPromises();
@@ -1113,7 +1127,7 @@ describe("<Notifications />", () => {
 
             await flushPromises();
 
-            fireEvent.click(within(screen.getByTestId(section + keywordsRuleId)).getByLabelText("Noisy"));
+            fireEvent.click(within(screen.getByTestId(section + keywordsRuleId)).getByLabelText("On"));
 
             expect(mockClient.setPushRuleActions).toHaveBeenCalledWith(
                 "global",
