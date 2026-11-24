@@ -1,0 +1,150 @@
+/*
+Copyright 2026 Viktor Shchelochkov
+
+SPDX-License-Identifier: AGPL-3.0-only OR GPL-3.0-only
+Please see LICENSE files in the repository root for full details.
+*/
+
+/*
+ * On the card's content edge, where a settings row's label and value are (SettingsRow.module.css), its label's line as far
+ * from the card's edge as a 44px row's would be in a text row: 8px inside the row, which a card puts 4px from its top.
+ */
+.row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: var(--cpd-space-1x) var(--cpd-space-3x);
+    inline-size: 100%;
+    box-sizing: border-box;
+    padding-block: var(--cpd-space-2x) var(--cpd-space-1x);
+    color: var(--cpd-color-text-primary);
+    font: var(--cpd-font-body-md-regular);
+    letter-spacing: var(--cpd-font-letter-spacing-body-md);
+}
+
+/* Digits of one width, so that the value doesn't move while the slider is dragged */
+.value {
+    font-variant-numeric: tabular-nums;
+}
+
+.slider {
+    display: flex;
+    grid-column: 1 / -1;
+    align-items: center;
+    gap: var(--cpd-space-3x);
+}
+
+.adornment {
+    flex: none;
+    color: var(--cpd-color-text-secondary);
+}
+
+/*
+ * The app's sliders' look (SeekBar, VideoLightboxView): a thin track, filled up to the thumb in the accent as the thumb is.
+ * The rest of the track is the switches' off gray. --slider-fill is how far the thumb is, from 0 to 1; the thumb's middle
+ * stays its radius inside the track's ends.
+ */
+.range {
+    --slider-track: var(--cpd-space-1x);
+    --slider-thumb: var(--cpd-space-4x);
+    --slider-fill-end: calc(var(--slider-thumb) / 2 + (100% - var(--slider-thumb)) * var(--slider-fill, 0));
+    --slider-rest: var(--tl-color-bg-switch-off, var(--cpd-color-separator-primary));
+    --slider-direction: to right;
+
+    appearance: none;
+    flex: 1;
+    min-inline-size: 0;
+    block-size: var(--cpd-space-6x);
+    margin: 0;
+    background: transparent;
+
+    &:dir(rtl) {
+        --slider-direction: to left;
+    }
+
+    &:focus-visible {
+        outline: none;
+    }
+}
+
+.range::-webkit-slider-runnable-track {
+    box-sizing: border-box;
+    block-size: var(--slider-track);
+    border-radius: var(--tl-radius-control);
+    background: linear-gradient(
+        var(--slider-direction),
+        var(--cpd-color-bg-accent-rest) var(--slider-fill-end),
+        var(--slider-rest) var(--slider-fill-end)
+    );
+}
+
+.range::-moz-range-track {
+    box-sizing: border-box;
+    block-size: var(--slider-track);
+    border-radius: var(--tl-radius-control);
+    background: linear-gradient(
+        var(--slider-direction),
+        var(--cpd-color-bg-accent-rest) var(--slider-fill-end),
+        var(--slider-rest) var(--slider-fill-end)
+    );
+}
+
+.range::-webkit-slider-thumb {
+    appearance: none;
+    box-sizing: border-box;
+    inline-size: var(--slider-thumb);
+    block-size: var(--slider-thumb);
+    margin-block-start: calc((var(--slider-track) - var(--slider-thumb)) / 2);
+    border: none;
+    border-radius: var(--tl-radius-control);
+    background-color: var(--cpd-color-bg-accent-rest);
+}
+
+.range::-moz-range-thumb {
+    box-sizing: border-box;
+    inline-size: var(--slider-thumb);
+    block-size: var(--slider-thumb);
+    border: none;
+    border-radius: var(--tl-radius-control);
+    background-color: var(--cpd-color-bg-accent-rest);
+}
+
+.range:hover::-webkit-slider-thumb {
+    background-color: var(--cpd-color-bg-accent-hovered);
+}
+
+.range:hover::-moz-range-thumb {
+    background-color: var(--cpd-color-bg-accent-hovered);
+}
+
+/* Compound's focus ring, around the thumb */
+.range:focus-visible::-webkit-slider-thumb {
+    outline: var(--cpd-border-width-2) solid var(--cpd-color-border-focused);
+    outline-offset: 1px;
+}
+
+.range:focus-visible::-moz-range-thumb {
+    outline: var(--cpd-border-width-2) solid var(--cpd-color-border-focused);
+    outline-offset: 1px;
+}
+
+/* Forced colors drop the fills */
+@media (forced-colors: active) {
+    .range::-webkit-slider-runnable-track {
+        border: 1px solid ButtonBorder;
+    }
+
+    .range::-moz-range-track {
+        border: 1px solid ButtonBorder;
+    }
+
+    .range::-webkit-slider-thumb {
+        forced-color-adjust: none;
+        background-color: Highlight;
+        margin-block-start: calc((var(--slider-track) - var(--slider-thumb)) / 2 - 1px);
+    }
+
+    .range::-moz-range-thumb {
+        forced-color-adjust: none;
+        background-color: Highlight;
+    }
+}

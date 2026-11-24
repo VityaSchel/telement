@@ -30,15 +30,19 @@ import { tokenColor } from "../../../test/telement/computedStyle";
  * The font size preview card with your own message in a bubble, as EventTilePreview renders it: the last of its run.
  * It is on the settings dialog's surface, raised a gray step in dark themes as .mx_Dialog is (_common.pcss).
  */
-const preview = (theme = "cpd-theme-light"): string => `
+const preview = (theme = "cpd-theme-light", zoom = 1): string => `
     <div class="${theme}" style="width: 480px">
         <div class="raised">
-            <div class="mx_FontScalingPanel_preview" role="presentation">
-                <div class="root mx_EventTile stateOwnEvent stateLastInSection layoutBubble">
-                    <div class="line mx_EventTile_line">
-                        <div class="slotBody">
-                            <div class="mx_MTextBody mx_EventTile_content" data-event-layout="bubble">
-                                <div class="mx_EventTile_body">Hey you. You're the best!</div>
+            <div class="mx_FontScalingPanel_preview">
+                <div style="zoom: ${zoom}">
+                    <div role="presentation">
+                        <div class="root mx_EventTile stateOwnEvent stateLastInSection layoutBubble">
+                            <div class="line mx_EventTile_line">
+                                <div class="slotBody">
+                                    <div class="mx_MTextBody mx_EventTile_content" data-event-layout="bubble">
+                                        <div class="mx_EventTile_body">Hey you. You're the best!</div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -128,6 +132,31 @@ describe("The font size preview", () => {
             bubble.getBoundingClientRect().top - card.top,
             card.bottom - bubble.getBoundingClientRect().bottom,
         ]).toEqual([endInset, endInset]);
+    });
+
+    it("scales the message alone while a size is chosen, and keeps the card's outline and insets", () => {
+        document.body.innerHTML = PREVIEW;
+        const { height } = document.querySelector(".line")!.getBoundingClientRect();
+        document.body.innerHTML = preview("cpd-theme-light", 1.5);
+        const card = cardInner(document.querySelector(".mx_FontScalingPanel_preview")!);
+        const bubble = document.querySelector(".line")!.getBoundingClientRect();
+
+        expect(bubble.height).toBeCloseTo(height * 1.5, 0);
+        expect([bubble.top - card.top, card.bottom - bubble.bottom]).toEqual([12, 12]);
+        expect(getComputedStyle(document.querySelector(".mx_FontScalingPanel_preview")!).borderTopWidth).toBe("1px");
+    });
+
+    it("draws the slider's ends as letters in the settings' smallest and largest text", () => {
+        document.body.innerHTML = `
+            <div class="cpd-theme-light">
+                <span class="mx_FontScalingPanel_smallLetter">A</span><span class="mx_FontScalingPanel_largeLetter">A</span>
+            </div>
+        `;
+
+        expect([...document.querySelectorAll("span")].map((letter) => getComputedStyle(letter).fontSize)).toEqual([
+            "13px",
+            "20px",
+        ]);
     });
 
     it("rounds the card by 8, as the layout cards above it", () => {

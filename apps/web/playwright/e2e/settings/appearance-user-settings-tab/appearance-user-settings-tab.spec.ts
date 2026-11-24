@@ -31,19 +31,20 @@ test.describe("Appearance user settings tab", () => {
     });
 
     test(
-        "should support changing font size by using the font size dropdown",
+        "should support changing font size by using the font size slider",
         { tag: "@screenshot" },
         async ({ page, app, user }) => {
             await rejectToast(page, "Verify this device");
             await app.settings.openUserSettings("Appearance");
 
             const tab = page.getByTestId("mx_AppearanceUserSettingsTab");
-            const fontDropdown = tab.locator(".mx_FontScalingPanel_Dropdown");
-            await expect(fontDropdown.getByLabel("Font size")).toBeVisible();
+            const slider = tab.getByRole("slider", { name: "Font size" });
+            await expect(slider).toHaveAttribute("aria-valuetext", "16 (default)");
 
-            // Default browser font size is 16px and the select value is 0
-            // -4 value is 12px
-            await fontDropdown.getByLabel("Font size").selectOption({ value: "-4" });
+            // Default browser font size is 16px, four steps above 12px
+            for (let step = 0; step < 4; step++) await slider.press("ArrowLeft");
+            await expect(slider).toHaveAttribute("aria-valuetext", "12");
+            await expect(page.locator(":root")).toHaveCSS("font-size", "12px");
 
             await expect(page).toMatchScreenshot("window-12px.png", { includeDialogBackground: true });
         },

@@ -18,7 +18,7 @@ import { FilterableChoices, type ValueRowChoice } from "./FilterableChoices";
 import { ValueRowMenuItem } from "./ValueRowMenuItem";
 import styles from "./ValueRowView.module.css";
 
-/** A menu of more options than this starts with a search pill that filters them. The 19 font sizes have none. */
+/** A menu of more options than this starts with a search pill that filters them. */
 const MAX_OPTIONS_WITHOUT_FILTER = 20;
 
 /** One of the choices a {@link ValueRowView} offers in its menu. */
@@ -104,7 +104,7 @@ export interface ValueRowViewProps {
  *
  * @example
  * ```tsx
- * <ValueRowView vm={fontSizeRowViewModel} />
+ * <ValueRowView vm={cameraRowViewModel} />
  * ```
  */
 export function ValueRowView({ vm, className }: Readonly<ValueRowViewProps>): JSX.Element {

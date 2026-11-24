@@ -24,5 +24,6 @@ export * from "./room-list/RoomListSyncStatusView";
 export * from "./media/VideoLightboxView";
 export * from "./settings/ValueRowView";
 export * from "./settings/ActionRowView";
+export * from "./settings/SliderRowView";
 export * from "./media/MediaDownloadProgressView";
 export * from "./settings/SettingsSearchView";

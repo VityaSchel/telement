@@ -9,71 +9,137 @@ exports[`FontScalingPanel > renders the font scaling UI 1`] = `
     <div
       class="mx_SettingsSubsection_content mx_SettingsSubsection_contentStretch"
     >
-      <button
-        aria-expanded="false"
-        aria-haspopup="menu"
-        class="_row _interactive"
-        data-settings-row=""
-        data-state="closed"
-        id="radix-react-use-id-1"
-        type="button"
-      >
-        <span
-          class="_text"
-        >
-          <span
-            class="_label"
-          >
-            Font size
-          </span>
-        </span>
-        <span
-          class="_end"
-        >
-          <span
-            class="_value"
-          >
-            16 (default)
-          </span>
-          <svg
-            aria-hidden="true"
-            class="_chevron"
-            fill="currentColor"
-            height="1em"
-            viewBox="0 0 24 24"
-            width="1em"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M12 14.95q-.2 0-.375-.062a.9.9 0 0 1-.325-.213l-4.6-4.6a.95.95 0 0 1-.275-.7q0-.425.275-.7a.95.95 0 0 1 .7-.275q.425 0 .7.275l3.9 3.9 3.9-3.9a.95.95 0 0 1 .7-.275q.425 0 .7.275a.95.95 0 0 1 .275.7.95.95 0 0 1-.275.7l-4.6 4.6q-.15.15-.325.212a1.1 1.1 0 0 1-.375.063"
-            />
-          </svg>
-        </span>
-      </button>
       <div
-        class="mx_FontScalingPanel_preview mx_EventTilePreview_loader"
+        class="_row"
+        data-settings-row=""
+      >
+        <label
+          class="_label"
+          for="react-use-id-1"
+        >
+          Font size
+        </label>
+        <span
+          aria-hidden="true"
+          class="_value _value"
+        >
+          16 (default)
+        </span>
+        <div
+          class="_slider"
+        >
+          <span
+            aria-hidden="true"
+            class="_adornment"
+          >
+            <span
+              class="mx_FontScalingPanel_smallLetter"
+            >
+              A
+            </span>
+          </span>
+          <input
+            aria-valuetext="16 (default)"
+            class="_range"
+            id="react-use-id-1"
+            max="18"
+            min="0"
+            step="1"
+            style="--slider-fill: 0.3888888888888889;"
+            type="range"
+            value="7"
+          />
+          <span
+            aria-hidden="true"
+            class="_adornment"
+          >
+            <span
+              class="mx_FontScalingPanel_largeLetter"
+            >
+              A
+            </span>
+          </span>
+        </div>
+      </div>
+      <div
+        class="mx_FontScalingPanel_preview"
       >
         <div
-          class="mx_Spinner"
+          style="zoom: 1;"
         >
-          <svg
-            aria-label="Loading…"
-            class="_icon"
-            data-testid="spinner"
-            fill="currentColor"
-            height="1em"
-            role="progressbar"
-            style="width: 32px; height: 32px;"
-            viewBox="0 0 24 24"
-            width="1em"
-            xmlns="http://www.w3.org/2000/svg"
+          <div
+            class=""
+            role="presentation"
           >
-            <path
-              clip-rule="evenodd"
-              d="M12 4.031a8 8 0 1 0 8 8 1 1 0 0 1 2 0c0 5.523-4.477 10-10 10s-10-4.477-10-10 4.477-10 10-10a1 1 0 1 1 0 2"
-              fill-rule="evenodd"
-            />
-          </svg>
+            <div
+              aria-atomic="true"
+              aria-live="off"
+              class="_root mx_EventTile _stateOwnEvent _stateLastInSection _layoutBubble"
+              data-event-id="$9999999999999999999999999999999999999999999"
+              data-scroll-tokens="$9999999999999999999999999999999999999999999"
+              data-testid="event-tile"
+              tabindex="-1"
+            >
+              <div
+                class="_slotSender"
+                data-testid="event-tile-slot-sender"
+              >
+                <div
+                  class="mx_DisambiguatedProfile _disambiguatedProfile"
+                  data-event-density="default"
+                  data-event-layout="bubble"
+                  role="button"
+                  tabindex="0"
+                >
+                  <span
+                    class="mx_Username_color2 _disambiguatedProfile_displayName mx_DisambiguatedProfile_displayName"
+                    dir="auto"
+                  >
+                    @userId:matrix.org
+                  </span>
+                </div>
+              </div>
+              <div
+                class="_line mx_EventTile_line"
+                data-testid="event-tile-line"
+                id="1"
+              >
+                <div
+                  class="_slotBody"
+                  data-testid="event-tile-slot-body"
+                >
+                  <div
+                    class="mx_MTextBody mx_EventTile_content _root _text"
+                    data-event-density="default"
+                    data-event-layout="bubble"
+                  >
+                    <div
+                      class="mx_EventTile_body translate"
+                      dir="auto"
+                    >
+                      Hey you. You're the best!
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div
+                class="_slotAvatar"
+                data-testid="event-tile-slot-avatar"
+              >
+                <span
+                  class="_avatar mx_BaseAvatar _avatar-imageless"
+                  data-color="2"
+                  data-testid="avatar-img"
+                  data-type="round"
+                  role="presentation"
+                  style="--cpd-avatar-size: 32px;"
+                  title="@userId:matrix.org"
+                >
+                  u
+                </span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
