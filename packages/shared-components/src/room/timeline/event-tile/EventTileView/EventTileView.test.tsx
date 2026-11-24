@@ -848,6 +848,22 @@ describe("EventTileView", () => {
         expect(onContextMenu).toHaveBeenCalledTimes(4);
     });
 
+    it.each(["Room", "Thread"] as const)("focuses a %s row that is right-clicked", async (shape) => {
+        const { container, getByTestId } = render(
+            // What holds the timeline is focusable too, and would take the focus from a row that isn't
+            <div tabIndex={-1}>
+                <EventTileView
+                    {...createProps({ root: { ...renderState, shape }, slots: createStylingContractSlots() })}
+                />
+            </div>,
+            { presentation: { layout: "bubble" } },
+        );
+
+        await userEvent.click(getByTestId("styling-contract-body"), { button: "right" });
+
+        expect(document.activeElement).toBe(container.querySelector(`.${styles.root}`));
+    });
+
     it.each(["group", "bubble"] as const)(
         "draws the %s layout timestamp inside the body slot when it goes over the media",
         (layout) => {

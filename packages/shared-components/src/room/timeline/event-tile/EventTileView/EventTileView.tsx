@@ -219,7 +219,9 @@ export function EventTileView({
                 {!footerInLine && renderSlot("footer")}
             </>,
             undefined,
-            undefined,
+            // Telement: as in the room, so that a right-click focuses the row, which gets the focus back from the menu,
+            // rather than the whole room around it
+            -1,
             onContextMenu,
         );
     }
