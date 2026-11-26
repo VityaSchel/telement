@@ -41,8 +41,7 @@ import { Action } from "../../../dispatcher/actions";
 import { shouldShowComponent } from "../../../customisations/helpers/UIComponents";
 import { UIComponent } from "../../../settings/UIFeature";
 import { type ViewRoomPayload } from "../../../dispatcher/payloads/ViewRoomPayload";
-import RightPanelStore from "../../../stores/right-panel/RightPanelStore";
-import { RightPanelPhases } from "../../../stores/right-panel/RightPanelStorePhases";
+import { showSpaceInfo } from "../../../telement/spaces/showSpaceInfo";
 
 interface IProps extends IContextMenuProps {
     space?: Room;
@@ -236,10 +235,13 @@ const SpaceContextMenu: React.FC<IProps> = ({ space, hideHeader, onFinished, ...
         openSpace(ev);
     };
 
-    // Telement: the space's own room info (its topic, settings and Report room), in the right panel beside its home
+    // Telement: the space's own room info, in the right panel beside its home
     const onInfoClick = (ev: ButtonEvent): void => {
-        openSpace(ev);
-        RightPanelStore.instance.setCard({ phase: RightPanelPhases.RoomSummary }, true, space.roomId);
+        ev.preventDefault();
+        ev.stopPropagation();
+
+        showSpaceInfo(space);
+        onFinished();
     };
 
     return (
