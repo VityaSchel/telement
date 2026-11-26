@@ -7,7 +7,7 @@ Please see LICENSE files in the repository root for full details.
 */
 
 /* Telement: the search bar the room header's search button opens over the timeline: the search field with the arrows that
-   step through the results and Cancel, and what the search found under them */
+   step through the results and the close button, and what the search found under them */
 .mx_RoomSearchAuxPanel {
     padding: var(--cpd-space-3x);
     box-sizing: border-box;
@@ -27,15 +27,6 @@ Please see LICENSE files in the repository root for full details.
     .mx_RoomSearchAuxPanel_field {
         flex: 1;
         min-width: 0;
-    }
-
-    /* The label ends on the bar's 12px edge, as its box is drawn only while it is hovered */
-    .mx_RoomSearchAuxPanel_cancel {
-        flex-shrink: 0;
-        padding-inline: var(--cpd-space-2x);
-        margin-inline: calc(-1 * var(--cpd-space-2x));
-        font: var(--cpd-font-body-md-regular);
-        color: var(--cpd-color-text-action-accent);
     }
 
     .mx_RoomSearchAuxPanel_details {
@@ -64,7 +55,8 @@ Please see LICENSE files in the repository root for full details.
     /* "Search all rooms" stands on its own, so it is a text button in the accent, without a link's underline */
     .mx_RoomSearchAuxPanel_scopeButton {
         flex-shrink: 0;
-        /* Compound pads a link by 0.25rem for its pressed pill; this ends the text on the bar's edge, under Cancel */
+        /* Compound pads a link by 0.25rem for its pressed pill; this ends the text on the bar's edge, under the close
+           button */
         margin-inline-end: -0.25rem;
         font: inherit;
         color: var(--cpd-color-text-action-accent);

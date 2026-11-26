@@ -3188,6 +3188,7 @@
             "you": "You"
         },
         "search": {
+            "close_search": "Close search",
             "newer_result": "Newer result",
             "older_result": "Older result",
             "result_position": "%(number)s of %(total)s",

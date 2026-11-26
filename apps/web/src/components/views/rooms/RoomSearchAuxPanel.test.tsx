@@ -10,7 +10,7 @@ Please see LICENSE files in the repository root for full details.
 
 import React from "react";
 import { beforeEach, describe, it, expect, vi } from "vitest";
-import { act, render, screen } from "test-utils-rtl";
+import { act, render, screen, waitFor } from "test-utils-rtl";
 import userEvent from "@testing-library/user-event";
 import { type ISearchResults, MatrixEvent, type SearchResult } from "matrix-js-sdk/src/matrix";
 
@@ -84,10 +84,10 @@ describe("RoomSearchAuxPanel", () => {
         expect(props.onSearchScopeChange).toHaveBeenCalledWith(SearchScope.Room);
     });
 
-    it("should allow the user to cancel a search", async () => {
+    it("should allow the user to close the search", async () => {
         render(<RoomSearchAuxPanel {...props} />);
 
-        screen.getByRole("button", { name: "Cancel" }).click();
+        screen.getByRole("button", { name: "Close search" }).click();
         expect(props.onCancelClick).toHaveBeenCalled();
     });
 
@@ -167,7 +167,7 @@ describe("RoomSearchAuxPanel", () => {
         });
     });
 
-    it("shows the scope switch and Cancel as text buttons, so that no cross beside the field reads as clearing it", () => {
+    it("shows the scope switch as a text button", () => {
         render(
             <RoomSearchAuxPanel
                 {...props}
@@ -176,9 +176,7 @@ describe("RoomSearchAuxPanel", () => {
         );
 
         expect(screen.getByText("Search all rooms")).toHaveClass("mx_RoomSearchAuxPanel_scopeButton");
-        const cancel = screen.getByRole("button", { name: "Cancel" });
-        expect(cancel).toHaveTextContent("Cancel");
-        expect(cancel.querySelector("svg")).toBeNull();
+        expect(screen.queryByRole("button", { name: "Cancel" })).toBeNull();
     });
 
     describe("stepping through the results (Telement)", () => {
@@ -265,6 +263,48 @@ describe("RoomSearchAuxPanel", () => {
             renderBar({ results: results(2), count: 2, scope: SearchScope.All });
 
             expect(screen.queryByRole("button", { name: "Older result" })).toBeNull();
+        });
+
+        it("ends with the close button, after the arrows and outside the field, whose clear button only empties it", () => {
+            renderBar({ results: results(3), count: 3, hit: 1 });
+            const close = screen.getByRole("button", { name: "Close search" });
+            const clear = screen.getByRole("button", { name: "Clear search" });
+
+            expect(close.parentElement).toHaveClass("mx_RoomSearchAuxPanel_bar");
+            expect(close.matches(":last-child")).toBe(true);
+            expect(newer().compareDocumentPosition(close) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+            expect(clear.closest(".mx_RoomSearchAuxPanel_field")).not.toBeNull();
+            expect(close.closest(".mx_RoomSearchAuxPanel_field")).toBeNull();
+        });
+    });
+
+    describe("close button (Telement)", () => {
+        it("is an icon button like the arrows, which says what it does in its tooltip", async () => {
+            render(<RoomSearchAuxPanel {...props} />);
+            const close = screen.getByRole("button", { name: "Close search" });
+            await userEvent.hover(close);
+
+            // The tooltip names the button, so it is hidden from assistive technology rather than a tooltip to it
+            await waitFor(() =>
+                expect(document.getElementById(close.getAttribute("aria-labelledby")!)).toHaveTextContent(
+                    "Close search",
+                ),
+            );
+            expect(close).toHaveTextContent("");
+            expect(close.querySelector("svg")).not.toBeNull();
+        });
+
+        it("closes the bar without emptying the field first", async () => {
+            render(
+                <RoomSearchAuxPanel
+                    {...props}
+                    searchInfo={{ searchId: 1, term: "lunch", scope: SearchScope.Room, promise: new Promise(() => {}) }}
+                />,
+            );
+            await userEvent.click(screen.getByRole("button", { name: "Close search" }));
+
+            expect(props.onCancelClick).toHaveBeenCalledTimes(1);
+            expect(props.onSearchChange).not.toHaveBeenCalled();
         });
     });
 });

@@ -9,7 +9,8 @@ Please see LICENSE files in the repository root for full details.
 import React, { type JSX, type KeyboardEvent, useEffect, useRef, useState } from "react";
 import ChevronUpIcon from "@vector-im/compound-design-tokens/assets/web/icons/chevron-up";
 import ChevronDownIcon from "@vector-im/compound-design-tokens/assets/web/icons/chevron-down";
-import { Button, IconButton, Link } from "@vector-im/compound-web";
+import CloseIcon from "@vector-im/compound-design-tokens/assets/web/icons/close";
+import { IconButton, Link } from "@vector-im/compound-web";
 import { SearchFieldView } from "@element-hq/web-shared-components";
 
 import { _t } from "../../../languageHandler";
@@ -175,16 +176,16 @@ const RoomSearchAuxPanel: React.FC<Props> = ({
                         </IconButton>
                     </div>
                 )}
-                {/* In words, as a cross beside the field would read as clearing it, which the field's own does */}
-                <Button
-                    className="mx_RoomSearchAuxPanel_cancel"
-                    kind="tertiary"
-                    size="md"
-                    type="button"
+                {/* The bar's own cross, after the arrows and a gap away from the field's, which only empties it */}
+                <IconButton
                     onClick={onCancelClick}
+                    size="var(--tl-control-size)"
+                    style={{ padding: "var(--cpd-space-1-5x)" }}
+                    tooltip={_t("telement|search|close_search")}
+                    aria-label={_t("telement|search|close_search")}
                 >
-                    {_t("action|cancel")}
-                </Button>
+                    <CloseIcon />
+                </IconButton>
             </div>
             {details}
         </div>

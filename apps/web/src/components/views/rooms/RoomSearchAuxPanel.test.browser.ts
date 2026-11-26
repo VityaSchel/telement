@@ -8,8 +8,8 @@ Please see LICENSE files in the repository root for full details.
 import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { Button, IconButton, Link } from "@vector-im/compound-web";
-import { ChevronDownIcon, ChevronUpIcon } from "@vector-im/compound-design-tokens/assets/web/icons";
+import { IconButton, Link } from "@vector-im/compound-web";
+import { ChevronDownIcon, ChevronUpIcon, CloseIcon } from "@vector-im/compound-design-tokens/assets/web/icons";
 import compoundBase from "@vector-im/compound-design-tokens/assets/web/css/cpd-common-base.css?raw";
 import compoundSemantic from "@vector-im/compound-design-tokens/assets/web/css/cpd-common-semantic.css?raw";
 import compoundLightTheme from "@vector-im/compound-design-tokens/assets/web/css/cpd-theme-light-base.css?raw";
@@ -27,9 +27,9 @@ import { toBrowserCss } from "../../../test/telement/browserCss";
 import { tokenColor } from "../../../test/telement/computedStyle";
 
 /**
- * The bar RoomSearchAuxPanel puts over the timeline: the search field, a 36px pill, and Cancel, and with a search what
- * it found and its scope switch, and while a result shows in the timeline the place of the result and the arrows that
- * step through them.
+ * The bar RoomSearchAuxPanel puts over the timeline: the search field, a 36px pill, and the close button, and with a
+ * search what it found and its scope switch, and while a result shows in the timeline the place of the result and the
+ * arrows that step through them.
  */
 function renderPanel({
     searching = true,
@@ -70,7 +70,7 @@ function renderPanel({
                 <div class="mx_RoomSearchAuxPanel_bar">
                     <div class="mx_RoomSearchAuxPanel_field" style="height: 36px"></div>
                     ${steps}
-                    ${html(createElement(Button, { className: "mx_RoomSearchAuxPanel_cancel", kind: "tertiary", size: "md" }, "Cancel"))}
+                    ${iconButton("Close search", CloseIcon)}
                 </div>
                 ${details}
             </div>
@@ -135,27 +135,38 @@ describe("RoomSearchAuxPanel styles", () => {
     });
 
     it.each(["ltr", "rtl"])(
-        "cancels with text in the accent, which ends on the bar's 12px edge, in a 36px button centered on the field (%s)",
+        "closes with a gray 36px icon button on the bar's 12px edge, 12px after the field, centered on it (%s)",
         (dir) => {
             const panel = renderPanel({ dir });
             const box = panel.getBoundingClientRect();
             const field = boxOf(panel, ".mx_RoomSearchAuxPanel_field");
-            const button = panel.querySelector<HTMLElement>(".mx_RoomSearchAuxPanel_cancel")!;
-            const cancel = button.getBoundingClientRect();
-            const label = textBox(button);
+            const button = panel.querySelector<HTMLElement>('[aria-label="Close search"]')!;
+            const close = button.getBoundingClientRect();
 
-            expect(cancel.height).toBe(36);
-            expect(cancel.top).toBe(field.top);
-            expect(getComputedStyle(button).color).toBe(tokenColor("--cpd-color-text-action-accent", panel));
+            expect([close.width, close.height]).toEqual([36, 36]);
+            expect(close.top).toBe(field.top);
+            expect(getComputedStyle(button.querySelector("svg")!).color).toBe(
+                tokenColor("--cpd-color-icon-secondary", panel),
+            );
             expect(getComputedStyle(button).backgroundColor).toBe("rgba(0, 0, 0, 0)");
             const ends =
                 dir === "ltr"
-                    ? [box.right - label.right, label.left - field.right]
-                    : [label.left - box.left, field.left - label.right];
-            expect(ends[0]).toBeCloseTo(12, 0);
-            expect(ends[1]).toBeCloseTo(12, 0);
+                    ? [box.right - close.right, close.left - field.right]
+                    : [close.left - box.left, field.left - close.right];
+            expect(ends).toEqual([12, 12]);
         },
     );
+
+    it.each(["ltr", "rtl"])("closes with the button after the arrows, 12px from the newer one (%s)", (dir) => {
+        const panel = renderPanel({ stepping: true, dir });
+        const box = panel.getBoundingClientRect();
+        const newer = boxOf(panel, '[aria-label="Newer result"]');
+        const close = boxOf(panel, '[aria-label="Close search"]');
+
+        expect(dir === "ltr" ? close.left - newer.right : newer.left - close.right).toBe(12);
+        expect(dir === "ltr" ? box.right - close.right : close.left - box.left).toBe(12);
+        expect(close.top).toBe(newer.top);
+    });
 
     it("says what it found under the field, 13px secondary text from edge to edge", () => {
         const panel = renderPanel();
@@ -192,7 +203,8 @@ describe("RoomSearchAuxPanel styles", () => {
         const box = panel.getBoundingClientRect();
 
         expect(boxOf(panel, ".mx_RoomSearchAuxPanel_field").width).toBeGreaterThan(40);
-        expect(boxOf(panel, ".mx_RoomSearchAuxPanel_cancel").right).toBeLessThanOrEqual(box.right);
+        expect(boxOf(panel, '[aria-label="Close search"]').right).toBeLessThanOrEqual(box.right);
+        expect(boxOf(panel, '[aria-label="Close search"]').width).toBe(36);
         expect(panel.scrollWidth).toBeLessThanOrEqual(panel.clientWidth);
     });
 });
