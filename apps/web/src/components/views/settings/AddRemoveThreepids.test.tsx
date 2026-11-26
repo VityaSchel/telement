@@ -9,7 +9,7 @@ Please see LICENSE files in the repository root for full details.
 // @vitest-environment happy-dom
 
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import { render, screen, waitFor, cleanup } from "test-utils-rtl";
+import { render, screen, waitFor, cleanup, within } from "test-utils-rtl";
 import { clearAllModals, stubClient } from "test-utils";
 import { type MatrixClient, MatrixError, ThreepidMedium } from "matrix-js-sdk/src/matrix";
 import React from "react";
@@ -294,16 +294,15 @@ describe("AddRemoveThreepids", () => {
         const removeButton = await screen.findByRole("button", { name: /Remove/ });
         await userEvent.click(removeButton);
 
-        expect(screen.getByText(`Remove ${EMAIL1.address}?`)).toBeVisible();
-
-        const confirmRemoveButton = screen.getByRole("button", { name: /Remove/ });
-        await userEvent.click(confirmRemoveButton);
+        const dialog = await screen.findByRole("dialog", { name: `Remove ${EMAIL1.address}?` });
+        expect(client.deleteThreePid).not.toHaveBeenCalled();
+        await userEvent.click(within(dialog).getByRole("button", { name: "Remove" }));
 
         expect(client.deleteThreePid).toHaveBeenCalledWith(ThreepidMedium.Email, EMAIL1.address);
-        expect(onChangeFn).toHaveBeenCalled();
+        await waitFor(() => expect(onChangeFn).toHaveBeenCalled());
     });
 
-    it("should say what is removed, put Cancel where Remove was, and the focus on it and back", async () => {
+    it("should ask in the app's confirmation dialog, with Cancel and a red Remove", async () => {
         render(
             <AddRemoveThreepids
                 mode="hs"
@@ -312,17 +311,30 @@ describe("AddRemoveThreepids", () => {
                 isLoading={false}
                 onChange={() => {}}
             />,
+            {
+                wrapper: clientProviderWrapper,
+            },
         );
         const remove = screen.getByRole("button", { name: "Remove" });
         expect(remove).toHaveAccessibleDescription(EMAIL1.address);
 
         await userEvent.click(remove);
-        const cancel = screen.getByRole("button", { name: "Cancel" });
-        expect(cancel.matches(":last-child")).toBe(true);
-        expect(cancel).toHaveFocus();
+        const dialog = await screen.findByRole("dialog");
+        expect(dialog).toHaveClass("mx_QuestionDialog", "mx_Dialog_fixedWidth");
+        expect(within(dialog).getByRole("heading", { name: `Remove ${EMAIL1.address}?` })).toBeInTheDocument();
+        expect(dialog).toHaveTextContent(
+            "This email address will no longer be linked to your account. You won't be able to use it to reset your password.",
+        );
+        const buttons = dialog.querySelectorAll(".mx_Dialog_buttons button");
+        expect([...buttons].map((button) => button.textContent)).toEqual(["Cancel", "Remove"]);
+        expect(within(dialog).getByRole("button", { name: "Remove" })).toHaveClass("mx_Dialog_primary", "danger");
+        // The row itself asks nothing, and keeps its address and Remove
+        expect(screen.getByText(EMAIL1.address, { selector: ".mx_AddRemoveThreepids_row span" })).toBeInTheDocument();
+        expect(remove).toBeInTheDocument();
 
-        await userEvent.click(cancel);
-        expect(screen.getByRole("button", { name: "Remove" })).toHaveFocus();
+        await userEvent.click(within(dialog).getByRole("button", { name: "Cancel" }));
+        await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+        expect(client.deleteThreePid).not.toHaveBeenCalled();
     });
 
     it("should list nothing to share when there is nothing", () => {
@@ -356,12 +368,11 @@ describe("AddRemoveThreepids", () => {
         const removeButton = await screen.findByRole("button", { name: /Remove/ });
         await userEvent.click(removeButton);
 
-        expect(screen.getByText(`Remove ${EMAIL1.address}?`)).toBeVisible();
+        const dialog = await screen.findByRole("dialog", { name: `Remove ${EMAIL1.address}?` });
+        await userEvent.click(within(dialog).getByRole("button", { name: /Cancel/ }));
 
-        const confirmRemoveButton = screen.getByRole("button", { name: /Cancel/ });
-        await userEvent.click(confirmRemoveButton);
-
-        expect(screen.queryByText(`Remove ${EMAIL1.address}?`)).not.toBeInTheDocument();
+        await waitFor(() => expect(screen.queryByText(`Remove ${EMAIL1.address}?`)).not.toBeInTheDocument());
+        expect(screen.getByText(EMAIL1.address)).toBeInTheDocument();
 
         expect(client.deleteThreePid).not.toHaveBeenCalledWith(ThreepidMedium.Email, EMAIL1.address);
         expect(onChangeFn).not.toHaveBeenCalled();
@@ -385,13 +396,13 @@ describe("AddRemoveThreepids", () => {
         const removeButton = await screen.findByRole("button", { name: /Remove/ });
         await userEvent.click(removeButton);
 
-        expect(screen.getByText(`Remove +${PHONE1.address}?`)).toBeVisible();
-
-        const confirmRemoveButton = screen.getByRole("button", { name: /Remove/ });
-        await userEvent.click(confirmRemoveButton);
+        const dialog = await screen.findByRole("dialog", { name: `Remove +${PHONE1.address}?` });
+        expect(dialog).toHaveTextContent("This phone number will no longer be linked to your account.");
+        expect(dialog).not.toHaveTextContent("password");
+        await userEvent.click(within(dialog).getByRole("button", { name: "Remove" }));
 
         expect(client.deleteThreePid).toHaveBeenCalledWith(ThreepidMedium.Phone, PHONE1.address);
-        expect(onChangeFn).toHaveBeenCalled();
+        await waitFor(() => expect(onChangeFn).toHaveBeenCalled());
     });
 
     it("should bind an email address", async () => {

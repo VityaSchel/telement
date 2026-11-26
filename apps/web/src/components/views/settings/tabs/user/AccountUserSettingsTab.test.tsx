@@ -9,7 +9,7 @@ Please see LICENSE files in the repository root for full details.
 // @vitest-environment happy-dom
 
 import { describe, it, expect, beforeEach, afterEach, vi, type MockedObject } from "vitest";
-import { act, fireEvent, render, screen, within } from "test-utils-rtl";
+import { act, fireEvent, render, screen, waitFor, within } from "test-utils-rtl";
 import {
     getMockClientWithEventEmitter,
     mockClientMethodsServer,
@@ -383,10 +383,12 @@ describe("<AccountUserSettingsTab />", () => {
             fireEvent.click(within(section).getByText("Remove"));
 
             // confirm removal
-            expect(screen.getByText("Remove test@test.io?")).toBeInTheDocument();
-            fireEvent.click(within(section).getByText("Remove"));
+            const dialog = await screen.findByRole("dialog", { name: "Remove test@test.io?" });
+            fireEvent.click(within(dialog).getByRole("button", { name: "Remove" }));
 
-            expect(mockClient.deleteThreePid).toHaveBeenCalledWith(ThreepidMedium.Email, "test@test.io");
+            await waitFor(() =>
+                expect(mockClient.deleteThreePid).toHaveBeenCalledWith(ThreepidMedium.Email, "test@test.io"),
+            );
         });
 
         it("should allow adding a new email address", async () => {
@@ -412,10 +414,12 @@ describe("<AccountUserSettingsTab />", () => {
             fireEvent.click(within(section).getByText("Remove"));
 
             // confirm removal
-            expect(screen.getByText("Remove +123456789?")).toBeInTheDocument();
-            fireEvent.click(within(section).getByText("Remove"));
+            const dialog = await screen.findByRole("dialog", { name: "Remove +123456789?" });
+            fireEvent.click(within(dialog).getByRole("button", { name: "Remove" }));
 
-            expect(mockClient.deleteThreePid).toHaveBeenCalledWith(ThreepidMedium.Phone, "123456789");
+            await waitFor(() =>
+                expect(mockClient.deleteThreePid).toHaveBeenCalledWith(ThreepidMedium.Phone, "123456789"),
+            );
         });
 
         it("should allow adding a new phone number", async () => {

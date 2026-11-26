@@ -3199,6 +3199,8 @@
             "camera_description": "The camera chosen here is used for legacy calls.",
             "notification_exceptions": "Rooms with their own setting",
             "notification_silent": "Silent",
+            "remove_email_description": "This email address will no longer be linked to your account. You won't be able to use it to reset your password.",
+            "remove_msisdn_description": "This phone number will no longer be linked to your account.",
             "speaker_description": "The speaker chosen here is used for legacy calls."
         },
         "space_home": {

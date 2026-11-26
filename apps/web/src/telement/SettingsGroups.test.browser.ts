@@ -1291,13 +1291,6 @@ describe.each(THEMES.map(([theme]) => theme))("Settings groups in %s", (theme) =
             expect((box("#first-Remove").top + box("#first-Remove").bottom) / 2).toBe(box("#first").top + 22);
         });
 
-        it("keep their height while asking to confirm, so that nothing moves", () => {
-            renderList(address("first", "Remove alice@example.org?", ["Remove", "Cancel"]) + addRow);
-
-            expect(box("#first").height).toBe(44);
-            expect(box("#first-Cancel").left - box("#first-Remove").right).toBe(8);
-        });
-
         it("break a long address rather than running under its button", () => {
             renderList(address("first", `${"alice".repeat(40)}@example.org`, ["Remove"]));
 

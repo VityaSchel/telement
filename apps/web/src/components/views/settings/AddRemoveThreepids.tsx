@@ -24,6 +24,7 @@ import AccessibleButton, { type ButtonEvent } from "../elements/AccessibleButton
 import { useMatrixClientContext } from "../../../contexts/MatrixClientContext";
 import Modal from "../../../Modal";
 import ErrorDialog, { extractErrorMessageFromError } from "../dialogs/ErrorDialog";
+import QuestionDialog from "../dialogs/QuestionDialog";
 import Field from "../elements/Field";
 import CountryDropdown from "../auth/CountryDropdown";
 import { type PhoneNumberCountryDefinition } from "../../../phonenumber";
@@ -38,7 +39,7 @@ function formatThreepid({ medium, address }: Pick<ThirdPartyIdentifier, "medium"
 }
 
 interface ThreepidRowProps {
-    /** The address or number, or what is asked about it. */
+    /** The address or number. */
     children: ReactNode;
     textId?: string;
     /** What state it is in, in secondary text under it. */
@@ -69,9 +70,6 @@ interface ExistingThreepidProps {
 }
 
 const ExistingThreepid: React.FC<ExistingThreepidProps> = ({ mode, threepid, onChange, disabled }) => {
-    const [isConfirming, setIsConfirming] = useState(false);
-    // Whether the row was asking to confirm, so that Remove takes the focus back from Cancel
-    const [wasConfirming, setWasConfirming] = useState(false);
     const textId = useId();
     const client = useMatrixClientContext();
     const bindTask = useRef<AddThreepid>(undefined);
@@ -80,38 +78,39 @@ const ExistingThreepid: React.FC<ExistingThreepidProps> = ({ mode, threepid, onC
     const [continueDisabled, setContinueDisabled] = useState(false);
     const [verificationCode, setVerificationCode] = useState("");
 
-    const onRemoveClick = useCallback((e: ButtonEvent) => {
-        e.stopPropagation();
-        e.preventDefault();
-
-        setIsConfirming(true);
-    }, []);
-
-    const onCancelClick = useCallback((e: ButtonEvent) => {
-        e.stopPropagation();
-        e.preventDefault();
-
-        setIsConfirming(false);
-        setWasConfirming(true);
-    }, []);
-
-    const onConfirmRemoveClick = useCallback(
+    const onRemoveClick = useCallback(
         (e: ButtonEvent) => {
             e.stopPropagation();
             e.preventDefault();
 
-            client
-                .deleteThreePid(threepid.medium, threepid.address)
-                .then(() => {
-                    return onChange(threepid);
-                })
-                .catch((err) => {
-                    logger.error("Unable to remove contact information: " + err);
-                    Modal.createDialog(ErrorDialog, {
-                        title: _t("settings|general|error_remove_3pid"),
-                        description: err?.message ?? _t("invite|failed_generic"),
+            // Telement: asks in the app's confirmation dialog, rather than in the row
+            const address = formatThreepid(threepid);
+            const isEmail = threepid.medium === ThreepidMedium.Email;
+            const { finished } = Modal.createDialog(QuestionDialog, {
+                title: isEmail
+                    ? _t("settings|general|remove_email_prompt", { email: address })
+                    : _t("settings|general|remove_msisdn_prompt", { phone: address }),
+                description: isEmail
+                    ? _t("telement|settings|remove_email_description")
+                    : _t("telement|settings|remove_msisdn_description"),
+                button: _t("action|remove"),
+                danger: true,
+            });
+            void finished.then(([confirmed]) => {
+                if (!confirmed) return;
+                client
+                    .deleteThreePid(threepid.medium, threepid.address)
+                    .then(() => {
+                        return onChange(threepid);
+                    })
+                    .catch((err) => {
+                        logger.error("Unable to remove contact information: " + err);
+                        Modal.createDialog(ErrorDialog, {
+                            title: _t("settings|general|error_remove_3pid"),
+                            description: err?.message ?? _t("invite|failed_generic"),
+                        });
                     });
-                });
+            });
         },
         [client, threepid, onChange],
     );
@@ -237,28 +236,6 @@ const ExistingThreepid: React.FC<ExistingThreepidProps> = ({ mode, threepid, onC
 
     const address = formatThreepid(threepid);
 
-    if (isConfirming) {
-        return (
-            // Cancel is where Remove was, so that clicking twice doesn't remove the address
-            <ThreepidRow
-                actions={
-                    <>
-                        <DialogFooterButton destructive onClick={onConfirmRemoveClick}>
-                            {_t("action|remove")}
-                        </DialogFooterButton>
-                        <DialogFooterButton autoFocus onClick={onCancelClick}>
-                            {_t("action|cancel")}
-                        </DialogFooterButton>
-                    </>
-                }
-            >
-                {threepid.medium === ThreepidMedium.Email
-                    ? _t("settings|general|remove_email_prompt", { email: address })
-                    : _t("settings|general|remove_msisdn_prompt", { phone: address })}
-            </ThreepidRow>
-        );
-    }
-
     if (isVerifyingBind) {
         if (threepid.medium === ThreepidMedium.Email) {
             return (
@@ -307,7 +284,6 @@ const ExistingThreepid: React.FC<ExistingThreepidProps> = ({ mode, threepid, onC
                     onClick={mode === "hs" ? onRemoveClick : threepid.bound ? onRevokeClick : onShareClick}
                     destructive={mode === "hs" || threepid.bound}
                     disabled={disabled}
-                    autoFocus={wasConfirming}
                     aria-describedby={textId}
                 >
                     {mode === "hs" ? _t("action|remove") : threepid.bound ? _t("action|revoke") : _t("action|share")}
