@@ -177,19 +177,21 @@ for one of those to be split one problem per pull request, and every pull reques
   Telement needs and note it in the upstream merge log.
 
 Pull requests in [element-hq/element-web](https://github.com/element-hq/element-web/pulls) and the Telement commits
-that carry the same fixes, as of 2026-11-20:
+that carry the same fixes, as of 2026-11-26:
 
-| Pull requests                 | Telement commit                                                                    | State                                        |
-| ----------------------------- | ---------------------------------------------------------------------------------- | -------------------------------------------- |
-| #35834, #35852                | 6941fa855b                                                                         | merged upstream                              |
-| #35835–#35838, #35842         | 17f8ec6213; #35836 also 89400a168f                                                 | open                                         |
-| #35845, #35846                | 45456fb2da, 3522d6cdc5; #35845 also the user avatar commit, #35846 also 89400a168f | open                                         |
-| #35847–#35851, #35853, #35855 | 15cf3387ba                                                                         | split from #35844; #35853 merged upstream    |
-| #35854                        | efe6f11062                                                                         | open                                         |
-| #35983–#35989                 | `git log --grep pull/<N>`                                                          | open                                         |
-| #35990                        | "Disable every AccessibleButton kind the way Compound disables its Button…"        | open; Telement fixes the bug its own way     |
-| #35991, #35992, #35994–#35996 | `git log --grep pull/<N>`                                                          | open                                         |
-| #35993                        | `git log --grep pull/<N>`                                                          | open; Telement fixes it in its drawer button |
+| Pull requests                  | Telement commit                                                                    | State                                       |
+| ------------------------------ | ---------------------------------------------------------------------------------- | ------------------------------------------- |
+| #35834, #35852                 | 6941fa855b                                                                         | merged upstream                             |
+| #35835–#35838, #35842          | 17f8ec6213; #35836 also 89400a168f                                                 | open                                        |
+| #35845, #35846                 | 45456fb2da, 3522d6cdc5; #35845 also the user avatar commit, #35846 also 89400a168f | open                                        |
+| #35847–#35851, #35853, #35855  | 15cf3387ba                                                                         | split from #35844; #35853 merged upstream   |
+| #35854                         | efe6f11062                                                                         | open                                        |
+| #35983, #35985, #35986, #35988 | `git log --grep pull/<N>`                                                          | open                                        |
+| #35989, #35991, #35992         | `git log --grep pull/<N>`                                                          | open                                        |
+| #35994, #35995                 | `git log --grep pull/<N>`                                                          | open                                        |
+| #35984, #35987, #35996         | `git log --grep pull/<N>`                                                          | merged upstream                             |
+| #35990                         | "Disable every AccessibleButton kind the way Compound disables its Button…"        | merged upstream; Telement keeps its own fix |
+| #35993                         | `git log --grep pull/<N>`                                                          | merged upstream; Telement's drawer button   |
 
 ## Changing upstream code
 
