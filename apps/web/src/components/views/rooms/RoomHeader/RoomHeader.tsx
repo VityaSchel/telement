@@ -66,6 +66,7 @@ import {
     ROOM_INFO_PANE,
     THREADS_PANE,
 } from "../../../../telement/right-panel/panes";
+import { getRoomInfoTitle } from "../../../../telement/right-panel/getRoomInfoTitle";
 
 function RoomHeaderButtons({
     room,
@@ -362,13 +363,13 @@ function RoomHeaderButtons({
                 </Tooltip>
             )}
 
-            <Tooltip label={_t("right_panel|room_summary_card|title")}>
+            <Tooltip label={getRoomInfoTitle(room)}>
                 <IconButton
                     onClick={(evt) => {
                         evt.stopPropagation();
                         sdkContext.rightPanelStore.showOrHidePhase(RightPanelPhases.RoomSummary);
                     }}
-                    aria-label={_t("right_panel|room_summary_card|title")}
+                    aria-label={getRoomInfoTitle(room)}
                     aria-expanded={isRoomInfoOpen}
                     aria-controls={RIGHT_PANEL_ID}
                 >
@@ -486,7 +487,7 @@ export default function RoomHeader({
                 </WithPresenceIndicator>
                 {/* Disable on-click actions until the room is created */}
                 <button
-                    aria-label={_t("right_panel|room_summary_card|title")}
+                    aria-label={getRoomInfoTitle(room)}
                     tabIndex={0}
                     onClick={
                         room instanceof LocalRoom

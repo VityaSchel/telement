@@ -11,7 +11,15 @@ Please see LICENSE files in the repository root for full details.
 import React from "react";
 import { describe, it, expect, beforeEach, afterEach, vi, type MockedObject } from "vitest";
 import { render, fireEvent, screen } from "test-utils-rtl";
-import { Room, type MatrixClient, JoinRule, MatrixEvent, HistoryVisibility } from "matrix-js-sdk/src/matrix";
+import {
+    EventType,
+    Room,
+    RoomType,
+    type MatrixClient,
+    JoinRule,
+    MatrixEvent,
+    HistoryVisibility,
+} from "matrix-js-sdk/src/matrix";
 import userEvent from "@testing-library/user-event";
 import { LinkedTextContext } from "@element-hq/web-shared-components";
 import { flushPromises, stubClient } from "test-utils";
@@ -143,6 +151,22 @@ describe("<RoomSummaryCard />", () => {
         expect(screen.getByRole("heading", { name: "Room info" })).toBeInTheDocument();
         expect(screen.queryByRole("searchbox")).not.toBeInTheDocument();
         expect(screen.queryByRole("button", { name: "Close" })).not.toBeInTheDocument();
+    });
+
+    it("is titled Space info for a space", () => {
+        room.currentState.setStateEvents([
+            new MatrixEvent({
+                type: EventType.RoomCreate,
+                room_id: roomId,
+                sender: userId,
+                state_key: "",
+                content: { type: RoomType.Space },
+            }),
+        ]);
+        getComponent();
+
+        expect(screen.getByRole("heading", { name: "Space info" })).toBeInTheDocument();
+        expect(screen.queryByRole("heading", { name: "Room info" })).not.toBeInTheDocument();
     });
 
     describe("keyboard", () => {

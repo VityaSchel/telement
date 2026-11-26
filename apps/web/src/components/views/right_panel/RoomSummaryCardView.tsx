@@ -38,6 +38,7 @@ import { useRoomSummaryCardViewModel } from "../../viewmodels/right_panel/RoomSu
 import { useRoomTopicViewModel } from "../../viewmodels/right_panel/RoomSummaryCardTopicViewModel";
 import { useRoomName } from "../../../hooks/useRoomName.ts";
 import { RovingMenuBar, RovingMenuItem, RovingToggleMenuItem } from "../../../telement/right-panel/RovingMenu";
+import { getRoomInfoTitle } from "../../../telement/right-panel/getRoomInfoTitle";
 
 interface IProps {
     room: Room;
@@ -188,7 +189,7 @@ const RoomSummaryCardView: React.FC<IProps> = ({ room, permalinkCreator }) => {
             className="mx_RoomSummaryCard"
             ariaLabelledBy="room-summary-panel-tab"
             role="tabpanel"
-            header={_t("right_panel|room_summary_card|title")}
+            header={getRoomInfoTitle(room)}
         >
             {roomInfo}
 

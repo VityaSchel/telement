@@ -26,6 +26,7 @@ import {
     Room,
     RoomStateEvent,
     RoomMember,
+    RoomType,
     type MatrixClient,
     ClientEvent,
 } from "matrix-js-sdk/src/matrix";
@@ -207,6 +208,22 @@ describe("RoomHeader", () => {
         const infoButton = getAllByRole("button", { name: "Room info" })[1];
         await user.click(infoButton);
         expect(setCardSpy).toHaveBeenCalledWith({ phase: RightPanelPhases.RoomSummary });
+    });
+
+    it("names its room info buttons Space info in a space, as the pane is titled there", () => {
+        room.currentState.setStateEvents([
+            new MatrixEvent({
+                type: EventType.RoomCreate,
+                room_id: ROOM_ID,
+                sender: "@alice:example.org",
+                state_key: "",
+                content: { type: RoomType.Space },
+            }),
+        ]);
+        render(<RoomHeader room={room} />, getWrapper());
+
+        expect(screen.getAllByRole("button", { name: "Space info" })).toHaveLength(2);
+        expect(screen.queryByRole("button", { name: "Room info" })).not.toBeInTheDocument();
     });
 
     it("opens the thread panel", async () => {

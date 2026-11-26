@@ -3175,7 +3175,8 @@
             "pin_to_top": "Pin to top",
             "pinned_messages": {
                 "empty_description": "Right-click a message and choose “%(pinAction)s” to add it here."
-            }
+            },
+            "space_info": "Space info"
         },
         "room": {
             "enable_encryption_prompt": "<a>Enable encryption in settings</a>.",
