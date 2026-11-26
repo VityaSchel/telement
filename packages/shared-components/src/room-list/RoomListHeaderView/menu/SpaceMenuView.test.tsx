@@ -8,6 +8,7 @@
 import React from "react";
 import { render, screen, within } from "@test-utils";
 import userEvent from "@testing-library/user-event";
+import InfoIcon from "@vector-im/compound-design-tokens/assets/web/icons/info";
 import { vi, describe, it, afterEach, expect } from "vitest";
 
 import { SpaceMenuView } from "./SpaceMenuView";
@@ -35,6 +36,7 @@ describe("<SpaceMenuView />", () => {
         await user.click(button);
 
         expect(screen.getByRole("menuitem", { name: "Space home" })).toBeInTheDocument();
+        expect(screen.getByRole("menuitem", { name: "Space info" })).toBeInTheDocument();
         expect(screen.getByRole("menuitem", { name: "Invite" })).toBeInTheDocument();
         expect(screen.getByRole("menuitem", { name: "Preferences" })).toBeInTheDocument();
         expect(screen.getByRole("menuitem", { name: "Space settings" })).toBeInTheDocument();
@@ -90,6 +92,35 @@ describe("<SpaceMenuView />", () => {
         await user.click(screen.getByRole("menuitem", { name: "Space home" }));
 
         expect(vm.openSpaceHome).toHaveBeenCalledTimes(1);
+    });
+
+    it("lists Space info right under Space home, with the info icon", async () => {
+        const user = userEvent.setup();
+
+        const vm = new MockedViewModel(defaultSnapshot);
+        render(<SpaceMenuView vm={vm} />);
+
+        await user.click(screen.getByRole("button", { name: "Open space menu" }));
+
+        const items = within(screen.getByRole("menu")).getAllByRole("menuitem");
+        expect(items.slice(0, 2).map((item) => item.textContent)).toEqual(["Space home", "Space info"]);
+        const { container: infoIcon } = render(<InfoIcon />);
+        expect(items[1].querySelector("svg path")?.getAttribute("d")).toBe(
+            infoIcon.querySelector("path")?.getAttribute("d"),
+        );
+    });
+
+    it("should call openSpaceInfo when Space info is clicked", async () => {
+        const user = userEvent.setup();
+
+        const vm = new MockedViewModel(defaultSnapshot);
+        render(<SpaceMenuView vm={vm} />);
+
+        await user.click(screen.getByRole("button", { name: "Open space menu" }));
+        await user.click(screen.getByRole("menuitem", { name: "Space info" }));
+
+        expect(vm.openSpaceInfo).toHaveBeenCalledTimes(1);
+        expect(vm.openSpaceHome).not.toHaveBeenCalled();
     });
 
     it("should call inviteInSpace when Invite is clicked", async () => {

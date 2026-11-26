@@ -75,6 +75,10 @@ export interface RoomListHeaderViewActions {
      */
     openSpaceHome: () => void;
     /**
+     * Open the active space home with the space's own room info in the right panel beside it
+     */
+    openSpaceInfo: () => void;
+    /**
      * Display the space invite dialog
      */
     inviteInSpace: () => void;

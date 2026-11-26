@@ -30,6 +30,7 @@ import RoomListStoreV3 from "../../stores/room-list-v3/RoomListStoreV3";
 import { SortingAlgorithm } from "../../stores/room-list-v3/skip-list/sorters";
 import { createRoom, hasCreateRoomRights } from "./utils";
 import { getRoomListSyncStatus } from "../../telement/room-list/getRoomListSyncStatus";
+import { showSpaceInfo } from "../../telement/spaces/showSpaceInfo";
 
 export interface Props {
     /**
@@ -158,6 +159,11 @@ export class RoomListHeaderViewModel
             action: Action.ViewRoom,
             room_id: this.activeSpace.roomId,
         });
+    };
+
+    public openSpaceInfo = (): void => {
+        if (!this.activeSpace) return;
+        showSpaceInfo(this.activeSpace);
     };
 
     public inviteInSpace = (): void => {

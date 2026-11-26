@@ -277,6 +277,9 @@
             "placeholder": "Search settings",
             "results": "Settings found"
         },
+        "space_menu": {
+            "space_info": "Space info"
+        },
         "timeline": {
             "next_unread_mention": "Next unread mention",
             "unread_mentions": {

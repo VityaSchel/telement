@@ -34,6 +34,8 @@ import {
     showSpaceSettings,
 } from "../../utils/space";
 import { createRoom, hasCreateRoomRights } from "./utils";
+import RightPanelStore from "../../stores/right-panel/RightPanelStore";
+import { RightPanelPhases } from "../../stores/right-panel/RightPanelStorePhases";
 
 vi.mock("../../utils/space", () => ({
     shouldShowSpaceSettings: vi.fn(),
@@ -275,6 +277,41 @@ describe("RoomListHeaderViewModel", () => {
             expect(dispatchSpy).toHaveBeenCalledWith({
                 action: Action.ViewRoom,
                 room_id: "!space:server",
+            });
+        });
+
+        describe("openSpaceInfo (Telement)", () => {
+            beforeEach(() => {
+                RightPanelStore.instance.reset();
+            });
+
+            afterEach(() => {
+                RightPanelStore.instance.reset();
+            });
+
+            it("opens the space's home with the space's own room info in the right panel", () => {
+                const dispatchSpy = vi.spyOn(defaultDispatcher, "dispatch");
+                RightPanelStore.instance.setCard({ phase: RightPanelPhases.MemberList }, true, mockSpace.roomId);
+                vm = new RoomListHeaderViewModel({ matrixClient, spaceStore: sdkContext.spaceStore });
+
+                vm.openSpaceInfo();
+
+                expect(dispatchSpy).toHaveBeenCalledWith({ action: Action.ViewRoom, room_id: mockSpace.roomId });
+                expect(RightPanelStore.instance.isOpenForRoom(mockSpace.roomId)).toBe(true);
+                expect(RightPanelStore.instance.currentCardForRoom(mockSpace.roomId).phase).toBe(
+                    RightPanelPhases.RoomSummary,
+                );
+            });
+
+            it("does nothing without an active space", () => {
+                vi.spyOn(sdkContext.spaceStore, "activeSpaceRoom", "get").mockReturnValue(null);
+                const dispatchSpy = vi.spyOn(defaultDispatcher, "dispatch");
+                vm = new RoomListHeaderViewModel({ matrixClient, spaceStore: sdkContext.spaceStore });
+
+                vm.openSpaceInfo();
+
+                expect(dispatchSpy).not.toHaveBeenCalled();
+                expect(RightPanelStore.instance.isOpenForRoom(mockSpace.roomId)).toBe(false);
             });
         });
 
