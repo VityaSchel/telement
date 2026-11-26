@@ -11,7 +11,7 @@ Please see LICENSE files in the repository root for full details.
 import React from "react";
 import { type MatrixClient, type Room } from "matrix-js-sdk/src/matrix";
 import { describe, it, expect, beforeEach, afterEach, vi, type Mocked } from "vitest";
-import { prettyDOM, render, type RenderResult, screen } from "test-utils-rtl";
+import { act, prettyDOM, render, type RenderResult, screen } from "test-utils-rtl";
 import userEvent from "@testing-library/user-event";
 
 import SpaceContextMenu from "./SpaceContextMenu";
@@ -26,6 +26,10 @@ import {
 import { leaveSpace } from "../../../utils/leave-behaviour";
 import { shouldShowComponent } from "../../../customisations/helpers/UIComponents";
 import { UIComponent } from "../../../settings/UIFeature";
+import defaultDispatcher from "../../../dispatcher/dispatcher";
+import { Action } from "../../../dispatcher/actions";
+import RightPanelStore from "../../../stores/right-panel/RightPanelStore";
+import { RightPanelPhases } from "../../../stores/right-panel/RightPanelStorePhases";
 
 vi.mock("../../../customisations/helpers/UIComponents", () => ({
     shouldShowComponent: vi.fn(),
@@ -150,6 +154,66 @@ describe("<SpaceContextMenu />", () => {
         await userEvent.click(screen.getByTestId("leave-option"));
         expect(leaveSpace).toHaveBeenCalledWith(defaultProps.space);
         expect(onFinished).toHaveBeenCalled();
+    });
+
+    describe("Space info (Telement)", () => {
+        const space = makeMockSpace({ roomId: "!space:server" });
+        const info = (): HTMLElement => screen.getByRole("menuitem", { name: "Space info" });
+        const expectRoomInfo = (): void => {
+            expect(RightPanelStore.instance.isOpenForRoom(space.roomId)).toBe(true);
+            expect(RightPanelStore.instance.currentCardForRoom(space.roomId).phase).toBe(RightPanelPhases.RoomSummary);
+        };
+
+        beforeEach(() => {
+            RightPanelStore.instance.reset();
+        });
+
+        afterEach(() => {
+            RightPanelStore.instance.reset();
+        });
+
+        it("is right under Space home, with the info icon", () => {
+            renderComponent({ space });
+
+            const items = screen.getAllByRole("menuitem").map((item) => item.textContent);
+            expect(items.slice(0, 2)).toEqual(["Space home", "Space info"]);
+            expect(info().querySelector("svg")).not.toBeNull();
+        });
+
+        it("opens the space's home with the space's own room info in the right panel", async () => {
+            const dispatch = vi.spyOn(defaultDispatcher, "dispatch");
+            const onFinished = vi.fn();
+            renderComponent({ space, onFinished });
+
+            await userEvent.click(info());
+
+            expect(dispatch).toHaveBeenCalledWith({ action: Action.ViewRoom, room_id: space.roomId });
+            expectRoomInfo();
+            expect(onFinished).toHaveBeenCalled();
+        });
+
+        it("shows the room info in place of the space's people, and keeps it open when it is open", async () => {
+            RightPanelStore.instance.setCard({ phase: RightPanelPhases.MemberList }, true, space.roomId);
+            renderComponent({ space });
+
+            await userEvent.click(info());
+            expectRoomInfo();
+
+            await userEvent.click(info());
+            expectRoomInfo();
+        });
+
+        it("is reached from Space home with the down arrow, and picked with Enter", async () => {
+            renderComponent({ space });
+            const home = screen.getByRole("menuitem", { name: "Space home" });
+            act(() => home.focus());
+
+            await userEvent.keyboard("{ArrowDown}");
+            expect(info()).toHaveFocus();
+            await userEvent.keyboard("{Enter}");
+
+            expectRoomInfo();
+        });
     });
 
     describe("add children section", () => {

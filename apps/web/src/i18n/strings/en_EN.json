@@ -3206,6 +3206,9 @@
             "empty_description_no_rights": "Rooms added to this space will appear here.",
             "empty_title": "No rooms yet"
         },
+        "space_menu": {
+            "space_info": "Space info"
+        },
         "space_settings": {
             "preview": "Preview"
         },

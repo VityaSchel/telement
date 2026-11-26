@@ -15,6 +15,7 @@ import {
     PreferencesIcon,
     UserAddIcon,
     HomeIcon,
+    InfoIcon,
     SettingsIcon,
 } from "@vector-im/compound-design-tokens/assets/web/icons";
 
@@ -40,6 +41,8 @@ import { Action } from "../../../dispatcher/actions";
 import { shouldShowComponent } from "../../../customisations/helpers/UIComponents";
 import { UIComponent } from "../../../settings/UIFeature";
 import { type ViewRoomPayload } from "../../../dispatcher/payloads/ViewRoomPayload";
+import RightPanelStore from "../../../stores/right-panel/RightPanelStore";
+import { RightPanelPhases } from "../../../stores/right-panel/RightPanelStorePhases";
 
 interface IProps extends IContextMenuProps {
     space?: Room;
@@ -233,6 +236,12 @@ const SpaceContextMenu: React.FC<IProps> = ({ space, hideHeader, onFinished, ...
         openSpace(ev);
     };
 
+    // Telement: the space's own room info (its topic, settings and Report room), in the right panel beside its home
+    const onInfoClick = (ev: ButtonEvent): void => {
+        openSpace(ev);
+        RightPanelStore.instance.setCard({ phase: RightPanelPhases.RoomSummary }, true, space.roomId);
+    };
+
     return (
         <IconizedContextMenu {...props} onFinished={onFinished} className="mx_SpacePanel_contextMenu" compact>
             {!hideHeader && <div className="mx_SpacePanel_contextMenu_header">{space.name}</div>}
@@ -241,6 +250,11 @@ const SpaceContextMenu: React.FC<IProps> = ({ space, hideHeader, onFinished, ...
                     icon={<HomeIcon />}
                     label={_t("space|context_menu|home")}
                     onClick={onHomeClick}
+                />
+                <IconizedContextMenuOption
+                    icon={<InfoIcon />}
+                    label={_t("telement|space_menu|space_info")}
+                    onClick={onInfoClick}
                 />
                 {inviteOption}
                 <IconizedContextMenuOption

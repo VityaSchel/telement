@@ -54,6 +54,34 @@ exports[`<SpaceContextMenu /> > renders menu correctly 1`] = `
               [36m</span>[39m
             [36m</li>[39m
             [36m<li[39m
+              [33maria-label[39m=[32m"Space info"[39m
+              [33mclass[39m=[32m"mx_AccessibleButton mx_IconizedContextMenu_item"[39m
+              [33mrole[39m=[32m"menuitem"[39m
+              [33mtabindex[39m=[32m"-1"[39m
+            [36m>[39m
+              [36m<svg[39m
+                [33mfill[39m=[32m"currentColor"[39m
+                [33mheight[39m=[32m"1em"[39m
+                [33mviewBox[39m=[32m"0 0 24 24"[39m
+                [33mwidth[39m=[32m"1em"[39m
+                [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+              [36m>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M11.288 7.288A.97.97 0 0 1 12 7q.424 0 .713.287Q13 7.576 13 8t-.287.713A.97.97 0 0 1 12 9a.97.97 0 0 1-.713-.287A.97.97 0 0 1 11 8q0-.424.287-.713m.001 4.001A.97.97 0 0 1 12 11q.424 0 .713.287.287.288.287.713v4q0 .424-.287.712A.97.97 0 0 1 12 17a.97.97 0 0 1-.713-.288A.97.97 0 0 1 11 16v-4q0-.424.287-.713"[39m
+                [36m/>[39m
+                [36m<path[39m
+                  [33mclip-rule[39m=[32m"evenodd"[39m
+                  [33md[39m=[32m"M22 12c0 5.523-4.477 10-10 10S2 17.523 2 12 6.477 2 12 2s10 4.477 10 10m-2 0a8 8 0 1 1-16 0 8 8 0 0 1 16 0"[39m
+                  [33mfill-rule[39m=[32m"evenodd"[39m
+                [36m/>[39m
+              [36m</svg>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"mx_IconizedContextMenu_label"[39m
+              [36m>[39m
+                [0mSpace info[0m
+              [36m</span>[39m
+            [36m</li>[39m
+            [36m<li[39m
               [33maria-label[39m=[32m"Explore rooms"[39m
               [33mclass[39m=[32m"mx_AccessibleButton mx_IconizedContextMenu_item"[39m
               [33mrole[39m=[32m"menuitem"[39m
